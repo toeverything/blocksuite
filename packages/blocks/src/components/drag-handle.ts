@@ -198,7 +198,7 @@ export class DragHandle extends LitElement {
   private _cursor: number | null = 0;
   private _lastSelectedIndex = -1;
   private _container: HTMLElement;
-  private _dragImage: HTMLDivElement | null = null;
+  private _dragImage: HTMLElement | null = null;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -267,8 +267,10 @@ export class DragHandle extends LitElement {
 
     this._draggingElements = [];
 
-    this._dragImage?.remove();
-    this._dragImage = null;
+    if (this._dragImage) {
+      this._dragImage.style.opacity = '1';
+      this._dragImage = null;
+    }
   }
 
   public setPointerEvents(value: 'auto' | 'none') {
@@ -295,6 +297,7 @@ export class DragHandle extends LitElement {
     document.body.addEventListener('wheel', this._onWheel);
     window.addEventListener('resize', this._onResize);
     this._dragHandle.addEventListener('click', this._onClick);
+    this._dragHandle.addEventListener('mousedown', this._onMouseDown);
     isFirefox &&
       document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mousemove', this._onMouseMoveOnHost);
@@ -316,6 +319,7 @@ export class DragHandle extends LitElement {
       handlePreventDocumentDragOverDelay
     );
     this._dragHandle.removeEventListener('click', this._onClick);
+    this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
     isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mousemove', this._onMouseMoveOnHost);
@@ -343,6 +347,7 @@ export class DragHandle extends LitElement {
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.top = `${top}px`;
+    e.stopPropagation();
   }
 
   // fixme: handle multiple blocks case
@@ -386,6 +391,11 @@ export class DragHandle extends LitElement {
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
+    e.stopPropagation();
+  };
+
+  private _onMouseDown = (e: MouseEvent) => {
+    e.stopPropagation();
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
@@ -419,14 +429,13 @@ export class DragHandle extends LitElement {
       ? selectedBlocks
       : [clickDragState.element];
 
-    // fixme: handle multiple blocks case
-    // the drag image right now only renders the first block
+    this._dragImage =
+      (draggingBlockElements.length > 1
+        ? this._container.querySelector('.affine-page-selected-rects-container')
+        : draggingBlockElements[0]) ?? clickDragState.element;
 
-    this._attachDragImage(draggingBlockElements);
-
-    if (this._dragImage) {
-      e.dataTransfer.setDragImage(this._dragImage, 0, 0);
-    }
+    this._dragImage.style.opacity = '0.99';
+    e.dataTransfer.setDragImage(this._dragImage, 0, 0);
 
     this._draggingElements = draggingBlockElements;
   };
@@ -475,23 +484,6 @@ export class DragHandle extends LitElement {
 
     this.hide();
   };
-
-  private _attachDragImage(draggingElements: HTMLElement[]) {
-    if (this._dragImage) {
-      return;
-    }
-    this._dragImage = document.createElement('div');
-    this._dragImage.classList.add('affine-default-page-block-container');
-    this._dragImage.style.position = 'absolute';
-    this._dragImage.style.pointerEvents = 'none';
-    // this._dragImage.style
-    draggingElements.forEach(element => {
-      const cloned = element.cloneNode(true);
-      // todo: make sure the cloned does not have block id
-      this._dragImage?.appendChild(cloned);
-    });
-    document.body.appendChild(this._dragImage);
-  }
 
   override render() {
     return html`
