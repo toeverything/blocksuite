@@ -673,6 +673,8 @@ export class DefaultSelectionManager {
         page: this.page,
         direction,
         anchorEl: {
+          // After update block type, the block selection will be cleared and refreshed.
+          // So we need to get the targe block's rect dynamic.
           getBoundingClientRect: () => {
             const blocks = this.state.selectedBlocks;
             if (!blocks.length) {
