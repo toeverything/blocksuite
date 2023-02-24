@@ -1,4 +1,3 @@
-import { handleUnindent } from '../__internal__/rich-text/rich-text-operations.js';
 import { BaseService } from '../__internal__/service/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
@@ -33,24 +32,6 @@ export class ParagraphBlockService extends BaseService {
         return `<blockquote>${text}</blockquote>`;
       default:
         return text;
-    }
-  }
-
-  /**
-   * side effect when update block type
-   */
-  updateTypeEffect(model: ParagraphBlockModel, newType: string) {
-    // if change to header, move all children to parent level
-    if (newType.startsWith('h')) {
-      let len = model.children.length;
-      while (len > 0) {
-        if (model.children[0]) {
-          handleUnindent(model.page, model.children[0]);
-          len--;
-        } else {
-          break;
-        }
-      }
     }
   }
 }

@@ -30,7 +30,7 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-export function setStartRange(editableContainer: Element) {
+function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -43,7 +43,7 @@ export function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-export function setEndRange(editableContainer: Element) {
+function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -135,7 +135,6 @@ export async function focusRichText(
         newLeft = right - 1;
       }
       range = caretRangeFromPoint(newLeft, newTop);
-      resetNativeSelection(range);
       break;
     }
   }
@@ -350,6 +349,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
       // .filter(model => model.text);
       if (models.length) {
         return {
+          type: 'Block',
           startModel: models[0],
           startOffset: 0,
           endModel: models[models.length - 1],
@@ -871,6 +871,7 @@ export function nativeRangeToBlockRange(range: Range): BlockRange {
     range.endOffset
   );
   return {
+    type: 'Native',
     startModel: models[0],
     startOffset,
     endModel: models[models.length - 1],
@@ -899,15 +900,6 @@ export function updateBlockRange(
     model === oldModel ? newModel : model
   );
   return blockRange;
-}
-
-/**
- * Save the current block selection. Can be restored with {@link restoreSelection}.
- *
- * See also {@link restoreSelection}
- */
-export function saveBlockRange(range = getCurrentRange()): BlockRange {
-  return nativeRangeToBlockRange(range);
 }
 
 /**

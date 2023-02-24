@@ -12,11 +12,11 @@
   --affine-page-background: #fff;
   --affine-popover-background: #fff;
   --affine-hover-background: #f1f3ff;
+  --affine-card-hover-background: #f8f9ff;
   --affine-code-background: #f2f5f9;
   --affine-tooltip-background: #6880ff;
   --affine-code-block-background: #fafbfd;
   --affine-hub-background: #fbfbfc;
-  --affine-block-hub-hover-background: #f8f9ff;
   --affine-text-color: #424149;
   --affine-secondary-text-color: #8e8d91;
   --affine-edgeless-text-color: #3a4c5c;
@@ -48,7 +48,7 @@
   --affine-font-h6: 18px;
   --affine-font-base: 16px;
   --affine-font-sm: 14px;
-  --affine-font-xs: 14px;
+  --affine-font-xs: 12px; /* not recommended */
   --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;

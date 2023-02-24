@@ -154,6 +154,7 @@ export function getOptions(): Pick<
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_slash_menu: params.get('slash') !== '0',
+      enable_block_selection_format_bar: true,
       readonly: {
         'space:page0': false,
       },

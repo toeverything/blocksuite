@@ -193,7 +193,7 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .card-container:hover {
-      background: var(--affine-block-hub-hover-background);
+      background: var(--affine-card-hover-background);
       fill: var(--affine-primary-color);
       top: -2px;
       left: -2px;
@@ -327,6 +327,10 @@ export class BlockHub extends NonShadowLitElement {
       top: 10px;
       transform: translateX(calc(-100% - 7px));
       border-radius: 10px 10px 0 10px;
+    }
+
+    [role='menu-entry'] tool-tip {
+      font-size: var(--affine-font-sm);
     }
 
     .block-hub-icons-container {

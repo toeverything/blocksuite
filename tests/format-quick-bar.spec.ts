@@ -6,6 +6,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  getIndexCoordinate,
   initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
@@ -662,4 +663,58 @@ test('should format quick bar action status updated while undo', async ({
   await expect(boldBtn).toHaveAttribute('active', '');
   await undoByKeyboard(page);
   await expect(boldBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format quick bar work in block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  await dragBetweenCoords(
+    page,
+    { x: coord.x - 20, y: coord.y - 20 },
+    { x: coord.x + 20, y: coord.y }
+  );
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 285, 5);
+  assertAlmostEqual(box.y, 220, 5);
+
+  const boldBtn = formatQuickBar.getByTestId('bold');
+  await boldBtn.click();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="456"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await page.mouse.click(0, 0);
+  await expect(formatQuickBar).not.toBeVisible();
 });

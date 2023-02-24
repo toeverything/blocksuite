@@ -66,7 +66,11 @@ export class Page extends Space<PageData> {
     rootAdded: new Signal<BaseBlockModel | BaseBlockModel[]>(),
     rootDeleted: new Signal<string | string[]>(),
     textUpdated: new Signal<Y.YTextEvent>(),
-    updated: new Signal(),
+    yUpdated: new Signal(),
+    blockUpdated: new Signal<{
+      type: 'add' | 'delete' | 'update';
+      id: string;
+    }>(),
   };
 
   constructor(
@@ -419,6 +423,12 @@ export class Page extends Space<PageData> {
         yChildren.insert(index, [id]);
       }
     });
+
+    this.signals.blockUpdated.emit({
+      type: 'add',
+      id,
+    });
+
     return id;
   }
 
@@ -511,6 +521,11 @@ export class Page extends Space<PageData> {
       const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
       syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+    });
+
+    this.signals.blockUpdated.emit({
+      type: 'update',
+      id: model.id,
     });
   }
 
@@ -609,6 +624,11 @@ export class Page extends Space<PageData> {
         }
       }
     });
+
+    this.signals.blockUpdated.emit({
+      type: 'delete',
+      id: model.id,
+    });
   }
 
   /** Connect a rich text editor instance with a YText instance. */
@@ -657,7 +677,8 @@ export class Page extends Space<PageData> {
     this.signals.rootAdded.dispose();
     this.signals.rootDeleted.dispose();
     this.signals.textUpdated.dispose();
-    this.signals.updated.dispose();
+    this.signals.yUpdated.dispose();
+    this.signals.blockUpdated.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -945,7 +966,7 @@ export class Page extends Space<PageData> {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.signals.updated.emit();
+    this.signals.yUpdated.emit();
   };
 
   private _handleVersion() {
