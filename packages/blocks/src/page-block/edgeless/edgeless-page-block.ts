@@ -200,15 +200,13 @@ export class EdgelessPageBlockComponent
   }
 
   private _listenToolbarEnableChange() {
-    const page = this.page;
+    const clientID = this.page.doc.clientID;
 
     this._toolbarEnabled =
-      page.awarenessStore.getFlag('enable_edgeless_toolbar') ?? false;
-
-    const clientID = page.doc.clientID;
+      this.page.awarenessStore.getFlag('enable_edgeless_toolbar') ?? false;
 
     this._disposables.add(
-      page.awarenessStore.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_edgeless_toolbar,
         enable => {
           this._toolbarEnabled = enable ?? false;
@@ -266,12 +264,13 @@ export class EdgelessPageBlockComponent
     requestAnimationFrame(() => {
       this._initViewport();
       this._initSurface();
+      // Due to change `this._toolbarEnabled` in this function
+      this._listenToolbarEnableChange();
       this.requestUpdate();
     });
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
-    this._listenToolbarEnableChange();
   }
 
   connectedCallback() {

@@ -56,6 +56,9 @@ export class EdgelessToolIconButton extends LitElement {
   @property()
   active = false;
 
+  @property()
+  testId?: string;
+
   private _dispatchClickEvent() {
     if (this.disabled) return;
 
@@ -75,6 +78,7 @@ export class EdgelessToolIconButton extends LitElement {
         role="button"
         ?disabled=${this.disabled}
         ?active=${this.active}
+        data-test-id=${this.testId ?? ''}
         @click=${this._dispatchClickEvent}
       >
         <slot></slot>

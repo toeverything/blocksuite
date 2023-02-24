@@ -3,7 +3,7 @@ import './shapes-menu.js';
 
 import { ShapeIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
-import { html, LitElement } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
@@ -41,6 +41,12 @@ function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends LitElement {
+  static styles = css`
+    :host {
+      display: flex;
+    }
+  `;
+
   @property()
   mouseMode!: MouseMode;
 
@@ -80,6 +86,7 @@ export class EdgelessShapeToolButton extends LitElement {
       <edgeless-tool-icon-button
         .tooltips=${'Shape'}
         .active=${type === 'shape'}
+        .testId=${'shape'}
         @tool.click=${() => this._toggleShapesMenu()}
       >
         ${ShapeIcon}

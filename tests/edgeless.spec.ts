@@ -226,11 +226,21 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
 
   const toolbarLocator = page.locator('edgeless-toolbar');
   await expect(toolbarLocator).toBeVisible();
-  await page.click('.icon-container[role="shape"]');
-  const shapeComponentLocator = page.locator('shape-menu');
+
+  const shapeTool = page.locator('.icon-container[data-test-id="shape"]');
+  const shapeToolPosition = await shapeTool.boundingBox();
+
+  expect(shapeToolPosition).toBeTruthy();
+  if (!shapeToolPosition) {
+    return;
+  }
+
+  await page.mouse.click(shapeToolPosition.x + 10, shapeToolPosition.y + 10);
+
+  const shapeComponentLocator = page.locator('edgeless-shapes-menu');
   await expect(shapeComponentLocator).toBeVisible();
 
-  await page.click('.icon-container[role="shape"]');
+  await page.mouse.click(shapeToolPosition.x + 10, shapeToolPosition.y + 10);
   await expect(shapeComponentLocator).toBeHidden();
 });
 
