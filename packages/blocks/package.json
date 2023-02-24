@@ -18,7 +18,6 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@faker-js/faker": "^7.6.0",
     "@popperjs/core": "^2.11.6",
     "autosize": "^6.0.1",
     "highlight.js": "^11.7.0",

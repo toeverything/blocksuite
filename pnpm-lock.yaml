@@ -85,7 +85,6 @@ importers:
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
       '@blocksuite/virgo': workspace:*
-      '@faker-js/faker': ^7.6.0
       '@popperjs/core': ^2.11.6
       '@types/autosize': ^4.0.1
       autosize: ^6.0.1
@@ -100,7 +99,6 @@ importers:
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/virgo': link:../virgo
-      '@faker-js/faker': 7.6.0
       '@popperjs/core': 2.11.6
       autosize: 6.0.1
       highlight.js: 11.7.0
@@ -1068,11 +1066,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /@faker-js/faker/7.6.0:
-    resolution: {integrity: sha512-XK6BTq1NDMo9Xqw/YkYyGjSsg44fbNwYRx7QK2CuoQgyy+f1rrTDHoExVM5PsyXCtfl2vs2vVJ0MN0yN6LppRw==}
-    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
-    dev: false
 
   /@floating-ui/core/1.0.5:
     resolution: {integrity: sha512-iDdOsaCHZH/0FM0yNBYt+cJxJF9S5jrYWNtDZOiDFMiZ7uxMJ/71h8eTwoVifEAruv9p9rlMPYCGIgMjOz95FQ==}

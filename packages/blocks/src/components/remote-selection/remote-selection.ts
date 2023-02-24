@@ -1,8 +1,9 @@
-import { blockRangeToNativeRange } from '@blocksuite/blocks/std.js';
 import { assertExists, Page, UserInfo, UserRange } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import { blockRangeToNativeRange } from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
   width: number;

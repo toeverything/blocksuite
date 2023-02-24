@@ -192,6 +192,7 @@ export class EdgelessSelectionManager {
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
+      noop,
       noop
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
