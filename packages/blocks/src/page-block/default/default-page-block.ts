@@ -410,9 +410,13 @@ export class DefaultPageBlockComponent
           );
         }
 
-        return getAllowSelectedBlocks(this.model).filter(block => {
-          return !draggingBlockIds?.includes(block.id);
-        });
+        if (!draggingBlockIds || draggingBlockIds.length === 1) {
+          return getAllowSelectedBlocks(this.model);
+        } else {
+          return getAllowSelectedBlocks(this.model).filter(block => {
+            return !draggingBlockIds?.includes(block.id);
+          });
+        }
       };
     };
     if (
