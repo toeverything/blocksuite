@@ -59,6 +59,8 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   );
 }
 
+// `parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY`
+/*
 function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   return (
     a.left >= bound.left + offset.x &&
@@ -67,6 +69,7 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
     a.bottom <= bound.bottom + offset.y
   );
 }
+*/
 
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
@@ -159,7 +162,8 @@ function filterSelectedBlockByIndex(
   const len = entries.length;
   const results = [];
   let once = true;
-  let boundRect: DOMRect | null = null;
+  // let boundRect: DOMRect | null = null;
+  let prevBlock: Element | null = null;
 
   for (let i = focusedBlockIndex; i < len; i++) {
     const [block, rect] = entries[i];
@@ -168,18 +172,21 @@ function filterSelectedBlockByIndex(
       const nextRect = richText?.getBoundingClientRect() || rect;
 
       if (nextRect && intersects(rect, selectionRect, offset)) {
-        boundRect = rect;
+        // boundRect = rect;
+        prevBlock = block;
         results.push(block);
         once = false;
       }
-    } else {
-      if (boundRect) {
-        // sometimes: rect.bottom = 467.2372016906738, boundRect.bottom = 467.23719024658203
-        if (contains(boundRect, rect, { x: 0, y: 1 })) {
-          results.push(block);
-        } else {
-          break;
-        }
+    } else if (prevBlock) {
+      // prev block contains block
+      // if (contains(boundRect, rect, { x: 0, y: 1 })) {
+      if (
+        prevBlock.compareDocumentPosition(block) &
+        Node.DOCUMENT_POSITION_CONTAINED_BY
+      ) {
+        results.push(block);
+      } else {
+        break;
       }
     }
   }
