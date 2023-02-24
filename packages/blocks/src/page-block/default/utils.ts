@@ -510,7 +510,12 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 
       requestAnimationFrame(() => {
         // update selection rects
-        defaultPageBlock.selection.setSelectedBlocks(blocks);
+        // block may change its flavour after moved.
+        defaultPageBlock.selection.setSelectedBlocks(
+          blocks
+            .map(b => getBlockById(b.model.id))
+            .filter((b): b is BlockComponentElement => !!b)
+        );
       });
     },
     setSelectedBlocks(
