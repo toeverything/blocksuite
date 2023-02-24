@@ -94,41 +94,41 @@ function filterSelectedBlockWithoutSubtree(
         prevIndex = i;
       } else {
         let prevBlock = entries[prevIndex][0];
-        const flag = block.compareDocumentPosition(prevBlock);
-        // prev block before block
-        if (flag & Node.DOCUMENT_POSITION_PRECEDING) {
-          // prev block contains block
-          if (flag & Node.DOCUMENT_POSITION_CONTAINS) {
-            // not continuous block
-            if (results.length > 1) {
-              continue;
-            }
-            prevIndex = i;
-            results.shift();
-          } else {
-            // backward search parent block and remove its subtree
-            // only keep same level blocks
-            const { previousElementSibling } = block;
-            // previousElementSibling is not prev block and previousElementSibling contains prev block
-            if (
-              previousElementSibling &&
-              previousElementSibling !== prevBlock &&
-              previousElementSibling.compareDocumentPosition(prevBlock) &
-                Node.DOCUMENT_POSITION_CONTAINED_BY
-            ) {
-              let n = i;
-              while (n--) {
-                prevBlock = entries[n][0];
-                if (prevBlock === previousElementSibling) {
-                  results.push({ block: prevBlock, index: n });
-                  break;
-                } else {
-                  results.pop();
-                }
+        // prev block before and contains block
+        if (
+          prevBlock.compareDocumentPosition(block) ===
+          (Node.DOCUMENT_POSITION_FOLLOWING |
+            Node.DOCUMENT_POSITION_CONTAINED_BY)
+        ) {
+          // not continuous block
+          if (results.length > 1) {
+            continue;
+          }
+          prevIndex = i;
+          results.shift();
+        } else {
+          // backward search parent block and remove its subtree
+          // only keep same level blocks
+          const { previousElementSibling } = block;
+          // previousElementSibling is not prev block and previousElementSibling contains prev block
+          if (
+            previousElementSibling &&
+            previousElementSibling !== prevBlock &&
+            previousElementSibling.compareDocumentPosition(prevBlock) &
+              Node.DOCUMENT_POSITION_CONTAINED_BY
+          ) {
+            let n = i;
+            while (n--) {
+              prevBlock = entries[n][0];
+              if (prevBlock === previousElementSibling) {
+                results.push({ block: prevBlock, index: n });
+                break;
+              } else {
+                results.pop();
               }
             }
-            prevIndex = i;
           }
+          prevIndex = i;
         }
       }
 
