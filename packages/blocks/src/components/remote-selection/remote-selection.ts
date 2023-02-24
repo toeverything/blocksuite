@@ -13,7 +13,6 @@ interface SelectionRect {
 }
 
 function addAlpha(hexColor: string, opacity: number): string {
-  console.log(hexColor, opacity);
   const normalized = Math.round(Math.min(Math.max(opacity, 0), 1) * 255);
   return hexColor + normalized.toString(16).toUpperCase();
 }
@@ -67,6 +66,12 @@ export class RemoteSelection extends LitElement {
 
   private _colorMap = new Map<number, string>();
 
+  private _resizeObserver: ResizeObserver = new ResizeObserver(() => {
+    this.requestUpdate();
+  });
+
+  private _abortController = new AbortController();
+
   protected firstUpdated() {
     assertExists(this.page);
     this.page.awarenessStore.signals.update.subscribe(
@@ -113,6 +118,28 @@ export class RemoteSelection extends LitElement {
         this.requestUpdate();
       }
     );
+
+    this._resizeObserver.observe(document.body);
+
+    const defaultViewportElement = document.querySelector(
+      '.affine-default-viewport'
+    );
+    defaultViewportElement?.addEventListener(
+      'scroll',
+      () => {
+        console.log(1);
+        this.requestUpdate();
+      },
+      {
+        signal: this._abortController.signal,
+      }
+    );
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._resizeObserver.disconnect();
+    this._abortController.abort();
   }
 
   private _getSelectionRect(range: UserRange): SelectionRect[] {
