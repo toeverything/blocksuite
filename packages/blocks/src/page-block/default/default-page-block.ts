@@ -318,7 +318,7 @@ export class DefaultPageBlockComponent
     if (type === 'block') {
       selection.refreshSelectionRectAndSelecting(viewportState);
     } else if (type === 'embed') {
-      selection.refresEmbedRects(this.embedEditingState);
+      selection.refreshEmbedRects(this.embedEditingState);
     } else if (type === 'native') {
       const { startRange, rangePoint } = selection.state;
       if (startRange && rangePoint) {

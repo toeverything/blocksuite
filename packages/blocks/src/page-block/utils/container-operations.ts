@@ -150,11 +150,11 @@ export function updateBlockType(
     }
     requestAnimationFrame(() =>
       restoreSelection({
-        type: 'Native',
+        type: 'Block',
         startModel: model,
         endModel: model,
         startOffset: 0,
-        endOffset: 0,
+        endOffset: model.text?.length ?? 0,
         betweenModels: [],
       })
     );
@@ -181,7 +181,7 @@ export function updateBlockType(
   // Focus last new block
   const lastModel = newModels.at(-1);
   if (lastModel) asyncFocusRichText(page, lastModel.id);
-  if (savedBlockRange && savedBlockRange.type === 'Native') {
+  if (savedBlockRange) {
     requestAnimationFrame(() => restoreSelection(savedBlockRange));
   }
   return newModels;

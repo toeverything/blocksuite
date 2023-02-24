@@ -88,7 +88,7 @@ export class AwarenessStore<
     if (upstreamFlags) {
       this.awareness.setLocalStateField(
         'flags',
-        merge(defaultFlags, upstreamFlags)
+        merge(true, defaultFlags, upstreamFlags)
       );
     } else {
       this.awareness.setLocalStateField('flags', { ...defaultFlags });

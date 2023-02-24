@@ -99,7 +99,7 @@ export class Store {
     this.awarenessStore = new AwarenessStore(
       this,
       awareness ?? new Awareness<RawAwarenessState>(this.doc),
-      merge(flagsPreset, defaultFlags)
+      merge(true, flagsPreset, defaultFlags)
     );
 
     switch (idGenerator) {
