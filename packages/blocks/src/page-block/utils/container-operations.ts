@@ -181,7 +181,7 @@ export function updateBlockType(
   // Focus last new block
   const lastModel = newModels.at(-1);
   if (lastModel) asyncFocusRichText(page, lastModel.id);
-  if (savedBlockRange && savedBlockRange.type === 'Native') {
+  if (savedBlockRange) {
     requestAnimationFrame(() => restoreSelection(savedBlockRange));
   }
   return newModels;

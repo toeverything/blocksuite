@@ -362,6 +362,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   // check exist native selection
   if (hasNativeSelection()) {
     const range = getCurrentRange();
+    // TODO check range is in page
     return nativeRangeToBlockRange(range);
   }
   return null;
@@ -907,8 +908,42 @@ export function updateBlockRange(
  * See also {@link resetNativeSelection}
  */
 export function restoreSelection(blockRange: BlockRange) {
-  const range = blockRangeToNativeRange(blockRange);
-  resetNativeSelection(range);
+  if (blockRange.type === 'Native') {
+    const range = blockRangeToNativeRange(blockRange);
+    resetNativeSelection(range);
+
+    // Try clean block selection
+    const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
+    if (!defaultPageBlock.selection) {
+      // In the edgeless mode
+      return;
+    }
+    defaultPageBlock.selection.clear();
+    return;
+  }
+  const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
+  if (!defaultPageBlock.selection) {
+    // In the edgeless mode
+    return;
+  }
+  const models =
+    blockRange.startModel === blockRange.endModel
+      ? [blockRange.startModel]
+      : [
+          blockRange.startModel,
+          ...blockRange.betweenModels,
+          blockRange.endModel,
+        ];
+  defaultPageBlock.selection.clear();
+  // get fresh elements
+  defaultPageBlock.selection.state.type = 'block';
+  defaultPageBlock.selection.state.selectedBlocks = models
+    .map(model => getBlockElementByModel(model))
+    .filter(Boolean) as Element[];
+  defaultPageBlock.selection.refreshSelectedBlocksRects();
+  // Try clean native selection
+  resetNativeSelection(null);
+  (document.activeElement as HTMLTextAreaElement).blur();
 }
 
 /**
