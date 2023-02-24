@@ -1,6 +1,5 @@
 import '../../components/drag-handle.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -51,16 +50,6 @@ import {
   getBlockEditingStateByPosition,
 } from './utils.js';
 
-function calcDepth(left: number, containerLeft: number) {
-  return Math.ceil(
-    (left - containerLeft) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-  );
-}
-
-function calcContainerLeft(left: number) {
-  return left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
-}
-
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
     a.left + offset.x <= b.right &&
@@ -84,8 +73,6 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 // for more context.
 //
 // The `selectionRect` is a rect of drag-and-drop selection.
-//
-// TODO: checks the parent by `contains` method
 function filterSelectedBlockWithoutSubtree(
   blockCache: Map<BlockComponentElement, DOMRect>,
   selectionRect: DOMRect,
@@ -98,42 +85,53 @@ function filterSelectedBlockWithoutSubtree(
   // empty
   if (len === 0) return results;
 
-  const containerLeft = calcContainerLeft(entries[0][1].left);
-  let depth = 1;
-  let once = true;
+  let prevIndex = -1;
 
   for (let i = 0; i < len; i++) {
     const [block, rect] = entries[i];
     if (intersects(rect, selectionRect, offset)) {
-      const currentDepth = calcDepth(rect.left, containerLeft);
-      if (once) {
-        depth = currentDepth;
-        once = false;
+      if (prevIndex === -1) {
+        prevIndex = i;
       } else {
-        if (currentDepth > depth) {
-          // not continuous block
-          if (results.length > 1) {
-            continue;
-          }
-
-          depth = currentDepth;
-          results.shift();
-        } else if (currentDepth < depth) {
-          // backward search parent block and remove its subtree
-          let n = i;
-          while (n--) {
-            const [b, r] = entries[n];
-            if (calcDepth(r.left, containerLeft) === currentDepth) {
-              results.push({ block: b, index: n });
-              break;
-            } else {
-              results.pop();
+        let prevBlock = entries[prevIndex][0];
+        const flag = block.compareDocumentPosition(prevBlock);
+        // prev block before block
+        if (flag & Node.DOCUMENT_POSITION_PRECEDING) {
+          // prev block contains block
+          if (flag & Node.DOCUMENT_POSITION_CONTAINS) {
+            // not continuous block
+            if (results.length > 1) {
+              continue;
             }
+            prevIndex = i;
+            results.shift();
+          } else {
+            // backward search parent block and remove its subtree
+            // only keep same level blocks
+            const { previousElementSibling } = block;
+            // previousElementSibling is not prev block and previousElementSibling contains prev block
+            if (
+              previousElementSibling &&
+              previousElementSibling !== prevBlock &&
+              previousElementSibling.compareDocumentPosition(prevBlock) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY
+            ) {
+              let n = i;
+              while (n--) {
+                prevBlock = entries[n][0];
+                if (prevBlock === previousElementSibling) {
+                  results.push({ block: prevBlock, index: n });
+                  break;
+                } else {
+                  results.pop();
+                }
+              }
+            }
+            prevIndex = i;
           }
-
-          depth = currentDepth;
         }
       }
+
       results.push({ block, index: i });
     }
   }
@@ -190,16 +188,16 @@ function filterSelectedBlockByIndex(
 }
 
 // clear subtree in block for drawing rect
-function clearSubtree(selectedBlocks: BlockComponentElement[], left: number) {
+function clearSubtree(selectedBlocks: BlockComponentElement[], prevBlock: BlockComponentElement) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
-    const currentLeft = block.getBoundingClientRect().left;
-    if (currentLeft > left) {
+    if (
+      prevBlock.compareDocumentPosition(block) &
+      Node.DOCUMENT_POSITION_CONTAINED_BY
+    ) {
       return false;
-    } else if (currentLeft < left) {
-      left = currentLeft;
-      return true;
     } else {
+      prevBlock = block;
       return true;
     }
   });
@@ -941,17 +939,19 @@ export class DefaultSelectionManager {
 
     if (selectedBlocks.length === 0) return;
 
-    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+    const firstBlock = selectedBlocks[0];
 
     // just refresh selected blocks
     if (focusedBlockIndex === -1) {
-      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
+      const rects = clearSubtree(selectedBlocks, firstBlock).map(
         block => blockCache.get(block) as DOMRect
       );
       this._signals.updateSelectedRects.emit(rects);
     } else {
       // only current focused-block
-      this._signals.updateSelectedRects.emit([firstBlockRect]);
+      this._signals.updateSelectedRects.emit([
+        blockCache.get(firstBlock) as DOMRect,
+      ]);
     }
   }
 
@@ -1051,17 +1051,19 @@ export class DefaultSelectionManager {
     this.clear();
     this.state.type = 'block';
 
-    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+    const firstBlock = selectedBlocks[0];
 
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
-      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
+      const rects = clearSubtree(selectedBlocks, firstBlock).map(
         block => blockCache.get(block) as DOMRect
       );
       this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
-      this.setSelectedBlocks(selectedBlocks, [firstBlockRect]);
+      this.setSelectedBlocks(selectedBlocks, [
+        blockCache.get(firstBlock) as DOMRect,
+      ]);
     }
   }
 
