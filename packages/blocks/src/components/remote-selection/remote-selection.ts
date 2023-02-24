@@ -1,6 +1,5 @@
 import { blockRangeToNativeRange } from '@blocksuite/blocks/std.js';
 import { assertExists, Page, UserInfo, UserRange } from '@blocksuite/store';
-import { faker } from '@faker-js/faker';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,7 +11,29 @@ interface SelectionRect {
   left: number;
 }
 
-function selectionPositionStyle(rect: SelectionRect, color: string) {
+function addAlpha(hexColor: string, opacity: number): string {
+  console.log(hexColor, opacity);
+  const normalized = Math.round(Math.min(Math.max(opacity, 0), 1) * 255);
+  return hexColor + normalized.toString(16).toUpperCase();
+}
+
+function randomColor(): string {
+  const hex = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${hex}`;
+}
+
+function selectionStyle(rect: SelectionRect, color: string) {
+  return styleMap({
+    position: 'absolute',
+    width: `${rect.width}px`,
+    height: `${rect.height}px`,
+    top: `${rect.top}px`,
+    left: `${rect.left}px`,
+    backgroundColor: color,
+  });
+}
+
+function cursorStyle(rect: SelectionRect, color: string) {
   return styleMap({
     position: 'absolute',
     width: `${rect.width}px`,
@@ -42,10 +63,8 @@ export class RemoteSelection extends LitElement {
     userRange: UserRange;
     user?: UserInfo;
   }> = [];
-  private _selections: Array<{
-    rects: SelectionRect[];
-    user?: UserInfo;
-  }> = [];
+
+  private _colorMap = new Map<number, string>();
 
   protected firstUpdated() {
     assertExists(this.page);
@@ -63,6 +82,7 @@ export class RemoteSelection extends LitElement {
         assertExists(this.page);
         const page = this.page;
         const { user, rangeMap } = msg.state;
+
         if (msg.type === 'update') {
           const index = this._ranges.findIndex(range => range.id === msg.id);
           if (index === -1) {
@@ -103,14 +123,16 @@ export class RemoteSelection extends LitElement {
     }
 
     const nativeRange = blockRangeToNativeRange({
+      type: 'Native',
       startModel,
       startOffset: range.startOffset,
       endModel,
       endOffset: range.endOffset,
       betweenModels: [],
     });
-    const roughRect = nativeRange.getBoundingClientRect();
-    return Array.from(nativeRange.getClientRects())
+
+    const nativeRects = Array.from(nativeRange.getClientRects());
+    return nativeRects
       .map(rect => ({
         width: rect.width,
         height: rect.height,
@@ -119,29 +141,114 @@ export class RemoteSelection extends LitElement {
       }))
       .filter(
         rect =>
-          rect.width > 0 &&
-          rect.height > 0 &&
-          rect.width < roughRect.width &&
-          rect.height < roughRect.height
+          (rect.width > 1 && rect.height > 0) ||
+          range.startBlockId === range.endBlockId
       );
   }
 
+  private _getCursorRect(range: UserRange): SelectionRect | null {
+    const endBlockId = range.endBlockId;
+    const endOffset = range.endOffset;
+    assertExists(this.page);
+
+    const endModel = this.page.getBlockById(endBlockId);
+    if (!endModel || !endModel.text) {
+      return null;
+    }
+
+    try {
+      const nativeRange = blockRangeToNativeRange({
+        type: 'Native',
+        startModel: endModel,
+        startOffset: endOffset,
+        endModel,
+        endOffset: endOffset,
+        betweenModels: [],
+      });
+
+      const nativeRects = Array.from(nativeRange.getClientRects());
+      if (nativeRects.length === 1) {
+        const rect = nativeRects[0];
+        return {
+          width: 2,
+          height: rect.height + 4,
+          top: rect.top - 2,
+          left: rect.left,
+        };
+      }
+    } catch (e) {
+      return null;
+    }
+
+    return null;
+  }
+
   render() {
-    if (!this.page) {
+    if (!this.page || this._ranges.length === 0) {
+      this._colorMap.clear();
       return html``;
     }
 
-    console.log(this._ranges);
-    this._selections = this._ranges.map(range => ({
+    const selections: Array<{
+      id: number;
+      userRange: UserRange;
+      rects: SelectionRect[];
+      user?: UserInfo;
+    }> = this._ranges.map(range => ({
+      id: range.id,
+      userRange: range.userRange,
       rects: this._getSelectionRect(range.userRange),
       user: range.user,
     }));
+
     return html`<div>
-      ${this._selections.flatMap(selection => {
-        const color = faker.color.rgb({ format: 'css', includeAlpha: true });
-        return selection.rects.map(
-          r => html`<div style="${selectionPositionStyle(r, color)}"></div>`
-        );
+      ${selections.flatMap(selection => {
+        if (selection.user) {
+          this._colorMap.set(selection.id, selection.user.color);
+        }
+        if (!this._colorMap.has(selection.id)) {
+          this._colorMap.set(selection.id, randomColor());
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const color = this._colorMap.get(selection.id)!;
+        const cursorRect = this._getCursorRect(selection.userRange);
+
+        return selection.rects
+          .map(
+            r => html`
+              <div style="${selectionStyle(r, addAlpha(color, 0.5))}"></div>
+            `
+          )
+          .concat([
+            html`
+              <div
+                style="${cursorRect
+                  ? cursorStyle(cursorRect, color)
+                  : styleMap({
+                      display: 'none',
+                    })}"
+              >
+                <div
+                  style="${styleMap({
+                    position: 'relative',
+                    height: '100%',
+                  })}"
+                >
+                  <div
+                    style="${styleMap({
+                      position: 'absolute',
+                      bottom: `${cursorRect?.height}px`,
+                      padding: '2px',
+                      'background-color': color,
+                      color: 'white',
+                    })}"
+                  >
+                    ${selection.user?.name}
+                  </div>
+                </div>
+              </div>
+            `,
+          ]);
       })}
     </div>`;
   }

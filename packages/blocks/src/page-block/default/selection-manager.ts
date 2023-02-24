@@ -435,7 +435,8 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
-        this._onSelectionChange
+        this._onSelectionChangeWithDebounce,
+        this._onSelectionChangeWithoutDebounce
       )
     );
   }
@@ -646,8 +647,6 @@ export class DefaultSelectionManager {
 
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
-
-      this.updateLocalSelection();
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
@@ -807,13 +806,11 @@ export class DefaultSelectionManager {
     // console.log('mouseout', e);
   };
 
-  private _onSelectionChange = (_: Event) => {
+  private _onSelectionChangeWithDebounce = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
       return;
     }
-
-    this.updateLocalSelection();
 
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
@@ -841,6 +838,10 @@ export class DefaultSelectionManager {
       page: this.page,
       direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
+  };
+
+  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+    this.updateLocalSelection();
   };
 
   // clear selection: `block`, `embed`, `native`
@@ -1103,9 +1104,13 @@ export class DefaultSelectionManager {
   }
 
   updateLocalSelection() {
+    if (!this) {
+      return;
+    }
+
     const page = this.page;
     const blockRange = getCurrentBlockRange(page);
-    if (blockRange) {
+    if (blockRange && blockRange.type === 'Native') {
       const userRange: UserRange = {
         startOffset: blockRange.startOffset,
         endOffset: blockRange.endOffset,
