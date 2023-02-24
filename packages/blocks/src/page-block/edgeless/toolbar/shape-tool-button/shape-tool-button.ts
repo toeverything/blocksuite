@@ -47,12 +47,12 @@ export class EdgelessShapeToolButton extends LitElement {
   @property()
   edgeless?: EdgelessPageBlockComponent;
 
-  private _shapesMenu?: ShapesMenuInstance;
+  private _shapesMenu: ShapesMenuInstance | null = null;
 
   private _toggleShapesMenu() {
     if (this._shapesMenu) {
       this._shapesMenu.dispose();
-      this._shapesMenu = undefined;
+      this._shapesMenu = null;
     } else {
       this._shapesMenu = createShapesMenuPopper(this);
       this._shapesMenu.element.mouseMode = this.mouseMode;
@@ -63,14 +63,14 @@ export class EdgelessShapeToolButton extends LitElement {
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       this._shapesMenu?.dispose();
-      this._shapesMenu = undefined;
+      this._shapesMenu = null;
     }
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this._shapesMenu?.dispose?.();
-    this._shapesMenu = undefined;
+    this._shapesMenu = null;
   }
 
   render() {

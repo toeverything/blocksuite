@@ -30,8 +30,8 @@ export class EdgelessShapesMenu extends LitElement {
   edgeless?: EdgelessPageBlockComponent;
 
   render() {
-    const type =
-      this.mouseMode?.type === 'shape' ? this.mouseMode.shape : undefined;
+    const shapeType =
+      this.mouseMode?.type === 'shape' ? this.mouseMode.shape : null;
 
     return html`
       <div class="shape-menu-container">
@@ -40,7 +40,7 @@ export class EdgelessShapesMenu extends LitElement {
             <edgeless-tool-icon-button
               .disabled=${disabled}
               .tooltips=${tooltips}
-              .active=${type === name}
+              .active=${shapeType === name}
               @tool.click=${() => {
                 if (disabled) {
                   return;
