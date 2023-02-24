@@ -150,11 +150,11 @@ export function updateBlockType(
     }
     requestAnimationFrame(() =>
       restoreSelection({
-        type: 'Native',
+        type: 'Block',
         startModel: model,
         endModel: model,
         startOffset: 0,
-        endOffset: 0,
+        endOffset: model.text?.length ?? 0,
         betweenModels: [],
       })
     );
