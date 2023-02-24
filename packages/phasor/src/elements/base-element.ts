@@ -1,3 +1,5 @@
+import { serializeXYWH } from '../utils/xywh.js';
+
 export interface SurfaceElement {
   id: string;
   x: number;
@@ -30,6 +32,10 @@ export abstract class BaseElement implements SurfaceElement {
 
   get centerY() {
     return this.y + this.h / 2;
+  }
+
+  get xywh() {
+    return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
   setBound(x: number, y: number, w: number, h: number) {

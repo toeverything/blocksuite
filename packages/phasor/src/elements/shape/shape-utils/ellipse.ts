@@ -1,58 +1,53 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { RenderSequenceItem, ShapeRenderConfig } from '../types.js';
+import type { ShapeRenderConfig } from '../types.js';
+
+function getEllipsePath(width: number, height: number): Path2D {
+  const path2d = new Path2D();
+  path2d.ellipse(
+    width / 2,
+    height / 2,
+    width / 2,
+    height / 2,
+    0,
+    0,
+    2 * Math.PI
+  );
+  return path2d;
+}
 
 export class Ellipse {
-  static createRenderSequence({
-    width,
-    height,
-    fillColor,
-    strokeWidth,
-    strokeColor,
-    strokeStyle,
-  }: ShapeRenderConfig): RenderSequenceItem[] {
-    const sequence: RenderSequenceItem[] = [];
+  static render(
+    ctx: CanvasRenderingContext2D,
+    {
+      width,
+      height,
+      filled,
+      fillColor,
+      strokeWidth,
+      strokeColor,
+      strokeStyle,
+    }: ShapeRenderConfig
+  ) {
+    const renderOffset = Math.max(strokeWidth, 0) / 2;
+    const renderWidth = width - renderOffset * 2;
+    const renderHeight = height - renderOffset * 2;
 
-    if (fillColor) {
-      const fillPath2d = new Path2D();
-      fillPath2d.ellipse(
-        width / 2,
-        height / 2,
-        width / 2,
-        height / 2,
-        0,
-        0,
-        2 * Math.PI
-      );
-      sequence.push({
-        type: 'fill',
-        path2d: fillPath2d,
-        color: fillColor,
-      });
+    ctx.translate(renderOffset, renderOffset);
+
+    const path2d = getEllipsePath(renderWidth, renderHeight);
+
+    if (filled) {
+      ctx.fillStyle = fillColor;
+      ctx.fill(path2d);
     }
 
     if (strokeWidth > 0) {
-      const strokePath2d = new Path2D();
-      strokePath2d.ellipse(
-        width / 2,
-        height / 2,
-        width / 2 - strokeWidth / 2,
-        height / 2 - strokeWidth / 2,
-        0,
-        0,
-        2 * Math.PI
-      );
-      sequence.push({
-        type: 'stroke',
-        path2d: strokePath2d,
-        width: strokeWidth,
-        color: strokeColor,
-        style: strokeStyle,
-      });
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.stroke(path2d);
     }
-
-    return sequence;
   }
 
   static hitTest(

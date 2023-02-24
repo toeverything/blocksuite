@@ -4,7 +4,10 @@ import type { ShapeElement } from './shape/shape-element.js';
 export type { SurfaceElement } from './base-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
-export type { ShapeType } from './shape/types.js';
+export type {
+  MutableProperties as ShapeMutableProperties,
+  ShapeType,
+} from './shape/types.js';
 
 export type PhasorElement = ShapeElement | DebugElement;
 

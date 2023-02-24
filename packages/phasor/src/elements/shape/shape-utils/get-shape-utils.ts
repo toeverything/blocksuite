@@ -2,7 +2,6 @@ import type { ShapeType, ShapeUtils } from '../types.js';
 import { Diamond } from './diamond.js';
 import { Ellipse } from './ellipse.js';
 import { Rect } from './rect.js';
-import { RoundedRect } from './rounded-rect.js';
 import { Triangle } from './triangle.js';
 
 const shapeUtilsMap: Record<ShapeType, ShapeUtils> = {
@@ -10,7 +9,6 @@ const shapeUtilsMap: Record<ShapeType, ShapeUtils> = {
   triangle: Triangle,
   ellipse: Ellipse,
   diamond: Diamond,
-  roundedRect: RoundedRect,
 };
 
 export function getShapeUtils(shapeType: ShapeType): ShapeUtils {

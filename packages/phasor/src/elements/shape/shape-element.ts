@@ -1,32 +1,28 @@
-import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
+import type { Color, StrokeStyle } from '../../consts.js';
+import { deserializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { getShapeUtils } from './shape-utils/get-shape-utils.js';
-import type { RenderSequenceItem, ShapeType } from './types.js';
+import type { MutableProperties, SerializedShape, ShapeType } from './types.js';
 
 export class ShapeElement extends BaseElement {
   type = 'shape' as const;
-  shapeType: ShapeType;
-  color: `#${string}` = '#000000';
 
-  private _renderSequence: RenderSequenceItem[] = [];
+  shapeType: ShapeType;
+
+  rounded = false;
+  filled = false;
+  fillColor: Color = '#ffffff';
+  strokeWidth = 4;
+  strokeColor: Color = '#000000';
+  strokeStyle: StrokeStyle = 'solid';
 
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
   }
 
-  setBound(x: number, y: number, w: number, h: number): void {
-    super.setBound(x, y, w, h);
-
-    const shapeUtils = getShapeUtils(this.shapeType);
-    this._renderSequence = shapeUtils.createRenderSequence({
-      width: this.w,
-      height: this.h,
-      fillColor: undefined,
-      strokeWidth: 4,
-      strokeColor: '#000',
-      strokeStyle: 'solid',
-    });
+  updateProperties(properties: MutableProperties) {
+    Object.assign(this, properties);
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
@@ -35,39 +31,46 @@ export class ShapeElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    this._renderSequence.forEach(seq => {
-      ctx.save();
-      if (seq.type === 'fill') {
-        ctx.fillStyle = seq.color;
-        ctx.fill(seq.path2d);
-      } else if (seq.type === 'stroke') {
-        ctx.strokeStyle = seq.color ?? '#000';
-        ctx.lineWidth = seq.width;
-        ctx.stroke(seq.path2d);
-      }
-      ctx.restore();
+    const shapeUtils = getShapeUtils(this.shapeType);
+    shapeUtils.render(ctx, {
+      width: this.w,
+      height: this.h,
+      rounded: this.rounded,
+      filled: this.filled,
+      fillColor: this.fillColor,
+      strokeWidth: this.strokeWidth,
+      strokeColor: this.strokeColor,
+      strokeStyle: this.strokeStyle,
     });
   }
 
-  serialize(): Record<string, unknown> {
+  serialize(): SerializedShape {
     return {
       id: this.id,
       index: this.index,
       type: this.type,
+      xywh: this.xywh,
+
       shapeType: this.shapeType,
-      xywh: serializeXYWH(this.x, this.y, this.w, this.h),
-      color: this.color,
+
+      rounded: this.rounded,
+      filled: this.filled,
+      fillColor: this.fillColor,
+      strokeWidth: this.strokeWidth,
+      strokeColor: this.strokeColor,
+      strokeStyle: this.strokeStyle,
     };
   }
 
   static deserialize(data: Record<string, unknown>): ShapeElement {
     const shapeType = data.shapeType as ShapeType;
     const element = new ShapeElement(data.id as string, shapeType);
-    element.index = data.index as string;
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     element.setBound(x, y, w, h);
-    element.color = data.color as `#${string}`;
+    const { id, type, xywh, ...properties } = data as SerializedShape;
+    element.updateProperties(properties);
+
     return element;
   }
 }

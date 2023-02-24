@@ -1,50 +1,48 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { RenderSequenceItem, ShapeRenderConfig } from '../types.js';
+import type { ShapeRenderConfig } from '../types.js';
+
+function getDiamondPath(width: number, height: number): Path2D {
+  const path2d = new Path2D();
+  path2d.moveTo(width / 2, 0);
+  path2d.lineTo(width, height / 2);
+  path2d.lineTo(width / 2, height);
+  path2d.lineTo(0, height / 2);
+  path2d.closePath();
+  return path2d;
+}
 
 export class Diamond {
-  static createRenderSequence({
-    width,
-    height,
-    fillColor,
-    strokeWidth,
-    strokeColor,
-    strokeStyle,
-  }: ShapeRenderConfig): RenderSequenceItem[] {
-    const sequence: RenderSequenceItem[] = [];
+  static render(
+    ctx: CanvasRenderingContext2D,
+    {
+      width,
+      height,
+      filled,
+      fillColor,
+      strokeWidth,
+      strokeColor,
+      strokeStyle,
+    }: ShapeRenderConfig
+  ) {
+    const renderOffset = Math.max(strokeWidth, 0) / 2;
+    const renderWidth = width - renderOffset * 2;
+    const renderHeight = height - renderOffset * 2;
 
-    if (fillColor) {
-      const fillPath2d = new Path2D();
-      fillPath2d.moveTo(width / 2, 0);
-      fillPath2d.lineTo(width, height / 2);
-      fillPath2d.lineTo(width / 2, height);
-      fillPath2d.lineTo(0, height / 2);
-      fillPath2d.closePath();
-      sequence.push({
-        type: 'fill',
-        path2d: fillPath2d,
-        color: fillColor,
-      });
+    ctx.translate(renderOffset, renderOffset);
+
+    const path2d = getDiamondPath(renderWidth, renderHeight);
+    if (filled) {
+      ctx.fillStyle = fillColor;
+      ctx.fill(path2d);
     }
 
     if (strokeWidth > 0) {
-      const strokePath2d = new Path2D();
-      strokePath2d.moveTo(width / 2, 0 + strokeWidth / 2);
-      strokePath2d.lineTo(width - strokeWidth / 2, height / 2);
-      strokePath2d.lineTo(width / 2, height - strokeWidth / 2);
-      strokePath2d.lineTo(0 + strokeWidth / 2, height / 2);
-      strokePath2d.closePath();
-      sequence.push({
-        type: 'stroke',
-        path2d: strokePath2d,
-        width: strokeWidth,
-        color: strokeColor,
-        style: strokeStyle,
-      });
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.stroke(path2d);
     }
-
-    return sequence;
   }
 
   static hitTest(
