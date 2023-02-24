@@ -401,7 +401,7 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _thresold: number; // distance to the upper and lower boundaries of the viewport
+  private readonly _threshold: number; // distance to the upper and lower boundaries of the viewport
 
   constructor({
     page,
@@ -420,7 +420,7 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    this._thresold = threshold;
+    this._threshold = threshold;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
@@ -545,17 +545,17 @@ export class DefaultSelectionManager {
 
       // TODO: for the behavior of scrolling, see the native selection
       // speed easeOutQuad + easeInQuad
-      if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
+      if (Math.ceil(scrollTop) < max && clientHeight - y < this._threshold) {
         // ↓
-        const d = (this._thresold - (clientHeight - y)) * 0.25;
+        const d = (this._threshold - (clientHeight - y)) * 0.25;
         scrollTop += d;
         endPoint.y += d;
         auto = Math.ceil(scrollTop) < max;
         viewport.scrollTop = scrollTop;
         this.updateSelectionRect(startPoint, endPoint);
-      } else if (scrollTop > 0 && y < this._thresold) {
+      } else if (scrollTop > 0 && y < this._threshold) {
         // ↑
-        const d = (y - this._thresold) * 0.25;
+        const d = (y - this._threshold) * 0.25;
         scrollTop += d;
         endPoint.y += d;
         auto = scrollTop > 0;
@@ -904,7 +904,7 @@ export class DefaultSelectionManager {
     if (type === 'block') {
       this.refreshSelectedBlocksRects();
     } else if (type === 'embed') {
-      this.refresEmbedRects();
+      this.refreshEmbedRects();
     }
   }
 
@@ -944,7 +944,7 @@ export class DefaultSelectionManager {
     }
   }
 
-  refresEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
+  refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;
