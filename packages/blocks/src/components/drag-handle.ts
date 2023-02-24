@@ -185,13 +185,20 @@ export class DragHandle extends LitElement {
   private _currentPageX = 0;
   private _currentPageY = 0;
 
-  private _startModelState: EditingState | null = null;
+  /**
+   * Current drag handle model state
+   */
+  private _handleAnchorState: EditingState | null = null;
 
-  private _lastModelState: EditingState | null = null;
-  private _indicator!: DragIndicator;
+  /**
+   * Last drag handle dropping target state
+   */
+  private _lastDroppingTarget: EditingState | null = null;
+  private _indicator: DragIndicator | null = null;
   private _cursor: number | null = 0;
   private _lastSelectedIndex = -1;
   private _container: HTMLElement;
+  private _dragImage: HTMLDivElement | null = null;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -210,7 +217,7 @@ export class DragHandle extends LitElement {
       true
     );
     if (modelState) {
-      this._startModelState = modelState;
+      this._handleAnchorState = modelState;
       this._cursor = modelState.index;
       const rect = modelState.position;
       if (this._cursor === this._lastSelectedIndex) {
@@ -246,16 +253,22 @@ export class DragHandle extends LitElement {
   public hide() {
     this.style.display = 'none';
     this._cursor = null;
-    this._startModelState = null;
-    this._lastModelState = null;
-    this._indicator.cursorPosition = null;
-    this._indicator.targetRect = null;
+    this._handleAnchorState = null;
+    this._lastDroppingTarget = null;
+
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
+    }
 
     this._draggingElements?.forEach(e => {
       e.style.opacity = '1';
     });
 
     this._draggingElements = [];
+
+    this._dragImage?.remove();
+    this._dragImage = null;
   }
 
   public setPointerEvents(value: 'auto' | 'none') {
@@ -292,11 +305,9 @@ export class DragHandle extends LitElement {
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    // Drag handle may be disposed without initializing indicator
-    if (this._indicator) {
-      this._indicator.cursorPosition = null;
-      this._indicator.targetRect = null;
-    }
+
+    // cleanup
+    this.hide();
 
     window.removeEventListener('resize', this._onResize);
     document.body.removeEventListener('wheel', this._onWheel);
@@ -318,10 +329,10 @@ export class DragHandle extends LitElement {
       this._currentPageX = e.pageX;
       this._currentPageY = e.pageY;
     }
-    if (!this._startModelState) {
+    if (!this._handleAnchorState) {
       return;
     }
-    const rect = this._startModelState.position;
+    const rect = this._handleAnchorState.position;
     const top = Math.max(
       0,
       Math.min(
@@ -336,17 +347,17 @@ export class DragHandle extends LitElement {
 
   // fixme: handle multiple blocks case
   private _onResize = (e: UIEvent) => {
-    if (this._startModelState) {
+    if (this._handleAnchorState) {
       const newModelState = this._getBlockEditingStateByPosition?.(
-        this.getDropAllowedBlocks([this._startModelState.model.id]),
-        this._startModelState.position.x,
-        this._startModelState.position.y,
+        this.getDropAllowedBlocks([this._handleAnchorState.model.id]),
+        this._handleAnchorState.position.x,
+        this._handleAnchorState.position.y,
         true
       );
       if (newModelState) {
-        this._startModelState = newModelState;
+        this._handleAnchorState = newModelState;
         this._cursor = newModelState.index;
-        const rect = this._startModelState.position;
+        const rect = this._handleAnchorState.position;
         this.style.display = 'block';
         const containerRect = this._container.getBoundingClientRect();
         this.style.left = `${rect.left - containerRect.left - 20}px`;
@@ -408,14 +419,14 @@ export class DragHandle extends LitElement {
       ? selectedBlocks
       : [clickDragState.element];
 
-    // hack: set opacity to 0.9 to remove dragging element's shadow
-    // maybe the dragging element also has opacity?
-    const firstElement = draggingBlockElements[0];
-
     // fixme: handle multiple blocks case
     // the drag image right now only renders the first block
-    firstElement.style.opacity = '0.99';
-    e.dataTransfer.setDragImage(firstElement, 0, 0);
+
+    this._attachDragImage(draggingBlockElements);
+
+    if (this._dragImage) {
+      e.dataTransfer.setDragImage(this._dragImage, 0, 0);
+    }
 
     this._draggingElements = draggingBlockElements;
   };
@@ -430,10 +441,9 @@ export class DragHandle extends LitElement {
       x = this._currentPageX;
       y = this._currentPageY;
     }
-    if (this._cursor === null) {
+    if (this._cursor === null || !this._indicator) {
       return;
     }
-    assertExists(this._startModelState);
     const modelState = this._getBlockEditingStateByCursor?.(
       this.getDropAllowedBlocks(this._draggingBlockIds),
       x,
@@ -445,7 +455,7 @@ export class DragHandle extends LitElement {
     );
     if (modelState) {
       this._cursor = modelState.index;
-      this._lastModelState = modelState;
+      this._lastDroppingTarget = modelState;
       this._indicator.targetRect = modelState.position;
     }
     this._indicator.cursorPosition = {
@@ -455,16 +465,33 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragEnd = (e: DragEvent) => {
-    if (!this._lastModelState) {
+    if (!this._lastDroppingTarget) {
       // may drop to the same block position
       return;
     }
     assertExists(this._draggingElements);
 
-    this.onDropCallback?.(e, this._draggingElements, this._lastModelState);
+    this.onDropCallback?.(e, this._draggingElements, this._lastDroppingTarget);
 
     this.hide();
   };
+
+  private _attachDragImage(draggingElements: HTMLElement[]) {
+    if (this._dragImage) {
+      return;
+    }
+    this._dragImage = document.createElement('div');
+    this._dragImage.classList.add('affine-default-page-block-container');
+    this._dragImage.style.position = 'absolute';
+    this._dragImage.style.pointerEvents = 'none';
+    // this._dragImage.style
+    draggingElements.forEach(element => {
+      const cloned = element.cloneNode(true);
+      // todo: make sure the cloned does not have block id
+      this._dragImage?.appendChild(cloned);
+    });
+    document.body.appendChild(this._dragImage);
+  }
 
   override render() {
     return html`

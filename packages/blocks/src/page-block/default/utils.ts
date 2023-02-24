@@ -508,7 +508,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
 
-      // ??? is there a better way?
       requestAnimationFrame(() => {
         // update selection rects
         defaultPageBlock.selection.setSelectedBlocks(blocks);
