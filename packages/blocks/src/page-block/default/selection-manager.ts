@@ -191,6 +191,7 @@ function filterSelectedBlockByIndex(
 function clearSubtree(selectedBlocks: BlockComponentElement[], prevBlock: BlockComponentElement) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
+    // prev block contains block
     if (
       prevBlock.compareDocumentPosition(block) &
       Node.DOCUMENT_POSITION_CONTAINED_BY
