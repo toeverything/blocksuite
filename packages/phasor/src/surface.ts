@@ -8,13 +8,13 @@ import type { HitTestOptions } from './elements/base-element.js';
 import {
   BrushElement,
   DebugElement,
+  getBrushBoundFromPoints,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import Utils from './utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -61,15 +61,10 @@ export class SurfaceManager {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
-    const bound = Utils.getBoundsFromPoints(points);
     const lineWidth = element.lineWidth;
+    const bound = getBrushBoundFromPoints(points, lineWidth);
 
-    element.setBound(
-      point[0],
-      point[1],
-      bound.width < lineWidth ? lineWidth : bound.width + lineWidth,
-      bound.height < lineWidth ? lineWidth : bound.height + lineWidth
-    );
+    element.setBound(point[0], point[1], bound.w, bound.h);
     element.color = color;
     element.points = points;
 
@@ -237,17 +232,13 @@ export class SurfaceManager {
         if (key === 'points') {
           const points: number[][] = JSON.parse(yElement.get(key) as string);
 
-          const bounds = Utils.getBoundsFromPoints(points);
+          const lineWidth = (element as BrushElement).lineWidth;
+
+          const bounds = getBrushBoundFromPoints(points, lineWidth);
 
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
-          const lineWidth = (element as BrushElement).lineWidth;
-          element.setBound(
-            element.x,
-            element.y,
-            bounds.width + lineWidth,
-            bounds.height + lineWidth
-          );
+          element.setBound(element.x, element.y, bounds.w, bounds.h);
           this._renderer.addElement(element);
         }
       }

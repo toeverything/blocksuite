@@ -35,7 +35,6 @@ function mouseMove(
 
   if (topElement) {
     const [x, y] = surface.toViewCoord(topElement.x, topElement.y);
-
     hoverRect.style.visibility = 'visible';
     hoverRect.style.left = `${x}px`;
     hoverRect.style.top = `${y}px`;
@@ -71,20 +70,25 @@ function main() {
   surface.addDebugElement(new Bound(298, 0, 2, 300), 'gray');
 
   surface.addBrushElement([300, 120], 'green', [
-    [0, 0],
-    [0, 100],
-    [20, 20],
-    [40, 120],
-    [100, 60],
-    [180, 10],
+    [0, 14.35],
+    [0.23, 14.35],
+    [0.99, 14.35],
+    [3.03, 14.1],
+    [4.21, 13.7],
+    [5.42, 13.18],
+    [6.61, 12.58],
+    [10.91, 10.87],
+    [17.4, 8.78],
+    [21.25, 7.89],
+    [25.05, 7.01],
+    [28.9, 6.12],
+    [33.24, 0],
   ]);
   surface.addBrushElement([300, 10], 'blue');
   const brushId = surface.addBrushElement([300, 20], 'purple');
   surface.updateBrushElementPoints(brushId, [
     [0, 0],
-    [10, 20],
-    [30, 65],
-    [15, 40],
+    [100, 100],
   ]);
 
   // Uncomment to batch load mock data
