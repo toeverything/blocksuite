@@ -918,7 +918,7 @@ export function restoreSelection(blockRange: BlockRange) {
       // In the edgeless mode
       return;
     }
-    defaultPageBlock.selection.clear();
+    defaultPageBlock.selection.state.clearBlock();
     return;
   }
   const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
