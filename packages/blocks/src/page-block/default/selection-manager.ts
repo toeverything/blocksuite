@@ -162,7 +162,6 @@ function filterSelectedBlockByIndex(
   const len = entries.length;
   const results = [];
   let once = true;
-  // let boundRect: DOMRect | null = null;
   let prevBlock: Element | null = null;
 
   for (let i = focusedBlockIndex; i < len; i++) {
@@ -172,14 +171,12 @@ function filterSelectedBlockByIndex(
       const nextRect = richText?.getBoundingClientRect() || rect;
 
       if (nextRect && intersects(rect, selectionRect, offset)) {
-        // boundRect = rect;
         prevBlock = block;
         results.push(block);
         once = false;
       }
     } else if (prevBlock) {
       // prev block contains block
-      // if (contains(boundRect, rect, { x: 0, y: 1 })) {
       if (
         prevBlock.compareDocumentPosition(block) &
         Node.DOCUMENT_POSITION_CONTAINED_BY
