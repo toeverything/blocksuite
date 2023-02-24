@@ -50,10 +50,10 @@ export class EdgelessToolBar extends LitElement {
   `;
 
   @property()
-  mouseMode?: MouseMode;
+  mouseMode!: MouseMode;
 
   @property()
-  edgeless?: EdgelessPageBlockComponent;
+  edgeless!: EdgelessPageBlockComponent;
 
   private _setMouseMode(mouseMode: MouseMode) {
     this.edgeless?.signals.mouseModeUpdated.emit(mouseMode);

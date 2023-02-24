@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-toolbar-with-flag.js';
+import './toolbar/edgeless-toolbar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { XYWH } from '@blocksuite/phasor';
@@ -106,10 +106,13 @@ export class EdgelessPageBlockComponent
   @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;
 
-  @state()
+  @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
+
+  @state()
+  private _toolbarEnabled = false;
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
@@ -196,6 +199,27 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
+  private _listenToolbarEnableChange() {
+    const page = this.page;
+
+    this._toolbarEnabled =
+      page.awarenessStore.getFlag('enable_edgeless_toolbar') ?? false;
+
+    const clientID = page.doc.clientID;
+
+    this._disposables.add(
+      page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_edgeless_toolbar,
+        enable => {
+          this._toolbarEnabled = enable ?? false;
+        },
+        {
+          filter: msg => msg.id === clientID,
+        }
+      )
+    );
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -247,6 +271,7 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+    this._listenToolbarEnableChange();
   }
 
   connectedCallback() {
@@ -331,11 +356,10 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
-      <edgeless-toolbar-with-flag
+      <edgeless-toolbar
         .mouseMode=${this.mouseMode}
         .edgeless=${this}
-        .mouseRoot=${this.mouseRoot}
-      ></edgeless-toolbar-with-flag>
+      ></edgeless-toolbar>
     `;
   }
 }
