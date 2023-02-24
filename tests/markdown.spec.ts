@@ -3,6 +3,10 @@ import {
   focusRichText,
   getCursorBlockIdAndHeight,
   initEmptyParagraphState,
+  pressArrowLeft,
+  pressBackspace,
+  pressEnter,
+  pressSpace,
   resetHistory,
   type,
   undoByClick,
@@ -227,4 +231,22 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   // TODO
   // await assertRichTexts(page, ['\n']);
+});
+
+test('inline code should work when pressing Enter followed by Backspace twice', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '`test`');
+  await pressSpace(page);
+  await pressArrowLeft(page);
+  await pressEnter(page);
+  await pressBackspace(page);
+  await pressEnter(page);
+  await pressBackspace(page);
+
+  await assertRichTexts(page, ['test']);
 });

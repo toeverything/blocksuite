@@ -136,7 +136,7 @@ export class RichText extends NonShadowLitElement {
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
-    this.quill.on('text-change', (delta: DeltaStatic) => {
+    this.quill.on('text-change', (delta: DeltaStatic, oldDelta, source) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
@@ -154,7 +154,13 @@ export class RichText extends NonShadowLitElement {
         attr = 'link';
       }
       // only length is 2 need to be handled
-      if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
+      if (
+        delta.ops.length === 2 &&
+        delta.ops[1]?.insert &&
+        attr &&
+        source === 'user'
+      ) {
+        // console.log(this.quill);
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr];
         if (retain !== undefined) {
