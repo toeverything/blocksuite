@@ -24,14 +24,14 @@ export class EdgelessShapesMenu extends LitElement {
   `;
 
   @property()
-  mouseMode?: MouseMode;
+  mouseMode!: MouseMode;
 
   @property()
-  edgeless?: EdgelessPageBlockComponent;
+  edgeless!: EdgelessPageBlockComponent;
 
   render() {
     const shapeType =
-      this.mouseMode?.type === 'shape' ? this.mouseMode.shape : null;
+      this.mouseMode.type === 'shape' ? this.mouseMode.shape : null;
 
     return html`
       <div class="shape-menu-container">

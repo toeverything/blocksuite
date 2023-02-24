@@ -42,10 +42,10 @@ function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends LitElement {
   @property()
-  mouseMode?: MouseMode;
+  mouseMode!: MouseMode;
 
   @property()
-  edgeless?: EdgelessPageBlockComponent;
+  edgeless!: EdgelessPageBlockComponent;
 
   private _shapesMenu: ShapesMenuInstance | null = null;
 
