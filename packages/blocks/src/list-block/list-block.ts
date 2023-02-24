@@ -66,6 +66,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       user-select: none;
     }
     .affine-list-block__todo-prefix {
+      margin-top: 1px;
       cursor: pointer;
     }
     .affine-list-block__todo {
