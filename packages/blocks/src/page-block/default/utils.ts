@@ -487,12 +487,11 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     },
     onDropCallback(e, blocks, end): void {
       const page = defaultPageBlock.page;
-      const firstDraggingModel = blocks[0].model;
       const rect = end.position;
       const targetModel = end.model;
       if (
         blocks.length === 1 &&
-        doesInSamePath(page, targetModel, firstDraggingModel)
+        doesInSamePath(page, targetModel, blocks[0].model)
       ) {
         return;
       }
@@ -510,7 +509,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.signals.updateEmbedRects.emit([]);
 
       // ??? is there a better way?
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         // update selection rects
         defaultPageBlock.selection.setSelectedBlocks(blocks);
       });
