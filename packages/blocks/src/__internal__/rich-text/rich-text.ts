@@ -160,7 +160,6 @@ export class RichText extends NonShadowLitElement {
         attr &&
         source === 'user'
       ) {
-        // console.log(this.quill);
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr];
         if (retain !== undefined) {
