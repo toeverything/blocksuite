@@ -111,7 +111,7 @@ function filterSelectedBlockWithoutSubtree(
           results.shift();
         } else {
           // backward search parent block and remove its subtree
-          // only keep same level blocks
+          // only keep blocks with same level
           const { previousElementSibling } = block;
           // previousElementSibling is not prev block and previousElementSibling contains prev block
           if (
