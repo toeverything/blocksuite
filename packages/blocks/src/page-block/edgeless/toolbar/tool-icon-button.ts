@@ -48,19 +48,17 @@ export class EdgelessToolIconButton extends LitElement {
   `;
 
   @property()
-  disabled?: boolean;
+  disabled = false;
 
   @property()
-  tooltips?: string;
+  tooltips!: string;
 
   @property()
-  active?: boolean;
+  active = false;
 
-  // @event tool.click
   private _dispatchClickEvent() {
-    if (this.disabled) {
-      return;
-    }
+    if (this.disabled) return;
+
     this.dispatchEvent(
       new CustomEvent<void>('tool.click', {
         composed: true,
