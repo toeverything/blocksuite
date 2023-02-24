@@ -667,19 +667,24 @@ export class DefaultSelectionManager {
       ) {
         return;
       }
-      const blocks = this.state.selectedBlocks;
-
-      if (!blocks.length) {
-        return;
-      }
-      const firstBlock = blocks[0];
-      const lastBlock = blocks[blocks.length - 1];
 
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
         direction,
-        anchorEl: direction === 'center-bottom' ? lastBlock : firstBlock,
+        anchorEl: {
+          getBoundingClientRect: () => {
+            const blocks = this.state.selectedBlocks;
+            if (!blocks.length) {
+              throw new Error("Failed to get format bar's anchor element");
+            }
+            const firstBlock = blocks[0];
+            const lastBlock = blocks[blocks.length - 1];
+            const targetBlock =
+              direction === 'center-bottom' ? lastBlock : firstBlock;
+            return targetBlock.getBoundingClientRect();
+          },
+        },
       });
     }
   };
