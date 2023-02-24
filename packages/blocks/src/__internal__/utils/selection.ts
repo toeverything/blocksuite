@@ -20,11 +20,9 @@ import {
   getModelsByRange,
   getNextBlock,
   getPreviousBlock,
-  getQuillIndexByNativeSelection,
-  getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type { BlockRange, SelectionPosition } from './types.js';
+import type { SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -296,7 +294,7 @@ export function isRangeNativeSelection() {
  *
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
-export function isMultiBlockRange(range = getCurrentRange()) {
+export function isMultiBlockRange(range = getCurrentNativeRange()) {
   return getModelsByRange(range).length > 1;
 }
 
@@ -312,7 +310,7 @@ export function isMultiBlockRange(range = getCurrentRange()) {
  * this function will return true,
  * but {@link isMultiBlockRange} will return false.
  */
-export function isMultiLineRange(range = getCurrentRange()) {
+export function isMultiLineRange(range = getCurrentNativeRange()) {
   // Get the selection height
   const { height } = range.getBoundingClientRect();
 
@@ -323,7 +321,7 @@ export function isMultiLineRange(range = getCurrentRange()) {
   return height > oneLineHeight;
 }
 
-export function getCurrentRange(selection = window.getSelection()) {
+export function getCurrentNativeRange(selection = window.getSelection()) {
   // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
   if (!selection) {
@@ -340,35 +338,6 @@ export function getCurrentRange(selection = window.getSelection()) {
     console.warn('getCurrentRange may be wrong, rangeCount > 1');
   }
   return selection.getRangeAt(0);
-}
-
-export function getCurrentBlockRange(page: Page): BlockRange | null {
-  // check exist block selection
-  if (page.root) {
-    const pageBlock = getDefaultPageBlock(page.root);
-    if (pageBlock.selection) {
-      const selectedBlock = pageBlock.selection.state.selectedBlocks;
-      const models = selectedBlock.map(element => getModelByElement(element));
-      // .filter(model => model.text);
-      if (models.length) {
-        return {
-          type: 'Block',
-          startModel: models[0],
-          startOffset: 0,
-          endModel: models[models.length - 1],
-          endOffset: models[models.length - 1].text?.length ?? 0,
-          betweenModels: models.slice(1, models.length - 1),
-        };
-      }
-    }
-  }
-  // check exist native selection
-  if (hasNativeSelection()) {
-    const range = getCurrentRange();
-    // TODO check range is in page
-    return nativeRangeToBlockRange(range);
-  }
-  return null;
 }
 
 function handleInFrameDragMove(
@@ -837,117 +806,6 @@ export function isDatabase(e: SelectionEvent) {
     return true;
   }
   return false;
-}
-
-export function blockRangeToNativeRange(blockRange: BlockRange) {
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(
-    blockRange.startModel,
-    blockRange.startOffset
-  );
-  if (!startNode) {
-    throw new Error(
-      'Failed to convert block range to native range. Start node is null.'
-    );
-  }
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(
-    blockRange.endModel,
-    blockRange.endOffset
-  );
-  if (!startNode) {
-    throw new Error(
-      'Failed to convert block range to native range. End node is null.'
-    );
-  }
-  const range = new Range();
-  range.setStart(startNode, startOffset);
-  range.setEnd(endNode, endOffset);
-  return range;
-}
-
-export function nativeRangeToBlockRange(range: Range): BlockRange {
-  const models = getModelsByRange(range);
-  const startOffset = getQuillIndexByNativeSelection(
-    range.startContainer,
-    range.startOffset
-  );
-  const endOffset = getQuillIndexByNativeSelection(
-    range.endContainer,
-    range.endOffset
-  );
-  return {
-    type: 'Native',
-    startModel: models[0],
-    startOffset,
-    endModel: models[models.length - 1],
-    endOffset,
-    betweenModels: models.slice(1, -1),
-  };
-}
-
-/**
- * Sometimes, the block in the block range is updated, we need to update the block range manually.
- *
- * Note: it will mutate the `blockRange` object.
- */
-export function updateBlockRange(
-  blockRange: BlockRange,
-  oldModel: BaseBlockModel,
-  newModel: BaseBlockModel
-) {
-  if (blockRange.startModel === oldModel) {
-    blockRange.startModel = newModel;
-  }
-  if (blockRange.endModel === oldModel) {
-    blockRange.endModel = newModel;
-  }
-  blockRange.betweenModels = blockRange.betweenModels.map(model =>
-    model === oldModel ? newModel : model
-  );
-  return blockRange;
-}
-
-/**
- * Restore the block selection.
- * See also {@link resetNativeSelection}
- */
-export function restoreSelection(blockRange: BlockRange) {
-  if (blockRange.type === 'Native') {
-    const range = blockRangeToNativeRange(blockRange);
-    resetNativeSelection(range);
-
-    // Try clean block selection
-    const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
-    if (!defaultPageBlock.selection) {
-      // In the edgeless mode
-      return;
-    }
-    defaultPageBlock.selection.state.clearBlock();
-    defaultPageBlock.selection.state.type = 'native';
-    return;
-  }
-  const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
-  if (!defaultPageBlock.selection) {
-    // In the edgeless mode
-    return;
-  }
-  const models =
-    blockRange.startModel === blockRange.endModel
-      ? [blockRange.startModel]
-      : [
-          blockRange.startModel,
-          ...blockRange.betweenModels,
-          blockRange.endModel,
-        ];
-  defaultPageBlock.selection.clear();
-  // get fresh elements
-  defaultPageBlock.selection.state.type = 'block';
-  defaultPageBlock.selection.state.selectedBlocks = models
-    .map(model => getBlockElementByModel(model))
-    .filter(Boolean) as BlockComponentElement[];
-  defaultPageBlock.selection.refreshSelectedBlocksRects();
-  // Try clean native selection
-  resetNativeSelection(null);
-  (document.activeElement as HTMLTextAreaElement).blur();
 }
 
 /**

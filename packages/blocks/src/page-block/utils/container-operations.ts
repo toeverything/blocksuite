@@ -8,10 +8,15 @@ import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
-  BlockRange,
   ExtendedModel,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import {
+  BlockRange,
+  getCurrentBlockRange,
+  restoreSelection,
+  updateBlockRange,
+} from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
   getBlockElementByModel,
@@ -22,20 +27,23 @@ import {
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
-  getCurrentBlockRange,
-  getCurrentRange,
+  getCurrentNativeRange,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
-  restoreSelection,
-  updateBlockRange,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
-export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
+/**
+ * TODO Use BlockRange
+ */
+export function deleteModelsByRange(
+  page: Page,
+  range = getCurrentNativeRange()
+) {
   const models = getModelsByRange(range);
 
   const first = models[0];
@@ -112,15 +120,6 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
     index
   );
   return id;
-}
-
-export async function updateSelectedTextType(
-  flavour: keyof BlockSchema,
-  type?: string
-) {
-  const range = getCurrentRange();
-  const modelsInRange = getModelsByRange(range);
-  updateBlockType(modelsInRange, flavour, type);
 }
 
 export function updateBlockType(
@@ -357,7 +356,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     selection.state.selectedBlocks.length === 0 &&
     currentSelection?.focusNode?.nodeName === '#text'
   ) {
-    const currentRange = getCurrentRange();
+    const currentRange = getCurrentNativeRange();
     const rangeRect = currentRange.getBoundingClientRect();
     selection.selectBlocksByRect(rangeRect);
   } else {

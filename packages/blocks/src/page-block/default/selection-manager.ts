@@ -13,8 +13,7 @@ import {
   BlockComponentElement,
   getAllBlocks,
   getBlockElementByModel,
-  getCurrentBlockRange,
-  getCurrentRange,
+  getCurrentNativeRange,
   getDefaultPageBlock,
   getModelByElement,
   handleNativeRangeClick,
@@ -31,6 +30,7 @@ import {
   SelectionEvent,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type {
   EmbedBlockComponent,
@@ -828,7 +828,7 @@ export class DefaultSelectionManager {
       return;
     }
 
-    const range = getCurrentRange(selection);
+    const range = getCurrentNativeRange(selection);
     if (range.collapsed) {
       return;
     }

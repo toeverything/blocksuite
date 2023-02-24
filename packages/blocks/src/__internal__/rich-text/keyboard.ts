@@ -5,7 +5,7 @@ import type { Quill, RangeStatic } from 'quill';
 
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
@@ -219,15 +219,15 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return tryMatchSpaceHotkey(page, model, quill, prefix, range);
   }
 
-  function onBackspace(this: KeyboardEventThis) {
+  function onBackspace(e: KeyboardEvent, quill: Quill) {
     // To workaround uncontrolled behavior when deleting character at block start,
     // in this case backspace should be handled in quill.
-    if (isCollapsedAtBlockStart(this.quill)) {
+    if (isCollapsedAtBlockStart(quill)) {
       // window.requestAnimationFrame(() => {
       handleLineStartBackspace(page, model);
       // });
       return PREVENT_DEFAULT;
-    } else if (isMultiBlockRange(getCurrentRange())) {
+    } else if (isMultiBlockRange(getCurrentNativeRange())) {
       // return PREVENT_DEFAULT;
       noop();
     }
@@ -307,7 +307,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     backspace: {
       key: 'Backspace',
-      handler: onBackspace,
+      handler(
+        this: KeyboardEventThis,
+        range: QuillRange,
+        context: BindingContext
+      ) {
+        return onBackspace(context.event, this.quill);
+      },
     },
     up: {
       key: 'ArrowUp',
@@ -367,7 +373,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         //   return ALLOW_DEFAULT;
         // }
         requestAnimationFrame(() => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
         return ALLOW_DEFAULT;

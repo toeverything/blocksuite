@@ -3,12 +3,10 @@ import './format-bar-node.js';
 
 import { Page, Signal } from '@blocksuite/store';
 
-import {
-  getCurrentBlockRange,
-  getCurrentRange,
-  getDefaultPageBlock,
-  throttle,
-} from '../../__internal__/utils/index.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
+import { getCurrentNativeRange } from '../../__internal__/utils/selection.js';
+import { throttle } from '../../__internal__/utils/std.js';
 import {
   calcPositionPointByRange,
   calcSafeCoordinate,
@@ -59,7 +57,7 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
-    const positioningEl = anchorEl ?? getCurrentRange();
+    const positioningEl = anchorEl ?? getCurrentNativeRange();
     const dir = formatQuickBar.direction;
 
     const positioningPoint =

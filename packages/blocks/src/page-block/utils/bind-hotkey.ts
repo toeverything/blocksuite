@@ -8,6 +8,7 @@ import {
   hotkey,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
@@ -15,7 +16,7 @@ import {
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
-  getCurrentRange,
+  getCurrentNativeRange,
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
@@ -32,7 +33,7 @@ import {
   handleSelectAll,
 } from '../utils/index.js';
 import { formatConfig } from './const.js';
-import { updateSelectedTextType } from './container-operations.js';
+import { updateBlockType } from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -52,7 +53,19 @@ export function bindCommonHotkey(page: Page) {
       return;
     }
     hotkey.addListener(hotkeyStr, () => {
-      updateSelectedTextType(flavour, type);
+      const blockRange = getCurrentBlockRange(page);
+      if (!blockRange) {
+        return;
+      }
+      const models =
+        blockRange.startModel === blockRange.endModel
+          ? [blockRange.startModel]
+          : [
+              blockRange.startModel,
+              ...blockRange.betweenModels,
+              blockRange.endModel,
+            ];
+      updateBlockType(models, flavour, type);
     });
   });
 
@@ -90,7 +103,7 @@ export function handleUp(
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
-    const range = getCurrentRange();
+    const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock) {
       focusTitle();
@@ -155,7 +168,7 @@ export function handleDown(
     if (matchFlavours(model, ['affine:code'])) {
       return;
     }
-    const range = getCurrentRange();
+    const range = getCurrentNativeRange();
     const atLineEdge = isAtLineEdge(range);
     const { left, bottom } = range.getBoundingClientRect();
     const isAtEmptyLine = left === 0 && bottom === 0;
@@ -217,7 +230,7 @@ export function handleDown(
 function handleTab(page: Page, selection: DefaultSelectionManager) {
   switch (selection.state.type) {
     case 'native': {
-      const range = getCurrentRange();
+      const range = getCurrentNativeRange();
       const start = range.startContainer;
       const end = range.endContainer;
       const startModel = getModelByElement(start.parentElement as HTMLElement);

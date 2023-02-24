@@ -6,7 +6,7 @@ import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
-import { getCurrentRange } from './selection.js';
+import { getCurrentNativeRange } from './selection.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -185,7 +185,7 @@ export function getBlockElementByModel(
 }
 
 export function getStartModelBySelection() {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)

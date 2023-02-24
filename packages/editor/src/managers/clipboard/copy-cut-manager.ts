@@ -221,7 +221,9 @@ export class CopyCutManager {
   // TODO: Optimization
   // TODO: is not compatible with safari
   private _copyToClipboardFromPc(clips: ClipboardItem[]): boolean {
-    const curRange = SelectionUtils.getCurrentRange();
+    const savedRange = SelectionUtils.hasNativeSelection()
+      ? SelectionUtils.getCurrentNativeRange()
+      : null;
 
     let success = false;
     /**
@@ -251,7 +253,7 @@ export class CopyCutManager {
     } finally {
       tempElem.removeEventListener('copy', listener);
       document.body.removeChild(tempElem);
-      SelectionUtils.resetNativeSelection(curRange);
+      savedRange && SelectionUtils.resetNativeSelection(savedRange);
     }
     return success;
   }
