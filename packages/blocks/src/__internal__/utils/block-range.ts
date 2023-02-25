@@ -1,6 +1,7 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
+  BlockComponentElement,
   getBlockElementByModel,
   getDefaultPageBlock,
   getModelByElement,
@@ -55,6 +56,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
     if (pageBlock.selection) {
       const selectedBlocks = pageBlock.selection.state.selectedBlocks;
       const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+      // Fix order may be wrong
       const models = [...selectedBlocks, ...selectedEmbeds]
         .map(element => getModelByElement(element))
         .filter(Boolean);
@@ -183,7 +185,7 @@ export function restoreSelection(blockRange: BlockRange) {
   defaultPageBlock.selection.state.type = 'block';
   defaultPageBlock.selection.state.selectedBlocks = models
     .map(model => getBlockElementByModel(model))
-    .filter(Boolean) as Element[];
+    .filter(Boolean) as BlockComponentElement[];
   defaultPageBlock.selection.refreshSelectedBlocksRects();
   // Try clean native selection
   resetNativeSelection(null);
