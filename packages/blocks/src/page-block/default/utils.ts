@@ -8,6 +8,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
+  BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
@@ -28,6 +29,7 @@ export interface EditingState {
   model: BaseBlockModel;
   position: DOMRect;
   index: number;
+  element: BlockComponentElement;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -196,6 +198,7 @@ function binarySearchBlockEditingState(
                 index: mid,
                 position: result.blockRect,
                 model: result.block,
+                element: result.hoverDom,
               };
             }
           }
@@ -211,6 +214,7 @@ function binarySearchBlockEditingState(
         index: mid,
         position: blockRect,
         model: block,
+        element: hoverDom,
       };
     }
 
@@ -460,7 +464,7 @@ export function getAllowSelectedBlocks(
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
-    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
+    container: defaultPageBlock.mouseRoot as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,
@@ -481,31 +485,54 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         skipX,
       });
     },
-    onDropCallback(e, start, end): void {
+    onDropCallback(e, blocks, end): void {
       const page = defaultPageBlock.page;
-      const startModel = start.model;
       const rect = end.position;
-      const nextModel = end.model;
-      if (doesInSamePath(page, nextModel, startModel)) {
+      const targetModel = end.model;
+      if (
+        blocks.length === 1 &&
+        doesInSamePath(page, targetModel, blocks[0].model)
+      ) {
         return;
       }
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      page.moveBlock(startModel, nextModel, distanceToTop < distanceToBottom);
+      page.moveBlocks(
+        blocks.map(b => b.model),
+        targetModel,
+        distanceToTop < distanceToBottom
+      );
       defaultPageBlock.signals.updateSelectedRects.emit([]);
       defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
+
+      requestAnimationFrame(() => {
+        // update selection rects
+        // block may change its flavour after moved.
+        defaultPageBlock.selection.setSelectedBlocks(
+          blocks
+            .map(b => getBlockById(b.model.id))
+            .filter((b): b is BlockComponentElement => !!b)
+        );
+      });
     },
-    setSelectedBlocks(selectedBlocks: EditingState | null): void {
-      if (selectedBlocks) {
+    setSelectedBlocks(
+      selectedBlocks: EditingState | BlockComponentElement[] | null
+    ): void {
+      if (Array.isArray(selectedBlocks)) {
+        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
+      } else if (selectedBlocks) {
         const { position, index } = selectedBlocks;
         defaultPageBlock.selection.selectBlocksByIndexAndBounding(
           index,
           position
         );
       }
+    },
+    getSelectedBlocks() {
+      return defaultPageBlock.selection.state.selectedBlocks;
     },
   });
 }

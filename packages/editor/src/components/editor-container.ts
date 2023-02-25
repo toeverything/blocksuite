@@ -209,7 +209,9 @@ export class EditorContainer extends NonShadowLitElement {
 
     return html`
       <style>
+        editor-container,
         .affine-editor-container {
+          display: block;
           height: 100%;
           position: relative;
           overflow-y: auto;
