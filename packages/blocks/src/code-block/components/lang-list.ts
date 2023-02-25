@@ -52,17 +52,6 @@ export class LangList extends NonShadowLitElement {
         margin-bottom: 5px;
       }
 
-      code-block-button {
-        font-size: var(--affine-font-sm);
-        text-align: justify;
-        line-height: 22px;
-      }
-
-      code-block-button:hover {
-        color: var(--affine-primary-color);
-        background: var(--affine-hover-background);
-      }
-
       #filter-input {
         display: flex;
         align-items: center;
