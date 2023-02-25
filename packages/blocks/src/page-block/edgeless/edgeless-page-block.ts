@@ -199,7 +199,7 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
-  private _listenToolbarEnableChange() {
+  private _handleToolbarFlag() {
     const clientID = this.page.doc.clientID;
 
     this._toolbarEnabled =
@@ -265,16 +265,12 @@ export class EdgelessPageBlockComponent
       this._initViewport();
       this._initSurface();
       // Due to change `this._toolbarEnabled` in this function
-      this._listenToolbarEnableChange();
+      this._handleToolbarFlag();
       this.requestUpdate();
     });
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
   }
 
   disconnectedCallback() {
@@ -356,10 +352,12 @@ export class EdgelessPageBlockComponent
           : null}
       </div>
       ${this._toolbarEnabled
-        ? html`<edgeless-toolbar
-            .mouseMode=${this.mouseMode}
-            .edgeless=${this}
-          ></edgeless-toolbar>`
+        ? html`
+            <edgeless-toolbar
+              .mouseMode=${this.mouseMode}
+              .edgeless=${this}
+            ></edgeless-toolbar>
+          `
         : nothing}
     `;
   }
