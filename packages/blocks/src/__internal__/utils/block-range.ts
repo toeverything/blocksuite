@@ -59,7 +59,6 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   // check exist native selection
   if (hasNativeSelection()) {
     const range = getCurrentNativeRange();
-    // TODO check range is in page
     return nativeRangeToBlockRange(range);
   }
   return null;
@@ -90,8 +89,12 @@ export function blockRangeToNativeRange(blockRange: BlockRange) {
   return range;
 }
 
-export function nativeRangeToBlockRange(range: Range): BlockRange {
+export function nativeRangeToBlockRange(range: Range): BlockRange | null {
+  // TODO check range is in page
   const models = getModelsByRange(range);
+  if (!models.length) {
+    return null;
+  }
   const startOffset = getQuillIndexByNativeSelection(
     range.startContainer,
     range.startOffset
@@ -182,7 +185,7 @@ type ExperimentBlockRange = {
 
 export const experimentCreateBlockRange = (
   rangeOrBlockRange: Range | BlockRange
-): ExperimentBlockRange => {
+): ExperimentBlockRange | null => {
   let cacheRange: Range | null =
     rangeOrBlockRange instanceof Range ? rangeOrBlockRange : null;
   const blockRange =
@@ -190,6 +193,9 @@ export const experimentCreateBlockRange = (
       ? nativeRangeToBlockRange(rangeOrBlockRange)
       : rangeOrBlockRange;
 
+  if (!blockRange) {
+    return null;
+  }
   if (!blockRange.models.length) {
     throw new Error('Block range must have at least one model.');
   }
