@@ -127,8 +127,8 @@ export const showFormatQuickBar = async ({
     }
     // If the selection is collapsed, abort the format quick bar
     if (
-      blockRange.type &&
-      blockRange.startModel === blockRange.endModel &&
+      blockRange.type === 'Native' &&
+      blockRange.models.length === 1 &&
       blockRange.startOffset === blockRange.endOffset
     ) {
       abortController.abort();

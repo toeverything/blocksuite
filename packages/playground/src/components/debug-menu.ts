@@ -153,15 +153,7 @@ export class DebugMenu extends NonShadowLitElement {
     if (!blockRange) {
       return;
     }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    updateBlockType(models, 'affine:list', listType);
+    updateBlockType(blockRange.models, 'affine:list', listType);
   }
 
   private _addCodeBlock(e: PointerEvent) {
@@ -172,7 +164,7 @@ export class DebugMenu extends NonShadowLitElement {
     if (!blockRange) {
       throw new Error("Can't add code block without a selection");
     }
-    const startModel = blockRange.startModel;
+    const startModel = blockRange.models[0];
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
     const blockProps = {
@@ -193,15 +185,7 @@ export class DebugMenu extends NonShadowLitElement {
     if (!blockRange) {
       return;
     }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    updateBlockType(models, 'affine:paragraph', type);
+    updateBlockType(blockRange.models, 'affine:paragraph', type);
   }
 
   private _switchEditorMode() {

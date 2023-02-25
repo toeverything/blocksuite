@@ -56,15 +56,7 @@ export function bindCommonHotkey(page: Page) {
       if (!blockRange) {
         return;
       }
-      const models =
-        blockRange.startModel === blockRange.endModel
-          ? [blockRange.startModel]
-          : [
-              blockRange.startModel,
-              ...blockRange.betweenModels,
-              blockRange.endModel,
-            ];
-      updateBlockType(models, flavour, type);
+      updateBlockType(blockRange.models, flavour, type);
     });
   });
 
@@ -300,9 +292,9 @@ export function bindHotkeys(
     if (blockRange.type === 'Block') {
       e.stopPropagation();
       e.preventDefault();
-      const model = blockRange.endModel;
-      const parentModel = page.getParent(model);
-      const index = parentModel?.children.indexOf(model);
+      const endModel = blockRange.models[blockRange.models.length - 1];
+      const parentModel = page.getParent(endModel);
+      const index = parentModel?.children.indexOf(endModel);
       assertExists(index);
       assertExists(parentModel);
       const id = page.addBlockByFlavour(
@@ -329,16 +321,8 @@ export function bindHotkeys(
       return;
     }
 
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
     // delete blocks
-    handleBlockSelectionBatchDelete(page, models);
+    handleBlockSelectionBatchDelete(page, blockRange.models);
     selection.clear();
     e.preventDefault();
     return;

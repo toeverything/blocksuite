@@ -22,27 +22,13 @@ import {
  */
 export type BlockRange = {
   /**
-   * @deprecated Use models instead
-   */
-  startModel: BaseBlockModel;
-  /**
-   * @deprecated Use models instead
-   */
-  endModel: BaseBlockModel;
-  /**
-   * Models between startModel and endModel, not including startModel and endModel
-   * @deprecated Use models instead
-   */
-  betweenModels: BaseBlockModel[];
-
-  /**
    * 'Native' for native selection, 'Block' for block selection
    */
   type: 'Native' | 'Block';
   /**
    * Promise the length of models is greater than 0
    */
-  // models: BaseBlockModel[];
+  models: BaseBlockModel[];
   startOffset: number;
   endOffset: number;
   // collapsed is true when models.length === 1 && startOffset === endOffset
@@ -63,11 +49,9 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
       if (models.length) {
         return {
           type: 'Block',
-          startModel: models[0],
           startOffset: 0,
-          endModel: models[models.length - 1],
           endOffset: models[models.length - 1].text?.length ?? 0,
-          betweenModels: models.slice(1, models.length - 1),
+          models,
         };
       }
     }
@@ -83,7 +67,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
 
 export function blockRangeToNativeRange(blockRange: BlockRange) {
   const [startNode, startOffset] = getTextNodeBySelectedBlock(
-    blockRange.startModel,
+    blockRange.models[0],
     blockRange.startOffset
   );
   if (!startNode) {
@@ -92,7 +76,7 @@ export function blockRangeToNativeRange(blockRange: BlockRange) {
     );
   }
   const [endNode, endOffset] = getTextNodeBySelectedBlock(
-    blockRange.endModel,
+    blockRange.models[blockRange.models.length - 1],
     blockRange.endOffset
   );
   if (!startNode) {
@@ -118,11 +102,9 @@ export function nativeRangeToBlockRange(range: Range): BlockRange {
   );
   return {
     type: 'Native',
-    startModel: models[0],
     startOffset,
-    endModel: models[models.length - 1],
     endOffset,
-    betweenModels: models.slice(1, -1),
+    models,
   };
 }
 
@@ -136,13 +118,7 @@ export function updateBlockRange(
   oldModel: BaseBlockModel,
   newModel: BaseBlockModel
 ) {
-  if (blockRange.startModel === oldModel) {
-    blockRange.startModel = newModel;
-  }
-  if (blockRange.endModel === oldModel) {
-    blockRange.endModel = newModel;
-  }
-  blockRange.betweenModels = blockRange.betweenModels.map(model =>
+  blockRange.models = blockRange.models.map(model =>
     model === oldModel ? newModel : model
   );
   return blockRange;
@@ -158,7 +134,7 @@ export function restoreSelection(blockRange: BlockRange) {
     resetNativeSelection(range);
 
     // Try clean block selection
-    const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
+    const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
     if (!defaultPageBlock.selection) {
       // In the edgeless mode
       return;
@@ -167,23 +143,15 @@ export function restoreSelection(blockRange: BlockRange) {
     defaultPageBlock.selection.state.type = 'native';
     return;
   }
-  const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
+  const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
   if (!defaultPageBlock.selection) {
     // In the edgeless mode
     return;
   }
-  const models =
-    blockRange.startModel === blockRange.endModel
-      ? [blockRange.startModel]
-      : [
-          blockRange.startModel,
-          ...blockRange.betweenModels,
-          blockRange.endModel,
-        ];
   defaultPageBlock.selection.clear();
   // get fresh elements
   defaultPageBlock.selection.state.type = 'block';
-  defaultPageBlock.selection.state.selectedBlocks = models
+  defaultPageBlock.selection.state.selectedBlocks = blockRange.models
     .map(model => getBlockElementByModel(model))
     .filter(Boolean) as BlockComponentElement[];
   defaultPageBlock.selection.refreshSelectedBlocksRects();

@@ -80,7 +80,11 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.models = this._getCurrentModels();
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
+    }
+    this.models = blockRange.models;
     const startModel = this.models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.format = getCurrentCombinedFormat(this.page);
@@ -124,22 +128,6 @@ export class FormatQuickBar extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposableGroup.dispose();
-  }
-
-  private _getCurrentModels() {
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't get current block range");
-    }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    return models;
   }
 
   private _onHover() {
