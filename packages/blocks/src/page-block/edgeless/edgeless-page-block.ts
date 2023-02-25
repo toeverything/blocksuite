@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
-import './toolbar.js';
+import './toolbar/edgeless-toolbar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { XYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
-import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -40,7 +40,6 @@ import {
   EdgelessSelectionState,
   ViewportState,
 } from './selection-manager.js';
-import type { EdgelessToolBar } from './toolbar.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -101,14 +100,19 @@ export class EdgelessPageBlockComponent
   @property()
   mouseRoot!: HTMLElement;
 
-  @property()
-  mouseMode!: MouseMode;
-
   @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
 
   @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;
+
+  @property()
+  mouseMode: MouseMode = {
+    type: 'default',
+  };
+
+  @state()
+  private _toolbarEnabled = false;
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
@@ -118,6 +122,7 @@ export class EdgelessPageBlockComponent
     updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
+    mouseModeUpdated: new Signal<MouseMode>(),
   };
 
   surface!: SurfaceManager;
@@ -128,8 +133,6 @@ export class EdgelessPageBlockComponent
 
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
-
-  private _toolbar: EdgelessToolBar | null = null;
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -196,27 +199,20 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
-  private _initEdgelessToolBar() {
-    if (this.page.awarenessStore.getFlag('enable_edgeless_toolbar')) {
-      this._toolbar = document.createElement('edgeless-toolbar');
-      this.mouseRoot.appendChild(this._toolbar);
-    }
+  private _handleToolbarFlag() {
+    const clientID = this.page.doc.clientID;
+
+    this._toolbarEnabled =
+      this.page.awarenessStore.getFlag('enable_edgeless_toolbar') ?? false;
+
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_edgeless_toolbar,
         enable => {
-          if (enable) {
-            if (!this._toolbar) {
-              this._toolbar = document.createElement('edgeless-toolbar');
-              this.mouseRoot.appendChild(this._toolbar);
-            }
-          } else {
-            this._toolbar?.remove();
-            this._toolbar = null;
-          }
+          this._toolbarEnabled = enable ?? false;
         },
         {
-          filter: msg => msg.id === this.page.doc.clientID,
+          filter: msg => msg.id === clientID,
         }
       )
     );
@@ -233,7 +229,7 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    this._initEdgelessToolBar();
+    // this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncSelectionRect());
@@ -250,6 +246,7 @@ export class EdgelessPageBlockComponent
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
+    this.signals.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
       this.requestUpdate();
@@ -267,6 +264,8 @@ export class EdgelessPageBlockComponent
     requestAnimationFrame(() => {
       this._initViewport();
       this._initSurface();
+      // Due to change `this._toolbarEnabled` in this function
+      this._handleToolbarFlag();
       this.requestUpdate();
     });
 
@@ -281,14 +280,11 @@ export class EdgelessPageBlockComponent
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
     this.signals.shapeUpdated.dispose();
+    this.signals.mouseModeUpdated.dispose();
     this._disposables.dispose();
     this._selection.dispose();
     this.surface.dispose();
     this._removeHotkeys();
-    if (this._toolbar) {
-      this._toolbar.remove();
-      this._toolbar = null;
-    }
   }
 
   render() {
@@ -355,6 +351,14 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
+      ${this._toolbarEnabled
+        ? html`
+            <edgeless-toolbar
+              .mouseMode=${this.mouseMode}
+              .edgeless=${this}
+            ></edgeless-toolbar>
+          `
+        : nothing}
     `;
   }
 }
