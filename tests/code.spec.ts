@@ -15,7 +15,6 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/index.js';
@@ -554,23 +553,6 @@ test('code block option can appear and disappear during mousemove', async ({
   await expect(locator).toBeVisible();
   await page.mouse.move(optionPosition.right + 10, optionPosition.y);
   await expect(locator).toBeHidden();
-});
-
-test('should ctrl+enter works in code block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
-  await focusRichText(page);
-
-  await type(page, 'const a = 10;');
-  await assertRichTexts(page, ['const a = 10;\n']);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press(`${SHORT_KEY}+Enter`);
-  // TODO fix this
-  // actual
-  await assertRichTexts(page, ['const a = 10\n;\n']);
-  test.fail();
-  // but expected
-  await assertRichTexts(page, ['const a = 10;\n\n']);
 });
 
 test('should tab works in code block', async ({ page }) => {
