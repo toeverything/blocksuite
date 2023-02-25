@@ -192,6 +192,7 @@ export function getStartModelBySelection() {
       : (range.startContainer as HTMLElement);
 
   const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
+  // TODO Fix this, this cast is not safe
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -368,7 +369,7 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   }
   if (offset > text.length) {
     // FIXME
-    // console.error('Offset is out of range! model: ', model, offset);
+    console.error('Offset is out of range! model: ', model, offset);
   }
   const blockElement = getBlockById(model.id);
   if (!blockElement) {

@@ -168,7 +168,7 @@ export function restoreSelection(blockRange: BlockRange) {
   defaultPageBlock.selection.refreshSelectedBlocksRects();
   // Try clean native selection
   resetNativeSelection(null);
-  (document.activeElement as HTMLTextAreaElement).blur();
+  (document.activeElement as HTMLElement).blur();
 }
 
 // The following section is experimental code.

@@ -802,7 +802,13 @@ export function isEmbed(e: SelectionEvent) {
 }
 
 export function isDatabase(e: SelectionEvent) {
-  if ((e.raw.target as HTMLElement).className.startsWith('affine-database')) {
+  const target = e.raw.target;
+  if (!(target instanceof HTMLElement)) {
+    // When user click on the list indicator,
+    // the target is not an `HTMLElement`, instead `SVGElement`.
+    return false;
+  }
+  if (target.className.startsWith('affine-database')) {
     return true;
   }
   return false;
