@@ -1,4 +1,10 @@
-import { assertExists, Page, UserInfo, UserRange } from '@blocksuite/store';
+import {
+  assertExists,
+  Page,
+  StackItem,
+  UserInfo,
+  UserRange,
+} from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -85,23 +91,6 @@ export class RemoteSelection extends LitElement {
         }
 
         if (msg.id === this.page?.awarenessStore.awareness.clientID) {
-          assertExists(this.page);
-          const range = msg.state.rangeMap[this.page.prefixedId];
-          const startModel = this.page.getBlockById(range.startBlockId);
-          const endModel = this.page.getBlockById(range.endBlockId);
-          if (!startModel || !endModel || !startModel.text || !endModel.text) {
-            return;
-          }
-
-          const nativeRange = blockRangeToNativeRange({
-            type: 'Native',
-            startModel,
-            startOffset: range.startOffset,
-            endModel,
-            endOffset: range.endOffset,
-            betweenModels: [],
-          });
-          resetNativeSelection(nativeRange);
           return;
         }
 
@@ -136,6 +125,35 @@ export class RemoteSelection extends LitElement {
         }
 
         this.requestUpdate();
+      }
+    );
+
+    this.page.history.on(
+      'stack-item-popped',
+      (event: { stackItem: StackItem }) => {
+        const range = event.stackItem.meta.get('cursor-location');
+        if (!range) {
+          return;
+        }
+
+        assertExists(this.page);
+        const startModel = this.page.getBlockById(range.startBlockId);
+        const endModel = this.page.getBlockById(range.endBlockId);
+        if (!startModel || !endModel || !startModel.text || !endModel.text) {
+          return;
+        }
+
+        requestAnimationFrame(() => {
+          const nativeRange = blockRangeToNativeRange({
+            type: 'Native',
+            startModel,
+            startOffset: range.startOffset,
+            endModel,
+            endOffset: range.endOffset,
+            betweenModels: [],
+          });
+          resetNativeSelection(nativeRange);
+        });
       }
     );
 

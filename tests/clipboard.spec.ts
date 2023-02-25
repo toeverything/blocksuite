@@ -141,7 +141,6 @@ test('markdown format parse', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await focusRichText(page);
   clipData = {
     'text/plain': `# ***bolditalic***
 # **bold**
@@ -197,7 +196,6 @@ test('split block when paste', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['abc']);
 
-  await focusRichText(page);
   await type(page, 'aa');
   await pressEnter(page);
   await type(page, 'bb');

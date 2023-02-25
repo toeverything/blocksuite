@@ -85,6 +85,10 @@ export class Page extends Space<PageData> {
     this._idGenerator = idGenerator;
   }
 
+  get history() {
+    return this._history;
+  }
+
   get workspace() {
     return this._workspace;
   }
@@ -732,13 +736,6 @@ export class Page extends Space<PageData> {
     }
 
     this.awarenessStore.setLocalRange(this, range);
-    // When we undo the lcoal change will be filtered by yjs and not trigger
-    // awareness update event, so we need to trigger it manually.
-    this.awarenessStore.signals.update.emit({
-      id: this.awarenessStore.awareness.clientID,
-      type: 'update',
-      state: this.awarenessStore.awareness.getLocalState(),
-    });
     this._historyObserver();
   };
 
