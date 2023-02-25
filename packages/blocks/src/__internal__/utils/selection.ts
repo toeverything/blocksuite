@@ -919,6 +919,7 @@ export function restoreSelection(blockRange: BlockRange) {
       return;
     }
     defaultPageBlock.selection.state.clearBlock();
+    defaultPageBlock.selection.state.type = 'native';
     return;
   }
   const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
