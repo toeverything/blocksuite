@@ -1,3 +1,7 @@
+import {
+  BLOCK_ID_ATTR,
+  DRAG_HANDLE_OFFSET_LEFT,
+} from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
@@ -232,7 +236,10 @@ export class DragHandle extends LitElement {
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       const containerRect = this._container.getBoundingClientRect();
       this.style.left = `${
-        rect.left - containerRect.left - DRAG_HANDLE_WIDTH - 20
+        rect.left -
+        containerRect.left -
+        DRAG_HANDLE_WIDTH -
+        DRAG_HANDLE_OFFSET_LEFT
       }px`;
       this.style.top = `${rect.top - containerRect.top}px`;
       this.style.opacity = `${(
