@@ -194,6 +194,14 @@ export class AwarenessStore<
         ...rangeMap,
         [space.prefixedId]: range,
       });
+
+      // When we undo the lcoal change will be filtered by yjs and not trigger
+      // awareness update event, so we need to trigger it manually.
+      this.signals.update.emit({
+        id: this.awareness.clientID,
+        type: 'update',
+        state: this.awareness.getLocalState(),
+      });
     }
   }
 

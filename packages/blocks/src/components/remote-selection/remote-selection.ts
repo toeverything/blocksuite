@@ -3,7 +3,10 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { blockRangeToNativeRange } from '../../__internal__/utils/selection.js';
+import {
+  blockRangeToNativeRange,
+  resetNativeSelection,
+} from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
   width: number;
@@ -77,11 +80,28 @@ export class RemoteSelection extends LitElement {
     this.page.awarenessStore.signals.update.subscribe(
       msg => msg,
       msg => {
-        if (
-          !msg ||
-          !msg.state?.rangeMap ||
-          msg.id === this.page?.awarenessStore.awareness.clientID
-        ) {
+        if (!msg || !msg.state?.rangeMap) {
+          return;
+        }
+
+        if (msg.id === this.page?.awarenessStore.awareness.clientID) {
+          assertExists(this.page);
+          const range = msg.state.rangeMap[this.page.prefixedId];
+          const startModel = this.page.getBlockById(range.startBlockId);
+          const endModel = this.page.getBlockById(range.endBlockId);
+          if (!startModel || !endModel || !startModel.text || !endModel.text) {
+            return;
+          }
+
+          const nativeRange = blockRangeToNativeRange({
+            type: 'Native',
+            startModel,
+            startOffset: range.startOffset,
+            endModel,
+            endOffset: range.endOffset,
+            betweenModels: [],
+          });
+          resetNativeSelection(nativeRange);
           return;
         }
 
