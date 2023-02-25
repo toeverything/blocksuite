@@ -144,15 +144,19 @@ export class RemoteSelection extends LitElement {
         }
 
         requestAnimationFrame(() => {
-          const nativeRange = blockRangeToNativeRange({
-            type: 'Native',
-            startModel,
-            startOffset: range.startOffset,
-            endModel,
-            endOffset: range.endOffset,
-            betweenModels: [],
-          });
-          resetNativeSelection(nativeRange);
+          try {
+            const nativeRange = blockRangeToNativeRange({
+              type: 'Native',
+              startModel,
+              startOffset: range.startOffset,
+              endModel,
+              endOffset: range.endOffset,
+              betweenModels: [],
+            });
+            resetNativeSelection(nativeRange);
+          } catch (error) {
+            /* empty */
+          }
         });
       }
     );
@@ -165,7 +169,6 @@ export class RemoteSelection extends LitElement {
     defaultViewportElement?.addEventListener(
       'scroll',
       () => {
-        console.log(1);
         this.requestUpdate();
       },
       {
