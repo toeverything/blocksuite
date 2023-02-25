@@ -118,6 +118,11 @@ export async function enterPlaygroundRoom(
     }
   });
 
+  // Log all uncaught errors
+  page.on('pageerror', exception => {
+    throw new Error(`Uncaught exception: "${exception}"`);
+  });
+
   await initEmptyEditor(page, flags);
   return room;
 }
