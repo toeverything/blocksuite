@@ -103,6 +103,70 @@ export class RichText extends NonShadowLitElement {
   @property({ hasChanged: () => true })
   modules: Record<string, unknown> = {};
 
+  // If one types a character after the code or link node,
+  // the character should not be inserted into the code or link node.
+  // So we check and remove the corresponding format manually.
+  private _handleInlineBoundaryInput() {
+    this.quill.on('text-change', (delta: DeltaStatic, oldDelta, source) => {
+      if (source !== 'user') return;
+
+      const selectorMap = {
+        code: 'code',
+        link: 'link-node',
+      } as const;
+      let attr: keyof typeof selectorMap | null = null;
+
+      if (!delta.ops) {
+        return;
+      }
+
+      if (delta.ops[1]?.attributes?.code) {
+        attr = 'code';
+      }
+      if (delta.ops[1]?.attributes?.link) {
+        attr = 'link';
+      }
+      // only length is 2 need to be handled
+      if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
+        const retain = delta.ops[0].retain;
+        const selector = selectorMap[attr];
+        if (retain !== undefined) {
+          const currentLeaf: [LeafBlot, number] = this.quill.getLeaf(
+            retain + Number(delta.ops[1]?.insert.toString().length)
+          );
+          const nextLeaf: [LeafBlot, number] = this.quill.getLeaf(
+            retain + Number(delta.ops[1]?.insert.toString().length) + 1
+          );
+          const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
+          const currentEmbedElement = currentParentElement?.closest(selector);
+          const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
+          const nextEmbedElement = nextParentElement?.closest(selector);
+          const insertedString: string = delta.ops[1]?.insert.toString();
+
+          // if insert to the same node, no need to handle
+          // For example,
+          // `inline |code`
+          //         ⬆️ should not remove format when insert to inside the format
+          if (
+            // At the end of the node, need to remove format
+            !nextEmbedElement ||
+            // At the edge of the node, need to remove format
+            nextEmbedElement !== currentEmbedElement
+          ) {
+            this.model.text?.replace(
+              retain,
+              insertedString.length,
+              ' ' + insertedString,
+              {
+                [attr]: false,
+              }
+            );
+          }
+        }
+      }
+    });
+  }
+
   firstUpdated() {
     const { host, model, placeholder, _textContainer } = this;
     const { page } = host;
@@ -133,73 +197,11 @@ export class RichText extends NonShadowLitElement {
     if (this.modules.syntax && this.quill.getText() === '\n') {
       this.quill.focus();
     }
-    // If you type a character after the code or link node,
-    // the character should not be inserted into the code or link node.
-    // So we check and remove the corresponding format manually.
-    this.quill.on('text-change', (delta: DeltaStatic, oldDelta, source) => {
-      const selectorMap = {
-        code: 'code',
-        link: 'link-node',
-      } as const;
-      let attr: keyof typeof selectorMap | null = null;
 
-      if (!delta.ops) {
-        return;
-      }
-
-      if (delta.ops[1]?.attributes?.code) {
-        attr = 'code';
-      }
-      if (delta.ops[1]?.attributes?.link) {
-        attr = 'link';
-      }
-      // only length is 2 need to be handled
-      if (
-        delta.ops.length === 2 &&
-        delta.ops[1]?.insert &&
-        attr &&
-        source === 'user'
-      ) {
-        const retain = delta.ops[0].retain;
-        const selector = selectorMap[attr];
-        if (retain !== undefined) {
-          const currentLeaf: [LeafBlot, number] = this.quill.getLeaf(
-            retain + Number(delta.ops[1]?.insert.toString().length)
-          );
-          const nextLeaf: [LeafBlot, number] = this.quill.getLeaf(
-            retain + Number(delta.ops[1]?.insert.toString().length) + 1
-          );
-          const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
-          const currentEmbedElement = currentParentElement?.closest(selector);
-          const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
-          const nextEmbedElement = nextParentElement?.closest(selector);
-          const insertedString: string = delta.ops[1]?.insert.toString();
-
-          // if insert to the same node, no need to handle
-          // For example,
-          // `inline |code`
-          //         ⬆️ should not remove format when insert to inside the format
-          if (
-            // At the end of the node, need to remove format
-            !nextEmbedElement ||
-            // At the edge of the node, need to remove format
-            nextEmbedElement !== currentEmbedElement
-          ) {
-            model.text?.replace(
-              retain,
-              insertedString.length,
-              ' ' + insertedString,
-              {
-                [attr]: false,
-              }
-            );
-          }
-        }
-      }
-    });
+    this._handleInlineBoundaryInput();
   }
 
-  override connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
     const { model, host } = this;
     if (this.quill) {
@@ -207,7 +209,7 @@ export class RichText extends NonShadowLitElement {
     }
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     this.host.page.detachRichText(this.model.id);
