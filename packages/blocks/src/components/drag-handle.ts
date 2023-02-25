@@ -1,7 +1,4 @@
-import {
-  BLOCK_ID_ATTR,
-  DRAG_HANDLE_OFFSET_LEFT,
-} from '@blocksuite/global/config';
+import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
