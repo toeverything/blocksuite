@@ -1,11 +1,11 @@
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { IconButton } from '../../components/button.js';
 
 // TODO reuse existing button component
 @customElement('code-block-button')
-export class CodeBlockButton extends IconButton {
+export class CodeBlockButton extends LitElement {
   static styles = css`
     ${IconButton.styles}
     :host {
