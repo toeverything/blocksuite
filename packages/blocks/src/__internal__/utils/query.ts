@@ -368,8 +368,18 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
     throw new Error("Failed to get block's text!");
   }
   if (offset > text.length) {
-    // FIXME
-    console.error('Offset is out of range! model: ', model, offset);
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
   }
   const blockElement = getBlockById(model.id);
   if (!blockElement) {

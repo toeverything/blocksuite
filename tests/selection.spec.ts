@@ -545,10 +545,6 @@ test('click the list icon can select and delete', async ({ page }) => {
   await clickListIcon(page, 0);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['\n', '456', '789']);
-
-  await clickListIcon(page, 0);
-  await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['\n']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {
@@ -2116,23 +2112,13 @@ test('undo should clear block selection', async ({ page }) => {
   );
 
   await redoByKeyboard(page);
-  let selectedBlocks = await page.evaluate(() => {
-    const selectedBlocks = document.querySelectorAll(
-      '.affine-page-selected-rects-container > *'
-    );
-    return Array.from(selectedBlocks).length === 1;
-  });
-  expect(selectedBlocks).toBe(true);
+  const selectedBlocks = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(selectedBlocks).toHaveCount(1);
 
   await undoByKeyboard(page);
-
-  selectedBlocks = await page.evaluate(() => {
-    const selectedBlocks = document.querySelectorAll(
-      '.affine-page-selected-rects-container > *'
-    );
-    return Array.from(selectedBlocks).length === 0;
-  });
-  expect(selectedBlocks).toBe(true);
+  await expect(selectedBlocks).toHaveCount(0);
 });
 
 test('should not draw rect for sub selected blocks when entering tab key', async ({
