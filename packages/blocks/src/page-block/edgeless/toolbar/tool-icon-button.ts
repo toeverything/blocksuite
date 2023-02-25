@@ -51,7 +51,7 @@ export class EdgelessToolIconButton extends LitElement {
   disabled = false;
 
   @property()
-  tooltips!: string;
+  tooltip!: string;
 
   @property()
   active = false;
@@ -71,7 +71,7 @@ export class EdgelessToolIconButton extends LitElement {
   }
 
   render() {
-    const tooltips = this.disabled ? '(Coming soon)' : this.tooltips;
+    const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
     return html`
       <div
         class="icon-container"
@@ -82,8 +82,8 @@ export class EdgelessToolIconButton extends LitElement {
         @click=${this._dispatchClickEvent}
       >
         <slot></slot>
-        ${tooltips
-          ? html` <arrow-tool-tip .tipText=${tooltips}></arrow-tool-tip> `
+        ${tooltip
+          ? html` <arrow-tool-tip .tipText=${tooltip}></arrow-tool-tip> `
           : nothing}
       </div>
     `;

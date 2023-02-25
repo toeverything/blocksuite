@@ -12,40 +12,40 @@ import type { ShapeMouseMode } from '../../../../__internal__/index.js';
 export const ShapeComponentConfig: {
   name: ShapeMouseMode['shape'];
   icon: TemplateResult<1>;
-  tooltips: string;
+  tooltip: string;
   disabled: boolean;
 }[] = [
   {
     name: 'rect',
     icon: SquareIcon,
-    tooltips: 'Square',
+    tooltip: 'Square',
     disabled: false,
   },
   {
     // TODO update new shape value
     name: 'rect',
     icon: EllipseIcon,
-    tooltips: 'Ellipse',
+    tooltip: 'Ellipse',
     disabled: true,
   },
   {
     // TODO update new shape value
     name: 'rect',
     icon: DiamondIcon,
-    tooltips: 'Diamond',
+    tooltip: 'Diamond',
     disabled: true,
   },
   {
     name: 'triangle',
     icon: TriangleIcon,
-    tooltips: 'Triangle',
+    tooltip: 'Triangle',
     disabled: true,
   },
   {
     // TODO update new shape value
     name: 'rect',
     icon: RoundedRectangleIcon,
-    tooltips: 'Rounded rectangle',
+    tooltip: 'Rounded rectangle',
     disabled: true,
   },
 ];

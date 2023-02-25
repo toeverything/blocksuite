@@ -16,7 +16,7 @@ import type { MouseMode } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-toolbar')
-export class EdgelessToolBar extends LitElement {
+export class EdgelessToolbar extends LitElement {
   static styles = css`
     :host {
       position: absolute;
@@ -65,7 +65,7 @@ export class EdgelessToolBar extends LitElement {
     return html`
       <div class="edgeless-toolbar-container">
         <edgeless-tool-icon-button
-          .tooltips=${'Select'}
+          .tooltip=${'Select'}
           .active=${type === 'default'}
           @tool.click=${() => this._setMouseMode({ type: 'default' })}
         >
@@ -73,7 +73,7 @@ export class EdgelessToolBar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .disabled=${true}
-          .tooltips=${'Text'}
+          .tooltip=${'Text'}
           .active=${false}
           @tool.click=${() => console.log('Text')}
         >
@@ -85,7 +85,7 @@ export class EdgelessToolBar extends LitElement {
         ></edgeless-shape-tool-button>
         <edgeless-tool-icon-button
           .disabled=${true}
-          .tooltips=${'Image'}
+          .tooltip=${'Image'}
           .active=${false}
           @tool.click=${() => console.log('Image')}
         >
@@ -93,7 +93,7 @@ export class EdgelessToolBar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .disabled=${true}
-          .tooltips=${'Connector'}
+          .tooltip=${'Connector'}
           .active=${false}
           @tool.click=${() => console.log('Connector')}
         >
@@ -101,7 +101,7 @@ export class EdgelessToolBar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .disabled=${true}
-          .tooltips=${'Pen'}
+          .tooltip=${'Pen'}
           .active=${false}
           @tool.click=${() => console.log('Pen')}
         >
@@ -109,7 +109,7 @@ export class EdgelessToolBar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .disabled=${true}
-          .tooltips=${'Hand'}
+          .tooltip=${'Hand'}
           .active=${false}
           @tool.click=${() => console.log('Hand')}
         >
@@ -122,6 +122,6 @@ export class EdgelessToolBar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toolbar': EdgelessToolBar;
+    'edgeless-toolbar': EdgelessToolbar;
   }
 }

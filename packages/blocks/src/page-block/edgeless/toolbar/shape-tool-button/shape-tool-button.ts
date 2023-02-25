@@ -73,7 +73,7 @@ export class EdgelessShapeToolButton extends LitElement {
     }
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     super.disconnectedCallback();
     this._shapeMenu?.dispose?.();
     this._shapeMenu = null;
@@ -84,7 +84,7 @@ export class EdgelessShapeToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltips=${'Shape'}
+        .tooltip=${'Shape'}
         .active=${type === 'shape'}
         .testId=${'shape'}
         @tool.click=${() => this._toggleShapeMenu()}

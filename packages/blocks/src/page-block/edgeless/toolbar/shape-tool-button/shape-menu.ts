@@ -35,16 +35,15 @@ export class EdgelessShapeMenu extends LitElement {
 
     return html`
       <div class="shape-menu-container">
-        ${ShapeComponentConfig.map(({ name, icon, tooltips, disabled }) => {
+        ${ShapeComponentConfig.map(({ name, icon, tooltip, disabled }) => {
           return html`
             <edgeless-tool-icon-button
               .disabled=${disabled}
-              .tooltips=${tooltips}
+              .tooltip=${tooltip}
               .active=${shapeType === name}
               @tool.click=${() => {
-                if (disabled) {
-                  return;
-                }
+                if (disabled) return;
+
                 this.edgeless.signals.mouseModeUpdated.emit({
                   type: 'shape',
                   shape: name,
