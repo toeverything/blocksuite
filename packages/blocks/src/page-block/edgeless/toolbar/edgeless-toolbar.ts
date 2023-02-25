@@ -1,5 +1,5 @@
 import './tool-icon-button.js';
-import './shape-tool-button/shape-tool-button.js';
+import './shape-tool/shape-tool-button.js';
 
 import {
   ConnectorIcon,
