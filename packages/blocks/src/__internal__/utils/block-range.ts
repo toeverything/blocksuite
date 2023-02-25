@@ -53,9 +53,11 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   if (page.root) {
     const pageBlock = getDefaultPageBlock(page.root);
     if (pageBlock.selection) {
-      const selectedBlock = pageBlock.selection.state.selectedBlocks;
-      const models = selectedBlock.map(element => getModelByElement(element));
-      // .filter(model => model.text);
+      const selectedBlocks = pageBlock.selection.state.selectedBlocks;
+      const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+      const models = [...selectedBlocks, ...selectedEmbeds]
+        .map(element => getModelByElement(element))
+        .filter(Boolean);
       if (models.length) {
         return {
           type: 'Block',
@@ -160,6 +162,7 @@ export function restoreSelection(blockRange: BlockRange) {
       return;
     }
     defaultPageBlock.selection.state.clearBlock();
+    defaultPageBlock.selection.state.type = 'native';
     return;
   }
   const defaultPageBlock = getDefaultPageBlock(blockRange.startModel);
