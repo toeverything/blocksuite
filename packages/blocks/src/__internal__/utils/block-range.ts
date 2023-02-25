@@ -159,3 +159,63 @@ export function restoreSelection(blockRange: BlockRange) {
   resetNativeSelection(null);
   (document.activeElement as HTMLTextAreaElement).blur();
 }
+
+// The following section is experimental code.
+// I believe that `BlockRange` is sufficient for our current needs,
+// so we do not plan to enable the following section at this time.
+//
+// However, it can help us understand the design and development direction of `BlockRange`.
+// If it is needed in the future, we may enable it.
+
+type ExperimentBlockRange = {
+  type: 'Native' | 'Block';
+  range: Range;
+  models: BaseBlockModel[];
+  startModel: BaseBlockModel;
+  endModel: BaseBlockModel;
+  betweenModels: BaseBlockModel[];
+  startOffset: number;
+  endOffset: number;
+  collapsed: boolean;
+  apply: () => void;
+};
+
+export const experimentCreateBlockRange = (
+  rangeOrBlockRange: Range | BlockRange
+): ExperimentBlockRange => {
+  let cacheRange: Range | null =
+    rangeOrBlockRange instanceof Range ? rangeOrBlockRange : null;
+  const blockRange =
+    rangeOrBlockRange instanceof Range
+      ? nativeRangeToBlockRange(rangeOrBlockRange)
+      : rangeOrBlockRange;
+
+  if (!blockRange.models.length) {
+    throw new Error('Block range must have at least one model.');
+  }
+
+  const getRange = () => {
+    // cache range may be expired
+    if (cacheRange) {
+      return cacheRange;
+    }
+    cacheRange = blockRangeToNativeRange(blockRange);
+    return cacheRange;
+  };
+
+  return {
+    ...blockRange,
+    startModel: blockRange.models[0],
+    endModel: blockRange.models[blockRange.models.length - 1],
+    betweenModels: blockRange.models.slice(1, blockRange.models.length - 1),
+    get range() {
+      return getRange();
+    },
+    collapsed:
+      blockRange.models.length === 1 &&
+      blockRange.startOffset === blockRange.endOffset,
+    apply() {
+      restoreSelection(blockRange);
+    },
+  };
+};
