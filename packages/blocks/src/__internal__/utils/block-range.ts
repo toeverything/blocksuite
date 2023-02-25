@@ -65,8 +65,14 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
 }
 
 export function blockRangeToNativeRange(blockRange: BlockRange) {
+  const models = blockRange.models.filter(model => model.text);
+  if (!models.length) {
+    // BlockRange may be selected embeds, and it don't have text
+    // so we can't convert it to native range
+    return null;
+  }
   const [startNode, startOffset] = getTextNodeBySelectedBlock(
-    blockRange.models[0],
+    models[0],
     blockRange.startOffset
   );
   if (!startNode) {
@@ -75,7 +81,7 @@ export function blockRangeToNativeRange(blockRange: BlockRange) {
     );
   }
   const [endNode, endOffset] = getTextNodeBySelectedBlock(
-    blockRange.models[blockRange.models.length - 1],
+    models[models.length - 1],
     blockRange.endOffset
   );
   if (!startNode) {
@@ -93,6 +99,8 @@ export function nativeRangeToBlockRange(range: Range): BlockRange | null {
   // TODO check range is in page
   const models = getModelsByRange(range);
   if (!models.length) {
+    // NativeRange may be outside of the editor
+    // so we can't convert it to block range
     return null;
   }
   const startOffset = getQuillIndexByNativeSelection(
@@ -172,7 +180,7 @@ export function restoreSelection(blockRange: BlockRange) {
 
 type ExperimentBlockRange = {
   type: 'Native' | 'Block';
-  range: Range;
+  range: Range | null;
   models: BaseBlockModel[];
   startModel: BaseBlockModel;
   endModel: BaseBlockModel;

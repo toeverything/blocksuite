@@ -2,13 +2,13 @@ import type { SurfaceElement } from '@blocksuite/phasor';
 import type { Disposable, Page, UserRange } from '@blocksuite/store';
 
 import {
-  getCurrentBlockRange,
   initMouseEventHandlers,
   MouseMode,
   noop,
   SelectionEvent,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
@@ -285,9 +285,7 @@ export class EdgelessSelectionManager {
       const userRange: UserRange = {
         startOffset: blockRange.startOffset,
         endOffset: blockRange.endOffset,
-        startBlockId: blockRange.startModel.id,
-        endBlockId: blockRange.endModel.id,
-        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+        blockIds: blockRange.models.map(m => m.id),
       };
       page.awarenessStore.setLocalRange(page, userRange);
     }

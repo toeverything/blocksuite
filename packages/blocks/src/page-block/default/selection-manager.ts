@@ -1121,9 +1121,7 @@ export class DefaultSelectionManager {
       const userRange: UserRange = {
         startOffset: blockRange.startOffset,
         endOffset: blockRange.endOffset,
-        startBlockId: blockRange.startModel.id,
-        endBlockId: blockRange.endModel.id,
-        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+        blockIds: blockRange.models.map(m => m.id),
       };
       page.awarenessStore.setLocalRange(page, userRange);
     }
