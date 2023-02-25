@@ -1115,10 +1115,6 @@ export class DefaultSelectionManager {
   }
 
   updateLocalSelection() {
-    if (!this) {
-      return;
-    }
-
     const page = this.page;
     const blockRange = getCurrentBlockRange(page);
     if (blockRange && blockRange.type === 'Native') {

@@ -144,19 +144,15 @@ export class RemoteSelection extends LitElement {
         }
 
         requestAnimationFrame(() => {
-          try {
-            const nativeRange = blockRangeToNativeRange({
-              type: 'Native',
-              startModel,
-              startOffset: range.startOffset,
-              endModel,
-              endOffset: range.endOffset,
-              betweenModels: [],
-            });
-            resetNativeSelection(nativeRange);
-          } catch (error) {
-            /* empty */
-          }
+          const nativeRange = blockRangeToNativeRange({
+            type: 'Native',
+            startModel,
+            startOffset: range.startOffset,
+            endModel,
+            endOffset: range.endOffset,
+            betweenModels: [],
+          });
+          resetNativeSelection(nativeRange);
         });
       }
     );
