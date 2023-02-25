@@ -70,7 +70,7 @@ export class RichText extends LitElement {
   }
 
   render() {
-    return html`<style>
+    return html` <style>
         .rich-text-container {
           width: 100%;
           height: 100%;
@@ -139,6 +139,22 @@ export class ToolBar extends LitElement {
     const undoManager = new Y.UndoManager(this.vEditor.yText, {
       trackedOrigins: new Set([this.vEditor.yText.doc?.clientID]),
     });
+
+    addEventListener('keydown', e => {
+      if (
+        e instanceof KeyboardEvent &&
+        (e.ctrlKey || e.metaKey) &&
+        e.key === 'z'
+      ) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          undoManager.redo();
+        } else {
+          undoManager.undo();
+        }
+      }
+    });
+
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });
