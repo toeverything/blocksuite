@@ -70,7 +70,7 @@ export class RichText extends LitElement {
   }
 
   render() {
-    return html`<style>
+    return html` <style>
         .rich-text-container {
           width: 100%;
           height: 100%;
