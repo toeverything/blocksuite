@@ -111,7 +111,7 @@ function filterSelectedBlockWithoutSubtree(
           results.shift();
         } else {
           // backward search parent block and remove its subtree
-          // only keep blocks with same level
+          // only keep blocks of same level
           const { previousElementSibling } = block;
           // previousElementSibling is not prev block and previousElementSibling contains prev block
           if (
@@ -194,7 +194,10 @@ function filterSelectedBlockByIndex(
 }
 
 // clear subtree in block for drawing rect
-function clearSubtree(selectedBlocks: BlockComponentElement[], prevBlock: BlockComponentElement) {
+function clearSubtree(
+  selectedBlocks: BlockComponentElement[],
+  prevBlock: BlockComponentElement
+) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     // prev block contains block
