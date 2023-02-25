@@ -94,7 +94,8 @@ export function initMouseEventHandlers(
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
-  onSelectionChange: (e: Event) => void
+  onSelectionChangeWithDebounce: (e: Event) => void,
+  onSelectionChangeWithOutDebounce: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -199,7 +200,7 @@ export function initMouseEventHandlers(
     );
   };
 
-  const selectionChangeHandler = debounce<
+  const selectionChangeHandlerWithDebounce = debounce<
     Event[],
     (this: unknown, ...args: Event[]) => void
   >(e => {
@@ -208,21 +209,39 @@ export function initMouseEventHandlers(
       return;
     }
 
-    onSelectionChange(e as Event);
+    onSelectionChangeWithDebounce(e as Event);
   }, 300);
+
+  const selectionChangeHandlerWithOutDebounce = (e: Event) => {
+    onSelectionChangeWithOutDebounce(e);
+  };
 
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
-  document.addEventListener('selectionchange', selectionChangeHandler);
+  document.addEventListener(
+    'selectionchange',
+    selectionChangeHandlerWithDebounce
+  );
+  document.addEventListener(
+    'selectionchange',
+    selectionChangeHandlerWithOutDebounce
+  );
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
-    document.removeEventListener('selectionchange', selectionChangeHandler);
+    document.removeEventListener(
+      'selectionchange',
+      selectionChangeHandlerWithDebounce
+    );
+    document.removeEventListener(
+      'selectionchange',
+      selectionChangeHandlerWithOutDebounce
+    );
   };
   return dispose;
 }

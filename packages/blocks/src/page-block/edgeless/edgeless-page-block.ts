@@ -288,6 +288,10 @@ export class EdgelessPageBlockComponent
   }
 
   render() {
+    requestAnimationFrame(() => {
+      this._selection.refreshRemoteSelection();
+    });
+
     this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
     const childrenContainer = EdgelessBlockChildrenContainer(

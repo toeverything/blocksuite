@@ -1,7 +1,8 @@
 import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Disposable } from '@blocksuite/store';
+import type { Disposable, Page, UserRange } from '@blocksuite/store';
 
 import {
+  getCurrentBlockRange,
   initMouseEventHandlers,
   MouseMode,
   noop,
@@ -122,6 +123,8 @@ export class ViewportState {
 }
 
 export class EdgelessSelectionManager {
+  readonly page: Page;
+
   private _mouseMode: MouseMode = {
     type: 'default',
   };
@@ -177,6 +180,7 @@ export class EdgelessSelectionManager {
   }
 
   constructor(container: EdgelessPageBlockComponent) {
+    this.page = container.page;
     this._container = container;
     this._controllers = {
       default: new DefaultModeController(this._container),
@@ -192,7 +196,8 @@ export class EdgelessSelectionManager {
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
-      noop
+      noop,
+      this._onSelectionChangeWithoutDebounce
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {
@@ -263,9 +268,35 @@ export class EdgelessSelectionManager {
     return this._controllers[this.mouseMode.type].onContainerContextMenu(e);
   };
 
+  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+    this.updateLocalSelection();
+  };
+
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
     this._selectionUpdateCallback.dispose();
+  }
+
+  updateLocalSelection() {
+    const page = this.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (blockRange && blockRange.type === 'Native') {
+      const userRange: UserRange = {
+        startOffset: blockRange.startOffset,
+        endOffset: blockRange.endOffset,
+        startBlockId: blockRange.startModel.id,
+        endBlockId: blockRange.endModel.id,
+        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+      };
+      page.awarenessStore.setLocalRange(page, userRange);
+    }
+  }
+
+  refreshRemoteSelection() {
+    const element = document.querySelector('remote-selection');
+    if (element) {
+      element.requestUpdate();
+    }
   }
 }

@@ -6,13 +6,14 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Page, UserRange } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
   BlockComponentElement,
   getAllBlocks,
   getBlockElementByModel,
+  getCurrentBlockRange,
   getCurrentRange,
   getDefaultPageBlock,
   getModelByElement,
@@ -438,7 +439,8 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
-        this._onSelectionChange
+        this._onSelectionChangeWithDebounce,
+        this._onSelectionChangeWithoutDebounce
       )
     );
   }
@@ -815,11 +817,12 @@ export class DefaultSelectionManager {
     // console.log('mouseout', e);
   };
 
-  private _onSelectionChange = (_: Event) => {
+  private _onSelectionChangeWithDebounce = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
       return;
     }
+
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;
@@ -846,6 +849,10 @@ export class DefaultSelectionManager {
       page: this.page,
       direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
+  };
+
+  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+    this.updateLocalSelection();
   };
 
   // clear selection: `block`, `embed`, `native`
@@ -1105,5 +1112,20 @@ export class DefaultSelectionManager {
     }
 
     return null;
+  }
+
+  updateLocalSelection() {
+    const page = this.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (blockRange && blockRange.type === 'Native') {
+      const userRange: UserRange = {
+        startOffset: blockRange.startOffset,
+        endOffset: blockRange.endOffset,
+        startBlockId: blockRange.startModel.id,
+        endBlockId: blockRange.endModel.id,
+        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+      };
+      page.awarenessStore.setLocalRange(page, userRange);
+    }
   }
 }

@@ -85,6 +85,10 @@ export class Page extends Space<PageData> {
     this._idGenerator = idGenerator;
   }
 
+  get history() {
+    return this._history;
+  }
+
   get workspace() {
     return this._workspace;
   }
@@ -661,13 +665,6 @@ export class Page extends Space<PageData> {
 
     const adapter = new RichTextAdapter(this, yText, quill);
     this.richTextAdapters.set(id, adapter);
-
-    quill.on('selection-change', () => {
-      const cursor = adapter.getCursor();
-      if (!cursor) return;
-
-      this.awarenessStore.setLocalCursor(this, { ...cursor, id });
-    });
   };
 
   /** Cancel the connection between the rich text editor instance and YText. */
@@ -744,7 +741,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awarenessStore.getLocalCursor(this)
+        this.awarenessStore.getLocalRange(this)
       );
     }
 
@@ -752,12 +749,12 @@ export class Page extends Space<PageData> {
   };
 
   private _historyPopObserver = (event: { stackItem: StackItem }) => {
-    const cursor = event.stackItem.meta.get('cursor-location');
-    if (!cursor) {
+    const range = event.stackItem.meta.get('cursor-location');
+    if (!range) {
       return;
     }
 
-    this.awarenessStore.setLocalCursor(this, cursor);
+    this.awarenessStore.setLocalRange(this, range);
     this._historyObserver();
   };
 
