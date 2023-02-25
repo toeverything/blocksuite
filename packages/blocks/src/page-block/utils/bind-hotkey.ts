@@ -22,7 +22,6 @@ import {
   getPreviousBlock,
   getRichTextByModel,
   getStartModelBySelection,
-  isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
@@ -270,20 +269,6 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
   }
 }
 
-function isDispatchFromCodeBlock(e: KeyboardEvent) {
-  if (!e.target || !(e.target instanceof Element)) {
-    return false;
-  }
-  try {
-    // if the target is `body`, it will throw an error
-    const model = getModelByElement(e.target);
-    return matchFlavours(model, ['affine:code']);
-  } catch (error) {
-    // just check failed, no need to handle
-    return false;
-  }
-}
-
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
@@ -308,33 +293,14 @@ export function bindHotkeys(
   bindCommonHotkey(page);
 
   hotkey.addListener(ENTER, e => {
-    const targetInput = e.target;
-    // TODO caption ad-hoc should be moved to the caption input for processing
-    const isCaption = isCaptionElement(targetInput);
-    const { state } = selection;
-    let element: Element | null = null;
-
-    // select blocks or focus caption input, then enter will create a new block.
-    if (state.type === 'block') {
-      const { selectedBlocks } = state;
-      if (selectedBlocks.length) {
-        element = selectedBlocks[selectedBlocks.length - 1];
-      }
-    } else if (state.type === 'embed') {
-      const { selectedEmbeds } = state;
-      if (selectedEmbeds.length) {
-        element = selectedEmbeds[selectedEmbeds.length - 1];
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-
-    if (!element && isCaption) {
-      element = targetInput;
-    }
-
-    if (element) {
+    if (blockRange.type === 'Block') {
       e.stopPropagation();
       e.preventDefault();
-      const model = getModelByElement(element);
+      const model = blockRange.endModel;
       const parentModel = page.getParent(model);
       const index = parentModel?.children.indexOf(model);
       assertExists(index);
@@ -349,50 +315,33 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
+    // TODO fix native selection enter
+    return;
   });
 
   hotkey.addListener(BACKSPACE, e => {
-    const { state } = selection;
-    if (state.type === 'none') {
-      // Will be handled in the `keyboard.onBackspace` function
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
       return;
     }
-    if (state.type === 'native') {
+    if (blockRange.type === 'Native') {
       handleMultiBlockBackspace(page, e);
       return;
     }
 
-    let blocks: Element[] | null = null;
-    if (state.type === 'block') {
-      // XXX Ad-hoc for code block
-      // At the beginning of the code block,
-      // the backspace will selected the block first.
-      // The select logic already processed in the `handleLineStartBackspace` function.
-      // So we need to prevent the default delete behavior.
-      if (isDispatchFromCodeBlock(e)) {
-        return;
-      }
-      const { selectedBlocks } = state;
-      if (selectedBlocks.length) {
-        blocks = selectedBlocks;
-      }
-    } else if (state.type === 'embed') {
-      const { selectedEmbeds } = state;
-      if (selectedEmbeds.length) {
-        blocks = selectedEmbeds;
-      }
-    }
-
-    if (blocks && blocks.length) {
-      e.preventDefault();
-      // delete blocks
-      handleBlockSelectionBatchDelete(
-        page,
-        blocks.map(block => getModelByElement(block))
-      );
-      selection.clear();
-      return;
-    }
+    const models =
+      blockRange.startModel === blockRange.endModel
+        ? [blockRange.startModel]
+        : [
+            blockRange.startModel,
+            ...blockRange.betweenModels,
+            blockRange.endModel,
+          ];
+    // delete blocks
+    handleBlockSelectionBatchDelete(page, models);
+    selection.clear();
+    e.preventDefault();
+    return;
   });
 
   hotkey.addListener(SELECT_ALL, e => {

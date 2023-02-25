@@ -8,8 +8,6 @@ import {
   getCurrentNativeRange,
   getNextBlock,
   isCollapsedAtBlockStart,
-  isMultiBlockRange,
-  noop,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { markdownConvert, tryMatchSpaceHotkey } from './markdown-convert.js';
@@ -220,16 +218,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onBackspace(e: KeyboardEvent, quill: Quill) {
-    // To workaround uncontrolled behavior when deleting character at block start,
-    // in this case backspace should be handled in quill.
     if (isCollapsedAtBlockStart(quill)) {
-      // window.requestAnimationFrame(() => {
       handleLineStartBackspace(page, model);
-      // });
+      e.stopPropagation();
       return PREVENT_DEFAULT;
-    } else if (isMultiBlockRange(getCurrentNativeRange())) {
-      // return PREVENT_DEFAULT;
-      noop();
     }
     return ALLOW_DEFAULT;
   }
