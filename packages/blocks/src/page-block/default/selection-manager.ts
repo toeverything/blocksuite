@@ -121,13 +121,15 @@ function filterSelectedBlockWithoutSubtree(
               Node.DOCUMENT_POSITION_CONTAINED_BY
           ) {
             let n = i;
+            let m = results.length;
             while (n--) {
               prevBlock = entries[n][0];
               if (prevBlock === previousElementSibling) {
                 results.push({ block: prevBlock, index: n });
                 break;
-              } else {
+              } else if (m > 0) {
                 results.pop();
+                m--;
               }
             }
           }
