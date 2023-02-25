@@ -209,8 +209,7 @@ export class DefaultPageBlockComponent
   private async _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
     const { page, model, _title } = this;
-
-    if (e.key === 'Enter' && hasContent) {
+    if (e.key === 'Enter' && !e.isComposing && hasContent) {
       assertExists(_title.selectionStart);
       const titleCursorIndex = _title.selectionStart;
       const contentLeft = _title.value.slice(0, titleCursorIndex);
