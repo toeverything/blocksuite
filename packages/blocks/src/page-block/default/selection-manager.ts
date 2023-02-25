@@ -10,6 +10,7 @@ import type { Page, UserRange } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
+  BlockComponentElement,
   getAllBlocks,
   getBlockElementByModel,
   getCurrentBlockRange,
@@ -87,13 +88,13 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 //
 // TODO: checks the parent by `contains` method
 function filterSelectedBlockWithoutSubtree(
-  blockCache: Map<Element, DOMRect>,
+  blockCache: Map<BlockComponentElement, DOMRect>,
   selectionRect: DOMRect,
   offset: IPoint
 ) {
   const entries = Array.from(blockCache.entries());
   const len = entries.length;
-  const results: { block: Element; index: number }[] = [];
+  const results: { block: BlockComponentElement; index: number }[] = [];
 
   // empty
   if (len === 0) return results;
@@ -144,14 +145,14 @@ function filterSelectedBlockWithoutSubtree(
 // Find the current focused block and its substree.
 // The `selectionRect` is a rect of block element.
 function filterSelectedBlockByIndex(
-  blockCache: Map<Element, DOMRect>,
+  blockCache: Map<BlockComponentElement, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
   offset: IPoint = {
     x: 0,
     y: 0,
   }
-): Element[] {
+): BlockComponentElement[] {
   // SELECT_ALL
   if (focusedBlockIndex === -1) {
     return Array.from(blockCache.keys());
@@ -190,7 +191,7 @@ function filterSelectedBlockByIndex(
 }
 
 // clear subtree in block for drawing rect
-function clearSubtree(selectedBlocks: Element[], left: number) {
+function clearSubtree(selectedBlocks: BlockComponentElement[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     const currentLeft = block.getBoundingClientRect().left;
@@ -207,8 +208,11 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
 
 // find blocks and its subtree
 function findBlocksWithSubtree(
-  blockCache: Map<Element, DOMRect>,
-  selectedBlocksWithoutSubtree: { block: Element; index: number }[] = []
+  blockCache: Map<BlockComponentElement, DOMRect>,
+  selectedBlocksWithoutSubtree: {
+    block: BlockComponentElement;
+    index: number;
+  }[] = []
 ) {
   const results = [];
   const len = selectedBlocksWithoutSubtree.length;
@@ -256,7 +260,7 @@ type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'database';
 export class PageSelectionState {
   type: PageSelectionType;
   selectedEmbeds: EmbedBlockComponent[] = [];
-  selectedBlocks: Element[] = [];
+  selectedBlocks: BlockComponentElement[] = [];
   // -1: SELECT_ALL
   // >=0: only current focused-block
   focusedBlockIndex = -1;
@@ -266,9 +270,9 @@ export class PageSelectionState {
   private _startPoint: { x: number; y: number } | null = null;
   private _endPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
-  private _blockCache = new Map<Element, DOMRect>();
+  private _blockCache = new Map<BlockComponentElement, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
-  private _activeComponent: HTMLElement | null = null;
+  private _activeComponent: BlockComponentElement | null = null;
 
   constructor(type: PageSelectionType) {
     this.type = type;
@@ -278,7 +282,7 @@ export class PageSelectionState {
     return this._activeComponent;
   }
 
-  set activeComponent(component: HTMLElement | null) {
+  set activeComponent(component: BlockComponentElement | null) {
     this._activeComponent = component;
   }
 
@@ -483,7 +487,7 @@ export class DefaultSelectionManager {
   }
 
   setSelectedBlocks(
-    selectedBlocks: Element[],
+    selectedBlocks: BlockComponentElement[],
     rects?: DOMRect[],
     selectionType?: PageSelectionType
   ) {
@@ -889,7 +893,7 @@ export class DefaultSelectionManager {
   }
 
   selecting(
-    blockCache: Map<Element, DOMRect>,
+    blockCache: Map<BlockComponentElement, DOMRect>,
     selectionRect: DOMRect,
     viewportState: ViewportState
   ) {
@@ -1003,7 +1007,7 @@ export class DefaultSelectionManager {
 
   // Click on the prefix icon of list block
   resetSelectedBlockByRect(
-    blockElement: Element,
+    blockElement: BlockComponentElement,
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.setFocusedBlockIndexByElement(blockElement);
