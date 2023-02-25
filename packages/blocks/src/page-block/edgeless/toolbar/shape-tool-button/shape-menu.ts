@@ -5,10 +5,10 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { ShapeComponentConfig } from './shapes-menu-config.js';
+import { ShapeComponentConfig } from './shape-menu-config.js';
 
-@customElement('edgeless-shapes-menu')
-export class EdgelessShapesMenu extends LitElement {
+@customElement('edgeless-shape-menu')
+export class EdgelessShapeMenu extends LitElement {
   static styles = css`
     .shape-menu-container {
       display: flex;
@@ -63,6 +63,6 @@ export class EdgelessShapesMenu extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-shapes-menu': EdgelessShapesMenu;
+    'edgeless-shape-menu': EdgelessShapeMenu;
   }
 }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { assertExists } from '@blocksuite/global/utils';
 import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
@@ -228,20 +229,17 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
   await expect(toolbarLocator).toBeVisible();
 
   const shapeTool = page.locator('.icon-container[data-test-id="shape"]');
-  const shapeToolPosition = await shapeTool.boundingBox();
+  const shapeToolBox = await shapeTool.boundingBox();
 
-  expect(shapeToolPosition).toBeTruthy();
-  if (!shapeToolPosition) {
-    return;
-  }
+  assertExists(shapeToolBox);
 
-  await page.mouse.click(shapeToolPosition.x + 10, shapeToolPosition.y + 10);
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
 
-  const shapeComponentLocator = page.locator('edgeless-shapes-menu');
-  await expect(shapeComponentLocator).toBeVisible();
+  const shapeMenu = page.locator('edgeless-shape-menu');
+  await expect(shapeMenu).toBeVisible();
 
-  await page.mouse.click(shapeToolPosition.x + 10, shapeToolPosition.y + 10);
-  await expect(shapeComponentLocator).toBeHidden();
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await expect(shapeMenu).toBeHidden();
 });
 
 test('edgeless arrow up/down', async ({ page }) => {

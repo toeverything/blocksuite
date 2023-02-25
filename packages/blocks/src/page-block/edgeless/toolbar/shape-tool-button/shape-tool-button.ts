@@ -1,5 +1,5 @@
 import '../tool-icon-button.js';
-import './shapes-menu.js';
+import './shape-menu.js';
 
 import { ShapeIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
@@ -8,17 +8,17 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { EdgelessShapesMenu } from './shapes-menu.js';
+import type { EdgelessShapeMenu } from './shape-menu.js';
 
-interface ShapesMenuInstance {
-  element: EdgelessShapesMenu;
+interface ShapeMenuPopper {
+  element: EdgelessShapeMenu;
   dispose: () => void;
 }
 
-function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
-  const shapeComponent = document.createElement('edgeless-shapes-menu');
-  document.body.appendChild(shapeComponent);
-  const popper = createPopper(reference, shapeComponent, {
+function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
+  const shapeMenu = document.createElement('edgeless-shape-menu');
+  document.body.appendChild(shapeMenu);
+  const popper = createPopper(reference, shapeMenu, {
     placement: 'top',
     modifiers: [
       {
@@ -31,9 +31,9 @@ function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
   });
 
   return {
-    element: shapeComponent,
+    element: shapeMenu,
     dispose: () => {
-      shapeComponent.remove();
+      shapeMenu.remove();
       popper.destroy();
     },
   };
@@ -53,30 +53,30 @@ export class EdgelessShapeToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _shapesMenu: ShapesMenuInstance | null = null;
+  private _shapeMenu: ShapeMenuPopper | null = null;
 
-  private _toggleShapesMenu() {
-    if (this._shapesMenu) {
-      this._shapesMenu.dispose();
-      this._shapesMenu = null;
+  private _toggleShapeMenu() {
+    if (this._shapeMenu) {
+      this._shapeMenu.dispose();
+      this._shapeMenu = null;
     } else {
-      this._shapesMenu = createShapesMenuPopper(this);
-      this._shapesMenu.element.mouseMode = this.mouseMode;
-      this._shapesMenu.element.edgeless = this.edgeless;
+      this._shapeMenu = createShapeMenuPopper(this);
+      this._shapeMenu.element.mouseMode = this.mouseMode;
+      this._shapeMenu.element.edgeless = this.edgeless;
     }
   }
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
-      this._shapesMenu?.dispose();
-      this._shapesMenu = null;
+      this._shapeMenu?.dispose();
+      this._shapeMenu = null;
     }
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    this._shapesMenu?.dispose?.();
-    this._shapesMenu = null;
+    this._shapeMenu?.dispose?.();
+    this._shapeMenu = null;
   }
 
   render() {
@@ -87,7 +87,7 @@ export class EdgelessShapeToolButton extends LitElement {
         .tooltips=${'Shape'}
         .active=${type === 'shape'}
         .testId=${'shape'}
-        @tool.click=${() => this._toggleShapesMenu()}
+        @tool.click=${() => this._toggleShapeMenu()}
       >
         ${ShapeIcon}
       </edgeless-tool-icon-button>

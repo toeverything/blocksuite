@@ -9,12 +9,12 @@ import type { TemplateResult } from 'lit';
 
 import type { ShapeMouseMode } from '../../../../__internal__/index.js';
 
-export const ShapeComponentConfig: Array<{
+export const ShapeComponentConfig: {
   name: ShapeMouseMode['shape'];
   icon: TemplateResult<1>;
   tooltips: string;
   disabled: boolean;
-}> = [
+}[] = [
   {
     name: 'rect',
     icon: SquareIcon,
