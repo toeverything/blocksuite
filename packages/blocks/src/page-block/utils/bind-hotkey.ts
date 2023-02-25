@@ -11,6 +11,7 @@ import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-o
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
+  BlockComponentElement,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -247,7 +248,7 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         // get fresh elements
         selection.state.selectedBlocks = models
           .map(model => getBlockElementByModel(model))
-          .filter(block => block !== null) as Element[];
+          .filter(block => block !== null) as BlockComponentElement[];
         selection.refreshSelectedBlocksRects();
       });
       selection.clear();

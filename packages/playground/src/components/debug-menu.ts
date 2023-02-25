@@ -93,6 +93,9 @@ export class DebugMenu extends NonShadowLitElement {
   @state()
   readonly = false;
 
+  @state()
+  hasOffset = false;
+
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
 
@@ -179,6 +182,10 @@ export class DebugMenu extends NonShadowLitElement {
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
     this.mode = mode;
+  }
+
+  private _switchOffsetMode() {
+    this.hasOffset = !this.hasOffset;
   }
 
   private _addFrame() {
@@ -289,6 +296,9 @@ export class DebugMenu extends NonShadowLitElement {
       window.dispatchEvent(
         createEvent('affine:switch-edgeless-display-mode', this.showGrid)
       );
+    }
+    if (changedProperties.has('hasOffset')) {
+      document.body.style.margin = this.hasOffset ? '60px 0 0 40px' : '0';
     }
     super.update(changedProperties);
   }
@@ -469,6 +479,16 @@ export class DebugMenu extends NonShadowLitElement {
               @click=${this._switchEditorMode}
             >
               <sl-icon name="phone-flip"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Add container offset" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Add container offset"
+              @click=${this._switchOffsetMode}
+            >
+              <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
         </div>

@@ -244,14 +244,18 @@ export class Page extends Space<PageData> {
     );
   }
 
-  getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {
-    if (rootId === target.id) return null;
+  getParentById(
+    rootId: string,
+    target: BaseBlockModel | string
+  ): BaseBlockModel | null {
+    const targetId = typeof target === 'string' ? target : target.id;
+    if (rootId === targetId) return null;
 
     const root = this._blockMap.get(rootId);
     if (!root) return null;
 
     for (const [childId] of root.childMap) {
-      if (childId === target.id) return root;
+      if (childId === targetId) return root;
 
       const parent = this.getParentById(childId, target);
       if (parent !== null) return parent;
@@ -259,7 +263,7 @@ export class Page extends Space<PageData> {
     return null;
   }
 
-  getParent(block: BaseBlockModel) {
+  getParent(block: BaseBlockModel | string) {
     if (!this.root) return null;
 
     return this.getParentById(this.root.id, block);
@@ -458,30 +462,45 @@ export class Page extends Space<PageData> {
   }
 
   @debug('CRUD')
-  moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+  moveBlocks(
+    blocks: BaseBlockModel[],
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
     if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const currentParentModel = this.getParent(model);
+
+    const firstBlock = blocks[0];
+    const currentParentModel = this.getParent(firstBlock);
+
+    // the blocks must have the same parent (siblings)
+    if (blocks.some(block => this.getParent(block) !== currentParentModel)) {
+      console.error('the blocks must have the same parent');
+    }
+
     const nextParentModel = this.getParent(targetModel);
     if (currentParentModel === null || nextParentModel === null) {
       throw new Error('cannot find parent model');
     }
+
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === model.id);
-      yChildrenA.delete(idx);
+      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
+      yChildrenA.delete(idx, blocks.length);
       const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
       const nextIdx = yChildrenB
         .toArray()
         .findIndex(id => id === targetModel.id);
+
+      const ids = blocks.map(block => block.id);
       if (top) {
-        yChildrenB.insert(nextIdx, [model.id]);
+        yChildrenB.insert(nextIdx, ids);
       } else {
-        yChildrenB.insert(nextIdx + 1, [model.id]);
+        yChildrenB.insert(nextIdx + 1, ids);
       }
     });
     currentParentModel.propsUpdated.emit();

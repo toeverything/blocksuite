@@ -124,10 +124,6 @@ export async function dragHandleFromBlockToBlockBottomById(
   if (!handle) {
     throw new Error();
   }
-  await page.mouse.click(
-    handle.x + handle.width / 2,
-    handle.y + handle.height / 2
-  );
   await page.mouse.move(
     handle.x + handle.width / 2,
     handle.y + handle.height / 2

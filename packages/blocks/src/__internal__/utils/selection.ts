@@ -12,6 +12,7 @@ import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
+  BlockComponentElement,
   getBlockElementByModel,
   getDefaultPageBlock,
   getElementFromEventTarget,
@@ -172,7 +173,9 @@ export function focusBlockByModel(
     if (matchFlavours(model, ['affine:database'])) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
-        .filter((element): element is HTMLElement => element !== null);
+        .filter(
+          (element): element is BlockComponentElement => element !== null
+        );
       defaultPageBlock.selection.state.selectedBlocks.push(...elements);
     }
     defaultPageBlock.selection.state.type = 'block';
@@ -940,7 +943,7 @@ export function restoreSelection(blockRange: BlockRange) {
   defaultPageBlock.selection.state.type = 'block';
   defaultPageBlock.selection.state.selectedBlocks = models
     .map(model => getBlockElementByModel(model))
-    .filter(Boolean) as Element[];
+    .filter(Boolean) as BlockComponentElement[];
   defaultPageBlock.selection.refreshSelectedBlocksRects();
   // Try clean native selection
   resetNativeSelection(null);
