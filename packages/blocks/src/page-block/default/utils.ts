@@ -127,10 +127,11 @@ function binarySearchBlockEditingState(
     dragging?: boolean;
   }
 ): EditingState | null {
+  const noSkipX = !options?.skipX;
   const dragging = Boolean(options?.dragging);
   let containerLeft = 0;
 
-  if (!options?.skipX) {
+  if (noSkipX) {
     const firstBlock = getBlockAndRect(blocks, 0);
     containerLeft = firstBlock.blockRect.left;
   }
@@ -189,7 +190,7 @@ function binarySearchBlockEditingState(
     if (inside) {
       assertExists(blockRect);
 
-      if (containerLeft) {
+      if (noSkipX) {
         if (dragging) {
           x = Math.max(x + DRAG_HANDLE_OFFSET_LEFT, containerLeft);
           let n = mid - 1;
