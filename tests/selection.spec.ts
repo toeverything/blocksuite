@@ -521,7 +521,7 @@ async function clickListIcon(page: Page, i = 0) {
   await locator.click();
 }
 
-test('click the list icon to select', async ({ page }) => {
+test('click the list icon can select and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -534,16 +534,21 @@ test('click the list icon to select', async ({ page }) => {
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
-  await clickListIcon(page, 4);
+});
+
+test('click the list icon can select and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await clickListIcon(page, 0);
   await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
-  // FIXME
-  // This should be ['123', '123', '456', '789'] but there is another bug affecting it
-  await clickListIcon(page, 1);
+  await assertRichTexts(page, ['\n', '456', '789']);
+
+  await clickListIcon(page, 0);
   await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['123', '\n', '456', '789']);
-  // FIXME
-  // This should be ['123','456','789'] but there is another bug affecting it
+  await assertRichTexts(page, ['\n']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {
