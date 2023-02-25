@@ -296,4 +296,11 @@ export class EdgelessSelectionManager {
       page.awarenessStore.setLocalRange(page, userRange);
     }
   }
+
+  refreshRemoteSelection() {
+    const element = document.querySelector('remote-selection');
+    if (element) {
+      element.requestUpdate();
+    }
+  }
 }
