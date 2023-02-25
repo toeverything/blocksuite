@@ -190,13 +190,14 @@ export class LangList extends NonShadowLitElement {
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
             language => html`
-              <code-block-button
+              <icon-button
                 width="100%"
+                height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
               >
                 ${language}
-              </code-block-button>
+              </icon-button>
             `
           )}
         </div>
