@@ -221,7 +221,6 @@ function binarySearchBlockEditingState(
               }
             }
           }
-          return null;
         } else {
           // y-coord is checked before
           if (!isPointIn(x, detectRect)) {
