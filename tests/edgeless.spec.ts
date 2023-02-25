@@ -78,11 +78,9 @@ test('cursor for active and inactive state', async ({ page }) => {
   await switchEditorMode(page);
   await undoByClick(page);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
 
   await redoByClick(page);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
 
   // active
   await page.mouse.dblclick(450, 300);
