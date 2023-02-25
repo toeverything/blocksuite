@@ -772,11 +772,11 @@ function getTextNodeFromElement(element: Element): Text | null {
   }
 
   const textNode = Array.from(spanElement.childNodes).find(
-    node => node instanceof Text
+    (node): node is Text => node instanceof Text
   );
 
   if (textNode) {
-    return textNode as Text;
+    return textNode;
   }
   return null;
 }
@@ -854,24 +854,21 @@ function renderDeltas(
   const chunks = deltaInsertsToChunks(deltas);
 
   // every chunk is a line
-  const lines: VirgoLine[] = [];
-  for (const chunk of chunks) {
-    if (chunk.length === 0) {
-      const virgoLine = new VirgoLine();
+  const lines = chunks.map(chunk => {
+    const virgoLine = new VirgoLine();
 
+    if (chunk.length === 0) {
       virgoLine.elements.push(new BaseText());
-      lines.push(virgoLine);
     } else {
-      const virgoLine = new VirgoLine();
-      for (const delta of chunk) {
+      chunk.forEach(delta => {
         const element = render(delta);
 
         virgoLine.elements.push(element);
-      }
-
-      lines.push(virgoLine);
+      });
     }
-  }
+
+    return virgoLine;
+  });
 
   rootElement.replaceChildren(...lines);
 }
