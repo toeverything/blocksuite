@@ -2007,7 +2007,7 @@ test('should keep native range selection when scrolling backward with the scroll
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, -blockHeight * 3);
+        await page.mouse.wheel(0, -blockHeight * 4);
         await page.waitForTimeout(250);
       },
     }
