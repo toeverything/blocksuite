@@ -5,11 +5,9 @@ import type { Quill, RangeStatic } from 'quill';
 
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getNextBlock,
   isCollapsedAtBlockStart,
-  isMultiBlockRange,
-  noop,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { markdownConvert, tryMatchSpaceHotkey } from './markdown-convert.js';
@@ -219,17 +217,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return tryMatchSpaceHotkey(page, model, quill, prefix, range);
   }
 
-  function onBackspace(this: KeyboardEventThis) {
-    // To workaround uncontrolled behavior when deleting character at block start,
-    // in this case backspace should be handled in quill.
-    if (isCollapsedAtBlockStart(this.quill)) {
-      // window.requestAnimationFrame(() => {
+  function onBackspace(e: KeyboardEvent, quill: Quill) {
+    if (isCollapsedAtBlockStart(quill)) {
       handleLineStartBackspace(page, model);
-      // });
+      e.stopPropagation();
       return PREVENT_DEFAULT;
-    } else if (isMultiBlockRange(getCurrentRange())) {
-      // return PREVENT_DEFAULT;
-      noop();
     }
     return ALLOW_DEFAULT;
   }
@@ -307,7 +299,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     backspace: {
       key: 'Backspace',
-      handler: onBackspace,
+      handler(
+        this: KeyboardEventThis,
+        range: QuillRange,
+        context: BindingContext
+      ) {
+        return onBackspace(context.event, this.quill);
+      },
     },
     up: {
       key: 'ArrowUp',
@@ -367,7 +365,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         //   return ALLOW_DEFAULT;
         // }
         requestAnimationFrame(() => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
         return ALLOW_DEFAULT;

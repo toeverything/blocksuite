@@ -5,6 +5,7 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
+import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
   DebugElement,
@@ -31,13 +32,15 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  addShapeElement(bound: IBound, shapeType: ShapeType, color: string) {
+  addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
     const { x, y, w, h } = bound;
 
     element.setBound(x, y, w, h);
-    element.color = color as `#${string}`;
+    if (props) {
+      element.updateProps(props);
+    }
 
     return this._addElement(element);
   }

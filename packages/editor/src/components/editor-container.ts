@@ -172,7 +172,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.page.awarenessStore.setLocalCursor(this.page, null);
+    this.page.awarenessStore.setLocalRange(this.page, null);
     this._disposables.dispose();
   }
 
@@ -200,20 +200,26 @@ export class EditorContainer extends NonShadowLitElement {
       ></affine-edgeless-page>
     `;
 
+    const remoteSelectionContainer = html`
+      <remote-selection .page=${this.page}></remote-selection>
+    `;
+
     const blockRoot = html`
       ${choose(this.mode, [
         ['page', () => pageContainer],
         ['edgeless', () => edgelessContainer],
       ])}
+      ${remoteSelectionContainer}
     `;
 
     return html`
       <style>
+        editor-container,
         .affine-editor-container {
+          display: block;
           height: 100%;
           position: relative;
-          overflow-y: auto;
-          overflow-x: hidden;
+          overflow: hidden;
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

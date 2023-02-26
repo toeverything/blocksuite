@@ -8,7 +8,8 @@ export {
   getBrushBoundFromPoints,
 } from './brush/brush-element.js';
 export { DebugElement } from './debug/debug-element.js';
-export { ShapeElement, type ShapeType } from './shape/shape-element.js';
+export { ShapeElement } from './shape/shape-element.js';
+export type { ShapeProps, ShapeType } from './shape/types.js';
 
 export type PhasorElement = ShapeElement | DebugElement | BrushElement;
 

@@ -1,4 +1,4 @@
-import { getStroke } from 'perfect-freehand';
+import { getStroke, getStrokePoints } from 'perfect-freehand';
 
 import Utils from '../../utils/tl-utils.js';
 import { Vec } from '../../utils/vec.js';
@@ -90,6 +90,15 @@ export function getRectanglePath(
   const { points, options } = getDrawStrokeInfo(id, style, size);
   const stroke = getStroke(points, options);
   const commands = Utils.getSvgPathFromStroke(stroke);
+  // https://stackoverflow.com/a/30830108
+  const path = new Path2D(commands);
+  return path;
+}
+
+export function getFillPath(id: string, style: ShapeStyles, size: number[]) {
+  const { points, options } = getDrawStrokeInfo(id, style, size);
+  const stroke = getStrokePoints(points, options);
+  const commands = Utils.getSvgPathFromStrokePoints(stroke);
   // https://stackoverflow.com/a/30830108
   const path = new Path2D(commands);
   return path;

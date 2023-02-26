@@ -83,7 +83,7 @@ export class VEditor {
 
     this._rootElement.addEventListener(
       'beforeinput',
-      this._onBefoeInput.bind(this),
+      this._onBeforeInput.bind(this),
       {
         signal: this._rootElementAbort.signal,
       }
@@ -169,7 +169,7 @@ export class VEditor {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length > vRange.index &&
+        index + delta.insert.length >= vRange.index &&
         index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
@@ -327,12 +327,21 @@ export class VEditor {
     let anchorOffset = 0;
     let focusOffset = 0;
     let index = 0;
+
     for (let i = 0; i < lineElements.length; i++) {
+      if (anchorText && focusText) {
+        break;
+      }
+
       const textElements = Array.from(
         lineElements[i].querySelectorAll('[data-virgo-text="true"]')
       );
 
       for (let j = 0; j < textElements.length; j++) {
+        if (anchorText && focusText) {
+          break;
+        }
+
         const textNode = getTextNodeFromElement(textElements[j]);
         if (!textNode) {
           return null;
@@ -352,7 +361,7 @@ export class VEditor {
         index += textLength;
       }
 
-      // the one becasue of the line break
+      // the one because of the line break
       index += 1;
     }
 
@@ -383,7 +392,7 @@ export class VEditor {
    *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
    *        the third is null
    *    2.2
-   *        the vRange of first Editor is null, the second is {index: 0, length: 5},
+   *        the vRange of first Editor is null, the second is {index: 5, length: 1},
    *        the third is {index: 0, length: 2}
    * 3. anchor and focus are in another Editor
    *    aa|aaaa
@@ -400,61 +409,15 @@ export class VEditor {
       return null;
     }
 
-    let anchorText: Text | null = null;
-    let anchorTextOffset = anchorOffset;
-    let focusText: Text | null = null;
-    let focusTextOffset = focusOffset;
+    const [anchorText, anchorTextOffset] = getTextAndOffset(
+      anchorNode,
+      anchorOffset
+    );
+    const [focusText, focusTextOffset] = getTextAndOffset(
+      focusNode,
+      focusOffset
+    );
 
-    if (anchorNode instanceof Text && isVText(anchorNode)) {
-      anchorText = anchorNode;
-      anchorTextOffset = anchorOffset;
-    } else if (
-      anchorNode instanceof HTMLElement &&
-      anchorNode.dataset.virgoElement === 'true'
-    ) {
-      const textNode = getTextNodeFromElement(anchorNode);
-      if (textNode) {
-        anchorText = textNode;
-        anchorTextOffset = anchorOffset;
-      }
-    } else if (
-      anchorNode instanceof HTMLElement &&
-      anchorNode.parentElement instanceof VirgoLine
-    ) {
-      const firstTextElement = anchorNode.querySelector('v-text');
-      if (firstTextElement) {
-        const textNode = getTextNodeFromElement(firstTextElement);
-        if (textNode) {
-          anchorText = textNode;
-          anchorTextOffset = 0;
-        }
-      }
-    }
-    if (focusNode instanceof Text && isVText(focusNode)) {
-      focusText = focusNode;
-      focusTextOffset = focusOffset;
-    } else if (
-      focusNode instanceof HTMLElement &&
-      focusNode.dataset.virgoElement === 'true'
-    ) {
-      const textNode = getTextNodeFromElement(focusNode);
-      if (textNode) {
-        focusText = textNode;
-        focusTextOffset = focusOffset;
-      }
-    } else if (
-      focusNode instanceof HTMLElement &&
-      focusNode.parentElement instanceof VirgoLine
-    ) {
-      const firstTextElement = focusNode.querySelector('v-text');
-      if (firstTextElement) {
-        const textNode = getTextNodeFromElement(firstTextElement);
-        if (textNode) {
-          anchorText = textNode;
-          anchorTextOffset = 0;
-        }
-      }
-    }
     // case 1
     if (anchorText && focusText) {
       const anchorDomPoint = textPointToDomPoint(
@@ -543,7 +506,7 @@ export class VEditor {
     return null;
   }
 
-  private _onBefoeInput(event: InputEvent): void {
+  private _onBeforeInput(event: InputEvent): void {
     event.preventDefault();
 
     if (this._isReadOnly) {
@@ -593,15 +556,15 @@ export class VEditor {
       } else if (this._vRange.index > 0) {
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
         const tmpString = this.yText.toString().slice(0, this._vRange.index);
-        const deletedChracater = [...tmpString].slice(-1).join('');
+        const deletedCharacter = [...tmpString].slice(-1).join('');
         this.deleteText({
-          index: this._vRange.index - deletedChracater.length,
-          length: deletedChracater.length,
+          index: this._vRange.index - deletedCharacter.length,
+          length: deletedCharacter.length,
         });
 
         this.signals.updateVRange.emit([
           {
-            index: this._vRange.index - deletedChracater.length,
+            index: this._vRange.index - deletedCharacter.length,
             length: 0,
           },
           'input',
@@ -809,17 +772,58 @@ function getTextNodeFromElement(element: Element): Text | null {
   }
 
   const textNode = Array.from(spanElement.childNodes).find(
-    node => node instanceof Text
+    (node): node is Text => node instanceof Text
   );
 
   if (textNode) {
-    return textNode as Text;
+    return textNode;
   }
   return null;
 }
 
-function isVText(text: Text) {
-  return text.parentElement?.dataset.virgoText === 'true' ?? false;
+function isVText(text: unknown): text is Text {
+  return (
+    text instanceof Text &&
+    (text.parentElement?.dataset.virgoText === 'true' ?? false)
+  );
+}
+
+function isVElement(element: unknown): element is HTMLElement {
+  return (
+    element instanceof HTMLElement && element.dataset.virgoElement === 'true'
+  );
+}
+
+function isVLine(element: unknown): element is HTMLElement {
+  return (
+    element instanceof HTMLElement && element.parentElement instanceof VirgoLine
+  );
+}
+
+function getTextAndOffset(node: unknown, offset: number) {
+  let text: Text | null = null;
+  let textOffset = offset;
+  if (isVText(node)) {
+    text = node;
+    textOffset = offset;
+  } else if (isVElement(node)) {
+    const textNode = getTextNodeFromElement(node);
+    if (textNode) {
+      text = textNode;
+      textOffset = offset;
+    }
+  } else if (isVLine(node)) {
+    const firstTextElement = node.querySelector('v-text');
+    if (firstTextElement) {
+      const textNode = getTextNodeFromElement(firstTextElement);
+      if (textNode) {
+        text = textNode;
+        textOffset = 0;
+      }
+    }
+  }
+
+  return [text, textOffset] as const;
 }
 
 function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
@@ -850,24 +854,21 @@ function renderDeltas(
   const chunks = deltaInsertsToChunks(deltas);
 
   // every chunk is a line
-  const lines: VirgoLine[] = [];
-  for (const chunk of chunks) {
-    if (chunk.length === 0) {
-      const virgoLine = new VirgoLine();
+  const lines = chunks.map(chunk => {
+    const virgoLine = new VirgoLine();
 
+    if (chunk.length === 0) {
       virgoLine.elements.push(new BaseText());
-      lines.push(virgoLine);
     } else {
-      const virgoLine = new VirgoLine();
-      for (const delta of chunk) {
+      chunk.forEach(delta => {
         const element = render(delta);
 
         virgoLine.elements.push(element);
-      }
-
-      lines.push(virgoLine);
+      });
     }
-  }
+
+    return virgoLine;
+  });
 
   rootElement.replaceChildren(...lines);
 }

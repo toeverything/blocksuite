@@ -15,12 +15,11 @@ import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 import {
   createEvent,
   type FrameBlockModel,
-  getModelsByRange,
+  getCurrentBlockRange,
   MouseMode,
   NonShadowLitElement,
-  SelectionUtils,
   ShapeMouseMode,
-  updateSelectedTextType,
+  updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
 import {
@@ -93,6 +92,9 @@ export class DebugMenu extends NonShadowLitElement {
   @state()
   readonly = false;
 
+  @state()
+  hasOffset = false;
+
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
 
@@ -147,16 +149,22 @@ export class DebugMenu extends NonShadowLitElement {
   ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
-
-    updateSelectedTextType('affine:list', listType);
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      return;
+    }
+    updateBlockType(blockRange.models, 'affine:list', listType);
   }
 
   private _addCodeBlock(e: PointerEvent) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const range = SelectionUtils.getCurrentRange();
-    const startModel = getModelsByRange(range)[0];
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't add code block without a selection");
+    }
+    const startModel = blockRange.models[0];
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
     const blockProps = {
@@ -173,12 +181,20 @@ export class DebugMenu extends NonShadowLitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:paragraph', type);
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      return;
+    }
+    updateBlockType(blockRange.models, 'affine:paragraph', type);
   }
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
     this.mode = mode;
+  }
+
+  private _switchOffsetMode() {
+    this.hasOffset = !this.hasOffset;
   }
 
   private _addFrame() {
@@ -289,6 +305,9 @@ export class DebugMenu extends NonShadowLitElement {
       window.dispatchEvent(
         createEvent('affine:switch-edgeless-display-mode', this.showGrid)
       );
+    }
+    if (changedProperties.has('hasOffset')) {
+      document.body.style.margin = this.hasOffset ? '60px 0 0 40px' : '0';
     }
     super.update(changedProperties);
   }
@@ -469,6 +488,16 @@ export class DebugMenu extends NonShadowLitElement {
               @click=${this._switchEditorMode}
             >
               <sl-icon name="phone-flip"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Add container offset" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Add container offset"
+              @click=${this._switchOffsetMode}
+            >
+              <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
         </div>

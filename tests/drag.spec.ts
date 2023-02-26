@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  dragBetweenIndices,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   focusRichText,
@@ -370,4 +371,175 @@ test('should sync selected-blocks to session-manager when clicking drag handle',
 `,
     '789',
   ]);
+});
+
+test('should be able to drag & drop multiple blocks', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 3],
+    [0, 0],
+    { x: -80, y: 20 },
+    { x: 60, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(2);
+
+  await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
+  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+
+  await assertRichTexts(page, ['789', '123', '456']);
+
+  // Selection is still 2 after drop
+  await expect(blockSelections).toHaveCount(2);
+});
+
+test('should be able to drag & drop multiple blocks to nested block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await type(page, 'A');
+  await pressEnter(page);
+  await type(page, 'B');
+  await pressEnter(page);
+  await type(page, 'C');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'D');
+  await pressEnter(page);
+  await type(page, 'E');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'F');
+  await pressEnter(page);
+  await type(page, 'G');
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:list
+      prop:checked={false}
+      prop:text="A"
+      prop:type="bulleted"
+    />
+    <affine:list
+      prop:checked={false}
+      prop:text="B"
+      prop:type="bulleted"
+    />
+    <affine:list
+      prop:checked={false}
+      prop:text="C"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="D"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="E"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="F"
+          prop:type="bulleted"
+        />
+        <affine:list
+          prop:checked={false}
+          prop:text="G"
+          prop:type="bulleted"
+        />
+      </affine:list>
+    </affine:list>
+  </affine:frame>
+</affine:page>`
+  );
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 10],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(2);
+
+  await dragHandleFromBlockToBlockBottomById(page, '3', '8');
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:list
+      prop:checked={false}
+      prop:text="C"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="D"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="E"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="F"
+          prop:type="bulleted"
+        />
+        <affine:list
+          prop:checked={false}
+          prop:text="A"
+          prop:type="bulleted"
+        />
+        <affine:list
+          prop:checked={false}
+          prop:text="B"
+          prop:type="bulleted"
+        />
+        <affine:list
+          prop:checked={false}
+          prop:text="G"
+          prop:type="bulleted"
+        />
+      </affine:list>
+    </affine:list>
+  </affine:frame>
+</affine:page>`
+  );
 });

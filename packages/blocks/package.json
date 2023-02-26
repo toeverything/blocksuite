@@ -24,7 +24,6 @@
     "hotkeys-js": "^3.10.1",
     "lit": "^2.6.1",
     "quill": "=1.3.7",
-    "quill-cursors": "^4.0.2",
     "zod": "^3.20.6"
   },
   "exports": {

@@ -116,10 +116,6 @@ export class BaseBlockModel<Props = unknown>
   text?: Text;
   sourceId?: string;
 
-  // TODO: separate from model
-  parentIndex?: number;
-  depth?: number;
-
   constructor(
     page: Page,
     props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>

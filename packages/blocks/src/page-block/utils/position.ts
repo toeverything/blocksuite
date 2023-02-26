@@ -2,7 +2,7 @@ import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 import {
   clamp,
-  getCurrentRange,
+  getCurrentNativeRange,
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
@@ -53,7 +53,7 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
   const endY = e.y;
   // selection direction
   const isForwards = endX > startX;
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const selectedOneLine = !isMultiLineRange(range);
 
   if (isForwards) {
@@ -84,7 +84,7 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
  * ```
  */
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
-  const curRange = getCurrentRange();
+  const curRange = getCurrentNativeRange();
   const direction = getDragDirection(e);
 
   const isSelectedNothing =
