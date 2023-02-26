@@ -1,9 +1,10 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeMethods, ShapeRenderProps } from '../types.js';
+import type { ShapeElement } from '../shape-element.js';
+import type { ShapeMethods } from '../types.js';
 
-function createTrianglePath(width: number, height: number): Path2D {
+function createTrianglePath(width: number, height: number) {
   const path = new Path2D();
   path.moveTo(width / 2, 0);
   path.lineTo(width, height);
@@ -13,18 +14,9 @@ function createTrianglePath(width: number, height: number): Path2D {
 }
 
 export const TriangleMethods: ShapeMethods = {
-  render(
-    ctx: CanvasRenderingContext2D,
-    {
-      w,
-      h,
-      filled,
-      fillColor,
-      strokeWidth,
-      strokeColor,
-      strokeStyle,
-    }: ShapeRenderProps
-  ) {
+  render(ctx: CanvasRenderingContext2D, element: ShapeElement) {
+    const { w, h, strokeWidth, filled, fillColor, strokeColor } = element;
+
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
