@@ -15,12 +15,11 @@ import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 import {
   createEvent,
   type FrameBlockModel,
-  getModelsByRange,
+  getCurrentBlockRange,
   MouseMode,
   NonShadowLitElement,
-  SelectionUtils,
   ShapeMouseMode,
-  updateSelectedTextType,
+  updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
 import {
@@ -150,16 +149,22 @@ export class DebugMenu extends NonShadowLitElement {
   ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
-
-    updateSelectedTextType('affine:list', listType);
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      return;
+    }
+    updateBlockType(blockRange.models, 'affine:list', listType);
   }
 
   private _addCodeBlock(e: PointerEvent) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const range = SelectionUtils.getCurrentRange();
-    const startModel = getModelsByRange(range)[0];
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't add code block without a selection");
+    }
+    const startModel = blockRange.models[0];
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
     const blockProps = {
@@ -176,7 +181,11 @@ export class DebugMenu extends NonShadowLitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:paragraph', type);
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      return;
+    }
+    updateBlockType(blockRange.models, 'affine:paragraph', type);
   }
 
   private _switchEditorMode() {

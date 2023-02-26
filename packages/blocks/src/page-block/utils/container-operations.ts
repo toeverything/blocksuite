@@ -8,10 +8,15 @@ import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
-  BlockRange,
   ExtendedModel,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import {
+  BlockRange,
+  getCurrentBlockRange,
+  restoreSelection,
+  updateBlockRange,
+} from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
   getBlockElementByModel,
@@ -22,20 +27,23 @@ import {
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
-  getCurrentBlockRange,
-  getCurrentRange,
+  getCurrentNativeRange,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
-  restoreSelection,
-  updateBlockRange,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
-export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
+/**
+ * TODO Use BlockRange
+ */
+export function deleteModelsByRange(
+  page: Page,
+  range = getCurrentNativeRange()
+) {
   const models = getModelsByRange(range);
 
   const first = models[0];
@@ -114,15 +122,6 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
   return id;
 }
 
-export async function updateSelectedTextType(
-  flavour: keyof BlockSchema,
-  type?: string
-) {
-  const range = getCurrentRange();
-  const modelsInRange = getModelsByRange(range);
-  updateBlockType(modelsInRange, flavour, type);
-}
-
 export function updateBlockType(
   models: BaseBlockModel[],
   flavour: keyof BlockSchema,
@@ -151,11 +150,9 @@ export function updateBlockType(
     requestAnimationFrame(() =>
       restoreSelection({
         type: 'Block',
-        startModel: model,
-        endModel: model,
         startOffset: 0,
         endOffset: model.text?.length ?? 0,
-        betweenModels: [],
+        models: [model],
       })
     );
     return [model];
@@ -239,8 +236,8 @@ function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
 }
 
 export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
-  if (blockRange.startModel === blockRange.endModel) {
-    const richText = getRichTextByModel(blockRange.startModel);
+  if (blockRange.models.length === 1) {
+    const richText = getRichTextByModel(blockRange.models[0]);
     assertExists(richText);
     const { quill } = richText;
     const format = quill.getFormat(
@@ -252,12 +249,13 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   const formatArr = [];
   // Start block
   // Skip code block or empty block
+  const startModel = blockRange.models[0];
   if (
-    !matchFlavours(blockRange.startModel, ['affine:code']) &&
-    blockRange.startModel.text &&
-    blockRange.startModel.text.length
+    !matchFlavours(startModel, ['affine:code']) &&
+    startModel.text &&
+    startModel.text.length
   ) {
-    const startRichText = getRichTextByModel(blockRange.startModel);
+    const startRichText = getRichTextByModel(startModel);
     assertExists(startRichText);
     const startFormat = startRichText.quill.getFormat(
       blockRange.startOffset,
@@ -266,18 +264,20 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     formatArr.push(startFormat);
   }
   // End block
+  const endModel = blockRange.models[blockRange.models.length - 1];
   if (
-    !matchFlavours(blockRange.endModel, ['affine:code']) &&
-    blockRange.endModel.text &&
-    blockRange.endModel.text.length
+    !matchFlavours(endModel, ['affine:code']) &&
+    endModel.text &&
+    endModel.text.length
   ) {
-    const endRichText = getRichTextByModel(blockRange.endModel);
+    const endRichText = getRichTextByModel(endModel);
     assertExists(endRichText);
     const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
     formatArr.push(endFormat);
   }
   // Between blocks
-  blockRange.betweenModels
+  blockRange.models
+    .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
@@ -302,17 +302,18 @@ export function getCurrentCombinedFormat(page: Page): TextAttributes {
 }
 
 function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
-  const { startModel, startOffset, endModel, endOffset, betweenModels } =
-    blockRange;
+  const { startOffset, endOffset } = blockRange;
+  const startModel = blockRange.models[0];
+  const endModel = blockRange.models[blockRange.models.length - 1];
   // edge case 1: collapsed range
-  if (startModel === endModel && startOffset === endOffset) {
+  if (blockRange.models.length === 1 && startOffset === endOffset) {
     // Collapsed range
     return;
   }
   const format = getCombinedFormat(blockRange);
 
   // edge case 2: same model
-  if (startModel === endModel) {
+  if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'])) return;
     startModel.text?.format(startOffset, endOffset - startOffset, {
       [key]: !format[key],
@@ -331,7 +332,8 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
     endModel.text?.format(0, endOffset, { [key]: !format[key] });
   }
   // format between models
-  betweenModels
+  blockRange.models
+    .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
       model.text?.format(0, model.text.length, { [key]: !format[key] });
@@ -357,7 +359,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     selection.state.selectedBlocks.length === 0 &&
     currentSelection?.focusNode?.nodeName === '#text'
   ) {
-    const currentRange = getCurrentRange();
+    const currentRange = getCurrentNativeRange();
     const rangeRect = currentRange.getBoundingClientRect();
     selection.selectBlocksByRect(rangeRect);
   } else {

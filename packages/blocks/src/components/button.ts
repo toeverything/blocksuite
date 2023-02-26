@@ -103,18 +103,20 @@ export class IconButton extends LitElement {
       );
     }
 
+    let width = this.width;
+    let height = this.height;
     if (this.size) {
-      this.width = this.size;
-      this.height = this.size;
+      width = this.size;
+      height = this.size;
     }
 
     this.style.setProperty(
       '--button-width',
-      typeof this.width === 'string' ? this.width : `${this.width}px`
+      typeof width === 'string' ? width : `${width}px`
     );
     this.style.setProperty(
       '--button-height',
-      typeof this.height === 'string' ? this.height : `${this.height}px`
+      typeof height === 'string' ? height : `${height}px`
     );
   }
 

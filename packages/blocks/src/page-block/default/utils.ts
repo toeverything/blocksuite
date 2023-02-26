@@ -13,7 +13,7 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   OpenBlockInfo,
   resetNativeSelection,
@@ -428,7 +428,7 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   quill.setSelection(0, quill.getLength());
   document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
 
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   range.setStart(richText, 0);
   range.setEnd(richText, 0);
   resetNativeSelection(range);

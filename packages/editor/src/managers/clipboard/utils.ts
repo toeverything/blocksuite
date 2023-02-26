@@ -39,6 +39,9 @@ function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
   return getLastSelectBlock(last.children);
 }
 
+/**
+ * @deprecated Use `getCurrentBlockRange` instead,
+ */
 export function getSelectInfo(page: Page): SelectionInfo {
   if (!page.root) {
     return {
@@ -60,7 +63,7 @@ export function getSelectInfo(page: Page): SelectionInfo {
     selectedModels = selectedBlocks.map(block => getModelByElement(block));
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type as DomSelectionType;
-    selectedModels = getModelsByRange(SelectionUtils.getCurrentRange());
+    selectedModels = getModelsByRange(SelectionUtils.getCurrentNativeRange());
   }
   if (type !== 'None') {
     selectedBlocks = getSelectedBlock(selectedModels);

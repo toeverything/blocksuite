@@ -9,9 +9,7 @@ import { uuidv4 } from './utils/id-generator.js';
 export interface UserRange {
   startOffset: number;
   endOffset: number;
-  startBlockId: string;
-  endBlockId: string;
-  betweenBlockIds: string[];
+  blockIds: string[];
 }
 
 export interface UserInfo {
