@@ -3,13 +3,13 @@ import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeRenderConfig } from '../types.js';
 
-function getTrianglePath(width: number, height: number): Path2D {
-  const path2d = new Path2D();
-  path2d.moveTo(width / 2, 0);
-  path2d.lineTo(width, height);
-  path2d.lineTo(0, height);
-  path2d.closePath();
-  return path2d;
+function createTrianglePath(width: number, height: number): Path2D {
+  const path = new Path2D();
+  path.moveTo(width / 2, 0);
+  path.lineTo(width, height);
+  path.lineTo(0, height);
+  path.closePath();
+  return path;
 }
 
 export class Triangle {
@@ -31,17 +31,17 @@ export class Triangle {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path2d = getTrianglePath(renderWidth, renderHeight);
+    const path = createTrianglePath(renderWidth, renderHeight);
 
     if (filled) {
       ctx.fillStyle = fillColor;
-      ctx.fill(path2d);
+      ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = strokeWidth;
-      ctx.stroke(path2d);
+      ctx.stroke(path);
     }
   }
 

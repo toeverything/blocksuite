@@ -17,14 +17,13 @@ export interface ShapeRenderConfig {
   strokeStyle: StrokeStyle;
 }
 
-export type SerializedShape = {
+export type SerializedShapeProps = {
   id: string;
   index: string;
   type: string;
   xywh: string;
 
   shapeType: ShapeType;
-
   rounded: boolean;
   filled: boolean;
   fillColor: Color;
@@ -33,14 +32,12 @@ export type SerializedShape = {
   strokeStyle: StrokeStyle;
 };
 
-export type MutablePropertyKeys = keyof Omit<
-  SerializedShape,
+export type MutableShapeKeys = keyof Omit<
+  SerializedShapeProps,
   'id' | 'type' | 'xywh'
 >;
 
-export type MutableProperties = Partial<
-  Pick<SerializedShape, MutablePropertyKeys>
->;
+export type ShapeProps = Partial<Pick<SerializedShapeProps, MutableShapeKeys>>;
 
 export interface ShapeUtils {
   render: (ctx: CanvasRenderingContext2D, config: ShapeRenderConfig) => void;

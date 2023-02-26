@@ -1,14 +1,12 @@
 import type { Color, StrokeStyle } from '../../consts.js';
 import { deserializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
-import { getShapeUtils } from './shape-utils/get-shape-utils.js';
-import type { MutableProperties, SerializedShape, ShapeType } from './types.js';
+import { getShapeUtils } from './shape-utils/index.js';
+import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
 
 export class ShapeElement extends BaseElement {
   type = 'shape' as const;
-
   shapeType: ShapeType;
-
   rounded = false;
   filled = false;
   fillColor: Color = '#ffffff';
@@ -21,8 +19,8 @@ export class ShapeElement extends BaseElement {
     this.shapeType = shapeType;
   }
 
-  updateProperties(properties: MutableProperties) {
-    Object.assign(this, properties);
+  updateProps(props: ShapeProps) {
+    Object.assign(this, props);
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
@@ -44,7 +42,7 @@ export class ShapeElement extends BaseElement {
     });
   }
 
-  serialize(): SerializedShape {
+  serialize(): SerializedShapeProps {
     return {
       id: this.id,
       index: this.index,
@@ -68,8 +66,8 @@ export class ShapeElement extends BaseElement {
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     element.setBound(x, y, w, h);
-    const { id, type, xywh, ...properties } = data as SerializedShape;
-    element.updateProperties(properties);
+    const { id, type, xywh, ...properties } = data as SerializedShapeProps;
+    element.updateProps(properties);
 
     return element;
   }

@@ -3,7 +3,7 @@ import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeRenderConfig } from '../types.js';
 
-function getEllipsePath(width: number, height: number): Path2D {
+function createEllipsePath(width: number, height: number): Path2D {
   const path2d = new Path2D();
   path2d.ellipse(
     width / 2,
@@ -36,17 +36,17 @@ export class Ellipse {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path2d = getEllipsePath(renderWidth, renderHeight);
+    const path = createEllipsePath(renderWidth, renderHeight);
 
     if (filled) {
       ctx.fillStyle = fillColor;
-      ctx.fill(path2d);
+      ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = strokeWidth;
-      ctx.stroke(path2d);
+      ctx.stroke(path);
     }
   }
 

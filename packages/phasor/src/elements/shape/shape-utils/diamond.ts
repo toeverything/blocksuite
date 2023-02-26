@@ -3,14 +3,14 @@ import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeRenderConfig } from '../types.js';
 
-function getDiamondPath(width: number, height: number): Path2D {
-  const path2d = new Path2D();
-  path2d.moveTo(width / 2, 0);
-  path2d.lineTo(width, height / 2);
-  path2d.lineTo(width / 2, height);
-  path2d.lineTo(0, height / 2);
-  path2d.closePath();
-  return path2d;
+function createDiamondPath(width: number, height: number): Path2D {
+  const path = new Path2D();
+  path.moveTo(width / 2, 0);
+  path.lineTo(width, height / 2);
+  path.lineTo(width / 2, height);
+  path.lineTo(0, height / 2);
+  path.closePath();
+  return path;
 }
 
 export class Diamond {
@@ -32,16 +32,16 @@ export class Diamond {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path2d = getDiamondPath(renderWidth, renderHeight);
+    const path = createDiamondPath(renderWidth, renderHeight);
     if (filled) {
       ctx.fillStyle = fillColor;
-      ctx.fill(path2d);
+      ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = strokeWidth;
-      ctx.stroke(path2d);
+      ctx.stroke(path);
     }
   }
 

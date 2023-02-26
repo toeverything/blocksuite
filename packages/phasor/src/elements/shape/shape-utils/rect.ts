@@ -7,7 +7,7 @@ import type { ShapeRenderConfig } from '../types.js';
 const kRect = 1 - 0.5522847498;
 const roundedRate = 0.1;
 
-function getRectPath(
+function createRectPath(
   x: number,
   y: number,
   w: number,
@@ -15,12 +15,12 @@ function getRectPath(
   rx: number,
   ry: number
 ): Path2D {
-  const path2d = new Path2D();
+  const path = new Path2D();
 
-  path2d.moveTo(x + rx, y);
+  path.moveTo(x + rx, y);
 
-  path2d.lineTo(x + w - rx, y);
-  path2d.bezierCurveTo(
+  path.lineTo(x + w - rx, y);
+  path.bezierCurveTo(
     x + w - kRect * rx,
     y,
     x + w,
@@ -29,8 +29,8 @@ function getRectPath(
     y + ry
   );
 
-  path2d.lineTo(x + w, y + h - ry);
-  path2d.bezierCurveTo(
+  path.lineTo(x + w, y + h - ry);
+  path.bezierCurveTo(
     x + w,
     y + h - kRect * ry,
     x + w - kRect * rx,
@@ -39,8 +39,8 @@ function getRectPath(
     y + h
   );
 
-  path2d.lineTo(x + rx, y + h);
-  path2d.bezierCurveTo(
+  path.lineTo(x + rx, y + h);
+  path.bezierCurveTo(
     x + kRect * rx,
     y + h,
     x,
@@ -49,11 +49,11 @@ function getRectPath(
     y + h - ry
   );
 
-  path2d.lineTo(x, y + ry);
-  path2d.bezierCurveTo(x, y + kRect * ry, x + kRect * rx, y, x + rx, y);
+  path.lineTo(x, y + ry);
+  path.bezierCurveTo(x, y + kRect * ry, x + kRect * rx, y, x + rx, y);
 
-  path2d.closePath();
-  return path2d;
+  path.closePath();
+  return path;
 }
 
 export class Rect {
@@ -78,7 +78,7 @@ export class Rect {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path2d = getRectPath(0, 0, renderWidth, renderHeight, rx, ry);
+    const path2d = createRectPath(0, 0, renderWidth, renderHeight, rx, ry);
 
     if (filled) {
       ctx.fillStyle = fillColor;

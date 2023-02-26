@@ -5,7 +5,7 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
-import type { ShapeMutableProperties } from './elements/index.js';
+import type { ShapeProps } from './elements/index.js';
 import {
   DebugElement,
   PhasorElement,
@@ -30,18 +30,14 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  addShapeElement(
-    bound: IBound,
-    shapeType: ShapeType,
-    properties?: ShapeMutableProperties
-  ) {
+  addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
     const { x, y, w, h } = bound;
 
     element.setBound(x, y, w, h);
-    if (properties) {
-      element.updateProperties(properties);
+    if (props) {
+      element.updateProps(props);
     }
 
     return this._addElement(element);
