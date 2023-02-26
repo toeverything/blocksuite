@@ -143,10 +143,7 @@ export class DebugMenu extends NonShadowLitElement {
     }
   }
 
-  private _convertToList(
-    e: PointerEvent,
-    listType: 'bulleted' | 'numbered' | 'todo'
-  ) {
+  private _convertToList(e: PointerEvent, listType: ListType) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
     const blockRange = getCurrentBlockRange(this.page);
@@ -437,6 +434,11 @@ export class DebugMenu extends NonShadowLitElement {
                   this._convertToList(e, 'numbered')}
               >
                 Numbered List
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+              >
+                Toggle List
               </sl-menu-item>
               <sl-menu-item
                 @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}

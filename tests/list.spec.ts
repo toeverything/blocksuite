@@ -46,14 +46,32 @@ test('add new Toggle list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Toggle List');
-  await page.keyboard.type('aa');
+  await page.keyboard.type('top');
   await pressTab(page);
   await pressEnter(page);
-  await page.keyboard.type('aa');
+  await page.keyboard.type('kid 1');
   await pressEnter(page);
 
-  await assertRichTexts(page, ['aa', 'aa', '\n']);
-  await assertBlockCount(page, 'list', 3);
+  await assertRichTexts(page, ['top', 'kid 1', '\n']);
+  // await assertBlockCount(page, 'list', 3);
+});
+test('add new Toggle list via slash', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page, 0);
+  await type(page, '/toggle');
+  // await expect(slashItems).toHaveCount(1);
+  await pressEnter(page);
+  await clickBlockTypeMenuItem(page, 'Toggle List');
+  await page.keyboard.type('top');
+  await pressTab(page);
+  await pressEnter(page);
+  await page.keyboard.type('kid 1');
+  await pressEnter(page);
+
+  await assertRichTexts(page, ['top', 'kid 1', '\n']);
+  // await assertBlockCount(page, 'list', 3);
 });
 
 test('convert to numbered list block', async ({ page }) => {

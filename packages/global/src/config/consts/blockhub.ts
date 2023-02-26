@@ -1,7 +1,6 @@
 import type { TemplateResult } from 'lit/html.js';
 
 import {
-  ArrowRightIcon,
   BulletedListIcon,
   CodeBlockIcon,
   DividerIcon,
@@ -16,6 +15,7 @@ import {
   QuoteIcon,
   TextIcon,
   TodoIcon,
+  ToggleIcon,
 } from '../icons.js';
 
 export type BlockConfig<
@@ -91,8 +91,8 @@ export const paragraphConfig = [
     flavour: 'affine:list',
     type: 'toggle',
     name: 'Toggle List',
-    hotkey: 'command+option+7,ctrl+shift+7',
-    icon: ArrowRightIcon,
+    hotkey: null,
+    icon: ToggleIcon,
   },
   {
     flavour: 'affine:list',
@@ -227,7 +227,7 @@ export const BLOCKHUB_LIST_ITEMS = [
     type: 'toggle',
     name: 'Toggle List',
     description: 'a simple toggle list.',
-    icon: ArrowRightIcon,
+    icon: ToggleIcon,
     toolTip: 'Drag to insert Toggle List.',
   },
   {
