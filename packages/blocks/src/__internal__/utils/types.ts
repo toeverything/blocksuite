@@ -5,12 +5,8 @@ import type { TextAttributes } from '@blocksuite/virgo';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 import type { Point } from './rect.js';
-export type SelectionPosition = 'start' | 'end' | Point;
 
-export type SelectionOptions = {
-  needFocus?: boolean;
-  from?: 'previous' | 'next';
-};
+export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IService {
   onLoad?: () => Promise<void>;
@@ -48,25 +44,25 @@ export interface CommonBlockElement extends HTMLElement {
  */
 export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
-export interface SelectionInfo {
-  type: 'Block' | DomSelectionType;
-  selectedBlocks: SelectedBlock[];
-}
-
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
-}
+export type BlockRange = {
+  /**
+   * 'Native' for native selection, 'Block' for block selection
+   */
+  type: 'Native' | 'Block';
+  startModel: BaseBlockModel;
+  endModel: BaseBlockModel;
+  startOffset: number;
+  endOffset: number;
+  /**
+   * Models between startModel and endModel, not including startModel and endModel
+   */
+  betweenModels: BaseBlockModel[];
+  // collapsed is true when startModel === endModel && startOffset === endOffset
+  // collapsed: true;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
-
-export interface BlockSelectionInfo {
-  type: 'Block';
-  blocks: SelectedBlock[];
-}
 
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = FrameBlockModel;

@@ -193,10 +193,9 @@ test('image loading', async ({ page }) => {
 
   await page.waitForTimeout(100);
 
-  const deliveringContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
-    .innerText();
-  expect(deliveringContent).toBe('Delivering content...');
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toContainText('Delivering content...');
 
   await page.waitForTimeout(3000);
 
@@ -266,10 +265,9 @@ test('image get message from awareness', async ({ page, browser }) => {
 
   await page.waitForTimeout(100);
 
-  const deliveringContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
-    .innerText();
-  expect(deliveringContent).toBe('Delivering content...');
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toHaveText('Delivering content...');
 
   await pageB.evaluate(async () => {
     const { page } = window;

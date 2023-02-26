@@ -193,7 +193,7 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .card-container:hover {
-      background: var(--affine-block-hub-hover-background);
+      background: var(--affine-card-hover-background);
       fill: var(--affine-primary-color);
       top: -2px;
       left: -2px;
@@ -213,6 +213,7 @@ export class BlockHub extends NonShadowLitElement {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       color: var(--affine-secondary-text-color);
+      white-space: pre;
     }
 
     .card-container:hover.grabbing {
@@ -326,6 +327,10 @@ export class BlockHub extends NonShadowLitElement {
       top: 10px;
       transform: translateX(calc(-100% - 7px));
       border-radius: 10px 10px 0 10px;
+    }
+
+    [role='menu-entry'] tool-tip {
+      font-size: var(--affine-font-sm);
     }
 
     .block-hub-icons-container {
@@ -518,7 +523,7 @@ export class BlockHub extends NonShadowLitElement {
             tip-position="left"
             style="top: 5px"
             ?hidden=${!this._showToolTip}
-            >Drag to Insert blank line
+            >Drag to insert blank line
           </tool-tip>
         </div>
         <div

@@ -24,6 +24,7 @@ import {
   pasteByKeyboard,
   pressEnter,
   pressShiftTab,
+  pressTab,
   redoByKeyboard,
   resetHistory,
   SHORT_KEY,
@@ -2136,13 +2137,12 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 30, coord.y - 10);
-  await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x + 20, coord.y + 50);
-  await page.mouse.up();
-
-  await page.keyboard.press('Tab');
+  await dragBetweenCoords(
+    page,
+    { x: coord.x - 30, y: coord.y - 10 },
+    { x: coord.x + 20, y: coord.y + 50 }
+  );
+  await pressTab(page);
 
   await assertStoreMatchJSX(
     page,
@@ -2167,9 +2167,8 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   );
 
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 40, coord.y - 40);
-  await page.mouse.down();
-  await page.keyboard.press('Tab');
+  await page.mouse.click(coord.x - 40, coord.y - 40);
+  await pressTab(page);
 
   const rectNum = await page.evaluate(() => {
     const container = document.querySelector(

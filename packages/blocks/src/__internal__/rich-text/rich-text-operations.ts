@@ -221,7 +221,12 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
  * ```
  * Refer to https://github.com/toeverything/AFFiNE/blob/b59b010decb9c5decd9e3090f1a417696ce86f54/libs/components/editor-blocks/src/utils/indent.ts#L23-L122
  */
-export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
+export function handleUnindent(
+  page: Page,
+  model: ExtendedModel,
+  offset = 0,
+  capture = true
+) {
   const parent = page.getParent(model);
   if (!parent || matchFlavours(parent, ['affine:frame'])) {
     // Topmost, do nothing
@@ -230,7 +235,10 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
 
   const grandParent = page.getParent(parent);
   if (!grandParent) return;
-  page.captureSync();
+  // TODO: need better solution
+  if (capture) {
+    page.captureSync();
+  }
 
   // 1. save child blocks of the parent block
   const previousSiblings = page.getPreviousSiblings(model);

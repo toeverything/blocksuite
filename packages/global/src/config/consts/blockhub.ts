@@ -199,9 +199,9 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:divider',
     type: null,
     name: 'Divider',
-    description: 'A visually divide block.',
+    description: 'A visual divider.',
     icon: DividerIcon,
-    toolTip: 'Drag to insert Divider',
+    toolTip: 'A visual divider',
   },
 ];
 
@@ -212,15 +212,15 @@ export const BLOCKHUB_LIST_ITEMS = [
     name: 'Bulleted List',
     description: 'A simple bulleted list.',
     icon: BulletedListIcon,
-    toolTip: 'Drag to insert Bulleted List.',
+    toolTip: 'Drag to insert Bulleted List',
   },
   {
     flavour: 'affine:list',
     type: 'numbered',
     name: 'Numbered List',
-    description: '1. A list with numbering.',
+    description: 'A list with numbering.',
     icon: NumberedListIcon,
-    toolTip: 'Drag to insert Numbered List.',
+    toolTip: 'Drag to insert Numbered List',
   },
   {
     flavour: 'affine:list',
@@ -228,7 +228,7 @@ export const BLOCKHUB_LIST_ITEMS = [
     name: 'To-do List',
     description: 'Track tasks with a to-do list.',
     icon: TodoIcon,
-    toolTip: 'Drag to insert To-do List.',
+    toolTip: 'Drag to insert To-do List',
   },
 ];
 
@@ -239,6 +239,6 @@ export const BLOCKHUB_FILE_ITEMS = [
     name: 'Image',
     description: 'Upload images.',
     icon: ImageIcon,
-    toolTip: 'Drag to insert Image.',
+    toolTip: 'Drag to insert Image',
   },
 ];

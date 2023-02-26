@@ -46,6 +46,7 @@ export class ListBlockComponent extends NonShadowLitElement {
     }
     .affine-list-rich-text-wrapper {
       display: flex;
+      align-items: center;
     }
     .affine-list-rich-text-wrapper rich-text {
       flex: 1;
@@ -55,7 +56,6 @@ export class ListBlockComponent extends NonShadowLitElement {
       flex-shrink: 0;
       min-width: 26px;
       height: 26px;
-      margin-top: 3px;
       margin-right: 4px;
       display: flex;
       align-items: center;

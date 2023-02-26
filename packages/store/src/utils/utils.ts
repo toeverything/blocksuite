@@ -123,7 +123,7 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
 
 export function doesInsideBlockByFlavour(
   page: Page,
-  block: BaseBlockModel,
+  block: BaseBlockModel | string,
   flavour: keyof BlockSuiteInternal.BlockModels
 ): boolean {
   const parent = page.getParent(block);

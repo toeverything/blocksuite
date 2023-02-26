@@ -6,13 +6,13 @@ import {
   ListBlockModel,
   SelectionUtils,
 } from '@blocksuite/blocks';
-import { matchFlavours } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, SelectedBlock } from './types.js';
+import { getSelectInfo } from './utils.js';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -45,7 +45,7 @@ export class CopyCutManager {
 
   private async _getClipItems() {
     const clips: ClipboardItem[] = [];
-    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
+    const selectionInfo = getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = await this._getCustomClip(selectedBlocks);

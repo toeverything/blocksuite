@@ -88,7 +88,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container {
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
@@ -105,7 +105,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     .affine-code-block-container .container {
       position: absolute;
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;
@@ -158,7 +158,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    .lang-container code-block-button {
+    .lang-container icon-button {
       padding: 4px 0 0 12px;
       justify-content: flex-start;
     }
@@ -242,14 +242,13 @@ export class CodeBlockComponent extends NonShadowLitElement {
         ${isHovering || this.showLangList !== 'hidden'
           ? html` <div class="container">
               <div class="lang-container" @click=${this._onClick}>
-                <code-block-button
+                <icon-button
                   width="101px"
                   height="24px"
-                  fontSize="14px"
                   class="${this.showLangList === 'hidden' ? '' : 'clicked'}"
                 >
                   ${this.model.language} ${ArrowDownIcon}
-                </code-block-button>
+                </icon-button>
               </div>
               <lang-list
                 showLangList=${this.showLangList}

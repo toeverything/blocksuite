@@ -84,7 +84,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   };
   await page.mouse.move(position.x, position.y);
 
-  const locator = page.locator('code-block-button');
+  const locator = page.locator('.lang-container > icon-button');
   await expect(locator).toBeVisible();
   const languageText = await locator.innerText();
   expect(languageText).toEqual('TypeScript');
@@ -135,16 +135,14 @@ test('change code language can work', async ({ page }) => {
 
   await page.mouse.move(position.x, position.y);
 
-  const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
+  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
   await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
   await type(page, 'rust');
-  await page.click(
-    '.lang-list-button-container > code-block-button:nth-child(1)'
-  );
+  await page.click('.lang-list-button-container > icon-button:nth-child(1)');
   await expect(locator).toBeHidden();
 
   await page.mouse.move(position.x, position.y);
@@ -170,7 +168,7 @@ test('language select list can disappear when click other place', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
+  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
@@ -423,25 +421,23 @@ test('drag select code block can delete it', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('affine-code');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return {
-      startX: bbox.left,
-      startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.right,
-      endY: bbox.bottom - bbox.height / 2,
-    };
-  });
+  const bbox = await page.locator('affine-code').boundingBox();
+  if (!bbox) {
+    throw new Error("Failed to get code block's bounding box");
+  }
+  const position = {
+    startX: bbox.x,
+    startY: bbox.y + bbox.height / 2,
+    endX: bbox.x + bbox.width,
+    endY: bbox.y + bbox.height / 2,
+  };
   await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY }
   );
-  await page.locator('.ql-syntax').evaluate(e => e.blur());
   await page.keyboard.press('Backspace');
-
   const locator = page.locator('affine-code');
   await expect(locator).toBeHidden();
 });

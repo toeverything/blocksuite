@@ -461,7 +461,6 @@ export class RichTextAdapter {
     return {
       anchor,
       focus,
-      selection,
     };
   }
 

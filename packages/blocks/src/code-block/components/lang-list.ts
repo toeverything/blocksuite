@@ -52,17 +52,6 @@ export class LangList extends NonShadowLitElement {
         margin-bottom: 5px;
       }
 
-      code-block-button {
-        font-size: var(--affine-font-sm);
-        text-align: justify;
-        line-height: 22px;
-      }
-
-      code-block-button:hover {
-        color: var(--affine-primary-color);
-        background: var(--affine-hover-background);
-      }
-
       #filter-input {
         display: flex;
         align-items: center;
@@ -190,13 +179,14 @@ export class LangList extends NonShadowLitElement {
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
             language => html`
-              <code-block-button
+              <icon-button
                 width="100%"
+                height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
               >
                 ${language}
-              </code-block-button>
+              </icon-button>
             `
           )}
         </div>

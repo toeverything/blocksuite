@@ -1,9 +1,14 @@
-import { assertExists, assertFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  assertFlavours,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
+  BlockRange,
   ExtendedModel,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -16,16 +21,17 @@ import {
   getQuillIndexByNativeSelection,
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
-import { getCurrentRange } from '../../__internal__/utils/selection.js';
 import {
+  getCurrentBlockRange,
+  getCurrentRange,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  isRangeNativeSelection,
   resetNativeSelection,
   restoreSelection,
-  saveBlockSelection,
+  updateBlockRange,
 } from '../../__internal__/utils/selection.js';
+import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
@@ -108,19 +114,22 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
   return id;
 }
 
-export async function updateSelectedTextType(flavour: string, type?: string) {
+export async function updateSelectedTextType(
+  flavour: keyof BlockSchema,
+  type?: string
+) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   updateBlockType(modelsInRange, flavour, type);
 }
 
-export async function updateBlockType(
+export function updateBlockType(
   models: BaseBlockModel[],
-  flavour: string,
+  flavour: keyof BlockSchema,
   type?: string
 ) {
   if (!models.length) {
-    return;
+    return [];
   }
   const page = models[0].page;
   const hasSamePage = models.every(model => model.page === page);
@@ -132,45 +141,50 @@ export async function updateBlockType(
     );
   }
   page.captureSync();
-  const selectedBlocks = saveBlockSelection();
+  const savedBlockRange = getCurrentBlockRange(page);
   if (flavour === 'affine:code') {
     const id = mergeToCodeBlocks(page, models);
+    const model = page.getBlockById(id);
+    if (!model) {
+      throw new Error('Failed to get model after merge code block!');
+    }
     requestAnimationFrame(() =>
-      restoreSelection([
-        {
-          id,
-          startPos: 0,
-          endPos: 0,
-          children: [],
-        },
-      ])
+      restoreSelection({
+        type: 'Block',
+        startModel: model,
+        endModel: model,
+        startOffset: 0,
+        endOffset: model.text?.length ?? 0,
+        betweenModels: [],
+      })
     );
-    return;
+    return [model];
   }
-  let lastNewId: string | null = null;
+  // The lastNewId will not be null since we have checked models.length > 0
+  const newModels: BaseBlockModel[] = [];
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
-    } else {
-      const oldId = model.id;
-      const newId = transformBlock(model, flavour, type);
-
-      // Replace selected block id
-      const blocks = selectedBlocks.filter(block => block.id === oldId);
-      // Because selectedBlocks maybe contains same block when only select one block, so we need to replace all of them
-      blocks.forEach(block => {
-        block.id = newId;
-      });
-      lastNewId = newId;
+      newModels.push(model);
+      return;
     }
+    const newId = transformBlock(model, flavour, type);
+    const newModel = page.getBlockById(newId);
+    if (!newModel) {
+      throw new Error('Failed to get new model after transform block!');
+    }
+    savedBlockRange && updateBlockRange(savedBlockRange, model, newModel);
+    newModels.push(newModel);
   });
-  if (lastNewId) {
-    asyncFocusRichText(page, lastNewId);
+
+  // Focus last new block
+  const lastModel = newModels.at(-1);
+  if (lastModel) asyncFocusRichText(page, lastModel.id);
+  if (savedBlockRange) {
+    requestAnimationFrame(() => restoreSelection(savedBlockRange));
   }
-  requestAnimationFrame(() => {
-    restoreSelection(selectedBlocks);
-  });
+  return newModels;
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
@@ -201,170 +215,140 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
-export const getFormat = (
-  models = getModelsByRange(getCurrentRange())
-): TextAttributes => {
-  if (!models.length) {
+/**
+ * Merge format of multiple blocks. Format will be active only when all blocks have the same format.
+ *
+ * Used for format quick bar.
+ */
+function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
+  if (!formatArr.length) {
     return {};
   }
-  if (models.length === 1) {
-    const richText = getRichTextByModel(models[0]);
-    assertExists(richText);
-    const { quill } = richText;
-    const range = quill.getSelection();
-    assertExists(range);
-    const format = quill.getFormat(range);
-    return format;
-  }
-  const selection = window.getSelection();
-  const first = models[0];
-  const last = models[models.length - 1];
-  const firstRichText = getRichTextByModel(first);
-  const lastRichText = getRichTextByModel(last);
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-  assertExists(selection);
-
-  const firstIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-  const firstFormat = firstRichText.quill.getFormat(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1
-  );
-  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
-
-  const formatArr = [];
-  !(models[0].flavour === 'affine:code') && formatArr.push(firstFormat);
-  !(models[models.length - 1].flavour === 'affine:code') &&
-    formatArr.push(lastFormat);
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
-    assertExists(richText);
-    const content = richText.quill.getText();
-    if (!content || content === '\n') {
-      // empty line should not be included
-      continue;
-    }
-    if (models[i].flavour === 'affine:code') {
-      continue;
-    }
-    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
-    formatArr.push(format);
-  }
-  // const allFormat = formatArr.every(item => item[key]);
-  const allFormat = formatArr.reduce((acc, cur) => {
-    const newFormat: Record<string, unknown> = {};
+  return formatArr.reduce((acc, cur) => {
+    const newFormat: TextAttributes = {};
     for (const key in acc) {
-      if (acc[key] === cur[key]) {
-        newFormat[key] = acc[key];
+      const typedKey = key as keyof TextAttributes;
+      if (acc[typedKey] === cur[typedKey]) {
+        // This cast is secure because we have checked that the value of the key is the same.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        newFormat[typedKey] = acc[typedKey] as any;
       }
     }
     return newFormat;
   });
-  return allFormat;
-};
+}
 
-function formatModelsByRange(
-  models: BaseBlockModel[],
-  page: Page,
-  key: keyof TextAttributes
-) {
-  const selection = window.getSelection();
-  const selectedBlocks = saveBlockSelection(selection);
-  const first = models[0];
-  const last = models[models.length - 1];
-  const firstRichText = getRichTextByModel(first);
-  const lastRichText = getRichTextByModel(last);
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-  assertExists(selection);
-
-  const firstIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-  const isFormatActive = getFormat()[key];
-  page.captureSync();
-  firstRichText.model.text?.format(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1,
-    { [key]: !isFormatActive }
-  );
-  lastRichText.model.text?.format(0, endIndex, { [key]: !isFormatActive });
-
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
+export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
+  if (blockRange.startModel === blockRange.endModel) {
+    const richText = getRichTextByModel(blockRange.startModel);
     assertExists(richText);
-    richText.model.text?.format(0, richText.quill.getLength() - 1, {
-      [key]: !isFormatActive,
+    const { quill } = richText;
+    const format = quill.getFormat(
+      blockRange.startOffset,
+      blockRange.endOffset - blockRange.startOffset
+    );
+    return format;
+  }
+  const formatArr = [];
+  // Start block
+  // Skip code block or empty block
+  if (
+    !matchFlavours(blockRange.startModel, ['affine:code']) &&
+    blockRange.startModel.text &&
+    blockRange.startModel.text.length
+  ) {
+    const startRichText = getRichTextByModel(blockRange.startModel);
+    assertExists(startRichText);
+    const startFormat = startRichText.quill.getFormat(
+      blockRange.startOffset,
+      startRichText.quill.getLength() - blockRange.startOffset
+    );
+    formatArr.push(startFormat);
+  }
+  // End block
+  if (
+    !matchFlavours(blockRange.endModel, ['affine:code']) &&
+    blockRange.endModel.text &&
+    blockRange.endModel.text.length
+  ) {
+    const endRichText = getRichTextByModel(blockRange.endModel);
+    assertExists(endRichText);
+    const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
+    formatArr.push(endFormat);
+  }
+  // Between blocks
+  blockRange.betweenModels
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .filter(model => model.text && model.text.length)
+    .forEach(model => {
+      const richText = getRichTextByModel(model);
+      assertExists(richText);
+      const format = richText.quill.getFormat(
+        0,
+        richText.quill.getLength() - 1
+      );
+      formatArr.push(format);
+    });
+
+  return mergeFormat(formatArr);
+}
+
+export function getCurrentCombinedFormat(page: Page): TextAttributes {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return {};
+  }
+  return getCombinedFormat(blockRange);
+}
+
+function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
+  const { startModel, startOffset, endModel, endOffset, betweenModels } =
+    blockRange;
+  // edge case 1: collapsed range
+  if (startModel === endModel && startOffset === endOffset) {
+    // Collapsed range
+    return;
+  }
+  const format = getCombinedFormat(blockRange);
+
+  // edge case 2: same model
+  if (startModel === endModel) {
+    if (matchFlavours(startModel, ['affine:code'])) return;
+    startModel.text?.format(startOffset, endOffset - startOffset, {
+      [key]: !format[key],
+    });
+    return;
+  }
+  // common case
+  // format start model
+  if (!matchFlavours(startModel, ['affine:code'])) {
+    startModel.text?.format(startOffset, startModel.text.length - startOffset, {
+      [key]: !format[key],
     });
   }
-  restoreSelection(selectedBlocks);
+  // format end model
+  if (!matchFlavours(endModel, ['affine:code'])) {
+    endModel.text?.format(0, endOffset, { [key]: !format[key] });
+  }
+  // format between models
+  betweenModels
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .forEach(model => {
+      model.text?.format(0, model.text.length, { [key]: !format[key] });
+    });
+
+  // Native selection maybe shifted after format
+  // We need to restore it manually
+  if (blockRange.type === 'Native') {
+    restoreSelection(blockRange);
+  }
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {
-  if (!hasNativeSelection()) return;
-
-  if (isRangeNativeSelection()) {
-    const models = getModelsByRange(getCurrentRange()).filter(model => {
-      return !(model.flavour === 'affine:code');
-    });
-    if (models.length === 1) {
-      const richText = getRichTextByModel(models[0]);
-      assertExists(richText);
-      const { quill } = richText;
-      const range = quill.getSelection();
-      assertExists(range);
-      page.captureSync();
-
-      const { index, length } = range;
-      const format = quill.getFormat(range);
-      models[0].text?.format(index, length, { [key]: !format[key] });
-    } else {
-      formatModelsByRange(models, page, key);
-    }
-  }
-}
-
-/**
- * @deprecated
- */
-export function handleNativeSelectAll() {
-  const blocks = document.querySelectorAll('.ql-editor');
-  const firstRichText = blocks[0];
-  const lastRichText = blocks[blocks.length - 1];
-  const range = document.createRange();
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-  assertExists(range);
-
-  const lastNode = findLastNode(lastRichText);
-  const firstNode = findFirstNode(firstRichText);
-  range.setStart(firstNode, 0);
-  // @ts-ignore
-  range.setEnd(lastNode, lastNode.length);
-
-  const nearestCommonAncestor = findNearestCommonAncestor(
-    firstRichText,
-    lastRichText,
-    document.querySelector('body') as Node
-  );
-  initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
-  resetNativeSelection(range);
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+  page.captureSync();
+  formatBlockRange(blockRange, key);
 }
 
 export function handleSelectAll(selection: DefaultSelectionManager) {
@@ -384,56 +368,6 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   }
 
   resetNativeSelection(null);
-}
-
-// TODO should show format bar after select all
-function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
-  nearestCommonAncestor.addEventListener(
-    'mousemove',
-    e => {
-      e.stopPropagation();
-      // SelectedBlockType 总是 text, DragDirection 总是 never
-      console.log(nearestCommonAncestor);
-    },
-    { once: true }
-  );
-}
-
-function findLastNode(ele: Element | Node): Node {
-  if (ele.lastChild) {
-    return findLastNode(ele.lastChild);
-  }
-  return ele;
-}
-
-function findFirstNode(ele: Element | Node): Node {
-  if (ele.firstChild) {
-    return findFirstNode(ele.firstChild);
-  }
-  return ele;
-}
-
-function findNearestCommonAncestor(
-  node1: Node,
-  node2: Node,
-  root: Node = document.querySelector('body') as Node
-): Node {
-  const ancestors: Node[][] = new Array(2).fill(0).map(() => []);
-  [node1, node2].forEach((node, index) => {
-    while (node !== root && node.parentElement) {
-      node = node.parentElement;
-      ancestors[index].push(node);
-    }
-  });
-
-  for (let i = 0; i < ancestors[0].length; i++) {
-    for (let j = 0; j < ancestors[1].length; j++) {
-      if (ancestors[0][i] === ancestors[1][j]) {
-        return ancestors[0][i];
-      }
-    }
-  }
-  return root;
 }
 
 export function handleBlockSelectionBatchDelete(

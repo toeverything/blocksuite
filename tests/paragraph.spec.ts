@@ -295,6 +295,53 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
+test('update paragraph with children to head type', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  await pressEnter(page);
+  await focusRichText(page, 1);
+  await type(page, 'bbb');
+  await pressEnter(page);
+  await focusRichText(page, 2);
+  await type(page, 'ccc');
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+
+  // aaa
+  //   bbc
+  //   ccc
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab');
+  await focusRichText(page, 2);
+  await page.keyboard.press('Tab');
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['3', '4']);
+
+  await focusRichText(page);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+
+  await type(page, '# ');
+
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '2', []);
+  await assertBlockChildrenIds(page, '3', ['4']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['# aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['3', '4']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '2', []);
+  await assertBlockChildrenIds(page, '3', ['4']);
+});
+
 test('should indent and unindent works with children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);

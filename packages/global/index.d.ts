@@ -69,6 +69,10 @@ declare type BlockSuiteFlags = {
   enable_surface: boolean;
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
+  /**
+   * Block selection can trigger format bar
+   */
+  enable_block_selection_format_bar: boolean;
   enable_edgeless_toolbar: boolean;
   readonly: Record<string, boolean>;
 };

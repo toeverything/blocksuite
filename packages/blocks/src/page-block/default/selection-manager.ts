@@ -6,12 +6,14 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Page, UserRange } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
+  BlockComponentElement,
   getAllBlocks,
   getBlockElementByModel,
+  getCurrentBlockRange,
   getCurrentRange,
   getDefaultPageBlock,
   getModelByElement,
@@ -86,13 +88,13 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 //
 // TODO: checks the parent by `contains` method
 function filterSelectedBlockWithoutSubtree(
-  blockCache: Map<Element, DOMRect>,
+  blockCache: Map<BlockComponentElement, DOMRect>,
   selectionRect: DOMRect,
   offset: IPoint
 ) {
   const entries = Array.from(blockCache.entries());
   const len = entries.length;
-  const results: { block: Element; index: number }[] = [];
+  const results: { block: BlockComponentElement; index: number }[] = [];
 
   // empty
   if (len === 0) return results;
@@ -143,14 +145,14 @@ function filterSelectedBlockWithoutSubtree(
 // Find the current focused block and its substree.
 // The `selectionRect` is a rect of block element.
 function filterSelectedBlockByIndex(
-  blockCache: Map<Element, DOMRect>,
+  blockCache: Map<BlockComponentElement, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
   offset: IPoint = {
     x: 0,
     y: 0,
   }
-): Element[] {
+): BlockComponentElement[] {
   // SELECT_ALL
   if (focusedBlockIndex === -1) {
     return Array.from(blockCache.keys());
@@ -189,7 +191,7 @@ function filterSelectedBlockByIndex(
 }
 
 // clear subtree in block for drawing rect
-function clearSubtree(selectedBlocks: Element[], left: number) {
+function clearSubtree(selectedBlocks: BlockComponentElement[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     const currentLeft = block.getBoundingClientRect().left;
@@ -206,8 +208,11 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
 
 // find blocks and its subtree
 function findBlocksWithSubtree(
-  blockCache: Map<Element, DOMRect>,
-  selectedBlocksWithoutSubtree: { block: Element; index: number }[] = []
+  blockCache: Map<BlockComponentElement, DOMRect>,
+  selectedBlocksWithoutSubtree: {
+    block: BlockComponentElement;
+    index: number;
+  }[] = []
 ) {
   const results = [];
   const len = selectedBlocksWithoutSubtree.length;
@@ -255,7 +260,7 @@ type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'database';
 export class PageSelectionState {
   type: PageSelectionType;
   selectedEmbeds: EmbedBlockComponent[] = [];
-  selectedBlocks: Element[] = [];
+  selectedBlocks: BlockComponentElement[] = [];
   // -1: SELECT_ALL
   // >=0: only current focused-block
   focusedBlockIndex = -1;
@@ -265,9 +270,9 @@ export class PageSelectionState {
   private _startPoint: { x: number; y: number } | null = null;
   private _endPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
-  private _blockCache = new Map<Element, DOMRect>();
+  private _blockCache = new Map<BlockComponentElement, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
-  private _activeComponent: HTMLElement | null = null;
+  private _activeComponent: BlockComponentElement | null = null;
 
   constructor(type: PageSelectionType) {
     this.type = type;
@@ -277,7 +282,7 @@ export class PageSelectionState {
     return this._activeComponent;
   }
 
-  set activeComponent(component: HTMLElement | null) {
+  set activeComponent(component: BlockComponentElement | null) {
     this._activeComponent = component;
   }
 
@@ -401,7 +406,7 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _thresold: number; // distance to the upper and lower boundaries of the viewport
+  private readonly _threshold: number; // distance to the upper and lower boundaries of the viewport
 
   constructor({
     page,
@@ -420,7 +425,7 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    this._thresold = threshold;
+    this._threshold = threshold;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
@@ -434,7 +439,8 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
-        this._onSelectionChange
+        this._onSelectionChangeWithDebounce,
+        this._onSelectionChangeWithoutDebounce
       )
     );
   }
@@ -481,7 +487,7 @@ export class DefaultSelectionManager {
   }
 
   setSelectedBlocks(
-    selectedBlocks: Element[],
+    selectedBlocks: BlockComponentElement[],
     rects?: DOMRect[],
     selectionType?: PageSelectionType
   ) {
@@ -545,17 +551,17 @@ export class DefaultSelectionManager {
 
       // TODO: for the behavior of scrolling, see the native selection
       // speed easeOutQuad + easeInQuad
-      if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
+      if (Math.ceil(scrollTop) < max && clientHeight - y < this._threshold) {
         // ↓
-        const d = (this._thresold - (clientHeight - y)) * 0.25;
+        const d = (this._threshold - (clientHeight - y)) * 0.25;
         scrollTop += d;
         endPoint.y += d;
         auto = Math.ceil(scrollTop) < max;
         viewport.scrollTop = scrollTop;
         this.updateSelectionRect(startPoint, endPoint);
-      } else if (scrollTop > 0 && y < this._thresold) {
+      } else if (scrollTop > 0 && y < this._threshold) {
         // ↑
-        const d = (y - this._thresold) * 0.25;
+        const d = (y - this._threshold) * 0.25;
         scrollTop += d;
         endPoint.y += d;
         auto = scrollTop > 0;
@@ -654,41 +660,43 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    this._showFormatQuickBar(e);
-  };
 
-  private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-
-      showFormatQuickBar({ direction });
+      showFormatQuickBar({ page: this.page, direction });
     } else if (this.state.type === 'block') {
-      // TODO handle block selection
-      // const direction = getDragDirection(e);
-      // const { selectedRichTexts } = this._getSelectedBlockInfo(e);
-      // if (selectedRichTexts.length === 0) {
-      //   // Selecting nothing
-      //   return;
-      // }
-      // const selectedBlocks = selectedRichTexts.map(richText => {
-      //   return getBlockById(richText.model.id) as unknown as HTMLElement;
-      // });
-      // const selectedType: SelectedBlockType = selectedBlocks.every(block => {
-      //   return /paragraph-block/i.test(block.tagName);
-      // })
-      //   ? 'text'
-      //   : 'other';
-      // console.log(`selectedType: ${selectedType}`, this.state.type);
-      // const anchor = ['rightDown', 'leftDown'].includes(direction)
-      //   ? selectedBlocks[selectedBlocks.length - 1]
-      //   : selectedBlocks[0];
-      // showFormatQuickBar({ anchorEl: anchor });
+      if (
+        !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
+      ) {
+        return;
+      }
+
+      const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
+      showFormatQuickBar({
+        page: this.page,
+        direction,
+        anchorEl: {
+          // After update block type, the block selection will be cleared and refreshed.
+          // So we need to get the targe block's rect dynamic.
+          getBoundingClientRect: () => {
+            const blocks = this.state.selectedBlocks;
+            if (!blocks.length) {
+              throw new Error("Failed to get format bar's anchor element");
+            }
+            const firstBlock = blocks[0];
+            const lastBlock = blocks[blocks.length - 1];
+            const targetBlock =
+              direction === 'center-bottom' ? lastBlock : firstBlock;
+            return targetBlock.getBoundingClientRect();
+          },
+        },
+      });
     }
-  }
+  };
 
   private _onContainerClick = (e: SelectionEvent) => {
     // do nothing when clicking on scrollbar
@@ -768,7 +776,7 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ direction: 'center-bottom' });
+    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -810,7 +818,7 @@ export class DefaultSelectionManager {
     // console.log('mouseout', e);
   };
 
-  private _onSelectionChange = (_: Event) => {
+  private _onSelectionChangeWithDebounce = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
       return;
@@ -837,8 +845,6 @@ export class DefaultSelectionManager {
       return;
     }
 
-    // Fix selection direction after support multi-line selection by keyboard
-    // FIXME: if selection produced by mouse, it always be `left-right`
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let direction: 'left-right' | 'right-left' | 'none' = 'none';
 
@@ -847,9 +853,15 @@ export class DefaultSelectionManager {
     } else if (offsetDelta < 0) {
       direction = 'left-right';
     }
+    // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
+      page: this.page,
       direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
+  };
+
+  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+    this.updateLocalSelection();
   };
 
   // clear selection: `block`, `embed`, `native`
@@ -890,7 +902,7 @@ export class DefaultSelectionManager {
   }
 
   selecting(
-    blockCache: Map<Element, DOMRect>,
+    blockCache: Map<BlockComponentElement, DOMRect>,
     selectionRect: DOMRect,
     viewportState: ViewportState
   ) {
@@ -919,7 +931,7 @@ export class DefaultSelectionManager {
     if (type === 'block') {
       this.refreshSelectedBlocksRects();
     } else if (type === 'embed') {
-      this.refresEmbedRects();
+      this.refreshEmbedRects();
     }
   }
 
@@ -945,23 +957,21 @@ export class DefaultSelectionManager {
 
     if (selectedBlocks.length === 0) return;
 
+    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+
     // just refresh selected blocks
     if (focusedBlockIndex === -1) {
-      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
-      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
         block => blockCache.get(block) as DOMRect
       );
       this._signals.updateSelectedRects.emit(rects);
     } else {
       // only current focused-block
-      const rects = selectedBlocks
-        .slice(0, 1)
-        .map(block => blockCache.get(block) as DOMRect);
-      this._signals.updateSelectedRects.emit(rects);
+      this._signals.updateSelectedRects.emit([firstBlockRect]);
     }
   }
 
-  refresEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
+  refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;
@@ -1006,7 +1016,7 @@ export class DefaultSelectionManager {
 
   // Click on the prefix icon of list block
   resetSelectedBlockByRect(
-    blockElement: Element,
+    blockElement: BlockComponentElement,
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.setFocusedBlockIndexByElement(blockElement);
@@ -1034,14 +1044,22 @@ export class DefaultSelectionManager {
   // `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshBlockRectCache();
-    const { blockCache, focusedBlockIndex } = this.state;
+    const {
+      blockCache,
+      focusedBlockIndex,
+      selectedBlocks: prevSelectedBlocks,
+    } = this.state;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
       hitRect
     );
 
-    if (this.state.blockCache.size === this.state.selectedBlocks.length) {
+    if (blockCache.size === prevSelectedBlocks.length) {
+      return;
+    }
+
+    if (selectedBlocks.length === 0) {
       return;
     }
 
@@ -1049,19 +1067,17 @@ export class DefaultSelectionManager {
     this.clear();
     this.state.type = 'block';
 
+    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
-      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
-      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
         block => blockCache.get(block) as DOMRect
       );
       this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
-      const rects = selectedBlocks
-        .slice(0, 1)
-        .map(block => blockCache.get(block) as DOMRect);
-      this.setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, [firstBlockRect]);
     }
   }
 
@@ -1105,5 +1121,20 @@ export class DefaultSelectionManager {
     }
 
     return null;
+  }
+
+  updateLocalSelection() {
+    const page = this.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (blockRange && blockRange.type === 'Native') {
+      const userRange: UserRange = {
+        startOffset: blockRange.startOffset,
+        endOffset: blockRange.endOffset,
+        startBlockId: blockRange.startModel.id,
+        endBlockId: blockRange.endModel.id,
+        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+      };
+      page.awarenessStore.setLocalRange(page, userRange);
+    }
   }
 }
