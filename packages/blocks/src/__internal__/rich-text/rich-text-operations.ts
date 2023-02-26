@@ -1,11 +1,7 @@
 // operations used in rich-text level
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
 import type { Quill } from 'quill';
 

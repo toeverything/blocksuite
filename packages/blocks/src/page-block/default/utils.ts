@@ -21,6 +21,7 @@ import {
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import { RichText } from './../../../../playground/examples/virgo/test-page';
 import type {
   CodeBlockOption,
   DefaultPageBlockComponent,
@@ -260,7 +261,7 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   // Give an empty position (xywh=0,0,0,0) for invisible blocks.
   // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
   if (!hoverDom) {
-    hoverDom = offscreen;
+    hoverDom = offscreen as RichText;
   }
 
   assertExists(hoverDom);
