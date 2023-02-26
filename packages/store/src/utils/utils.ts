@@ -75,7 +75,7 @@ export function syncBlockProps(
   Object.entries(defaultProps).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
       if (value instanceof Text) {
-        yBlock.set(`prop:${key}`, value.yText);
+        yBlock.set(`prop:${key}`, new Y.Text());
       } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
