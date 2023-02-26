@@ -37,7 +37,7 @@ function main() {
   surface.addShapeElement(new Bound(200, 220, 210, 100), 'ellipse');
   surface.addShapeElement(new Bound(310, 0, 100, 100), 'diamond');
   surface.addShapeElement(new Bound(310, 110, 100, 100), 'rect', {
-    rounded: true,
+    radius: 0.1,
     filled: true,
     fillColor: '#009900',
     strokeColor: '#dddd00',
