@@ -281,7 +281,8 @@ test('use keyboard copy inside code block copy plain text', async ({
   <affine:frame>
     <affine:code
       prop:language="JavaScript"
-      prop:text="use\n"
+      prop:text="use
+"
     />
     <affine:paragraph
       prop:text="use"
@@ -326,7 +327,8 @@ test('use code block copy menu of code block copy whole code block', async ({
   <affine:frame>
     <affine:code
       prop:language="JavaScript"
-      prop:text="use\n"
+      prop:text="use
+"
     />
     <affine:code
       prop:language="JavaScript"
