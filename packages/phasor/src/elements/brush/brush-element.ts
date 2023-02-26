@@ -40,8 +40,8 @@ export class BrushElement extends BaseElement {
     ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
 
     if (this.tiny) {
-      const path2d = new Path2D();
-      path2d.ellipse(
+      const path = new Path2D();
+      path.ellipse(
         0,
         0,
         this.lineWidth / 2,
@@ -52,21 +52,21 @@ export class BrushElement extends BaseElement {
       );
 
       ctx.fillStyle = this.color;
-      ctx.fill(path2d);
+      ctx.fill(path);
       return;
     }
 
-    const path2d = new Path2D();
-    path2d.moveTo(this.points[0][0], this.points[0][1]);
+    const path = new Path2D();
+    path.moveTo(this.points[0][0], this.points[0][1]);
     for (const point of this.points) {
-      path2d.lineTo(point[0], point[1]);
+      path.lineTo(point[0], point[1]);
     }
 
     ctx.strokeStyle = this.color;
     ctx.lineWidth = this.lineWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.stroke(path2d);
+    ctx.stroke(path);
   }
 
   serialize(): Record<string, unknown> {
