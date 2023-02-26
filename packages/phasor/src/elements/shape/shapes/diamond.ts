@@ -1,7 +1,7 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeMethods, ShapeRenderConfig } from '../types.js';
+import type { ShapeMethods, ShapeRenderProps } from '../types.js';
 
 function createDiamondPath(width: number, height: number): Path2D {
   const path = new Path2D();
@@ -17,18 +17,18 @@ export const DiamondMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
     {
-      width,
-      height,
+      w,
+      h,
       filled,
       fillColor,
       strokeWidth,
       strokeColor,
       strokeStyle,
-    }: ShapeRenderConfig
+    }: ShapeRenderProps
   ) {
     const renderOffset = Math.max(strokeWidth, 0) / 2;
-    const renderWidth = width - renderOffset * 2;
-    const renderHeight = height - renderOffset * 2;
+    const renderWidth = w - renderOffset * 2;
+    const renderHeight = h - renderOffset * 2;
 
     ctx.translate(renderOffset, renderOffset);
 

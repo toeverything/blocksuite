@@ -34,7 +34,7 @@ export abstract class BaseElement implements SurfaceElement {
     return this.y + this.h / 2;
   }
 
-  get xywh() {
+  protected get _xywh() {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 

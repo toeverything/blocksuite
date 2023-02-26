@@ -3,9 +3,9 @@ import type { HitTestOptions } from '../base-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
-export interface ShapeRenderConfig {
-  width: number;
-  height: number;
+export interface ShapeRenderProps {
+  w: number;
+  h: number;
 
   // Radius percentage, only supported by rect/triangle shape
   radius: number;
@@ -32,15 +32,12 @@ export type SerializedShapeProps = {
   strokeStyle: StrokeStyle;
 };
 
-export type MutableShapeKeys = keyof Omit<
-  SerializedShapeProps,
-  'id' | 'type' | 'xywh'
->;
+type ShapeKeys = keyof Omit<SerializedShapeProps, 'id' | 'type' | 'xywh'>;
 
-export type ShapeProps = Partial<Pick<SerializedShapeProps, MutableShapeKeys>>;
+export type ShapeProps = Partial<Pick<SerializedShapeProps, ShapeKeys>>;
 
 export interface ShapeMethods {
-  render: (ctx: CanvasRenderingContext2D, config: ShapeRenderConfig) => void;
+  render: (ctx: CanvasRenderingContext2D, config: ShapeRenderProps) => void;
   hitTest: (
     x: number,
     y: number,

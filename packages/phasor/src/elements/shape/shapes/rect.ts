@@ -1,7 +1,7 @@
 import type { IBound } from '../../../consts.js';
 import { isPointIn } from '../../../utils/hit-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeMethods, ShapeRenderConfig } from '../types.js';
+import type { ShapeMethods, ShapeRenderProps } from '../types.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -59,19 +59,19 @@ export const RectMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
     {
-      width,
-      height,
+      w,
+      h,
       radius,
       filled,
       fillColor,
       strokeWidth,
       strokeColor,
       strokeStyle,
-    }: ShapeRenderConfig
+    }: ShapeRenderProps
   ) {
     const renderOffset = Math.max(strokeWidth, 0) / 2;
-    const renderWidth = width - renderOffset * 2;
-    const renderHeight = height - renderOffset * 2;
+    const renderWidth = w - renderOffset * 2;
+    const renderHeight = h - renderOffset * 2;
     const rx = renderWidth * radius;
     const ry = renderHeight * radius;
 

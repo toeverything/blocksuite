@@ -2,9 +2,14 @@ import type { Color, StrokeStyle } from '../../consts.js';
 import { deserializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
-import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
+import type {
+  SerializedShapeProps,
+  ShapeProps,
+  ShapeRenderProps,
+  ShapeType,
+} from './types.js';
 
-export class ShapeElement extends BaseElement {
+export class ShapeElement extends BaseElement implements ShapeRenderProps {
   type = 'shape' as const;
   shapeType: ShapeType;
   radius = 0;
@@ -31,8 +36,8 @@ export class ShapeElement extends BaseElement {
   render(ctx: CanvasRenderingContext2D) {
     const { render } = ShapeMethodsMap[this.shapeType];
     render(ctx, {
-      width: this.w,
-      height: this.h,
+      w: this.w,
+      h: this.h,
       radius: this.radius,
       filled: this.filled,
       fillColor: this.fillColor,
@@ -47,7 +52,7 @@ export class ShapeElement extends BaseElement {
       id: this.id,
       index: this.index,
       type: this.type,
-      xywh: this.xywh,
+      xywh: this._xywh,
 
       shapeType: this.shapeType,
 
