@@ -143,10 +143,11 @@ function shiftRange(range: Range): Range | null {
  */
 export function isAtLineEdge(range: Range) {
   if (!range.collapsed) {
-    console.warn(
-      'Failed to determine if the caret is at line edge! expected a collapsed range but got',
-      range
-    );
+    // FIXME
+    // console.warn(
+    //   'Failed to determine if the caret is at line edge! expected a collapsed range but got',
+    //   range
+    // );
     return false;
   }
   const nextRange = shiftRange(range);

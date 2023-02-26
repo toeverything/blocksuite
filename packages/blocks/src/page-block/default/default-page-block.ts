@@ -252,7 +252,6 @@ export class DefaultPageBlockComponent
     }
   };
 
-  // FIXME: keep embed selected rects after scroll
   // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
     const { selection } = this;
