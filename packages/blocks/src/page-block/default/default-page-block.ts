@@ -17,7 +17,7 @@ import {
   asyncFocusRichText,
   BlockChildrenContainer,
   type BlockHost,
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   hotkey,
   isMultiBlockRange,
@@ -378,7 +378,7 @@ export class DefaultPageBlockComponent
       (e.key.length === 1 || e.key === 'Enter') &&
       window.getSelection()?.type === 'Range'
     ) {
-      const range = getCurrentRange();
+      const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);
       }

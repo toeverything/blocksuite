@@ -1,5 +1,6 @@
 import {
   assertExists,
+  BaseBlockModel,
   Page,
   StackItem,
   UserInfo,
@@ -9,10 +10,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  blockRangeToNativeRange,
-  resetNativeSelection,
-} from '../../__internal__/utils/selection.js';
+import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
+import { resetNativeSelection } from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
   width: number;
@@ -131,26 +130,24 @@ export class RemoteSelection extends LitElement {
     this.page.history.on(
       'stack-item-popped',
       (event: { stackItem: StackItem }) => {
-        const range = event.stackItem.meta.get('cursor-location');
-        if (!range) {
+        const userRange = event.stackItem.meta.get('cursor-location');
+        if (!userRange) {
           return;
         }
 
         assertExists(this.page);
-        const startModel = this.page.getBlockById(range.startBlockId);
-        const endModel = this.page.getBlockById(range.endBlockId);
-        if (!startModel || !endModel || !startModel.text || !endModel.text) {
-          return;
-        }
-
+        const models = userRange.blockIds
+          .map(id => {
+            assertExists(this.page);
+            return this.page.getBlockById(id);
+          })
+          .filter(Boolean) as BaseBlockModel[];
         requestAnimationFrame(() => {
           const nativeRange = blockRangeToNativeRange({
             type: 'Native',
-            startModel,
-            startOffset: range.startOffset,
-            endModel,
-            endOffset: range.endOffset,
-            betweenModels: [],
+            startOffset: userRange.startOffset,
+            endOffset: userRange.endOffset,
+            models,
           });
           resetNativeSelection(nativeRange);
         });
@@ -179,22 +176,24 @@ export class RemoteSelection extends LitElement {
     this._abortController.abort();
   }
 
-  private _getSelectionRect(range: UserRange): SelectionRect[] {
+  private _getSelectionRect(userRange: UserRange): SelectionRect[] {
     assertExists(this.page);
-    const startModel = this.page.getBlockById(range.startBlockId);
-    const endModel = this.page.getBlockById(range.endBlockId);
-    if (!startModel || !endModel || !startModel.text || !endModel.text) {
-      return [];
-    }
+    const models = userRange.blockIds
+      .map(id => {
+        assertExists(this.page);
+        return this.page.getBlockById(id);
+      })
+      .filter(Boolean) as BaseBlockModel[];
 
     const nativeRange = blockRangeToNativeRange({
       type: 'Native',
-      startModel,
-      startOffset: range.startOffset,
-      endModel,
-      endOffset: range.endOffset,
-      betweenModels: [],
+      startOffset: userRange.startOffset,
+      endOffset: userRange.endOffset,
+      models,
     });
+    if (!nativeRange) {
+      return [];
+    }
 
     const nativeRects = Array.from(nativeRange.getClientRects());
     return nativeRects
@@ -206,43 +205,38 @@ export class RemoteSelection extends LitElement {
       }))
       .filter(
         rect =>
-          (rect.width > 1 && rect.height > 0) ||
-          range.startBlockId === range.endBlockId
+          (rect.width > 1 && rect.height > 0) || userRange.blockIds.length === 1
       );
   }
 
-  private _getCursorRect(range: UserRange): SelectionRect | null {
-    const endBlockId = range.endBlockId;
-    const endOffset = range.endOffset;
+  private _getCursorRect(userRange: UserRange): SelectionRect | null {
     assertExists(this.page);
-
+    const endBlockId = userRange.blockIds[userRange.blockIds.length - 1];
+    const endOffset = userRange.endOffset;
     const endModel = this.page.getBlockById(endBlockId);
     if (!endModel || !endModel.text) {
       return null;
     }
 
-    try {
-      const nativeRange = blockRangeToNativeRange({
-        type: 'Native',
-        startModel: endModel,
-        startOffset: endOffset,
-        endModel,
-        endOffset: endOffset,
-        betweenModels: [],
-      });
-
-      const nativeRects = Array.from(nativeRange.getClientRects());
-      if (nativeRects.length === 1) {
-        const rect = nativeRects[0];
-        return {
-          width: 2,
-          height: rect.height + 4,
-          top: rect.top - 2,
-          left: rect.left,
-        };
-      }
-    } catch (e) {
+    const nativeRange = blockRangeToNativeRange({
+      type: 'Native',
+      startOffset: endOffset,
+      endOffset: endOffset,
+      models: [endModel],
+    });
+    if (!nativeRange) {
       return null;
+    }
+
+    const nativeRects = Array.from(nativeRange.getClientRects());
+    if (nativeRects.length === 1) {
+      const rect = nativeRects[0];
+      return {
+        width: 2,
+        height: rect.height + 4,
+        top: rect.top - 2,
+        left: rect.left,
+      };
     }
 
     return null;

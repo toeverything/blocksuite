@@ -17,10 +17,8 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  getCurrentBlockRange,
-  getRichTextByModel,
-} from '../../__internal__/utils/index.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   DragDirection,
@@ -82,7 +80,11 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.models = this._getCurrentModels();
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
+    }
+    this.models = blockRange.models;
     const startModel = this.models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.format = getCurrentCombinedFormat(this.page);
@@ -126,22 +128,6 @@ export class FormatQuickBar extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposableGroup.dispose();
-  }
-
-  private _getCurrentModels() {
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't get current block range");
-    }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    return models;
   }
 
   private _onHover() {

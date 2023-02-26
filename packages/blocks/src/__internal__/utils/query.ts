@@ -6,7 +6,7 @@ import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
-import { getCurrentRange } from './selection.js';
+import { getCurrentNativeRange } from './selection.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -185,13 +185,14 @@ export function getBlockElementByModel(
 }
 
 export function getStartModelBySelection() {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
       : (range.startContainer as HTMLElement);
 
   const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
+  // TODO Fix this, this cast is not safe
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -367,8 +368,18 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
     throw new Error("Failed to get block's text!");
   }
   if (offset > text.length) {
-    // FIXME
-    // console.error('Offset is out of range! model: ', model, offset);
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
   }
   const blockElement = getBlockById(model.id);
   if (!blockElement) {

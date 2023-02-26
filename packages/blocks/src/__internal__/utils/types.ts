@@ -44,23 +44,6 @@ export interface CommonBlockElement extends HTMLElement {
  */
 export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
-export type BlockRange = {
-  /**
-   * 'Native' for native selection, 'Block' for block selection
-   */
-  type: 'Native' | 'Block';
-  startModel: BaseBlockModel;
-  endModel: BaseBlockModel;
-  startOffset: number;
-  endOffset: number;
-  /**
-   * Models between startModel and endModel, not including startModel and endModel
-   */
-  betweenModels: BaseBlockModel[];
-  // collapsed is true when startModel === endModel && startOffset === endOffset
-  // collapsed: true;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
 

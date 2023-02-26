@@ -16,7 +16,7 @@ import { Page, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   resetNativeSelection,
   uploadImageFromLocal,
@@ -185,7 +185,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: CopyIcon,
         divider: true,
         action: async ({ model }) => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           await copyBlock(model);
           resetNativeSelection(curRange);
           toast('Copied to clipboard');

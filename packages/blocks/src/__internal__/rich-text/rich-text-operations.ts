@@ -11,7 +11,7 @@ import {
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
-  getCurrentRange,
+  getCurrentNativeRange,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
@@ -402,7 +402,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   if (!range.collapsed) {
     // If the range is not collapsed,
     // we assume that the caret is at the start of the range.
@@ -424,7 +424,7 @@ export function handleKeyDown(
   event: KeyboardEvent,
   editableContainer: HTMLElement
 ) {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   if (!range.collapsed) {
     // If the range is not collapsed,
     // we assume that the caret is at the end of the range.
