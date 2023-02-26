@@ -1953,7 +1953,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 10; i++) {
     await pressEnter(page);
   }
 
@@ -1963,7 +1963,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
+  const data = new Array(9).fill(`
 `);
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
@@ -2000,14 +2000,14 @@ test('should keep native range selection when scrolling backward with the scroll
 
   await dragBetweenIndices(
     page,
-    [10, 3],
-    [10, 0],
+    [14, 3],
+    [14, 0],
     { x: 0, y: 0 },
     { x: 0, y: 0 },
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, -blockHeight * 2);
+        await page.mouse.wheel(0, -blockHeight * 3);
         await page.waitForTimeout(250);
       },
     }

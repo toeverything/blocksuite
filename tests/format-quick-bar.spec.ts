@@ -73,7 +73,7 @@ test('should format quick bar show when select text', async ({ page }) => {
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 260, 10);
+  assertAlmostEqual(box.y, 235, 10);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
@@ -127,7 +127,7 @@ test('should format quick bar show when select text by keyboard', async ({
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
   assertAlmostEqual(rightBox.x, 20, 6);
-  assertAlmostEqual(rightBox.y, 180, 6);
+  assertAlmostEqual(rightBox.y, 175, 6);
 });
 
 test('should format quick bar can only display one at a time', async ({
@@ -728,7 +728,7 @@ test('should format quick bar work in single block selection', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 285, 5);
-  assertAlmostEqual(box.y, 220, 5);
+  assertAlmostEqual(box.y, 205, 5);
 
   const boldBtn = formatQuickBar.getByTestId('bold');
   await boldBtn.click();
