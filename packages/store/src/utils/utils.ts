@@ -1,3 +1,4 @@
+import type { BlockModels } from '@blocksuite/global/types';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
@@ -120,7 +121,7 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
 export function doesInsideBlockByFlavour(
   page: Page,
   block: BaseBlockModel | string,
-  flavour: keyof BlockSuiteInternal.BlockModels
+  flavour: keyof BlockModels
 ): boolean {
   const parent = page.getParent(block);
   if (parent === null) {

@@ -77,8 +77,8 @@ function isAtBlockEnd(quill: Quill) {
 // 2. In the middle and start of block, press Enter will insert a \n to break the line
 // TODO this should be configurable per-block
 function isSoftEnterable(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:code'])) return true;
-  if (matchFlavours(model, ['affine:paragraph'])) {
+  if (matchFlavours(model, ['affine:code'] as const)) return true;
+  if (matchFlavours(model, ['affine:paragraph'] as const)) {
     return model.type === 'quote';
   }
   return false;
@@ -111,14 +111,15 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
-      matchFlavours(model, ['affine:list']) && model.text?.length === 0;
+      matchFlavours(model, ['affine:list'] as const) &&
+      model.text?.length === 0;
     const selection = quill.getSelection();
     assertExists(selection);
 
     if (
       isEmptyList &&
       parent &&
-      matchFlavours(parent, ['affine:frame']) &&
+      matchFlavours(parent, ['affine:frame'] as const) &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(page, model);
@@ -169,7 +170,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onTab(this: KeyboardEventThis) {
-    if (matchFlavours(model, ['affine:code'])) {
+    if (matchFlavours(model, ['affine:code'] as const)) {
       return ALLOW_DEFAULT;
     }
     const index = this.quill.getSelection()?.index;
@@ -178,7 +179,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onShiftTab(this: KeyboardEventThis) {
-    if (matchFlavours(model, ['affine:code'])) {
+    if (matchFlavours(model, ['affine:code'] as const)) {
       return ALLOW_DEFAULT;
     }
     const index = this.quill.getSelection()?.index;
@@ -358,7 +359,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         }
         // End of feature flag
 
-        if (matchFlavours(model, ['affine:code'])) {
+        if (matchFlavours(model, ['affine:code'] as const)) {
           return ALLOW_DEFAULT;
         }
         // if (context.format['code'] === true) {
