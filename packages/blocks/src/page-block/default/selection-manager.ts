@@ -1015,12 +1015,10 @@ export class DefaultSelectionManager {
   }
 
   refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
-    requestAnimationFrame(() => {
-      this.state.selectedBlocks = models
-        .map(model => getBlockElementByModel(model))
-        .filter((block): block is BlockComponentElement => block !== null);
-      this.refreshSelectedBlocksRects();
-    });
+    this.state.selectedBlocks = models
+      .map(model => getBlockElementByModel(model))
+      .filter((block): block is BlockComponentElement => block !== null);
+    this.refreshSelectedBlocksRects();
   }
 
   refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
