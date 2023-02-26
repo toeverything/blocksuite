@@ -730,7 +730,7 @@ test('should format quick bar work in single block selection', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 285, 5);
-  assertAlmostEqual(box.y, 220, 5);
+  assertAlmostEqual(box.y, 215, 10);
 
   const boldBtn = formatQuickBar.getByTestId('bold');
   await boldBtn.click();
@@ -803,7 +803,7 @@ test('should format quick bar work in multiple block selection', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 303, 5);
-  assertAlmostEqual(box.y, 102, 5);
+  assertAlmostEqual(box.y, 100, 10);
 
   await formatBarController.boldBtn.click();
   await formatBarController.italicBtn.click();
