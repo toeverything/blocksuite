@@ -4,7 +4,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { LeafBlot } from 'parchment';
 import type { DeltaStatic, Quill as QuillType } from 'quill';
 import Quill from 'quill';
-import QuillCursors from 'quill-cursors';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import type { BlockHost } from '../utils/index.js';
@@ -13,7 +12,6 @@ import { createKeyboardBindings } from './keyboard.js';
 import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
-Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
@@ -175,7 +173,6 @@ export class RichText extends NonShadowLitElement {
     this.quill = new Quill(_textContainer, {
       modules: Object.assign(
         {
-          cursors: true,
           toolbar: false,
           history: {
             maxStack: 0,
