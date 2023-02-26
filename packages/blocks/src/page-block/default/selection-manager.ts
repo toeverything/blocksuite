@@ -60,7 +60,6 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   );
 }
 
-// `parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY`
 /*
 function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   return (
@@ -71,6 +70,11 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   );
 }
 */
+function contains(parent: Element, node: Element) {
+  return (
+    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
+  );
+}
 
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
@@ -99,11 +103,7 @@ function filterSelectedBlockWithoutSubtree(
       } else {
         let prevBlock = entries[prevIndex][0];
         // prev block before and contains block
-        if (
-          prevBlock.compareDocumentPosition(block) ===
-          (Node.DOCUMENT_POSITION_FOLLOWING |
-            Node.DOCUMENT_POSITION_CONTAINED_BY)
-        ) {
+        if (contains(prevBlock, block)) {
           // not continuous block
           if (results.length > 1) {
             continue;
@@ -118,8 +118,7 @@ function filterSelectedBlockWithoutSubtree(
           if (
             previousElementSibling &&
             previousElementSibling !== prevBlock &&
-            previousElementSibling.compareDocumentPosition(prevBlock) &
-              Node.DOCUMENT_POSITION_CONTAINED_BY
+            contains(previousElementSibling, prevBlock)
           ) {
             let n = i;
             let m = results.length;
@@ -147,7 +146,7 @@ function filterSelectedBlockWithoutSubtree(
 
 // Find the current focused block and its substree.
 // The `selectionRect` is a rect of block element.
-function filterSelectedBlockByIndex(
+function filterSelectedBlockByIndexAndBound(
   blockCache: Map<BlockComponentElement, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
@@ -164,30 +163,59 @@ function filterSelectedBlockByIndex(
   const entries = Array.from(blockCache.entries());
   const len = entries.length;
   const results = [];
-  let once = true;
   let prevBlock: Element | null = null;
 
   for (let i = focusedBlockIndex; i < len; i++) {
     const [block, rect] = entries[i];
-    if (once) {
+    if (prevBlock) {
+      // prev block contains block
+      if (contains(prevBlock, block)) {
+        results.push(block);
+      } else {
+        break;
+      }
+    } else {
       const richText = block.querySelector('rich-text');
       const nextRect = richText?.getBoundingClientRect() || rect;
 
       if (nextRect && intersects(rect, selectionRect, offset)) {
         prevBlock = block;
         results.push(block);
-        once = false;
       }
-    } else if (prevBlock) {
-      // prev block contains block
-      if (
-        prevBlock.compareDocumentPosition(block) &
-        Node.DOCUMENT_POSITION_CONTAINED_BY
-      ) {
-        results.push(block);
-      } else {
-        break;
-      }
+    }
+  }
+
+  return results;
+}
+
+// Find the current focused block and its substree.
+function filterSelectedBlockByIndex(
+  blockCache: Map<BlockComponentElement, DOMRect>,
+  index: number
+): BlockComponentElement[] {
+  const blocks = Array.from(blockCache.keys());
+  // SELECT_ALL
+  if (index === -1) {
+    return blocks;
+  }
+
+  const len = blocks.length;
+  const results: BlockComponentElement[] = [];
+
+  if (index > len - 1) {
+    return results;
+  }
+
+  const prevBlock = blocks[index];
+
+  results.push(prevBlock);
+
+  for (let i = index + 1; i < len; i++) {
+    // prev block contains block
+    if (contains(prevBlock, blocks[i])) {
+      results.push(blocks[i]);
+    } else {
+      break;
     }
   }
 
@@ -202,10 +230,7 @@ function clearSubtree(
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     // prev block contains block
-    if (
-      prevBlock.compareDocumentPosition(block) &
-      Node.DOCUMENT_POSITION_CONTAINED_BY
-    ) {
+    if (contains(prevBlock, block)) {
       return false;
     } else {
       prevBlock = block;
@@ -226,15 +251,9 @@ function findBlocksWithSubtree(
   const len = selectedBlocksWithoutSubtree.length;
 
   for (let i = 0; i < len; i++) {
-    const { block, index } = selectedBlocksWithoutSubtree[i];
+    const { index } = selectedBlocksWithoutSubtree[i];
     // find block's subtree
-    results.push(
-      ...filterSelectedBlockByIndex(
-        blockCache,
-        index,
-        blockCache.get(block) as DOMRect
-      )
-    );
+    results.push(...filterSelectedBlockByIndex(blockCache, index));
   }
 
   return results;
@@ -975,6 +994,15 @@ export class DefaultSelectionManager {
     }
   }
 
+  refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
+    requestAnimationFrame(() => {
+      this.state.selectedBlocks = models
+        .map(model => getBlockElementByModel(model))
+        .filter((block): block is BlockComponentElement => block !== null);
+      this.refreshSelectedBlocksRects();
+    });
+  }
+
   refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
@@ -996,7 +1024,7 @@ export class DefaultSelectionManager {
   }
 
   // Click on drag-handle button
-  selectBlocksByIndexAndBounding(index: number, boundRect: DOMRect) {
+  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
     this.state.focusedBlockIndex = index;
 
     const { blockCache, focusedBlockIndex } = this.state;
@@ -1010,8 +1038,7 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
-      focusedBlockIndex,
-      boundRect
+      focusedBlockIndex
     );
 
     // only current focused-block
@@ -1037,8 +1064,7 @@ export class DefaultSelectionManager {
     const boundRect = blockCache.get(blockElement) as DOMRect;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
-      focusedBlockIndex,
-      boundRect
+      focusedBlockIndex
     );
 
     // only current focused-block
@@ -1053,7 +1079,7 @@ export class DefaultSelectionManager {
       focusedBlockIndex,
       selectedBlocks: prevSelectedBlocks,
     } = this.state;
-    const selectedBlocks = filterSelectedBlockByIndex(
+    const selectedBlocks = filterSelectedBlockByIndexAndBound(
       blockCache,
       focusedBlockIndex,
       hitRect

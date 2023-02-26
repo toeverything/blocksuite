@@ -2,17 +2,12 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import {
-  getBlockElementByModel,
-  hasNativeSelection,
-  hotkey,
-} from '../../__internal__/index.js';
+import { hasNativeSelection, hotkey } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
-  BlockComponentElement,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -246,16 +241,7 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         getModelByElement(block)
       );
       handleMultiBlockIndent(page, models);
-
-      requestAnimationFrame(() => {
-        selection.state.type = 'block';
-        // get fresh elements
-        selection.state.selectedBlocks = models
-          .map(model => getBlockElementByModel(model))
-          .filter(block => block !== null) as BlockComponentElement[];
-        selection.refreshSelectedBlocksRects();
-      });
-      selection.clear();
+      selection.refreshSelectedBlocksRectsByModels(models);
       break;
     }
   }
