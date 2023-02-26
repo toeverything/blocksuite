@@ -1,11 +1,10 @@
 import type { IBound } from '../../../consts.js';
 import { isPointIn } from '../../../utils/hit-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeRenderConfig } from '../types.js';
+import type { ShapeMethods, ShapeRenderConfig } from '../types.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
-const roundedRate = 0.1;
 
 function createRectPath(
   x: number,
@@ -56,13 +55,13 @@ function createRectPath(
   return path;
 }
 
-export class Rect {
-  static render(
+export const RectMethods: ShapeMethods = {
+  render(
     ctx: CanvasRenderingContext2D,
     {
       width,
       height,
-      rounded,
+      radius,
       filled,
       fillColor,
       strokeWidth,
@@ -73,30 +72,26 @@ export class Rect {
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = width - renderOffset * 2;
     const renderHeight = height - renderOffset * 2;
-    const rx = rounded ? renderWidth * roundedRate : 0;
-    const ry = rounded ? renderHeight * roundedRate : 0;
+    const rx = renderWidth * radius;
+    const ry = renderHeight * radius;
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path2d = createRectPath(0, 0, renderWidth, renderHeight, rx, ry);
+    const path = createRectPath(0, 0, renderWidth, renderHeight, rx, ry);
 
     if (filled) {
       ctx.fillStyle = fillColor;
-      ctx.fill(path2d);
+      ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = strokeWidth;
-      ctx.stroke(path2d);
+      ctx.stroke(path);
     }
-  }
+  },
 
-  static hitTest(
-    point: [number, number],
-    bound: IBound,
-    options?: HitTestOptions
-  ) {
-    return isPointIn(bound, point[0], point[1]);
-  }
-}
+  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+    return isPointIn(bound, x, y);
+  },
+};

@@ -1,13 +1,13 @@
 import type { Color, StrokeStyle } from '../../consts.js';
 import { deserializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
-import { getShapeUtils } from './shape-utils/index.js';
+import { ShapeMethodsMap } from './shapes/index.js';
 import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
 
 export class ShapeElement extends BaseElement {
   type = 'shape' as const;
   shapeType: ShapeType;
-  rounded = false;
+  radius = 0;
   filled = false;
   fillColor: Color = '#ffffff';
   strokeWidth = 4;
@@ -24,16 +24,16 @@ export class ShapeElement extends BaseElement {
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
-    const shapeUtils = getShapeUtils(this.shapeType);
-    return shapeUtils.hitTest([x, y], this, options);
+    const { hitTest } = ShapeMethodsMap[this.shapeType];
+    return hitTest(x, y, this, options);
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    const shapeUtils = getShapeUtils(this.shapeType);
-    shapeUtils.render(ctx, {
+    const { render } = ShapeMethodsMap[this.shapeType];
+    render(ctx, {
       width: this.w,
       height: this.h,
-      rounded: this.rounded,
+      radius: this.radius,
       filled: this.filled,
       fillColor: this.fillColor,
       strokeWidth: this.strokeWidth,
@@ -51,7 +51,7 @@ export class ShapeElement extends BaseElement {
 
       shapeType: this.shapeType,
 
-      rounded: this.rounded,
+      radius: this.radius,
       filled: this.filled,
       fillColor: this.fillColor,
       strokeWidth: this.strokeWidth,

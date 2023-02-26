@@ -7,9 +7,9 @@ export interface ShapeRenderConfig {
   width: number;
   height: number;
 
-  // rect shape support only
-  rounded?: boolean;
-  filled?: boolean;
+  // Radius percentage, only supported by rect/triangle shape
+  radius: number;
+  filled: boolean;
   fillColor: Color;
   strokeWidth: number;
   strokeColor: Color;
@@ -24,7 +24,7 @@ export type SerializedShapeProps = {
   xywh: string;
 
   shapeType: ShapeType;
-  rounded: boolean;
+  radius: number;
   filled: boolean;
   fillColor: Color;
   strokeWidth: number;
@@ -39,10 +39,11 @@ export type MutableShapeKeys = keyof Omit<
 
 export type ShapeProps = Partial<Pick<SerializedShapeProps, MutableShapeKeys>>;
 
-export interface ShapeUtils {
+export interface ShapeMethods {
   render: (ctx: CanvasRenderingContext2D, config: ShapeRenderConfig) => void;
   hitTest: (
-    point: [number, number],
+    x: number,
+    y: number,
     bound: IBound,
     options?: HitTestOptions
   ) => boolean;

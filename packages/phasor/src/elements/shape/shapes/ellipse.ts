@@ -1,20 +1,16 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeRenderConfig } from '../types.js';
+import type { ShapeMethods, ShapeRenderConfig } from '../types.js';
 
-function createDiamondPath(width: number, height: number): Path2D {
+function createEllipsePath(width: number, height: number): Path2D {
   const path = new Path2D();
-  path.moveTo(width / 2, 0);
-  path.lineTo(width, height / 2);
-  path.lineTo(width / 2, height);
-  path.lineTo(0, height / 2);
-  path.closePath();
+  path.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, 2 * Math.PI);
   return path;
 }
 
-export class Diamond {
-  static render(
+export const EllipseMethods: ShapeMethods = {
+  render(
     ctx: CanvasRenderingContext2D,
     {
       width,
@@ -32,7 +28,8 @@ export class Diamond {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path = createDiamondPath(renderWidth, renderHeight);
+    const path = createEllipsePath(renderWidth, renderHeight);
+
     if (filled) {
       ctx.fillStyle = fillColor;
       ctx.fill(path);
@@ -43,18 +40,14 @@ export class Diamond {
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }
-  }
+  },
 
-  static hitTest(
-    point: [number, number],
-    bound: IBound,
-    options?: HitTestOptions
-  ) {
-    const points = [
-      [bound.x + bound.w / 2, bound.y + 0],
-      [bound.x + bound.w, bound.y + bound.h],
-      [bound.x + 0, bound.y + bound.h],
-    ];
-    return Utils.pointInPolygon(point, points);
-  }
-}
+  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+    return Utils.pointInEllipse(
+      [x, y],
+      [bound.x + bound.w / 2, bound.y + bound.h / 2],
+      bound.w / 2,
+      bound.h / 2
+    );
+  },
+};

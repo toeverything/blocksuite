@@ -1,7 +1,7 @@
 import type { IBound } from '../../../consts.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
-import type { ShapeRenderConfig } from '../types.js';
+import type { ShapeMethods, ShapeRenderConfig } from '../types.js';
 
 function createTrianglePath(width: number, height: number): Path2D {
   const path = new Path2D();
@@ -12,8 +12,8 @@ function createTrianglePath(width: number, height: number): Path2D {
   return path;
 }
 
-export class Triangle {
-  static render(
+export const TriangleMethods: ShapeMethods = {
+  render(
     ctx: CanvasRenderingContext2D,
     {
       width,
@@ -43,18 +43,14 @@ export class Triangle {
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }
-  }
+  },
 
-  static hitTest(
-    point: [number, number],
-    bound: IBound,
-    options?: HitTestOptions
-  ) {
+  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     const points = [
       [bound.x + bound.w / 2, bound.y + 0],
       [bound.x + bound.w, bound.y + bound.h],
       [bound.x + 0, bound.y + bound.h],
     ];
-    return Utils.pointInPolygon(point, points);
-  }
-}
+    return Utils.pointInPolygon([x, y], points);
+  },
+};
