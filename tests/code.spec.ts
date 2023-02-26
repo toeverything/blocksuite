@@ -254,7 +254,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   expect(content).toBe('useuse\n');
 });
 
-test.skip('use keyboard copy inside code block copy plain text', async ({
+test('use keyboard copy inside code block copy plain text', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -275,24 +275,13 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-  <affine:page
+<affine:page
   prop:title=""
 >
   <affine:frame>
     <affine:code
       prop:language="JavaScript"
-      prop:text={
-        <>
-          <text
-            insert="use"
-          />
-          <text
-            code-block={true}
-            insert="
-"
-          />
-        </>
-      }
+      prop:text="use\n"
     />
     <affine:paragraph
       prop:text="use"
@@ -303,7 +292,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
   );
 });
 
-test.skip('use code block copy menu of code block copy whole code block', async ({
+test('use code block copy menu of code block copy whole code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -337,18 +326,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   <affine:frame>
     <affine:code
       prop:language="JavaScript"
-      prop:text={
-        <>
-          <text
-            insert="use"
-          />
-          <text
-            code-block={true}
-            insert="
-"
-          />
-        </>
-      }
+      prop:text="use\n"
     />
     <affine:code
       prop:language="JavaScript"
@@ -473,8 +451,24 @@ test('press ArrowDown before code block can select code block', async ({
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowDown');
 
-  const locator = page.locator('.affine-page-selected-rects-container');
+  const locator = page.locator('.affine-page-selected-rects-container > *');
   await expect(locator).toHaveCount(1);
+});
+
+test('press backspace inside should select code block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+  const codeBlock = page.locator('affine-code');
+  const selectedRects = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await page.keyboard.press('Backspace');
+  await expect(selectedRects).toHaveCount(1);
+  await expect(codeBlock).toBeVisible();
+  await page.keyboard.press('Backspace');
+  await expect(selectedRects).toHaveCount(0);
+  await expect(codeBlock).toBeHidden();
 });
 
 test('press backspace after code block can select code block', async ({
@@ -488,7 +482,7 @@ test('press backspace after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('Backspace');
 
-  const locator = page.locator('.affine-page-selected-rects-container');
+  const locator = page.locator('.affine-page-selected-rects-container > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -503,7 +497,7 @@ test('press ArrowUp after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('ArrowUp');
 
-  const locator = page.locator('.affine-page-selected-rects-container');
+  const locator = page.locator('.affine-page-selected-rects-container > *');
   await expect(locator).toHaveCount(1);
 });
 
