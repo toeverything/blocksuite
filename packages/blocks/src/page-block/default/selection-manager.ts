@@ -681,6 +681,9 @@ export class DefaultSelectionManager {
       ) {
         return;
       }
+      if (!this.state.selectedBlocks.length) {
+        return;
+      }
 
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({

@@ -84,7 +84,7 @@ export function blockRangeToNativeRange(blockRange: BlockRange) {
     models[models.length - 1],
     blockRange.endOffset
   );
-  if (!startNode) {
+  if (!endNode) {
     throw new Error(
       'Failed to convert block range to native range. End node is null.'
     );
