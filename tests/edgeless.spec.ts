@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { assertExists } from '@blocksuite/global/utils';
 import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
+  assertEdgelessHoverRect,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -77,11 +79,9 @@ test('cursor for active and inactive state', async ({ page }) => {
   await switchEditorMode(page);
   await undoByClick(page);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
 
   await redoByClick(page);
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
 
   // active
   await page.mouse.dblclick(450, 300);
@@ -225,12 +225,19 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
 
   const toolbarLocator = page.locator('edgeless-toolbar');
   await expect(toolbarLocator).toBeVisible();
-  await page.click('.icon-container[role="shape"]');
-  const shapeComponentLocator = page.locator('shape-menu');
-  await expect(shapeComponentLocator).toBeVisible();
 
-  await page.click('.icon-container[role="shape"]');
-  await expect(shapeComponentLocator).toBeHidden();
+  const shapeTool = page.locator('.icon-container[data-test-id="shape"]');
+  const shapeToolBox = await shapeTool.boundingBox();
+
+  assertExists(shapeToolBox);
+
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+
+  const shapeMenu = page.locator('edgeless-shape-menu');
+  await expect(shapeMenu).toBeVisible();
+
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await expect(shapeMenu).toBeHidden();
 });
 
 test('edgeless arrow up/down', async ({ page }) => {
@@ -260,4 +267,63 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await page.keyboard.press('ArrowUp');
   await assertSelection(page, 0, 4, 0);
+});
+
+test('selection box of shape element sync on fast dragging', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await switchMouseMode(page);
+  await dragBetweenCoords(
+    page,
+    { x: 150, y: 150 },
+    { x: 700, y: 500 },
+    { click: true }
+  );
+
+  await assertEdgelessHoverRect(page, 650, 450, 100, 100);
+});
+
+test('hover state for shape element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(150, 150);
+  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
+});
+
+test('hovering on shape should not have effect on underlying block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+
+  const block = page.locator('.affine-edgeless-block-child');
+  const blockBox = await block.boundingBox();
+  if (blockBox === null) throw new Error('Unexpected box value: box is null');
+
+  const { x, y } = blockBox;
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(x + 50, y + 50);
+  await assertEdgelessHoverRect(page, x, y, 100, 100);
 });

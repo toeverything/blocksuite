@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import { AwarenessStore, BlobUploadState } from '../awareness.js';
-import { BlockSchema } from '../base.js';
+import { BlockSchema, internalPrimitives } from '../base.js';
 import {
   BlobOptionsGetter,
   BlobStorage,
@@ -326,7 +326,7 @@ export class Workspace {
       this.flavourSchemaMap.set(schema.model.flavour, schema);
       this.flavourInitialPropsMap.set(
         schema.model.flavour,
-        schema.model.props()
+        schema.model.props(internalPrimitives)
       );
     });
     return this;

@@ -90,7 +90,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     noop();
   }
 
-  syncBlockSelectionRect() {
+  syncSelectionRect() {
     noop();
   }
 }

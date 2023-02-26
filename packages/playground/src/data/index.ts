@@ -6,8 +6,9 @@
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
 
-interface InitFn {
+export interface InitFn {
   (workspace: Workspace): Promise<string>;
+  id: string;
   displayName: string;
   description: string;
 }
@@ -32,6 +33,7 @@ export const empty: InitFn = (workspace: Workspace) => {
   });
 };
 
+empty.id = 'empty';
 empty.displayName = 'Empty Editor';
 empty.description = 'Start from empty editor';
 
@@ -63,6 +65,7 @@ export const heavy: InitFn = (workspace: Workspace) => {
   });
 };
 
+heavy.id = 'heavy';
 heavy.displayName = 'Heavy Example';
 heavy.description = 'Heavy example on thousands of paragraph blocks';
 
@@ -111,6 +114,7 @@ export const preset: InitFn = (workspace: Workspace) => {
   });
 };
 
+preset.id = 'preset';
 preset.displayName = 'BlockSuite Starter';
 preset.description = 'Start from friendly introduction';
 
@@ -219,5 +223,6 @@ export const database: InitFn = (workspace: Workspace) => {
   });
 };
 
+database.id = 'database';
 database.displayName = 'Database Example';
 database.description = 'Database block basic example';

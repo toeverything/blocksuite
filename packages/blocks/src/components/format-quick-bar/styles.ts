@@ -20,7 +20,7 @@ const paragraphPanelStyle = css`
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
   }
 `;

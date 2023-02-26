@@ -1,5 +1,6 @@
 export * from './components/index.js';
 export * from './managers/index.js';
+export * from './utils/index.js';
 
 const env =
   typeof globalThis !== 'undefined'
@@ -20,5 +21,12 @@ if (env[importIdentifier] === true) {
     '@blocksuite/editor was already imported. This breaks constructor checks and will lead to issues!'
   );
 }
+
+if (typeof window === 'undefined') {
+  throw new Error(
+    'Seems like you are importing @blocksuite/editor in SSR mode. Which is not supported for now.'
+  );
+}
+
 // @ts-ignore
 env[importIdentifier] = true;

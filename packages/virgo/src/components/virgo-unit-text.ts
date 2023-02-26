@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 
 const unitTextStyles = styleMap({
-  whiteSpace: 'pre',
+  whiteSpace: 'break-spaces',
 });
 
 @customElement('virgo-unit-text')

@@ -5,12 +5,8 @@ import type { TextAttributes } from '@blocksuite/virgo';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 import type { Point } from './rect.js';
-export type SelectionPosition = 'start' | 'end' | Point;
 
-export type SelectionOptions = {
-  needFocus?: boolean;
-  from?: 'previous' | 'next';
-};
+export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IService {
   onLoad?: () => Promise<void>;
@@ -48,25 +44,8 @@ export interface CommonBlockElement extends HTMLElement {
  */
 export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
-export interface SelectionInfo {
-  type: 'Block' | DomSelectionType;
-  selectedBlocks: SelectedBlock[];
-}
-
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
-
-export interface BlockSelectionInfo {
-  type: 'Block';
-  blocks: SelectedBlock[];
-}
 
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = FrameBlockModel;
@@ -91,6 +70,11 @@ export type OpenBlockInfo = {
     delete?: number;
     retain?: number;
     attributes?: TextAttributes;
+  }[];
+  rawText?: {
+    insert: string;
+    delete?: number;
+    retain?: number;
   }[];
   checked?: boolean;
   children: OpenBlockInfo[];

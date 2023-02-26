@@ -1,10 +1,12 @@
 import {
+  BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
-  BulletedListIconLarge,
   CrossIcon,
   DatabaseTableViewIcon,
+  ImageIcon,
+  NumberedListIconLarge,
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
@@ -43,7 +45,7 @@ type BlockHubItem = {
   toolTip: string;
 };
 
-export type CardListType = 'blank' | 'list' | 'text' | 'database';
+export type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {
@@ -101,7 +103,10 @@ export class BlockHub extends NonShadowLitElement {
   @query('[role="menu-entry"]')
   private _blockHubMenuEntry!: HTMLElement;
 
-  private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  private readonly _onDropCallback: (
+    e: DragEvent,
+    lastModelState: EditingState
+  ) => Promise<void>;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -122,54 +127,73 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .affine-block-hub-container {
-      width: 280px;
+      width: 274px;
       position: absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 8px);
       top: calc(50%);
-      overflow-y: auto;
+      overflow-y: unset;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
       fill: var(--affine-icon-color);
       font-size: var(--affine-font-sm);
-      background: var(--affine-block-hub-background);
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      background: var(--affine-hub-background);
+      box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
       border-radius: 10px;
     }
 
     .affine-block-hub-container[type='text'] {
       top: unset;
-      bottom: 0px;
+      bottom: 0;
       transform: unset;
-      right: calc(100% + 5.5px);
+      right: calc(100% + 4px);
     }
 
     .visible {
-      display: flex;
+      display: block;
     }
 
     .invisible {
       display: none;
     }
 
+    .card-container-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
     .card-container {
       display: flex;
       position: relative;
       align-items: center;
-      width: 256px;
+      width: 250px;
       height: 54px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       cursor: grab;
+      top: 0;
+      left: 0;
+      transition: all 0.1s ease-in-out;
+    }
+
+    .card-icon-container {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      right: 12px;
+    }
+
+    .card-icon-container > svg {
+      width: 20px;
+      height: 20px;
     }
 
     .card-container:hover {
-      background: var(--affine-block-hub-hover-background);
+      background: var(--affine-card-hover-background);
       fill: var(--affine-primary-color);
       top: -2px;
       left: -2px;
@@ -177,22 +201,26 @@ export class BlockHub extends NonShadowLitElement {
 
     .card-description-container {
       display: block;
-      width: 200px;
+      width: 190px;
       color: var(--affine-text-color);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      margin: 8px 0 8px 12px;
       text-align: justify;
     }
 
     .affine-block-hub-container .description {
-      font-size: var(--affine-font-xs);
-      color: var(---affine-icon-color);
+      font-size: var(--affine-font-sm);
+      line-height: var(--affine-line-height);
+      color: var(--affine-secondary-text-color);
+      white-space: pre;
     }
 
     .card-container:hover.grabbing {
       top: unset;
       left: unset;
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+        0 0 12px rgba(66, 65, 73, 0.08);
     }
 
     .grabbing {
@@ -205,7 +233,8 @@ export class BlockHub extends NonShadowLitElement {
 
     .affine-block-hub-title-container {
       margin: 16px 0 20px 12px;
-      color: var(--affine-line-number-color);
+      color: var(--affine-secondary-text-color);
+      font-size: var(--affine-font-base);
     }
 
     .prominent {
@@ -218,11 +247,14 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 0px 4px;
       position: fixed;
       width: 44px;
       background: var(--affine-page-background);
       border-radius: 10px;
+    }
+
+    .block-hub-menu-container[expanded] {
+      box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
     }
 
     .block-hub-icon-container {
@@ -235,12 +267,6 @@ export class BlockHub extends NonShadowLitElement {
       border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
-    }
-
-    .block-hub-icon-container:first-child {
-      background: var(--affine-code-block-background);
-      border: 0.5px solid var(--affine-border-color);
-      border-radius: 5px;
     }
 
     .block-hub-icon-container[selected='true'] {
@@ -264,10 +290,15 @@ export class BlockHub extends NonShadowLitElement {
       fill: var(--affine-line-number-color);
     }
 
+    .block-hub-menu-container[expanded] .new-icon {
+      border-radius: 5px;
+    }
+
     .new-icon:hover {
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
+      fill: var(--affine-primary-color);
       background: var(--affine-page-background);
     }
 
@@ -295,13 +326,14 @@ export class BlockHub extends NonShadowLitElement {
       right: unset;
       top: 10px;
       transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0px 10px;
+      border-radius: 10px 10px 0 10px;
+    }
+
+    [role='menu-entry'] tool-tip {
+      font-size: var(--affine-font-sm);
     }
 
     .block-hub-icons-container {
-      position: absolute;
-      bottom: 100%;
-      height: 0px;
       overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
     }
@@ -313,7 +345,10 @@ export class BlockHub extends NonShadowLitElement {
   constructor(options: {
     mouseRoot: HTMLElement;
     enable_database: boolean;
-    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+    onDropCallback: (
+      e: DragEvent,
+      lastModelState: EditingState
+    ) => Promise<void>;
   }) {
     super();
     this._mouseRoot = options.mouseRoot;
@@ -442,7 +477,7 @@ export class BlockHub extends NonShadowLitElement {
     }
     if (!this._expanded) {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0px 4px';
+      this._blockHubMenuContainer.style.padding = '0 4px';
       this._timer = window.setTimeout(() => {
         this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
@@ -463,13 +498,13 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
-    const menuNum = this._enable_database ? 4 : 3;
+    const menuNum = this._enable_database ? 5 : 4;
     const height = menuNum * 44 + 10;
     return html`
       <div
         class="block-hub-icons-container"
         ?transition=${this._expanded}
-        style="height: ${this._expanded ? `${height}px` : '0px'};"
+        style="height: ${this._expanded ? `${height}px` : '0'};"
       >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
@@ -488,7 +523,7 @@ export class BlockHub extends NonShadowLitElement {
             tip-position="left"
             style="top: 5px"
             ?hidden=${!this._showToolTip}
-            >Drag to Insert blank line
+            >Drag to insert blank line
           </tool-tip>
         </div>
         <div
@@ -504,7 +539,19 @@ export class BlockHub extends NonShadowLitElement {
           selected=${this._cardVisibleType === 'list' ? 'true' : 'false'}
         >
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
-          ${BulletedListIconLarge}
+          ${NumberedListIconLarge}
+        </div>
+        <div
+          class="block-hub-icon-container"
+          type="file"
+          selected=${this._cardVisibleType === 'file' ? 'true' : 'false'}
+        >
+          ${this._blockHubCardTemplate(
+            BLOCKHUB_FILE_ITEMS,
+            'file',
+            'Image or file'
+          )}
+          ${ImageIcon}
         </div>
         ${this._enable_database
           ? html`
@@ -539,9 +586,10 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const shouldScroll = this._maxHeight < 800;
     const styles = styleMap({
       maxHeight: `${this._maxHeight}px`,
-      overflowY: this._maxHeight < 800 ? 'scroll' : 'unset',
+      overflowY: shouldScroll ? 'scroll' : 'unset',
     });
     return html`
       <div
@@ -551,37 +599,39 @@ export class BlockHub extends NonShadowLitElement {
         style="${styles}"
         type=${type}
       >
-        <div>
-          <div class="affine-block-hub-title-container">${title}</div>
-          ${blockHubItems.map(
-            ({ flavour, type, name, description, icon, toolTip }, index) => {
-              return html`
+        <div class="affine-block-hub-title-container">${title}</div>
+        ${blockHubItems.map(
+          ({ flavour, type, name, description, icon, toolTip }, index) => {
+            return html`
+              <div class="card-container-wrapper">
                 <div
-                  class="has-tool-tip"
+                  class="card-container has-tool-tip ${this._isGrabbing
+                    ? 'grabbing'
+                    : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
                   affine-type=${type}
-                  style="z-index: ${blockHubItems.length - index}"
                 >
-                  <div
-                    class="card-container ${this._isGrabbing ? 'grabbing' : ''}"
-                  >
-                    <div class="card-description-container">
-                      <div>${name}</div>
-                      <div class="description">${description}</div>
-                    </div>
-                    ${icon}
+                  <div class="card-description-container">
+                    <div>${name}</div>
+                    <div class="description">${description}</div>
                   </div>
+                  <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
-                    tip-position="bottom"
-                    style=${this._showToolTip ? '' : 'display: none'}
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="display: ${this._showToolTip
+                      ? ''
+                      : 'none'}; z-index: ${blockHubItems.length - index}"
                     >${toolTip}
                   </centered-tool-tip>
                 </div>
-              `;
-            }
-          )}
-        </div>
+              </div>
+            `;
+          }
+        )}
       </div>
     `;
   };
@@ -638,6 +688,24 @@ export class BlockHub extends NonShadowLitElement {
       this._currentPageX = e.pageX;
       this._currentPageY = e.pageY;
     }
+
+    this._refreshCursor(e);
+  };
+
+  private _refreshCursor = (e: MouseEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    const blocks = this.getAllowedBlocks();
+    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
+      skipX: true,
+    });
+    modelState
+      ? (this._cursor = modelState.index)
+      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
@@ -749,6 +817,7 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div
         class="block-hub-menu-container"
+        ?expanded=${this._expanded}
         style="bottom: ${this.bottom}px; right: ${this.right}px;"
       >
         ${this._blockHubMenuTemplate()}
@@ -763,7 +832,7 @@ export class BlockHub extends NonShadowLitElement {
             inert
             tip-position="left"
             role="tooltip"
-            >insert blocks
+            >Insert blocks
           </tool-tip>
         </div>
         ${this._blockHubCardTemplate(BLOCKHUB_TEXT_ITEMS, 'text', 'Text block')}

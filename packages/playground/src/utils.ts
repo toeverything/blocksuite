@@ -1,4 +1,5 @@
 import * as blocks from '@blocksuite/blocks';
+import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import {
   configDebugLog,
@@ -17,6 +18,7 @@ import {
   Utils,
   Workspace,
 } from '@blocksuite/store';
+import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
@@ -28,6 +30,13 @@ export const defaultMode =
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 
+declare global {
+  // eslint-disable-next-line no-var
+  var targetPageId: string | undefined;
+  // eslint-disable-next-line no-var
+  var debugWorkspace: Workspace | undefined;
+}
+
 if (isE2E) {
   Object.defineProperty(window, '$blocksuite', {
     value: Object.freeze({
@@ -36,6 +45,34 @@ if (isE2E) {
       global: { utils: globalUtils },
       editor,
     }),
+  });
+} else {
+  Object.defineProperty(globalThis, 'openFromFile', {
+    value: async function importFromFile(pageId?: string) {
+      const file = await fileOpen({
+        extensions: ['.ydoc'],
+      });
+      const buffer = await file.arrayBuffer();
+      if (pageId) {
+        globalThis.targetPageId = pageId;
+      }
+      Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
+    },
+  });
+  Object.defineProperty(globalThis, 'debugFromFile', {
+    value: async function debuggerFromFile() {
+      const file = await fileOpen({
+        extensions: ['.ydoc'],
+      });
+      const buffer = await file.arrayBuffer();
+      const workspace = new Workspace({
+        room: 'temporary',
+      })
+        .register(builtInSchemas)
+        .register(__unstableSchemas);
+      Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
+      globalThis.debugWorkspace = workspace;
+    },
   });
 }
 export const isBase64 =
@@ -119,6 +156,7 @@ export function getOptions(): Pick<
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_slash_menu: params.get('slash') !== '0',
+      enable_block_selection_format_bar: true,
       readonly: {
         'space:page0': false,
       },

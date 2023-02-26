@@ -8,9 +8,8 @@ import type { EmbedBlockModel } from './embed-model.js';
 export class EmbedBlockComponent extends NonShadowLitElement {
   static styles = css`
     .affine-embed-wrapper {
-      /* padding: 10px; */
       text-align: center;
-      height: 24px;
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-embed-wrapper-caption {
       width: 100%;

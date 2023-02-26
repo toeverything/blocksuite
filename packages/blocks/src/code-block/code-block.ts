@@ -88,7 +88,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container {
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
@@ -105,7 +105,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     .affine-code-block-container .container {
       position: absolute;
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;
@@ -136,7 +136,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     .affine-code-block-container .ql-syntax {
       width: 620px;
       margin: 0;
-      overflow-x: scroll;
+      overflow-x: auto;
       /*scrollbar-color: #fff0 #fff0;*/
     }
 
@@ -158,14 +158,14 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    .lang-container code-block-button {
+    .lang-container icon-button {
       padding: 4px 0 0 12px;
       justify-content: flex-start;
     }
 
     .code-block-option {
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
+        0 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
@@ -223,14 +223,14 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   render() {
     const page = getDefaultPageBlock(this.model);
-    const codeBlockOption = page.codeBlockOption;
+    const codeBlockOption = page?.codeBlockOption;
     const boundingClientRect = this.getBoundingClientRect();
     // when there are multiple code blocks, decide whether mouse is hovering on the current code block
-    const isHovering = !codeBlockOption
-      ? false
-      : codeBlockOption.position.y + boundingClientRect.height >
+    const isHovering = codeBlockOption
+      ? codeBlockOption.position.y + boundingClientRect.height >
           boundingClientRect.top &&
-        codeBlockOption.position.y < boundingClientRect.bottom;
+        codeBlockOption.position.y < boundingClientRect.bottom
+      : false;
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
@@ -242,14 +242,13 @@ export class CodeBlockComponent extends NonShadowLitElement {
         ${isHovering || this.showLangList !== 'hidden'
           ? html` <div class="container">
               <div class="lang-container" @click=${this._onClick}>
-                <code-block-button
+                <icon-button
                   width="101px"
                   height="24px"
-                  fontSize="14px"
                   class="${this.showLangList === 'hidden' ? '' : 'clicked'}"
                 >
                   ${this.model.language} ${ArrowDownIcon}
-                </code-block-button>
+                </icon-button>
               </div>
               <lang-list
                 showLangList=${this.showLangList}

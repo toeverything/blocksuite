@@ -75,7 +75,7 @@ export async function dragEmbedResizeByTopRight(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left - 334, y },
+      to: { x: bottomRightButtonBound.left + 5 - 339, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
@@ -92,7 +92,7 @@ export async function dragEmbedResizeByTopLeft(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left + 344, y },
+      to: { x: bottomRightButtonBound.left + 5 + 339, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
@@ -124,10 +124,6 @@ export async function dragHandleFromBlockToBlockBottomById(
   if (!handle) {
     throw new Error();
   }
-  await page.mouse.click(
-    handle.x + handle.width / 2,
-    handle.y + handle.height / 2
-  );
   await page.mouse.move(
     handle.x + handle.width / 2,
     handle.y + handle.height / 2

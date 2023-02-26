@@ -16,15 +16,17 @@ export const styles = css`
   }
 
   .slash-menu {
+    box-sizing: border-box;
     font-size: var(--affine-font-base);
     position: absolute;
-    padding: 8px 4px;
+    padding: 12px 0;
     display: flex;
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
+    /* transition: max-height 0.2s ease-in-out; */
   }
 
   .slash-category {
@@ -33,14 +35,12 @@ export const styles = css`
     box-sizing: border-box;
     width: 150px;
     max-width: 150px;
-    transition: max-width 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
     color: #8e8d91;
     gap: 5px;
-    padding: 0 16px;
-    padding-right: 0;
-    margin-right: 16px;
+    margin-bottom: 20px;
+    /* transition: max-width 0.2s ease-in-out; */
   }
   .slash-category::before {
     content: '';
@@ -52,13 +52,22 @@ export const styles = css`
     background-color: var(--affine-border-color);
   }
 
+  .slash-category-hide {
+    max-width: 0;
+    padding: 0;
+    margin: 0;
+    height: 0;
+  }
+
   .slash-category-name {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
     white-space: nowrap;
     cursor: pointer;
-    padding: 5px 8px;
-    width: 100%;
+    padding: 4px 20px;
+  }
+  .slash-category-name:hover {
+    color: var(--affine-popover-color);
   }
 
   .slash-active-category {
@@ -73,14 +82,16 @@ export const styles = css`
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 2px;
+    width: 1px;
     height: 12px;
     background: linear-gradient(180deg, #5438ff 0%, #b638ff 100%);
-    border-radius: 0.5px;
+    border-radius: 1px;
   }
 
   .slash-item-container {
+    box-sizing: border-box;
     overflow-y: auto;
+    padding: 0 8px;
     width: 200px;
   }
 
@@ -94,7 +105,7 @@ export const styles = css`
   }
 
   .slash-item-divider {
-    border: 1px dashed var(--affine-border-color);
+    border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
   }
 `;

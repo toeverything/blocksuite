@@ -69,14 +69,14 @@ declare type BlockSuiteFlags = {
   enable_surface: boolean;
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
+
   /**
-   * @deprecated Will be removed after slash menu is stable
+   * Block selection can trigger format bar
    */
-  enable_append_flavor_slash: boolean;
+  enable_block_selection_format_bar: boolean;
 
   enable_toggle_block: boolean;
   enable_hide_children: boolean;
-
   enable_edgeless_toolbar: boolean;
   readonly: Record<string, boolean>;
 };

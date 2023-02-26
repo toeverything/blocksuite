@@ -185,6 +185,7 @@ test('split block when paste', async ({ page }) => {
   await captureHistory(page);
 
   await setQuillSelection(page, 1, 1);
+  await page.waitForTimeout(100);
   await pasteContent(page, clipData);
 
   await assertRichTexts(page, ['atext', 'h1', 'c']);

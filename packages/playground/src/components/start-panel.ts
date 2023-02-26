@@ -9,8 +9,8 @@ import * as examples from '../data/index.js';
 
 const initFunctions = Object.values(examples);
 
-@customElement('example-list')
-export class ExampleList extends LitElement {
+@customElement('start-panel')
+export class StartPanel extends LitElement {
   static styles = css`
     .container {
       display: flex;
@@ -34,7 +34,14 @@ export class ExampleList extends LitElement {
         ${repeat(
           initFunctions,
           fn => html`
-            <sl-card class="card" @click=${() => fn(window.workspace)}>
+            <sl-card
+              class="card"
+              @click=${() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('init', fn.id);
+                window.location.search = urlParams.toString();
+              }}
+            >
               <div slot="header">${fn.displayName}</div>
               ${fn.description}
             </sl-card>
@@ -47,6 +54,6 @@ export class ExampleList extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'example-list': ExampleList;
+    'start-panel': StartPanel;
   }
 }

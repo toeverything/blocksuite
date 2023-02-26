@@ -1,4 +1,5 @@
 import { init, parse } from 'es-module-lexer';
+import MagicString from 'magic-string';
 import micromatch from 'micromatch';
 import path from 'path';
 import type { Plugin } from 'vite';
@@ -47,7 +48,12 @@ export function fineTuneHmr({
           }
           `;
 
-        return preamble + '\n' + code;
+        const s = new MagicString(code);
+        s.prepend(preamble + '\n');
+        return {
+          code: s.toString(),
+          map: s.generateMap({ hires: true, source: id, includeContent: true }),
+        };
       }
     },
   };

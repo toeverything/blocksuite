@@ -5,14 +5,12 @@ import type { Quill, RangeStatic } from 'quill';
 
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getNextBlock,
   isCollapsedAtBlockStart,
-  isMultiBlockRange,
-  noop,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
-import { markdownConvert } from './markdown-convert.js';
+import { markdownConvert, tryMatchSpaceHotkey } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
@@ -22,7 +20,6 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
-  tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
 // Type definitions is ported from quill
@@ -171,13 +168,19 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onIndent(this: KeyboardEventThis) {
+  function onTab(this: KeyboardEventThis) {
+    if (matchFlavours(model, ['affine:code'])) {
+      return ALLOW_DEFAULT;
+    }
     const index = this.quill.getSelection()?.index;
     handleIndent(page, model, index);
     return PREVENT_DEFAULT;
   }
 
-  function onUnindent(this: KeyboardEventThis) {
+  function onShiftTab(this: KeyboardEventThis) {
+    if (matchFlavours(model, ['affine:code'])) {
+      return ALLOW_DEFAULT;
+    }
     const index = this.quill.getSelection()?.index;
     handleUnindent(page, model, index);
     return PREVENT_DEFAULT;
@@ -215,17 +218,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return isPrevented;
   }
 
-  function onBackspace(this: KeyboardEventThis) {
-    // To workaround uncontrolled behavior when deleting character at block start,
-    // in this case backspace should be handled in quill.
-    if (isCollapsedAtBlockStart(this.quill)) {
-      // window.requestAnimationFrame(() => {
+  function onBackspace(e: KeyboardEvent, quill: Quill) {
+    if (isCollapsedAtBlockStart(quill)) {
       handleLineStartBackspace(page, model);
-      // });
+      e.stopPropagation();
       return PREVENT_DEFAULT;
-    } else if (isMultiBlockRange(getCurrentRange())) {
-      // return PREVENT_DEFAULT;
-      noop();
     }
     return ALLOW_DEFAULT;
   }
@@ -283,12 +280,12 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     tab: {
       key: 'Tab',
-      handler: onIndent,
+      handler: onTab,
     },
     shiftTab: {
       key: 'Tab',
       shiftKey: true,
-      handler: onUnindent,
+      handler: onShiftTab,
     },
     spaceMarkdownMatch: {
       key: ' ',
@@ -303,7 +300,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     backspace: {
       key: 'Backspace',
-      handler: onBackspace,
+      handler(
+        this: KeyboardEventThis,
+        range: QuillRange,
+        context: BindingContext
+      ) {
+        return onBackspace(context.event, this.quill);
+      },
     },
     up: {
       key: 'ArrowUp',
@@ -339,7 +342,12 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
 
     slash: {
-      key: '/',
+      key: [
+        '/',
+        // Compatible with CJK IME
+        '、',
+      ],
+      shiftKey: null,
       // prefix non digit or empty string
       // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
       // prefix: /[^\d]$|^(?![\s\S])/,
@@ -358,7 +366,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         //   return ALLOW_DEFAULT;
         // }
         requestAnimationFrame(() => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
         return ALLOW_DEFAULT;

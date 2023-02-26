@@ -1,13 +1,12 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import { Signal } from '@blocksuite/global/utils';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
-import { BaseBlockModel } from '../base.js';
+import { BaseBlockModel, internalPrimitives } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import { RichTextAdapter, Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
@@ -20,6 +19,7 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
+
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -66,7 +66,11 @@ export class Page extends Space<PageData> {
     rootAdded: new Signal<BaseBlockModel | BaseBlockModel[]>(),
     rootDeleted: new Signal<string | string[]>(),
     textUpdated: new Signal<Y.YTextEvent>(),
-    updated: new Signal(),
+    yUpdated: new Signal(),
+    blockUpdated: new Signal<{
+      type: 'add' | 'delete' | 'update';
+      id: string;
+    }>(),
   };
 
   constructor(
@@ -79,6 +83,10 @@ export class Page extends Space<PageData> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+  }
+
+  get history() {
+    return this._history;
   }
 
   get workspace() {
@@ -111,7 +119,11 @@ export class Page extends Space<PageData> {
   }
 
   get root() {
-    return Array.isArray(this._root) ? this._root[0] : this._root;
+    const root = Array.isArray(this._root) ? this._root[0] : this._root;
+    if (root && root.flavour !== 'affine:page') {
+      console.error('data broken');
+    }
+    return root;
   }
 
   get surface() {
@@ -236,14 +248,18 @@ export class Page extends Space<PageData> {
     );
   }
 
-  getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {
-    if (rootId === target.id) return null;
+  getParentById(
+    rootId: string,
+    target: BaseBlockModel | string
+  ): BaseBlockModel | null {
+    const targetId = typeof target === 'string' ? target : target.id;
+    if (rootId === targetId) return null;
 
     const root = this._blockMap.get(rootId);
     if (!root) return null;
 
     for (const [childId] of root.childMap) {
-      if (childId === target.id) return root;
+      if (childId === targetId) return root;
 
       const parent = this.getParentById(childId, target);
       if (parent !== null) return parent;
@@ -251,7 +267,7 @@ export class Page extends Space<PageData> {
     return null;
   }
 
-  getParent(block: BaseBlockModel) {
+  getParent(block: BaseBlockModel | string) {
     if (!this.root) return null;
 
     return this.getParentById(this.root.id, block);
@@ -313,6 +329,45 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  getSchemaByFlavour(flavour: string) {
+    return this.workspace.flavourSchemaMap.get(flavour);
+  }
+
+  getInitialPropsMapByFlavour(flavour: string) {
+    return this.workspace.flavourInitialPropsMap.get(flavour);
+  }
+
+  @debug('CRUD')
+  public addBlocksByFlavour<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    Flavour extends keyof ALLProps & string = keyof ALLProps & string
+  >(
+    blocks: Array<{
+      flavour: Flavour;
+      blockProps?: Partial<
+        ALLProps[Flavour] &
+          Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
+      >;
+    }>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): string[] {
+    const ids: string[] = [];
+    blocks.forEach(block => {
+      const id = this.addBlockByFlavour<ALLProps, Flavour>(
+        block.flavour,
+        block.blockProps ?? {},
+        parent,
+        parentIndex
+      );
+      ids.push(id);
+      typeof parentIndex === 'number' && parentIndex++;
+    });
+
+    return ids;
+  }
+
   @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -326,7 +381,7 @@ export class Page extends Space<PageData> {
     > = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
-  ) {
+  ): string {
     if (this.awarenessStore.isReadonly(this)) {
       throw new Error('cannot modify data in readonly mode');
     }
@@ -353,7 +408,15 @@ export class Page extends Space<PageData> {
       initInternalProps(yBlock, clonedProps);
       const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
+      const schema = this.getSchemaByFlavour(flavour);
+      assertExists(schema);
+      syncBlockProps(
+        schema,
+        defaultProps,
+        yBlock,
+        clonedProps,
+        this._ignoredKeys
+      );
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent);
@@ -368,6 +431,12 @@ export class Page extends Space<PageData> {
         yChildren.insert(index, [id]);
       }
     });
+
+    this.signals.blockUpdated.emit({
+      type: 'add',
+      id,
+    });
+
     return id;
   }
 
@@ -397,30 +466,45 @@ export class Page extends Space<PageData> {
   }
 
   @debug('CRUD')
-  moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+  moveBlocks(
+    blocks: BaseBlockModel[],
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
     if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const currentParentModel = this.getParent(model);
+
+    const firstBlock = blocks[0];
+    const currentParentModel = this.getParent(firstBlock);
+
+    // the blocks must have the same parent (siblings)
+    if (blocks.some(block => this.getParent(block) !== currentParentModel)) {
+      console.error('the blocks must have the same parent');
+    }
+
     const nextParentModel = this.getParent(targetModel);
     if (currentParentModel === null || nextParentModel === null) {
       throw new Error('cannot find parent model');
     }
+
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === model.id);
-      yChildrenA.delete(idx);
+      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
+      yChildrenA.delete(idx, blocks.length);
       const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
       const nextIdx = yChildrenB
         .toArray()
         .findIndex(id => id === targetModel.id);
+
+      const ids = blocks.map(block => block.id);
       if (top) {
-        yChildrenB.insert(nextIdx, [model.id]);
+        yChildrenB.insert(nextIdx, ids);
       } else {
-        yChildrenB.insert(nextIdx + 1, [model.id]);
+        yChildrenB.insert(nextIdx + 1, ids);
       }
     });
     currentParentModel.propsUpdated.emit();
@@ -457,32 +541,55 @@ export class Page extends Space<PageData> {
         model.flavour
       );
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, props, this._ignoredKeys);
+      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      assertExists(schema);
+      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+    });
+
+    this.signals.blockUpdated.emit({
+      type: 'update',
+      id: model.id,
     });
   }
 
-  addSiblingBlock(
+  addSiblingBlocks(
     targetModel: BaseBlockModel,
-    blockProps: Partial<BaseBlockModel>,
-    direction: 'left' | 'right' = 'right'
-  ) {
+    props: Array<Partial<BaseBlockModel>>,
+    place: 'after' | 'before' = 'after'
+  ): string[] {
     const parent = this.getParent(targetModel);
-    assertExists(blockProps.flavour);
     assertExists(parent);
 
     const targetIndex =
       parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
-    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+    const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
-    const id = this.addBlockByFlavour(
-      blockProps.flavour,
-      {
-        type: blockProps.type,
-      },
-      parent.id,
-      insertIndex
-    );
-    return id;
+    if (props.length > 1) {
+      const blocks: Array<{
+        flavour: keyof BlockSuiteModelProps.ALL;
+        blockProps: Partial<
+          BlockSuiteModelProps.ALL &
+            Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
+        >;
+      }> = [];
+      props.forEach(prop => {
+        const { flavour, ...blockProps } = prop;
+        assertExists(flavour);
+        blocks.push({ flavour, blockProps });
+      });
+      const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
+      return ids;
+    } else {
+      assertExists(props[0].flavour);
+      const { flavour, ...blockProps } = props[0];
+      const id = this.addBlockByFlavour(
+        flavour,
+        blockProps,
+        parent.id,
+        insertIndex
+      );
+      return [id];
+    }
   }
 
   deleteBlockById(id: string) {
@@ -540,6 +647,11 @@ export class Page extends Space<PageData> {
         }
       }
     });
+
+    this.signals.blockUpdated.emit({
+      type: 'delete',
+      id: model.id,
+    });
   }
 
   /** Connect a rich text editor instance with a YText instance. */
@@ -553,13 +665,6 @@ export class Page extends Space<PageData> {
 
     const adapter = new RichTextAdapter(this, yText, quill);
     this.richTextAdapters.set(id, adapter);
-
-    quill.on('selection-change', () => {
-      const cursor = adapter.getCursor();
-      if (!cursor) return;
-
-      this.awarenessStore.setLocalCursor(this, { ...cursor, id });
-    });
   };
 
   /** Cancel the connection between the rich text editor instance and YText. */
@@ -595,7 +700,8 @@ export class Page extends Space<PageData> {
     this.signals.rootAdded.dispose();
     this.signals.rootDeleted.dispose();
     this.signals.textUpdated.dispose();
-    this.signals.updated.dispose();
+    this.signals.yUpdated.dispose();
+    this.signals.blockUpdated.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -635,7 +741,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awarenessStore.getLocalCursor(this)
+        this.awarenessStore.getLocalRange(this)
       );
     }
 
@@ -643,12 +749,12 @@ export class Page extends Space<PageData> {
   };
 
   private _historyPopObserver = (event: { stackItem: StackItem }) => {
-    const cursor = event.stackItem.meta.get('cursor-location');
-    if (!cursor) {
+    const range = event.stackItem.meta.get('cursor-location');
+    if (!range) {
       return;
     }
 
-    this.awarenessStore.setLocalCursor(this, cursor);
+    this.awarenessStore.setLocalRange(this, range);
     this._historyObserver();
   };
 
@@ -670,7 +776,7 @@ export class Page extends Space<PageData> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockModel.flavour = schema.model.flavour as any;
     blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.props();
+    const modelProps = schema.model.props(internalPrimitives);
     Object.entries(modelProps).forEach(([key, value]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (blockModel as any)[key] = props[key] ?? value;
@@ -680,7 +786,7 @@ export class Page extends Space<PageData> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
-    const isRoot = this._blockMap.size === 0;
+    let isRoot = false;
     let isSurface = false;
 
     const props = toBlockProps(yBlock) as BlockProps;
@@ -688,22 +794,22 @@ export class Page extends Space<PageData> {
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
+    if (model.flavour === 'affine:page') {
+      isRoot = true;
+    }
     this._blockMap.set(props.id, model);
 
-    if (
-      // TODO use schema
-      matchFlavours(model, [
-        'affine:paragraph',
-        'affine:list',
-        'affine:code',
-      ]) &&
-      !yBlock.get('prop:text')
-    ) {
-      this.transact(() => yBlock.set('prop:text', new Y.Text()));
-    }
+    const initialProps = this.workspace.flavourInitialPropsMap.get(
+      model.flavour
+    );
+    assertExists(initialProps);
+    Object.entries(initialProps).forEach(([key, value]) => {
+      if (value instanceof Text) {
+        const yText = yBlock.get(`prop:${key}`) as Y.Text;
+        Object.assign(model, { [key]: new Text(yText) });
+      }
+    });
 
-    const yText = yBlock.get('prop:text') as Y.Text;
-    model.text = new Text(yText);
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
@@ -883,7 +989,7 @@ export class Page extends Space<PageData> {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.signals.updated.emit();
+    this.signals.yUpdated.emit();
   };
 
   private _handleVersion() {

@@ -26,17 +26,19 @@ export class FormatBarButton extends IconButton {
   @property()
   active = false;
 
+  private readonly _mousedown = (e: MouseEvent) => {
+    // prevents catching or bubbling in editor-container
+    e.stopPropagation();
+  };
+
   override connectedCallback() {
     super.connectedCallback();
+    this.addEventListener('mousedown', this._mousedown);
+  }
 
-    this.style.setProperty(
-      '--button-width',
-      typeof this.width === 'string' ? this.width : `${this.width}px`
-    );
-    this.style.setProperty(
-      '--button-height',
-      typeof this.height === 'string' ? this.height : `${this.height}px`
-    );
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('mousedown', this._mousedown);
   }
 }
 

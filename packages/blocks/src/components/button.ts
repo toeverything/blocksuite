@@ -67,7 +67,13 @@ export class IconButton extends LitElement {
   `;
 
   @property()
-  size: string | number = '28px';
+  size: string | number | null = null;
+
+  @property()
+  width: string | number = '28px';
+
+  @property()
+  height: string | number = '28px';
 
   @property()
   text: string | null = null;
@@ -91,23 +97,31 @@ export class IconButton extends LitElement {
     super.connectedCallback();
     this.tabIndex = 0;
 
-    this.style.setProperty(
-      '--button-size',
-      typeof this.size === 'string' ? this.size : `${this.size}px`
-    );
+    if (this.size && (this.width || this.height)) {
+      throw new Error(
+        'Cannot set both size and width/height on an icon-button'
+      );
+    }
+
+    let width = this.width;
+    let height = this.height;
+    if (this.size) {
+      width = this.size;
+      height = this.size;
+    }
 
     this.style.setProperty(
       '--button-width',
-      typeof this.size === 'string' ? this.size : `${this.size}px`
+      typeof width === 'string' ? width : `${width}px`
     );
     this.style.setProperty(
       '--button-height',
-      typeof this.size === 'string' ? this.size : `${this.size}px`
+      typeof height === 'string' ? height : `${height}px`
     );
   }
 
   override render() {
-    return html`<slot></slot> ${this.text
+    return html`<slot></slot>${this.text
         ? html`<span style="margin-left: 12px;">${this.text}</span>`
         : ''}`;
   }

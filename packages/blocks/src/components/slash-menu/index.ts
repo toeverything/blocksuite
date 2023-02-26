@@ -3,7 +3,7 @@ import './slash-menu-node.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
-  getQuillIndexByNativeSelection,
+  getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
 import {
@@ -13,14 +13,13 @@ import {
 } from '../../page-block/utils/position.js';
 import type { SlashMenu } from './slash-menu-node.js';
 
-const MAX_HEIGHT = 344;
 let globalAbortController = new AbortController();
 
 function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
   const { placement, height } = compareTopAndBottomSpace(
     range,
     document.body,
-    30
+    16
   );
 
   const positioningElRect = range.getBoundingClientRect();
@@ -46,7 +45,7 @@ function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
 
   slashMenu.left = `${safeCoordinate.x}px`;
   slashMenu.top = `${safeCoordinate.y}px`;
-  slashMenu.maxHeight = `${Math.min(height, MAX_HEIGHT)}px`;
+  slashMenu.maxHeight = height;
   slashMenu.position = placement;
 }
 
@@ -83,11 +82,17 @@ function onAbort(
     );
     return;
   }
-  const idx = getQuillIndexByNativeSelection(
-    range.startContainer,
-    // minus 1 to remove the slash
-    range.startOffset - 1
-  );
+  const richText = getRichTextByModel(model);
+  const quill = richText?.quill;
+  if (!quill) {
+    console.warn(
+      'Failed to clean slash search text! No quill found for model, model:',
+      model
+    );
+    return;
+  }
+  const { index: curIdx } = quill.getSelection();
+  const idx = curIdx - searchStr.length;
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
   if (textStr !== searchStr) {

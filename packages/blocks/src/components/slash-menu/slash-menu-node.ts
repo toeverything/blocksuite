@@ -19,7 +19,7 @@ export class SlashMenu extends LitElement {
   top: string | null = null;
 
   @property()
-  maxHeight: string | null = null;
+  maxHeight: number | null = null;
 
   @property()
   position: 'top' | 'bottom' = 'bottom';
@@ -61,6 +61,12 @@ export class SlashMenu extends LitElement {
       Signal.disposableListener(window, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
         capture: true,
+      })
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(this, 'mousedown', e => {
+        // Prevent input from losing focus
+        e.preventDefault();
       })
     );
 
@@ -153,61 +159,81 @@ export class SlashMenu extends LitElement {
     }
 
     if (
-      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].includes(
-        e.key
-      )
+      ![
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Enter',
+        'Tab',
+      ].includes(e.key)
     ) {
       return;
     }
+    // prevent arrow key from moving cursor
+    e.preventDefault();
     const configLen = this._filterItems.length;
+
+    const handleCursorUp = () => {
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx - 1 + menuGroups.length) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex =
+        (this._activatedItemIndex - 1 + configLen) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
+    const handleCursorDown = () => {
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx + 1) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
     switch (e.key) {
       case 'Enter': {
-        e.preventDefault();
         if (e.isComposing) {
           return;
         }
         this._handleClickItem(this._activatedItemIndex);
-        break;
+        return;
       }
+      case 'Tab': {
+        if (e.shiftKey) {
+          handleCursorUp();
+        } else {
+          handleCursorDown();
+        }
+        return;
+      }
+
       case 'ArrowUp': {
-        e.preventDefault();
-        if (this._leftPanelActivated) {
-          const nowGroupIdx = this._getGroupIndexByItem(
-            this._filterItems[this._activatedItemIndex]
-          );
-          this._handleClickCategory(
-            menuGroups[
-              (nowGroupIdx - 1 + menuGroups.length) % menuGroups.length
-            ]
-          );
-          return;
-        }
-        this._activatedItemIndex =
-          (this._activatedItemIndex - 1 + configLen) % configLen;
-        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
-        break;
+        handleCursorUp();
+        return;
       }
+
       case 'ArrowDown': {
-        e.preventDefault();
-        if (this._leftPanelActivated) {
-          const nowGroupIdx = this._getGroupIndexByItem(
-            this._filterItems[this._activatedItemIndex]
-          );
-          this._handleClickCategory(
-            menuGroups[(nowGroupIdx + 1) % menuGroups.length]
-          );
-          return;
-        }
-        this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
-        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
-        break;
+        handleCursorDown();
+        return;
       }
+
       case 'ArrowLeft':
-        e.preventDefault();
         this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
-        e.preventDefault();
         if (this._leftPanelActivated) {
           this._leftPanelActivated = false;
         }
@@ -215,8 +241,6 @@ export class SlashMenu extends LitElement {
       default:
         throw new Error(`Unknown key: ${e.key}`);
     }
-    // prevent arrow key from moving cursor
-    e.preventDefault();
   };
 
   private _getGroupIndexByItem(item: SlashItem) {
@@ -255,8 +279,19 @@ export class SlashMenu extends LitElement {
     const ele = shadowRoot.querySelector(
       `format-bar-button[text="${item.name}"]`
     );
-    // TODO scroll if needed
-    ele?.scrollIntoView(true);
+    if (!ele) {
+      return;
+    }
+    // `scrollIntoViewIfNeeded` is not a standard API
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    }
+    ele.scrollIntoView(true);
   }
 
   private _handleClickItem(index: number) {
@@ -287,6 +322,8 @@ export class SlashMenu extends LitElement {
   }
 
   private _categoryTemplate() {
+    const showCategory = !this._searchString.length;
+
     const activatedCategory = menuGroups.find(group =>
       group.items.some(
         item => item.name === this._filterItems[this._activatedItemIndex].name
@@ -294,10 +331,7 @@ export class SlashMenu extends LitElement {
     );
 
     return html`<div
-      class="slash-category"
-      style="${this._searchString.length
-        ? 'max-width: 0; padding: 0; margin: 0;'
-        : ''}"
+      class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
     >
       ${menuGroups.map(
         group =>
@@ -317,6 +351,11 @@ export class SlashMenu extends LitElement {
     if (this._hide) {
       return html``;
     }
+
+    const MAX_HEIGHT_WITH_CATEGORY = 408;
+    const MAX_HEIGHT = 344;
+    const showCategory = !this._searchString.length;
+
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,
@@ -325,7 +364,12 @@ export class SlashMenu extends LitElement {
     const slashMenuStyles = styleMap({
       top: this.position === 'bottom' ? '100%' : null,
       bottom: this.position !== 'bottom' ? '100%' : null,
-      maxHeight: this.maxHeight,
+      maxHeight: this.maxHeight
+        ? `${Math.min(
+            this.maxHeight,
+            showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
+          )}px`
+        : null,
     });
 
     const btnItems = this._filterItems.map(

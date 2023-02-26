@@ -18,9 +18,9 @@ export const toolTipStyle = css`
     top: 0;
     inline-size: max-content;
     text-align: center;
-    font-size: var(--affine-font-xs);
+    font-size: var(--affine-font-sm);
     padding: 4px 12px;
-    border-radius: 10px 10px 10px 0px;
+    border-radius: 10px 10px 10px 0;
     color: var(--affine-tooltip-color);
     background: var(--affine-tooltip-background);
     box-shadow: var(--affine-tooltip-shadow);
@@ -34,13 +34,13 @@ export const toolTipStyle = css`
     left: unset;
     right: 0;
     transform: translateX(calc(100% + 8px));
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px 10px;
   }
   tool-tip:is([tip-position='left']) {
     left: 0;
     right: unset;
     transform: translateX(calc(-100% - 8px));
-    border-radius: 10px 10px 0px 10px;
+    border-radius: 10px 10px 0 10px;
   }
   .has-tool-tip {
     position: relative;
@@ -58,7 +58,7 @@ export const centeredToolTipStyle = css`
     position: absolute;
     inline-size: max-content;
     text-align: center;
-    font-size: var(--affine-font-xs);
+    font-size: var(--affine-font-sm);
     padding: 4px 12px;
     border-radius: 10px;
     color: var(--affine-tooltip-color);

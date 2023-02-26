@@ -6,6 +6,7 @@
  */
 export * from './common-operations.js';
 export * from './components.js';
+export * from './filesys.js';
 export * from './gesture.js';
 export * from './hotkey.js';
 export * from './lit.js';

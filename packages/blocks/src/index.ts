@@ -16,7 +16,9 @@ import './database-block/index.js';
 export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service.js';
 export type { BaseService } from './__internal__/service/index.js';
+export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common-operations.js';
+export * from './__internal__/utils/filesys.js';
 export * from './__internal__/utils/lit.js';
 export * from './__internal__/utils/query.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
@@ -51,6 +53,12 @@ if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/blocks was already imported. This breaks constructor checks and will lead to issues!'
+  );
+}
+
+if (typeof window === 'undefined') {
+  throw new Error(
+    'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }
 

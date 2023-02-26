@@ -3,10 +3,10 @@ export const plate = {
   pageBackground: '#fff',
   popoverBackground: '#fff',
   hoverBackground: '#f1f3ff',
+  cardHoverBackground: '#f1f3ff',
   codeBackground: '#f2f5f9',
   codeBlockBackground: '#fafbfd',
   blockHubBackground: '#fbfbfc',
-  blockHubHoverBackground: '#f8f9ff',
   textColor: '#3a4c5c',
   edgelessTextColor: '#3a4c5c',
   linkColor: '#6880ff',
@@ -38,11 +38,11 @@ export const CSSColorProperties: Array<{
   },
   {
     name: 'blockHubBackground',
-    cssProperty: '--affine-block-hub-background',
+    cssProperty: ' --affine-hub-background',
   },
   {
-    name: 'blockHubHoverBackground',
-    cssProperty: '--affine-block-hub-hover-background',
+    name: 'cardHoverBackground',
+    cssProperty: '--affine-card-hover-background',
   },
   { name: 'textColor', cssProperty: '--affine-text-color' },
   {

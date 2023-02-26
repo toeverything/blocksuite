@@ -8,32 +8,50 @@ export class Renderer {
   ctx: CanvasRenderingContext2D;
   gridManager = new GridManager();
 
-  readonly width: number;
-  readonly height: number;
+  private _width = 0;
+  private _height = 0;
 
   private _zoom = 1.0;
   private _centerX = 0.0;
   private _centerY = 0.0;
   private _shouldUpdate = false;
 
+  private _canvasResizeObserver!: ResizeObserver;
+
   constructor(canvas: HTMLCanvasElement) {
-    const dpr = window.devicePixelRatio;
-
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-
-    const bbox = canvas.getBoundingClientRect();
-    canvas.width = Math.ceil(bbox.width * dpr);
-    canvas.height = Math.ceil(bbox.height * dpr);
-
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.width = bbox.width;
-    this.height = bbox.height;
-    this._centerX = this.width / 2;
-    this._centerY = this.height / 2;
+
+    this._initSize();
+    this.setCenter(this.width / 2, this.height / 2);
 
     this._loop();
+
+    this._canvasResizeObserver = new ResizeObserver(() => {
+      const oldWidth = this.width;
+      const oldHeight = this.height;
+
+      this._initSize();
+
+      this.setCenter(
+        this._centerX - (oldWidth - this.width) / 2,
+        this._centerY - (oldHeight - this.height) / 2
+      );
+
+      // Re-render once canvas's size changed. Otherwise, it will flicker.
+      // Because the observer is called after the element rendered, but the canvas's content is not flush.
+      this._render();
+      this._shouldUpdate = false;
+    });
+    this._canvasResizeObserver.observe(this.canvas);
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
   }
 
   get zoom() {
@@ -49,11 +67,11 @@ export class Renderer {
   }
 
   get viewportX() {
-    return this._centerX - this.width / 2 / this._zoom;
+    return this.centerX - this.width / 2 / this._zoom;
   }
 
   get viewportY() {
-    return this._centerY - this.height / 2 / this._zoom;
+    return this.centerY - this.height / 2 / this._zoom;
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
@@ -120,6 +138,22 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
+  private _initSize() {
+    const { canvas } = this;
+    const dpr = window.devicePixelRatio;
+
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+
+    const bbox = canvas.getBoundingClientRect();
+    canvas.width = Math.ceil(bbox.width * dpr);
+    canvas.height = Math.ceil(bbox.height * dpr);
+    this._width = bbox.width;
+    this._height = bbox.height;
+
+    this._shouldUpdate = true;
+  }
+
   private _loop() {
     requestAnimationFrame(() => {
       if (this._shouldUpdate) {
@@ -148,7 +182,7 @@ export class Renderer {
     ctx.save();
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, width, height);
-    ctx.translate(-width / 2 / zoom, -height / 2 / zoom);
+    ctx.translate(-width / dpr / zoom, -height / dpr / zoom);
 
     const elements = this.gridManager.search(viewBound);
     for (const element of elements) {
@@ -165,5 +199,9 @@ export class Renderer {
     }
 
     ctx.restore();
+  }
+
+  dispose() {
+    this._canvasResizeObserver.disconnect();
   }
 }

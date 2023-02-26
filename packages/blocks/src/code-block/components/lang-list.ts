@@ -4,6 +4,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import { codeLaguages } from '../utils/code-laguages.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -49,17 +50,6 @@ export class LangList extends NonShadowLitElement {
         justify-content: flex-start;
         padding-left: 12px;
         margin-bottom: 5px;
-      }
-
-      code-block-button {
-        font-size: var(--affine-font-sm);
-        text-align: justify;
-        line-height: 22px;
-      }
-
-      code-block-button:hover {
-        color: var(--affine-primary-color);
-        background: var(--affine-hover-background);
       }
 
       #filter-input {
@@ -117,200 +107,7 @@ export class LangList extends NonShadowLitElement {
   @property()
   delay = 150;
 
-  static languages = [
-    'TypeScript',
-    'Rust',
-    'Python',
-    'Java',
-    'C',
-    'CPP',
-    'JavaScript',
-    'PHP',
-    'Go',
-    'Bash',
-    'Swift',
-    'Dart',
-    'Delphi',
-    'XML',
-    '1c',
-    'abnf',
-    'accesslog',
-    'actionscript',
-    'ada',
-    'angelscript',
-    'apache',
-    'applescript',
-    'arcade',
-    'arduino',
-    'armasm',
-    'asciidoc',
-    'aspectj',
-    'autohotkey',
-    'autoit',
-    'avrasm',
-    'awk',
-    'axapta',
-    'basic',
-    'bnf',
-    'brainfuck',
-    'cal',
-    'capnproto',
-    'ceylon',
-    'clean',
-    'clojure',
-    'clojure-repl',
-    'cmake',
-    'coffeescript',
-    'coq',
-    'cos',
-    'crmsh',
-    'crystal',
-    'csharp',
-    'csp',
-    'css',
-    'd',
-    'markdown',
-    'diff',
-    'django',
-    'dns',
-    'dockerfile',
-    'dos',
-    'dsconfig',
-    'dts',
-    'dust',
-    'ebnf',
-    'elixir',
-    'elm',
-    'ruby',
-    'erb',
-    'erlang-repl',
-    'erlang',
-    'excel',
-    'fix',
-    'flix',
-    'fortran',
-    'fsharp',
-    'gams',
-    'gauss',
-    'gcode',
-    'gherkin',
-    'glsl',
-    'gml',
-    'golo',
-    'gradle',
-    'graphql',
-    'groovy',
-    'haml',
-    'handlebars',
-    'haskell',
-    'haxe',
-    'hsp',
-    'http',
-    'hy',
-    'inform7',
-    'ini',
-    'irpf90',
-    'isbl',
-    'jboss-cli',
-    'json',
-    'julia',
-    'julia-repl',
-    'kotlin',
-    'lasso',
-    'latex',
-    'ldif',
-    'leaf',
-    'less',
-    'lisp',
-    'livecodeserver',
-    'livescript',
-    'llvm',
-    'lsl',
-    'lua',
-    'makefile',
-    'mathematica',
-    'matlab',
-    'maxima',
-    'mel',
-    'mercury',
-    'mipsasm',
-    'mizar',
-    'perl',
-    'mojolicious',
-    'monkey',
-    'moonscript',
-    'n1ql',
-    'nestedtext',
-    'nginx',
-    'nim',
-    'nix',
-    'node-repl',
-    'nsis',
-    'objectivec',
-    'ocaml',
-    'openscad',
-    'oxygene',
-    'parser3',
-    'pf',
-    'pgsql',
-    'php-template',
-    'plaintext',
-    'pony',
-    'powershell',
-    'processing',
-    'profile',
-    'prolog',
-    'properties',
-    'protobuf',
-    'puppet',
-    'purebasic',
-    'python-repl',
-    'q',
-    'qml',
-    'r',
-    'reasonml',
-    'rib',
-    'roboconf',
-    'routeros',
-    'rsl',
-    'ruleslanguage',
-    'sas',
-    'scala',
-    'scheme',
-    'scilab',
-    'scss',
-    'shell',
-    'smali',
-    'smalltalk',
-    'sml',
-    'sqf',
-    'sql',
-    'stan',
-    'stata',
-    'step21',
-    'stylus',
-    'subunit',
-    'taggerscript',
-    'yaml',
-    'tap',
-    'tcl',
-    'thrift',
-    'tp',
-    'twig',
-    'vala',
-    'vbnet',
-    'vbscript',
-    'vbscript-html',
-    'verilog',
-    'vhdl',
-    'vim',
-    'wasm',
-    'wren',
-    'x86asm',
-    'xl',
-    'xquery',
-    'zephir',
-  ];
+  static languages = codeLaguages;
 
   protected updated() {
     if (this.showLangList !== 'hidden') {
@@ -382,13 +179,14 @@ export class LangList extends NonShadowLitElement {
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
             language => html`
-              <code-block-button
+              <icon-button
                 width="100%"
+                height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
               >
                 ${language}
-              </code-block-button>
+              </icon-button>
             `
           )}
         </div>

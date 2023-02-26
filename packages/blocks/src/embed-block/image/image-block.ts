@@ -27,7 +27,6 @@ export class ImageBlockComponent extends NonShadowLitElement {
       align-items: center;
       justify-content: center;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-image-wrapper img {
       max-width: 100%;
@@ -55,8 +54,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
 
     .embed-editing-state {
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.4);
+      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.8),
+        0 3px 16px -6px rgba(24, 39, 75, 0.4);
       border-radius: 10px;
       list-style: none;
       padding: 4px;

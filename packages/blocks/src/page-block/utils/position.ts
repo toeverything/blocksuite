@@ -2,12 +2,12 @@ import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 import {
   clamp,
-  getCurrentRange,
+  getCurrentNativeRange,
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const selection = window.getSelection() as Selection;
@@ -38,6 +38,7 @@ export type DragDirection =
   | 'left-bottom'
   | 'left-top'
   | 'center-bottom'
+  | 'center-top'
   // no select direction, for example select all by `ctrl + a`
   | 'directionless';
 
@@ -52,7 +53,7 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
   const endY = e.y;
   // selection direction
   const isForwards = endX > startX;
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const selectedOneLine = !isMultiLineRange(range);
 
   if (isForwards) {
@@ -83,7 +84,7 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
  * ```
  */
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
-  const curRange = getCurrentRange();
+  const curRange = getCurrentNativeRange();
   const direction = getDragDirection(e);
 
   const isSelectedNothing =

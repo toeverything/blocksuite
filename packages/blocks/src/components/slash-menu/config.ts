@@ -3,6 +3,7 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
+  ImageIcon,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -15,12 +16,13 @@ import { Page, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   resetNativeSelection,
+  uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
-import { formatConfig } from '../../page-block/utils/const.js';
+// import { formatConfig } from '../../page-block/utils/const.js';
 import { updateBlockType } from '../../page-block/utils/index.js';
 import { toast } from '../toast.js';
 
@@ -73,25 +75,26 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       dividerItem,
     ],
   },
-  {
-    name: 'Style',
-    items: formatConfig
-      .filter(i => !['Link', 'Code'].includes(i.name))
-      .map(({ name, icon, id }, idx) => ({
-        name,
-        icon,
-        divider: idx === 0,
-        action: ({ model }) => {
-          if (!model.text) {
-            return;
-          }
-          const len = model.text.length;
-          model.text.format(0, len, {
-            [id]: true,
-          });
-        },
-      })),
-  },
+  // TODO https://github.com/toeverything/blocksuite/issues/1184
+  // {
+  //   name: 'Style',
+  //   items: formatConfig
+  //     .filter(i => !['Link', 'Code'].includes(i.name))
+  //     .map(({ name, icon, id }, idx) => ({
+  //       name,
+  //       icon,
+  //       divider: idx === 0,
+  //       action: ({ model }) => {
+  //         if (!model.text) {
+  //           return;
+  //         }
+  //         const len = model.text.length;
+  //         model.text.format(0, len, {
+  //           [id]: true,
+  //         });
+  //       },
+  //     })),
+  // },
   {
     name: 'List',
     items: paragraphConfig
@@ -102,6 +105,25 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         divider: idx === 0,
         action: ({ model }) => updateBlockType([model], flavour, type),
       })),
+  },
+  {
+    name: 'Image & File',
+    items: [
+      {
+        name: 'Image',
+        icon: ImageIcon,
+        divider: true,
+        async action({ page, model }) {
+          const parent = page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          parent.children.indexOf(model);
+          const props = await uploadImageFromLocal(page);
+          page.addSiblingBlocks(model, props);
+        },
+      },
+    ],
   },
   {
     name: 'Date & Time',
@@ -163,7 +185,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: CopyIcon,
         divider: true,
         action: async ({ model }) => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           await copyBlock(model);
           resetNativeSelection(curRange);
           toast('Copied to clipboard');

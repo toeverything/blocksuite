@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 
 import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { pressEnter, SHORT_KEY, type } from './keyboard.js';
+import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
+const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
 const RICH_TEXT_SELECTOR = '.ql-editor';
 const TITLE_SELECTOR = '.affine-default-page-block-title';
 
@@ -32,8 +33,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // Firefox warn on quill
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
-    // Fixme: https://github.com/toeverything/blocksuite/issues/1126
-    'Error: Unexpected console message: Failed to clean slash search text!',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -277,7 +276,20 @@ export async function initThreeLists(page: Page) {
   await pressEnter(page);
   await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.press('Tab', { delay: 50 });
+  await pressTab(page);
+  await type(page, '789');
+}
+
+export async function insertThreeLevelLists(page: Page, i = 0) {
+  await focusRichText(page, i);
+  await type(page, '-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await type(page, '123');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '456');
+  await pressEnter(page);
+  await pressTab(page);
   await type(page, '789');
 }
 
@@ -432,20 +444,21 @@ export async function readClipboardText(page: Page) {
 
 export const getCenterPosition: (
   page: Page,
+  // TODO use `locator` directly
   selector: string
 ) => Promise<{ x: number; y: number }> = async (
   page: Page,
   selector: string
 ) => {
-  return await page.evaluate((selector: string) => {
-    const bbox = document
-      .querySelector(selector)
-      ?.getBoundingClientRect() as DOMRect;
-    return {
-      x: bbox.left + bbox.width / 2,
-      y: bbox.top + bbox.height / 2,
-    };
-  }, selector);
+  const locator = page.locator(selector);
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Failed to getCenterPosition! Can't get bounding box");
+  }
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  };
 };
 
 export const getBoundingClientRect: (
@@ -500,4 +513,21 @@ export async function getIndexCoordinate(
     }
   );
   return coord;
+}
+
+export async function assertEdgelessHoverRect(
+  page: Page,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+) {
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless hover rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
 }

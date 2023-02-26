@@ -1,8 +1,9 @@
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
+import type { z } from 'zod';
 
-import type { BaseBlockModel } from '../base.js';
+import { BaseBlockModel, BlockSchema, internalPrimitives } from '../base.js';
 import { Text } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import type {
@@ -42,18 +43,18 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
-  // schema: z.infer<typeof BlockSchema>,
+  schema: z.infer<typeof BlockSchema>,
   defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
 ) {
-  Object.keys(props).forEach(key => {
+  const propSchema = schema.model.props(internalPrimitives);
+  Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
-    const value = props[key];
 
-    // TODO use schema
-    if (key === 'text' && value instanceof Text) {
+    const isText = propSchema[key] instanceof Text;
+    if (isText) {
       yBlock.set(`prop:${key}`, value.yText);
       return;
     }
@@ -73,7 +74,9 @@ export function syncBlockProps(
   // set default value
   Object.entries(defaultProps).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      if (Array.isArray(value)) {
+      if (value instanceof Text) {
+        yBlock.set(`prop:${key}`, new Y.Text());
+      } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
         yBlock.set(`prop:${key}`, value);
@@ -116,7 +119,7 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
 
 export function doesInsideBlockByFlavour(
   page: Page,
-  block: BaseBlockModel,
+  block: BaseBlockModel | string,
   flavour: keyof BlockSuiteInternal.BlockModels
 ): boolean {
   const parent = page.getParent(block);

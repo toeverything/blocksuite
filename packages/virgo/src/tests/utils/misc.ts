@@ -1,3 +1,4 @@
+import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
 
@@ -6,7 +7,10 @@ export async function type(page: Page, content: string) {
 }
 
 export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', 'http://localhost:5173/');
+  const url = new URL(
+    'examples/virgo/index.html',
+    getDefaultPlaygroundURL(!!process.env.CI)
+  );
   await page.goto(url.toString());
 }
 

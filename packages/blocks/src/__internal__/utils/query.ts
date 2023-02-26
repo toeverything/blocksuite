@@ -3,11 +3,21 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
-import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
+import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
+import { getCurrentNativeRange } from './selection.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
+
+export type BlockComponentElement =
+  HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
+    ? U extends { model: infer M }
+      ? M extends BaseBlockModel
+        ? U
+        : never
+      : never
+    : never;
 
 interface ContainerBlock {
   model?: BaseBlockModel;
@@ -17,10 +27,14 @@ export function getBlockById<T extends ElementTagName>(
   id: string,
   container: Element = document.body
 ) {
-  return container.querySelector<T>(`[${ATTR}="${id}"]` as T);
+  return container.querySelector<T>(
+    `[${ATTR}="${id}"]` as T
+  ) as BlockComponentElement | null;
 }
 
-export function getBlockByPoint(point: IPoint): Element | null | undefined {
+export function getBlockByPoint(
+  point: IPoint
+): BlockComponentElement | null | undefined {
   return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
 }
 
@@ -31,8 +45,12 @@ export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  const currentBlock = getBlockById<T>(id, ele);
-  return currentBlock?.parentElement?.closest<T>(`[${ATTR}]` as T) || null;
+  const currentBlock = getBlockById(id, ele);
+  return (
+    (currentBlock?.parentElement?.closest<T>(
+      `[${ATTR}]` as T
+    ) as BlockComponentElement) || null
+  );
 }
 
 /**
@@ -143,16 +161,15 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
-  assertExists(model.page.root);
-  const page = document.querySelector(
-    `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  const page = getDefaultPageBlock(model);
   const container = page.closest('editor-container');
   assertExists(container);
   return container;
 }
 
-export function getBlockElementByModel(model: BaseBlockModel) {
+export function getBlockElementByModel(
+  model: BaseBlockModel
+): BlockComponentElement | null {
   assertExists(model.page.root);
   const page = document.querySelector(
     `[${ATTR}="${model.page.root.id}"]`
@@ -160,21 +177,22 @@ export function getBlockElementByModel(model: BaseBlockModel) {
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
-    return page as HTMLElement;
+    return page;
   }
 
   const element = page.querySelector(`[${ATTR}="${model.id}"]`);
-  return element as HTMLElement | null;
+  return element as BlockComponentElement | null;
 }
 
 export function getStartModelBySelection() {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
       : (range.startContainer as HTMLElement);
 
   const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
+  // TODO Fix this, this cast is not safe
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -266,25 +284,6 @@ export function getDOMRectByLine(
   }
 }
 
-export function getCurrentRange(selection = window.getSelection()) {
-  // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
-  // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
-  if (!selection) {
-    throw new Error('Failed to get current range, selection is null');
-  }
-  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
-  // The rangeCount will usually be 1.
-  // But scripting can be used to make the selection contain more than one range.
-  // See https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount for more details.
-  if (selection.rangeCount === 0) {
-    throw new Error('Failed to get current range, rangeCount is 0');
-  }
-  if (selection.rangeCount > 1) {
-    console.warn('getCurrentRange may be wrong, rangeCount > 1');
-  }
-  return selection.getRangeAt(0);
-}
-
 function textWithoutNode(parentNode: Node, currentNode: Node) {
   let text = '';
   for (let i = 0; i < parentNode.childNodes.length; i++) {
@@ -300,6 +299,9 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
   return text;
 }
 
+/**
+ * FIXME: Use it carefully, it will skip soft enter!
+ */
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,
@@ -348,8 +350,8 @@ export function getQuillIndexByNativeSelection(
  * See also {@link getQuillIndexByNativeSelection}
  *
  * ```ts
- * const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
- * const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
+ * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
+ * const [endNode, endOffset] = getTextNodeBySelectedBlock(endModel, endOffset);
  *
  * const range = new Range();
  * range.setStart(startNode, startOffset);
@@ -360,26 +362,42 @@ export function getQuillIndexByNativeSelection(
  * selection.addRange(range);
  * ```
  */
-export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
-  const blockElement = getBlockById(selectedBlock.id);
-  const offset = selectedBlock.startPos ?? selectedBlock.endPos ?? 0;
+export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
+  const text = model.text;
+  if (!text) {
+    throw new Error("Failed to get block's text!");
+  }
+  if (offset > text.length) {
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
+  }
+  const blockElement = getBlockById(model.id);
   if (!blockElement) {
-    throw new Error(
-      'Failed to get block element, block id: ' + selectedBlock.id
-    );
+    throw new Error('Failed to get block element, block id: ' + model.id);
   }
   const richText = blockElement.querySelector('rich-text');
   if (!richText) {
     throw new Error('Failed to get rich text element');
   }
   const quill = richText.quill;
-
   const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
   return [leaf.domNode, leafOffset] as const;
 }
 
 export function getAllBlocks() {
-  const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
+  const blocks: BlockComponentElement[] = Array.from(
+    document.querySelectorAll(`[${ATTR}]`)
+  );
   return blocks.filter(item => {
     return (
       item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'

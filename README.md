@@ -14,16 +14,17 @@
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+[![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/AffineDev)
 
 ---
 
-BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+BlockSuite (_pronounced "block sweet"_) is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
-- 👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
+- 👉 [Try BlockSuite-based AFFiNE online](https://app.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned or [see our roadmap here](https://github.com/orgs/toeverything/projects/10/views/6)!
 
 ## Introduction
 
@@ -46,6 +47,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10/views/6)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Telegram Group](https://t.me/AffineDev)
@@ -116,8 +118,8 @@ import { EditorContainer } from '@blocksuite/editor';
  */
 function createInitialPage(workspace: Workspace) {
   // Events are being emitted using signals.
-  workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id) as Page;
+  workspace.signals.pageAdded.once(pageId => {
+    const page = workspace.getPage(pageId) as Page;
 
     // Block types are defined and registered in BlockSchema.
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
@@ -157,6 +159,8 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
 
 ## Current Status (`@blocksuite/editor`)
 
+> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10/views/6).
+
 - Basic text editing
   - ✅ Paragraph with inline style
   - ✅ Nested list
@@ -164,17 +168,17 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Markdown shortcuts
 - Block-level editing
   - ✅ Inline text format bar
-  - ⚛️ Block-level selection
+  - ✅ Inline slash menu
+  - ✅ Block hub
   - ⚛️ Block drag handle
-  - ⚛️ Block hub
-  - ⚛️ Inline slash menu
+  - ⚛️ Block-level selection
 - Rich-content
-  - ⚛️ Image block
+  - ✅ Image block
   - 🚧 Database block
   - 📌 Third-party embedded block
 - Whiteboard (edgeless mode)
   - ✅ Zooming and panning
-  - ⚛️ Frame block
+  - ✅ Frame block
   - ⚛️ Shape element
   - 🚧 Handwriting element
   - 📌 Grouping

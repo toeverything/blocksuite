@@ -7,6 +7,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getCenterPosition,
   getQuillSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
@@ -14,7 +15,6 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  SHORT_KEY,
   type,
   undoByKeyboard,
 } from './utils/actions/index.js';
@@ -62,6 +62,33 @@ test('use markdown syntax with trailing characters can create code block', async
   await expect(locator).toBeVisible();
 });
 
+test('support ```[lang] to add code block with language', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '```ts');
+  await type(page, ' ');
+
+  const codeLocator = page.locator('affine-code');
+  await expect(codeLocator).toBeVisible();
+
+  const codeRect = await codeLocator.boundingBox();
+  if (!codeRect) {
+    throw new Error('Failed to get bounding box of code block.');
+  }
+  const position = {
+    x: codeRect.x + codeRect.width / 2,
+    y: codeRect.y + codeRect.height / 2,
+  };
+  await page.mouse.move(position.x, position.y);
+
+  const locator = page.locator('.lang-container > icon-button');
+  await expect(locator).toBeVisible();
+  const languageText = await locator.innerText();
+  expect(languageText).toEqual('TypeScript');
+});
+
 test('use more than three backticks can not create code block', async ({
   page,
 }) => {
@@ -107,16 +134,14 @@ test('change code language can work', async ({ page }) => {
 
   await page.mouse.move(position.x, position.y);
 
-  const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
+  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
   await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
   await type(page, 'rust');
-  await page.click(
-    '.lang-list-button-container > code-block-button:nth-child(1)'
-  );
+  await page.click('.lang-list-button-container > icon-button:nth-child(1)');
   await expect(locator).toBeHidden();
 
   await page.mouse.move(position.x, position.y);
@@ -144,7 +169,7 @@ test('language select list can disappear when click other place', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
+  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
@@ -208,7 +233,146 @@ test('drag copy paste', async ({ page }) => {
   await pasteByKeyboard(page);
 
   const content = await getQuillSelectionText(page);
-  expect(content).toBe('use\n');
+  expect(content).toBe('useuse\n');
+});
+
+test('keyboard selection and copy paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+
+  const content = await getQuillSelectionText(page);
+  expect(content).toBe('useuse\n');
+});
+
+test.skip('use keyboard copy inside code block copy plain text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await page.keyboard.press('ArrowRight');
+  await pressEnter(page);
+  await pressEnter(page);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+  <affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:code
+      prop:language="JavaScript"
+      prop:text={
+        <>
+          <text
+            insert="use"
+          />
+          <text
+            code-block={true}
+            insert="
+"
+          />
+        </>
+      }
+    />
+    <affine:paragraph
+      prop:text="use"
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test.skip('use code block copy menu of code block copy whole code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('use');
+  await pressEnter(page);
+  await pressEnter(page);
+
+  const codeBlockPosition = await getCenterPosition(page, 'affine-code');
+  await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
+
+  const position = await getCenterPosition(
+    page,
+    '.code-block-option > format-bar-button:nth-child(1)'
+  );
+
+  await page.mouse.move(position.x, position.y);
+  await page.waitForTimeout(50);
+  await page.mouse.click(position.x, position.y);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:code
+      prop:language="JavaScript"
+      prop:text={
+        <>
+          <text
+            insert="use"
+          />
+          <text
+            code-block={true}
+            insert="
+"
+          />
+        </>
+      }
+    />
+    <affine:code
+      prop:language="JavaScript"
+      prop:text="use"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test('code block copy button can work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  const position = await getCenterPosition(
+    page,
+    '.code-block-option > format-bar-button:nth-child(1)'
+  );
+  await page.mouse.click(position.x, position.y);
+  await focusRichText(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['useuse\n']);
 });
 
 test('split code by enter', async ({ page }) => {
@@ -257,48 +421,28 @@ test('split code with selection by enter', async ({ page }) => {
   await assertRichTexts(page, ['he\no\n']);
 });
 
-test('keyboard selection and copy paste', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
-  await focusRichText(page);
-
-  await type(page, 'use');
-  await page.keyboard.down('Shift');
-  for (let i = 0; i < 'use'.length; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
-  await page.keyboard.up('Shift');
-  await copyByKeyboard(page);
-  await pasteByKeyboard(page);
-
-  const content = await getQuillSelectionText(page);
-  expect(content).toBe('use\n');
-});
-
 test('drag select code block can delete it', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('affine-code');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return {
-      startX: bbox.left,
-      startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.right,
-      endY: bbox.bottom - bbox.height / 2,
-    };
-  });
+  const bbox = await page.locator('affine-code').boundingBox();
+  if (!bbox) {
+    throw new Error("Failed to get code block's bounding box");
+  }
+  const position = {
+    startX: bbox.x,
+    startY: bbox.y + bbox.height / 2,
+    endX: bbox.x + bbox.width,
+    endY: bbox.y + bbox.height / 2,
+  };
   await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY }
   );
-  await page.locator('.ql-syntax').evaluate(e => e.blur());
   await page.keyboard.press('Backspace');
-
   const locator = page.locator('affine-code');
   await expect(locator).toBeHidden();
 });
@@ -411,19 +555,15 @@ test('code block option can appear and disappear during mousemove', async ({
   await expect(locator).toBeHidden();
 });
 
-test('should ctrl+enter works in code block', async ({ page }) => {
+test('should tab works in code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
   await assertRichTexts(page, ['const a = 10;\n']);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press(`${SHORT_KEY}+Enter`);
-  // TODO fix this
-  // actual
-  await assertRichTexts(page, ['const a = 10\n;\n']);
-  test.fail();
-  // but expected
-  await assertRichTexts(page, ['const a = 10;\n\n']);
+  await page.keyboard.press('Tab');
+  await assertRichTexts(page, ['  const a = 10;\n']);
+  await page.keyboard.press(`Shift+Tab`);
+  await assertRichTexts(page, ['const a = 10;\n']);
 });

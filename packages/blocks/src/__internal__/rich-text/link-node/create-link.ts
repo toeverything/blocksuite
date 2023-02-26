@@ -8,13 +8,13 @@ import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
   getRichTextByModel,
   getStartModelBySelection,
-  isRangeSelection,
+  isRangeNativeSelection,
 } from '../../utils/index.js';
 import { MockSelectNode } from './mock-select-node.js';
 
 export async function createLink(page: Page) {
   // TODO may allow user creating a link with text
-  if (!isRangeSelection()) return;
+  if (!isRangeNativeSelection()) return;
 
   const startModel = getStartModelBySelection();
   const richText = getRichTextByModel(startModel);

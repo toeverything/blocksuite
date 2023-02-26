@@ -17,7 +17,7 @@ import {
   asyncFocusRichText,
   BlockChildrenContainer,
   type BlockHost,
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   hotkey,
   isMultiBlockRange,
@@ -103,13 +103,7 @@ export class DefaultPageBlockComponent
       cursor: default;
 
       min-height: calc(100% - 78px);
-      height: auto;
-      overflow: hidden;
       padding-bottom: 150px;
-    }
-
-    .affine-default-page-block-container > .affine-block-children-container {
-      padding-left: 0;
     }
 
     .affine-default-page-block-title {
@@ -184,7 +178,7 @@ export class DefaultPageBlockComponent
   selectedRects: DOMRect[] = [];
 
   @state()
-  selectEmbedRects: DOMRect[] = [];
+  selectedEmbedRects: DOMRect[] = [];
 
   @state()
   embedEditingState!: EmbedEditingState | null;
@@ -215,8 +209,7 @@ export class DefaultPageBlockComponent
   private async _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
     const { page, model, _title } = this;
-
-    if (e.key === 'Enter' && hasContent) {
+    if (e.key === 'Enter' && !e.isComposing && hasContent) {
       assertExists(_title.selectionStart);
       const titleCursorIndex = _title.selectionStart;
       const contentLeft = _title.value.slice(0, titleCursorIndex);
@@ -268,39 +261,40 @@ export class DefaultPageBlockComponent
   // FIXME: keep embed selected rects after scroll
   // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
-    if (this.selection.state.type !== 'block') {
-      this.selection.state.clear();
-      // if (this.selection.state.type !== 'embed') {
-      this.signals.updateEmbedRects.emit([]);
-      this.signals.updateEmbedEditingState.emit(null);
-      // }
+    const { selection } = this;
+    const { state } = selection;
+    const { type } = state;
+
+    if (type === 'native') {
       return;
     }
 
-    const { scrollTop, scrollHeight, clientHeight } = this.viewportState;
-    const max = scrollHeight - clientHeight;
-    let top = e.deltaY / 2;
-    if (top > 0) {
-      if (Math.ceil(scrollTop) === max) return;
+    if (type === 'block') {
+      const { viewportState, defaultViewportElement } = this;
+      const { scrollTop, scrollHeight, clientHeight } = viewportState;
+      const max = scrollHeight - clientHeight;
+      let top = e.deltaY / 2;
+      if (top > 0) {
+        if (Math.ceil(scrollTop) === max) return;
 
-      top = Math.min(top, max - scrollTop);
-    } else if (top < 0) {
-      if (scrollTop === 0) return;
+        top = Math.min(top, max - scrollTop);
+      } else if (top < 0) {
+        if (scrollTop === 0) return;
 
-      top = Math.max(top, -scrollTop);
-    }
+        top = Math.max(top, -scrollTop);
+      }
 
-    const { startPoint, endPoint } = this.selection.state;
-    if (startPoint && endPoint) {
-      e.preventDefault();
+      const { startPoint, endPoint } = state;
+      if (startPoint && endPoint) {
+        e.preventDefault();
 
-      this.viewportState.scrollTop += top;
-      // FIXME: need smooth
-      this.defaultViewportElement.scrollTop += top;
+        viewportState.scrollTop += top;
+        // FIXME: need smooth
+        defaultViewportElement.scrollTop += top;
 
-      endPoint.y += top;
-      this.selection.updateSelectionRect(startPoint, endPoint);
-      return;
+        endPoint.y += top;
+        selection.updateSelectionRect(startPoint, endPoint);
+      }
     }
 
     // trigger native scroll
@@ -309,19 +303,29 @@ export class DefaultPageBlockComponent
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
   // May need optimization
   // private _onResize = (_: Event) => {
-  //   this.selection.refreshSelectedBlocksRects();
   // };
 
   private _onScroll = (e: Event) => {
-    const type = this.selection.state.type;
+    const { selection, viewportState } = this;
+    const { type } = selection.state;
     const { scrollLeft, scrollTop } = e.target as Element;
-    this.viewportState.scrollLeft = scrollLeft;
-    this.viewportState.scrollTop = scrollTop;
+    viewportState.scrollLeft = scrollLeft;
+    viewportState.scrollTop = scrollTop;
+
     if (type === 'block') {
-      this.selection.refreshSelectionRectAndSelecting(this.viewportState);
-      // Why? Clicling on the image and the `type` is set to `block`.
-      // See _onContainerClick
-      this.selection.refresEmbedRects();
+      selection.refreshSelectionRectAndSelecting(viewportState);
+    } else if (type === 'embed') {
+      selection.refreshEmbedRects(this.embedEditingState);
+    } else if (type === 'native') {
+      const { startRange, rangePoint } = selection.state;
+      if (startRange && rangePoint) {
+        // Create a synthetic `mousemove` MouseEvent
+        const evt = new MouseEvent('mousemove', {
+          clientX: rangePoint.x,
+          clientY: rangePoint.y,
+        });
+        this.mouseRoot.dispatchEvent(evt);
+      }
     }
   };
 
@@ -374,7 +378,7 @@ export class DefaultPageBlockComponent
       (e.key.length === 1 || e.key === 'Enter') &&
       window.getSelection()?.type === 'Range'
     ) {
-      const range = getCurrentRange();
+      const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);
       }
@@ -388,20 +392,28 @@ export class DefaultPageBlockComponent
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
         if (
-          draggingBlock &&
+          draggingBlockIds &&
+          draggingBlockIds.length === 1 &&
           Utils.doesInsideBlockByFlavour(
             this.page,
-            draggingBlock,
+            draggingBlockIds[0],
             'affine:database'
           )
         ) {
           return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlock) as BaseBlockModel
+            this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
           );
         }
-        return getAllowSelectedBlocks(this.model);
+
+        if (!draggingBlockIds || draggingBlockIds.length === 1) {
+          return getAllowSelectedBlocks(this.model);
+        } else {
+          return getAllowSelectedBlocks(this.model).filter(block => {
+            return !draggingBlockIds?.includes(block.id);
+          });
+        }
       };
     };
     if (
@@ -469,7 +481,10 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateEmbedRects.on(rects => {
-      this.selectEmbedRects = rects;
+      this.selectedEmbedRects = rects;
+      if (rects.length === 0) {
+        this.embedEditingState = null;
+      }
       this.requestUpdate();
     });
     this.signals.updateEmbedEditingState.on(embedEditingState => {
@@ -500,7 +515,7 @@ export class DefaultPageBlockComponent
         for (const { target } of entries) {
           if (target === this.defaultViewportElement) {
             this.updateViewportState();
-            this.selection.refreshSelectedBlocksRects();
+            this.selection.refresh();
             break;
           }
         }
@@ -549,6 +564,8 @@ export class DefaultPageBlockComponent
   }
 
   render() {
+    const { readonly } = this;
+
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
@@ -558,16 +575,18 @@ export class DefaultPageBlockComponent
       this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects,
+      this.selectedEmbedRects,
       this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
-      this.embedEditingState,
-      this.signals
+      readonly ? null : this.embedEditingState,
+      this.signals,
+      this.viewportState
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
-      this.codeBlockOption
+      readonly ? null : this.codeBlockOption
     );
+
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">

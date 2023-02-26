@@ -124,12 +124,16 @@ describe.concurrent('addBlock', () => {
     const page = await createTestPage();
     page.addBlockByFlavour('affine:page');
     page.addBlockByFlavour('affine:paragraph');
+    page.addBlocksByFlavour([
+      { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
+      { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
+    ]);
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
         'meta:tagSchema': {},
-        'sys:children': ['1'],
+        'sys:children': ['1', '2', '3'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
         'prop:title': '',
@@ -140,6 +144,20 @@ describe.concurrent('addBlock', () => {
         'sys:id': '1',
         'prop:text': '',
         'prop:type': 'text',
+      },
+      '2': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+        'prop:text': '',
+        'prop:type': 'h1',
+      },
+      '3': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+        'prop:text': '',
+        'prop:type': 'h2',
       },
     });
   });

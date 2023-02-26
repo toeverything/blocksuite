@@ -76,7 +76,7 @@ export const editLinkStyle = css`
 `;
 
 export const linkPopoverStyle = css`
-  .overlay-container {
+  .popover-container {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     font-style: normal;
@@ -128,7 +128,7 @@ export const linkPopoverStyle = css`
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
-    padding: 6px 0px 6px 12px;
+    padding: 6px 0 6px 12px;
     color: var(--affine-icon-color);
   }
 
@@ -136,7 +136,7 @@ export const linkPopoverStyle = css`
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     box-sizing: border-box;
-    padding: 6px 12px 6px 0px;
+    padding: 6px 12px 6px 0;
     width: 260px;
     height: 34px;
     color: inherit;
@@ -162,7 +162,7 @@ export const linkPopoverStyle = css`
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px 10px;
   }
 
   .affine-link-popover-input {

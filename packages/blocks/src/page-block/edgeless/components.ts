@@ -28,6 +28,7 @@ import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
   getXYWH,
+  isSurfaceElement,
   isTopLevelBlock,
   PADDING_X,
   PADDING_Y,
@@ -61,10 +62,10 @@ export function EdgelessHoverRect(
 ) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  // const isSurfaceElement = hoverState.block.flavour === 'affine:shape';
+  const isInSurface = isSurfaceElement(hoverState.content);
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, false),
+    ...getCommonRectStyle(rect, zoom, isInSurface),
     border: '1px solid var(--affine-primary-color)',
   };
 
@@ -169,7 +170,7 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: modelW + (isSurfaceElement ? SHAPE_PADDING : PADDING_X) + 'px',
     height: modelH + (isSurfaceElement ? SHAPE_PADDING : PADDING_Y) + 'px',
-    padding: isSurfaceElement ? '0px' : `${PADDING_X / 2}px`,
+    padding: isSurfaceElement ? '0' : `${PADDING_X / 2}px`,
     background: isSurfaceElement ? 'transparent' : 'white',
     pointerEvents: isSurfaceElement ? 'none' : 'all',
     zIndex: '0',

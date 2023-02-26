@@ -1,7 +1,15 @@
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Quill } from 'quill';
-import type { RangeStatic } from 'quill';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Quill, RangeStatic } from 'quill';
+
+import { getCodeLaguage } from '../../code-block/utils/code-laguages.js';
+import {
+  convertToDivider,
+  convertToList,
+  convertToParagraph,
+  ExtendedModel,
+} from '../utils/index.js';
 
 type Match = {
   name: string;
@@ -199,7 +207,6 @@ const matches: Match[] = [
       quill.setSelection(startIndex + annotatedText.length + 1, 0);
 
       model.text?.delete(startIndex + annotatedText.length, 1);
-      model.text?.delete(selection.index, 1);
       model.text?.delete(selection.index - 1, 1);
       model.text?.delete(startIndex, 1);
       quill.format('underline', false);
@@ -245,7 +252,7 @@ const matches: Match[] = [
   },
   {
     name: 'codeblock',
-    pattern: /^```[a-zA-Z0-9]*$/g,
+    pattern: /^```([a-zA-Z0-9]*)$/g,
     action: (
       model: BaseBlockModel,
       quill: Quill,
@@ -256,16 +263,19 @@ const matches: Match[] = [
       if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
         return false;
       }
+      const match = pattern.exec(text);
       const page = model.page;
       page.captureSync();
       const parent = page.getParent(model);
       assertExists(parent);
       const index = parent.children.indexOf(model);
-      const blockProps = {
-        flavour: 'affine:code',
-      };
       page.deleteBlock(model);
-      page.addBlock(blockProps, parent, index);
+      page.addBlockByFlavour(
+        'affine:code',
+        { language: getCodeLaguage(match?.[1] || '') || 'JavaScript' },
+        parent,
+        index
+      );
       return true;
     },
   },
@@ -362,4 +372,67 @@ export function markdownConvert(
     }
   }
   return false;
+}
+
+export function tryMatchSpaceHotkey(
+  page: Page,
+  model: ExtendedModel,
+  quill: Quill,
+  prefix: string,
+  range: { index: number; length: number }
+) {
+  const [, offset] = quill.getLine(range.index);
+  if (offset > prefix.length) {
+    return ALLOW_DEFAULT;
+  }
+  if (matchFlavours(model, ['affine:code'])) {
+    return ALLOW_DEFAULT;
+  }
+  let isConverted = false;
+  switch (prefix.trim()) {
+    case '[]':
+    case '[ ]':
+      isConverted = convertToList(page, model, 'todo', prefix, {
+        checked: false,
+      });
+      break;
+    case '[x]':
+      isConverted = convertToList(page, model, 'todo', prefix, {
+        checked: true,
+      });
+      break;
+    case '-':
+    case '*':
+      isConverted = convertToList(page, model, 'bulleted', prefix);
+      break;
+    case '***':
+    case '---':
+      isConverted = convertToDivider(page, model, prefix);
+      break;
+    case '#':
+      isConverted = convertToParagraph(page, model, 'h1', prefix);
+      break;
+    case '##':
+      isConverted = convertToParagraph(page, model, 'h2', prefix);
+      break;
+    case '###':
+      isConverted = convertToParagraph(page, model, 'h3', prefix);
+      break;
+    case '####':
+      isConverted = convertToParagraph(page, model, 'h4', prefix);
+      break;
+    case '#####':
+      isConverted = convertToParagraph(page, model, 'h5', prefix);
+      break;
+    case '######':
+      isConverted = convertToParagraph(page, model, 'h6', prefix);
+      break;
+    case '>':
+      isConverted = convertToParagraph(page, model, 'quote', prefix);
+      break;
+    default:
+      isConverted = convertToList(page, model, 'numbered', prefix);
+  }
+
+  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
 }

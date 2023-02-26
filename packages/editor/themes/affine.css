@@ -12,17 +12,18 @@
   --affine-page-background: #fff;
   --affine-popover-background: #fff;
   --affine-hover-background: #f1f3ff;
+  --affine-card-hover-background: #f8f9ff;
   --affine-code-background: #f2f5f9;
   --affine-tooltip-background: #6880ff;
   --affine-code-block-background: #fafbfd;
-  --affine-block-hub-background: #fbfbfc;
-  --affine-block-hub-hover-background: #f8f9ff;
-  --affine-text-color: #28293d;
+  --affine-hub-background: #fbfbfc;
+  --affine-text-color: #424149;
+  --affine-secondary-text-color: #8e8d91;
   --affine-edgeless-text-color: #3a4c5c;
   --affine-link-color: #6880ff;
   --affine-link-color2: #6880ff;
   --affine-link-visited-color: #abb8fe;
-  --affine-icon-color: #555770;
+  --affine-icon-color: #77757d;
   --affine-block-handle-color: #c7c3d9;
   --affine-popover-color: #4c6275;
   --affine-input-color: #4c6275;
@@ -47,7 +48,7 @@
   --affine-font-h6: 18px;
   --affine-font-base: 16px;
   --affine-font-sm: 14px;
-  --affine-font-xs: 14px;
+  --affine-font-xs: 12px; /* not recommended */
   --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;

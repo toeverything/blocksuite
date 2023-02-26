@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/virgo",
-  "version": "0.4.0-alpha.3",
+  "version": "0.4.1",
   "description": "A micro editor.",
   "main": "src/index.ts",
   "type": "module",
@@ -17,7 +17,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "lit": "^2.6.1",
-    "yjs": "^13.5.45"
+    "yjs": "^13.5.46"
   },
   "peerDependencies": {
     "lit": "^2",
@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "zod": "^3.20.2"
+    "zod": "^3.20.6"
   }
 }

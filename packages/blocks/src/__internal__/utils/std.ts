@@ -7,11 +7,16 @@ import type { Detail } from './types.js';
  * Whether the block supports rendering its children.
  */
 export function supportsChildren(model: BaseBlockModel): boolean {
-  return !matchFlavours(model, [
-    'affine:embed',
-    'affine:divider',
-    'affine:code',
-  ]);
+  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
+    return false;
+  }
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
+  ) {
+    return false;
+  }
+  return true;
 }
 
 export function almostEqual(a: number, b: number) {

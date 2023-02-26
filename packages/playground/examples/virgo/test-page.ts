@@ -139,6 +139,22 @@ export class ToolBar extends LitElement {
     const undoManager = new Y.UndoManager(this.vEditor.yText, {
       trackedOrigins: new Set([this.vEditor.yText.doc?.clientID]),
     });
+
+    addEventListener('keydown', e => {
+      if (
+        e instanceof KeyboardEvent &&
+        (e.ctrlKey || e.metaKey) &&
+        e.key === 'z'
+      ) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          undoManager.redo();
+        } else {
+          undoManager.undo();
+        }
+      }
+    });
+
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });
@@ -160,11 +176,11 @@ export class ToolBar extends LitElement {
     });
     strikethroughButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { strikethrough: true });
+      toggleStyle(this.vEditor, { strike: true });
     });
     inlineCode.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { inlineCode: true });
+      toggleStyle(this.vEditor, { code: true });
     });
     resetButton.addEventListener('click', () => {
       undoManager.stopCapturing();
@@ -215,9 +231,15 @@ export class TestPage extends LitElement {
 
     .editors > div {
       height: 600px;
+      width: 600px;
       display: grid;
       grid-template-rows: 100px 1fr;
       overflow-y: scroll;
+    }
+
+    .editors tool-bar,
+    .editors rich-text {
+      width: 570px;
     }
   `;
 

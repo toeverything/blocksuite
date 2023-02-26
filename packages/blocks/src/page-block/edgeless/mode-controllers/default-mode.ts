@@ -21,6 +21,7 @@ import type { Selectable } from '../selection-manager.js';
 import {
   getSelectionBoxBound,
   getXYWH,
+  isSurfaceElement,
   isTopLevelBlock,
   pick,
 } from '../utils.js';
@@ -57,38 +58,37 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _updateHoverState(content: Selectable | null) {
-    if (content) {
-      if (isTopLevelBlock(content)) {
-        this._hoverState = {
-          rect: getSelectionBoxBound(this._edgeless.viewport, content.xywh),
-          content,
-        };
-      }
-    } else {
+    if (!content) {
       this._hoverState = null;
+      return;
     }
+
+    const { viewport } = this._edgeless;
+    const xywh = getXYWH(content);
+    this._hoverState = {
+      rect: getSelectionBoxBound(viewport, xywh),
+      content,
+    };
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
     const { viewport } = this._edgeless;
-
     const xywh = getXYWH(selected);
+    const isSurfaceEl = isSurfaceElement(selected);
 
-    switch (this.blockSelectionState.type) {
-      case 'none':
-        this._blockSelectionState = {
-          type: 'single',
-          active: false,
-          selected,
-          rect: getSelectionBoxBound(viewport, xywh),
-        };
-        this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-        break;
-      case 'single':
-        if (this.blockSelectionState.selected === selected) {
-          this.blockSelectionState.active = true;
-          this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-        } else {
+    if (isSurfaceEl) {
+      // shape
+      this._blockSelectionState = {
+        type: 'single',
+        active: true,
+        selected,
+        rect: getSelectionBoxBound(viewport, xywh),
+      };
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
+    } else {
+      // block
+      switch (this.blockSelectionState.type) {
+        case 'none':
           this._blockSelectionState = {
             type: 'single',
             active: false,
@@ -96,9 +96,27 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             rect: getSelectionBoxBound(viewport, xywh),
           };
           this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-        }
-        handleNativeRangeClick(this._page, e);
-        break;
+          break;
+        case 'single':
+          if (this.blockSelectionState.selected === selected) {
+            this.blockSelectionState.active = true;
+            this._edgeless.signals.updateSelection.emit(
+              this.blockSelectionState
+            );
+          } else {
+            this._blockSelectionState = {
+              type: 'single',
+              active: false,
+              selected,
+              rect: getSelectionBoxBound(viewport, xywh),
+            };
+            this._edgeless.signals.updateSelection.emit(
+              this.blockSelectionState
+            );
+          }
+          handleNativeRangeClick(this._page, e);
+          break;
+      }
     }
   }
 
@@ -158,31 +176,28 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           }
           const deltaX = this._dragLastPos.x - e.x;
           const deltaY = this._dragLastPos.y - e.y;
+          const boundX =
+            this.blockSelectionState.selected.x -
+            deltaX / this._edgeless.viewport.zoom;
+          const boundY =
+            this.blockSelectionState.selected.y -
+            deltaY / this._edgeless.viewport.zoom;
+          const boundW = this.blockSelectionState.selected.w;
+          const boundH = this.blockSelectionState.selected.h;
           this._edgeless.surface.setElementBound(
             this.blockSelectionState.selected.id,
             {
-              x:
-                this.blockSelectionState.selected.x -
-                deltaX / this._edgeless.viewport.zoom,
-              y:
-                this.blockSelectionState.selected.y -
-                deltaY / this._edgeless.viewport.zoom,
-              w: this.blockSelectionState.selected.w,
-              h: this.blockSelectionState.selected.h,
+              x: boundX,
+              y: boundY,
+              w: boundW,
+              h: boundH,
             }
           );
           this._blockSelectionState = {
             ...this.blockSelectionState,
             rect: getSelectionBoxBound(
               this._edgeless.viewport,
-              serializeXYWH(
-                this.blockSelectionState.selected.x -
-                  deltaX / this._edgeless.viewport.zoom,
-                this.blockSelectionState.selected.y -
-                  deltaY / this._edgeless.viewport.zoom,
-                this.blockSelectionState.selected.w,
-                this.blockSelectionState.selected.h
-              )
+              serializeXYWH(boundX, boundY, boundW, boundH)
             ),
           };
           this._edgeless.signals.updateSelection.emit(
@@ -235,17 +250,21 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragEnd(e: SelectionEvent): void {
+    const selected = this._pick(e.x, e.y);
+    const isSurfaceEl = isSurfaceElement(selected);
+
     if (this._lock) {
       this._page.captureSync();
       this._lock = false;
     }
-    if (this.isActive) {
+
+    if (this.isActive && !isSurfaceEl) {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ direction });
+      showFormatQuickBar({ page: this._page, direction });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
         this._page.captureSync();
@@ -257,9 +276,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerMouseMove(e: SelectionEvent): void {
     const { viewport } = this._edgeless;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const hovered = pick(this._blocks, modelX, modelY);
 
-    this._updateHoverState(hovered);
+    const shape = this._surface.pickTop(modelX, modelY);
+    const blocks = pick(this._blocks, modelX, modelY);
+
+    this._updateHoverState(shape ?? blocks);
     this._edgeless.signals.hoverUpdated.emit();
   }
 
@@ -267,17 +288,17 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     noop();
   }
 
-  syncBlockSelectionRect() {
+  // Selection rect can be used for both top-level blocks and surface elements
+  syncSelectionRect() {
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;
-      if (isTopLevelBlock(selected)) {
-        const block = selected;
-        const rect = getSelectionBoxBound(this._edgeless.viewport, block.xywh);
-        this.blockSelectionState.rect = rect;
-        this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-      }
+
+      const xywh = getXYWH(selected);
+      const rect = getSelectionBoxBound(this._edgeless.viewport, xywh);
+      this.blockSelectionState.rect = rect;
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
     }
 
-    this._updateHoverState(this._hoverState?.content ?? null);
+    this._updateHoverState(this._hoverState?.content || null);
   }
 }
