@@ -5,7 +5,6 @@ import {
   OpenBlockInfo,
 } from '@blocksuite/blocks';
 import {
-  deleteModelsByRange,
   EmbedBlockModel,
   getServiceOrRegister,
   ListBlockModel,
