@@ -456,6 +456,7 @@ export function handleKeyDown(
   return ALLOW_DEFAULT;
 }
 
+// WARNING this seems to be deprecated
 export function tryMatchSpaceHotkey(
   page: Page,
   model: ExtendedModel,
