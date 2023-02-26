@@ -36,6 +36,7 @@ import type {
   ImageBlockComponent,
 } from '../../embed-block/index.js';
 import {
+  calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/position.js';
@@ -466,6 +467,7 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
+        // TODO merge these two functions
         this._onSelectionChangeWithDebounce,
         this._onSelectionChangeWithoutDebounce
       )
@@ -693,7 +695,15 @@ export class DefaultSelectionManager {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ page: this.page, direction });
+      showFormatQuickBar({
+        page: this.page,
+        direction,
+        anchorEl: {
+          getBoundingClientRect: () => {
+            return calcCurrentSelectionPosition(direction, this.state);
+          },
+        },
+      });
     } else if (this.state.type === 'block') {
       if (
         !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
@@ -712,15 +722,7 @@ export class DefaultSelectionManager {
           // After update block type, the block selection will be cleared and refreshed.
           // So we need to get the targe block's rect dynamic.
           getBoundingClientRect: () => {
-            const blocks = this.state.selectedBlocks;
-            if (!blocks.length) {
-              throw new Error("Failed to get format bar's anchor element");
-            }
-            const firstBlock = blocks[0];
-            const lastBlock = blocks[blocks.length - 1];
-            const targetBlock =
-              direction === 'center-bottom' ? lastBlock : firstBlock;
-            return targetBlock.getBoundingClientRect();
+            return calcCurrentSelectionPosition(direction, this.state);
           },
         },
       });
@@ -805,7 +807,18 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
+    const direction = 'center-bottom';
+
+    // Show format quick bar when double click on text
+    showFormatQuickBar({
+      page: this.page,
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
+    });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -867,17 +880,24 @@ export class DefaultSelectionManager {
     }
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
-    let direction: 'left-right' | 'right-left' | 'none' = 'none';
+    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
 
     if (offsetDelta > 0) {
-      direction = 'right-left';
+      selectionDirection = 'right-left';
     } else if (offsetDelta < 0) {
-      direction = 'left-right';
+      selectionDirection = 'left-right';
     }
+    const direction =
+      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
     });
   };
 
