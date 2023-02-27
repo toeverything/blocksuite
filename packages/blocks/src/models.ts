@@ -86,12 +86,10 @@ export type BlockService = typeof blockService;
 
 export type ServiceFlavour = keyof BlockService;
 
-type RemoveInternals<T> = Omit<T, 'onLoad'>;
-
 export type BlockServiceInstance = {
   [Key in Flavour]: Key extends ServiceFlavour
     ? BlockService[Key] extends { new (): unknown }
-      ? RemoveInternals<InstanceType<BlockService[Key]>>
+      ? InstanceType<BlockService[Key]>
       : never
-    : RemoveInternals<InstanceType<typeof BaseService>>;
+    : InstanceType<typeof BaseService>;
 };
