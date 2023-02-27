@@ -1,4 +1,9 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import type {
+  getCurrentBlockRange,
+  getDefaultPageBlock,
+  handleBlockSelectionBatchDelete,
+  OpenBlockInfo,
+} from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   getStartModelBySelection,
@@ -49,10 +54,23 @@ export class PasteManager {
 
       const blocksPromise = this._clipboardEvent2Blocks(e);
       if (blocksPromise instanceof Promise) {
+        const page = this._editor.page;
+        const blockRange = getCurrentBlockRange(page);
+        if (blockRange) {
+          if (blockRange.type === 'Native') {
+            deleteModelsByRange(page);
+          } else {
+            handleBlockSelectionBatchDelete(page, blockRange.models);
+            const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+            pageBlock.selection.clear();
+          }
+        }
         e.preventDefault();
         e.stopPropagation();
         const blocks: OpenBlockInfo[] = await blocksPromise;
-        this.insertBlocks(blocks);
+        requestAnimationFrame(() => {
+          this.insertBlocks(blocks);
+        })
       }
     }
   };
