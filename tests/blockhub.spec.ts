@@ -117,9 +117,7 @@ test('drag blank line into text area', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -176,9 +174,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -234,9 +230,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"

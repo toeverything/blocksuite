@@ -56,9 +56,7 @@ export class VEditor {
     }
 
     if (onKeyDown) {
-      this._onKeyDown = e => {
-        onKeyDown(e);
-      };
+      this._onKeyDown = onKeyDown;
     }
 
     this.signals = {
@@ -133,15 +131,9 @@ export class VEditor {
 
   getNativeSelection(): Selection | null {
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return null;
-    }
-
-    if (selection.rangeCount === 0) {
-      return null;
-    }
+    if (!selection) return null;
+    if (selection.rangeCount === 0) return null;
 
     return selection;
   }
@@ -300,7 +292,6 @@ export class VEditor {
 
         if (newRange) {
           const selectionRoot = findDocumentOrShadowRoot(this);
-          // @ts-ignore
           const selection = selectionRoot.getSelection();
           if (selection) {
             selection.removeAllRanges();
@@ -616,18 +607,11 @@ export class VEditor {
     }
 
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return;
-    }
-
-    if (selection.rangeCount === 0) {
-      return;
-    }
+    if (!selection) return;
+    if (selection.rangeCount === 0) return;
 
     const { anchorNode, focusNode } = selection;
-
     if (
       !this._rootElement.contains(anchorNode) ||
       !this._rootElement.contains(focusNode)
@@ -658,8 +642,8 @@ export class VEditor {
     }
   };
 
-  private _onUpdateVRange = ([newRangStatic, origin]: UpdateVRangeProp) => {
-    this._vRange = newRangStatic;
+  private _onUpdateVRange = ([newVRange, origin]: UpdateVRangeProp) => {
+    this._vRange = newVRange;
 
     if (origin === 'native') {
       return;
@@ -669,10 +653,21 @@ export class VEditor {
     this._rootElement?.blur();
 
     const fn = () => {
+      if (!newVRange) {
+        return;
+      }
+
       // when using input method _vRange will return to the starting point,
-      // so we need to reassign
-      this._vRange = newRangStatic;
-      this.syncVRange();
+      // so we need to resync
+      const newRange = this.toDomRange(newVRange);
+      if (newRange) {
+        const selectionRoot = findDocumentOrShadowRoot(this);
+        const selection = selectionRoot.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
     };
 
     // updates in lit are performed asynchronously
@@ -826,7 +821,7 @@ function getTextAndOffset(node: unknown, offset: number) {
   return [text, textOffset] as const;
 }
 
-function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
+function findDocumentOrShadowRoot(editor: VEditor): Document {
   const el = editor.getRootElement();
 
   if (!el) {
@@ -837,8 +832,7 @@ function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
 
   if (
     (root instanceof Document || root instanceof ShadowRoot) &&
-    // @ts-ignore
-    root.getSelection != null
+    'getSelection' in root
   ) {
     return root;
   }

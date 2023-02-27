@@ -96,17 +96,17 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
-  const titleElement = document.querySelector(
-    '.affine-default-page-block-title'
-  ) as HTMLTextAreaElement | null;
-  if (!titleElement) {
-    throw new Error("Can't find title element");
+  const pageComponent = document.querySelector('affine-default-page');
+  if (!pageComponent) {
+    throw new Error("Can't find page component!");
   }
-  if (index > titleElement.value.length) {
-    index = titleElement.value.length;
+  if (!pageComponent.titleVEditor) {
+    throw new Error("Can't find title vEditor!");
   }
-  titleElement.setSelectionRange(index, index);
-  titleElement.focus();
+  if (index > pageComponent.titleVEditor.yText.length) {
+    index = pageComponent.titleVEditor.yText.length;
+  }
+  pageComponent.titleVEditor.setVRange({ index, length: 0 });
 }
 
 export async function focusRichText(

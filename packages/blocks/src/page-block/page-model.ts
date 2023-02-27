@@ -3,11 +3,11 @@ import { literal } from 'lit/static-html.js';
 
 export const PageBlockModelSchema = defineBlockSchema(
   'affine:page',
-  () => ({
-    title: '',
+  internal => ({
+    title: internal.Text(),
   }),
   {
-    version: 1,
+    version: 2,
     tag: literal`affine-page`,
   }
 );

@@ -1,6 +1,6 @@
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { builtInSchemas } from '@blocksuite/blocks/models';
-import { BaseBlockModel, Page, Workspace } from '@blocksuite/store';
+import { BaseBlockModel, Page, Text, Workspace } from '@blocksuite/store';
 import { customElement, query } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
@@ -40,13 +40,15 @@ export class SimpleAffineEditor extends NonShadowLitElement {
       editor.page = page;
       this.appendChild(editor);
 
-      const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: new Text(),
+      });
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
     });
   }
 
-  setTitle(title: string) {
+  setTitle(title: Text) {
     this.page.updateBlock(this.page.root as BaseBlockModel, { title });
   }
 
