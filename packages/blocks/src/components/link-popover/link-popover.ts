@@ -115,9 +115,6 @@ export class LinkPopover extends LitElement {
   @property()
   previewLink = '';
 
-  // @state()
-  // private link = '';
-
   @state()
   private bodyOverflowStyle = '';
 
