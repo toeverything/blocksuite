@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit/html.js';
 
+import type { BlockModelProps } from '../../types.js';
 import {
   BulletedListIcon,
   CodeBlockIcon,
@@ -19,7 +20,7 @@ import {
 
 export type BlockConfig<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+  ALLProps extends Record<string, any> = BlockModelProps,
   Flavour extends keyof ALLProps & string = keyof ALLProps & string
 > = {
   flavour: Flavour;
