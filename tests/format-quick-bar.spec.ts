@@ -708,7 +708,7 @@ test('should format quick bar action status updated while undo', async ({
 test('should format quick bar work in single block selection', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
@@ -781,7 +781,7 @@ test('should format quick bar work in single block selection', async ({
 test('should format quick bar work in multiple block selection', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
@@ -869,7 +869,7 @@ test('should format quick bar work in multiple block selection', async ({
 test('should format quick bar with block selection works when update block type', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
@@ -945,7 +945,7 @@ test('should format quick bar with block selection works when update block type'
 test('should format quick bar show after convert to code block', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   const formatBarController = getFormatBar(page);

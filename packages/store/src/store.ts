@@ -76,7 +76,7 @@ const flagsPreset = {
   enable_edgeless_toolbar: true,
   enable_slash_menu: true,
   enable_database: false,
-  enable_block_selection_format_bar: false,
+  enable_block_selection_format_bar: true,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

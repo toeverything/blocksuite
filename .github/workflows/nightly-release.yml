@@ -35,7 +35,7 @@ jobs:
         run: ./scripts/replace-nightly-version.sh
 
       - name: Try Publishing to NPM
-        run: ./scripts/publish.sh
+        run: NIGHTLY=true ./scripts/publish.sh
         env:
           NIGHTLY: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
