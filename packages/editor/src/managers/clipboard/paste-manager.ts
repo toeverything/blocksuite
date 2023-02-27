@@ -1,4 +1,4 @@
-import type {
+import {
   getCurrentBlockRange,
   getDefaultPageBlock,
   handleBlockSelectionBatchDelete,
@@ -70,7 +70,7 @@ export class PasteManager {
         const blocks: OpenBlockInfo[] = await blocksPromise;
         requestAnimationFrame(() => {
           this.insertBlocks(blocks);
-        })
+        });
       }
     }
   };
