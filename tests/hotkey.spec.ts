@@ -675,3 +675,47 @@ test('should bracket complete works', async ({ page }) => {
   // Should not trigger bracket complete when type right bracket
   await assertRichTexts(page, ['(()){']);
 });
+
+test('should bracket complete with backtick works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello world');
+
+  await dragBetweenIndices(page, [0, 2], [0, 5]);
+  await resetHistory(page);
+  await type(page, '`');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="he"
+      />
+      <text
+        code={true}
+        insert="llo"
+      />
+      <text
+        insert=" world"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await undoByClick(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello world"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+});
