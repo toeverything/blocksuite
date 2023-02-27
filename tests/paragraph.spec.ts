@@ -16,13 +16,13 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitDefaultPageLoaded,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
   assertBlockType,
   assertClassName,
-  assertKeyboardWorkInInput,
   assertPageTitleFocus,
   assertRichTexts,
   assertSelection,
@@ -34,6 +34,7 @@ import { test } from './utils/playwright.js';
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await type(page, 'hello');
   await pressEnter(page);
   await type(page, 'world');
@@ -52,6 +53,7 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 test('init paragraph by page title enter in middle', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await type(page, 'hello');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
@@ -65,6 +67,7 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
 test('drag over paragraph title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -80,6 +83,7 @@ test('drag over paragraph title', async ({ page }) => {
 test('backspace and arrow on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -100,13 +104,12 @@ test('backspace and arrow on title', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertTitle(page, 'hll');
-  const title = page.locator('.affine-default-page-block-title');
-  await assertKeyboardWorkInInput(page, title);
 });
 
 test('backspace on line start of the first block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -681,6 +684,7 @@ test('after deleting a text row, cursor should jump to the end of previous list 
 test('press tab in paragraph children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitDefaultPageLoaded(page);
   await pressEnter(page);
   await type(page, '1');
   await pressEnter(page);
@@ -716,7 +720,9 @@ test('press arrow down should move caret to the start of line', async ({
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     page.addBlockByFlavour(
       'affine:paragraph',
@@ -749,7 +755,9 @@ test('press arrow up in the second line should move caret to the first line', as
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
@@ -798,7 +806,9 @@ test('press arrow down in indent line should not move caret to the start of line
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
     const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);

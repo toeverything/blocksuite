@@ -13,7 +13,6 @@ import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
 const RICH_TEXT_SELECTOR = '.ql-editor';
-const TITLE_SELECTOR = '.affine-default-page-block-title';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   if (!process.env.CI) {
@@ -171,7 +170,9 @@ export async function enterPlaygroundWithList(page: Page) {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     for (let i = 0; i < 3; i++) {
       page.addBlockByFlavour('affine:list', {}, frameId);
@@ -187,7 +188,9 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
     page.captureSync();
 
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page');
+      pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
     }
 
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
@@ -202,7 +205,9 @@ export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
 
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     page.addBlockByFlavour('affine:surface', {}, null);
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
@@ -218,7 +223,9 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page');
+      pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
     }
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     const paragraphId = page.addBlockByFlavour(
@@ -246,11 +253,6 @@ export async function initEmptyCodeBlockState(page: Page) {
   });
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
-}
-
-export async function focusTitle(page: Page) {
-  const locator = page.locator(TITLE_SELECTOR);
-  await locator.click();
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -530,4 +532,20 @@ export async function assertEdgelessHoverRect(
   expect(box.y).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
+}
+
+export function virgoEditorInnerTextToString(innerText: string): string {
+  return innerText.replace('\u200B', '');
+}
+
+export async function focusTitle(page: Page) {
+  await page.evaluate(() => {
+    const defaultPageComponent = document.querySelector('affine-default-page');
+    if (!defaultPageComponent) {
+      throw new Error('default page component not found');
+    }
+
+    defaultPageComponent.titleVEditor.focusEnd();
+  });
+  await page.waitForTimeout(50);
 }

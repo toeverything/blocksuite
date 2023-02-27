@@ -14,20 +14,46 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
   const elements = surface.pick(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
-    `picked elements count: ${elements.length}. top element type ${
+    `picked elements count: ${elements.length}, top element type: ${
       topElement?.type
-    }. top element color ${(topElement as DebugElement).color}`
+    }, color ${(topElement as DebugElement)?.color}`
   );
 }
 
-function main() {
-  const doc = new Y.Doc();
-  const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-  const yContainer = doc.getMap('container');
-  const surface = new SurfaceManager(canvas, yContainer);
+function addBrushElements(surface: SurfaceManager) {
+  surface.addBrushElement(0, 120, 'green', [
+    [0, 14.35],
+    [0.23, 14.35],
+    [0.99, 14.35],
+    [3.03, 14.1],
+    [4.21, 13.7],
+    [5.42, 13.18],
+    [6.61, 12.58],
+    [10.91, 10.87],
+    [17.4, 8.78],
+    [21.25, 7.89],
+    [25.05, 7.01],
+    [28.9, 6.12],
+    [33.24, 0],
+  ]);
 
-  surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
-  surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
+  const brushId = surface.addBrushElement(0, 0, 'purple');
+  surface.updateBrushElementPoints(brushId, [
+    [0, 0],
+    [10, 10],
+    [20, 20],
+    [30, 30],
+    [40, 40],
+    [50, 50],
+    [60, 60],
+    [70, 70],
+    [80, 80],
+    [90, 90],
+    [100, 100],
+  ]);
+}
+
+function addShapeElements(surface: SurfaceManager) {
   surface.addShapeElement(new Bound(200, 0, 100, 100), 'rect', {
     filled: true,
     strokeWidth: 0,
@@ -42,6 +68,20 @@ function main() {
     fillColor: '#009900',
     strokeColor: '#dddd00',
   });
+}
+
+function main() {
+  const doc = new Y.Doc();
+  const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+  const yContainer = doc.getMap('container');
+  const surface = new SurfaceManager(canvas, yContainer);
+
+  surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
+  surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
+  surface.addDebugElement(new Bound(298, 0, 2, 300), 'gray');
+
+  addBrushElements(surface);
+  addShapeElements(surface);
 
   // Uncomment to batch load mock data
   // initMockData(surface, 100, 1000, 1000);

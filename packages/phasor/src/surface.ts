@@ -7,7 +7,9 @@ import type { IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { ShapeProps } from './elements/index.js';
 import {
+  BrushElement,
   DebugElement,
+  getBrushBoundFromPoints,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
@@ -54,6 +56,31 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
+  addBrushElement(
+    x: number,
+    y: number,
+    color: string,
+    points: number[][] = []
+  ): string {
+    const id = nanoid(10);
+    const element = new BrushElement(id);
+
+    const lineWidth = element.lineWidth;
+    const bound = getBrushBoundFromPoints(points, lineWidth);
+
+    element.setBound(x, y, bound.w, bound.h);
+    element.color = color;
+    element.points = points;
+
+    return this._addElement(element);
+  }
+
+  updateBrushElementPoints(id: string, points: number[][]) {
+    const yElement = this._yElements.get(id) as Y.Map<unknown>;
+    assertExists(yElement);
+    yElement.set('points', JSON.stringify(points));
+  }
+
   setElementBound(id: string, bound: IBound) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
@@ -82,7 +109,7 @@ export class SurfaceManager {
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
-    const bound: IBound = { x, y, w: 1, h: 1 };
+    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
       return element.hitTest(x, y, options);
@@ -113,6 +140,12 @@ export class SurfaceManager {
         element = ShapeElement.deserialize(yElement.toJSON());
         break;
       }
+      case 'brush': {
+        element = BrushElement.deserialize(yElement.toJSON());
+        break;
+      }
+      default:
+        throw new Error('no element type matched.');
     }
     assertExists(element);
 
@@ -197,6 +230,19 @@ export class SurfaceManager {
           // refresh grid manager
           this._renderer.removeElement(element);
           element.setBound(x, y, w, h);
+          this._renderer.addElement(element);
+        }
+
+        if (key === 'points') {
+          const points: number[][] = JSON.parse(yElement.get(key) as string);
+
+          const lineWidth = (element as BrushElement).lineWidth;
+
+          const bounds = getBrushBoundFromPoints(points, lineWidth);
+
+          this._renderer.removeElement(element);
+          (element as BrushElement).points = points;
+          element.setBound(element.x, element.y, bounds.w, bounds.h);
           this._renderer.addElement(element);
         }
       }

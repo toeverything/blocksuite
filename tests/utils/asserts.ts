@@ -22,7 +22,10 @@ import {
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
-import { captureHistory } from './actions/misc.js';
+import {
+  captureHistory,
+  virgoEditorInnerTextToString,
+} from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -34,7 +37,7 @@ export const defaultStore: SerializedStore = {
     ],
     versions: {
       'affine:paragraph': 1,
-      'affine:page': 1,
+      'affine:page': 2,
       'affine:database': 1,
       'affine:list': 1,
       'affine:frame': 1,
@@ -74,9 +77,9 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
-  const actual = await locator.inputValue();
-  expect(actual).toBe(text);
+  const vEditor = page.locator('[data-block-is-title="true"]');
+  const vText = virgoEditorInnerTextToString(await vEditor.innerText());
+  expect(vText).toBe(text);
 }
 
 export async function assertText(page: Page, text: string) {
@@ -336,7 +339,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
     if (node['sys:flavour'] === 'affine:page') {
-      return (node['prop:title'] as string) ?? '';
+      return (node['prop:title'] as Text).toString() ?? '';
     }
     if (!('prop:type' in node)) {
       return '[? unknown node]';

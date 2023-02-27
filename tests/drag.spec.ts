@@ -137,9 +137,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -188,9 +186,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -245,9 +241,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -303,9 +297,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -432,9 +424,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -498,9 +488,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}

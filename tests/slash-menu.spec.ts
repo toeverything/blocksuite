@@ -120,7 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
     }
     const { x, y } = box;
     assertAlmostEqual(x, 95, 6);
-    assertAlmostEqual(y, 172, 6);
+    assertAlmostEqual(y, 167, 8);
   });
 
   test('left arrow should active left panel', async () => {

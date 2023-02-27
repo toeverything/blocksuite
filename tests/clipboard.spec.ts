@@ -360,9 +360,7 @@ test('should keep first line format when pasted into a new line', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -400,9 +398,7 @@ test('should keep first line format when pasted into a new line', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}

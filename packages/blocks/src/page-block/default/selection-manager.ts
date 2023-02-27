@@ -24,7 +24,7 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
-  isTitleElement,
+  isInsidePageTitle,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
@@ -36,6 +36,7 @@ import type {
   ImageBlockComponent,
 } from '../../embed-block/index.js';
 import {
+  calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/position.js';
@@ -466,6 +467,7 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
+        // TODO merge these two functions
         this._onSelectionChangeWithDebounce,
         this._onSelectionChangeWithoutDebounce
       )
@@ -628,7 +630,8 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    this.state.resetStartRange(e);
+    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
     }
@@ -693,7 +696,15 @@ export class DefaultSelectionManager {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ page: this.page, direction });
+      showFormatQuickBar({
+        page: this.page,
+        direction,
+        anchorEl: {
+          getBoundingClientRect: () => {
+            return calcCurrentSelectionPosition(direction, this.state);
+          },
+        },
+      });
     } else if (this.state.type === 'block') {
       if (
         !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
@@ -712,15 +723,7 @@ export class DefaultSelectionManager {
           // After update block type, the block selection will be cleared and refreshed.
           // So we need to get the targe block's rect dynamic.
           getBoundingClientRect: () => {
-            const blocks = this.state.selectedBlocks;
-            if (!blocks.length) {
-              throw new Error("Failed to get format bar's anchor element");
-            }
-            const firstBlock = blocks[0];
-            const lastBlock = blocks[blocks.length - 1];
-            const targetBlock =
-              direction === 'center-bottom' ? lastBlock : firstBlock;
-            return targetBlock.getBoundingClientRect();
+            return calcCurrentSelectionPosition(direction, this.state);
           },
         },
       });
@@ -789,7 +792,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isTitleElement(target) || isDatabaseInput(target)) {
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;
@@ -808,7 +811,18 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
+    const direction = 'center-bottom';
+
+    // Show format quick bar when double click on text
+    showFormatQuickBar({
+      page: this.page,
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
+    });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -856,6 +870,14 @@ export class DefaultSelectionManager {
       return;
     }
 
+    // filter out selection change event from title
+    if (
+      isInsidePageTitle(selection.anchorNode) ||
+      isInsidePageTitle(selection.focusNode)
+    ) {
+      return;
+    }
+
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;
@@ -870,17 +892,24 @@ export class DefaultSelectionManager {
     }
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
-    let direction: 'left-right' | 'right-left' | 'none' = 'none';
+    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
 
     if (offsetDelta > 0) {
-      direction = 'right-left';
+      selectionDirection = 'right-left';
     } else if (offsetDelta < 0) {
-      direction = 'left-right';
+      selectionDirection = 'left-right';
     }
+    const direction =
+      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
     });
   };
 
@@ -998,12 +1027,10 @@ export class DefaultSelectionManager {
   }
 
   refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
-    requestAnimationFrame(() => {
-      this.state.selectedBlocks = models
-        .map(model => getBlockElementByModel(model))
-        .filter((block): block is BlockComponentElement => block !== null);
-      this.refreshSelectedBlocksRects();
-    });
+    this.state.selectedBlocks = models
+      .map(model => getBlockElementByModel(model))
+      .filter((block): block is BlockComponentElement => block !== null);
+    this.refreshSelectedBlocksRects();
   }
 
   refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {

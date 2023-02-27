@@ -157,6 +157,7 @@ export function restoreSelection(blockRange: BlockRange) {
     // In the edgeless mode
     return;
   }
+  defaultPageBlock.selection.state.type = 'block';
   defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
     blockRange.models
   );
