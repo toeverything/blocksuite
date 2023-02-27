@@ -9,7 +9,9 @@ importers:
 
   .:
     specifiers:
+      '@blocksuite/blocks': workspace:*
       '@blocksuite/global': workspace:*
+      '@blocksuite/store': workspace:*
       '@blocksuite/virgo': workspace:*
       '@commitlint/cli': ^17.4.3
       '@commitlint/config-conventional': ^17.4.3
@@ -44,7 +46,9 @@ importers:
       vite-plugin-web-components-hmr: ^0.1.3
       vitest: ^0.28.5
     devDependencies:
+      '@blocksuite/blocks': link:packages/blocks
       '@blocksuite/global': link:packages/global
+      '@blocksuite/store': link:packages/store
       '@blocksuite/virgo': link:packages/virgo
       '@commitlint/cli': 17.4.3
       '@commitlint/config-conventional': 17.4.3

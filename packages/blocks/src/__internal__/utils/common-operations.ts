@@ -46,10 +46,13 @@ export function convertToList(
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
-  if (matchFlavours(model, ['affine:list']) && model['type'] === listType) {
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model['type'] === listType
+  ) {
     return false;
   }
-  if (matchFlavours(model, ['affine:paragraph'])) {
+  if (matchFlavours(model, ['affine:paragraph'] as const)) {
     const parent = page.getParent(model);
     if (!parent) return false;
 
@@ -70,7 +73,7 @@ export function convertToList(
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
-    matchFlavours(model, ['affine:list']) &&
+    matchFlavours(model, ['affine:list'] as const) &&
     model['type'] !== listType
   ) {
     model.text?.insert(' ', prefix.length);
@@ -91,7 +94,7 @@ export function convertToParagraph(
   if (matchFlavours(model, ['affine:paragraph']) && model['type'] === type) {
     return false;
   }
-  if (!matchFlavours(model, ['affine:paragraph'])) {
+  if (!matchFlavours(model, ['affine:paragraph'] as const)) {
     const parent = page.getParent(model);
     if (!parent) return false;
 
@@ -111,7 +114,7 @@ export function convertToParagraph(
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
-    matchFlavours(model, ['affine:paragraph']) &&
+    matchFlavours(model, ['affine:paragraph'] as const) &&
     model['type'] !== type
   ) {
     model.text?.insert(' ', prefix.length);
@@ -128,10 +131,13 @@ export function convertToDivider(
   model: ExtendedModel,
   prefix: string
 ): boolean {
-  if (matchFlavours(model, ['affine:divider']) || model.type === 'quote') {
+  if (
+    matchFlavours(model, ['affine:divider'] as const) ||
+    model.type === 'quote'
+  ) {
     return false;
   }
-  if (!matchFlavours(model, ['affine:divider'])) {
+  if (!matchFlavours(model, ['affine:divider'] as const)) {
     const parent = page.getParent(model);
     if (!parent) return false;
 

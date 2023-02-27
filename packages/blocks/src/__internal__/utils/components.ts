@@ -84,7 +84,10 @@ export function BlockChildrenContainer(
   host: BlockHost,
   onLoaded: () => void
 ) {
-  const paddingLeft = matchFlavours(model, ['affine:page', 'affine:frame'])
+  const paddingLeft = matchFlavours(model, [
+    'affine:page',
+    'affine:frame',
+  ] as const)
     ? 0
     : BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 

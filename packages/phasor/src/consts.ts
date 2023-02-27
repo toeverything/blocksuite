@@ -7,3 +7,7 @@ export interface IBound {
   w: number;
   h: number;
 }
+
+export type Color = `#${string}`;
+
+export type StrokeStyle = 'solid';

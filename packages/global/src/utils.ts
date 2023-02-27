@@ -1,3 +1,7 @@
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import type { BlockModels } from './types.js';
+
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
 export { Signal } from './utils/signal.js';
@@ -23,17 +27,27 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   }
 }
 
-export function matchFlavours<
-  Key extends keyof BlockSuiteInternal.BlockModels &
-    string = keyof BlockSuiteInternal.BlockModels & string
->(
-  model: { flavour: Key },
-  expected: readonly Key[]
-): boolean /* model is BlockModels[Key] */ {
-  return expected.includes(model.flavour as Key);
-}
+type BlockModelKey = keyof BlockModels;
+type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
+export function matchFlavours<Key extends Readonly<Array<string>>>(
+  model: BaseBlockModel,
+  expected: Key
+): model is Flavours<Writeable<Key>> {
+  return expected.includes(model.flavour);
+}
+// export function matchFlavours<
+//   Key extends keyof BlockModels &
+//     string = keyof BlockModels & string
+// >(
+//   model: { flavour: Key },
+//   expected: readonly Key[]
+// ): model is BlockModels[Key] {
+//   return expected.includes(model.flavour as Key);
+// }
+
+export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:database',
   'affine:divider',
   'affine:embed',
@@ -41,11 +55,10 @@ export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
 ];
 
 export const isNonTextBlock = <
-  Key extends keyof BlockSuiteInternal.BlockModels &
-    string = keyof BlockSuiteInternal.BlockModels & string
->(model: {
-  flavour: Key;
-}) => matchFlavours(model, nonTextBlock);
+  Key extends keyof BlockModels & string = keyof BlockModels & string
+>(
+  model: BaseBlockModel
+) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
   | void

@@ -766,7 +766,10 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      matchFlavours(clickBlockInfo.model, [
+        'affine:embed',
+        'affine:divider',
+      ] as const)
     ) {
       window.getSelection()?.removeAllRanges();
 

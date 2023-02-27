@@ -152,8 +152,8 @@ export function handleDown(
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (
-      matchFlavours(model, ['affine:code']) ||
-      matchFlavours(model, ['affine:page'])
+      matchFlavours(model, ['affine:code'] as const) ||
+      matchFlavours(model, ['affine:page'] as const)
     ) {
       return;
     }

@@ -86,7 +86,7 @@ export function getNextBlock(
     const nextSibling = page.getNextSibling(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
-      if (matchFlavours(nextSibling, ['affine:frame'])) {
+      if (matchFlavours(nextSibling, ['affine:frame'] as const)) {
         return getNextBlock(nextSibling);
       }
       return nextSibling;
@@ -130,7 +130,7 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'] as const)) {
       return getPreviousBlock(parentBlock);
     }
     return parentBlock;
@@ -226,7 +226,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       const block = ele as ContainerBlock;
       assertExists(block.model);
       const blockElement = getBlockElementByModel(block.model);
-      const mainElement = matchFlavours(block.model, ['affine:page'])
+      const mainElement = matchFlavours(block.model, ['affine:page'] as const)
         ? blockElement?.querySelector(
             '.affine-default-page-block-title-container'
           )

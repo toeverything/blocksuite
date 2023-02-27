@@ -13,6 +13,7 @@
   "exports": {
     ".": "./index.d.ts",
     "./database": "./src/database.ts",
+    "./types": "./src/types.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
     "./config": "./src/config/index.ts",
