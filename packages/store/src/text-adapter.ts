@@ -56,11 +56,13 @@ export class Text {
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(input: Y.Text | string) {
+  constructor(input?: Y.Text | string) {
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
-    } else {
+    } else if (input instanceof Y.Text) {
       this._yText = input;
+    } else {
+      this._yText = new Y.Text();
     }
   }
 

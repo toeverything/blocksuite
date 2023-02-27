@@ -91,7 +91,6 @@ importers:
       '@blocksuite/virgo': workspace:*
       '@popperjs/core': ^2.11.6
       '@types/autosize': ^4.0.1
-      autosize: ^6.0.1
       highlight.js: ^11.7.0
       hotkeys-js: ^3.10.1
       lit: ^2.6.1
@@ -103,7 +102,6 @@ importers:
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/virgo': link:../virgo
       '@popperjs/core': 2.11.6
-      autosize: 6.0.1
       highlight.js: 11.7.0
       hotkeys-js: 3.10.1_otx73r74oyscqvo3amwccrzngy
       lit: 2.6.1
@@ -2968,10 +2966,6 @@ packages:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
     dev: true
-
-  /autosize/6.0.1:
-    resolution: {integrity: sha512-f86EjiUKE6Xvczc4ioP1JBlWG7FKrE13qe/DxBCpe8GCipCq2nFw73aO8QEBKHfSbYGDN5eB9jXWKen7tspDqQ==}
-    dev: false
 
   /axe-core/4.6.1:
     resolution: {integrity: sha512-lCZN5XRuOnpG4bpMq8v0khrWtUOn+i8lZSb6wHZH56ZfbIEv6XwJV84AAueh9/zi7qPVJ/E4yz6fmsiyOmXR4w==}

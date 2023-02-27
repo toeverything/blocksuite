@@ -146,11 +146,12 @@ export class CopyCutManager {
         },
       ];
     } else {
-      delta =
-        model.text?.sliceToDelta(
-          selectedBlock.startPos || 0,
-          selectedBlock.endPos
-        ) || [];
+      delta = model.text?.yText.doc
+        ? model.text?.sliceToDelta(
+            selectedBlock.startPos || 0,
+            selectedBlock.endPos
+          )
+        : [];
     }
 
     const children: OpenBlockInfo[] = [];

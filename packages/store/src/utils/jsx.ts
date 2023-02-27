@@ -1,4 +1,4 @@
-import { AbstractType, Array, Doc, Map, Text } from 'yjs';
+import * as Y from 'yjs';
 
 import type { PrefixedBlockProps } from '../workspace/page.js';
 
@@ -60,8 +60,12 @@ export function yDocToJSXNode(
     Object.entries(node).filter(([key]) => !IGNORE_PROPS.includes(key))
   );
 
-  if ('prop:text' in props) {
+  if ('prop:text' in props && props['prop:text'] instanceof Array) {
     props['prop:text'] = parseDelta(props['prop:text'] as DeltaText);
+  }
+
+  if ('prop:title' in props && props['prop:title'] instanceof Array) {
+    props['prop:title'] = parseDelta(props['prop:title'] as DeltaText);
   }
 
   return {
@@ -72,10 +76,10 @@ export function yDocToJSXNode(
   };
 }
 
-export function serializeYDoc(doc: Doc) {
+export function serializeYDoc(doc: Y.Doc) {
   const json: Record<string, unknown> = {};
   doc.share.forEach((value, key) => {
-    if (value instanceof Map) {
+    if (value instanceof Y.Map) {
       json[key] = serializeYMap(value);
     } else {
       json[key] = value.toJSON();
@@ -84,16 +88,16 @@ export function serializeYDoc(doc: Doc) {
   return json;
 }
 
-function serializeYMap(map: Map<unknown>) {
+function serializeYMap(map: Y.Map<unknown>) {
   const json: Record<string, unknown> = {};
   map.forEach((value, key) => {
-    if (value instanceof Map) {
+    if (value instanceof Y.Map) {
       json[key] = serializeYMap(value);
-    } else if (value instanceof Text) {
+    } else if (value instanceof Y.Text) {
       json[key] = serializeYText(value);
-    } else if (value instanceof Array) {
+    } else if (value instanceof Y.Array) {
       json[key] = value.toJSON();
-    } else if (value instanceof AbstractType) {
+    } else if (value instanceof Y.AbstractType) {
       json[key] = value.toJSON();
     } else {
       json[key] = value;
@@ -107,7 +111,7 @@ type DeltaText = {
   attributes?: { [format: string]: unknown };
 }[];
 
-function serializeYText(text: Text): DeltaText {
+function serializeYText(text: Y.Text): DeltaText {
   const delta = text.toDelta();
   return delta;
 }
