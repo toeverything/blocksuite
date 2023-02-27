@@ -66,34 +66,31 @@ export class DebugMenu extends NonShadowLitElement {
   editor!: EditorContainer;
 
   @state()
-  connected = true;
+  private connected = true;
 
   @state()
-  canUndo = false;
+  private canUndo = false;
 
   @state()
-  canRedo = false;
+  private canRedo = false;
 
   @state()
-  mode: 'page' | 'edgeless' = 'page';
+  private mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  mouseModeType: MouseMode['type'] = 'default';
+  private mouseModeType: MouseMode['type'] = 'default';
 
   @state()
-  showGrid = false;
+  private showGrid = false;
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = '#000000';
+  private shapeModeColor: ShapeMouseMode['color'] = '#000000';
 
   @state()
-  shapeModeShape: ShapeMouseMode['shape'] = 'rect';
+  private shapeModeShape: ShapeMouseMode['shape'] = 'rect';
 
   @state()
-  readonly = false;
-
-  @state()
-  hasOffset = false;
+  private hasOffset = false;
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;

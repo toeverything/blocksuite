@@ -87,7 +87,7 @@ export class LangList extends NonShadowLitElement {
   }
 
   @state()
-  filterText = '';
+  private filterText = '';
 
   @property()
   id!: string;
@@ -100,9 +100,6 @@ export class LangList extends NonShadowLitElement {
 
   @query('#filter-input')
   filterInput!: HTMLInputElement;
-
-  @state()
-  disposeTimer = 0;
 
   @property()
   delay = 150;

@@ -199,13 +199,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   langListElement!: HTMLElement;
 
   @state()
-  showLangList = 'hidden';
-
-  @state()
-  disposeTimer = 0;
-
-  @state()
-  filterText = '';
+  private showLangList = 'hidden';
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);

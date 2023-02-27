@@ -68,19 +68,19 @@ export class BlockHub extends NonShadowLitElement {
   right = 24;
 
   @state()
-  _expanded = false;
+  private _expanded = false;
 
   @state()
-  _isGrabbing = false;
+  private _isGrabbing = false;
 
   @state()
-  _isCardListVisible = false;
+  private _isCardListVisible = false;
 
   @state()
-  _cardVisibleType: CardListType | null = null;
+  private _cardVisibleType: CardListType | null = null;
 
   @state()
-  _showToolTip = true;
+  private _showToolTip = true;
 
   @state()
   _maxHeight = 2000;

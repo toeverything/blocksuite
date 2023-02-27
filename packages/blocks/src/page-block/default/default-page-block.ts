@@ -161,10 +161,10 @@ export class DefaultPageBlockComponent
   mouseRoot!: HTMLElement;
 
   @state()
-  frameSelectionRect: DOMRect | null = null;
+  private frameSelectionRect: DOMRect | null = null;
 
   @state()
-  viewportState: ViewportState = {
+  private viewportState: ViewportState = {
     left: 0,
     top: 0,
     scrollLeft: 0,
@@ -175,15 +175,15 @@ export class DefaultPageBlockComponent
   };
 
   @state()
-  selectedRects: DOMRect[] = [];
+  private selectedRects: DOMRect[] = [];
 
   @state()
-  selectedEmbedRects: DOMRect[] = [];
+  private selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  embedEditingState!: EmbedEditingState | null;
+  private embedEditingState!: EmbedEditingState | null;
 
-  @state()
+  @property()
   codeBlockOption!: CodeBlockOption | null;
 
   @query('.affine-default-viewport')

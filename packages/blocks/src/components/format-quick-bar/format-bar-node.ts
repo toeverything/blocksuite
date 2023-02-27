@@ -54,24 +54,24 @@ export class FormatQuickBar extends LitElement {
   direction!: DragDirection;
 
   @state()
-  models: BaseBlockModel[] = [];
+  private models: BaseBlockModel[] = [];
 
   @state()
-  paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
+  private paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
-  paragraphPanelHoverDelay = 150;
+  private paragraphPanelHoverDelay = 150;
 
   @state()
-  paragraphPanelTimer = 0;
+  private paragraphPanelTimer = 0;
 
   @state()
-  showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+  private showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
 
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  format: TextAttributes = {};
+  private format: TextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;

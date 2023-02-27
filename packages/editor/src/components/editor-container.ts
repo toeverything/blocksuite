@@ -34,10 +34,10 @@ export class EditorContainer extends NonShadowLitElement {
   showGrid = false;
 
   // TODO only select block
-  @state()
+  @property()
   clipboard = new ClipboardManager(this, this);
 
-  @state()
+  @property()
   contentParser = new ContentParser(this);
 
   get model() {

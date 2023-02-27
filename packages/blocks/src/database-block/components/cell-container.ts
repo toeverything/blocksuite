@@ -20,7 +20,7 @@ export class DatabaseCellContainer
   `;
 
   @state()
-  isEditing = false;
+  private isEditing = false;
 
   setValue(value: unknown) {
     if (value) {

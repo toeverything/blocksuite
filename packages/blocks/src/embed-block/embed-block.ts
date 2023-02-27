@@ -43,7 +43,7 @@ export class EmbedBlockComponent extends NonShadowLitElement {
   _input!: HTMLInputElement;
 
   @state()
-  _caption!: string;
+  private _caption!: string;
 
   firstUpdated() {
     requestAnimationFrame(() => {

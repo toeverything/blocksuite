@@ -115,14 +115,14 @@ export class LinkPopover extends LitElement {
   @property()
   previewLink = '';
 
-  @state()
-  link = '';
+  // @state()
+  // private link = '';
 
   @state()
-  bodyOverflowStyle = '';
+  private bodyOverflowStyle = '';
 
   @state()
-  disableConfirm = true;
+  private disableConfirm = true;
 
   @query('#text-input')
   textInput: HTMLInputElement | undefined;

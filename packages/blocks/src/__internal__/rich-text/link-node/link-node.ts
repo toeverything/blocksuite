@@ -20,7 +20,7 @@ export class LinkNodeComponent extends LitElement {
   popoverHoverOpenDelay = 150;
 
   @state()
-  popoverTimer = 0;
+  private popoverTimer = 0;
 
   static styles = css`
     a {
