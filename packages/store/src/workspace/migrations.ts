@@ -117,15 +117,15 @@ const migrations: Migration[] = [
       for (const pageId of pageIds) {
         const spaceId = `space:${pageId}`;
         const yBlocks = doc.getMap(spaceId);
-        // @ts-ignore
-        yBlocks.forEach((yBlock: Y.Map<unknown>) => {
+
+        for (const yBlock of yBlocks.values()) {
           if (yBlock.get('sys:flavour') === 'affine:page') {
             const title = yBlock.get('prop:title') as string;
             const yTitle = new Y.Text(title);
             yBlock.set('prop:title', yTitle);
             return;
           }
-        });
+        }
       }
     },
   },
