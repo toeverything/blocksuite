@@ -1,8 +1,21 @@
+import { getStrokePoints } from 'perfect-freehand';
+
 import type { IBound } from '../../consts.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { Vec } from '../../utils/vec.js';
 import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
+
+function getSolidStrokePoints(points: number[][], lineWidth: number) {
+  return getStrokePoints(points, {
+    size: lineWidth,
+    thinning: 0.65,
+    streamline: 0.65,
+    smoothing: 0.65,
+    easing: t => Math.sin((t * Math.PI) / 2),
+    simulatePressure: true,
+  });
+}
 
 export function getBrushBoundFromPoints(
   points: number[][],
@@ -23,14 +36,14 @@ export class BrushElement extends BaseElement {
   points: number[][] = [];
   lineWidth = 4;
 
-  get tiny() {
+  private get _isTiny() {
     return this.w <= this.lineWidth && this.h <= this.lineWidth;
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
     const point = Vec.sub([x, y], [this.x, this.y]);
 
-    if (this.tiny) {
+    if (this._isTiny) {
       return Utils.pointInCircle(point, [0, 0], this.lineWidth / 2);
     }
     return Utils.pointInPolyline(point, this.points, this.lineWidth);
@@ -39,28 +52,10 @@ export class BrushElement extends BaseElement {
   render(ctx: CanvasRenderingContext2D) {
     ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
 
-    if (this.tiny) {
-      const path = new Path2D();
-      path.ellipse(
-        0,
-        0,
-        this.lineWidth / 2,
-        this.lineWidth / 2,
-        0,
-        0,
-        2 * Math.PI
-      );
-
-      ctx.fillStyle = this.color;
-      ctx.fill(path);
-      return;
-    }
-
-    const path = new Path2D();
-    path.moveTo(this.points[0][0], this.points[0][1]);
-    for (const point of this.points) {
-      path.lineTo(point[0], point[1]);
-    }
+    // render stroke points
+    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+    const commands = Utils.getSvgPathFromStrokePoints(stroke);
+    const path = new Path2D(commands);
 
     ctx.strokeStyle = this.color;
     ctx.lineWidth = this.lineWidth;
