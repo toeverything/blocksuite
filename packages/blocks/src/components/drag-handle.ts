@@ -5,8 +5,11 @@ import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockComponentElement, IPoint } from '../__internal__/index.js';
-import type { SelectionEvent } from '../__internal__/index.js';
+import type {
+  BlockComponentElement,
+  IPoint,
+  SelectionEvent,
+} from '../__internal__/index.js';
 import type { EditingState } from '../page-block/default/utils.js';
 
 const handleIcon = svg`

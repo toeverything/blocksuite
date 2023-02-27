@@ -531,3 +531,18 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 </affine:page>`
   );
 });
+
+test('should blur rich-text first when block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await expect(page.locator('*:focus')).toHaveCount(1);
+
+  await dragHandleFromBlockToBlockBottomById(page, '2', '4');
+  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await assertRichTexts(page, ['456', '789', '123']);
+
+  await expect(page.locator('*:focus')).toHaveCount(0);
+});
