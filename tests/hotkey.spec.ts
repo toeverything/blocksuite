@@ -683,6 +683,7 @@ test('should bracket complete with backtick works', async ({ page }) => {
   await type(page, 'hello world');
 
   await dragBetweenIndices(page, [0, 2], [0, 5]);
+  await resetHistory(page);
   await type(page, '`');
   await assertStoreMatchJSX(
     page,
@@ -702,6 +703,17 @@ test('should bracket complete with backtick works', async ({ page }) => {
       />
     </>
   }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await undoByClick(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello world"
   prop:type="text"
 />`,
     paragraphId
