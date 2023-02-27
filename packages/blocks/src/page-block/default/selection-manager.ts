@@ -388,7 +388,12 @@ export class PageSelectionState {
   blur() {
     resetNativeSelection(null);
     // deactivate quill keyboard event handler
-    (document.activeElement as HTMLElement).blur();
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
   }
 
   clearRaf() {
