@@ -1,6 +1,6 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import { assertExists, Signal } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
@@ -805,14 +805,12 @@ export class Page extends Space<PageData> {
       }
     });
 
-    if (model.flavour === 'affine:page') {
+    if (matchFlavours(model, ['affine:page'] as const)) {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
-      (model as BlockSuiteInternal.BlockModels['affine:page']).title = new Text(
-        titleText
-      );
+      model.title = new Text(titleText);
     }
 
     // TODO use schema
