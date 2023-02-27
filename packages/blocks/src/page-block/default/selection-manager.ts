@@ -526,9 +526,6 @@ export class DefaultSelectionManager {
     rects?: DOMRect[],
     selectionType?: PageSelectionType
   ) {
-    // rich-text should be unfocused
-    this.state.blur();
-
     this.state.selectedBlocks = selectedBlocks;
     this.state.type = selectionType ?? this.state.type;
 
@@ -1064,6 +1061,9 @@ export class DefaultSelectionManager {
 
   // Click on drag-handle button
   selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+    // rich-text should be unfocused
+    this.state.blur();
+
     this.state.focusedBlockIndex = index;
 
     const { blockCache, focusedBlockIndex } = this.state;
