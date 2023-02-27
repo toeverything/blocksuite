@@ -23,7 +23,7 @@
     "preview": "run-p serve preview:playground",
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
-    "dev:playground": "pnpm --filter @blocksuite/playground dev:hmr",
+    "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0 --cache",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
