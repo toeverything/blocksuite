@@ -16,7 +16,7 @@ export class BaseService implements IService {
   ) {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + BaseService.deltaLeaf2Html(item);
+      return html + BaseService._deltaLeaf2Html(item);
     }, '');
     return `${text}${childText}`;
   }
@@ -31,7 +31,7 @@ export class BaseService implements IService {
     return `${text}${childText}`;
   }
 
-  private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+  private static _deltaLeaf2Html(deltaLeaf: DeltaOperation) {
     let text: string = deltaLeaf.insert;
     const attributes = deltaLeaf.attributes;
     if (!attributes) {

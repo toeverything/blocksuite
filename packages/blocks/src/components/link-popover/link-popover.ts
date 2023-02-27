@@ -116,10 +116,10 @@ export class LinkPopover extends LitElement {
   previewLink = '';
 
   @state()
-  private bodyOverflowStyle = '';
+  private _bodyOverflowStyle = '';
 
   @state()
-  private disableConfirm = true;
+  private _disableConfirm = true;
 
   @query('#text-input')
   textInput: HTMLInputElement | undefined;
@@ -135,7 +135,7 @@ export class LinkPopover extends LitElement {
 
     if (this.showMask) {
       // Disable body scroll
-      this.bodyOverflowStyle = document.body.style.overflow;
+      this._bodyOverflowStyle = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
     }
   }
@@ -153,7 +153,7 @@ export class LinkPopover extends LitElement {
 
     if (this.showMask) {
       // Restore body scroll style
-      document.body.style.overflow = this.bodyOverflowStyle;
+      document.body.style.overflow = this._bodyOverflowStyle;
     }
   }
 
@@ -166,7 +166,7 @@ export class LinkPopover extends LitElement {
   }
 
   private _onConfirm() {
-    if (this.disableConfirm) {
+    if (this._disableConfirm) {
       return;
     }
     if (!this.linkInput) {
@@ -199,7 +199,7 @@ export class LinkPopover extends LitElement {
 
   private _onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
-    this.disableConfirm = false;
+    this._disableConfirm = false;
   }
 
   private _onKeydown(e: KeyboardEvent) {
@@ -210,14 +210,14 @@ export class LinkPopover extends LitElement {
       throw new Error('Failed to update link! Link input not found!');
     }
     const isValid = isValidLink(this.linkInput.value);
-    this.disableConfirm = isValid ? false : true;
+    this._disableConfirm = isValid ? false : true;
     return;
   }
 
   confirmBtnTemplate() {
     return html`<icon-button
       class="affine-confirm-button"
-      ?disabled=${this.disableConfirm}
+      ?disabled=${this._disableConfirm}
       @click=${this._onConfirm}
       >${ConfirmIcon}</icon-button
     >`;

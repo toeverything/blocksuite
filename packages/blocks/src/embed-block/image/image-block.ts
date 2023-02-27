@@ -142,7 +142,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
-  private waitImageUploaded() {
+  private _waitImageUploaded() {
     return new Promise<void>(resolve => {
       // If we could not get message from awareness in 1000ms,
       // we assume this image is not found.
@@ -199,7 +199,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     let url = await storage.get(this.model.sourceId);
     if (!url) {
       this._imageState = 'waitUploaded';
-      await this.waitImageUploaded();
+      await this._waitImageUploaded();
       this._imageState = 'loading';
       url = await storage.get(this.model.sourceId);
     }

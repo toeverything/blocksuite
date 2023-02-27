@@ -20,7 +20,7 @@ export class DatabaseCellContainer
   `;
 
   @state()
-  private isEditing = false;
+  private _isEditing = false;
 
   setValue(value: unknown) {
     if (value) {
@@ -36,8 +36,8 @@ export class DatabaseCellContainer
 
   setEditing = (isEditing: boolean) => {
     assertExists(this.shadowRoot);
-    this.isEditing = isEditing;
-    if (!this.isEditing) {
+    this._isEditing = isEditing;
+    if (!this._isEditing) {
       setTimeout(() => {
         this.addEventListener('click', this._onClick);
       });
@@ -75,14 +75,14 @@ export class DatabaseCellContainer
   }
 
   _onClick = (event: Event) => {
-    this.isEditing = true;
+    this._isEditing = true;
     this.removeEventListener('click', this._onClick);
     setTimeout(() => {
       onClickOutside(
         this,
         () => {
           this.addEventListener('click', this._onClick);
-          this.isEditing = false;
+          this._isEditing = false;
         },
         'mousedown'
       );
@@ -106,7 +106,7 @@ export class DatabaseCellContainer
       this.rowModel,
       this.column
     );
-    if (this.isEditing && renderer.components.CellEditing !== false) {
+    if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}

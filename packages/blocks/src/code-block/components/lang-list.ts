@@ -87,7 +87,7 @@ export class LangList extends NonShadowLitElement {
   }
 
   @state()
-  private filterText = '';
+  private _filterText = '';
 
   @property()
   id!: string;
@@ -130,7 +130,7 @@ export class LangList extends NonShadowLitElement {
   private _dispose() {
     this.dispatchEvent(createEvent('dispose', null));
     document.removeEventListener('click', this._clickHandler);
-    this.filterText = '';
+    this._filterText = '';
   }
 
   private _onLanguageClicked(language: string) {
@@ -145,10 +145,10 @@ export class LangList extends NonShadowLitElement {
 
   render() {
     const filteredLanguages = LangList.languages.filter(language => {
-      if (!this.filterText) {
+      if (!this._filterText) {
         return true;
       }
-      return language.toLowerCase().startsWith(this.filterText.toLowerCase());
+      return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
     if (this.showLangList === 'hidden') {
@@ -169,8 +169,8 @@ export class LangList extends NonShadowLitElement {
             id="filter-input"
             type="text"
             placeholder="Search"
-            value=${this.filterText}
-            @keyup=${() => (this.filterText = this.filterInput?.value)}
+            value=${this._filterText}
+            @keyup=${() => (this._filterText = this.filterInput?.value)}
           />
         </div>
         <div class="lang-list-button-container">
