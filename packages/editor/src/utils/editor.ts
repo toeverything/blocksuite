@@ -45,7 +45,7 @@ export const createBlockHub: (
         distanceToTop < distanceToBottom ? 'before' : 'after'
       );
       if (ids.length === 1) {
-        await asyncFocusRichText(page, ids[0]);
+        asyncFocusRichText(page, ids[0]);
       }
       tryUpdateFrameSize(page, 1);
     },
