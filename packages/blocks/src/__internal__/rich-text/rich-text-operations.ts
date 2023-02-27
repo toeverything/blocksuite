@@ -373,18 +373,21 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         // No previous sibling, it's the first block
         // Try to merge with the title
 
-        const text = model.text?.toString() || '';
+        const text = model.text;
         const titleElement = document.querySelector(
           '.affine-default-page-block-title'
         ) as HTMLTextAreaElement;
         const pageModel = getModelByElement(titleElement) as PageBlockModel;
-        const oldTitle = pageModel.title;
-        const title = oldTitle + text;
+        const title = pageModel.title;
+
         page.captureSync();
+        let textLength = 0;
+        if (text) {
+          textLength = text.length;
+          title.join(text);
+        }
         page.deleteBlock(model);
-        // model.text?.delete(0, model.text.length);
-        page.updateBlock(pageModel, { title });
-        focusTitle(oldTitle.length);
+        focusTitle(title.length - textLength);
       }
     }
 

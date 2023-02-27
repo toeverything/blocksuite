@@ -75,11 +75,11 @@ export async function dragEmbedResizeByTopRight(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left + 5 - 339, y },
+      to: { x: bottomRightButtonBound.left + 5 - 400, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
-    steps: 5,
+    steps: 10,
   });
 }
 
@@ -92,11 +92,11 @@ export async function dragEmbedResizeByTopLeft(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left + 5 + 339, y },
+      to: { x: bottomRightButtonBound.left + 5 + 400, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
-    steps: 5,
+    steps: 10,
   });
 }
 

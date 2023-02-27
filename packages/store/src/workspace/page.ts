@@ -1,6 +1,6 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import { assertExists, Signal } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
@@ -520,11 +520,6 @@ export class Page extends Space<PageData> {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
-      if (props.text instanceof Text) {
-        model.text = props.text;
-        yBlock.set('prop:text', props.text.yText);
-      }
-
       // TODO diff children changes
       // All child nodes will be deleted in the current behavior, then added again.
       // Through diff children changes, the experience can be improved.
@@ -810,12 +805,15 @@ export class Page extends Space<PageData> {
       }
     });
 
-    if (model.flavour === 'affine:page') {
+    if (matchFlavours(model, ['affine:page'] as const)) {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+
+      const titleText = yBlock.get('prop:title') as Y.Text;
+      model.title = new Text(titleText);
     }
 
-    // todo: use schema
+    // TODO use schema
     if (model.flavour === 'affine:database') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (model as any).columns = (

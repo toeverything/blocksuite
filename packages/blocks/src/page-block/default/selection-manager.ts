@@ -24,7 +24,7 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
-  isTitleElement,
+  isInsidePageTitle,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
@@ -630,7 +630,8 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    this.state.resetStartRange(e);
+    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
     }
@@ -791,7 +792,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isTitleElement(target) || isDatabaseInput(target)) {
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;
@@ -866,6 +867,14 @@ export class DefaultSelectionManager {
   private _onSelectionChangeWithDebounce = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
+      return;
+    }
+
+    // filter out selection change event from title
+    if (
+      isInsidePageTitle(selection.anchorNode) ||
+      isInsidePageTitle(selection.focusNode)
+    ) {
       return;
     }
 

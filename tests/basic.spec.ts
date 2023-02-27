@@ -48,7 +48,9 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text('hello'),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
     const text = new page.Text('world');
@@ -74,14 +76,15 @@ test('basic init with external text', async ({ page }) => {
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
-  await pageA.keyboard.type('hello');
+  await waitDefaultPageLoaded(pageA);
+  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
-  await pageB.keyboard.type(' world');
+  await type(pageB, ' world');
   await assertTitle(pageA, 'hello world');
 });
 
@@ -269,6 +272,7 @@ test('should undo/redo work on title', async ({ page }) => {
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello ']);
 
+  await focusRichText(page);
   await undoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello world']);
