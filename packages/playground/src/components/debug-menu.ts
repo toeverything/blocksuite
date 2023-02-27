@@ -74,8 +74,8 @@ export class DebugMenu extends NonShadowLitElement {
   @state()
   private canRedo = false;
 
-  @state()
-  private mode: 'page' | 'edgeless' = 'page';
+  @property()
+  mode: 'page' | 'edgeless' = 'page';
 
   @state()
   private mouseModeType: MouseMode['type'] = 'default';

@@ -163,8 +163,8 @@ export class DefaultPageBlockComponent
   @state()
   private frameSelectionRect: DOMRect | null = null;
 
-  @state()
-  private viewportState: ViewportState = {
+  @property()
+  viewportState: ViewportState = {
     left: 0,
     top: 0,
     scrollLeft: 0,
