@@ -7,7 +7,7 @@ export const PageBlockModelSchema = defineBlockSchema(
     title: internal.Text(),
   }),
   {
-    version: 1,
+    version: 2,
     tag: literal`affine-page`,
   }
 );

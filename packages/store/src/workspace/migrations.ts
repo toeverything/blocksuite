@@ -88,6 +88,46 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    desc: 'update affine:page title type from string to Text',
+    condition: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      if (!yVersions) return false;
+
+      const pageVersion = yVersions.get('affine:page');
+      if (!pageVersion) {
+        throw new MigrationError('affine:page version not found');
+      }
+      return pageVersion < 2;
+    },
+    migrate: doc => {
+      // @ts-ignore
+      const pageIds = doc
+        .getMap('space:meta')
+        .get('pages')
+        .map((a: Y.Map<unknown>) => a.get('id')) as string[];
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      yVersions.delete('affine:page');
+      yVersions.set('affine:page', 2);
+
+      for (const pageId of pageIds) {
+        const spaceId = `space:${pageId}`;
+        const yBlocks = doc.getMap(spaceId);
+        // @ts-ignore
+        yBlocks.forEach((yBlock: Y.Map<unknown>) => {
+          if (yBlock.get('sys:flavour') === 'affine:page') {
+            const title = yBlock.get('prop:title') as string;
+            const yTitle = new Y.Text(title);
+            yBlock.set('prop:title', yTitle);
+          }
+        });
+      }
+    },
+  },
 ];
 
 export function tryMigrate(doc: Y.Doc) {
