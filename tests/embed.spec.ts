@@ -9,8 +9,7 @@ import {
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
-  focusRichText,
-  initEmptyParagraphState,
+  initImageState,
   insertThreeLevelLists,
   moveToImage,
   pressEnter,
@@ -27,30 +26,6 @@ import {
   assertRichTexts,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
-
-async function initImageState(page: Page) {
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await page.evaluate(() => {
-    const clipData = {
-      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
-    };
-    const e = new ClipboardEvent('paste', {
-      clipboardData: new DataTransfer(),
-    });
-    Object.defineProperty(e, 'target', {
-      writable: false,
-      value: document.body,
-    });
-    Object.entries(clipData).forEach(([key, value]) => {
-      e.clipboardData?.setData(key, value);
-    });
-    document.body.dispatchEvent(e);
-  });
-
-  // due to pasting img calls fetch, so we need timeout for downloading finished.
-  await page.waitForTimeout(500);
-}
 
 async function focusCaption(page: Page) {
   await page.click('.embed-editing-state>format-bar-button:nth-child(1)');

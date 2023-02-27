@@ -311,7 +311,8 @@ export class DefaultSelectionManager {
       rect: this._container.innerRect,
     });
 
-    if (element) {
+    // dont show option menu of image on selecting
+    if (!e.dragging && element) {
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
