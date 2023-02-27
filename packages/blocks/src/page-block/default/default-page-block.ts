@@ -217,6 +217,7 @@ export class DefaultPageBlockComponent
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
       });
+      this.requestUpdate();
     });
     this._titleVEditor.focusEnd();
   }
