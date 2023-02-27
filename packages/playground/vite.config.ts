@@ -13,7 +13,7 @@ const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
 export default defineConfig({
   plugins: [
     react(),
-    hmrPlugin,
+    // hmrPlugin,
     enableIstanbul &&
       istanbul({
         cwd: fileURLToPath(new URL('../..', import.meta.url)),
