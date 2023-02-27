@@ -57,7 +57,8 @@ export class SurfaceManager {
   }
 
   addBrushElement(
-    point: [number, number],
+    x: number,
+    y: number,
     color: string,
     points: number[][] = []
   ): string {
@@ -67,7 +68,7 @@ export class SurfaceManager {
     const lineWidth = element.lineWidth;
     const bound = getBrushBoundFromPoints(points, lineWidth);
 
-    element.setBound(point[0], point[1], bound.w, bound.h);
+    element.setBound(x, y, bound.w, bound.h);
     element.color = color;
     element.points = points;
 
@@ -108,7 +109,7 @@ export class SurfaceManager {
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
-    const bound: IBound = { x: x - 1, y: y - 1, w: 3, h: 3 };
+    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
       return element.hitTest(x, y, options);

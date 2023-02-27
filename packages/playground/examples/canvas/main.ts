@@ -14,14 +14,14 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
   const elements = surface.pick(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
-    `picked elements count: ${elements.length}. top element type ${
+    `picked elements count: ${elements.length}, top element type: ${
       topElement?.type
-    }. top element color ${(topElement as DebugElement).color}`
+    }, color ${(topElement as DebugElement)?.color}`
   );
 }
 
 function addBrushElements(surface: SurfaceManager) {
-  surface.addBrushElement([300, 120], 'green', [
+  surface.addBrushElement(0, 120, 'green', [
     [0, 14.35],
     [0.23, 14.35],
     [0.99, 14.35],
@@ -36,10 +36,19 @@ function addBrushElements(surface: SurfaceManager) {
     [28.9, 6.12],
     [33.24, 0],
   ]);
-  surface.addBrushElement([300, 10], 'blue');
-  const brushId = surface.addBrushElement([300, 20], 'purple');
+
+  const brushId = surface.addBrushElement(0, 0, 'purple');
   surface.updateBrushElementPoints(brushId, [
     [0, 0],
+    [10, 10],
+    [20, 20],
+    [30, 30],
+    [40, 40],
+    [50, 50],
+    [60, 60],
+    [70, 70],
+    [80, 80],
+    [90, 90],
     [100, 100],
   ]);
 }
