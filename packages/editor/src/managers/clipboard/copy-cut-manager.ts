@@ -120,7 +120,7 @@ export class CopyCutManager {
 
     let { flavour, type } = model;
     let delta: DeltaOperation[] = [];
-    if (matchFlavours(model, ['affine:page'])) {
+    if (matchFlavours(model, ['affine:page'] as const)) {
       flavour = 'affine:paragraph';
       type = 'text';
       const service = await getServiceOrRegister(model.flavour);
@@ -135,7 +135,7 @@ export class CopyCutManager {
           insert: text,
         },
       ];
-    } else if (matchFlavours(model, ['affine:embed'])) {
+    } else if (matchFlavours(model, ['affine:embed'] as const)) {
       flavour = 'affine:embed';
       type = 'image';
       const service = await getServiceOrRegister(model.flavour);

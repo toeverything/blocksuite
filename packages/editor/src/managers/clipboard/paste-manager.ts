@@ -191,7 +191,7 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
@@ -248,7 +248,7 @@ export class PasteManager {
           // instead of appending a new image block, if this paragraph is empty.
           if (
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
@@ -263,7 +263,7 @@ export class PasteManager {
             insertLen > 0 &&
             parent &&
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
@@ -334,7 +334,7 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {

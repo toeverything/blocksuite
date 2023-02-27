@@ -151,7 +151,7 @@ export function handleDown(
   if (hasNativeSelection()) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
-    if (matchFlavours(model, ['affine:code'])) {
+    if (matchFlavours(model, ['affine:code'] as const)) {
       return;
     }
     const range = getCurrentNativeRange();
@@ -241,7 +241,9 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         getModelByElement(block)
       );
       handleMultiBlockIndent(page, models);
-      selection.refreshSelectedBlocksRectsByModels(models);
+      requestAnimationFrame(() => {
+        selection.refreshSelectedBlocksRectsByModels(models);
+      });
       break;
     }
   }
@@ -294,6 +296,7 @@ export function bindHotkeys(
       return;
     }
     // TODO fix native selection enter
+
     return;
   });
 

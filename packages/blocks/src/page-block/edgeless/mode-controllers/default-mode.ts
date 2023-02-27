@@ -14,6 +14,7 @@ import {
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import {
+  calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../../utils/position.js';
@@ -264,7 +265,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ page: this._page, direction });
+      showFormatQuickBar({
+        page: this._page,
+        direction,
+        anchorEl: {
+          getBoundingClientRect: () => {
+            return calcCurrentSelectionPosition(direction);
+          },
+        },
+      });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
         this._page.captureSync();
