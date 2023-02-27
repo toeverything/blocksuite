@@ -4,8 +4,8 @@ import type { DeltaOperation } from 'quill';
 import type { IService } from '../utils/index.js';
 
 export class BaseService implements IService {
-  handleUnindent: any;
-  supportsChildren: any;
+  handleUnindent!: typeof import('../rich-text/rich-text-operations.js').handleUnindent;
+  supportsChildren!: typeof import('../utils/index.js').supportsChildren;
   async onLoad() {
     this.supportsChildren = (
       await import('../utils/index.js')
