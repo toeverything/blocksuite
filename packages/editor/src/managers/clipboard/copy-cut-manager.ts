@@ -5,6 +5,7 @@ import {
   OpenBlockInfo,
 } from '@blocksuite/blocks';
 import {
+  deleteModelsByRange,
   EmbedBlockModel,
   getServiceOrRegister,
   ListBlockModel,
@@ -47,6 +48,10 @@ export class CopyCutManager {
     const page = this._editor.page;
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) {
+      return;
+    }
+    if (blockRange.type === 'Native') {
+      deleteModelsByRange(page);
       return;
     }
     handleBlockSelectionBatchDelete(page, blockRange.models);
