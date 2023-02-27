@@ -1,11 +1,19 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
-import { handleUnindent } from '../rich-text/rich-text-operations.js';
-import { IService, supportsChildren } from '../utils/index.js';
+import type { IService } from '../utils/index.js';
 
 export class BaseService implements IService {
-  onLoad?: () => Promise<void>;
+  handleUnindent: any;
+  supportsChildren: any;
+  async onLoad() {
+    this.supportsChildren = (
+      await import('../utils/index.js')
+    ).supportsChildren;
+    this.handleUnindent = (
+      await import('../rich-text/rich-text-operations.js')
+    ).handleUnindent;
+  }
   block2html(
     block: BaseBlockModel,
     childText: string,
@@ -64,7 +72,7 @@ export class BaseService implements IService {
   updateEffect(block: BaseBlockModel) {
     // we need to unindent the first child of the block if it not
     // support children
-    if (supportsChildren(block)) {
+    if (this.supportsChildren(block)) {
       return;
     }
 
@@ -72,6 +80,6 @@ export class BaseService implements IService {
       return;
     }
 
-    handleUnindent(block.page, block.children[0], 0, false);
+    this.handleUnindent(block.page, block.children[0], 0, false);
   }
 }
