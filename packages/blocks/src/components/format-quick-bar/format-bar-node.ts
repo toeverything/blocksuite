@@ -21,7 +21,6 @@ import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
-  DragDirection,
   getCurrentCombinedFormat,
   updateBlockType,
 } from '../../page-block/utils/index.js';
@@ -48,10 +47,6 @@ export class FormatQuickBar extends LitElement {
   // Sometimes the quick bar need to update position
   @property()
   positionUpdated = new Signal();
-
-  // for update position
-  @property()
-  direction!: DragDirection;
 
   @state()
   models: BaseBlockModel[] = [];

@@ -42,6 +42,7 @@ function getFormatBar(page: Page) {
   const textBtn = formatQuickBar.getByTestId('affine:paragraph/text');
   const h1Btn = formatQuickBar.getByTestId('affine:paragraph/h1');
   const bulletedBtn = formatQuickBar.getByTestId('affine:list/bulleted');
+  const codeBlockBtn = formatQuickBar.getByTestId('affine:code/');
 
   return {
     formatQuickBar,
@@ -57,6 +58,7 @@ function getFormatBar(page: Page) {
     textBtn,
     h1Btn,
     bulletedBtn,
+    codeBlockBtn,
   };
 }
 
@@ -936,4 +938,29 @@ test('should format quick bar with block selection works when update block type'
   await expect(blockSelections).toHaveCount(3);
   await page.mouse.click(0, 0);
   await expect(formatBarController.formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar show after convert to code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  const formatBarController = getFormatBar(page);
+  await dragBetweenIndices(page, [2, 3], [0, 0]);
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  await formatBarController.openParagraphMenu();
+  await formatBarController.codeBlockBtn.click();
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:code
+    prop:language="JavaScript"
+    prop:text="123\n456\n789"
+  />
+</affine:frame>`,
+    frameId
+  );
 });

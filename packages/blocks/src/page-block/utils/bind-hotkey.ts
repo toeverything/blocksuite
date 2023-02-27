@@ -241,7 +241,9 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         getModelByElement(block)
       );
       handleMultiBlockIndent(page, models);
-      selection.refreshSelectedBlocksRectsByModels(models);
+      requestAnimationFrame(() => {
+        selection.refreshSelectedBlocksRectsByModels(models);
+      });
       break;
     }
   }
@@ -294,6 +296,7 @@ export function bindHotkeys(
       return;
     }
     // TODO fix native selection enter
+
     return;
   });
 

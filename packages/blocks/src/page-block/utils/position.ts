@@ -3,11 +3,13 @@ import { caretRangeFromPoint } from '@blocksuite/global/utils';
 import {
   clamp,
   getCurrentNativeRange,
+  hasNativeSelection,
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
+import type { PageSelectionState } from '../default/selection-manager.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const selection = window.getSelection() as Selection;
@@ -160,6 +162,40 @@ export function calcPositionPointByRange(
     y: lineRect.y + (isBottom ? lineRect.height : 0),
   };
   return positioningPoint;
+}
+/**
+ * This function is used to calculate the position of the format bar.
+ *
+ * After update block type, the native selection may be change to block selection,
+ * for example, update block to code block.
+ * So we need to get the targe block's rect dynamic.
+ */
+export function calcCurrentSelectionPosition(
+  direction: DragDirection,
+  // Edgeless mode not have pageSelectionState
+  pageSelectionState?: PageSelectionState
+) {
+  if (!pageSelectionState || !pageSelectionState.selectedBlocks.length) {
+    if (!hasNativeSelection()) {
+      throw new Error(
+        "Failed to get anchor element! There's no block selection or native selection."
+      );
+    }
+    // Native selection
+    const range = getCurrentNativeRange();
+    const positioningPoint = calcPositionPointByRange(range, direction);
+    return positioningPoint;
+  }
+  // Block selection
+  const blocks = pageSelectionState.selectedBlocks;
+  const firstBlock = blocks[0];
+  const lastBlock = blocks[blocks.length - 1];
+  const targetBlock = direction.includes('bottom') ? lastBlock : firstBlock;
+  // Block selection always use the center of the block
+  const rect = targetBlock.getBoundingClientRect();
+  const x = rect.x + rect.width / 2;
+  const y = direction.includes('bottom') ? rect.bottom : rect.top;
+  return { x, y };
 }
 
 type CollisionBox = {
