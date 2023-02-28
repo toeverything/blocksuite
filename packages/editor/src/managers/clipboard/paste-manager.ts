@@ -57,7 +57,6 @@ export class PasteManager {
         e.preventDefault();
         e.stopPropagation();
         const blocks: OpenBlockInfo[] = await blocksPromise;
-
         const page = this._editor.page;
         const blockRange = getCurrentBlockRange(page);
         if (blockRange && blockRange.type !== 'Native') {
