@@ -180,7 +180,5 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            ### yDoc Bin Benchmark
-            - yDoc BIN Size: ${{ steps.bin-size-report.outputs.BIN_SIZE }}
-            - yDoc JSON Size: ${{ steps.bin-size-report.outputs.JSON_SIZE }}
+            ### yDoc Bin Benchmark\n- yDoc BIN Size: ${{ steps.bin-size-report.outputs.BIN_SIZE }}\n- yDoc JSON Size: ${{ steps.bin-size-report.outputs.JSON_SIZE }}
           comment_tag: benchmark
