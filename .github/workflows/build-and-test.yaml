@@ -23,7 +23,7 @@ on:
 jobs:
   build-next:
     name: Build Next.js Example
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -41,7 +41,7 @@ jobs:
 
   build-playground:
     name: Build Playground
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -63,7 +63,7 @@ jobs:
 
   e2e-test:
     name: Playground E2E test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
       - build-playground
     steps:
@@ -115,7 +115,7 @@ jobs:
 
   unit-test:
     name: Unit test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
