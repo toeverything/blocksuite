@@ -299,9 +299,6 @@ export function bindHotkeys(
       return;
     }
     if (blockRange.type === 'Native') {
-      e.stopPropagation();
-      e.preventDefault();
-
       blockRange.models.forEach((model, index) => {
         // first
         if (index === 0) {
