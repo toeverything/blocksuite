@@ -87,6 +87,7 @@ export const codeLaguages = [
   'haxe',
   'hsp',
   'http',
+  'html',
   'hy',
   'inform7',
   'ini',
@@ -224,5 +225,13 @@ const laguagesWithShortName: Record<string, string> = {
 };
 
 export const getCodeLaguage = (shortName: string) => {
+  const language = codeLaguages.find(codeLaguage => {
+    return codeLaguage.toLowerCase() === shortName.toLowerCase();
+  });
+
+  if (language) {
+    return language;
+  }
+
   return laguagesWithShortName[shortName];
 };
