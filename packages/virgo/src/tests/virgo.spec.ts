@@ -5,6 +5,7 @@ import {
   enterVirgoPlayground,
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
+  press,
   setVirgoRichTextRange,
   type,
 } from './utils/misc.js';
@@ -38,10 +39,10 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abcdefg');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
 
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
@@ -57,8 +58,8 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await press(page, 'Enter');
+  await press(page, 'Enter');
   await type(page, 'bbb');
 
   page.waitForTimeout(100);
@@ -77,11 +78,11 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
 
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
@@ -96,11 +97,11 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
   await type(page, 'bb');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
+  await press(page, 'ArrowRight');
+  await press(page, 'ArrowRight');
   await type(page, 'dd');
 
   expect(await editorA.innerText()).toBe('abbbcdd');
@@ -116,10 +117,10 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abbbcdd');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'Enter');
+  await press(page, 'Enter');
 
   expect(await editorA.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
   expect(await editorB.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
@@ -179,8 +180,8 @@ test('basic styles', async ({ page }) => {
   const editorABold = page.getByText('bold').nth(0);
   const editorAItalic = page.getByText('italic').nth(0);
   const editorAUnderline = page.getByText('underline').nth(0);
-  const editorAStrikethrough = page.getByText('strikethrough').nth(0);
-  const editorAInlineCode = page.getByText('inline-code').nth(0);
+  const editorAStrike = page.getByText('strike').nth(0);
+  const editorACode = page.getByText('code').nth(0);
 
   const editorAUndo = page.getByText('undo').nth(0);
   const editorARedo = page.getByText('redo').nth(0);
@@ -256,7 +257,7 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAStrikethrough.click();
+  editorAStrike.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -268,7 +269,7 @@ test('basic styles', async ({ page }) => {
         bold: true,
         italic: true,
         underline: true,
-        strikethrough: true,
+        strike: true,
       },
     },
     {
@@ -276,7 +277,7 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAInlineCode.click();
+  editorACode.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -288,8 +289,8 @@ test('basic styles', async ({ page }) => {
         bold: true,
         italic: true,
         underline: true,
-        strikethrough: true,
-        inlineCode: true,
+        strike: true,
+        code: true,
       },
     },
     {
@@ -321,8 +322,8 @@ test('basic styles', async ({ page }) => {
         bold: true,
         italic: true,
         underline: true,
-        strikethrough: true,
-        inlineCode: true,
+        strike: true,
+        code: true,
       },
     },
     {
@@ -341,8 +342,8 @@ test('basic styles', async ({ page }) => {
       attributes: {
         italic: true,
         underline: true,
-        strikethrough: true,
-        inlineCode: true,
+        strike: true,
+        code: true,
       },
     },
     {
@@ -360,8 +361,8 @@ test('basic styles', async ({ page }) => {
       insert: 'cde',
       attributes: {
         underline: true,
-        strikethrough: true,
-        inlineCode: true,
+        strike: true,
+        code: true,
       },
     },
     {
@@ -378,8 +379,8 @@ test('basic styles', async ({ page }) => {
     {
       insert: 'cde',
       attributes: {
-        strikethrough: true,
-        inlineCode: true,
+        strike: true,
+        code: true,
       },
     },
     {
@@ -387,7 +388,7 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAStrikethrough.click();
+  editorAStrike.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -396,7 +397,7 @@ test('basic styles', async ({ page }) => {
     {
       insert: 'cde',
       attributes: {
-        inlineCode: true,
+        code: true,
       },
     },
     {
@@ -404,7 +405,7 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAInlineCode.click();
+  editorACode.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -605,12 +606,12 @@ test('input continuous spaces', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc   def');
 
   await focusVirgoRichText(page);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
 
-  await page.keyboard.press('Enter');
+  await press(page, 'Enter');
 
   expect(await editorA.innerText()).toBe('abc  \n' + ' def');
   expect(await editorB.innerText()).toBe('abc  \n' + ' def');
@@ -627,9 +628,9 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
   await type(page, 'abc');
-  await page.keyboard.press('Enter', { delay: 50 });
+  await press(page, 'Enter');
   await type(page, 'def');
-  await page.keyboard.press('Enter', { delay: 50 });
+  await press(page, 'Enter');
   await type(page, 'ghi');
 
   expect(await editorA.innerText()).toBe('abc\ndef\nghi');
@@ -640,9 +641,9 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
    * def
    * |ghi
    */
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
 
   /**
    * |abc
@@ -650,16 +651,16 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
    * |ghi
    */
   await page.keyboard.down('Shift');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowUp');
+  await press(page, 'ArrowUp');
+  await press(page, 'ArrowUp');
 
   /**
    * a|bc
    * def
    * |ghi
    */
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Backspace');
+  await press(page, 'ArrowRight');
+  await press(page, 'Backspace');
 
   expect(await editorA.innerText()).toBe('aghi');
   expect(await editorB.innerText()).toBe('aghi');

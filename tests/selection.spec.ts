@@ -853,9 +853,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await waitNextFrame(page);
   await doubleClickBlockById(page, ids.frameId);
-  await page.mouse.click(0, 0);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });

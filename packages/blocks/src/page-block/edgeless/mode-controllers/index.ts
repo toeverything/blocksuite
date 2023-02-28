@@ -35,7 +35,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   /**
-   * Hold the state that the current selection of block(s)
+   * Holds the state of the current selected block(s) and/or shape(s).
    */
   get blockSelectionState() {
     return this._blockSelectionState;
