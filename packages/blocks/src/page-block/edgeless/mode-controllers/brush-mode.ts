@@ -46,7 +46,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._draggingPathPoints = points;
     this._draggingStartPoint = [e.x, e.y];
 
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: SelectionEvent) {
@@ -66,7 +66,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
       this._draggingPathPoints
     );
 
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: SelectionEvent) {
@@ -74,7 +74,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._draggingPathPoints = null;
     this._draggingStartPoint = null;
     this._page.captureSync();
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerMouseMove(e: SelectionEvent) {

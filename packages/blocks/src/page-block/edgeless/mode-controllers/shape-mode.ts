@@ -54,7 +54,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
     };
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: SelectionEvent) {
@@ -78,14 +78,14 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const bound = new Bound(x, y, w, h);
     const id = this._draggingElementId;
     this._surface.setElementBound(id, bound);
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: SelectionEvent) {
     this._draggingElementId = null;
     this._draggingArea = null;
     this._page.captureSync();
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerMouseMove(e: SelectionEvent) {

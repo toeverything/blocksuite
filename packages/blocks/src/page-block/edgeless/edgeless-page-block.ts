@@ -51,7 +51,7 @@ export interface EdgelessContainer extends HTMLElement {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
     updateSelection: Signal<EdgelessSelectionState>;
-    shapeUpdated: Signal;
+    surfaceUpdated: Signal;
   };
 }
 
@@ -123,7 +123,7 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Signal(),
     updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
-    shapeUpdated: new Signal(),
+    surfaceUpdated: new Signal(),
     mouseModeUpdated: new Signal<MouseMode>(),
   };
 
@@ -255,8 +255,9 @@ export class EdgelessPageBlockComponent
     });
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this.signals.shapeUpdated.on(() => this.requestUpdate());
+    this.signals.surfaceUpdated.on(() => this.requestUpdate());
     this.signals.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
+
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
       this.requestUpdate();
@@ -289,7 +290,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
-    this.signals.shapeUpdated.dispose();
+    this.signals.surfaceUpdated.dispose();
     this.signals.mouseModeUpdated.dispose();
     this._disposables.dispose();
     this._selection.dispose();
