@@ -22,3 +22,5 @@ next-env.d.ts
 
 # Cache
 .eslintcache
+
+/tmp

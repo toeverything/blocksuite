@@ -164,4 +164,8 @@ export class Store {
     }
     return yDocToJSXNode(json['space:page0'], id);
   }
+
+  serializeYDoc() {
+    return serializeYDoc(this.doc) as unknown as SerializedStore;
+  }
 }

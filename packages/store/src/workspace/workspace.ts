@@ -418,4 +418,8 @@ export class Workspace {
   exportJSX(id = '0') {
     return this._store.exportJSX(id);
   }
+
+  serializeYDoc() {
+    return this._store.serializeYDoc();
+  }
 }
