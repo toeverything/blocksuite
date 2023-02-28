@@ -153,7 +153,15 @@ export class VEditor {
     return null;
   }
 
+  /**
+   * In following example, the vRange is { index: 3, length: 3 } and
+   * conatins three deltas
+   *   aaa|bbb|ccc
+   * getDeltasByVRange(...) will just return bbb delta
+   */
   getDeltasByVRange(vRange: VRange): DeltaEntry[] {
+    if (vRange.length <= 0) return [];
+
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     const result: DeltaEntry[] = [];
@@ -161,7 +169,7 @@ export class VEditor {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= vRange.index &&
+        index + delta.insert.length > vRange.index &&
         index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
