@@ -1,5 +1,6 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
+import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
@@ -340,7 +341,7 @@ export class Page extends Space<PageData> {
   @debug('CRUD')
   public addBlocksByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
   >(
     blocks: Array<{
@@ -371,7 +372,7 @@ export class Page extends Space<PageData> {
   @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
   >(
     flavour: Flavour,
@@ -561,9 +562,9 @@ export class Page extends Space<PageData> {
 
     if (props.length > 1) {
       const blocks: Array<{
-        flavour: keyof BlockSuiteModelProps.ALL;
+        flavour: keyof BlockModelProps;
         blockProps: Partial<
-          BlockSuiteModelProps.ALL &
+          BlockModelProps &
             Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
         >;
       }> = [];
