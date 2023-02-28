@@ -38,7 +38,6 @@ importers:
       micromatch: ^4.0.5
       npm-run-all: ^4.1.5
       nyc: ^15.1.0
-      playwright: ^1.31.1
       prettier: ^2.8.4
       pretty-format: ^29.4.2
       tsx: ^3.12.3
@@ -77,7 +76,6 @@ importers:
       micromatch: 4.0.5
       npm-run-all: 4.1.5
       nyc: 15.1.0
-      playwright: 1.31.1
       prettier: 2.8.4
       pretty-format: 29.4.2
       tsx: 3.12.3
@@ -6134,21 +6132,6 @@ packages:
     resolution: {integrity: sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==}
     engines: {node: '>=14'}
     hasBin: true
-    dev: true
-
-  /playwright-core/1.31.1:
-    resolution: {integrity: sha512-JTyX4kV3/LXsvpHkLzL2I36aCdml4zeE35x+G5aPc4bkLsiRiQshU5lWeVpHFAuC8xAcbI6FDcw/8z3q2xtJSQ==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dev: true
-
-  /playwright/1.31.1:
-    resolution: {integrity: sha512-zKJabsIA2rvOwJ12lGTqWv4HVJzlfw2JtUvO4hAr7J8UXQZ1qEPpX20E1vcz/9fotnTkwgqp3CVdIBwptBN3Fg==}
-    engines: {node: '>=14'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      playwright-core: 1.31.1
     dev: true
 
   /postcss/8.4.14:

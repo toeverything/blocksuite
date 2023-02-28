@@ -1,4 +1,4 @@
-import { Browser, chromium, Page } from 'playwright';
+import { Browser, chromium, Page } from '@playwright/test';
 
 export const previewURL = `http://127.0.0.1:4173/`;
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readFile } from 'fs/promises';
 
 interface Timingresult {
@@ -6,7 +7,7 @@ interface Timingresult {
   dur: number;
   end: number;
   mem?: number;
-  evt?: any;
+  evt?: unknown;
 }
 
 export function extractRelevantEvents(entries: any[]) {
