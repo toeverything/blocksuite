@@ -163,21 +163,28 @@ export async function resetHistory(page: Page) {
 }
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
-export async function enterPlaygroundWithList(page: Page) {
+export async function enterPlaygroundWithList(
+  page: Page,
+  contents: string[] = []
+) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   await initEmptyEditor(page);
 
-  await page.evaluate(() => {
+  await page.evaluate(contents => {
     const { page } = window;
     const pageId = page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
     });
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     for (let i = 0; i < 3; i++) {
-      page.addBlockByFlavour('affine:list', {}, frameId);
+      page.addBlockByFlavour(
+        'affine:list',
+        contents.length > 0 ? { text: new page.Text(contents[i]) } : {},
+        frameId
+      );
     }
-  });
+  }, contents);
   await waitNextFrame(page);
 }
 
