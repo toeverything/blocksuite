@@ -298,7 +298,35 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
-    // TODO fix native selection enter
+    if (blockRange.type === 'Native') {
+      e.stopPropagation();
+      e.preventDefault();
+
+      blockRange.models.forEach((model, index) => {
+        // first
+        if (index === 0) {
+          model.text?.delete(
+            blockRange.startOffset,
+            model.text.length - blockRange.startOffset
+          );
+          page.updateBlock(model, {});
+          return;
+        }
+
+        // last
+        if (index === blockRange.models.length - 1) {
+          model.text?.delete(0, blockRange.endOffset);
+          page.updateBlock(model, {});
+          asyncFocusRichText(page, model.id);
+          return;
+        }
+
+        // middle
+        page.deleteBlockById(model.id);
+      });
+      selection.clear();
+      return;
+    }
 
     return;
   });
