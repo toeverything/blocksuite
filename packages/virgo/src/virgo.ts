@@ -509,57 +509,58 @@ export class VEditor {
     }
 
     const { inputType, data } = event;
+    const currentVRange = this._vRange;
 
-    if (inputType === 'insertText' && this._vRange.index >= 0 && data) {
-      this.insertText(this._vRange, data);
-
+    if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
       this.signals.updateVRange.emit([
         {
-          index: this._vRange.index + data.length,
+          index: currentVRange.index + data.length,
           length: 0,
         },
         'input',
       ]);
-    } else if (inputType === 'insertParagraph' && this._vRange.index >= 0) {
-      this.insertLineBreak(this._vRange);
 
+      this.insertText(currentVRange, data);
+    } else if (inputType === 'insertParagraph' && currentVRange.index >= 0) {
       this.signals.updateVRange.emit([
         {
-          index: this._vRange.index + 1,
+          index: currentVRange.index + 1,
           length: 0,
         },
         'input',
       ]);
+
+      this.insertLineBreak(currentVRange);
     } else if (
       inputType === 'deleteContentBackward' &&
-      this._vRange.index >= 0
+      currentVRange.index >= 0
     ) {
-      if (this._vRange.length > 0) {
-        this.deleteText(this._vRange);
-
+      if (currentVRange.length > 0) {
         this.signals.updateVRange.emit([
           {
-            index: this._vRange.index,
+            index: currentVRange.index,
             length: 0,
           },
           'input',
         ]);
-      } else if (this._vRange.index > 0) {
+
+        this.deleteText(currentVRange);
+      } else if (currentVRange.index > 0) {
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-        const tmpString = this.yText.toString().slice(0, this._vRange.index);
+        const tmpString = this.yText.toString().slice(0, currentVRange.index);
         const deletedCharacter = [...tmpString].slice(-1).join('');
+        this.signals.updateVRange.emit([
+          {
+            index: currentVRange.index - deletedCharacter.length,
+            length: 0,
+          },
+          'input',
+        ]);
+
         this.deleteText({
-          index: this._vRange.index - deletedCharacter.length,
+          index: currentVRange.index - deletedCharacter.length,
           length: deletedCharacter.length,
         });
-
-        this.signals.updateVRange.emit([
-          {
-            index: this._vRange.index - deletedCharacter.length,
-            length: 0,
-          },
-          'input',
-        ]);
       }
     }
   }
@@ -591,13 +592,15 @@ export class VEditor {
   }
 
   private _onYTextChange = () => {
-    assertExists(this._rootElement);
+    Promise.resolve().then(() => {
+      assertExists(this._rootElement);
 
-    renderDeltas(
-      this.yText.toDelta() as DeltaInsert[],
-      this._rootElement,
-      this._renderElement
-    );
+      renderDeltas(
+        this.yText.toDelta() as DeltaInsert[],
+        this._rootElement,
+        this._renderElement
+      );
+    });
   };
 
   private _onSelectionChange = () => {
