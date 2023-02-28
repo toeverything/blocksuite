@@ -45,6 +45,7 @@ export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
+  readonly surface: SurfaceManager;
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;

@@ -70,7 +70,21 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
     // zoom
     else {
       const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      const cx = viewport.centerX;
+      const cy = viewport.centerY;
+      const z = viewport.zoom;
       viewport.applyDeltaZoom(delta);
+
+      const rect = container.getBoundingClientRect();
+      const [modelX, modelY] = container.surface.toModelCoord(
+        e.clientX - rect.x,
+        e.clientY - rect.y
+      );
+
+      const deltaX = ((cx - modelX) * z) / viewport.zoom - (cx - modelX);
+      const deltaY = ((cy - modelY) * z) / viewport.zoom - (cy - modelY);
+      viewport.applyDeltaCenter(deltaX, deltaY);
+
       container.signals.viewportUpdated.emit();
     }
   };
