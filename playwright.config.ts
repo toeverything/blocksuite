@@ -38,7 +38,7 @@ const config: PlaywrightTestConfig = {
 
 if (process.env.CI) {
   config.retries = 3;
-  config.workers = 4;
+  config.workers = '50%';
 }
 
 export default config;
