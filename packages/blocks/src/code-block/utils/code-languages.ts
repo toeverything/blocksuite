@@ -1,4 +1,4 @@
-export const codeLaguages = [
+export const codeLanguages = [
   'TypeScript',
   'Rust',
   'Python',
@@ -194,7 +194,7 @@ export const codeLaguages = [
   'zephir',
 ];
 
-const laguagesWithShortName: Record<string, string> = {
+const languagesWithShortName: Record<string, string> = {
   clj: 'clojure',
 
   'c#': 'csharp',
@@ -225,7 +225,7 @@ const laguagesWithShortName: Record<string, string> = {
 };
 
 export const getCodeLanguage = (languageName: string) => {
-  const language = codeLaguages.find(codeLanguage => {
+  const language = codeLanguages.find(codeLanguage => {
     return codeLanguage.toLowerCase() === languageName.toLowerCase();
   });
 
@@ -233,5 +233,5 @@ export const getCodeLanguage = (languageName: string) => {
     return language;
   }
 
-  return laguagesWithShortName[languageName];
+  return languagesWithShortName[languageName];
 };
