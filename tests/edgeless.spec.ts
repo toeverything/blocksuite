@@ -110,57 +110,19 @@ test('resize block in edgeless mode', async ({ page }) => {
   expect(newXywh).toBe(xywh);
 });
 
-test.skip('add shape blocks', async ({ page }) => {
+test('add shape element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
-  await focusRichText(page);
-
   await switchEditorMode(page);
   await setMouseMode(page, 'shape');
-  const box = await page
-    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
-    ?.boundingBox();
-  if (!box) {
-    throw new Error('box is null');
-  }
-  const { x, y } = box;
-  await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
-  // await switchShapeColor(page, 'blue');
-  // await switchShapeType(page, 'triangle');
-  await dragBetweenCoords(page, { x, y }, { x: x + 200, y: y + 200 });
 
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await dragBetweenCoords(page, start, end);
   await setMouseMode(page, 'default');
 
-  /*
-  const shapeModel = await getModel<ShapeBlockModel>(page, '3');
-  expect(JSON.parse(shapeModel.xywh)).toStrictEqual([0, 0, 100, 100]);
-  expect(shapeModel.color).toBe('black');
-  expect(shapeModel.type).toBe('rectangle');
-  const shapeModel2 = await getModel<ShapeBlockModel>(page, '4');
-  expect(JSON.parse(shapeModel2.xywh)).toStrictEqual([0, 0, 200, 200]);
-  expect(shapeModel2.color).toBe('blue');
-  expect(shapeModel2.type).toBe('triangle');
-  */
-
-  const tag = await page.evaluate(() => {
-    const element = document.querySelector(`[data-block-id="3"]`);
-    return element?.tagName;
-  });
-  expect(tag).toBe('AFFINE-SHAPE');
-
-  await page.mouse.move(100, 100);
-  await page.mouse.wheel(10, 10);
-  const newBox = await page
-    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
-    ?.boundingBox();
-  if (!newBox) {
-    throw new Error('box is null');
-  }
-  // TODO: detect the offset precisely because delta is different between different `window.devicePixelRatio`.
-  //  Refs: https://bugzilla.mozilla.org/show_bug.cgi?id=970141
-  expect(newBox.x).toBeLessThan(box.x);
-  expect(newBox.y).toBeLessThan(box.y);
-  await assertRichTexts(page, ['hello']);
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {
@@ -265,19 +227,6 @@ test('selection box of shape element sync on fast dragging', async ({
   );
 
   await assertEdgelessHoverRect(page, 650, 450, 100, 100);
-});
-
-test('hover state for shape element', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  await setMouseMode(page, 'shape');
-  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
-
-  await page.mouse.move(150, 150);
-  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
 });
 
 test('hovering on shape should not have effect on underlying block', async ({
