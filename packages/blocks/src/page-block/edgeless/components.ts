@@ -48,9 +48,10 @@ function getCommonRectStyle(
     top: rect.y + 'px',
     width: rect.width + (isSurfaceElement ? 0 : PADDING_X) * zoom + 'px',
     height: rect.height + (isSurfaceElement ? 0 : PADDING_Y) * zoom + 'px',
-    borderRadius: `${10 * zoom}px`,
+    borderRadius: isSurfaceElement ? '0' : `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
+    zIndex: '1',
     backgroundColor:
       isSurfaceElement && selected ? 'var(--affine-selected-color)' : '',
   };
@@ -177,11 +178,7 @@ function EdgelessBlockChild(
   };
 
   return html`
-    <div
-      data-test-id=${`affine-edgeless-block-child-${model.id}-container`}
-      class="affine-edgeless-block-child"
-      style=${styleMap(style)}
-    >
+    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
       ${BlockElement(model, host, true)}
     </div>
   `;
@@ -462,7 +459,6 @@ export class EdgelessSelectedRect extends LitElement {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      zIndex: '0',
       ...getCommonRectStyle(this.rect, this.zoom, isSurfaceElement, true),
     };
     const handlers = this._getHandles(this.rect, isSurfaceElement);
