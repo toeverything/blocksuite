@@ -87,6 +87,7 @@ export const codeLaguages = [
   'haxe',
   'hsp',
   'http',
+  'html',
   'hy',
   'inform7',
   'ini',
@@ -223,6 +224,14 @@ const laguagesWithShortName: Record<string, string> = {
   yml: 'yaml',
 };
 
-export const getCodeLaguage = (shortName: string) => {
-  return laguagesWithShortName[shortName];
+export const getCodeLanguage = (languageName: string) => {
+  const language = codeLaguages.find(codeLanguage => {
+    return codeLanguage.toLowerCase() === languageName.toLowerCase();
+  });
+
+  if (language) {
+    return language;
+  }
+
+  return laguagesWithShortName[languageName];
 };
