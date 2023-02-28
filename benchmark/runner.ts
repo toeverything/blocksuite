@@ -14,7 +14,7 @@ const startPlaygroundPreview = () => {
       // todo: check if the service is really up
       console.log('playground preview started');
       resolve(child);
-    }, 1000);
+    }, 6000);
     // wait until child output "http://127.0.0.1:4173/", which means the preview is ready
     child.stdout?.on('data', data => {
       console.error('stderr: data', data.toString());
