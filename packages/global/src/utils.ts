@@ -15,9 +15,12 @@ export function isPrimitive(
   return a !== Object(a);
 }
 
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
+export function assertExists<T>(
+  val: T | null | undefined,
+  message = 'val does not exist'
+): asserts val is T {
   if (val === null || val === undefined) {
-    throw new Error('val does not exist');
+    throw new Error(message);
   }
 }
 

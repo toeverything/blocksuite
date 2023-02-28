@@ -16,6 +16,7 @@ import {
   pressSpace,
   pressTab,
   resetHistory,
+  selectAllByKeyboard,
   setQuillSelection,
   setSelection,
   SHORT_KEY,
@@ -440,4 +441,22 @@ test('should keep first line format when pasted into a new line', async ({
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('cut should work for multi-block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'a');
+  await pressEnter(page);
+  await type(page, 'b');
+  await pressEnter(page);
+  await type(page, 'c');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertText(page, '\n');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, ['a', 'b', 'c']);
 });

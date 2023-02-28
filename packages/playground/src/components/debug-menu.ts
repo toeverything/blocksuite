@@ -18,7 +18,6 @@ import {
   getCurrentBlockRange,
   MouseMode,
   NonShadowLitElement,
-  ShapeMouseMode,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
@@ -28,14 +27,9 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ShapeType } from '@blocksuite/phasor';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
-import type {
-  SlColorPicker,
-  SlDropdown,
-  SlSelect,
-} from '@shoelace-style/shoelace';
+import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
@@ -84,12 +78,6 @@ export class DebugMenu extends NonShadowLitElement {
   showGrid = false;
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = '#000000';
-
-  @state()
-  shapeModeShape: ShapeMouseMode['shape'] = 'rect';
-
-  @state()
   readonly = false;
 
   @state()
@@ -109,8 +97,8 @@ export class DebugMenu extends NonShadowLitElement {
     } else {
       return {
         type: this.mouseModeType,
-        color: this.shapeModeColor,
-        shape: this.shapeModeShape,
+        color: '#000000',
+        shape: 'rect',
       };
     }
   }
@@ -212,10 +200,6 @@ export class DebugMenu extends NonShadowLitElement {
       pageId
     );
     this.page.addBlock({ flavour: 'affine:paragraph' }, frameId);
-  }
-
-  private _switchMouseMode() {
-    this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
   private _switchShowGrid() {
@@ -516,46 +500,6 @@ export class DebugMenu extends NonShadowLitElement {
               </sl-icon>
             </sl-button>
           </sl-tooltip>
-          <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Mouse Mode"
-              @click=${this._switchMouseMode}
-            >
-              <sl-icon
-                name=${this.mouseMode.type === 'default'
-                  ? 'cursor'
-                  : 'pentagon'}
-              >
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-color-picker
-            size="small"
-            value="#000000"
-            hoist
-            label="Shape Color"
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlColorPicker;
-              this.shapeModeColor = target.value as `#${string}`;
-            }}
-          ></sl-color-picker>
-          <sl-select
-            placeholder="Shape Type"
-            size="small"
-            value=${this.shapeModeShape}
-            aria-label="Shape Type"
-            hoist
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlSelect;
-              this.shapeModeShape = target.value as ShapeType;
-            }}
-          >
-            <sl-menu-item value="rectangle">Rectangle</sl-menu-item>
-            <sl-menu-item value="triangle">Triangle</sl-menu-item>
-            <sl-menu-item value="ellipse">Ellipse</sl-menu-item>
-          </sl-select>
         </div>
       </div>
     `;
