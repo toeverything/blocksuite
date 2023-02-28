@@ -6,7 +6,7 @@ import { runYDocBenchmark as runYDocBinarySizeBenchmark } from './benchmark-ydoc
 
 const previewURL = `http://127.0.0.1:4173/`;
 
-const startPlaygroundPreview = (timeout = 10000) => {
+const startPlaygroundPreview = (timeout = 30000) => {
   console.log('starting playground preview ...');
   const child = spawn('pnpm', ['preview:playground'], {});
   let started = false;
@@ -20,7 +20,7 @@ const startPlaygroundPreview = (timeout = 10000) => {
     // wait until child output "http://127.0.0.1:4173/", which means the preview is ready
     child.stdout?.on('data', data => {
       const output = data.toString();
-      // console.log(output);
+      console.log(output);
       if (output.includes('ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL')) {
         reject('Failed to start playground preview');
         child.kill();
