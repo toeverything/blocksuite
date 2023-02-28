@@ -20,19 +20,19 @@ const startPlaygroundPreview = (timeout = 30000) => {
     // wait until child output "http://127.0.0.1:4173/", which means the preview is ready
     child.stdout?.on('data', data => {
       const output = data.toString();
-      console.log(output);
+      console.log('stdout: data', output);
       if (output.includes('ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL')) {
         reject('Failed to start playground preview');
         child.kill();
       } else if (output.includes(previewURL)) {
-        resolve(child);
         started = true;
+        resolve(child);
         console.log('playground preview started');
       }
     });
 
     child.stderr?.on('data', data => {
-      console.error(data.toString());
+      console.error('stderr: data', data.toString());
     });
 
     child.on('close', () => {
