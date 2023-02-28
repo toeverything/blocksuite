@@ -298,7 +298,7 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
-    if (blockRange.type === 'Native') {
+    if (blockRange.type === 'Native' && blockRange.models.length > 1) {
       blockRange.models.forEach((model, index) => {
         // first
         if (index === 0) {
