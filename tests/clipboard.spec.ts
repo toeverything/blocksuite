@@ -461,7 +461,7 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await assertRichTexts(page, ['a', 'b', 'c']);
 });
 
-test.only('paste in block-level selection', async ({ page }) => {
+test('paste in block-level selection', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
