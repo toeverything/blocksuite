@@ -1,8 +1,8 @@
 import { getStrokePoints } from 'perfect-freehand';
 
 import type { IBound } from '../../consts.js';
+import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
-import { Vec } from '../../utils/vec.js';
 import { serializeXYWH, XYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
@@ -23,8 +23,8 @@ function getBrushBoundFromPoints(
 ): IBound {
   const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
   return {
-    x: minX,
-    y: minY,
+    x: minX - lineWidth / 2,
+    y: minY - lineWidth / 2,
     w: width < lineWidth ? lineWidth : width + lineWidth,
     h: height < lineWidth ? lineWidth : height + lineWidth,
   };
@@ -64,20 +64,11 @@ export class BrushElement extends BaseElement {
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
-    const point = Vec.sub([x, y], [this.x, this.y]);
-
-    const points = getSolidStrokePoints(this.points, this.lineWidth).map(
-      s => s.point
-    );
-
-    return Utils.pointInPolyline(point, points, this.lineWidth);
+    return isPointIn(this, x, y);
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(
-      this.point[0] - this.x + this.lineWidth / 2,
-      this.point[1] - this.y + this.lineWidth / 2
-    );
+    ctx.translate(this.point[0] - this.x, this.point[1] - this.y);
 
     // render stroke points
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
