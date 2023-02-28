@@ -70,9 +70,7 @@ export class ClipboardEventDispatcher {
   private _onCut = (e: ClipboardEvent) => {
     if (!this._isValidClipboardEvent(e)) return;
 
-    if (ClipboardEventDispatcher.editorElementActive()) {
-      this.signals.cut.emit(e);
-    }
+    this.signals.cut.emit(e);
   };
 
   private _onPaste = (e: ClipboardEvent) => {

@@ -2090,3 +2090,21 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   const rects = page.locator('.affine-page-selected-rects-container > *');
   await expect(rects).toHaveCount(1);
 });
+
+test('should blur rich-text first when block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await expect(page.locator('*:focus')).toHaveCount(1);
+
+  const coord = await getIndexCoordinate(page, [1, 2]);
+  await dragBetweenCoords(
+    page,
+    { x: coord.x - 30, y: coord.y - 10 },
+    { x: coord.x + 20, y: coord.y + 50 }
+  );
+
+  await expect(page.locator('*:focus')).toHaveCount(0);
+});

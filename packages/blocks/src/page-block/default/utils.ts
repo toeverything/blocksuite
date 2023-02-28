@@ -513,10 +513,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         targetModel,
         distanceToTop < distanceToBottom
       );
-      defaultPageBlock.signals.updateSelectedRects.emit([]);
-      defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
-      defaultPageBlock.signals.updateEmbedEditingState.emit(null);
-      defaultPageBlock.signals.updateEmbedRects.emit([]);
+      const type = defaultPageBlock.selection.state.type;
+      defaultPageBlock.selection.clear();
+      defaultPageBlock.selection.state.type = type;
 
       requestAnimationFrame(() => {
         // update selection rects
