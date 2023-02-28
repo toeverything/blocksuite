@@ -54,23 +54,25 @@ export class PasteManager {
 
       const blocksPromise = this._clipboardEvent2Blocks(e);
       if (blocksPromise instanceof Promise) {
-        const page = this._editor.page;
-        const blockRange = getCurrentBlockRange(page);
-        if (blockRange) {
-          if (blockRange.type === 'Native') {
-            deleteModelsByRange(page);
-          } else {
-            handleBlockSelectionBatchDelete(page, blockRange.models);
-            const pageBlock = getDefaultPageBlock(blockRange.models[0]);
-            pageBlock.selection.clear();
-          }
-        }
         e.preventDefault();
         e.stopPropagation();
         const blocks: OpenBlockInfo[] = await blocksPromise;
-        requestAnimationFrame(() => {
-          this.insertBlocks(blocks);
-        });
+
+        const page = this._editor.page;
+        const blockRange = getCurrentBlockRange(page);
+        if (blockRange && blockRange.type !== 'Native') {
+          if (
+            !blockRange.models.every(model => model.flavour === 'affine:list')
+          ) {
+            handleBlockSelectionBatchDelete(page, blockRange.models);
+            const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+            pageBlock.selection.clear();
+            requestAnimationFrame(() => {
+              this.insertBlocks(blocks);
+            });
+          }
+        }
+        this.insertBlocks(blocks);
       }
     }
   };
