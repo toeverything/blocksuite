@@ -20,7 +20,7 @@ do
   pnpm build
 
   if [ "$NIGHTLY" = "true" ]; then
-    pnpm publish --tag nightly
+    pnpm publish --no-git-checks --tag nightly
   else
     pnpm publish
   fi
