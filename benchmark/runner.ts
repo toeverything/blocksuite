@@ -6,29 +6,18 @@ import { runYDocBenchmark as runYDocBinarySizeBenchmark } from './benchmark-ydoc
 
 const previewURL = `http://127.0.0.1:4173/`;
 
-const startPlaygroundPreview = (timeout = 30000) => {
+const startPlaygroundPreview = () => {
   console.log('starting playground preview ...');
   const child = spawn('pnpm', ['preview:playground'], {});
-  let started = false;
   return new Promise<ChildProcess>((resolve, reject) => {
     setTimeout(() => {
-      if (!started) {
-        reject('Start playground preview timeout');
-      }
-    }, timeout);
-
+      // todo: check if the service is really up
+      console.log('playground preview started');
+      resolve(child);
+    }, 1000);
     // wait until child output "http://127.0.0.1:4173/", which means the preview is ready
     child.stdout?.on('data', data => {
-      const output = data.toString();
-      console.log('stdout: data', output, output.indexOf('Local:'));
-      if (output.includes('ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL')) {
-        reject('Failed to start playground preview');
-        child.kill();
-      } else if (output.indexOf('Local:') > -1) {
-        started = true;
-        resolve(child);
-        console.log('playground preview started');
-      }
+      console.error('stderr: data', data.toString());
     });
 
     child.stderr?.on('data', data => {
