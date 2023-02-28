@@ -34,7 +34,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
+import { toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -321,14 +321,6 @@ export class BlockHub extends NonShadowLitElement {
       margin: 4px 0;
     }
 
-    tool-tip:is([tip-position='left']) {
-      left: 0;
-      right: unset;
-      top: 10px;
-      transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0 10px;
-    }
-
     [role='menu-entry'] tool-tip {
       font-size: var(--affine-font-sm);
     }
@@ -338,7 +330,6 @@ export class BlockHub extends NonShadowLitElement {
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
     }
 
-    ${centeredToolTipStyle}
     ${toolTipStyle}
   `;
 
@@ -617,16 +608,17 @@ export class BlockHub extends NonShadowLitElement {
                     <div class="description">${description}</div>
                   </div>
                   <div class="card-icon-container">${icon}</div>
-                  <centered-tool-tip
+                  <tool-tip
                     tip-position=${shouldScroll &&
                     index === blockHubItems.length - 1
                       ? 'top'
                       : 'bottom'}
-                    style="display: ${this._showToolTip
+                    style="${this._showToolTip
                       ? ''
-                      : 'none'}; z-index: ${blockHubItems.length - index}"
-                    >${toolTip}
-                  </centered-tool-tip>
+                      : 'display: none'}; z-index: ${blockHubItems.length -
+                    index}"
+                    >${toolTip}</tool-tip
+                  >
                 </div>
               </div>
             `;
