@@ -202,11 +202,6 @@ export class DebugMenu extends NonShadowLitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, frameId);
   }
 
-  private _switchMouseMode() {
-    this._mouseModeType =
-      this._mouseModeType === 'default' ? 'shape' : 'default';
-  }
-
   private _switchShowGrid() {
     this._showGrid = !this._showGrid;
   }
@@ -502,20 +497,6 @@ export class DebugMenu extends NonShadowLitElement {
               @click=${this._switchShowGrid}
             >
               <sl-icon name=${!this._showGrid ? 'square' : 'grid-3x3'}>
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
-          <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Mouse Mode"
-              @click=${this._switchMouseMode}
-            >
-              <sl-icon
-                name=${this.mouseMode.type === 'default'
-                  ? 'cursor'
-                  : 'pentagon'}
-              >
               </sl-icon>
             </sl-button>
           </sl-tooltip>
