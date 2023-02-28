@@ -1,7 +1,7 @@
 import { previewURL, startBrowser } from './common';
 
 export async function runYDocBenchmark() {
-  const browser = await startBrowser({ headless: false });
+  const browser = await startBrowser({ headless: true });
   const page = await browser.newPage();
 
   await page.goto(previewURL + '?init=preset');
