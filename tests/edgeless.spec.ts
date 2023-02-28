@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
 import { assertExists } from '@blocksuite/global/utils';
-import { expect, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
-import type { FrameBlockModel } from '../packages/blocks/src/index.js';
+import { getFrameSize } from './utils/actions/edgeless.js';
 import {
   assertEdgelessHoverRect,
   clickBlockById,
@@ -27,26 +27,6 @@ import {
   assertSelection,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
-
-async function getFrameSize(
-  page: Page,
-  ids: { pageId: string; frameId: string; paragraphId: string }
-) {
-  const result: string | null = await page.evaluate(
-    ([id]) => {
-      const page = window.workspace.getPage('page0');
-      const block = page?.getBlockById(id.frameId);
-      if (block?.flavour === 'affine:frame') {
-        return (block as FrameBlockModel).xywh;
-      } else {
-        return null;
-      }
-    },
-    [ids] as const
-  );
-  expect(result).not.toBeNull();
-  return result as string;
-}
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
