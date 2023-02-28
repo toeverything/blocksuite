@@ -18,7 +18,6 @@ import {
   getCurrentBlockRange,
   MouseMode,
   NonShadowLitElement,
-  ShapeMouseMode,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
@@ -28,14 +27,9 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ShapeType } from '@blocksuite/phasor';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
-import type {
-  SlColorPicker,
-  SlDropdown,
-  SlSelect,
-} from '@shoelace-style/shoelace';
+import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
@@ -84,13 +78,10 @@ export class DebugMenu extends NonShadowLitElement {
   private _showGrid = false;
 
   @state()
-  private _shapeModeColor: ShapeMouseMode['color'] = '#000000';
+  _readonly = false;
 
   @state()
-  private _shapeModeShape: ShapeMouseMode['shape'] = 'rect';
-
-  @state()
-  private _hasOffset = false;
+  _hasOffset = false;
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
@@ -106,8 +97,8 @@ export class DebugMenu extends NonShadowLitElement {
     } else {
       return {
         type: this._mouseModeType,
-        color: this._shapeModeColor,
-        shape: this._shapeModeShape,
+        color: '#000000',
+        shape: 'rect',
       };
     }
   }
@@ -528,32 +519,6 @@ export class DebugMenu extends NonShadowLitElement {
               </sl-icon>
             </sl-button>
           </sl-tooltip>
-
-          <sl-color-picker
-            size="small"
-            value="#000000"
-            hoist
-            label="Shape Color"
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlColorPicker;
-              this._shapeModeColor = target.value as `#${string}`;
-            }}
-          ></sl-color-picker>
-          <sl-select
-            placeholder="Shape Type"
-            size="small"
-            value=${this._shapeModeShape}
-            aria-label="Shape Type"
-            hoist
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlSelect;
-              this._shapeModeShape = target.value as ShapeType;
-            }}
-          >
-            <sl-menu-item value="rectangle">Rectangle</sl-menu-item>
-            <sl-menu-item value="triangle">Triangle</sl-menu-item>
-            <sl-menu-item value="ellipse">Ellipse</sl-menu-item>
-          </sl-select>
         </div>
       </div>
     `;

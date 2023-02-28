@@ -69,7 +69,7 @@ export class BaseService implements IService {
   /**
    * side effect when update block
    */
-  updateEffect(block: BaseBlockModel) {
+  async updateEffect(block: BaseBlockModel) {
     // we need to unindent the first child of the block if it not
     // support children
     if (this.supportsChildren(block)) {
