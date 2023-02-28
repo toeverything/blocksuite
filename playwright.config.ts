@@ -28,7 +28,7 @@ const config: PlaywrightTestConfig = {
     // Record video only when retrying a test for the first time.
     video: 'on-first-retry',
   },
-  workers: '100%',
+  workers: 4,
   retries: 1,
   // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
   // default 'list' when running locally
