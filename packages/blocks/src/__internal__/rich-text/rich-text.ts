@@ -166,35 +166,36 @@ export class RichText extends NonShadowLitElement {
   }
 
   firstUpdated() {
-    const { host, model, placeholder, _textContainer } = this;
-    const { page } = host;
-    const keyboardBindings = createKeyboardBindings(page, model);
+    requestAnimationFrame(() => {
+      const { host, model, placeholder, _textContainer } = this;
+      const { page } = host;
+      const keyboardBindings = createKeyboardBindings(page, model);
+      this.quill = new Quill(_textContainer, {
+        modules: Object.assign(
+          {
+            toolbar: false,
+            history: {
+              maxStack: 0,
+              userOnly: true,
+            },
+            keyboard: {
+              bindings: keyboardBindings,
+            },
+          },
+          this.modules
+        ),
+        placeholder,
+      });
 
-    this.quill = new Quill(_textContainer, {
-      modules: Object.assign(
-        {
-          toolbar: false,
-          history: {
-            maxStack: 0,
-            userOnly: true,
-          },
-          keyboard: {
-            bindings: keyboardBindings,
-          },
-        },
-        this.modules
-      ),
-      placeholder,
+      page.attachRichText(model.id, this.quill);
+      this.model.propsUpdated.on(() => this.requestUpdate());
+
+      if (this.modules.syntax && this.quill.getText() === '\n') {
+        this.quill.focus();
+      }
+
+      this._handleInlineBoundaryInput();
     });
-
-    page.attachRichText(model.id, this.quill);
-    this.model.propsUpdated.on(() => this.requestUpdate());
-
-    if (this.modules.syntax && this.quill.getText() === '\n') {
-      this.quill.focus();
-    }
-
-    this._handleInlineBoundaryInput();
   }
 
   connectedCallback() {

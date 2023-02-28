@@ -6,10 +6,14 @@ import type { Quill } from 'quill';
 import type { ExtendedModel } from './types.js';
 
 // XXX: workaround quill lifecycle issue
-export function asyncFocusRichText(page: Page, id: string) {
+export function asyncFocusRichText(page: Page, id: string, retries = 2) {
   requestAnimationFrame(() => {
     const adapter = page.richTextAdapters.get(id);
-    adapter?.quill.focus();
+    if (adapter) {
+      adapter?.quill.focus();
+    } else if (retries > 0) {
+      asyncFocusRichText(page, id, retries - 1);
+    }
   });
 }
 
