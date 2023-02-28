@@ -3,7 +3,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
-import { getFrameSize } from './utils/actions/edgeless.js';
+import {
+  getFrameSize,
+  setMouseMode,
+  switchEditorMode,
+} from './utils/actions/edgeless.js';
 import {
   assertEdgelessHoverRect,
   clickBlockById,
@@ -13,10 +17,6 @@ import {
   initEmptyEdgelessState,
   pressEnter,
   redoByClick,
-  switchEditorMode,
-  switchMouseMode,
-  switchShapeColor,
-  switchShapeType,
   type,
   undoByClick,
   waitNextFrame,
@@ -114,11 +114,9 @@ test.skip('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await focusRichText(page);
-  await type(page, 'hello');
-  await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await switchMouseMode(page);
+  await setMouseMode(page, 'shape');
   const box = await page
     .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
     ?.boundingBox();
@@ -127,11 +125,11 @@ test.skip('add shape blocks', async ({ page }) => {
   }
   const { x, y } = box;
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
-  await switchShapeColor(page, 'blue');
-  await switchShapeType(page, 'triangle');
+  // await switchShapeColor(page, 'blue');
+  // await switchShapeType(page, 'triangle');
   await dragBetweenCoords(page, { x, y }, { x: x + 200, y: y + 200 });
 
-  await switchMouseMode(page);
+  await setMouseMode(page, 'default');
 
   /*
   const shapeModel = await getModel<ShapeBlockModel>(page, '3');
@@ -170,10 +168,10 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await switchMouseMode(page);
+  await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
 
-  await switchMouseMode(page);
+  await setMouseMode(page, 'default');
   const startPoint = await page.evaluate(() => {
     // @ts-expect-error
     const hitbox = window.std.getShapeBlockHitBox('3');
@@ -256,9 +254,9 @@ test('selection box of shape element sync on fast dragging', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await switchMouseMode(page);
+  await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await switchMouseMode(page);
+  await setMouseMode(page, 'default');
   await dragBetweenCoords(
     page,
     { x: 150, y: 150 },
@@ -274,9 +272,9 @@ test('hover state for shape element', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await switchMouseMode(page);
+  await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await switchMouseMode(page);
+  await setMouseMode(page, 'default');
 
   await page.mouse.move(150, 150);
   await assertEdgelessHoverRect(page, 100, 100, 100, 100);
@@ -300,9 +298,9 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   const { x, y } = blockBox;
 
-  await switchMouseMode(page);
+  await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
-  await switchMouseMode(page);
+  await setMouseMode(page, 'default');
 
   await page.mouse.move(x + 50, y + 50);
   await assertEdgelessHoverRect(page, x, y, 100, 100);
