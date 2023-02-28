@@ -58,6 +58,23 @@ export const toolTipStyle = css`
     border-radius: 10px;
   }
 
+  /* Only work for tip-position='top' now */
+  tool-tip:is([arrow]) {
+    transform: translate(-50%, calc(-100% - 16px));
+  }
+  tool-tip:is([arrow])::before {
+    position: absolute;
+    content: '';
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 100%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--affine-tooltip-background);
+  }
+
   .has-tool-tip {
     position: relative;
   }

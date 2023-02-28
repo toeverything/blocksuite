@@ -1,6 +1,8 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { toolTipStyle } from '../../../components/tooltip/tooltip.js';
+
 @customElement('edgeless-tool-icon-button')
 export class EdgelessToolIconButton extends LitElement {
   static styles = css`
@@ -34,17 +36,7 @@ export class EdgelessToolIconButton extends LitElement {
       color: var(--affine-disable-color);
     }
 
-    arrow-tool-tip {
-      transform: translateX(-50%) translateY(-50%);
-      left: calc(50%);
-      bottom: 24px;
-      opacity: 0;
-    }
-
-    .icon-container:hover > arrow-tool-tip {
-      opacity: 1;
-      transition-delay: 200ms;
-    }
+    ${toolTipStyle}
   `;
 
   @property()
@@ -74,7 +66,7 @@ export class EdgelessToolIconButton extends LitElement {
     const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
     return html`
       <div
-        class="icon-container"
+        class="icon-container has-tool-tip"
         role="button"
         ?disabled=${this.disabled}
         ?active=${this.active}
@@ -83,7 +75,9 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html` <arrow-tool-tip .tipText=${tooltip}></arrow-tool-tip> `
+          ? html`<tool-tip inert role="tooltip" tip-position="top" arrow
+              >${tooltip}</tool-tip
+            >`
           : nothing}
       </div>
     `;
