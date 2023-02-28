@@ -9,7 +9,6 @@ import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
   DebugElement,
-  getBrushBoundFromPoints,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
@@ -70,11 +69,8 @@ export class SurfaceManager {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
-    const lineWidth = element.lineWidth;
-    const bound = getBrushBoundFromPoints(points, lineWidth);
-
-    element.setBound(x, y, bound.w, bound.h);
     element.color = color;
+    element.point = [x, y];
     element.points = points;
 
     return this._addElement(element);
@@ -229,6 +225,9 @@ export class SurfaceManager {
         assertExists(element);
 
         if (key === 'xywh') {
+          if (element.type === 'brush') {
+            return;
+          }
           const xywh = yElement.get(key) as string;
           const [x, y, w, h] = deserializeXYWH(xywh);
 
@@ -240,14 +239,8 @@ export class SurfaceManager {
 
         if (key === 'points') {
           const points: number[][] = JSON.parse(yElement.get(key) as string);
-
-          const lineWidth = (element as BrushElement).lineWidth;
-
-          const bounds = getBrushBoundFromPoints(points, lineWidth);
-
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
-          element.setBound(element.x, element.y, bounds.w, bounds.h);
           this._renderer.addElement(element);
         }
       }

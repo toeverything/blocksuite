@@ -60,7 +60,12 @@ export type ShapeMouseMode = {
   color: `#${string}`;
 };
 
-export type MouseMode = DefaultMouseMode | ShapeMouseMode;
+export type BrushMouseMode = {
+  type: 'brush';
+  color: `#${string}`;
+};
+
+export type MouseMode = DefaultMouseMode | ShapeMouseMode | BrushMouseMode;
 
 export type OpenBlockInfo = {
   flavour: string;

@@ -10,6 +10,7 @@ import {
 } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
@@ -185,6 +186,7 @@ export class EdgelessSelectionManager {
     this._controllers = {
       default: new DefaultModeController(this._container),
       shape: new ShapeModeController(this._container),
+      brush: new BrushModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,

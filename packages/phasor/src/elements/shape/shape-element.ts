@@ -5,6 +5,11 @@ import { ShapeMethodsMap } from './shapes/index.js';
 import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
 
 export class ShapeElement extends BaseElement {
+  x = 0;
+  y = 0;
+  w = 0;
+  h = 0;
+
   type = 'shape' as const;
   shapeType: ShapeType;
   radius = 0;
@@ -21,6 +26,13 @@ export class ShapeElement extends BaseElement {
 
   updateProps(props: ShapeProps) {
     Object.assign(this, props);
+  }
+
+  setBound(x: number, y: number, w: number, h: number) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {

@@ -100,10 +100,10 @@ export class EdgelessToolbar extends LitElement {
           ${ConnectorIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
           .tooltip=${'Pen'}
-          .active=${false}
-          @tool.click=${() => console.log('Pen')}
+          .active=${type === 'brush'}
+          @tool.click=${() =>
+            this._setMouseMode({ type: 'brush', color: '#000000' })}
         >
           ${PenIcon}
         </edgeless-tool-icon-button>
