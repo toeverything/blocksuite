@@ -47,7 +47,8 @@ export const toolTipStyle = css`
   }
   tool-tip:is([tip-position='left']) {
     left: 0;
-    transform: translateX(calc(-100% - 8px));
+    top: 50%;
+    transform: translate(calc(-100% - 8px), -50%);
     border-radius: 10px 10px 0 10px;
   }
   tool-tip:is([tip-position='bottom']) {

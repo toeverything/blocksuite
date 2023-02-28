@@ -512,7 +512,6 @@ export class BlockHub extends NonShadowLitElement {
             inert
             role="tooltip"
             tip-position="left"
-            style="top: 5px"
             ?hidden=${!this._showToolTip}
             >Drag to insert blank line
           </tool-tip>
@@ -560,7 +559,6 @@ export class BlockHub extends NonShadowLitElement {
                   inert
                   role="tooltip"
                   tip-position="left"
-                  style="top: 5px"
                   ?hidden=${!this._showToolTip}
                 >
                   Drag to create a database
