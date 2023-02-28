@@ -224,14 +224,14 @@ const laguagesWithShortName: Record<string, string> = {
   yml: 'yaml',
 };
 
-export const getCodeLaguage = (shortName: string) => {
-  const language = codeLaguages.find(codeLaguage => {
-    return codeLaguage.toLowerCase() === shortName.toLowerCase();
+export const getCodeLanguage = (languageName: string) => {
+  const language = codeLaguages.find(codeLanguage => {
+    return codeLanguage.toLowerCase() === languageName.toLowerCase();
   });
 
   if (language) {
     return language;
   }
 
-  return laguagesWithShortName[shortName];
+  return laguagesWithShortName[languageName];
 };
