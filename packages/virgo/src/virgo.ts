@@ -593,11 +593,17 @@ export class VEditor {
   private _onYTextChange = () => {
     assertExists(this._rootElement);
 
-    renderDeltas(
-      this.yText.toDelta() as DeltaInsert[],
-      this._rootElement,
-      this._renderElement
-    );
+    Promise.resolve().then(() => {
+      if (!this._rootElement) {
+        throw new Error('root element not found.');
+      }
+
+      renderDeltas(
+        this.yText.toDelta() as DeltaInsert[],
+        this._rootElement,
+        this._renderElement
+      );
+    });
   };
 
   private _onSelectionChange = () => {
