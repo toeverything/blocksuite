@@ -32,6 +32,10 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
+  get elements() {
+    return this._elements;
+  }
+
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
