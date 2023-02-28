@@ -4,7 +4,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
-import { codeLaguages } from '../utils/code-laguages.js';
+import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -104,7 +104,7 @@ export class LangList extends NonShadowLitElement {
   @property()
   delay = 150;
 
-  static languages = codeLaguages;
+  static languages = codeLanguages;
 
   protected updated() {
     if (this.showLangList !== 'hidden') {

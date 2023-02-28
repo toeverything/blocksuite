@@ -572,7 +572,6 @@ export class DefaultPageBlockComponent
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
-          ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
@@ -584,8 +583,8 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
-        ${codeBlockOptionContainer}
+        ${selectedRectsContainer} ${selectionRect} ${selectedEmbedContainer}
+        ${embedEditingContainer} ${codeBlockOptionContainer}
       </div>
     `;
   }

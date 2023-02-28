@@ -17,6 +17,7 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenFlavours,
@@ -579,7 +580,7 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.keyboard.press('Backspace');
   await assertBlockChildrenIds(page, '1', ['2']);
 

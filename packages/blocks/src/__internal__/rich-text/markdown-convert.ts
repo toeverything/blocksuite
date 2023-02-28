@@ -3,7 +3,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 
-import { getCodeLanguage } from '../../code-block/utils/code-laguages.js';
+import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
 import {
   convertToDivider,
   convertToList,

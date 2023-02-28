@@ -460,3 +460,21 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['a', 'b', 'c']);
 });
+
+test('paste in block-level selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'foo');
+  await pressEnter(page);
+  await type(page, 'bar');
+  await pressEnter(page);
+  await type(page, 'hehe');
+  await pressEnter(page);
+  await setSelection(page, 3, 0, 3, 0);
+  await copyByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertText(page, 'bar');
+});
