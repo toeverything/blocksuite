@@ -4,6 +4,7 @@ import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
 import type {
   DefaultMouseMode,
   SelectionEvent,
+  TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import {
   handleNativeRangeClick,
@@ -126,6 +127,19 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._setSingleSelectionState(selected, true);
   }
 
+  private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {
+    const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
+    const { zoom } = this._edgeless.viewport;
+    const xywh = JSON.stringify([
+      modelX + e.delta.x / zoom,
+      modelY + e.delta.y / zoom,
+      modelW,
+      modelH,
+    ]);
+    this._page.updateBlock(block, { xywh });
+    this._setSingleSelectionState(block, false);
+  }
+
   onContainerClick(e: SelectionEvent) {
     const selected = this._pick(e.x, e.y);
 
@@ -156,7 +170,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             this._setSingleSelectionState(selected, true);
         }
       }
-      this._handleClickOnSelected(selected, e);
     } else {
       this._setNoneSelectionState();
       this._frameSelectionState = {
@@ -196,30 +209,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         if (this._frameSelectionState) {
           noop();
         }
-        // Is dragging inside a single selected (but not active) frame
+        // Is dragging a selected (but not active) frame, move it
         else {
-          const { selected } = blockSelectionState;
-          if (isTopLevelBlock(selected)) {
-            const block = selected;
-            const [modelX, modelY, modelW, modelH] = JSON.parse(
-              block.xywh
-            ) as XYWH;
-            const { zoom } = this._edgeless.viewport;
-            const xywh = JSON.stringify([
-              modelX + e.delta.x / zoom,
-              modelY + e.delta.y / zoom,
-              modelW,
-              modelH,
-            ]);
-            this._page.updateBlock(block, { xywh });
-            blockSelectionState.rect = getSelectionBoxBound(
-              this._edgeless.viewport,
-              xywh
-            );
-            this._edgeless.signals.updateSelection.emit(
-              this.blockSelectionState
-            );
-          }
+          this._handleBlockDragMove(blockSelectionState.selected, e);
         }
         break;
     }
