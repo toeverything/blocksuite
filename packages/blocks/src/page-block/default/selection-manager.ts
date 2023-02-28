@@ -385,6 +385,17 @@ export class PageSelectionState {
     }
   }
 
+  blur() {
+    resetNativeSelection(null);
+    // deactivate quill keyboard event handler
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+  }
+
   clearRaf() {
     if (this.rafID) {
       this.rafID = void cancelAnimationFrame(this.rafID);
@@ -542,6 +553,8 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
+    // rich-text should be unfocused
+    this.state.blur();
     this.state.type = 'block';
     this._container.updateViewportState();
     const { scrollLeft, scrollTop } = this._container.viewportState;
@@ -550,8 +563,6 @@ export class DefaultSelectionManager {
       scrollLeft,
     });
     this.state.refreshBlockRectCache();
-    // deactivate quill keyboard event handler
-    (document.activeElement as HTMLDivElement).blur();
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
@@ -1055,6 +1066,9 @@ export class DefaultSelectionManager {
 
   // Click on drag-handle button
   selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+    // rich-text should be unfocused
+    this.state.blur();
+
     this.state.focusedBlockIndex = index;
 
     const { blockCache, focusedBlockIndex } = this.state;

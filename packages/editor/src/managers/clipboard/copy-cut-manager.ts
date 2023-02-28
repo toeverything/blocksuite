@@ -1,4 +1,9 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import {
+  getCurrentBlockRange,
+  getDefaultPageBlock,
+  handleBlockSelectionBatchDelete,
+  OpenBlockInfo,
+} from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   EmbedBlockModel,
@@ -40,7 +45,20 @@ export class CopyCutManager {
 
   public handleCut = async (e: ClipboardEvent) => {
     await this.handleCopy(e);
-    deleteModelsByRange(this._editor.page);
+    const page = this._editor.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
+    }
+    if (blockRange.type === 'Native') {
+      deleteModelsByRange(page);
+      return;
+    }
+    handleBlockSelectionBatchDelete(page, blockRange.models);
+    const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+    pageBlock.selection.clear();
+    e.preventDefault();
+    return;
   };
 
   private async _getClipItems() {

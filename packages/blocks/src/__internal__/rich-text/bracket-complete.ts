@@ -108,5 +108,15 @@ export function createBracketAutoCompleteBindings(
       },
     };
   });
+
+  bindings['backtick'] = {
+    key: '`',
+    collapsed: false,
+    handler(range, context) {
+      if (!model.text) return ALLOW_DEFAULT;
+      model.text.format(range.index, range.length, { code: true });
+      return PREVENT_DEFAULT;
+    },
+  };
   return bindings;
 }
