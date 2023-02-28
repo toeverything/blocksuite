@@ -22,11 +22,15 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
   assertSelection,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
+
+const CENTER_X = 450;
+const CENTER_Y = 300;
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -64,13 +68,33 @@ test('cursor for active and inactive state', async ({ page }) => {
   await waitNextFrame(page);
 
   // active
-  await page.mouse.dblclick(450, 300);
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
   await assertNativeSelectionRangeCount(page, 1);
 
   await undoByClick(page);
   await waitNextFrame(page);
   await assertNativeSelectionRangeCount(page, 1);
+});
+
+test('can drag selected non-active frame', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+  await assertFrameXYWH(page, [0, 0, 720, 24]);
+
+  // selected, non-active
+  await page.mouse.click(CENTER_X, CENTER_Y);
+  await dragBetweenCoords(
+    page,
+    { x: CENTER_X, y: CENTER_Y },
+    { x: CENTER_X, y: CENTER_Y + 100 }
+  );
+  await assertFrameXYWH(page, [0, 100, 720, 24]);
 });
 
 test('resize block in edgeless mode', async ({ page }) => {
