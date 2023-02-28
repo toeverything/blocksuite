@@ -182,7 +182,9 @@ jobs:
         with:
           mode: recreate
           message: |
-            ### yDoc Bin Benchmark
-            - yDoc BIN Size: ${{ steps.bin-size-report.outputs.BIN_SIZE }}
-            - yDoc JSON Size: ${{ steps.bin-size-report.outputs.JSON_SIZE }}
+            | yDoc Bin Size Benchmark |  |
+            | --- | --- |
+            | yDoc BIN Size | ${{ steps.bin-size-report.outputs.BIN_SIZE }} |
+            | yDoc JSON Size | ${{ steps.bin-size-report.outputs.JSON_SIZE }} |
+            | Bin / JSON ratio | ${{ steps.bin-size-report.outputs.RATIO }} |
           comment_tag: benchmark
