@@ -15,8 +15,8 @@ export const EllipseMethods: ShapeMethods = {
     const { w, h, strokeWidth, filled, fillColor, strokeColor } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
-    const renderWidth = w - renderOffset * 2;
-    const renderHeight = h - renderOffset * 2;
+    const renderWidth = Math.max(1, w - renderOffset * 2);
+    const renderHeight = Math.max(1, h - renderOffset * 2);
 
     ctx.translate(renderOffset, renderOffset);
 

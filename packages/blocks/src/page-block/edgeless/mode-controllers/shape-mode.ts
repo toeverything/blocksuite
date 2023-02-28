@@ -41,7 +41,13 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
     const bound = new Bound(modelX, modelY, 0, 0);
     const { shape, color } = this.mouseMode;
-    const id = this._surface.addShapeElement(bound, shape, color);
+
+    const shapeType = shape === 'roundedRect' ? 'rect' : shape;
+    const shapeProps = {
+      strokeColor: color,
+      radius: shape === 'roundedRect' ? 0.1 : 0,
+    };
+    const id = this._surface.addShapeElement(bound, shapeType, shapeProps);
     this._draggingElementId = id;
 
     this._draggingArea = {

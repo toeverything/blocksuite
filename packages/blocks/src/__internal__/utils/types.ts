@@ -56,7 +56,7 @@ export type DefaultMouseMode = {
 
 export type ShapeMouseMode = {
   type: 'shape';
-  shape: ShapeType;
+  shape: ShapeType | 'roundedRect';
   color: `#${string}`;
 };
 
