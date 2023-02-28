@@ -24,7 +24,7 @@ const startPlaygroundPreview = (timeout = 30000) => {
       if (output.includes('ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL')) {
         reject('Failed to start playground preview');
         child.kill();
-      } else if (output.includes(previewURL)) {
+      } else if (output.includes('Local:')) {
         started = true;
         resolve(child);
         console.log('playground preview started');
