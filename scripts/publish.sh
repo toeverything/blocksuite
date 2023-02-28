@@ -20,9 +20,9 @@ do
   pnpm build
 
   if [ "$NIGHTLY" = "true" ]; then
-    npm publish --tag nightly
+    pnpm publish --tag nightly
   else
-    npm publish
+    pnpm publish
   fi
 
   cd ../../
