@@ -88,4 +88,8 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
   syncSelectionRect() {
     noop();
   }
+
+  clearSelection() {
+    noop();
+  }
 }

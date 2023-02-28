@@ -163,6 +163,14 @@ export class EdgelessPageBlockComponent
       // } else {
       //   handleMultiBlockBackspace(this.page, e);
       // }
+      const { selected } = this._selection.blockSelectionState;
+
+      if (this.surface.hasElement(selected.id)) {
+        this.surface.removeElement(selected.id);
+        this._selection.currentController.clearSelection();
+        this.signals.updateSelection.emit(this._selection.blockSelectionState);
+        return;
+      }
       handleMultiBlockBackspace(this.page, e);
     }
   };

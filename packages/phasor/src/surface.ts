@@ -97,6 +97,10 @@ export class SurfaceManager {
     });
   }
 
+  hasElement(id: string) {
+    return this._yElements.has(id);
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     return this._renderer.toModelCoord(viewX, viewY);
   }
