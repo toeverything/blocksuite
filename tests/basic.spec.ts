@@ -19,6 +19,7 @@ import {
   undoByKeyboard,
   waitDefaultPageLoaded,
   waitForRemoteUpdateSignal,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
@@ -255,7 +256,8 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
 test('should undo/redo work on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
+
   await focusTitle(page);
   await type(page, 'title');
   await focusRichText(page);

@@ -17,6 +17,7 @@ import {
   selectAllByKeyboard,
   type,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -309,7 +310,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   );
 
   await page.mouse.move(position.x, position.y);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.mouse.click(position.x, position.y);
 
   await focusRichText(page, 1);
