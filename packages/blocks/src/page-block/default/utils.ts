@@ -311,7 +311,7 @@ export async function downloadImage(model: BaseBlockModel) {
 export async function copyImage(model: EmbedBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const service = getService(model.flavour);
-  const text = service.block2Text(model, '', 0, 0);
+  const text = service.block2Text(model);
   const delta = [
     {
       insert: text,

@@ -4,22 +4,23 @@ import type { ListBlockModel } from './list-model.js';
 export class ListBlockService extends BaseService {
   override block2html(
     block: ListBlockModel,
-    childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    let text = super.block2html(
-      block,
-      childText,
-      previousSiblingId,
-      nextSiblingId,
+    {
+      childText = '',
       begin,
-      end
-    );
-    const previousSiblingBlock = block.page.getBlockById(previousSiblingId);
-    const nextSiblingBlock = block.page.getBlockById(nextSiblingId);
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
+  ) {
+    let text = super.block2html(block, {
+      childText,
+      begin,
+      end,
+    });
+    const previousSiblingBlock = block.page.getPreviousSibling(block);
+    const nextSiblingBlock = block.page.getNextSibling(block);
     switch (block.type) {
       case 'bulleted':
         text = `<li>${text}</li>`;

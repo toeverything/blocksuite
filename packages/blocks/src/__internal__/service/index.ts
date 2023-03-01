@@ -1,19 +1,32 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
+import { getService } from '../service.js';
 import type { IService } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
+
+export type CustomClipboardInfo = {
+  type: string;
+  flavour: string;
+  sourceId?: string;
+  text?: DeltaOperation[];
+  children?: CustomClipboardInfo[];
+};
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
   block2html(
     block: BaseBlockModel,
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
+  ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
       return html + BaseService.deltaLeaf2Html(item);
@@ -23,12 +36,35 @@ export class BaseService implements IService {
 
   block2Text(
     block: BaseBlockModel,
-    childText: string,
-    begin?: number,
-    end?: number
-  ) {
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
+  ): string {
     const text = (block.text?.toString() || '').slice(begin || 0, end);
     return `${text}${childText}`;
+  }
+
+  block2Clipboard(
+    block: BaseBlockModel,
+    begin?: number,
+    end?: number
+  ): CustomClipboardInfo {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    return {
+      type: block.type as string,
+      flavour: block.flavour,
+      sourceId: block.sourceId,
+      text: delta,
+      children: block.children.map(child => {
+        return getService(child.flavour).block2Clipboard(child);
+      }),
+    };
   }
 
   private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {

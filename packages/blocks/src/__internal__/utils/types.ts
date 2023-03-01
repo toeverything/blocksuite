@@ -4,8 +4,8 @@ import type { TextAttributes } from '@blocksuite/virgo';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { Clipboard } from '../clipboard/index.js';
 import type { Point } from './rect.js';
-
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IService {
@@ -27,6 +27,7 @@ export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
+  clipboard: Clipboard;
   readonly isCompositionStart?: boolean;
 }
 

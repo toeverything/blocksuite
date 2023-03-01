@@ -10,6 +10,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   BlockHost,
   hotkey,
@@ -89,7 +90,7 @@ export class EdgelessPageBlockComponent
   `;
 
   flavour = 'edgeless' as const;
-
+  clipboard = new EdgelessClipboard();
   @property()
   showGrid = false;
 
@@ -275,8 +276,13 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
+  override connectedCallback() {
+    this.clipboard.init(this);
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.clipboard.dispose();
 
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();

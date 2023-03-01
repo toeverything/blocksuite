@@ -17,24 +17,25 @@ export class CodeBlockService extends BaseService {
 
   override block2html(
     block: CodeBlockModel,
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
   ): string {
     const codeElement = document.querySelector(
       `[${BLOCK_ID_ATTR}="${block.id}"] pre`
     );
     if (!codeElement) {
-      return super.block2html(
-        block,
+      return super.block2html(block, {
         childText,
-        _previousSiblingId,
-        _nextSiblingId,
         begin,
-        end
-      );
+        end,
+      });
     }
     codeElement.setAttribute('code-lang', block.language);
     return codeElement.outerHTML;
