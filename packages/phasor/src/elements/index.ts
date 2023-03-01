@@ -15,7 +15,7 @@ export type PhasorElement = ShapeElement | DebugElement | BrushElement;
 
 export type PhasorElementType = PhasorElement['type'];
 
-export const ElementsCtorMap = {
+export const ElementCtors = {
   debug: DebugElement,
   brush: BrushElement,
   shape: ShapeElement,

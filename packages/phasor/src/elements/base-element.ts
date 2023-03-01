@@ -40,6 +40,12 @@ export abstract class BaseElement implements SurfaceElement {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
+  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
+
+  abstract render(_: CanvasRenderingContext2D): void;
+
+  abstract serialize(): Record<string, unknown>;
+
   setBound(x: number, y: number, w: number, h: number) {
     this.x = x;
     this.y = y;
@@ -47,18 +53,9 @@ export abstract class BaseElement implements SurfaceElement {
     this.h = h;
   }
 
-  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
-
-  abstract render(_: CanvasRenderingContext2D): void;
-
-  abstract serialize(): Record<string, unknown>;
-
-  static transform<T extends BaseElement>(
-    element: T,
-    bound: IBound
-  ): Record<string, unknown> {
+  onUpdateBound(newBound: IBound): Record<string, unknown> {
     return {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+      xywh: serializeXYWH(newBound.x, newBound.y, newBound.w, newBound.h),
     };
   }
 }

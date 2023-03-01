@@ -41,7 +41,7 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = BrushElement.deserialize(data);
-    const changed = BrushElement.transform(element, {
+    const changed = element.onUpdateBound({
       x: 0,
       y: 0,
       w: 208,

@@ -9,7 +9,7 @@ import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
   DebugElement,
-  ElementsCtorMap,
+  ElementCtors,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
@@ -95,9 +95,9 @@ export class SurfaceManager {
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
-      const ElementCtor = ElementsCtorMap[element.type];
+      const ElementCtor = ElementCtors[element.type];
       assertExists(ElementCtor);
-      const delta = ElementCtor.transform(element, bound);
+      const delta = element.onUpdateBound(bound);
 
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
@@ -151,7 +151,7 @@ export class SurfaceManager {
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
-    const ElementCtor = ElementsCtorMap[type];
+    const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);

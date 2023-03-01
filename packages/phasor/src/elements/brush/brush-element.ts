@@ -87,24 +87,15 @@ export class BrushElement extends BaseElement {
     return element;
   }
 
-  // FIXME: The first parameter's type should be BrushElement.
-  static transform(
-    _element: BaseElement,
-    bound: IBound
-  ): Record<string, unknown> {
-    const element = _element as BrushElement;
+  onUpdateBound(bound: IBound): Record<string, unknown> {
+    const deltaX = bound.x - this.x;
+    const deltaY = bound.y - this.y;
 
-    const deltaX = bound.x - element.x;
-    const deltaY = bound.y - element.y;
+    const x = this.x + deltaX;
+    const y = this.y + deltaY;
 
-    const x = element.x + deltaX;
-    const y = element.y + deltaY;
-
-    const points = element.points.map(([x, y]) => {
-      return Vec.toFixed([
-        bound.w * (x / element.w),
-        bound.h * (y / element.h),
-      ]);
+    const points = this.points.map(([x, y]) => {
+      return Vec.toFixed([bound.w * (x / this.w), bound.h * (y / this.h)]);
     });
 
     return {

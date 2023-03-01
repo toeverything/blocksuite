@@ -20,7 +20,7 @@ import {
   initEmptyEdgelessState,
   pressEnter,
   redoByClick,
-  resizeElementByLeftTopHandler,
+  resizeElementByLeftTopHandle,
   type,
   undoByClick,
   waitNextFrame,
@@ -206,7 +206,7 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
-  await resizeElementByLeftTopHandler(page, delta, 10);
+  await resizeElementByLeftTopHandle(page, delta, 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [120, 140, 84, 64]);

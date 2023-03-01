@@ -88,7 +88,7 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = ShapeElement.deserialize(data);
-    const changed = ShapeElement.transform(element, {
+    const changed = element.onUpdateBound({
       x: 1,
       y: 1,
       w: 10,

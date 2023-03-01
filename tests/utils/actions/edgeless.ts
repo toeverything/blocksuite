@@ -90,7 +90,7 @@ export async function addBasicBrushElement(
   await setMouseMode(page, 'default');
 }
 
-export async function resizeElementByLeftTopHandler(
+export async function resizeElementByLeftTopHandle(
   page: Page,
   delta: { x: number; y: number },
   steps = 1
