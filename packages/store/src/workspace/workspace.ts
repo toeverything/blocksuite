@@ -176,7 +176,8 @@ class WorkspaceMeta<
       this.doc.getMap('space:' + pageMeta.id);
 
       if (!_prevPages.has(pageMeta.id)) {
-        this.pageAdded.emit(pageMeta.id);
+        // Ensure following YEvent handler could be triggered in correct order.
+        queueMicrotask(() => this.pageAdded.emit(pageMeta.id));
       }
     });
 
