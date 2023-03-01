@@ -1053,7 +1053,7 @@ test('should indent multi-selection block', async ({ page }) => {
 });
 
 // ↑
-test('should keep selection state when scrolling backward', async ({
+test('should keep block selection state when scrolling backward', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -1134,7 +1134,9 @@ test('should keep selection state when scrolling backward', async ({
 });
 
 // ↓
-test('should keep selection state when scrolling forward', async ({ page }) => {
+test('should keep block selection state when scrolling forward', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1161,6 +1163,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     if (!viewport) {
       throw new Error();
     }
+    viewport.scrollTo(0, 0);
     const distance = viewport.scrollHeight - viewport.clientHeight;
     const container = viewport.querySelector(
       '.affine-block-children-container'
@@ -2109,4 +2112,163 @@ test('should blur rich-text first when block selection', async ({ page }) => {
   );
 
   await expect(page.locator('*:focus')).toHaveCount(0);
+});
+
+// ↑
+test('should keep native selection state when scrolling backward', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const [viewport, container, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance);
+
+    const container = viewport.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+
+    return [
+      viewport.getBoundingClientRect(),
+      container.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [10, 3],
+    [10, 0],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await page.mouse.move(container.right - 1, viewport.top + 1);
+        const count = distance / (10 * 0.25);
+        await page.waitForTimeout((1000 / 60) * count);
+      },
+    }
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123456789987654321');
+
+  const scrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return viewport.scrollTop;
+  });
+
+  expect(scrollTop).toBe(0);
+});
+
+// ↓
+test('should keep native selection state when scrolling forward', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const [viewport, container, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    viewport.scrollTo(0, 0);
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    const container = viewport.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    return [
+      viewport.getBoundingClientRect(),
+      container.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [0, 3],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await page.mouse.move(container.right - 1, viewport.bottom - 1);
+        const count = distance / (10 * 0.25);
+        await page.waitForTimeout((1000 / 60) * count);
+      },
+    }
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123456789987654321');
+
+  const scrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return viewport.scrollTop;
+  });
+
+  // See https://jestjs.io/docs/expect#tobeclosetonumber-numdigits
+  // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2 = 0.511646496140377
+  expect(scrollTop).toBeCloseTo(distance, -0.01);
 });

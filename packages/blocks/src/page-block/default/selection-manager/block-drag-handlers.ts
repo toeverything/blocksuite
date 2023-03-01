@@ -24,10 +24,9 @@ export const BlockDragHandlers = {
   },
 
   onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
-    const { state } = selection;
+    const { state, viewportElement } = selection;
     const { x, y } = e;
 
-    const { viewportElement } = selection;
     const { viewport } = state;
     const { scrollHeight, clientHeight, scrollLeft } = viewport;
     let { scrollTop } = viewport;
