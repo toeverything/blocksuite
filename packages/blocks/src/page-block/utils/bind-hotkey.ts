@@ -281,8 +281,6 @@ export function bindHotkeys(
       return;
     }
     if (blockRange.type === 'Block') {
-      e.stopPropagation();
-      e.preventDefault();
       const endModel = blockRange.models[blockRange.models.length - 1];
       const parentModel = page.getParent(endModel);
       const index = parentModel?.children.indexOf(endModel);
@@ -298,33 +296,29 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
-    if (blockRange.type === 'Native' && blockRange.models.length > 1) {
-      blockRange.models.forEach((model, index) => {
-        // first
-        if (index === 0) {
-          model.text?.delete(
-            blockRange.startOffset,
-            model.text.length - blockRange.startOffset
-          );
-          page.updateBlock(model, {});
-          return;
-        }
+    // Avoid print extra enter
+    e.preventDefault();
 
-        // last
-        if (index === blockRange.models.length - 1) {
-          model.text?.delete(0, blockRange.endOffset);
-          page.updateBlock(model, {});
-          asyncFocusRichText(page, model.id);
-          return;
-        }
+    blockRange.models.forEach((model, index) => {
+      // first
+      if (index === 0) {
+        model.text?.delete(
+          blockRange.startOffset,
+          model.text.length - blockRange.startOffset
+        );
+        return;
+      }
 
-        // middle
-        page.deleteBlockById(model.id);
-      });
-      selection.clear();
-      return;
-    }
+      // last
+      if (index === blockRange.models.length - 1) {
+        model.text?.delete(0, blockRange.endOffset);
+        asyncFocusRichText(page, model.id);
+        return;
+      }
 
+      // middle
+      page.deleteBlockById(model.id);
+    });
     return;
   });
 

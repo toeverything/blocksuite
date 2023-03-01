@@ -6,7 +6,6 @@ import type { Quill, RangeStatic } from 'quill';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
   getCurrentNativeRange,
-  getNextBlock,
   isCollapsedAtBlockStart,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
