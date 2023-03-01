@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "test:unit": "vitest --run",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
   },
