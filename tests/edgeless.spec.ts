@@ -12,6 +12,7 @@ import {
   switchEditorMode,
 } from './utils/actions/edgeless.js';
 import {
+  addBasicBrushElement,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -19,6 +20,7 @@ import {
   initEmptyEdgelessState,
   pressEnter,
   redoByClick,
+  resizeElementByLeftTopHandle,
   type,
   undoByClick,
   waitNextFrame,
@@ -175,6 +177,39 @@ test('add shape element', async ({ page }) => {
 
   await page.mouse.move(start.x + 5, start.y + 5);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('add brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+});
+
+test('resize brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  const delta = { x: 20, y: 40 };
+  await resizeElementByLeftTopHandle(page, delta, 10);
+
+  await page.mouse.move(start.x + 25, start.y + 45);
+  await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {

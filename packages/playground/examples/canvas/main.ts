@@ -21,24 +21,38 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
 }
 
 function addBrushElements(surface: SurfaceManager) {
-  surface.addBrushElement(0, 120, 'green', [
-    [0, 14.35],
-    [0.23, 14.35],
-    [0.99, 14.35],
-    [3.03, 14.1],
-    [4.21, 13.7],
-    [5.42, 13.18],
-    [6.61, 12.58],
-    [10.91, 10.87],
-    [17.4, 8.78],
-    [21.25, 7.89],
-    [25.05, 7.01],
-    [28.9, 6.12],
-    [33.24, 0],
-  ]);
+  surface.addBrushElement(
+    { x: 0, y: 0, w: 37.24, h: 18.35 },
+    [
+      [0, 14.35],
+      [0.23, 14.35],
+      [0.99, 14.35],
+      [3.03, 14.1],
+      [4.21, 13.7],
+      [5.42, 13.18],
+      [6.61, 12.58],
+      [10.91, 10.87],
+      [17.4, 8.78],
+      [21.25, 7.89],
+      [25.05, 7.01],
+      [28.9, 6.12],
+      [33.24, 0],
+    ],
+    {
+      color: '#000000',
+      lineWidth: 4,
+    }
+  );
 
-  const brushId = surface.addBrushElement(0, 0, 'purple');
-  surface.updateBrushElementPoints(brushId, [
+  const brushId = surface.addBrushElement(
+    { x: 0, y: 100, w: 4, h: 4 },
+    [[0, 0]],
+    {
+      color: '#00ff00',
+      lineWidth: 4,
+    }
+  );
+  surface.updateBrushElement(brushId, { x: 0, y: 0, w: 104, h: 104 }, [
     [0, 0],
     [10, 10],
     [20, 20],
