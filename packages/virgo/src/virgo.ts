@@ -394,6 +394,7 @@ export class VEditor {
    */
   toVRange(selection: Selection): VRange | null {
     assertExists(this._rootElement);
+    const root = this._rootElement;
 
     const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
     if (!anchorNode || !focusNode) {
@@ -409,8 +410,12 @@ export class VEditor {
       focusOffset
     );
 
+    if (!anchorText || !focusText) {
+      return null;
+    }
+
     // case 1
-    if (anchorText && focusText) {
+    if (root.contains(anchorText) && root.contains(focusText)) {
       const anchorDomPoint = textPointToDomPoint(
         anchorText,
         anchorTextOffset,
@@ -432,49 +437,34 @@ export class VEditor {
       };
     }
 
-    // case 2
-    if (anchorText && !focusText) {
-      const anchorDomPoint = textPointToDomPoint(
-        anchorText,
-        anchorTextOffset,
-        this._rootElement
-      );
-
-      if (!anchorDomPoint) {
-        return null;
-      }
-
+    // case 2.1
+    if (!root.contains(anchorText) && root.contains(focusText)) {
       if (isSelectionBackwards(selection)) {
-        return {
-          index: 0,
-          length: anchorDomPoint.index,
-        };
-      } else {
+        const anchorDomPoint = textPointToDomPoint(
+          anchorText,
+          anchorTextOffset,
+          this._rootElement
+        );
+
+        if (!anchorDomPoint) {
+          return null;
+        }
+
         return {
           index: anchorDomPoint.index,
-          length: anchorDomPoint.text.wholeText.length - anchorDomPoint.index,
-        };
-      }
-    }
-
-    // case 2
-    if (!anchorText && focusText) {
-      const focusDomPoint = textPointToDomPoint(
-        focusText,
-        focusTextOffset,
-        this._rootElement
-      );
-
-      if (!focusDomPoint) {
-        return null;
-      }
-
-      if (isSelectionBackwards(selection)) {
-        return {
-          index: focusDomPoint.index,
-          length: focusDomPoint.text.wholeText.length - focusDomPoint.index,
+          length: this.yText.length - anchorDomPoint.index,
         };
       } else {
+        const focusDomPoint = textPointToDomPoint(
+          focusText,
+          focusTextOffset,
+          this._rootElement
+        );
+
+        if (!focusDomPoint) {
+          return null;
+        }
+
         return {
           index: 0,
           length: focusDomPoint.index,
@@ -482,12 +472,43 @@ export class VEditor {
       }
     }
 
+    // case 2.2
+    if (root.contains(anchorText) && !root.contains(focusText)) {
+      if (isSelectionBackwards(selection)) {
+        const focusDomPoint = textPointToDomPoint(
+          focusText,
+          focusTextOffset,
+          this._rootElement
+        );
+
+        if (!focusDomPoint) {
+          return null;
+        }
+
+        return {
+          index: 0,
+          length: focusDomPoint.index,
+        };
+      } else {
+        const anchorDomPoint = textPointToDomPoint(
+          anchorText,
+          anchorTextOffset,
+          this._rootElement
+        );
+
+        if (!anchorDomPoint) {
+          return null;
+        }
+
+        return {
+          index: anchorDomPoint.index,
+          length: this.yText.length - anchorDomPoint.index,
+        };
+      }
+    }
+
     // case 3
-    if (
-      !anchorText &&
-      !focusText &&
-      selection.containsNode(this._rootElement)
-    ) {
+    if (!root.contains(anchorText) && !root.contains(focusText)) {
       return {
         index: 0,
         length: this.yText.length,
@@ -611,13 +632,8 @@ export class VEditor {
     if (!selection) return;
     if (selection.rangeCount === 0) return;
 
-    const { anchorNode, focusNode } = selection;
-    if (
-      !this._rootElement.contains(anchorNode) ||
-      !this._rootElement.contains(focusNode)
-    ) {
-      return;
-    }
+    const range = selection.getRangeAt(0);
+    if (!range || !range.intersectsNode(this._rootElement)) return;
 
     const vRange = this.toVRange(selection);
     if (vRange) {
@@ -696,7 +712,7 @@ function textPointToDomPoint(
   }
 
   if (!rootElement.contains(text)) {
-    throw new Error('text is not in root element');
+    return null;
   }
 
   const textNodes = Array.from(
