@@ -41,6 +41,7 @@ export function handleBlockSelectionBatchDelete(
   const parentModel = page.getParent(models[0]);
   assertExists(parentModel);
   const index = parentModel.children.indexOf(models[0]);
+  page.captureSync();
   models.forEach(model => page.deleteBlock(model));
   const id = page.addBlockByFlavour(
     'affine:paragraph',
@@ -67,7 +68,6 @@ export function deleteModelsByRange(
   if (!blockRange) {
     return;
   }
-  page.captureSync();
   if (blockRange.type === 'Block') {
     handleBlockSelectionBatchDelete(page, blockRange.models);
     return;
@@ -79,12 +79,14 @@ export function deleteModelsByRange(
   }
   // Only select one block
   if (startModel === endModel) {
+    page.captureSync();
     startModel.text.delete(
       blockRange.startOffset,
       blockRange.endOffset - blockRange.startOffset
     );
     return;
   }
+  page.captureSync();
   startModel.text.delete(
     blockRange.startOffset,
     startModel.text.length - blockRange.startOffset

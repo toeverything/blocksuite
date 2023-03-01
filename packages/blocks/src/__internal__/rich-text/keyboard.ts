@@ -249,9 +249,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onBackspace(e: KeyboardEvent, quill: Quill) {
+    e.stopPropagation();
     if (isCollapsedAtBlockStart(quill)) {
       handleLineStartBackspace(page, model);
-      e.stopPropagation();
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
