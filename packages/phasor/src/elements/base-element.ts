@@ -1,3 +1,4 @@
+import type { IBound } from '../consts.js';
 import { serializeXYWH } from '../utils/xywh.js';
 
 export interface SurfaceElement {
@@ -44,4 +45,13 @@ export abstract class BaseElement implements SurfaceElement {
   abstract render(_: CanvasRenderingContext2D): void;
 
   abstract serialize(): Record<string, unknown>;
+
+  static transform<T extends BaseElement>(
+    element: T,
+    bound: IBound
+  ): Record<string, unknown> {
+    return {
+      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+    };
+  }
 }

@@ -89,7 +89,6 @@ export class BrushElement extends BaseElement {
       id: this.id,
       index: this.index,
       type: this.type,
-      xywh: serializeXYWH(this.x, this.y, this.w, this.h),
       color: this.color,
       anchor: this.anchor.join(','),
       points: JSON.stringify(this.points),
@@ -107,5 +106,29 @@ export class BrushElement extends BaseElement {
     ];
     element.points = JSON.parse(data.points as string);
     return element;
+  }
+
+  // FIXME: The first parameter's type should be BrushElement.
+  static transform(
+    _element: BaseElement,
+    bound: IBound
+  ): Record<string, unknown> {
+    const element = _element as BrushElement;
+
+    const deltaX = bound.x - element.x;
+    const deltaY = bound.y - element.y;
+
+    const anchor = [element.anchor[0] + deltaX, element.anchor[1] + deltaY];
+
+    // FIXME: Resize
+    // const points = element.points.map(([x, y]) => {
+    //   return [bound.w * (x / element.w), bound.h * (y / element.h)];
+    // });
+    const points = element.points;
+
+    return {
+      anchor: anchor.join(','),
+      points: JSON.stringify(points),
+    };
   }
 }

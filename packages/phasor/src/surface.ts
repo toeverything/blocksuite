@@ -9,6 +9,7 @@ import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
   DebugElement,
+  ElementsCtorMap,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
@@ -84,10 +85,23 @@ export class SurfaceManager {
 
   setElementBound(id: string, bound: IBound) {
     this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      console.log('----------start---------');
+      console.table(
+        [bound, { x: element.x, y: element.y, w: element.w, h: element.h }],
+        ['x', 'y', 'w', 'h']
+      );
+      console.log('----------end---------');
+      const ElementCtor = ElementsCtorMap[element.type];
+      assertExists(ElementCtor);
+      const delta = ElementCtor.transform(element, bound);
+
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      const xywh = serializeXYWH(bound.x, bound.y, bound.w, bound.h);
-      yElement.set('xywh', xywh);
+      for (const [key, value] of Object.entries(delta)) {
+        yElement.set(key, value);
+      }
     });
   }
 
@@ -135,23 +149,9 @@ export class SurfaceManager {
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
-    let element: PhasorElement | null = null;
-    switch (type) {
-      case 'debug': {
-        element = DebugElement.deserialize(yElement.toJSON());
-        break;
-      }
-      case 'shape': {
-        element = ShapeElement.deserialize(yElement.toJSON());
-        break;
-      }
-      case 'brush': {
-        element = BrushElement.deserialize(yElement.toJSON());
-        break;
-      }
-      default:
-        throw new Error('no element type matched.');
-    }
+    const ElementCtor = ElementsCtorMap[type];
+    assertExists(ElementCtor);
+    const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);
 
     this._renderer.addElement(element);
@@ -245,6 +245,15 @@ export class SurfaceManager {
           const points: number[][] = JSON.parse(yElement.get(key) as string);
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
+          this._renderer.addElement(element);
+        }
+
+        if (key === 'anchor') {
+          const anchor = (yElement.get(key) as string)
+            .split(',')
+            .map(v => Number(v)) as [number, number];
+          this._renderer.removeElement(element);
+          (element as BrushElement).anchor = anchor;
           this._renderer.addElement(element);
         }
       }
