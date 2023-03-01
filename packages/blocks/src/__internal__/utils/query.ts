@@ -1,7 +1,6 @@
 import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { LeafBlot } from 'parchment';
 
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
@@ -389,9 +388,10 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   if (!richText) {
     throw new Error('Failed to get rich text element');
   }
-  const quill = richText.quill;
-  const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
-  return [leaf.domNode, leafOffset] as const;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  const [leaf, leafOffset] = vEditor.getLeaf(offset);
+  return [leaf, leafOffset] as const;
 }
 
 export function getAllBlocks() {

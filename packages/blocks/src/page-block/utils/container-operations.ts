@@ -4,7 +4,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo';
+import type { TextAttributes, VEditor, VRange } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -36,6 +36,30 @@ import {
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
+
+export function getVEditorFormat(
+  vEditor: VEditor,
+  vRange: VRange
+): TextAttributes {
+  const deltas = vEditor.getDeltasByVRange(vRange);
+
+  const result: {
+    [key: string]: unknown;
+  } = {};
+  for (const [delta] of deltas) {
+    if (delta.attributes) {
+      for (const [key, value] of Object.entries(delta.attributes)) {
+        if (typeof result[key] === 'boolean') {
+          result[key] = result[key] && value;
+          continue;
+        }
+        result[key] = value;
+      }
+    }
+  }
+
+  return result as TextAttributes;
+}
 
 /**
  * TODO Use BlockRange
@@ -95,7 +119,11 @@ export function deleteModelsByRange(
     page.deleteBlock(models[i]);
   }
 
-  firstRichText.quill.setSelection(firstTextIndex, 0);
+  assertExists(firstRichText.vEditor);
+  firstRichText.vEditor.setVRange({
+    index: firstTextIndex,
+    length: 0,
+  });
 }
 
 function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
@@ -239,11 +267,12 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   if (blockRange.models.length === 1) {
     const richText = getRichTextByModel(blockRange.models[0]);
     assertExists(richText);
-    const { quill } = richText;
-    const format = quill.getFormat(
-      blockRange.startOffset,
-      blockRange.endOffset - blockRange.startOffset
-    );
+    const { vEditor } = richText;
+    assertExists(vEditor);
+    const format = getVEditorFormat(vEditor, {
+      index: blockRange.startOffset,
+      length: blockRange.endOffset - blockRange.startOffset,
+    });
     return format;
   }
   const formatArr = [];
@@ -257,10 +286,11 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   ) {
     const startRichText = getRichTextByModel(startModel);
     assertExists(startRichText);
-    const startFormat = startRichText.quill.getFormat(
-      blockRange.startOffset,
-      startRichText.quill.getLength() - blockRange.startOffset
-    );
+    assertExists(startRichText.vEditor);
+    const startFormat = getVEditorFormat(startRichText.vEditor, {
+      index: blockRange.startOffset,
+      length: startRichText.vEditor.yText.length - blockRange.startOffset,
+    });
     formatArr.push(startFormat);
   }
   // End block
@@ -272,7 +302,11 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   ) {
     const endRichText = getRichTextByModel(endModel);
     assertExists(endRichText);
-    const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
+    assertExists(endRichText.vEditor);
+    const endFormat = getVEditorFormat(endRichText.vEditor, {
+      index: 0,
+      length: blockRange.endOffset,
+    });
     formatArr.push(endFormat);
   }
   // Between blocks
@@ -283,10 +317,11 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     .forEach(model => {
       const richText = getRichTextByModel(model);
       assertExists(richText);
-      const format = richText.quill.getFormat(
-        0,
-        richText.quill.getLength() - 1
-      );
+      assertExists(richText.vEditor);
+      const format = getVEditorFormat(richText.vEditor, {
+        index: 0,
+        length: richText.vEditor.yText.length - 1,
+      });
       formatArr.push(format);
     });
 
