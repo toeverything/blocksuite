@@ -93,7 +93,7 @@ export class EdgelessViewControlBar extends LitElement {
 
     const bound = getCommonBound([
       new Bound(...frameXYWH),
-      ...this.edgeless.surface.elements.values(),
+      ...this.edgeless.surface.elements,
     ]);
     const zoom = Math.min(
       (width - FIT_TO_SCREEN_PADDING) / bound.w,

@@ -32,8 +32,9 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
+  /** @deprecated escape hatch for full traversal of elements */
   get elements() {
-    return this._elements;
+    return this._elements.values();
   }
 
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
