@@ -13,7 +13,6 @@ export const baseTextAttributes = z.object({
   underline: z.boolean().optional(),
   strike: z.boolean().optional(),
   code: z.boolean().optional(),
-  link: z.string().optional(),
 });
 
 export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;
