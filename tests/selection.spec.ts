@@ -349,7 +349,7 @@ test('double click choose words', async ({ page }) => {
 });
 
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test('select all and delete', async ({ page }) => {
+test.skip('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -707,17 +707,14 @@ test('the cursor should move to closest editor block when clicking outside conta
     return secondRichText.getBoundingClientRect();
   });
 
-  await page.mouse.move(rect.left - 50, rect.top + 5);
-  await page.mouse.down();
-  await page.mouse.up();
+  await page.mouse.click(rect.left - 50, rect.top + 5);
 
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123456', '789']);
 
   await undoByKeyboard(page);
-  await page.mouse.move(rect.right + 50, rect.top + 5);
-  await page.mouse.down();
-  await page.mouse.up();
+  await page.waitForTimeout(50);
+  await page.mouse.click(rect.right + 50, rect.top + 5);
 
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45', '789']);

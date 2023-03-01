@@ -2,7 +2,11 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { hasNativeSelection, hotkey } from '../../__internal__/index.js';
+import {
+  focusBlockByModel,
+  hasNativeSelection,
+  hotkey,
+} from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
@@ -21,13 +25,12 @@ import {
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
-import {
-  handleBlockSelectionBatchDelete,
-  handleMultiBlockBackspace,
-  handleSelectAll,
-} from '../utils/index.js';
+import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
-import { updateBlockType } from './container-operations.js';
+import {
+  deleteModelsByRange,
+  updateBlockType,
+} from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -281,8 +284,6 @@ export function bindHotkeys(
       return;
     }
     if (blockRange.type === 'Block') {
-      e.stopPropagation();
-      e.preventDefault();
       const endModel = blockRange.models[blockRange.models.length - 1];
       const parentModel = page.getParent(endModel);
       const index = parentModel?.children.indexOf(endModel);
@@ -298,24 +299,26 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
-    // TODO fix native selection enter
-
+    // Native selection
+    // Avoid print extra enter
+    e.preventDefault();
+    const startModel = blockRange.models[0];
+    startModel.text?.delete(
+      blockRange.startOffset,
+      startModel.text.length - blockRange.startOffset
+    );
+    const endModel = blockRange.models[blockRange.models.length - 1];
+    endModel.text?.delete(0, blockRange.endOffset);
+    blockRange.models.slice(1, -1).forEach(model => {
+      page.deleteBlock(model);
+    });
+    focusBlockByModel(endModel, 'start');
     return;
   });
 
   hotkey.addListener(BACKSPACE, e => {
-    const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
-    if (blockRange.type === 'Native') {
-      handleMultiBlockBackspace(page, e);
-      return;
-    }
-
     // delete blocks
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    selection.clear();
+    deleteModelsByRange(page);
     e.preventDefault();
     return;
   });

@@ -17,7 +17,10 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import {
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
@@ -178,7 +181,30 @@ export class FormatQuickBar extends LitElement {
       const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
       const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
       const targetType = alreadyTargetType ? defaultType : type;
-      this._models = updateBlockType(this._models, targetFlavour, targetType);
+      const newModels = updateBlockType(
+        this._models,
+        targetFlavour,
+        targetType
+      );
+
+      // Reset selection if the target is code block
+      if (targetFlavour === 'affine:code') {
+        if (newModels.length !== 1) {
+          throw new Error(
+            "Failed to reset selection! New model length isn't 1"
+          );
+        }
+        const codeModel = this._models[0];
+        requestAnimationFrame(() =>
+          restoreSelection({
+            type: 'Block',
+            startOffset: 0,
+            endOffset: codeModel.text?.length ?? 0,
+            models: [codeModel],
+          })
+        );
+      }
+      this._models = newModels;
       this._paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };

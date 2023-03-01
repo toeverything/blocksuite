@@ -177,7 +177,7 @@ class WorkspaceMeta<
 
       if (!_prevPages.has(pageMeta.id)) {
         // Ensure following YEvent handler could be triggered in correct order.
-        setTimeout(() => this.pageAdded.emit(pageMeta.id));
+        queueMicrotask(() => this.pageAdded.emit(pageMeta.id));
       }
     });
 
