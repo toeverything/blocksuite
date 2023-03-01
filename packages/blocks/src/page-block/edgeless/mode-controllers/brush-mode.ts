@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor/index.js';
+import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 
 import type {
   BrushMouseMode,
