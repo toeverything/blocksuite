@@ -9,6 +9,7 @@ import type { TextAttributes } from '@blocksuite/virgo';
 import {
   almostEqual,
   ExtendedModel,
+  getDefaultPageBlock,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
@@ -20,10 +21,6 @@ import {
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
   getBlockElementByModel,
-  getModelByElement,
-  getModelsByRange,
-  getParentBlockById,
-  getQuillIndexByNativeSelection,
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
@@ -37,65 +34,81 @@ import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
-/**
- * TODO Use BlockRange
- */
+export function handleBlockSelectionBatchDelete(
+  page: Page,
+  models: ExtendedModel[]
+) {
+  const parentModel = page.getParent(models[0]);
+  assertExists(parentModel);
+  const index = parentModel.children.indexOf(models[0]);
+  models.forEach(model => page.deleteBlock(model));
+  const id = page.addBlockByFlavour(
+    'affine:paragraph',
+    { type: 'text' },
+    parentModel,
+    index
+  );
+
+  // Try clean block selection
+  const defaultPageBlock = getDefaultPageBlock(models[0]);
+  if (!defaultPageBlock.selection) {
+    // In the edgeless mode
+    return;
+  }
+  defaultPageBlock.selection.clear();
+  id && asyncFocusRichText(page, id);
+  return;
+}
+
 export function deleteModelsByRange(
   page: Page,
-  range = getCurrentNativeRange()
+  blockRange = getCurrentBlockRange(page)
 ) {
-  const models = getModelsByRange(range);
-
-  const first = models[0];
-  const firstRichText = getRichTextByModel(first);
-  const last = models[models.length - 1];
-  const lastRichText = getRichTextByModel(last);
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-
-  const firstTextIndex = getQuillIndexByNativeSelection(
-    range.startContainer,
-    range.startOffset,
-    true
-  );
-  const endTextIndex = getQuillIndexByNativeSelection(
-    range.endContainer,
-    range.endOffset,
-    false
-  );
-
+  if (!blockRange) {
+    return;
+  }
+  page.captureSync();
+  if (blockRange.type === 'Block') {
+    handleBlockSelectionBatchDelete(page, blockRange.models);
+    return;
+  }
+  const startModel = blockRange.models[0];
+  const endModel = blockRange.models[blockRange.models.length - 1];
+  if (!startModel.text || !endModel.text) {
+    throw new Error('startModel or endModel does not have text');
+  }
   // Only select one block
-  if (models.length === 1) {
-    firstRichText.model.text?.delete(
-      firstTextIndex,
-      endTextIndex - firstTextIndex
+  if (startModel === endModel) {
+    startModel.text.delete(
+      blockRange.startOffset,
+      blockRange.endOffset - blockRange.startOffset
     );
     return;
   }
+  startModel.text.delete(
+    blockRange.startOffset,
+    startModel.text.length - blockRange.startOffset
+  );
+  endModel.text.delete(0, blockRange.endOffset);
+  startModel.text.join(endModel.text);
+  blockRange.models.slice(1).forEach(model => {
+    page.deleteBlock(model);
+  });
 
-  const isFirstRichTextNotEmpty =
-    firstRichText.model.text &&
-    firstRichText.model.text.length !== firstTextIndex;
-  // See https://github.com/toeverything/blocksuite/issues/283
-  if (isFirstRichTextNotEmpty) {
-    firstRichText.model.text?.delete(
-      firstTextIndex,
-      firstRichText.model.text.length - firstTextIndex
-    );
-  }
-  const isLastRichTextFullSelected: boolean =
-    lastRichText.model.text?.length === endTextIndex;
-  if (!isLastRichTextFullSelected) {
-    lastRichText.model.text?.delete(0, endTextIndex);
-    firstRichText.model.text?.join(lastRichText.model.text as Text);
-  }
+  const firstRichText = getRichTextByModel(startModel);
+  // TODO update focus API
+  firstRichText && firstRichText.quill.setSelection(blockRange.startOffset, 0);
+}
 
-  // delete models in between
-  for (let i = 1; i <= models.length - 1; i++) {
-    page.deleteBlock(models[i]);
-  }
-
-  firstRichText.quill.setSelection(firstTextIndex, 0);
+/**
+ * Do nothing when selection is collapsed or not multi block selected
+ */
+export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
+  if (!hasNativeSelection()) return;
+  if (isCollapsedNativeSelection()) return;
+  if (!isMultiBlockRange()) return;
+  e.preventDefault();
+  deleteModelsByRange(page);
 }
 
 function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
@@ -198,18 +211,6 @@ function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
   return id;
-}
-
-/**
- * Do nothing when selection is collapsed or not multi block selected
- */
-export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
-  if (!hasNativeSelection()) return;
-  if (isCollapsedNativeSelection()) return;
-  if (!isMultiBlockRange()) return;
-
-  e.preventDefault();
-  deleteModelsByRange(page);
 }
 
 /**
@@ -370,27 +371,6 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   }
 
   resetNativeSelection(null);
-}
-
-export function handleBlockSelectionBatchDelete(
-  page: Page,
-  models: ExtendedModel[]
-) {
-  page.captureSync();
-  const parent = getParentBlockById(models[0].id);
-
-  assertExists(parent);
-  const parentModel = getModelByElement(parent);
-  const index = parentModel?.children.indexOf(models[0]);
-  for (let i = 0; i < models.length; i++) {
-    page.deleteBlock(models[i]);
-  }
-  const id = page.addBlock(
-    { flavour: 'affine:paragraph', page, type: 'text' },
-    parentModel,
-    index
-  );
-  id && asyncFocusRichText(page, id);
 }
 
 export function tryUpdateFrameSize(page: Page, zoom: number) {

@@ -25,13 +25,12 @@ import {
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
-import {
-  handleBlockSelectionBatchDelete,
-  handleMultiBlockBackspace,
-  handleSelectAll,
-} from '../utils/index.js';
+import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
-import { updateBlockType } from './container-operations.js';
+import {
+  deleteModelsByRange,
+  updateBlockType,
+} from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -318,18 +317,8 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(BACKSPACE, e => {
-    const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
-    if (blockRange.type === 'Native') {
-      handleMultiBlockBackspace(page, e);
-      return;
-    }
-
     // delete blocks
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    selection.clear();
+    deleteModelsByRange(page);
     e.preventDefault();
     return;
   });
