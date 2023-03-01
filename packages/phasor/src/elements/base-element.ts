@@ -19,10 +19,10 @@ export abstract class BaseElement implements SurfaceElement {
   id: string;
   index!: string;
 
-  abstract get x(): number;
-  abstract get y(): number;
-  abstract get w(): number;
-  abstract get h(): number;
+  x = 0;
+  y = 0;
+  w = 0;
+  h = 0;
 
   constructor(id: string) {
     this.id = id;
@@ -38,6 +38,13 @@ export abstract class BaseElement implements SurfaceElement {
 
   protected get _xywh() {
     return serializeXYWH(this.x, this.y, this.w, this.h);
+  }
+
+  setBound(x: number, y: number, w: number, h: number) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
   }
 
   abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;

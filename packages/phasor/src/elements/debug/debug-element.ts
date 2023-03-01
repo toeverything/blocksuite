@@ -3,20 +3,8 @@ import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
 export class DebugElement extends BaseElement {
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
-
   type = 'debug' as const;
   color = '#000000';
-
-  setBound(x: number, y: number, w: number, h: number) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);

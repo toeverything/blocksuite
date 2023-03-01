@@ -3,7 +3,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
-import type { IBound } from './consts.js';
+import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { ShapeProps } from './elements/index.js';
 import {
@@ -16,7 +16,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { deserializeXYWH } from './utils/xywh.js';
+import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -62,25 +62,33 @@ export class SurfaceManager {
   }
 
   addBrushElement(
-    x: number,
-    y: number,
-    color: string,
-    points: number[][] = []
+    bound: IBound,
+    points: number[][] = [],
+    props: {
+      color?: Color;
+      lineWidth?: number;
+    } = {}
   ): string {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
-    element.color = color;
-    element.anchor = [x, y];
+    const { x, y, w, h } = bound;
+    element.setBound(x, y, w, h);
+
     element.points = points;
+    element.color = props.color ?? '#000000';
+    element.lineWidth = props.lineWidth ?? 4;
 
     return this._addElement(element);
   }
 
-  updateBrushElementPoints(id: string, points: number[][]) {
-    const yElement = this._yElements.get(id) as Y.Map<unknown>;
-    assertExists(yElement);
-    yElement.set('points', JSON.stringify(points));
+  updateBrushElement(id: string, bound: IBound, points: number[][]) {
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      yElement.set('points', JSON.stringify(points));
+      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+    });
   }
 
   setElementBound(id: string, bound: IBound) {
@@ -223,9 +231,6 @@ export class SurfaceManager {
         assertExists(element);
 
         if (key === 'xywh') {
-          if (element.type === 'brush') {
-            return;
-          }
           const xywh = yElement.get(key) as string;
           const [x, y, w, h] = deserializeXYWH(xywh);
 
@@ -239,15 +244,6 @@ export class SurfaceManager {
           const points: number[][] = JSON.parse(yElement.get(key) as string);
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
-          this._renderer.addElement(element);
-        }
-
-        if (key === 'anchor') {
-          const anchor = (yElement.get(key) as string)
-            .split(',')
-            .map(v => Number(v)) as [number, number];
-          this._renderer.removeElement(element);
-          (element as BrushElement).anchor = anchor;
           this._renderer.addElement(element);
         }
       }

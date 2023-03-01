@@ -63,6 +63,7 @@ export type ShapeMouseMode = {
 export type BrushMouseMode = {
   type: 'brush';
   color: `#${string}`;
+  lineWidth: number;
 };
 
 export type MouseMode = DefaultMouseMode | ShapeMouseMode | BrushMouseMode;

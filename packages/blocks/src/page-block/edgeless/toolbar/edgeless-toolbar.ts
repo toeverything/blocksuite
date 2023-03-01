@@ -103,7 +103,11 @@ export class EdgelessToolbar extends LitElement {
           .tooltip=${'Pen'}
           .active=${type === 'brush'}
           @tool.click=${() =>
-            this._setMouseMode({ type: 'brush', color: '#000000' })}
+            this._setMouseMode({
+              type: 'brush',
+              color: '#000000',
+              lineWidth: 4,
+            })}
         >
           ${PenIcon}
         </edgeless-tool-icon-button>
