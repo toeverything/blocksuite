@@ -2,7 +2,7 @@ import { forceGC, previewURL, startBrowser } from './common';
 import { computeResultsCPU } from './timeline';
 
 export async function runCPUBenchmark() {
-  const browser = await startBrowser({ headless: false });
+  const browser = await startBrowser({ headless: true });
   const page = await browser.newPage();
   const client = await page.context().newCDPSession(page);
 
