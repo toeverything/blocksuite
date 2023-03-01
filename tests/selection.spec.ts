@@ -27,6 +27,7 @@ import {
   pressTab,
   redoByKeyboard,
   resetHistory,
+  shamefullyBlurActiveElement,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -356,7 +357,7 @@ test('select all and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
   await page.keyboard.press(`${SHORT_KEY}+a`);
   await page.keyboard.press(`${SHORT_KEY}+a`);
-
+  await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
   await type(page, 'abc');
@@ -537,9 +538,11 @@ test('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['\n', '456', '789']);
   await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['\n', '\n']);
 });
