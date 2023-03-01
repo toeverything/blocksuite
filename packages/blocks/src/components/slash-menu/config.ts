@@ -38,14 +38,18 @@ function insertContent(model: BaseBlockModel, text: string) {
     throw new Error("Can't insert text! Text not found");
   }
   const richText = getRichTextByModel(model);
-  const quill = richText?.quill;
-  if (!quill) {
-    throw new Error("Can't insert text! Quill not found");
+  const vEditor = richText?.vEditor;
+  if (!vEditor) {
+    throw new Error("Can't insert text! vEditor not found");
   }
-  const index = quill.getSelection()?.index || model.text.length;
+  const vRange = vEditor.getVRange();
+  const index = vRange ? vRange.index : model.text.length;
   model.text.insert(text, index);
   // Update the caret to the end of the inserted text
-  quill.setSelection(index + text.length, 0);
+  vEditor.setVRange({
+    index: index + text.length,
+    length: 0,
+  });
 }
 
 const dividerItem: SlashItem = {

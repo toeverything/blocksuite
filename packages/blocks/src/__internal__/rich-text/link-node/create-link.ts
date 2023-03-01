@@ -1,6 +1,6 @@
 import './affine-link.js';
 
-import { getVEditorFormat } from '@blocksuite/blocks/index.js';
+import { getVEditorFormat } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 

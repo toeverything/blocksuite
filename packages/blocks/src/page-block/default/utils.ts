@@ -424,8 +424,12 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function copyCode(codeBlockOption: CodeBlockOption) {
   const richText = getRichTextByModel(codeBlockOption.model);
   assertExists(richText);
-  const quill = richText.quill;
-  quill.setSelection(0, quill.getLength());
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange({
+    index: 0,
+    length: vEditor.yText.length,
+  });
   document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
 
   const range = getCurrentNativeRange();
