@@ -2,7 +2,11 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { hasNativeSelection, hotkey } from '../../__internal__/index.js';
+import {
+  focusBlockByModel,
+  hasNativeSelection,
+  hotkey,
+} from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
@@ -296,29 +300,20 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
+    // Native selection
     // Avoid print extra enter
     e.preventDefault();
-
-    blockRange.models.forEach((model, index) => {
-      // first
-      if (index === 0) {
-        model.text?.delete(
-          blockRange.startOffset,
-          model.text.length - blockRange.startOffset
-        );
-        return;
-      }
-
-      // last
-      if (index === blockRange.models.length - 1) {
-        model.text?.delete(0, blockRange.endOffset);
-        asyncFocusRichText(page, model.id);
-        return;
-      }
-
-      // middle
-      page.deleteBlockById(model.id);
+    const startModel = blockRange.models[0];
+    startModel.text?.delete(
+      blockRange.startOffset,
+      startModel.text.length - blockRange.startOffset
+    );
+    const endModel = blockRange.models[blockRange.models.length - 1];
+    endModel.text?.delete(0, blockRange.endOffset);
+    blockRange.models.slice(1, -1).forEach(model => {
+      page.deleteBlock(model);
     });
+    focusBlockByModel(endModel, 'start');
     return;
   });
 
