@@ -547,5 +547,5 @@ export async function focusTitle(page: Page) {
 
     defaultPageComponent.titleVEditor.focusEnd();
   });
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 }

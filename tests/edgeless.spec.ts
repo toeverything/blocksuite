@@ -174,7 +174,7 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
     };
   });
   await page.mouse.click(startPoint.x + 2, startPoint.y + 2);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.keyboard.press('Backspace');
   const exist = await page.evaluate(() => {
     return document.querySelector('[data-block-id="3"]') != null;
