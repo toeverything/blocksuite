@@ -233,15 +233,6 @@ export function focusNextBlock(
 }
 
 export function resetNativeSelection(range: Range | null) {
-  if (!range) {
-    if (
-      document.activeElement &&
-      document.activeElement instanceof HTMLElement
-    ) {
-      document.activeElement.blur();
-    }
-    return;
-  }
   const selection = window.getSelection();
   assertExists(selection);
   selection.removeAllRanges();
