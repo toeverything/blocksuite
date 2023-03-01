@@ -1,8 +1,9 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
+import './view-control-bar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import type { XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -45,6 +46,7 @@ export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
+  readonly surface: SurfaceManager;
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
@@ -170,7 +172,7 @@ export class EdgelessPageBlockComponent
     this.viewport.setSize(bound.width, bound.height);
 
     const frame = this.pageModel.children[0] as FrameBlockModel;
-    const [modelX, modelY, modelW, modelH] = JSON.parse(frame.xywh) as XYWH;
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
@@ -363,6 +365,10 @@ export class EdgelessPageBlockComponent
             ></edgeless-toolbar>
           `
         : nothing}
+      <edgeless-view-control-bar
+        .edgeless=${this}
+        .zoom=${this.viewport.zoom}
+      ></edgeless-view-control-bar>
     `;
   }
 }

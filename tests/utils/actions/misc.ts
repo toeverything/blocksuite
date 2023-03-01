@@ -517,23 +517,6 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export async function assertEdgelessHoverRect(
-  page: Page,
-  x: number,
-  y: number,
-  w: number,
-  h: number
-) {
-  const hoverRect = page.locator('.affine-edgeless-hover-rect');
-  const box = await hoverRect.boundingBox();
-  if (!box) throw new Error('Missing edgeless hover rect');
-
-  expect(box.x).toBeCloseTo(x, 0);
-  expect(box.y).toBeCloseTo(y, 0);
-  expect(box.width).toBeCloseTo(w, 0);
-  expect(box.height).toBeCloseTo(h, 0);
-}
-
 export function virgoEditorInnerTextToString(innerText: string): string {
   return innerText.replace('\u200B', '');
 }
