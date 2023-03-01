@@ -87,12 +87,6 @@ export class SurfaceManager {
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
-      console.log('----------start---------');
-      console.table(
-        [bound, { x: element.x, y: element.y, w: element.w, h: element.h }],
-        ['x', 'y', 'w', 'h']
-      );
-      console.log('----------end---------');
       const ElementCtor = ElementsCtorMap[element.type];
       assertExists(ElementCtor);
       const delta = ElementCtor.transform(element, bound);
