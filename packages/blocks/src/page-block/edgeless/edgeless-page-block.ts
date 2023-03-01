@@ -138,8 +138,8 @@ export class EdgelessPageBlockComponent
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e));
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
     bindCommonHotkey(this.page);
   }
 

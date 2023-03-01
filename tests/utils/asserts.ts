@@ -150,7 +150,7 @@ export async function assertSelection(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
-  rangeLength: number
+  rangeLength = 0
 ) {
   const actual = await page.evaluate(
     ({ richTextIndex }) => {
