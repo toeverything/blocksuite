@@ -284,21 +284,6 @@ export function getDOMRectByLine(
   }
 }
 
-function textWithoutNode(parentNode: Node, currentNode: Node) {
-  let text = '';
-  for (let i = 0; i < parentNode.childNodes.length; i++) {
-    const node = parentNode.childNodes[i];
-
-    if (node !== currentNode || !currentNode.contains(node)) {
-      // @ts-ignore
-      text += node.textContent || node.innerText || '';
-    } else {
-      return text;
-    }
-  }
-  return text;
-}
-
 export function getVRangeByNode(node: Node): VRange | null {
   if (!node.parentElement) return null;
 

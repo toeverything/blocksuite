@@ -1,25 +1,14 @@
+import {
+  DeltaInsert,
+  TextAttributes,
+  VirgoUnitText,
+  ZERO_WIDTH_SPACE,
+} from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
-import type { DeltaInsert } from '../types.js';
-import { VirgoUnitText } from './virgo-unit-text.js';
-
-export const baseTextAttributes = z.object({
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  strike: z.boolean().optional(),
-  code: z.boolean().optional(),
-});
-
-export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;
-
-function virgoTextStyles(
-  props: BaseTextAttributes
-): ReturnType<typeof styleMap> {
+function affineTextStyles(props: TextAttributes): ReturnType<typeof styleMap> {
   let textDecorations = '';
   if (props.underline) {
     textDecorations += 'underline';
@@ -51,10 +40,10 @@ function virgoTextStyles(
   });
 }
 
-@customElement('v-text')
-export class BaseText extends LitElement {
+@customElement('affine-text')
+export class AffineText extends LitElement {
   @property({ type: Object })
-  delta: DeltaInsert<BaseTextAttributes> = {
+  delta: DeltaInsert<TextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
   };
 
@@ -62,7 +51,7 @@ export class BaseText extends LitElement {
     const unitText = new VirgoUnitText();
     unitText.str = this.delta.insert;
     const style = this.delta.attributes
-      ? virgoTextStyles(this.delta.attributes)
+      ? affineTextStyles(this.delta.attributes)
       : styleMap({});
 
     // we need to avoid \n appearing before and after the span element, which will
@@ -79,6 +68,6 @@ export class BaseText extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'v-text': BaseText;
+    'affine-text': AffineText;
   }
 }

@@ -2,33 +2,10 @@ import { assertExists, BaseBlockModel } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import Quill from 'quill';
 
-import Syntax from '../../code-block/components/syntax-code-block.js';
 import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { KeyboardWithEvent } from './quill-keyboard.js';
-
-Quill.register('modules/keyboard', KeyboardWithEvent, true);
-const Clipboard = Quill.import('modules/clipboard');
-
-class EmptyClipboard extends Clipboard {
-  onPaste() {
-    // No need to execute
-  }
-}
-
-Quill.register('modules/clipboard', EmptyClipboard, true);
-
-const Strike = Quill.import('formats/strike');
-// Quill uses <s> by default，but <s> is not supported by HTML5
-Strike.tagName = 'del';
-Quill.register(Strike, true);
-
-const CodeToken = Quill.import('modules/syntax');
-CodeToken.register();
-Syntax.register();
-Quill.register('modules/syntax', Syntax, true);
+import { renderElement } from './virgo/render-element.js';
 
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
@@ -54,6 +31,9 @@ export class RichText extends NonShadowLitElement {
 
   @query('.affine-rich-text')
   private _virgoContainer!: HTMLDivElement;
+  get virgoContainer() {
+    return this._virgoContainer;
+  }
 
   @property({ hasChanged: () => true })
   host!: BlockHost;
@@ -74,7 +54,9 @@ export class RichText extends NonShadowLitElement {
 
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
-    this._vEditor = new VEditor(this.model.text.yText);
+    this._vEditor = new VEditor(this.model.text.yText, {
+      renderElement,
+    });
     this._vEditor.mount(this._virgoContainer);
   }
 

@@ -352,6 +352,9 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
     startModel.text?.format(startOffset, endOffset - startOffset, {
       [key]: !format[key],
     });
+    requestAnimationFrame(() => {
+      restoreSelection(blockRange);
+    });
     return;
   }
   // common case
