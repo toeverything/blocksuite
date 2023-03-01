@@ -77,11 +77,13 @@ test('basic init with external text', async ({ page }) => {
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
+  await waitNextFrame(pageA);
   await waitDefaultPageLoaded(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
@@ -92,11 +94,13 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
 test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
+  await waitNextFrame(pageA);
   await focusRichText(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -112,10 +116,12 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
+  await waitNextFrame(pageA);
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
   await focusRichText(pageB);
   const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
