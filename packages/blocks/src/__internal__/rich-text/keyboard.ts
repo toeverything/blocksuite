@@ -218,24 +218,34 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onKeyLeft(e: KeyboardEvent, range: QuillRange) {
-    // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
-    const lineStart = range.index === 0 && range.length === 0;
-    if (lineStart) {
-      return PREVENT_DEFAULT;
+    // range.length === 0 means collapsed selection
+    if (range.length !== 0) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
     }
-    e.stopPropagation();
-    return ALLOW_DEFAULT;
+    const lineStart = range.index === 0;
+    if (!lineStart) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
+    }
+    // Need jump to previous block
+    return PREVENT_DEFAULT;
   }
 
   function onKeyRight(e: KeyboardEvent, range: QuillRange) {
+    if (range.length !== 0) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
+    }
     assertExists(model.text, 'Failed to onKeyRight! model.text not exists!');
     const textLength = model.text.length;
     const lineEnd = textLength === range.index;
-    if (lineEnd) {
-      return PREVENT_DEFAULT;
+    if (!lineEnd) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
     }
-    e.stopPropagation();
-    return ALLOW_DEFAULT;
+    // Need jump to next block
+    return PREVENT_DEFAULT;
   }
 
   function onSpace(
