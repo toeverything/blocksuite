@@ -713,6 +713,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await assertRichTexts(page, ['123456', '789']);
 
   await undoByKeyboard(page);
+  await page.waitForTimeout(50);
   await page.mouse.click(rect.right + 50, rect.top + 5);
 
   await page.keyboard.press('Backspace');
