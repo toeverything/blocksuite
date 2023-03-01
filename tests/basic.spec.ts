@@ -148,13 +148,19 @@ test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   // click together, both init with default id should lead to conflicts
   await initEmptyParagraphState(pageA);
   await initEmptyParagraphState(pageB);
+  await waitNextFrame(pageA);
   await focusRichText(pageA);
+  await waitNextFrame(pageB);
   await focusRichText(pageB);
-  await pageA.keyboard.type('');
-  await pageB.keyboard.type('');
+  await waitNextFrame(pageA);
+  await type(pageA, '');
+  await waitNextFrame(pageB);
+  await type(pageB, '');
 
-  await pageA.keyboard.type('hello');
+  await waitNextFrame(pageA);
+  await type(pageA, 'hello');
 
+  await waitNextFrame(pageB);
   await assertText(pageB, 'hello');
   await assertText(pageA, 'hello'); // actually '\n'
 });
