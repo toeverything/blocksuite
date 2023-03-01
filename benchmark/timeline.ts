@@ -81,11 +81,11 @@ async function fetchEventsFromPerformanceLog(
   fileName: string
 ): Promise<Timingresult[]> {
   let timingResults: Timingresult[] = [];
-  const entries = [];
+  let entries = [];
   do {
     const contents = await readFile(fileName, { encoding: 'utf8' });
     const json = JSON.parse(contents);
-    const entries = json['traceEvents'];
+    entries = json['traceEvents'];
     const filteredEvents = extractRelevantEvents(entries);
     timingResults = timingResults.concat(filteredEvents);
   } while (entries.length > 0);
