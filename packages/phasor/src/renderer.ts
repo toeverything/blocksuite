@@ -1,4 +1,4 @@
-import { IBound, MIN_ZOOM } from './consts.js';
+import { MIN_ZOOM } from './consts.js';
 import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
@@ -115,19 +115,6 @@ export class Renderer {
 
   removeElement(element: PhasorElement) {
     this.gridManager.remove(element);
-    this._shouldUpdate = true;
-  }
-
-  invalidateElement(element: PhasorElement, newBound: IBound) {
-    const { gridManager } = this;
-    if (gridManager.boundHasChanged(element, newBound)) {
-      gridManager.remove(element);
-      gridManager.add(element);
-    }
-    element.x = newBound.x;
-    element.y = newBound.y;
-    element.w = newBound.w;
-    element.h = newBound.h;
     this._shouldUpdate = true;
   }
 

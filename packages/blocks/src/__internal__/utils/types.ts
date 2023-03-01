@@ -56,11 +56,17 @@ export type DefaultMouseMode = {
 
 export type ShapeMouseMode = {
   type: 'shape';
-  shape: ShapeType;
+  shape: ShapeType | 'roundedRect';
   color: `#${string}`;
 };
 
-export type MouseMode = DefaultMouseMode | ShapeMouseMode;
+export type BrushMouseMode = {
+  type: 'brush';
+  color: `#${string}`;
+  lineWidth: number;
+};
+
+export type MouseMode = DefaultMouseMode | ShapeMouseMode | BrushMouseMode;
 
 export type OpenBlockInfo = {
   flavour: string;

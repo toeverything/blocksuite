@@ -29,6 +29,7 @@ import {
   pressTab,
   redoByKeyboard,
   resetHistory,
+  shamefullyBlurActiveElement,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -310,7 +311,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through frame', async ({ page }) => {
+test('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await addFrameByClick(page);
@@ -349,20 +350,14 @@ test('double click choose words', async ({ page }) => {
 });
 
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test.skip('select all and delete', async ({ page }) => {
+test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-
-  await page.evaluate(() => {
-    const defaultPage = document.querySelector('affine-default-page')!;
-    const rect = defaultPage.getBoundingClientRect();
-    // dont focus any block
-    defaultPage.selection.state.focusedBlockIndex = -1;
-    defaultPage.selection.selectBlocksByRect(rect);
-  });
-
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
   await type(page, 'abc');
@@ -536,8 +531,7 @@ test('click the list icon can select and copy', async ({ page }) => {
   await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
 });
 
-// FIXME: In playwright, the backspace key works on paragraph block, but not on list block.
-test.skip('click the list icon can select and delete', async ({ page }) => {
+test('click the list icon can select and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -545,7 +539,13 @@ test.skip('click the list icon can select and delete', async ({ page }) => {
 
   await clickListIcon(page, 0);
   await pressBackspace(page);
+  await shamefullyBlurActiveElement(page);
+  await pressBackspace(page);
   await assertRichTexts(page, ['\n', '456', '789']);
+  await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['\n', '\n']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {

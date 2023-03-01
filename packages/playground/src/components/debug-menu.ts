@@ -16,7 +16,6 @@ import {
   createEvent,
   type FrameBlockModel,
   getCurrentBlockRange,
-  MouseMode,
   NonShadowLitElement,
   updateBlockType,
 } from '@blocksuite/blocks';
@@ -72,9 +71,6 @@ export class DebugMenu extends NonShadowLitElement {
   mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _mouseModeType: MouseMode['type'] = 'default';
-
-  @state()
   private _showGrid = false;
 
   @property()
@@ -88,20 +84,6 @@ export class DebugMenu extends NonShadowLitElement {
 
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
-
-  get mouseMode(): MouseMode {
-    if (this._mouseModeType === 'default') {
-      return {
-        type: this._mouseModeType,
-      };
-    } else {
-      return {
-        type: this._mouseModeType,
-        color: '#000000',
-        shape: 'rect',
-      };
-    }
-  }
 
   get page() {
     return this.editor.page;
@@ -273,19 +255,11 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (
-      changedProperties.has('mouseModeType') ||
-      changedProperties.has('shapeModeColor') ||
-      changedProperties.has('shapeModeShape')
-    ) {
-      const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
-      window.dispatchEvent(event);
-    }
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
     }
-    if (changedProperties.has('showGrid')) {
+    if (changedProperties.has('_showGrid')) {
       window.dispatchEvent(
         createEvent('affine:switch-edgeless-display-mode', this._showGrid)
       );
