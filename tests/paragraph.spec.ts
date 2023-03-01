@@ -575,13 +575,13 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'bulleted');
 
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 
   await waitNextFrame(page);
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
@@ -591,11 +591,11 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
 
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockType(page, '6', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '6']);
 
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
@@ -605,11 +605,11 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');
 
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockType(page, '7', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '7']);
 
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace', { delay: 50 });
   await assertBlockChildrenIds(page, '1', ['2']);
 });
 
