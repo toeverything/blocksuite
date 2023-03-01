@@ -234,3 +234,21 @@ test('should clean slash string after soft enter', async ({ page }) => {
     paragraphId
   );
 });
+
+test('should focus on code blocks created by the slash menu', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '/');
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
+
+  const codeBlock = page.getByTestId('Code Block');
+  await codeBlock.click();
+  await codeBlock.waitFor({ state: 'hidden' });
+
+  await type(page, 'const a = 10;');
+  await assertRichTexts(page, ['const a = 10;\n']);
+});
