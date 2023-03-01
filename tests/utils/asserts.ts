@@ -558,3 +558,15 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await page.keyboard.press(`${SHORT_KEY}+x`);
   await expect(locator).toHaveValue('');
 }
+
+export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless hover rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
