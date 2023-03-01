@@ -203,10 +203,13 @@ export class Text {
   }
 
   join(other: Text) {
+    if (!other.toDelta().length) {
+      return;
+    }
     this._transact(() => {
       const yOther = other._yText;
       const delta: DeltaOperation[] = yOther.toDelta();
-      delta.splice(0, 0, { retain: this._yText.length });
+      delta.unshift({ retain: this._yText.length });
       this._yText.applyDelta(delta);
       this._yText.meta = { join: true };
     });
@@ -277,6 +280,9 @@ export class Text {
   }
 
   clear() {
+    if (!this._yText.length) {
+      return;
+    }
     this._transact(() => {
       this._yText.delete(0, this._yText.length);
       this._yText.meta = { clear: true };
