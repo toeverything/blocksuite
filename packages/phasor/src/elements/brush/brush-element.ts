@@ -33,12 +33,14 @@ function getBrushBoundFromPoints(
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
   color = '#000000';
-  point: [number, number] = [0, 0];
+  /* Absolute-positioned offset of the brush starting point */
+  anchor: [number, number] = [0, 0];
+  /* Brush mouse coords relative to anchor */
   points: number[][] = [];
   lineWidth = 4;
 
   private get _xywhArray(): XYWH {
-    const [x, y] = this.point;
+    const [x, y] = this.anchor;
     const bound = getBrushBoundFromPoints(this.points, this.lineWidth);
     return [x + bound.x, y + bound.y, bound.w, bound.h];
   }
@@ -68,7 +70,7 @@ export class BrushElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.point[0] - this.x, this.point[1] - this.y);
+    ctx.translate(this.anchor[0] - this.x, this.anchor[1] - this.y);
 
     // render stroke points
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
@@ -89,7 +91,7 @@ export class BrushElement extends BaseElement {
       type: this.type,
       xywh: serializeXYWH(this.x, this.y, this.w, this.h),
       color: this.color,
-      point: this.point.join(','),
+      anchor: this.anchor.join(','),
       points: JSON.stringify(this.points),
     };
   }
@@ -99,7 +101,7 @@ export class BrushElement extends BaseElement {
     element.index = data.index as string;
 
     element.color = data.color as string;
-    element.point = (data.point as string).split(',').map(s => Number(s)) as [
+    element.anchor = (data.anchor as string).split(',').map(s => Number(s)) as [
       number,
       number
     ];

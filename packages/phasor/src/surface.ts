@@ -70,7 +70,7 @@ export class SurfaceManager {
     const element = new BrushElement(id);
 
     element.color = color;
-    element.point = [x, y];
+    element.anchor = [x, y];
     element.points = points;
 
     return this._addElement(element);
