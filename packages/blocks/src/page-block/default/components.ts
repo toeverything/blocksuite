@@ -153,7 +153,9 @@ export function EmbedEditingContainer(
           }}
         >
           ${CaptionIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
+          <tool-tip inert tip-position="right-start" role="tooltip"
+            >Caption</tool-tip
+          >
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
@@ -163,7 +165,7 @@ export function EmbedEditingContainer(
           }}
         >
           ${DownloadIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
+          <tool-tip inert tip-position="right-start" role="tooltip"
             >Download
           </tool-tip>
         </format-bar-button>
@@ -175,7 +177,7 @@ export function EmbedEditingContainer(
           }}
         >
           ${CopyIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
+          <tool-tip inert tip-position="right-start" role="tooltip"
             >Copy to clipboard
           </tool-tip>
         </format-bar-button>
@@ -188,7 +190,9 @@ export function EmbedEditingContainer(
           }}"
         >
           ${DeleteIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
+          <tool-tip inert tip-position="right-start" role="tooltip"
+            >Delete</tool-tip
+          >
         </format-bar-button>
       </div>
     </div>
@@ -227,7 +231,7 @@ export function CodeBlockOptionContainer(
           @click=${() => copyCode(codeBlockOption)}
         >
           ${CopyIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
+          <tool-tip inert tip-position="right-start" role="tooltip"
             >Copy to Clipboard
           </tool-tip>
         </format-bar-button>
@@ -236,7 +240,7 @@ export function CodeBlockOptionContainer(
           @click=${() => toggleWrap(codeBlockOption)}
         >
           ${LineWrapIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
+          <tool-tip inert tip-position="right-start" role="tooltip"
             >Wrap code
           </tool-tip>
         </format-bar-button>
@@ -245,7 +249,9 @@ export function CodeBlockOptionContainer(
           @click=${() => deleteCodeBlock(codeBlockOption)}
         >
           ${DeleteIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Delete </tool-tip>
+          <tool-tip inert tip-position="right-start" role="tooltip"
+            >Delete
+          </tool-tip>
         </format-bar-button>
       </div>
     </div>
