@@ -530,8 +530,7 @@ test('click the list icon can select and copy', async ({ page }) => {
   await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
 });
 
-// FIXME: In playwright, the backspace key works on paragraph block, but not on list block.
-test.skip('click the list icon can select and delete', async ({ page }) => {
+test('click the list icon can select and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -540,6 +539,9 @@ test.skip('click the list icon can select and delete', async ({ page }) => {
   await clickListIcon(page, 0);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['\n', '456', '789']);
+  await clickListIcon(page, 0);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertRichTexts(page, ['\n', '\n']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {
