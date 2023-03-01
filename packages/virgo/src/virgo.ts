@@ -131,6 +131,10 @@ export class VEditor {
       onKeyDown?: (event: KeyboardEvent) => void;
     } = {}
   ) {
+    if (!yText.doc) {
+      throw new Error('yText must be attached to a Y.Doc');
+    }
+
     this.yText = yText;
     const { renderElement, onKeyDown } = opts;
 
