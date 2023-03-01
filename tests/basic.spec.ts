@@ -123,6 +123,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, {}, room);
   await waitNextFrame(pageB);
   await focusRichText(pageB);
+
   const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
   await signal;
@@ -148,19 +149,20 @@ test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   // click together, both init with default id should lead to conflicts
   await initEmptyParagraphState(pageA);
   await initEmptyParagraphState(pageB);
+
   await waitNextFrame(pageA);
   await focusRichText(pageA);
   await waitNextFrame(pageB);
   await focusRichText(pageB);
   await waitNextFrame(pageA);
+
   await type(pageA, '');
   await waitNextFrame(pageB);
   await type(pageB, '');
-
   await waitNextFrame(pageA);
   await type(pageA, 'hello');
-
   await waitNextFrame(pageB);
+
   await assertText(pageB, 'hello');
   await assertText(pageA, 'hello'); // actually '\n'
 });
