@@ -310,7 +310,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through frame', async ({ page }) => {
+test('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await addFrameByClick(page);
@@ -349,19 +349,13 @@ test('double click choose words', async ({ page }) => {
 });
 
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test.skip('select all and delete', async ({ page }) => {
+test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-
-  await page.evaluate(() => {
-    const defaultPage = document.querySelector('affine-default-page')!;
-    const rect = defaultPage.getBoundingClientRect();
-    // dont focus any block
-    defaultPage.selection.state.focusedBlockIndex = -1;
-    defaultPage.selection.selectBlocksByRect(rect);
-  });
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
 
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
