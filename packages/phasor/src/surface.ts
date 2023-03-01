@@ -16,7 +16,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
+import { deserializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
