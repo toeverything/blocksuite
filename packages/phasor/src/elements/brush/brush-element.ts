@@ -47,21 +47,6 @@ export class BrushElement extends BaseElement {
     return isPointIn(this, x, y);
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
-
-    // render stroke points
-    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-    const commands = Utils.getSvgPathFromStrokePoints(stroke);
-    const path = new Path2D(commands);
-
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = this.lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(path);
-  }
-
   serialize(): Record<string, unknown> {
     return {
       id: this.id,
@@ -102,5 +87,20 @@ export class BrushElement extends BaseElement {
       xywh: serializeXYWH(x, y, bound.w, bound.h),
       points: JSON.stringify(points),
     };
+  }
+
+  render(ctx: CanvasRenderingContext2D) {
+    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
+
+    // render stroke points
+    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+    const commands = Utils.getSvgPathFromStrokePoints(stroke);
+    const path = new Path2D(commands);
+
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(path);
   }
 }

@@ -28,11 +28,6 @@ export class ShapeElement extends BaseElement {
     return hitTest(x, y, this, options);
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    const { render } = ShapeMethodsMap[this.shapeType];
-    render(ctx, this);
-  }
-
   serialize(): SerializedShapeProps {
     return {
       id: this.id,
@@ -61,5 +56,10 @@ export class ShapeElement extends BaseElement {
     element.updateProps(properties);
 
     return element;
+  }
+
+  render(ctx: CanvasRenderingContext2D) {
+    const { render } = ShapeMethodsMap[this.shapeType];
+    render(ctx, this);
   }
 }

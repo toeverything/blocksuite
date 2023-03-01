@@ -10,11 +10,6 @@ export class DebugElement extends BaseElement {
     return isPointIn(this, x, y);
   }
 
-  render(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, this.w, this.h);
-  }
-
   serialize(): Record<string, unknown> {
     return {
       id: this.id,
@@ -33,5 +28,10 @@ export class DebugElement extends BaseElement {
     element.setBound(x, y, w, h);
     element.color = data.color as string;
     return element;
+  }
+
+  render(ctx: CanvasRenderingContext2D): void {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(0, 0, this.w, this.h);
   }
 }
