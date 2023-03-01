@@ -1,5 +1,5 @@
 import type { Color, StrokeStyle } from '../../consts.js';
-import { deserializeXYWH } from '../../utils/xywh.js';
+import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
@@ -17,10 +17,6 @@ export class ShapeElement extends BaseElement {
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
-  }
-
-  updateProps(props: ShapeProps) {
-    Object.assign(this, props);
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
@@ -51,11 +47,16 @@ export class ShapeElement extends BaseElement {
     const element = new ShapeElement(data.id as string, shapeType);
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    element.setBound(x, y, w, h);
-    const { id, type, xywh, ...properties } = data as SerializedShapeProps;
-    element.updateProps(properties);
+    setXYWH(element, { x, y, w, h });
+
+    const { id, type, xywh, ...props } = data as SerializedShapeProps;
+    ShapeElement.updateProps(element, props);
 
     return element;
+  }
+
+  static updateProps(element: ShapeElement, props: ShapeProps) {
+    Object.assign(element, props);
   }
 
   render(ctx: CanvasRenderingContext2D) {

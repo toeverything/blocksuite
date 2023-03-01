@@ -4,7 +4,7 @@ import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { Vec } from '../../utils/vec.js';
-import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
@@ -67,24 +67,24 @@ export class BrushElement extends BaseElement {
     element.lineWidth = data.lineWidth as number;
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    element.setBound(x, y, w, h);
+    setXYWH(element, { x, y, w, h });
     element.points = JSON.parse(data.points as string);
     return element;
   }
 
-  onUpdateBound(bound: IBound): Record<string, unknown> {
-    const deltaX = bound.x - this.x;
-    const deltaY = bound.y - this.y;
-
-    const x = this.x + deltaX;
-    const y = this.y + deltaY;
-
-    const points = this.points.map(([x, y]) => {
-      return Vec.toFixed([bound.w * (x / this.w), bound.h * (y / this.h)]);
+  static getBoundProps(
+    element: BaseElement,
+    bound: IBound
+  ): Record<string, string> {
+    const points = (element as BrushElement).points.map(([x, y]) => {
+      return Vec.toFixed([
+        bound.w * (x / element.w),
+        bound.h * (y / element.h),
+      ]);
     });
 
     return {
-      xywh: serializeXYWH(x, y, bound.w, bound.h),
+      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
       points: JSON.stringify(points),
     };
   }

@@ -1,5 +1,5 @@
 import { isPointIn } from '../../utils/hit-utils.js';
-import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
 export class DebugElement extends BaseElement {
@@ -25,7 +25,7 @@ export class DebugElement extends BaseElement {
     element.index = data.index as string;
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    element.setBound(x, y, w, h);
+    setXYWH(element, { x, y, w, h });
     element.color = data.color as string;
     return element;
   }

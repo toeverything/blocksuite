@@ -88,12 +88,12 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = ShapeElement.deserialize(data);
-    const changed = element.onUpdateBound({
+    const props = ShapeElement.getBoundProps(element, {
       x: 1,
       y: 1,
       w: 10,
       h: 10,
     });
-    expect(changed.xywh).toBe('[1,1,10,10]');
+    expect(props.xywh).toBe('[1,1,10,10]');
   });
 });

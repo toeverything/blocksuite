@@ -16,7 +16,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -40,11 +40,10 @@ export class SurfaceManager {
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
+    setXYWH(element, bound);
     if (props) {
-      element.updateProps(props);
+      ShapeElement.updateProps(element, props);
     }
 
     return this._addElement(element);
@@ -53,9 +52,8 @@ export class SurfaceManager {
   addDebugElement(bound: IBound, color: string): string {
     const id = nanoid(10);
     const element = new DebugElement(id);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
+    setXYWH(element, bound);
     element.color = color;
 
     return this._addElement(element);
@@ -72,9 +70,7 @@ export class SurfaceManager {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
-    const { x, y, w, h } = bound;
-    element.setBound(x, y, w, h);
-
+    setXYWH(element, bound);
     element.points = points;
     element.color = props.color ?? '#000000';
     element.lineWidth = props.lineWidth ?? 4;
@@ -97,11 +93,11 @@ export class SurfaceManager {
       assertExists(element);
       const ElementCtor = ElementCtors[element.type];
       assertExists(ElementCtor);
-      const delta = element.onUpdateBound(bound);
 
+      const props = ElementCtor.getBoundProps(element, bound);
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      for (const [key, value] of Object.entries(delta)) {
+      for (const [key, value] of Object.entries(props)) {
         yElement.set(key, value);
       }
     });
@@ -236,7 +232,7 @@ export class SurfaceManager {
 
           // refresh grid manager
           this._renderer.removeElement(element);
-          element.setBound(x, y, w, h);
+          setXYWH(element, { x, y, w, h });
           this._renderer.addElement(element);
         }
 

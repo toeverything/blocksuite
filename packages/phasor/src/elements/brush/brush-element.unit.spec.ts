@@ -41,14 +41,14 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = BrushElement.deserialize(data);
-    const changed = element.onUpdateBound({
+    const props = BrushElement.getBoundProps(element, {
       x: 0,
       y: 0,
       w: 208,
       h: 208,
     });
-    expect(changed.xywh).toBe('[0,0,208,208]');
-    expect(changed.points).toMatchObject(
+    expect(props.xywh).toBe('[0,0,208,208]');
+    expect(props.points).toMatchObject(
       JSON.stringify(
         JSON.parse(data.points).map(([x, y]: [number, number]) => [
           x * 2,

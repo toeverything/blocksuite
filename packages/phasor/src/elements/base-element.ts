@@ -46,16 +46,15 @@ export abstract class BaseElement implements SurfaceElement {
 
   abstract serialize(): Record<string, unknown>;
 
-  setBound(x: number, y: number, w: number, h: number) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-
-  onUpdateBound(newBound: IBound): Record<string, unknown> {
+  /**
+   * Different elements could hold different bound-related props.
+   * On updating element bound, instead of directly mutating element instance,
+   * we need to get these props and set them into Yjs.
+   * Then the change will be computed as YEvent, from which we can mutate the element.
+   */
+  static getBoundProps(_: BaseElement, bound: IBound): Record<string, string> {
     return {
-      xywh: serializeXYWH(newBound.x, newBound.y, newBound.w, newBound.h),
+      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     };
   }
 }
