@@ -194,7 +194,7 @@ export class FormatQuickBar extends LitElement {
             "Failed to reset selection! New model length isn't 1"
           );
         }
-        const codeModel = this._models[0];
+        const codeModel = newModels[0];
         requestAnimationFrame(() =>
           restoreSelection({
             type: 'Block',
