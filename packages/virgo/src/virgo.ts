@@ -25,6 +25,89 @@ interface DomPoint {
 }
 
 export class VEditor {
+  static domPointtoTextPoint(
+    node: unknown,
+    offset: number
+  ): readonly [Text, number] | null {
+    let text: Text | null = null;
+    let textOffset = offset;
+    if (isVText(node)) {
+      text = node;
+      textOffset = offset;
+    } else if (isVElement(node)) {
+      const textNode = getTextNodeFromElement(node);
+      if (textNode) {
+        text = textNode;
+        textOffset = offset;
+      }
+    } else if (isVLine(node)) {
+      const firstTextElement = node.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          text = textNode;
+          textOffset = 0;
+        }
+      }
+    }
+
+    if (!text) {
+      return null;
+    }
+
+    return [text, textOffset] as const;
+  }
+
+  static textPointToDomPoint(
+    text: Text,
+    offset: number,
+    rootElement: HTMLElement
+  ): DomPoint | null {
+    if (rootElement.dataset.virgoRoot !== 'true') {
+      throw new Error(
+        'textRangeToDomPoint should be called with editor root element'
+      );
+    }
+
+    if (!rootElement.contains(text)) {
+      return null;
+    }
+
+    const textNodes = Array.from(
+      rootElement.querySelectorAll('[data-virgo-text="true"]')
+    ).map(textElement => getTextNodeFromElement(textElement));
+    const goalIndex = textNodes.indexOf(text);
+    let index = 0;
+    for (const textNode of textNodes.slice(0, goalIndex)) {
+      if (!textNode) {
+        return null;
+      }
+
+      index += calculateTextLength(textNode);
+    }
+
+    if (text.wholeText !== ZERO_WIDTH_SPACE) {
+      index += offset;
+    }
+
+    const textElement = text.parentElement;
+    if (!textElement) {
+      throw new Error('text element not found');
+    }
+
+    const lineElement = textElement.closest('virgo-line');
+
+    if (!lineElement) {
+      throw new Error('line element not found');
+    }
+
+    const lineIndex = Array.from(
+      rootElement.querySelectorAll('virgo-line')
+    ).indexOf(lineElement);
+
+    return { text, index: index + lineIndex };
+  }
+
   private _rootElement: HTMLElement | null = null;
   private _rootElementAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
@@ -436,27 +519,27 @@ export class VEditor {
       return null;
     }
 
-    const [anchorText, anchorTextOffset] = getTextAndOffset(
+    const anchorTextRange = VEditor.domPointtoTextPoint(
       anchorNode,
       anchorOffset
     );
-    const [focusText, focusTextOffset] = getTextAndOffset(
-      focusNode,
-      focusOffset
-    );
+    const focusTextRange = VEditor.domPointtoTextPoint(focusNode, focusOffset);
 
-    if (!anchorText || !focusText) {
+    if (!anchorTextRange || !focusTextRange) {
       return null;
     }
 
+    const [anchorText, anchorTextOffset] = anchorTextRange;
+    const [focusText, focusTextOffset] = focusTextRange;
+
     // case 1
     if (root.contains(anchorText) && root.contains(focusText)) {
-      const anchorDomPoint = textPointToDomPoint(
+      const anchorDomPoint = VEditor.textPointToDomPoint(
         anchorText,
         anchorTextOffset,
         this._rootElement
       );
-      const focusDomPoint = textPointToDomPoint(
+      const focusDomPoint = VEditor.textPointToDomPoint(
         focusText,
         focusTextOffset,
         this._rootElement
@@ -475,7 +558,7 @@ export class VEditor {
     // case 2.1
     if (!root.contains(anchorText) && root.contains(focusText)) {
       if (isSelectionBackwards(selection)) {
-        const anchorDomPoint = textPointToDomPoint(
+        const anchorDomPoint = VEditor.textPointToDomPoint(
           anchorText,
           anchorTextOffset,
           this._rootElement
@@ -490,7 +573,7 @@ export class VEditor {
           length: this.yText.length - anchorDomPoint.index,
         };
       } else {
-        const focusDomPoint = textPointToDomPoint(
+        const focusDomPoint = VEditor.textPointToDomPoint(
           focusText,
           focusTextOffset,
           this._rootElement
@@ -510,7 +593,7 @@ export class VEditor {
     // case 2.2
     if (root.contains(anchorText) && !root.contains(focusText)) {
       if (isSelectionBackwards(selection)) {
-        const focusDomPoint = textPointToDomPoint(
+        const focusDomPoint = VEditor.textPointToDomPoint(
           focusText,
           focusTextOffset,
           this._rootElement
@@ -525,7 +608,7 @@ export class VEditor {
           length: focusDomPoint.index,
         };
       } else {
-        const anchorDomPoint = textPointToDomPoint(
+        const anchorDomPoint = VEditor.textPointToDomPoint(
           anchorText,
           anchorTextOffset,
           this._rootElement
@@ -738,56 +821,6 @@ export class VEditor {
   }
 }
 
-function textPointToDomPoint(
-  text: Text,
-  offset: number,
-  rootElement: HTMLElement
-): DomPoint | null {
-  if (rootElement.dataset.virgoRoot !== 'true') {
-    throw new Error(
-      'textRangeToDomPoint should be called with editor root element'
-    );
-  }
-
-  if (!rootElement.contains(text)) {
-    return null;
-  }
-
-  const textNodes = Array.from(
-    rootElement.querySelectorAll('[data-virgo-text="true"]')
-  ).map(textElement => getTextNodeFromElement(textElement));
-  const goalIndex = textNodes.indexOf(text);
-  let index = 0;
-  for (const textNode of textNodes.slice(0, goalIndex)) {
-    if (!textNode) {
-      return null;
-    }
-
-    index += calculateTextLength(textNode);
-  }
-
-  if (text.wholeText !== ZERO_WIDTH_SPACE) {
-    index += offset;
-  }
-
-  const textElement = text.parentElement;
-  if (!textElement) {
-    throw new Error('text element not found');
-  }
-
-  const lineElement = textElement.closest('virgo-line');
-
-  if (!lineElement) {
-    throw new Error('line element not found');
-  }
-
-  const lineIndex = Array.from(
-    rootElement.querySelectorAll('virgo-line')
-  ).indexOf(lineElement);
-
-  return { text, index: index + lineIndex };
-}
-
 function isSelectionBackwards(selection: Selection): boolean {
   let backwards = false;
   if (!selection.isCollapsed && selection.anchorNode && selection.focusNode) {
@@ -847,32 +880,6 @@ function isVLine(element: unknown): element is HTMLElement {
   return (
     element instanceof HTMLElement && element.parentElement instanceof VirgoLine
   );
-}
-
-function getTextAndOffset(node: unknown, offset: number) {
-  let text: Text | null = null;
-  let textOffset = offset;
-  if (isVText(node)) {
-    text = node;
-    textOffset = offset;
-  } else if (isVElement(node)) {
-    const textNode = getTextNodeFromElement(node);
-    if (textNode) {
-      text = textNode;
-      textOffset = offset;
-    }
-  } else if (isVLine(node)) {
-    const firstTextElement = node.querySelector('v-text');
-    if (firstTextElement) {
-      const textNode = getTextNodeFromElement(firstTextElement);
-      if (textNode) {
-        text = textNode;
-        textOffset = 0;
-      }
-    }
-  }
-
-  return [text, textOffset] as const;
 }
 
 function findDocumentOrShadowRoot(editor: VEditor): Document {

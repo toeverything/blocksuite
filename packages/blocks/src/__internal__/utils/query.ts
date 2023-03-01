@@ -1,6 +1,7 @@
 import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { VRange } from '@blocksuite/virgo';
 
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
@@ -298,55 +299,20 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
   return text;
 }
 
-/**
- * FIXME: Use it carefully, it will skip soft enter!
- */
-export function getQuillIndexByNativeSelection(
-  ele: Node | null | undefined,
-  nodeOffset: number,
-  isStart = true
-) {
-  if (
-    ele instanceof Element &&
-    ele.classList.contains('affine-default-page-block-title-container')
-  ) {
-    return (
-      (isStart
-        ? ele.querySelector('input')?.selectionStart
-        : ele.querySelector('input')?.selectionEnd) || 0
-    );
-  }
+export function getVRangeByNode(node: Node): VRange | null {
+  if (!node.parentElement) return null;
 
-  let offset = 0;
-  let lastNode = ele;
-  let selfAdded = false;
-  while (
-    ele &&
-    // @ts-ignore
-    (!lastNode?.getAttributeNode ||
-      // @ts-ignore
-      !lastNode.getAttributeNode('contenteditable'))
-  ) {
-    if (ele instanceof Element && ele.hasAttribute(ATTR)) {
-      offset = 0;
-      break;
-    }
-    if (!selfAdded) {
-      selfAdded = true;
-      offset += nodeOffset;
-    } else {
-      offset += textWithoutNode(ele, lastNode as Node).length;
-    }
-    lastNode = ele;
-    ele = ele?.parentNode;
-  }
-  return offset;
+  const richText = node.parentElement.closest('rich-text') as RichText;
+  const vEditor = richText?.vEditor;
+  if (!vEditor) return null;
+
+  return vEditor.getVRange();
 }
 
 /**
  * Get the specific text node and offset by the selected block.
- * The reverse implementation of {@link getQuillIndexByNativeSelection}
- * See also {@link getQuillIndexByNativeSelection}
+ * The reverse implementation of {@link getVRangeByNode}
+ * See also {@link getVRangeByNode}
  *
  * ```ts
  * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);

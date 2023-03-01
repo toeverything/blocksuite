@@ -3,11 +3,11 @@ import {
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
-  getQuillIndexByNativeSelection,
+  getVRangeByNode,
   SelectionUtils,
 } from '@blocksuite/blocks';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
+import { assertExists, BaseBlockModel } from '@blocksuite/store';
 
 import type { SelectedBlock, SelectionInfo } from './types.js';
 
@@ -69,16 +69,12 @@ export function getSelectInfo(page: Page): SelectionInfo {
     selectedBlocks = getSelectedBlock(selectedModels);
     if (type !== 'Block' && nativeSelection && selectedBlocks.length > 0) {
       const range = nativeSelection.getRangeAt(0);
-      const firstIndex = getQuillIndexByNativeSelection(
-        range.startContainer,
-        range.startOffset as number,
-        true
-      );
-      const endIndex = getQuillIndexByNativeSelection(
-        range.endContainer,
-        range.endOffset as number,
-        false
-      );
+      const firstVRange = getVRangeByNode(range.startContainer);
+      const endVRange = getVRangeByNode(range.endContainer);
+      assertExists(firstVRange);
+      assertExists(endVRange);
+      const firstIndex = firstVRange.index;
+      const endIndex = endVRange.index + endVRange.length;
       selectedBlocks[0].startPos = firstIndex;
       const lastBlock = getLastSelectBlock(selectedBlocks);
       if (lastBlock) {

@@ -23,7 +23,6 @@ import {
   getModelByElement,
   getModelsByRange,
   getParentBlockById,
-  getQuillIndexByNativeSelection,
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
@@ -76,17 +75,17 @@ export function deleteModelsByRange(
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
+  assertExists(firstRichText.vEditor);
+  assertExists(lastRichText.vEditor);
 
-  const firstTextIndex = getQuillIndexByNativeSelection(
-    range.startContainer,
-    range.startOffset,
-    true
-  );
-  const endTextIndex = getQuillIndexByNativeSelection(
-    range.endContainer,
-    range.endOffset,
-    false
-  );
+  const firstVRange = firstRichText.vEditor.getVRange();
+  const endVRange = lastRichText.vEditor.getVRange();
+
+  assertExists(firstVRange);
+  assertExists(endVRange);
+
+  const firstTextIndex = firstVRange.index;
+  const endTextIndex = endVRange.index;
 
   // Only select one block
   if (models.length === 1) {
@@ -377,7 +376,9 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
   // Native selection maybe shifted after format
   // We need to restore it manually
   if (blockRange.type === 'Native') {
-    restoreSelection(blockRange);
+    requestAnimationFrame(() => {
+      restoreSelection(blockRange);
+    });
   }
 }
 
