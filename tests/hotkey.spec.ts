@@ -4,7 +4,6 @@ import {
   clickBlockTypeMenuItem,
   dragBetweenIndices,
   enterPlaygroundRoom,
-  enterPlaygroundWithList,
   focusRichText,
   formatType,
   initEmptyParagraphState,
@@ -725,9 +724,13 @@ test('should bracket complete with backtick works', async ({ page }) => {
 test('pressing enter when selecting multiple blocks should create new block', async ({
   page,
 }) => {
-  await enterPlaygroundWithList(page, ['123', '123', '123']);
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 1], [2, 1]);
   await pressEnter(page);
-  await assertRichTexts(page, ['1', '23']);
+  await assertRichTexts(page, ['1', '89']);
   await assertSelection(page, 1, 0, 0);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 });

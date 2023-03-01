@@ -275,6 +275,7 @@ export async function initThreeParagraphs(page: Page) {
   await type(page, '456');
   await pressEnter(page);
   await type(page, '789');
+  await resetHistory(page);
 }
 
 export async function initThreeLists(page: Page) {
