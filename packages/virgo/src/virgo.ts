@@ -17,7 +17,7 @@ export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 
 export type DeltaEntry = [DeltaInsert, VRange];
 
-interface DomPoint {
+export interface DomPoint {
   // which text node this point is in
   text: Text;
   // the index here is relative to the Editor, not text node
@@ -25,7 +25,7 @@ interface DomPoint {
 }
 
 export class VEditor {
-  static domPointtoTextPoint(
+  static nativePointToTextPoint(
     node: unknown,
     offset: number
   ): readonly [Text, number] | null {
@@ -496,18 +496,21 @@ export class VEditor {
       return null;
     }
 
-    const anchorTextRange = VEditor.domPointtoTextPoint(
+    const anchorTextPoint = VEditor.nativePointToTextPoint(
       anchorNode,
       anchorOffset
     );
-    const focusTextRange = VEditor.domPointtoTextPoint(focusNode, focusOffset);
+    const focusTextPoint = VEditor.nativePointToTextPoint(
+      focusNode,
+      focusOffset
+    );
 
-    if (!anchorTextRange || !focusTextRange) {
+    if (!anchorTextPoint || !focusTextPoint) {
       return null;
     }
 
-    const [anchorText, anchorTextOffset] = anchorTextRange;
-    const [focusText, focusTextOffset] = focusTextRange;
+    const [anchorText, anchorTextOffset] = anchorTextPoint;
+    const [focusText, focusTextOffset] = focusTextPoint;
 
     // case 1
     if (root.contains(anchorText) && root.contains(focusText)) {
