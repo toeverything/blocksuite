@@ -4,6 +4,7 @@
 
 import './declare-test-window.js';
 
+import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
 import { expect, Locator, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
@@ -172,6 +173,21 @@ export async function assertNativeSelectionRangeCount(
     return selection?.rangeCount;
   });
   expect(actual).toEqual(count);
+}
+
+export async function assertFrameXYWH(
+  page: Page,
+  expected: [number, number, number, number]
+) {
+  const actual = await page.evaluate(() => {
+    const root = window.page.root as PageBlockModel;
+    const frame = root.children[0] as FrameBlockModel;
+    return JSON.parse(frame.xywh) as number[];
+  });
+  expect(actual[0]).toBeCloseTo(expected[0]);
+  expect(actual[1]).toBeCloseTo(expected[1]);
+  expect(actual[2]).toBeCloseTo(expected[2]);
+  expect(actual[3]).toBeCloseTo(expected[3]);
 }
 
 export async function assertTextFormat(

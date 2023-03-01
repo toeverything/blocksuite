@@ -6,6 +6,10 @@ export async function type(page: Page, content: string) {
   await page.keyboard.type(content, { delay: 50 });
 }
 
+export async function press(page: Page, content: string) {
+  await page.keyboard.press(content, { delay: 50 });
+}
+
 export async function enterVirgoPlayground(page: Page) {
   const url = new URL(
     'examples/virgo/index.html',
