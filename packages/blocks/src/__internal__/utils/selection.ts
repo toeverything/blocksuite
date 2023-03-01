@@ -96,6 +96,7 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
+  // TODO support SelectionPosition
   const pageComponent = document.querySelector('affine-default-page');
   if (!pageComponent) {
     throw new Error("Can't find page component!");
@@ -232,6 +233,15 @@ export function focusNextBlock(
 }
 
 export function resetNativeSelection(range: Range | null) {
+  if (!range) {
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+    return;
+  }
   const selection = window.getSelection();
   assertExists(selection);
   selection.removeAllRanges();
