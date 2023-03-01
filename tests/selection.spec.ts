@@ -22,6 +22,8 @@ import {
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowLeft,
+  pressBackspace,
   pressEnter,
   pressShiftTab,
   pressTab,
@@ -208,17 +210,15 @@ test('cursor move up and down', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  for (let i = 0; i < 3; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 3);
+
   await page.keyboard.press('ArrowUp');
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
   expect(indexOne).toBe(14);
   expect(textOne).toBe('arrow down test 1\n');
-  for (let i = 0; i < 3; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+
+  await pressArrowLeft(page, 3);
   await page.keyboard.press('ArrowDown');
   const indexTwo = await getQuillSelectionIndex(page);
   const textTwo = await getQuillSelectionText(page);
@@ -371,7 +371,7 @@ test('select all text with dragging and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
@@ -432,7 +432,7 @@ test('select text in the same line with dragging leftward and move outside the a
       },
     }
   );
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   await assertRichTexts(page, ['123', 'abc', '789']);
 });
@@ -477,7 +477,7 @@ test('select text in the same line with dragging rightward and move outside the 
       },
     }
   );
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
@@ -538,12 +538,13 @@ test('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
+  await pressBackspace(page);
   await shamefullyBlurActiveElement(page);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await assertRichTexts(page, ['\n', '456', '789']);
   await clickListIcon(page, 0);
   await shamefullyBlurActiveElement(page);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await assertRichTexts(page, ['\n', '\n']);
 });
 
