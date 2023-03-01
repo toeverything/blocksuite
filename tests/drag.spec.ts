@@ -373,10 +373,10 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
 
   await dragBetweenIndices(
     page,
-    [1, 3],
     [0, 0],
-    { x: -80, y: 20 },
-    { x: 60, y: 0 },
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
     {
       steps: 50,
     }

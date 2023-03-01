@@ -154,9 +154,9 @@ export class DefaultPageBlockComponent
   mouseRoot!: HTMLElement;
 
   @state()
-  frameSelectionRect: DOMRect | null = null;
+  private _frameSelectionRect: DOMRect | null = null;
 
-  @state()
+  @property()
   viewportState: ViewportState = {
     left: 0,
     top: 0,
@@ -168,15 +168,15 @@ export class DefaultPageBlockComponent
   };
 
   @state()
-  selectedRects: DOMRect[] = [];
+  private _selectedRects: DOMRect[] = [];
 
   @state()
-  selectedEmbedRects: DOMRect[] = [];
+  private _selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  embedEditingState!: EmbedEditingState | null;
+  private _embedEditingState!: EmbedEditingState | null;
 
-  @state()
+  @property()
   codeBlockOption!: CodeBlockOption | null;
 
   @query('.affine-default-viewport')
@@ -309,7 +309,7 @@ export class DefaultPageBlockComponent
     if (type === 'block') {
       selection.refreshSelectionRectAndSelecting(viewportState);
     } else if (type === 'embed') {
-      selection.refreshEmbedRects(this.embedEditingState);
+      selection.refreshEmbedRects(this._embedEditingState);
     } else if (type === 'native') {
       const { startRange, rangePoint } = selection.state;
       if (startRange && rangePoint) {
@@ -456,22 +456,22 @@ export class DefaultPageBlockComponent
     hotkey.enableHotkey();
 
     this.signals.updateFrameSelectionRect.on(rect => {
-      this.frameSelectionRect = rect;
+      this._frameSelectionRect = rect;
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
-      this.selectedRects = rects;
+      this._selectedRects = rects;
       this.requestUpdate();
     });
     this.signals.updateEmbedRects.on(rects => {
-      this.selectedEmbedRects = rects;
+      this._selectedEmbedRects = rects;
       if (rects.length === 0) {
-        this.embedEditingState = null;
+        this._embedEditingState = null;
       }
       this.requestUpdate();
     });
     this.signals.updateEmbedEditingState.on(embedEditingState => {
-      this.embedEditingState = embedEditingState;
+      this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
     this.signals.updateCodeBlockOption.on(codeBlockOption => {
@@ -551,17 +551,17 @@ export class DefaultPageBlockComponent
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
+    const selectionRect = FrameSelectionRect(this._frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
-      this.selectedRects,
+      this._selectedRects,
       this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectedEmbedRects,
+      this._selectedEmbedRects,
       this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
-      readonly ? null : this.embedEditingState,
+      readonly ? null : this._embedEditingState,
       this.signals,
       this.viewportState
     );

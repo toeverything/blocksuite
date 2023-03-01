@@ -31,13 +31,13 @@ export class EditorContainer extends NonShadowLitElement {
   };
 
   @state()
-  showGrid = false;
+  private showGrid = false;
 
   // TODO only select block
-  @state()
+  @property()
   clipboard = new ClipboardManager(this, this);
 
-  @state()
+  @property()
   contentParser = new ContentParser(this);
 
   get model() {
