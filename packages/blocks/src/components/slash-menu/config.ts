@@ -3,7 +3,7 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
-  ImageIcon,
+  ImageIcon20,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -131,7 +131,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Image',
-        icon: ImageIcon,
+        icon: ImageIcon20,
         divider: true,
         async action({ page, model }) {
           const parent = page.getParent(model);
