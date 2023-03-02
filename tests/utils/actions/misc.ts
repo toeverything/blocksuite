@@ -540,3 +540,18 @@ export async function focusTitle(page: Page) {
   });
   await waitNextFrame(page);
 }
+
+/**
+ * XXX: this is a workaround for the bug in Playwright
+ */
+export async function shamefullyBlurActiveElement(page: Page) {
+  await page.evaluate(() => {
+    if (
+      !document.activeElement ||
+      !(document.activeElement instanceof HTMLElement)
+    ) {
+      throw new Error("document.activeElement doesn't exist");
+    }
+    document.activeElement.blur();
+  });
+}

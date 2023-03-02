@@ -40,8 +40,9 @@ export const DiamondMethods: ShapeMethods = {
   hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     const points = [
       [bound.x + bound.w / 2, bound.y + 0],
-      [bound.x + bound.w, bound.y + bound.h],
-      [bound.x + 0, bound.y + bound.h],
+      [bound.x + bound.w, bound.y + bound.h / 2],
+      [bound.x + bound.w / 2, bound.y + bound.h],
+      [bound.x + 0, bound.y + bound.h / 2],
     ];
     return Utils.pointInPolygon([x, y], points);
   },

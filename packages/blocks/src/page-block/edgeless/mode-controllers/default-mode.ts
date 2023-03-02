@@ -285,4 +285,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     this._updateHoverState(this._hoverState?.content || null);
   }
+
+  clearSelection() {
+    this._blockSelectionState = {
+      type: 'none',
+    };
+    this._hoverState = null;
+  }
 }
