@@ -1,5 +1,10 @@
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
+import type {
+  DeltaInsert,
+  VEditor,
+  VirgoLine,
+  VRange,
+} from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
 
 export async function type(page: Page, content: string) {
@@ -73,5 +78,29 @@ export async function setVirgoRichTextRange(
       editor.setVRange(vRange as VRange);
     },
     [vRange, index]
+  );
+}
+
+export async function getVirgoRichTextLine(
+  page: Page,
+  index: number,
+  i = 0
+): Promise<readonly [string, number]> {
+  return await page.evaluate(
+    ([index, i]) => {
+      const richTexts = document
+        .querySelector('test-page')
+        ?.shadowRoot?.querySelectorAll('rich-text');
+
+      if (!richTexts) {
+        throw new Error('Cannot find rich-text');
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = (richTexts[i] as any).vEditor as VEditor;
+      const line = editor.getLine(index);
+      return [line[0].textContent, line[1]] as const;
+    },
+    [index, i]
   );
 }
