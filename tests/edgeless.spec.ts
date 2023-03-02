@@ -8,6 +8,8 @@ import {
   getEdgelessHoverRect,
   getFrameSize,
   increaseZoomLevel,
+  selectBrushColor,
+  selectBrushSize,
   setMouseMode,
   switchEditorMode,
 } from './utils/actions/edgeless.js';
@@ -27,6 +29,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
+  assertEdgelessPointColor,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
@@ -210,6 +213,44 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
+});
+
+test('add brush element with color', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'brush');
+  await selectBrushColor(page, '#B638FF');
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  await assertEdgelessPointColor(page, 110, 110, '#B638FF');
+});
+
+test('add brush element with different size', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'brush');
+  await selectBrushSize(page, 16);
+  await selectBrushColor(page, '#B638FF');
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 100 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  // Select two points on the top and bottom border of the line,
+  // their color should be the same as the specified color
+  await assertEdgelessPointColor(page, 110, 115, '#B638FF');
+  await assertEdgelessPointColor(page, 110, 100, '#B638FF');
+  // Select two points close to the upper and lower boundaries of the line,
+  // their color should be different from the specified color
+  await assertEdgelessPointColor(page, 110, 99, '#000000');
+  await assertEdgelessPointColor(page, 110, 116, '#000000');
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {

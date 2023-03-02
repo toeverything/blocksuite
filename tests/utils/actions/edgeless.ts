@@ -107,3 +107,18 @@ export async function resizeElementByLeftTopHandle(
     }
   );
 }
+
+export async function selectBrushColor(page: Page, color: `#${string}`) {
+  const colorButton = page.locator(
+    `edgeless-brush-tool-menu .color-unit[aria-label="${color}"]`
+  );
+  await colorButton.click();
+}
+
+export async function selectBrushSize(page: Page, size: 4 | 16) {
+  const sizeMap = { 4: 'thin', 16: 'thick' };
+  const sizeButton = page.locator(
+    `edgeless-brush-tool-menu .brush-size-button .${sizeMap[size]}`
+  );
+  await sizeButton.click();
+}
