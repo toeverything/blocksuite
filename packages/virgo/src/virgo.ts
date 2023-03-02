@@ -839,7 +839,7 @@ export class VEditor {
     };
 
     // updates in lit are performed asynchronously
-    setTimeout(fn, 0);
+    requestAnimationFrame(fn);
   };
 
   private _transact(fn: () => void): void {
