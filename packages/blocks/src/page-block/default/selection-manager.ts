@@ -725,6 +725,8 @@ export class DefaultSelectionManager {
       if (!this.state.selectedBlocks.length) {
         return;
       }
+      // TODO Check if there are valid blocks in the selection before showing the format bar
+      // If all the selected blocks are images, the format bar should not be displayed.
 
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({

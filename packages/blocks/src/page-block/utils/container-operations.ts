@@ -290,7 +290,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
 
 export function getCurrentCombinedFormat(page: Page): TextAttributes {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) {
+  if (!blockRange || blockRange.models.every(model => !model.text)) {
     return {};
   }
   return getCombinedFormat(blockRange);
