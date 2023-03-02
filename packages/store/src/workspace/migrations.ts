@@ -123,7 +123,7 @@ const migrations: Migration[] = [
             const title = yBlock.get('prop:title') as string;
             const yTitle = new Y.Text(title);
             yBlock.set('prop:title', yTitle);
-            return;
+            break;
           }
         }
       }
