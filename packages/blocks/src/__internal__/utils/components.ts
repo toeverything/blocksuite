@@ -84,6 +84,11 @@ export function BlockChildrenContainer(
   host: BlockHost,
   onLoaded: () => void
 ) {
+  if (!model) {
+    throw new Error(
+      "Failed to render block's children container! model not found"
+    );
+  }
   const paddingLeft = matchFlavours(model, [
     'affine:page',
     'affine:frame',
