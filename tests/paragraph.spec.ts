@@ -144,9 +144,7 @@ test('backspace on line start of the first block', async ({ page }) => {
   await assertRichTexts(page, []);
 });
 
-test.only('backspace on line start of the first empty block', async ({
-  page,
-}) => {
+test('backspace on line start of the first empty block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusTitle(page);
