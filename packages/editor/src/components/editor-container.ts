@@ -167,6 +167,9 @@ export class EditorContainer extends NonShadowLitElement {
 
   public async createBlockHub() {
     await this.updateComplete;
+    if (!this.page.root) {
+      await new Promise(res => this.page.signals.rootAdded.once(res));
+    }
     return createBlockHub(this, this.page);
   }
 
@@ -177,13 +180,13 @@ export class EditorContainer extends NonShadowLitElement {
   }
 
   render() {
-    if (!this.model) return null;
+    if (!this.model || !this.pageBlockModel) return null;
 
     const pageContainer = html`
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.pageBlockModel as PageBlockModel}
+        .model=${this.pageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
@@ -192,7 +195,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .pageModel=${this.pageBlockModel as PageBlockModel}
+        .pageModel=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
