@@ -255,8 +255,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   ) {
     const { quill } = this;
     const { prefix } = context;
-    const isPrevented = tryMatchSpaceHotkey(page, model, quill, prefix, range);
-    return isPrevented;
+    return tryMatchSpaceHotkey(page, model, quill, prefix, range);
   }
 
   function onBackspace(e: KeyboardEvent, quill: Quill) {
