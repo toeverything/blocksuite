@@ -162,14 +162,6 @@ export function updateBlockType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
-    requestAnimationFrame(() =>
-      restoreSelection({
-        type: 'Block',
-        startOffset: 0,
-        endOffset: model.text?.length ?? 0,
-        models: [model],
-      })
-    );
     return [model];
   }
   // The lastNewId will not be null since we have checked models.length > 0
