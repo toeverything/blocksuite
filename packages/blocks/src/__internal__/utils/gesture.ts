@@ -200,10 +200,7 @@ export function initMouseEventHandlers(
     );
   };
 
-  const selectionChangeHandlerWithDebounce = debounce<
-    Event[],
-    (this: unknown, ...args: Event[]) => void
-  >(e => {
+  const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
       return;
