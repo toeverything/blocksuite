@@ -66,15 +66,15 @@ export class DragIndicator extends LitElement {
 
 export type DragHandleGetModelStateCallback = (
   blocks: BaseBlockModel[],
-  pageX: number,
-  pageY: number,
+  clientX: number,
+  clientY: number,
   skipX?: boolean
 ) => EditingState | null;
 
 export type DragHandleGetModelStateWithCursorCallback = (
   blocks: BaseBlockModel[],
-  pageX: number,
-  pageY: number,
+  clientX: number,
+  clientY: number,
   cursor: number,
   size?: number,
   skipX?: boolean,
@@ -186,8 +186,8 @@ export class DragHandle extends LitElement {
     return this._draggingElements?.map(e => e.model.id) ?? null;
   }
 
-  private _currentPageX = 0;
-  private _currentPageY = 0;
+  private _currentClientX = 0;
+  private _currentClientY = 0;
 
   /**
    * Current drag handle model state
@@ -216,8 +216,8 @@ export class DragHandle extends LitElement {
     }
     const modelState = this._getBlockEditingStateByPosition(
       this.getDropAllowedBlocks(null),
-      event.raw.pageX,
-      event.raw.pageY,
+      event.raw.clientX,
+      event.raw.clientY,
       true
     );
     if (modelState) {
@@ -244,12 +244,12 @@ export class DragHandle extends LitElement {
       this.style.top = `${rect.top - containerRect.top}px`;
       this.style.opacity = `${(
         1 -
-        (event.raw.pageX - rect.left) / rect.width
+        (event.raw.clientX - rect.left) / rect.width
       ).toFixed(2)}`;
       const top = Math.max(
         0,
         Math.min(
-          event.raw.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+          event.raw.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
           rect.height - DRAG_HANDLE_HEIGHT
         )
       );
@@ -337,9 +337,10 @@ export class DragHandle extends LitElement {
 
   private _onMouseMoveOnHost(e: MouseEvent) {
     if (isFirefox) {
-      this._currentPageX = e.pageX;
-      this._currentPageY = e.pageY;
+      this._currentClientX = e.clientX;
+      this._currentClientY = e.clientY;
     }
+
     if (!this._handleAnchorState) {
       return;
     }
@@ -347,7 +348,7 @@ export class DragHandle extends LitElement {
     const top = Math.max(
       0,
       Math.min(
-        e.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+        e.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
         rect.height - DRAG_HANDLE_HEIGHT - 6
       )
     );
@@ -387,8 +388,8 @@ export class DragHandle extends LitElement {
   private _onClick = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
       this.getDropAllowedBlocks(null),
-      e.pageX,
-      e.pageY,
+      e.clientX,
+      e.clientY,
       true
     );
     if (clickDragState) {
@@ -409,15 +410,15 @@ export class DragHandle extends LitElement {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
-    this._currentPageX = e.pageX;
-    this._currentPageY = e.pageY;
+    this._currentClientX = e.clientX;
+    this._currentClientY = e.clientY;
   };
 
   private _onDragStart = (e: DragEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
       this.getDropAllowedBlocks(null),
-      e.pageX,
-      e.pageY,
+      e.clientX,
+      e.clientY,
       true
     );
 
@@ -449,13 +450,13 @@ export class DragHandle extends LitElement {
 
   private _onDrag = (e: DragEvent) => {
     this._dragHandle.style.cursor = 'grabbing';
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
     if (this._cursor === null || !this._indicator) {
       return;
