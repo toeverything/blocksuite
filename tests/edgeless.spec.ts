@@ -15,10 +15,12 @@ import {
   addBasicBrushElement,
   addBasicRectShapeElement,
   clickBlockById,
+  doubleClickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
+  locatorPanButton,
   pressEnter,
   redoByClick,
   resizeElementByLeftTopHandle,
@@ -381,12 +383,7 @@ test('pan tool shortcut', async ({ page }) => {
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 
   await page.keyboard.down('Space');
-  const panButton = page
-    .locator('edgeless-tool-icon-button')
-    .filter({
-      hasText: 'Hand',
-    })
-    .locator('.icon-container');
+  const panButton = locatorPanButton(page);
   expect(await panButton.getAttribute('active')).toEqual('');
 
   await dragBetweenCoords(
@@ -411,22 +408,14 @@ test('pan tool shortcut', async ({ page }) => {
 
 test('pan tool shortcut when user is editing', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
+  const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await setMouseMode(page, 'default');
-  // first call to select frame
-  await focusRichText(page);
-  // second call to enter editing mode
-  await focusRichText(page);
+  await doubleClickBlockById(page, ids.frameId);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await page.keyboard.down('Space');
-  const panButton = page
-    .locator('edgeless-tool-icon-button')
-    .filter({
-      hasText: 'Hand',
-    })
-    .locator('.icon-container');
+  const panButton = locatorPanButton(page);
   expect(await panButton.getAttribute('active')).toBeNull();
 });

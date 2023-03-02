@@ -30,6 +30,14 @@ export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
 
+export function locatorPanButton(page: Page, innerContainer = true) {
+  const panButton = page.locator('edgeless-tool-icon-button').filter({
+    hasText: 'Hand',
+  });
+
+  return innerContainer ? panButton.locator('.icon-container') : panButton;
+}
+
 export async function setMouseMode(
   page: Page,
   mode: 'default' | 'shape' | 'brush' | 'pan'
@@ -53,9 +61,7 @@ export async function setMouseMode(
     });
     await brushButton.click();
   } else if (mode === 'pan') {
-    const panButton = page.locator('edgeless-tool-icon-button').filter({
-      hasText: 'Hand',
-    });
+    const panButton = locatorPanButton(page, false);
     await panButton.click();
   }
 }
