@@ -289,6 +289,12 @@ export class VEditor {
       if (rangeIndex >= index && rangeIndex < index + lineElement.textLength) {
         return [lineElement, rangeIndex - index] as const;
       }
+      if (
+        rangeIndex === index + lineElement.textLength &&
+        rangeIndex === this.yText.length
+      ) {
+        return [lineElement, rangeIndex - index] as const;
+      }
       index += lineElement.textLength + 1;
     }
 
@@ -680,7 +686,7 @@ export class VEditor {
 
     const { inputType, data } = event;
     const currentVRange = this._vRange;
-
+    console.log(event);
     if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
       this.signals.updateVRange.emit([
         {
@@ -839,7 +845,7 @@ export class VEditor {
     };
 
     // updates in lit are performed asynchronously
-    setTimeout(fn, 0);
+    requestAnimationFrame(fn);
   };
 
   private _transact(fn: () => void): void {

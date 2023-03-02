@@ -406,11 +406,20 @@ export function createKeyboardBindings(
         // if (context.format['code'] === true) {
         //   return ALLOW_DEFAULT;
         // }
+
+        // we need to insert text before show menu, because the Text node will be
+        // expired if we insert text after show menu because of the re-render
+        this.vEditor.insertText(range, context.event.key);
+        this.vEditor.setVRange({
+          index: range.index + 1,
+          length: 0,
+        });
+
         requestAnimationFrame(() => {
           const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
-        return ALLOW_DEFAULT;
+        return PREVENT_DEFAULT;
       },
     },
     ...createBracketAutoCompleteBindings(model),
@@ -425,13 +434,19 @@ export function createKeyDownHandler(
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};
 
+  const SHORTKEY = /Mac/i.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
+
+  function normalize(binding: KeyboardBinding): KeyboardBinding {
+    if (binding.shortKey) {
+      binding[SHORTKEY] = binding.shortKey;
+      delete binding.shortKey;
+    }
+    return binding;
+  }
+
   function match(evt: KeyboardEvent, binding: KeyboardBinding) {
     if (
-      (
-        ['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as Array<
-          'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey'
-        >
-      ).some(key => {
+      (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(key => {
         return !!binding[key] !== evt[key] && binding[key] !== null;
       })
     ) {
@@ -440,11 +455,16 @@ export function createKeyDownHandler(
     return binding.key === evt.key || binding.key === evt.which;
   }
 
-  function addBinding(binding: KeyboardBinding) {
+  function addBinding(keyBinding: KeyboardBinding) {
+    const binding = normalize(keyBinding);
     const keys = Array.isArray(binding.key) ? binding.key : [binding.key];
     keys.forEach(key => {
+      const singleBinding = {
+        ...binding,
+        key,
+      };
       bindingStore[key] = bindingStore[key] ?? [];
-      bindingStore[key].push(binding);
+      bindingStore[key].push(singleBinding);
     });
   }
 
@@ -454,7 +474,9 @@ export function createKeyDownHandler(
 
   function keyDownHandler(evt: KeyboardEvent) {
     if (evt.defaultPrevented || evt.isComposing) return;
-    const keyBindings = bindingStore[evt.key] ?? [];
+    const keyBindings = (bindingStore[evt.key] || []).concat(
+      bindingStore[evt.which] || []
+    );
     const matches = keyBindings.filter(binding => match(evt, binding));
     if (matches.length === 0) return;
 
@@ -484,6 +506,18 @@ export function createKeyDownHandler(
       event: evt,
     };
     const prevented = matches.some(binding => {
+      if (
+        binding.collapsed != null &&
+        binding.collapsed !== curContext.collapsed
+      ) {
+        return false;
+      }
+      if (binding.prefix != null && !binding.prefix.test(curContext.prefix)) {
+        return false;
+      }
+      if (binding.suffix != null && !binding.suffix.test(curContext.suffix)) {
+        return false;
+      }
       return (
         binding.handler.call(
           {
