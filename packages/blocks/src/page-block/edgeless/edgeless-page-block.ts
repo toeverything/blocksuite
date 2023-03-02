@@ -136,7 +136,8 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
-  // when using shortcut to enter pan mode, should roll back to last mouse mode
+  // when user enters pan mode by pressing 'Space',
+  // we should roll back to the last mouse mode once user releases the key;
   private _enterPanMouseModeByShortcut = false;
 
   private _bindHotkeys() {
