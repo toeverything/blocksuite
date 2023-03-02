@@ -11,7 +11,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
     return false;
   }
   if (
-    matchFlavours(model, ['affine:paragraph']) &&
+    matchFlavours(model, ['affine:paragraph'] as const) &&
     ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
   ) {
     return false;
@@ -82,16 +82,14 @@ export const throttle = <
   } as T;
 };
 
-export const debounce = <
-  Args extends unknown[],
-  T extends (this: unknown, ...args: Args) => void
->(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const debounce = <T extends (...args: any[]) => void>(
   fn: T,
   limit: number,
   { leading = true, trailing = true } = {}
 ): T => {
   let timer: ReturnType<typeof setTimeout> | null = null;
-  let lastArgs: Args | null = null;
+  let lastArgs: Parameters<T> | null = null;
 
   const setTimer = () => {
     if (lastArgs && trailing) {
@@ -103,13 +101,13 @@ export const debounce = <
     }
   };
 
-  return function (this: unknown, ...args: Parameters<T>) {
+  return function (...args: Parameters<T>) {
     if (timer) {
       lastArgs = args;
       clearTimeout(timer);
     }
     if (leading && !timer) {
-      fn.apply(this, args);
+      fn(...args);
     }
     timer = setTimeout(setTimer, limit);
   } as T;

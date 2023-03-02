@@ -1,12 +1,14 @@
 import type { KeyHandler } from 'hotkeys-js';
 import hotkeys from 'hotkeys-js';
 
-import { isCaptionElement, isInsideRichText, isTitleElement } from './query.js';
+import {
+  isCaptionElement,
+  isInsidePageTitle,
+  isInsideRichText,
+} from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
-  if (shouldFilterHotKey(event)) {
-    return false;
-  }
+  if (shouldFilterHotkey(event)) return false;
   return true;
 };
 
@@ -18,7 +20,7 @@ function isUndoRedo(event: KeyboardEvent) {
   return false;
 }
 
-function shouldFilterHotKey(event: KeyboardEvent) {
+function shouldFilterHotkey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
   if (!target) {
@@ -29,7 +31,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
   // - code block language search input
   // - image caption
   // - link create/edit popover
-  if (!isInsideRichText(event.target)) {
+  if (!isInsideRichText(event.target) && !isInsidePageTitle(event.target)) {
     // TODO Remove ad-hoc
     // This ad-hoc should be moved to the caption input for processing
     // Enter on caption should jump out of input
@@ -38,7 +40,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
       return false;
     }
     // undo/redo should work in page title
-    if (isTitleElement(event.target) && isUndoRedo(event)) {
+    if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
       event.preventDefault();
       return false;
     }
@@ -79,9 +81,14 @@ class HotkeyManager {
   addListener(
     hotkey: string,
     listener: KeyHandler,
-    scope: string = SCOPE.AFFINE_PAGE
+    options: {
+      scope?: string;
+      keyup?: boolean;
+      keydown?: boolean;
+    } = {}
   ): void {
-    this._hotkeys(hotkey, { scope }, listener);
+    const scope = options.scope ?? SCOPE.AFFINE_PAGE;
+    this._hotkeys(hotkey, { ...options, scope }, listener);
   }
 
   removeListener(

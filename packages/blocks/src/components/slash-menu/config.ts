@@ -3,7 +3,7 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
-  ImageIcon,
+  ImageIcon20,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -15,8 +15,9 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Page, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   resetNativeSelection,
   uploadImageFromLocal,
@@ -70,7 +71,26 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         .map<SlashItem>(({ name, icon, flavour, type }) => ({
           name,
           icon,
-          action: ({ model }) => updateBlockType([model], flavour, type),
+          action: ({ model }) => {
+            const newModels = updateBlockType([model], flavour, type);
+            // Reset selection if the target is code block
+            if (flavour === 'affine:code') {
+              if (newModels.length !== 1) {
+                throw new Error(
+                  "Failed to reset selection! New model length isn't 1"
+                );
+              }
+              const codeModel = newModels[0];
+              requestAnimationFrame(() =>
+                restoreSelection({
+                  type: 'Native',
+                  startOffset: 0,
+                  endOffset: 0,
+                  models: [codeModel],
+                })
+              );
+            }
+          },
         })),
       dividerItem,
     ],
@@ -111,7 +131,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Image',
-        icon: ImageIcon,
+        icon: ImageIcon20,
         divider: true,
         async action({ page, model }) {
           const parent = page.getParent(model);
@@ -185,7 +205,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: CopyIcon,
         divider: true,
         action: async ({ model }) => {
-          const curRange = getCurrentRange();
+          const curRange = getCurrentNativeRange();
           await copyBlock(model);
           resetNativeSelection(curRange);
           toast('Copied to clipboard');

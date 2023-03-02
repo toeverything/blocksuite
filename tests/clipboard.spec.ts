@@ -16,6 +16,7 @@ import {
   pressSpace,
   pressTab,
   resetHistory,
+  selectAllByKeyboard,
   setQuillSelection,
   setSelection,
   SHORT_KEY,
@@ -360,9 +361,7 @@ test('should keep first line format when pasted into a new line', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -400,9 +399,7 @@ test('should keep first line format when pasted into a new line', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -444,4 +441,40 @@ test('should keep first line format when pasted into a new line', async ({
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('cut should work for multi-block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'a');
+  await pressEnter(page);
+  await type(page, 'b');
+  await pressEnter(page);
+  await type(page, 'c');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertText(page, '\n');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, ['a', 'b', 'c']);
+});
+
+test('paste in block-level selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'foo');
+  await pressEnter(page);
+  await type(page, 'bar');
+  await pressEnter(page);
+  await type(page, 'hehe');
+  await pressEnter(page);
+  await setSelection(page, 3, 0, 3, 0);
+  await copyByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertText(page, 'bar');
 });

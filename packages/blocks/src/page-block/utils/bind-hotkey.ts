@@ -1,38 +1,35 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertEquals,
+  assertExists,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import {
-  getBlockElementByModel,
-  hasNativeSelection,
-  hotkey,
-} from '../../__internal__/index.js';
+import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
-  BlockComponentElement,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
-  getCurrentRange,
+  getCurrentNativeRange,
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
-  getStartModelBySelection,
-  isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
-import {
-  handleBlockSelectionBatchDelete,
-  handleMultiBlockBackspace,
-  handleSelectAll,
-} from '../utils/index.js';
+import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
-import { updateSelectedTextType } from './container-operations.js';
+import {
+  deleteModelsByRange,
+  updateBlockType,
+} from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -52,7 +49,11 @@ export function bindCommonHotkey(page: Page) {
       return;
     }
     hotkey.addListener(hotkeyStr, () => {
-      updateSelectedTextType(flavour, type);
+      const blockRange = getCurrentBlockRange(page);
+      if (!blockRange) {
+        return;
+      }
+      updateBlockType(blockRange.models, flavour, type);
     });
   });
 
@@ -83,14 +84,44 @@ export function removeCommonHotKey() {
 
 export function handleUp(
   e: KeyboardEvent,
+  page: Page,
   selection?: DefaultSelectionManager
 ) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  if (blockRange.type === 'Block') {
+    if (!selection) {
+      console.error(
+        'Failed to handle up: selection is not provided',
+        blockRange
+      );
+      return;
+    }
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const pageBlock = getDefaultPageBlock(selectedModel);
+    selection.clear();
+    focusPreviousBlock(
+      selectedModel,
+      pageBlock.lastSelectionPosition instanceof Point
+        ? pageBlock.lastSelectionPosition
+        : 'end'
+    );
+    e.preventDefault();
+    return;
+  }
   // Assume the native selection is collapsed
-  if (hasNativeSelection()) {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
+  if (blockRange.type === 'Native') {
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle up! range is not collapsed'
+    );
+    const model = blockRange.models[0];
     const previousBlock = getPreviousBlock(model);
-    const range = getCurrentRange();
+    const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock) {
       focusTitle();
@@ -129,33 +160,58 @@ export function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
-  if (selection) {
-    const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const page = getDefaultPageBlock(selectedModel);
-    selection.clear();
-    focusPreviousBlock(
-      selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
-        : 'end'
-    );
-    e.preventDefault();
-  }
 }
 
 export function handleDown(
   e: KeyboardEvent,
+  page: Page,
   selection?: DefaultSelectionManager
 ) {
-  // Assume the native selection is collapsed
-  if (hasNativeSelection()) {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
-    if (matchFlavours(model, ['affine:code'])) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  if (blockRange.type === 'Block' && selection) {
+    if (!selection) {
+      console.error(
+        'Failed to handle down: selection is not provided',
+        blockRange
+      );
       return;
     }
-    const range = getCurrentRange();
+    const { state } = selection;
+    const lastEle = state.selectedBlocks.at(-1);
+    if (!lastEle) {
+      throw new Error(
+        "Failed to handleDown! Can't find last selected element!"
+      );
+    }
+    const selectedModel = getModelByElement(lastEle);
+    selection.clear();
+    const page = getDefaultPageBlock(selectedModel);
+    focusNextBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'start'
+    );
+    e.preventDefault();
+  }
+  // Assume the native selection is collapsed
+  if (blockRange.type === 'Native') {
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle down! range is not collapsed'
+    );
+    const model = blockRange.models[0];
+    if (
+      matchFlavours(model, ['affine:code'] as const) ||
+      matchFlavours(model, ['affine:page'] as const)
+    ) {
+      return;
+    }
+    const range = getCurrentNativeRange();
     const atLineEdge = isAtLineEdge(range);
     const { left, bottom } = range.getBoundingClientRect();
     const isAtEmptyLine = left === 0 && bottom === 0;
@@ -192,32 +248,13 @@ export function handleDown(
     focusNextBlock(model, new Point(left, bottom));
     return;
   }
-  if (selection) {
-    const { state } = selection;
-    const lastEle = state.selectedBlocks.at(-1);
-    if (!lastEle) {
-      throw new Error(
-        "Failed to handleDown! Can't find last selected element!"
-      );
-    }
-    const selectedModel = getModelByElement(lastEle);
-    selection.clear();
-    const page = getDefaultPageBlock(selectedModel);
-    focusNextBlock(
-      selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
-        : 'start'
-    );
-    e.preventDefault();
-  }
   return;
 }
 
 function handleTab(page: Page, selection: DefaultSelectionManager) {
   switch (selection.state.type) {
     case 'native': {
-      const range = getCurrentRange();
+      const range = getCurrentNativeRange();
       const start = range.startContainer;
       const end = range.endContainer;
       const startModel = getModelByElement(start.parentElement as HTMLElement);
@@ -242,32 +279,11 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         getModelByElement(block)
       );
       handleMultiBlockIndent(page, models);
-
       requestAnimationFrame(() => {
-        selection.state.type = 'block';
-        // get fresh elements
-        selection.state.selectedBlocks = models
-          .map(model => getBlockElementByModel(model))
-          .filter(block => block !== null) as BlockComponentElement[];
-        selection.refreshSelectedBlocksRects();
+        selection.refreshSelectedBlocksRectsByModels(models);
       });
-      selection.clear();
       break;
     }
-  }
-}
-
-function isDispatchFromCodeBlock(e: KeyboardEvent) {
-  if (!e.target || !(e.target instanceof Element)) {
-    return false;
-  }
-  try {
-    // if the target is `body`, it will throw an error
-    const model = getModelByElement(e.target);
-    return matchFlavours(model, ['affine:code']);
-  } catch (error) {
-    // just check failed, no need to handle
-    return false;
   }
 }
 
@@ -295,35 +311,14 @@ export function bindHotkeys(
   bindCommonHotkey(page);
 
   hotkey.addListener(ENTER, e => {
-    const targetInput = e.target;
-    // TODO caption ad-hoc should be moved to the caption input for processing
-    const isCaption = isCaptionElement(targetInput);
-    const { state } = selection;
-    let element: Element | null = null;
-
-    // select blocks or focus caption input, then enter will create a new block.
-    if (state.type === 'block') {
-      const { selectedBlocks } = state;
-      if (selectedBlocks.length) {
-        element = selectedBlocks[selectedBlocks.length - 1];
-      }
-    } else if (state.type === 'embed') {
-      const { selectedEmbeds } = state;
-      if (selectedEmbeds.length) {
-        element = selectedEmbeds[selectedEmbeds.length - 1];
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-
-    if (!element && isCaption) {
-      element = targetInput;
-    }
-
-    if (element) {
-      e.stopPropagation();
-      e.preventDefault();
-      const model = getModelByElement(element);
-      const parentModel = page.getParent(model);
-      const index = parentModel?.children.indexOf(model);
+    if (blockRange.type === 'Block') {
+      const endModel = blockRange.models[blockRange.models.length - 1];
+      const parentModel = page.getParent(endModel);
+      const index = parentModel?.children.indexOf(endModel);
       assertExists(index);
       assertExists(parentModel);
       const id = page.addBlockByFlavour(
@@ -336,50 +331,28 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
+    // Native selection
+    // Avoid print extra enter
+    e.preventDefault();
+    const startModel = blockRange.models[0];
+    startModel.text?.delete(
+      blockRange.startOffset,
+      startModel.text.length - blockRange.startOffset
+    );
+    const endModel = blockRange.models[blockRange.models.length - 1];
+    endModel.text?.delete(0, blockRange.endOffset);
+    blockRange.models.slice(1, -1).forEach(model => {
+      page.deleteBlock(model);
+    });
+    focusBlockByModel(endModel, 'start');
+    return;
   });
 
   hotkey.addListener(BACKSPACE, e => {
-    const { state } = selection;
-    if (state.type === 'none') {
-      // Will be handled in the `keyboard.onBackspace` function
-      return;
-    }
-    if (state.type === 'native') {
-      handleMultiBlockBackspace(page, e);
-      return;
-    }
-
-    let blocks: Element[] | null = null;
-    if (state.type === 'block') {
-      // XXX Ad-hoc for code block
-      // At the beginning of the code block,
-      // the backspace will selected the block first.
-      // The select logic already processed in the `handleLineStartBackspace` function.
-      // So we need to prevent the default delete behavior.
-      if (isDispatchFromCodeBlock(e)) {
-        return;
-      }
-      const { selectedBlocks } = state;
-      if (selectedBlocks.length) {
-        blocks = selectedBlocks;
-      }
-    } else if (state.type === 'embed') {
-      const { selectedEmbeds } = state;
-      if (selectedEmbeds.length) {
-        blocks = selectedEmbeds;
-      }
-    }
-
-    if (blocks && blocks.length) {
-      e.preventDefault();
-      // delete blocks
-      handleBlockSelectionBatchDelete(
-        page,
-        blocks.map(block => getModelByElement(block))
-      );
-      selection.clear();
-      return;
-    }
+    // delete blocks
+    deleteModelsByRange(page);
+    e.preventDefault();
+    return;
   });
 
   hotkey.addListener(SELECT_ALL, e => {
@@ -389,62 +362,46 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(e, selection);
+    handleUp(e, page, selection);
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(e, selection);
+    handleDown(e, page, selection);
   });
   hotkey.addListener(LEFT, e => {
-    let model: BaseBlockModel | null = null;
-    const {
-      state: { selectedBlocks, type },
-    } = selection;
-    if (
-      selectedBlocks.length &&
-      !(type === 'native' && window.getSelection()?.rangeCount)
-    ) {
-      model = getModelByElement(selection.state.selectedBlocks[0]);
-      signals.updateSelectedRects.emit([]);
-      selection.state.clear();
-      e.preventDefault();
-    } else {
-      const range = window.getSelection()?.getRangeAt(0);
-      if (range && range.collapsed && range.startOffset === 0) {
-        model = getStartModelBySelection();
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-    model && focusPreviousBlock(model, 'end');
+    if (blockRange.type === 'Block') {
+      // Do nothing
+      return;
+    }
+    // Assume native selection is collapsed
+    if (blockRange.models.length > 1) {
+      throw new Error(
+        "Failed to handle arrow left! Native selection can't be multi-block!"
+      );
+    }
+    focusPreviousBlock(blockRange.models[0], 'end');
+    return;
   });
   hotkey.addListener(RIGHT, e => {
-    let model: BaseBlockModel | null = null;
-    const {
-      state: { selectedBlocks, type },
-    } = selection;
-    if (
-      selectedBlocks.length &&
-      !(type === 'native' && window.getSelection()?.rangeCount)
-    ) {
-      model = getModelByElement(
-        selection.state.selectedBlocks[
-          selection.state.selectedBlocks.length - 1
-        ]
-      );
-      signals.updateSelectedRects.emit([]);
-      selection.state.clear();
-      e.preventDefault();
-    } else {
-      const range = window.getSelection()?.getRangeAt(0);
-      const textModel = getStartModelBySelection();
-      if (
-        range &&
-        range.collapsed &&
-        range.startOffset === textModel.text?.length
-      ) {
-        // handleUp(this.selection, this.signals);
-        model = getStartModelBySelection();
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-    model && focusNextBlock(model, 'start');
+    if (blockRange.type === 'Block') {
+      // Do nothing
+      return;
+    }
+    // Assume native selection is collapsed
+    if (blockRange.models.length > 1) {
+      throw new Error(
+        "Failed to handle arrow right! Native selection can't be multi-block!"
+      );
+    }
+    focusNextBlock(blockRange.models[0], 'start');
+    return;
   });
 
   hotkey.addListener(TAB, () => handleTab(page, selection));

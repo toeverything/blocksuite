@@ -22,11 +22,14 @@ import {
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowLeft,
+  pressBackspace,
   pressEnter,
   pressShiftTab,
   pressTab,
   redoByKeyboard,
   resetHistory,
+  shamefullyBlurActiveElement,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -207,17 +210,15 @@ test('cursor move up and down', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  for (let i = 0; i < 3; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 3);
+
   await page.keyboard.press('ArrowUp');
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
   expect(indexOne).toBe(14);
   expect(textOne).toBe('arrow down test 1\n');
-  for (let i = 0; i < 3; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+
+  await pressArrowLeft(page, 3);
   await page.keyboard.press('ArrowDown');
   const indexTwo = await getQuillSelectionIndex(page);
   const textTwo = await getQuillSelectionText(page);
@@ -310,7 +311,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through frame', async ({ page }) => {
+test('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await addFrameByClick(page);
@@ -354,15 +355,9 @@ test('select all and delete', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-
-  await page.evaluate(() => {
-    const defaultPage = document.querySelector('affine-default-page')!;
-    const rect = defaultPage.getBoundingClientRect();
-    // dont focus any block
-    defaultPage.selection.state.focusedBlockIndex = -1;
-    defaultPage.selection.selectBlocksByRect(rect);
-  });
-
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
   await type(page, 'abc');
@@ -376,7 +371,7 @@ test('select all text with dragging and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
@@ -437,7 +432,7 @@ test('select text in the same line with dragging leftward and move outside the a
       },
     }
   );
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   await assertRichTexts(page, ['123', 'abc', '789']);
 });
@@ -482,7 +477,7 @@ test('select text in the same line with dragging rightward and move outside the 
       },
     }
   );
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
@@ -521,7 +516,7 @@ async function clickListIcon(page: Page, i = 0) {
   await locator.click();
 }
 
-test('click the list icon to select', async ({ page }) => {
+test('click the list icon can select and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -534,16 +529,23 @@ test('click the list icon to select', async ({ page }) => {
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
-  await clickListIcon(page, 4);
-  await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
-  // FIXME
-  // This should be ['123', '123', '456', '789'] but there is another bug affecting it
-  await clickListIcon(page, 1);
-  await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['123', '\n', '456', '789']);
-  // FIXME
-  // This should be ['123','456','789'] but there is another bug affecting it
+});
+
+test('click the list icon can select and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await clickListIcon(page, 0);
+  await pressBackspace(page);
+  await shamefullyBlurActiveElement(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['\n', '456', '789']);
+  await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['\n', '\n']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {
@@ -623,13 +625,8 @@ test('selection on heavy page', async ({ page }) => {
       },
     }
   );
-  const rectNum = await page.evaluate(() => {
-    const container = document.querySelector(
-      '.affine-page-selected-rects-container'
-    );
-    return container?.children.length;
-  });
-  expect(rectNum).toBe(5);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(5);
 });
 
 // Refs: https://github.com/toeverything/blocksuite/issues/1004
@@ -710,17 +707,14 @@ test('the cursor should move to closest editor block when clicking outside conta
     return secondRichText.getBoundingClientRect();
   });
 
-  await page.mouse.move(rect.left - 50, rect.top + 5);
-  await page.mouse.down();
-  await page.mouse.up();
+  await page.mouse.click(rect.left - 50, rect.top + 5);
 
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123456', '789']);
 
   await undoByKeyboard(page);
-  await page.mouse.move(rect.right + 50, rect.top + 5);
-  await page.mouse.down();
-  await page.mouse.up();
+  await page.waitForTimeout(50);
+  await page.mouse.click(rect.right + 50, rect.top + 5);
 
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45', '789']);
@@ -856,9 +850,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await waitNextFrame(page);
   await doubleClickBlockById(page, ids.frameId);
-  await page.mouse.click(0, 0);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });
@@ -994,9 +986,7 @@ test('should indent native multi-selection block', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -1035,9 +1025,7 @@ test('should indent multi-selection block', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -1125,19 +1113,16 @@ test('should keep selection state when scrolling backward', async ({
     }
   );
 
-  const [total, scrollTop] = await page.evaluate(() => {
+  const scrollTop = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
-  expect(total).toBe(3 + 5 + 3);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(3 + 5 + 3);
   expect(scrollTop).toBe(0);
 });
 
@@ -1204,19 +1189,15 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     }
   );
 
-  const [total, scrollTop] = await page.evaluate(() => {
+  const scrollTop = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
-
-  expect(total).toBe(3 + 5 + 3);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(3 + 5 + 3);
   // See https://jestjs.io/docs/expect#tobeclosetonumber-numdigits
   // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2 = 0.511646496140377
   expect(scrollTop).toBeCloseTo(distance, -0.01);
@@ -1290,16 +1271,14 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   );
 
   // get count with scroll wheel
-  const [count0, scrollTop0] = await page.evaluate(() => {
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
+  const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   await page.mouse.move(0, 0);
@@ -1327,16 +1306,13 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   );
 
   // get count with moving mouse
-  const [count1, scrollTop1] = await page.evaluate(() => {
+  const count1 = await rects.count();
+  const scrollTop1 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   expect(count0).toBe(count1);
@@ -1410,16 +1386,14 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   );
 
   // get count with scroll wheel
-  const [count0, scrollTop0] = await page.evaluate(() => {
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
+  const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   await page.mouse.move(0, 0);
@@ -1446,16 +1420,13 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   );
 
   // get count with moving mouse
-  const [count1, scrollTop1] = await page.evaluate(() => {
+  const count1 = await rects.count();
+  const scrollTop1 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   expect(count0).toBe(count1);
@@ -1519,30 +1490,25 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     }
   );
 
-  const [count0, scrollTop0] = await page.evaluate(() => {
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
+  const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   await page.mouse.click(viewport.right, distance / 2);
 
-  const [count1, scrollTop1] = await page.evaluate(() => {
+  const count1 = await rects.count();
+  const scrollTop1 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   expect(count0).toBeGreaterThan(0);
@@ -1607,31 +1573,26 @@ test('should not clear selected rects when scrolling the wheel', async ({
     }
   );
 
-  const [count0, scrollTop0] = await page.evaluate(() => {
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
+  const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   await page.mouse.wheel(viewport.right, -distance / 4);
   await page.waitForTimeout(250);
 
-  const [count1, scrollTop1] = await page.evaluate(() => {
+  const count1 = await rects.count();
+  const scrollTop1 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   expect(count0).toBeGreaterThan(0);
@@ -1714,16 +1675,14 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     }
   );
 
-  const [count0, scrollTop0] = await page.evaluate(() => {
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
+  const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   await page.mouse.click(viewport.right, first.top + distance / 2);
@@ -1740,16 +1699,13 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   });
   await page.waitForTimeout(250);
 
-  const [count1, scrollTop1] = await page.evaluate(() => {
+  const count1 = await rects.count();
+  const scrollTop1 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport.scrollTop;
   });
 
   expect(count0).toBe(count1);
@@ -1785,16 +1741,8 @@ test('should clear block selection before native selection', async ({
     }
   );
 
-  const count0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return (
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0
-    );
-  });
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const count0 = await rects.count();
 
   await dragBetweenIndices(
     page,
@@ -1804,17 +1752,7 @@ test('should clear block selection before native selection', async ({
     { x: 0, y: 0 }
   );
 
-  const count1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return (
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0
-    );
-  });
-
+  const count1 = await rects.count();
   const textCount = await page.evaluate(() => {
     return window.getSelection()?.rangeCount || 0;
   });
@@ -1863,24 +1801,14 @@ test('should clear native selection before block selection', async ({
     }
   );
 
-  const blockCount = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return (
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0
-    );
-  });
-
   const textCount = await page.evaluate(() => {
     return window.getSelection()?.rangeCount || 0;
   });
 
   expect(text0).toBe('456\n');
   expect(textCount).toBe(0);
-  expect(blockCount).toBe(1);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(1);
 });
 
 test('should not be misaligned when the editor container has padding or margin', async ({
@@ -1930,18 +1858,8 @@ test('should not be misaligned when the editor container has padding or margin',
     }
   );
 
-  const count = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return (
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0
-    );
-  });
-
-  expect(count).toBe(3);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(3);
 });
 
 // ↑
@@ -1953,7 +1871,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 10; i++) {
     await pressEnter(page);
   }
 
@@ -1963,7 +1881,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
+  const data = new Array(9).fill(`
 `);
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
@@ -2000,14 +1918,14 @@ test('should keep native range selection when scrolling backward with the scroll
 
   await dragBetweenIndices(
     page,
-    [10, 3],
-    [10, 0],
+    [14, 3],
+    [14, 0],
     { x: 0, y: 0 },
     { x: 0, y: 0 },
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, -blockHeight * 2);
+        await page.mouse.wheel(0, -blockHeight * 4);
         await page.waitForTimeout(250);
       },
     }
@@ -2026,7 +1944,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 10; i++) {
     await pressEnter(page);
   }
 
@@ -2036,7 +1954,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
+  const data = new Array(9).fill(`
 `);
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
@@ -2078,7 +1996,7 @@ test('should keep native range selection when scrolling forward with the scroll 
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, blockHeight * 2);
+        await page.mouse.wheel(0, blockHeight * 3);
         await page.waitForTimeout(250);
       },
     }
@@ -2111,23 +2029,13 @@ test('undo should clear block selection', async ({ page }) => {
   );
 
   await redoByKeyboard(page);
-  let selectedBlocks = await page.evaluate(() => {
-    const selectedBlocks = document.querySelectorAll(
-      '.affine-page-selected-rects-container > *'
-    );
-    return Array.from(selectedBlocks).length === 1;
-  });
-  expect(selectedBlocks).toBe(true);
+  const selectedBlocks = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(selectedBlocks).toHaveCount(1);
 
   await undoByKeyboard(page);
-
-  selectedBlocks = await page.evaluate(() => {
-    const selectedBlocks = document.querySelectorAll(
-      '.affine-page-selected-rects-container > *'
-    );
-    return Array.from(selectedBlocks).length === 0;
-  });
-  expect(selectedBlocks).toBe(true);
+  await expect(selectedBlocks).toHaveCount(0);
 });
 
 test('should not draw rect for sub selected blocks when entering tab key', async ({
@@ -2150,9 +2058,8 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -2175,11 +2082,24 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await page.mouse.click(coord.x - 40, coord.y - 40);
   await pressTab(page);
 
-  const rectNum = await page.evaluate(() => {
-    const container = document.querySelector(
-      '.affine-page-selected-rects-container'
-    );
-    return container?.children.length;
-  });
-  expect(rectNum).toBe(1);
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(1);
+});
+
+test('should blur rich-text first when block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await expect(page.locator('*:focus')).toHaveCount(1);
+
+  const coord = await getIndexCoordinate(page, [1, 2]);
+  await dragBetweenCoords(
+    page,
+    { x: coord.x - 30, y: coord.y - 10 },
+    { x: coord.x + 20, y: coord.y + 50 }
+  );
+
+  await expect(page.locator('*:focus')).toHaveCount(0);
 });

@@ -1,8 +1,8 @@
 export * from './consts/affine-style-consts.js';
 export * from './consts/blockhub.js';
 
-export const BLOCK_ID_ATTR = 'data-block-id' as const;
-export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading' as const;
+export const BLOCK_ID_ATTR = 'data-block-id';
+export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';
 export const PREVENT_DEFAULT = false;
 export const ALLOW_DEFAULT = true;
 
@@ -27,3 +27,4 @@ export const MOVE_DETECT_THRESHOLD = 2;
 export const SCROLL_THRESHOLD = 100;
 
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
+export const DRAG_HANDLE_OFFSET_LEFT = 20;

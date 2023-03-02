@@ -3,12 +3,9 @@ import './format-bar-node.js';
 
 import { Page, Signal } from '@blocksuite/store';
 
-import {
-  getCurrentBlockRange,
-  getCurrentRange,
-  getDefaultPageBlock,
-  throttle,
-} from '../../__internal__/utils/index.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
+import { throttle } from '../../__internal__/utils/std.js';
 import {
   calcPositionPointByRange,
   calcSafeCoordinate,
@@ -26,12 +23,13 @@ export const showFormatQuickBar = async ({
   abortController = new AbortController(),
 }: {
   page: Page;
-  anchorEl?:
-    | {
-        getBoundingClientRect: () => DOMRect;
-        // contextElement?: Element;
-      }
-    | Range;
+  anchorEl: {
+    getBoundingClientRect: () => {
+      x: number;
+      y: number;
+    };
+    // contextElement?: Element;
+  };
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -48,7 +46,6 @@ export const showFormatQuickBar = async ({
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
-  formatQuickBar.direction = direction;
 
   formatQuickBarInstance = formatQuickBar;
   abortController.signal.addEventListener('abort', () => {
@@ -59,22 +56,10 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
-    const positioningEl = anchorEl ?? getCurrentRange();
-    const dir = formatQuickBar.direction;
-
     const positioningPoint =
-      positioningEl instanceof Range
-        ? calcPositionPointByRange(positioningEl, dir)
-        : (() => {
-            const rect = positioningEl.getBoundingClientRect();
-            const x = dir.includes('center')
-              ? rect.left + rect.width / 2
-              : dir.includes('left')
-              ? rect.left
-              : rect.right;
-            const y = dir.includes('bottom') ? rect.bottom : rect.top;
-            return { x, y };
-          })();
+      anchorEl instanceof Range
+        ? calcPositionPointByRange(anchorEl, direction)
+        : anchorEl.getBoundingClientRect();
 
     // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
     const boundaryRect = document.body.getBoundingClientRect();
@@ -82,7 +67,7 @@ export const showFormatQuickBar = async ({
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
     // Add offset to avoid the quick bar being covered by the window border
     const gapY = 5;
-    const isBottom = dir.includes('bottom');
+    const isBottom = direction.includes('bottom');
     const safeCoordinate = calcSafeCoordinate({
       positioningPoint,
       objRect: formatBarRect,
@@ -129,8 +114,8 @@ export const showFormatQuickBar = async ({
     }
     // If the selection is collapsed, abort the format quick bar
     if (
-      blockRange.type &&
-      blockRange.startModel === blockRange.endModel &&
+      blockRange.type === 'Native' &&
+      blockRange.models.length === 1 &&
       blockRange.startOffset === blockRange.endOffset
     ) {
       abortController.abort();

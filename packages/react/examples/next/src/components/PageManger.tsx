@@ -98,7 +98,7 @@ export const PageManger = () => {
           page={() => currentPage}
           onInit={async (page, editor) => {
             const pageBlockId = page.addBlockByFlavour('affine:page', {
-              title: 'Welcome to BlockSuite React example',
+              title: new page.Text('Welcome to BlockSuite React example'),
             });
             page.addBlockByFlavour('affine:surface', {}, null);
             const frameId = page.addBlockByFlavour(

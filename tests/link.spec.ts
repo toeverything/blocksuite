@@ -72,9 +72,7 @@ test('basic link', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text={
@@ -98,7 +96,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       const { page } = window;
       const pageId = page.addBlock({
         flavour: 'affine:page',
-        title: 'title',
+        title: new page.Text('title'),
       });
       const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
 

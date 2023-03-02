@@ -11,7 +11,7 @@ import {
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
-  getCurrentRange,
+  getCurrentNativeRange,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
@@ -34,7 +34,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
+  const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
   const blockProps = shouldInheritFlavour
     ? {
         flavour: model.flavour,
@@ -83,7 +83,10 @@ export function handleBlockSplit(
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.children.length > 0
+  ) {
     newParent = model;
     newBlockIndex = 0;
   }
@@ -228,7 +231,7 @@ export function handleUnindent(
   capture = true
 ) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:frame'])) {
+  if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
     // Topmost, do nothing
     return;
   }
@@ -274,7 +277,7 @@ export function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a code block,
   // select the code block itself
-  if (matchFlavours(model, ['affine:code'])) {
+  if (matchFlavours(model, ['affine:code'] as const)) {
     focusBlockByModel(model);
     return;
   }
@@ -285,7 +288,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  if (matchFlavours(model, ['affine:list'])) {
+  if (matchFlavours(model, ['affine:list'] as const)) {
     const parent = page.getParent(model);
     if (!parent) return;
 
@@ -309,7 +312,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (matchFlavours(model, ['affine:paragraph'])) {
+  if (matchFlavours(model, ['affine:paragraph'] as const)) {
     if (model.type !== 'text') {
       // Try to switch to normal text
       page.captureSync();
@@ -318,14 +321,14 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     }
 
     const parent = page.getParent(model);
-    if (!parent || matchFlavours(parent, ['affine:frame'])) {
+    if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
       const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
         : null;
       if (
         previousSiblingParent &&
-        matchFlavours(previousSiblingParent, ['affine:database'])
+        matchFlavours(previousSiblingParent, ['affine:database'] as const)
       ) {
         window.requestAnimationFrame(() => {
           focusBlockByModel(previousSiblingParent, 'end');
@@ -337,7 +340,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         });
       } else if (
         previousSibling &&
-        matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
+        matchFlavours(previousSibling, [
+          'affine:paragraph',
+          'affine:list',
+        ] as const)
       ) {
         page.captureSync();
         const preTextLength = previousSibling.text?.length || 0;
@@ -353,7 +359,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           'affine:embed',
           'affine:divider',
           'affine:code',
-        ])
+        ] as const)
       ) {
         window.requestAnimationFrame(() => {
           focusBlockByModel(previousSibling);
@@ -367,18 +373,21 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         // No previous sibling, it's the first block
         // Try to merge with the title
 
-        const text = model.text?.toString() || '';
+        const text = model.text;
         const titleElement = document.querySelector(
           '.affine-default-page-block-title'
         ) as HTMLTextAreaElement;
         const pageModel = getModelByElement(titleElement) as PageBlockModel;
-        const oldTitle = pageModel.title;
-        const title = oldTitle + text;
+        const title = pageModel.title;
+
         page.captureSync();
+        let textLength = 0;
+        if (text) {
+          textLength = text.length;
+          title.join(text);
+        }
         page.deleteBlock(model);
-        // model.text?.delete(0, model.text.length);
-        page.updateBlock(pageModel, { title });
-        focusTitle(oldTitle.length);
+        focusTitle(title.length - textLength);
       }
     }
 
@@ -402,7 +411,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   if (!range.collapsed) {
     // If the range is not collapsed,
     // we assume that the caret is at the start of the range.
@@ -424,7 +433,7 @@ export function handleKeyDown(
   event: KeyboardEvent,
   editableContainer: HTMLElement
 ) {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   if (!range.collapsed) {
     // If the range is not collapsed,
     // we assume that the caret is at the end of the range.

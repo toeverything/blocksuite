@@ -3,17 +3,21 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
-import type { IBound } from './consts.js';
+import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
+import type { ShapeProps } from './elements/index.js';
 import {
+  BrushElement,
   DebugElement,
+  ElementCtors,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
+import { getCommonBound } from './utils/bound.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -29,13 +33,18 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  addShapeElement(bound: IBound, shapeType: ShapeType, color: string) {
+  getElementsBound(): IBound | null {
+    return getCommonBound([...this._elements.values()]);
+  }
+
+  addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
-    element.color = color as `#${string}`;
+    setXYWH(element, bound);
+    if (props) {
+      ShapeElement.updateProps(element, props);
+    }
 
     return this._addElement(element);
   }
@@ -43,20 +52,54 @@ export class SurfaceManager {
   addDebugElement(bound: IBound, color: string): string {
     const id = nanoid(10);
     const element = new DebugElement(id);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
+    setXYWH(element, bound);
     element.color = color;
 
     return this._addElement(element);
   }
 
-  setElementBound(id: string, bound: IBound) {
+  addBrushElement(
+    bound: IBound,
+    points: number[][] = [],
+    props: {
+      color?: Color;
+      lineWidth?: number;
+    } = {}
+  ): string {
+    const id = nanoid(10);
+    const element = new BrushElement(id);
+
+    setXYWH(element, bound);
+    element.points = points;
+    element.color = props.color ?? '#000000';
+    element.lineWidth = props.lineWidth ?? 4;
+
+    return this._addElement(element);
+  }
+
+  updateBrushElement(id: string, bound: IBound, points: number[][]) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      const xywh = serializeXYWH(bound.x, bound.y, bound.w, bound.h);
-      yElement.set('xywh', xywh);
+      yElement.set('points', JSON.stringify(points));
+      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+    });
+  }
+
+  setElementBound(id: string, bound: IBound) {
+    this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      const ElementCtor = ElementCtors[element.type];
+      assertExists(ElementCtor);
+
+      const props = ElementCtor.getBoundProps(element, bound);
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      for (const [key, value] of Object.entries(props)) {
+        yElement.set(key, value);
+      }
     });
   }
 
@@ -64,6 +107,10 @@ export class SurfaceManager {
     this._transact(() => {
       this._yElements.delete(id);
     });
+  }
+
+  hasElement(id: string) {
+    return this._yElements.has(id);
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
@@ -79,7 +126,7 @@ export class SurfaceManager {
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
-    const bound: IBound = { x, y, w: 1, h: 1 };
+    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
       return element.hitTest(x, y, options);
@@ -100,17 +147,9 @@ export class SurfaceManager {
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
-    let element: PhasorElement | null = null;
-    switch (type) {
-      case 'debug': {
-        element = DebugElement.deserialize(yElement.toJSON());
-        break;
-      }
-      case 'shape': {
-        element = ShapeElement.deserialize(yElement.toJSON());
-        break;
-      }
-    }
+    const ElementCtor = ElementCtors[type];
+    assertExists(ElementCtor);
+    const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);
 
     this._renderer.addElement(element);
@@ -193,7 +232,14 @@ export class SurfaceManager {
 
           // refresh grid manager
           this._renderer.removeElement(element);
-          element.setBound(x, y, w, h);
+          setXYWH(element, { x, y, w, h });
+          this._renderer.addElement(element);
+        }
+
+        if (key === 'points') {
+          const points: number[][] = JSON.parse(yElement.get(key) as string);
+          this._renderer.removeElement(element);
+          (element as BrushElement).points = points;
           this._renderer.addElement(element);
         }
       }

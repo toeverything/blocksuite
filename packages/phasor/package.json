@@ -1,11 +1,12 @@
 {
   "name": "@blocksuite/phasor",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha.0",
   "description": "Hybrid canvas renderer.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "test:unit": "vitest --run",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
   },

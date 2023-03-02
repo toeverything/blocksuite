@@ -1,7 +1,7 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getCurrentRange, resetNativeSelection } from '../index.js';
+import { getCurrentNativeRange, resetNativeSelection } from '../index.js';
 import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {
@@ -100,7 +100,7 @@ export function createBracketAutoCompleteBindings(
         model.text.insert(pair.left, range.index);
         model.text.insert(pair.right, range.index + range.length + 1);
 
-        const curRange = getCurrentRange();
+        const curRange = getCurrentNativeRange();
         // move cursor to the end of the inserted text
         curRange.setStart(curRange.startContainer, curRange.startOffset + 1);
         resetNativeSelection(curRange);
@@ -108,5 +108,15 @@ export function createBracketAutoCompleteBindings(
       },
     };
   });
+
+  bindings['backtick'] = {
+    key: '`',
+    collapsed: false,
+    handler(range, context) {
+      if (!model.text) return ALLOW_DEFAULT;
+      model.text.format(range.index, range.length, { code: true });
+      return PREVENT_DEFAULT;
+    },
+  };
   return bindings;
 }

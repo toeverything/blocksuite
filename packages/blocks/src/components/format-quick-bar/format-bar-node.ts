@@ -19,11 +19,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getCurrentBlockRange,
-  getRichTextByModel,
-} from '../../__internal__/utils/index.js';
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
-  DragDirection,
   getCurrentCombinedFormat,
   updateBlockType,
 } from '../../page-block/utils/index.js';
@@ -51,29 +51,25 @@ export class FormatQuickBar extends LitElement {
   @property()
   positionUpdated = new Signal();
 
-  // for update position
-  @property()
-  direction!: DragDirection;
+  @state()
+  private _models: BaseBlockModel[] = [];
 
   @state()
-  models: BaseBlockModel[] = [];
+  private _paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
-  paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
+  private _paragraphPanelHoverDelay = 150;
 
   @state()
-  paragraphPanelHoverDelay = 150;
+  private _paragraphPanelTimer = 0;
 
   @state()
-  paragraphPanelTimer = 0;
-
-  @state()
-  showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+  private _showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
 
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  format: TextAttributes = {};
+  private _format: TextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
@@ -82,10 +78,14 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.models = this._getCurrentModels();
-    const startModel = this.models[0];
-    this.paragraphType = `${startModel.flavour}/${startModel.type}`;
-    this.format = getCurrentCombinedFormat(this.page);
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
+    }
+    this._models = blockRange.models;
+    const startModel = this._models[0];
+    this._paragraphType = `${startModel.flavour}/${startModel.type}`;
+    this._format = getCurrentCombinedFormat(this.page);
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
@@ -99,9 +99,9 @@ export class FormatQuickBar extends LitElement {
       if (!this.page) {
         return;
       }
-      this.format = getCurrentCombinedFormat(this.page);
+      this._format = getCurrentCombinedFormat(this.page);
     });
-    this.models.forEach(model => {
+    this._models.forEach(model => {
       const richText = getRichTextByModel(model);
       if (!richText) {
         console.warn(
@@ -128,48 +128,32 @@ export class FormatQuickBar extends LitElement {
     this._disposableGroup.dispose();
   }
 
-  private _getCurrentModels() {
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't get current block range");
-    }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    return models;
-  }
-
   private _onHover() {
-    if (this.showParagraphPanel !== 'hidden') {
-      clearTimeout(this.paragraphPanelTimer);
+    if (this._showParagraphPanel !== 'hidden') {
+      clearTimeout(this._paragraphPanelTimer);
       return;
     }
 
-    this.paragraphPanelTimer = window.setTimeout(async () => {
+    this._paragraphPanelTimer = window.setTimeout(async () => {
       const { placement, height } = compareTopAndBottomSpace(
         this.formatQuickBarElement,
         document.body,
         10
       );
-      this.showParagraphPanel = placement;
+      this._showParagraphPanel = placement;
       this.paragraphPanelMaxHeight = height + 'px';
-    }, this.paragraphPanelHoverDelay);
+    }, this._paragraphPanelHoverDelay);
   }
 
   private _onHoverEnd() {
-    if (this.showParagraphPanel !== 'hidden') {
+    if (this._showParagraphPanel !== 'hidden') {
       // Prepare to disappear
-      this.paragraphPanelTimer = window.setTimeout(async () => {
-        this.showParagraphPanel = 'hidden';
-      }, this.paragraphPanelHoverDelay * 2);
+      this._paragraphPanelTimer = window.setTimeout(async () => {
+        this._showParagraphPanel = 'hidden';
+      }, this._paragraphPanelHoverDelay * 2);
       return;
     }
-    clearTimeout(this.paragraphPanelTimer);
+    clearTimeout(this._paragraphPanelTimer);
   }
 
   private _onCopy() {
@@ -179,13 +163,13 @@ export class FormatQuickBar extends LitElement {
   }
 
   private _paragraphPanelTemplate() {
-    if (this.showParagraphPanel === 'hidden') {
+    if (this._showParagraphPanel === 'hidden') {
       return html``;
     }
     const styles = styleMap({
       left: '0',
-      top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
+      top: this._showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
+      bottom: this._showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
       maxHeight: this.paragraphPanelMaxHeight,
     });
     const updateParagraphType = (
@@ -193,12 +177,35 @@ export class FormatQuickBar extends LitElement {
       type?: string
     ) => {
       // Already in the target format, should convert back to text
-      const alreadyTargetType = this.paragraphType === `${flavour}/${type}`;
+      const alreadyTargetType = this._paragraphType === `${flavour}/${type}`;
       const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
       const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
       const targetType = alreadyTargetType ? defaultType : type;
-      this.models = updateBlockType(this.models, targetFlavour, targetType);
-      this.paragraphType = `${targetFlavour}/${targetType}`;
+      const newModels = updateBlockType(
+        this._models,
+        targetFlavour,
+        targetType
+      );
+
+      // Reset selection if the target is code block
+      if (targetFlavour === 'affine:code') {
+        if (newModels.length !== 1) {
+          throw new Error(
+            "Failed to reset selection! New model length isn't 1"
+          );
+        }
+        const codeModel = newModels[0];
+        requestAnimationFrame(() =>
+          restoreSelection({
+            type: 'Block',
+            startOffset: 0,
+            endOffset: codeModel.text?.length ?? 0,
+            models: [codeModel],
+          })
+        );
+      }
+      this._models = newModels;
+      this._paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
 
@@ -225,17 +232,17 @@ export class FormatQuickBar extends LitElement {
   override render() {
     const page = this.page;
 
-    if (!this.models.length || !page) {
+    if (!this._models.length || !page) {
       console.error(
         'Failed to render format-quick-bar! page not found!',
-        this.models,
+        this._models,
         page
       );
       return html``;
     }
     const paragraphIcon =
       paragraphConfig.find(
-        ({ flavour, type }) => `${flavour}/${type}` === this.paragraphType
+        ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
       )?.icon ?? paragraphConfig[0].icon;
     const paragraphItems = html` <format-bar-button
       class="paragraph-button"
@@ -248,20 +255,20 @@ export class FormatQuickBar extends LitElement {
 
     const paragraphPanel = this._paragraphPanelTemplate();
     const formatItems = formatConfig
-      .filter(({ showWhen = () => true }) => showWhen(this.models))
+      .filter(({ showWhen = () => true }) => showWhen(this._models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen(this.format)}
+          ?active=${activeWhen(this._format)}
           @click=${() => {
             action({
               page,
               abortController: this.abortController,
-              format: this.format,
+              format: this._format,
             });
             // format state need to update after format
-            this.format = getCurrentCombinedFormat(page);
+            this._format = getCurrentCombinedFormat(page);
             this.positionUpdated.emit();
           }}
         >

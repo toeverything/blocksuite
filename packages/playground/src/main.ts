@@ -37,7 +37,8 @@ function subscribePage(workspace: Workspace) {
 
     const editor = new EditorContainer();
     editor.page = page;
-    document.body.appendChild(editor);
+
+    document.getElementById('app')?.append(editor);
 
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;

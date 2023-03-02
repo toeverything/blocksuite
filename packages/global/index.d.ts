@@ -88,31 +88,6 @@ declare namespace BlockSuiteInternal {
     // TODO use schema
     text?: Text;
   }
-
-  import type {
-    // Model
-    CodeBlockModel,
-    DatabaseBlockModel,
-    DividerBlockModel,
-    EmbedBlockModel,
-    FrameBlockModel,
-    ListBlockModel,
-    PageBlockModel,
-    ParagraphBlockModel,
-    SurfaceBlockModel,
-  } from '@blocksuite/blocks/models';
-
-  export type BlockModels = {
-    'affine:paragraph': ParagraphBlockModel;
-    'affine:page': PageBlockModel;
-    'affine:list': ListBlockModel;
-    'affine:frame': FrameBlockModel;
-    'affine:code': CodeBlockModel;
-    'affine:divider': DividerBlockModel;
-    'affine:embed': EmbedBlockModel;
-    'affine:surface': SurfaceBlockModel;
-    'affine:database': DatabaseBlockModel;
-  };
 }
 
 declare type EmbedType = 'image' | 'video' | 'audio' | 'file';
@@ -126,59 +101,3 @@ declare type ParagraphType =
   | 'h4'
   | 'h5'
   | 'h6';
-
-declare namespace BlockSuiteModelProps {
-  interface CodeBlockModel {
-    language: string;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DividerBlockModel {}
-
-  interface EmbedBlockModel {
-    type: EmbedType;
-    sourceId: string;
-    width?: number;
-    height?: number;
-    caption?: string;
-  }
-
-  interface FrameBlockModel {
-    xywh: string;
-  }
-
-  interface ListBlockModel {
-    type: ListType;
-    checked: boolean;
-  }
-
-  interface PageBlockModel {
-    title: string;
-  }
-
-  interface ParagraphBlockModel {
-    type: ParagraphType;
-  }
-
-  import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
-
-  interface DatabaseBlockModel {
-    columns: BlockSuiteInternal.ColumnTypes[];
-    title: string;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface SurfaceBlockModel {}
-
-  export type ALL = {
-    'affine:database': DatabaseBlockModel;
-    'affine:paragraph': ParagraphBlockModel;
-    'affine:page': PageBlockModel;
-    'affine:list': ListBlockModel;
-    'affine:frame': FrameBlockModel;
-    'affine:code': CodeBlockModel;
-    'affine:divider': DividerBlockModel;
-    'affine:embed': EmbedBlockModel;
-    'affine:surface': SurfaceBlockModel;
-  };
-}

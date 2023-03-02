@@ -31,13 +31,13 @@ export class EditorContainer extends NonShadowLitElement {
   };
 
   @state()
-  showGrid = false;
+  private showGrid = false;
 
   // TODO only select block
-  @state()
+  @property()
   clipboard = new ClipboardManager(this, this);
 
-  @state()
+  @property()
   contentParser = new ContentParser(this);
 
   get model() {
@@ -167,23 +167,26 @@ export class EditorContainer extends NonShadowLitElement {
 
   public async createBlockHub() {
     await this.updateComplete;
+    if (!this.page.root) {
+      await new Promise(res => this.page.signals.rootAdded.once(res));
+    }
     return createBlockHub(this, this.page);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.page.awarenessStore.setLocalCursor(this.page, null);
+    this.page.awarenessStore.setLocalRange(this.page, null);
     this._disposables.dispose();
   }
 
   render() {
-    if (!this.model) return null;
+    if (!this.model || !this.pageBlockModel) return null;
 
     const pageContainer = html`
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.pageBlockModel as PageBlockModel}
+        .model=${this.pageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
@@ -192,7 +195,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .pageModel=${this.pageBlockModel as PageBlockModel}
+        .pageModel=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
@@ -200,11 +203,16 @@ export class EditorContainer extends NonShadowLitElement {
       ></affine-edgeless-page>
     `;
 
+    const remoteSelectionContainer = html`
+      <remote-selection .page=${this.page}></remote-selection>
+    `;
+
     const blockRoot = html`
       ${choose(this.mode, [
         ['page', () => pageContainer],
         ['edgeless', () => edgelessContainer],
       ])}
+      ${remoteSelectionContainer}
     `;
 
     return html`
@@ -214,8 +222,7 @@ export class EditorContainer extends NonShadowLitElement {
           display: block;
           height: 100%;
           position: relative;
-          overflow-y: auto;
-          overflow-x: hidden;
+          overflow: hidden;
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

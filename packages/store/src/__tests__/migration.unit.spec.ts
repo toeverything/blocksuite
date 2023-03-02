@@ -23,7 +23,7 @@ describe('migration', () => {
     const result = doc.toJSON();
     assert.deepEqual(result['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:page': 1,
+      'affine:page': 2,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
@@ -52,7 +52,7 @@ describe('migration', () => {
     const result = doc.toJSON();
     assert.deepEqual(result['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:page': 1,
+      'affine:page': 2,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
@@ -72,5 +72,34 @@ describe('migration', () => {
 
     expect(hasSurface).toBe(true);
     expect(hasShape).toBe(false);
+  });
+
+  test('migrate to new page title (v1 -> v2)', async () => {
+    const doc = await loadBinary('legacy-page-title');
+
+    const oldTitle = (
+      doc.getMap('space:page0').get('624813625:0') as Y.Map<unknown>
+    ).get('prop:title');
+
+    tryMigrate(doc);
+    assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
+      'affine:paragraph': 1,
+      'affine:database': 1,
+      'affine:page': 2,
+      'affine:list': 1,
+      'affine:frame': 1,
+      'affine:divider': 1,
+      'affine:embed': 1,
+      'affine:code': 1,
+      'affine:surface': 1,
+    });
+
+    const newTitle = (
+      doc.getMap('space:page0').get('624813625:0') as Y.Map<unknown>
+    ).get('prop:title') as Y.Text;
+
+    assert.isString(oldTitle);
+    assert.instanceOf(newTitle, Y.Text);
+    assert.equal(oldTitle, newTitle.toString());
   });
 });

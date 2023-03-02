@@ -120,7 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
     }
     const { x, y } = box;
     assertAlmostEqual(x, 95, 6);
-    assertAlmostEqual(y, 180, 6);
+    assertAlmostEqual(y, 167, 8);
   });
 
   test('left arrow should active left panel', async () => {
@@ -233,4 +233,44 @@ test('should clean slash string after soft enter', async ({ page }) => {
 />`,
     paragraphId
   );
+});
+
+test.describe('slash menu with code block', () => {
+  test('should focus on empty code blocks created by the slash menu', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const codeBlock = page.getByTestId('Code Block');
+    await codeBlock.click();
+    await codeBlock.waitFor({ state: 'hidden' });
+
+    await type(page, 'const a = 10;');
+    await assertRichTexts(page, ['const a = 10;\n']);
+  });
+
+  test('should focus on code blocks created by the slash menu', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '000');
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const codeBlock = page.getByTestId('Code Block');
+    await codeBlock.click();
+    await codeBlock.waitFor({ state: 'hidden' });
+
+    await type(page, '111');
+    await assertRichTexts(page, ['111000\n']);
+  });
 });

@@ -1,20 +1,18 @@
 import { Signal } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
-import type { RelativePosition } from 'yjs';
-import * as Y from 'yjs';
 
 import type { Space } from './space.js';
 import type { Store } from './store.js';
 import { uuidv4 } from './utils/id-generator.js';
 
-export interface SelectionRange {
-  id: string;
-  anchor: RelativePosition;
-  focus: RelativePosition;
+export interface UserRange {
+  startOffset: number;
+  endOffset: number;
+  blockIds: string[];
 }
 
-interface UserInfo {
+export interface UserInfo {
   id: number;
   name: string;
   color: string;
@@ -38,7 +36,7 @@ type Response = {
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > = {
-  cursor?: Record<Space['prefixedId'], SelectionRange>;
+  rangeMap?: Record<Space['prefixedId'], UserRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
@@ -184,21 +182,21 @@ export class AwarenessStore<
     ] satisfies Request<Flags>[]);
   }
 
-  setLocalCursor(space: Space, range: SelectionRange | null) {
-    const cursor = this.awareness.getLocalState()?.cursor ?? {};
+  setLocalRange(space: Space, range: UserRange | null) {
+    const rangeMap = this.awareness.getLocalState()?.rangeMap ?? {};
     if (range === null) {
-      delete cursor[space.prefixedId];
-      this.awareness.setLocalStateField('cursor', cursor);
+      delete rangeMap[space.prefixedId];
+      this.awareness.setLocalStateField('rangeMap', rangeMap);
     } else {
-      this.awareness.setLocalStateField('cursor', {
-        ...cursor,
+      this.awareness.setLocalStateField('rangeMap', {
+        ...rangeMap,
         [space.prefixedId]: range,
       });
     }
   }
 
-  getLocalCursor(space: Space): SelectionRange | undefined {
-    return this.awareness.getLocalState()?.['cursor']?.[space.prefixedId];
+  getLocalRange(space: Space): UserRange | undefined {
+    return this.awareness.getLocalState()?.['rangeMap']?.[space.prefixedId];
   }
 
   getStates(): Map<number, RawAwarenessState<Flags>> {
@@ -236,11 +234,6 @@ export class AwarenessStore<
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessEvent<Flags>) => {
-    if (awMsg.id === this.awareness.clientID) {
-      this.store.spaces.forEach(space => this.updateLocalCursor(space));
-    } else {
-      this._resetRemoteCursor();
-    }
     if (this.getFlag('enable_set_remote_flag') === true) {
       this._handleRemoteFlags();
     }
@@ -310,65 +303,6 @@ export class AwarenessStore<
     setTimeout(() => {
       nextTick.forEach(fn => fn());
     }, 100);
-  }
-
-  private _resetRemoteCursor() {
-    const states = this.getStates();
-    this.store.spaces.forEach(space => {
-      states.forEach((awState, clientId) => {
-        if (clientId === this.awareness.clientID) {
-          return;
-        }
-        const cursor = awState.cursor?.[space.prefixedId];
-        if (cursor) {
-          space.richTextAdapters.forEach(textAdapter =>
-            textAdapter.quillCursors.clearCursors()
-          );
-          const anchor = Y.createAbsolutePositionFromRelativePosition(
-            cursor.anchor,
-            space.doc
-          );
-          const focus = Y.createAbsolutePositionFromRelativePosition(
-            cursor.focus,
-            space.doc
-          );
-          const textAdapter = space.richTextAdapters.get(cursor.id || '');
-          if (anchor && focus && textAdapter) {
-            const user: Partial<UserInfo> = awState.user || {};
-            const color = user.color || '#ffa500';
-            const name = user.name || 'other';
-            textAdapter.quillCursors.createCursor(
-              clientId.toString(),
-              name,
-              color
-            );
-            textAdapter.quillCursors.moveCursor(clientId.toString(), {
-              index: anchor.index,
-              length: focus.index - anchor.index,
-            });
-          }
-        }
-      });
-    });
-  }
-
-  updateLocalCursor(space: Space) {
-    const localCursor = this.getLocalCursor(space);
-    if (!localCursor) {
-      return;
-    }
-    const anchor = Y.createAbsolutePositionFromRelativePosition(
-      localCursor.anchor,
-      space.doc
-    );
-    const focus = Y.createAbsolutePositionFromRelativePosition(
-      localCursor.focus,
-      space.doc
-    );
-    if (anchor && focus) {
-      const textAdapter = space.richTextAdapters.get(localCursor.id || '');
-      textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
-    }
   }
 
   destroy() {

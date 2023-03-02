@@ -56,11 +56,13 @@ export class Text {
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(input: Y.Text | string) {
+  constructor(input?: Y.Text | string) {
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
-    } else {
+    } else if (input instanceof Y.Text) {
       this._yText = input;
+    } else {
+      this._yText = new Y.Text();
     }
   }
 
@@ -201,10 +203,13 @@ export class Text {
   }
 
   join(other: Text) {
+    if (!other.toDelta().length) {
+      return;
+    }
     this._transact(() => {
       const yOther = other._yText;
       const delta: DeltaOperation[] = yOther.toDelta();
-      delta.splice(0, 0, { retain: this._yText.length });
+      delta.unshift({ retain: this._yText.length });
       this._yText.applyDelta(delta);
       this._yText.meta = { join: true };
     });
@@ -275,6 +280,9 @@ export class Text {
   }
 
   clear() {
+    if (!this._yText.length) {
+      return;
+    }
     this._transact(() => {
       this._yText.delete(0, this._yText.length);
       this._yText.meta = { clear: true };
@@ -459,7 +467,6 @@ export class RichTextAdapter {
     return {
       anchor,
       focus,
-      selection,
     };
   }
 

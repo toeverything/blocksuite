@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/blocks",
@@ -23,7 +23,7 @@
     "preview": "run-p serve preview:playground",
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
-    "dev:playground": "pnpm --filter @blocksuite/playground dev:hmr",
+    "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0 --cache",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
@@ -31,6 +31,7 @@
     "test:unit:coverage": "pnpm -r test:unit:coverage",
     "test:headed": "playwright test --headed",
     "test:store": "pnpm --filter @blocksuite/store test",
+    "test:virgo": "pnpm --filter @blocksuite/virgo test",
     "format": "prettier --write --cache packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
@@ -47,6 +48,8 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@commitlint/cli": "^17.4.3",
     "@commitlint/config-conventional": "^17.4.3",

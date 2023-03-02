@@ -1,5 +1,5 @@
 import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Disposable } from '@blocksuite/store';
+import type { Disposable, Page, UserRange } from '@blocksuite/store';
 
 import {
   initMouseEventHandlers,
@@ -8,9 +8,12 @@ import {
   SelectionEvent,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
+import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { initWheelEventHandlers } from './utils.js';
 
@@ -122,9 +125,13 @@ export class ViewportState {
 }
 
 export class EdgelessSelectionManager {
+  readonly page: Page;
+
   private _mouseMode: MouseMode = {
     type: 'default',
   };
+  private _lastMouseMode: MouseMode | null = null;
+
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
@@ -143,9 +150,15 @@ export class EdgelessSelectionManager {
   }
 
   set mouseMode(mode: MouseMode) {
+    const currentMouseMode = this._mouseMode;
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._lastMouseMode = currentMouseMode;
+  }
+
+  get lastMouseMode(): MouseMode | null {
+    return this._lastMouseMode;
   }
 
   get blockSelectionState() {
@@ -177,10 +190,13 @@ export class EdgelessSelectionManager {
   }
 
   constructor(container: EdgelessPageBlockComponent) {
+    this.page = container.page;
     this._container = container;
     this._controllers = {
       default: new DefaultModeController(this._container),
       shape: new ShapeModeController(this._container),
+      brush: new BrushModeController(this._container),
+      pan: new PanModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -192,7 +208,8 @@ export class EdgelessSelectionManager {
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
-      noop
+      noop,
+      this._onSelectionChangeWithoutDebounce
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {
@@ -263,9 +280,33 @@ export class EdgelessSelectionManager {
     return this._controllers[this.mouseMode.type].onContainerContextMenu(e);
   };
 
+  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+    this.updateLocalSelection();
+  };
+
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
     this._selectionUpdateCallback.dispose();
+  }
+
+  updateLocalSelection() {
+    const page = this.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (blockRange && blockRange.type === 'Native') {
+      const userRange: UserRange = {
+        startOffset: blockRange.startOffset,
+        endOffset: blockRange.endOffset,
+        blockIds: blockRange.models.map(m => m.id),
+      };
+      page.awarenessStore.setLocalRange(page, userRange);
+    }
+  }
+
+  refreshRemoteSelection() {
+    const element = document.querySelector('remote-selection');
+    if (element) {
+      element.requestUpdate();
+    }
   }
 }

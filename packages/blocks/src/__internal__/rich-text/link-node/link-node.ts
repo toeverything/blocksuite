@@ -20,7 +20,7 @@ export class LinkNodeComponent extends LitElement {
   popoverHoverOpenDelay = 150;
 
   @state()
-  popoverTimer = 0;
+  private _popoverTimer = 0;
 
   static styles = css`
     a {
@@ -58,7 +58,7 @@ export class LinkNodeComponent extends LitElement {
       return;
     }
 
-    this.popoverTimer = window.setTimeout(async () => {
+    this._popoverTimer = window.setTimeout(async () => {
       this.onDelayHover(e);
     }, this.popoverHoverOpenDelay);
   }
@@ -119,7 +119,7 @@ export class LinkNodeComponent extends LitElement {
   }
 
   private async _onHoverEnd(e: Event) {
-    clearTimeout(this.popoverTimer);
+    clearTimeout(this._popoverTimer);
   }
 
   render() {

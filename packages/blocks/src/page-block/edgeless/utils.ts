@@ -70,7 +70,25 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
     // zoom
     else {
       const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      const { centerX, centerY } = viewport;
+      const prevZoom = viewport.zoom;
       viewport.applyDeltaZoom(delta);
+
+      const newZoom = viewport.zoom;
+      const rect = container.getBoundingClientRect();
+
+      // Perform zooming relative to the mouse position
+      const [baseX, baseY] = container.surface.toModelCoord(
+        e.clientX - rect.x,
+        e.clientY - rect.y
+      );
+
+      const offsetX = centerX - baseX;
+      const offsetY = centerY - baseY;
+      const newCenterX = baseX + offsetX * (prevZoom / newZoom);
+      const newCenterY = baseY + offsetY * (prevZoom / newZoom);
+      viewport.setCenter(newCenterX, newCenterY);
+
       container.signals.viewportUpdated.emit();
     }
   };

@@ -8,6 +8,14 @@ export class VirgoLine extends LitElement {
   @property({ attribute: false })
   elements: TextElement[] = [];
 
+  get textLength() {
+    return this.elements.reduce((acc, el) => acc + el.delta.insert.length, 0);
+  }
+
+  get textContent() {
+    return this.elements.reduce((acc, el) => acc + el.delta.insert, '');
+  }
+
   render() {
     return html`
       <style>

@@ -6,7 +6,7 @@ import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
-import { getCurrentRange } from './selection.js';
+import { getCurrentNativeRange } from './selection.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -86,7 +86,7 @@ export function getNextBlock(
     const nextSibling = page.getNextSibling(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
-      if (matchFlavours(nextSibling, ['affine:frame'])) {
+      if (matchFlavours(nextSibling, ['affine:frame'] as const)) {
         return getNextBlock(nextSibling);
       }
       return nextSibling;
@@ -130,7 +130,7 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'] as const)) {
       return getPreviousBlock(parentBlock);
     }
     return parentBlock;
@@ -185,13 +185,18 @@ export function getBlockElementByModel(
 }
 
 export function getStartModelBySelection() {
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
       : (range.startContainer as HTMLElement);
 
-  const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
+  const startComponent = startContainer.closest(
+    `[${ATTR}]`
+  ) as ContainerBlock | null;
+  if (!startComponent) {
+    return null;
+  }
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -206,7 +211,11 @@ export function getRichTextByModel(model: BaseBlockModel) {
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
-    return [getStartModelBySelection()];
+    const model = getStartModelBySelection();
+    if (!model) {
+      return [];
+    }
+    return [model];
   }
   if (
     commonAncestor.attributes &&
@@ -225,7 +234,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       const block = ele as ContainerBlock;
       assertExists(block.model);
       const blockElement = getBlockElementByModel(block.model);
-      const mainElement = matchFlavours(block.model, ['affine:page'])
+      const mainElement = matchFlavours(block.model, ['affine:page'] as const)
         ? blockElement?.querySelector(
             '.affine-default-page-block-title-container'
           )
@@ -240,7 +249,11 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     });
     return intersectedModels;
   }
-  return [getStartModelBySelection()];
+  const model = getStartModelBySelection();
+  if (!model) {
+    return [];
+  }
+  return [model];
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
@@ -367,7 +380,18 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
     throw new Error("Failed to get block's text!");
   }
   if (offset > text.length) {
-    console.error('Offset is out of range! model: ', model, offset);
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
   }
   const blockElement = getBlockById(model.id);
   if (!blockElement) {
@@ -406,14 +430,11 @@ export function isInsideRichText(element: unknown): element is RichText {
   return !!richText;
 }
 
-export function isTitleElement(
-  element: unknown
-): element is HTMLTextAreaElement | HTMLInputElement {
-  return (
-    (element instanceof HTMLTextAreaElement ||
-      element instanceof HTMLInputElement) &&
-    element.getAttribute('data-block-is-title') === 'true'
-  );
+export function isInsidePageTitle(element: unknown): boolean {
+  const titleElement = document.querySelector('[data-block-is-title="true"]');
+  if (!titleElement) return false;
+
+  return titleElement.contains(element as Node);
 }
 
 export function isDatabaseInput(element: unknown): boolean {
