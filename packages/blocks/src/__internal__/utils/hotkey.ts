@@ -81,9 +81,14 @@ class HotkeyManager {
   addListener(
     hotkey: string,
     listener: KeyHandler,
-    scope: string = SCOPE.AFFINE_PAGE
+    options: {
+      scope?: string;
+      keyup?: boolean;
+      keydown?: boolean;
+    } = {}
   ): void {
-    this._hotkeys(hotkey, { scope }, listener);
+    const scope = options.scope ?? SCOPE.AFFINE_PAGE;
+    this._hotkeys(hotkey, { ...options, scope }, listener);
   }
 
   removeListener(

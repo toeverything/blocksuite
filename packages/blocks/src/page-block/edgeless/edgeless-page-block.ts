@@ -140,6 +140,7 @@ export class EdgelessPageBlockComponent
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
     hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
     bindCommonHotkey(this.page);
   }
 
@@ -172,6 +173,30 @@ export class EdgelessPageBlockComponent
         return;
       }
       handleMultiBlockBackspace(this.page, e);
+    }
+  };
+
+  private _handleSpace = (event: KeyboardEvent) => {
+    const { mouseMode, lastMouseMode, blockSelectionState } = this._selection;
+    if (event.type === 'keydown') {
+      if (mouseMode.type === 'pan') {
+        return;
+      }
+
+      if (
+        mouseMode.type === 'default' &&
+        blockSelectionState.type === 'single' &&
+        blockSelectionState.active
+      ) {
+        return;
+      }
+
+      this.mouseMode = { type: 'pan', temporary: true };
+    }
+    if (event.type === 'keyup') {
+      if (mouseMode.type === 'pan' && mouseMode.temporary && lastMouseMode) {
+        this.mouseMode = lastMouseMode;
+      }
     }
   };
 
