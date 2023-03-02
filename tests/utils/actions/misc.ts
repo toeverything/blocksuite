@@ -32,6 +32,8 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // Firefox warn on quill
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
+    // edgeless.spec.ts assert.ts › assertEdgelessPointColor
+    'Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true.',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
