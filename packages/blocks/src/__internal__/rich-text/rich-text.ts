@@ -12,7 +12,16 @@ import { createKeyboardBindings } from './keyboard.js';
 import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
+const Clipboard = Quill.import('modules/clipboard');
 
+class EmptyClipboard extends Clipboard {
+  onPaste(e: ClipboardEvent) {
+    e.preventDefault();
+    // No need to execute
+  }
+}
+
+Quill.register('modules/clipboard', EmptyClipboard, true);
 const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5
 Strike.tagName = 'del';

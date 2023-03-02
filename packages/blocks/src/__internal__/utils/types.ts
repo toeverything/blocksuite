@@ -1,3 +1,4 @@
+import type { BlockModelProps } from '@blocksuite/global/types.js';
 import type { ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
@@ -64,7 +65,7 @@ export type ShapeMouseMode = {
 export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 
 export type OpenBlockInfo = {
-  flavour: string;
+  flavour: keyof BlockModelProps;
   type?: string;
   text: {
     insert?: string;

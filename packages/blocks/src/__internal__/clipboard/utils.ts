@@ -1,4 +1,5 @@
 import type { ClipboardItem } from './clipboard-item.js';
+
 export enum CLIPBOARD_MIMETYPE {
   BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
@@ -41,4 +42,14 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
     document.body.removeChild(tempElem);
   }
   return success;
+};
+
+export const isPureFileInClipboard = (clipboardData: DataTransfer) => {
+  const types = clipboardData.types;
+  return (
+    (types.length === 1 && types[0] === 'Files') ||
+    (types.length === 2 &&
+      (types.includes('text/plain') || types.includes('text/html')) &&
+      types.includes('Files'))
+  );
 };

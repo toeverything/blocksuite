@@ -2,16 +2,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
 import { getService } from '../service.js';
-import type { IService } from '../utils/index.js';
+import type { IService, OpenBlockInfo } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
-
-export type CustomClipboardInfo = {
-  type: string;
-  flavour: string;
-  sourceId?: string;
-  text?: DeltaOperation[];
-  children?: CustomClipboardInfo[];
-};
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -50,19 +42,21 @@ export class BaseService implements IService {
     return `${text}${childText}`;
   }
 
-  block2Clipboard(
+  block2Json(
     block: BaseBlockModel,
     begin?: number,
     end?: number
-  ): CustomClipboardInfo {
+  ): OpenBlockInfo {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     return {
-      type: block.type as string,
       flavour: block.flavour,
-      sourceId: block.sourceId,
+      type: block.type as string,
       text: delta,
-      children: block.children.map(child => {
-        return getService(child.flavour).block2Clipboard(child);
+      children: block.children.map((child, index) => {
+        if (index === block.children.length - 1) {
+          return getService(child.flavour).block2Json(child, 0, end);
+        }
+        return getService(child.flavour).block2Json(child);
       }),
     };
   }
