@@ -68,6 +68,16 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
+  private _tryToSetDefaultBrushMouseMode() {
+    if (this.mouseMode.type !== 'brush') {
+      this.edgeless.signals.mouseModeUpdated.emit({
+        type: 'brush',
+        lineWidth: 4,
+        color: '#010101',
+      });
+    }
+  }
+
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'brush') {
@@ -81,14 +91,6 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  private _setMouseMode() {
-    this.edgeless.signals.mouseModeUpdated.emit({
-      type: 'brush',
-      lineWidth: 4,
-      color: '#000000',
-    });
-  }
-
   render() {
     const type = this.mouseMode?.type;
 
@@ -97,7 +99,7 @@ export class EdgelessBrushToolButton extends LitElement {
         .tooltip=${'Pen'}
         .active=${type === 'brush'}
         @tool.click=${() => {
-          this._setMouseMode();
+          this._tryToSetDefaultBrushMouseMode();
           this._toggleBrushToolMenu();
         }}
       >

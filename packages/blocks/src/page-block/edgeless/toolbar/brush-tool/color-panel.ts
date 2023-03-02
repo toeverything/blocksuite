@@ -28,10 +28,10 @@ export class EdgelessColorPanel extends LitElement {
     :host {
       display: flex;
       width: 204px;
-      padding: 10px 14px;
+      padding: 8px 12px;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
       box-sizing: border-box;
       background: var(--affine-popover-background);
     }
