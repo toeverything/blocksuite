@@ -137,9 +137,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -188,9 +186,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -245,9 +241,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -303,9 +297,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -381,10 +373,10 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
 
   await dragBetweenIndices(
     page,
-    [1, 3],
     [0, 0],
-    { x: -80, y: 20 },
-    { x: 60, y: 0 },
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
     {
       steps: 50,
     }
@@ -432,9 +424,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -498,9 +488,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:list
       prop:checked={false}
@@ -542,4 +530,19 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('should blur rich-text first when block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await expect(page.locator('*:focus')).toHaveCount(1);
+
+  await dragHandleFromBlockToBlockBottomById(page, '2', '4');
+  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await assertRichTexts(page, ['456', '789', '123']);
+
+  await expect(page.locator('*:focus')).toHaveCount(0);
 });

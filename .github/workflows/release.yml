@@ -11,7 +11,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -33,5 +33,4 @@ jobs:
       - name: Try Publishing to NPM
         run: ./scripts/publish.sh
         env:
-          NIGHTLY: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -17,7 +17,11 @@ export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 
 export type DeltaEntry = [DeltaInsert, VRange];
 
-interface DomPoint {
+// corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
+export type NativePoint = readonly [node: Node, offset: number];
+// the number here is relative to the text node
+export type TextPoint = readonly [text: Text, offset: number];
+export interface DomPoint {
   // which text node this point is in
   text: Text;
   // the index here is relative to the Editor, not text node
@@ -25,11 +29,95 @@ interface DomPoint {
 }
 
 export class VEditor {
+  static nativePointToTextPoint(
+    node: unknown,
+    offset: number
+  ): TextPoint | null {
+    let text: Text | null = null;
+    let textOffset = offset;
+    if (isVText(node)) {
+      text = node;
+      textOffset = offset;
+    } else if (isVElement(node)) {
+      const textNode = getTextNodeFromElement(node);
+      if (textNode) {
+        text = textNode;
+        textOffset = offset;
+      }
+    } else if (isVLine(node)) {
+      const firstTextElement = node.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          text = textNode;
+          textOffset = 0;
+        }
+      }
+    }
+
+    if (!text) {
+      return null;
+    }
+
+    return [text, textOffset] as const;
+  }
+
+  static textPointToDomPoint(
+    text: Text,
+    offset: number,
+    rootElement: HTMLElement
+  ): DomPoint | null {
+    if (rootElement.dataset.virgoRoot !== 'true') {
+      throw new Error(
+        'textRangeToDomPoint should be called with editor root element'
+      );
+    }
+
+    if (!rootElement.contains(text)) {
+      return null;
+    }
+
+    const textNodes = Array.from(
+      rootElement.querySelectorAll('[data-virgo-text="true"]')
+    ).map(textElement => getTextNodeFromElement(textElement));
+    const goalIndex = textNodes.indexOf(text);
+    let index = 0;
+    for (const textNode of textNodes.slice(0, goalIndex)) {
+      if (!textNode) {
+        return null;
+      }
+
+      index += calculateTextLength(textNode);
+    }
+
+    if (text.wholeText !== ZERO_WIDTH_SPACE) {
+      index += offset;
+    }
+
+    const textElement = text.parentElement;
+    if (!textElement) {
+      throw new Error('text element not found');
+    }
+
+    const lineElement = textElement.closest('virgo-line');
+
+    if (!lineElement) {
+      throw new Error('line element not found');
+    }
+
+    const lineIndex = Array.from(
+      rootElement.querySelectorAll('virgo-line')
+    ).indexOf(lineElement);
+
+    return { text, index: index + lineIndex };
+  }
+
   private _rootElement: HTMLElement | null = null;
   private _rootElementAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
   private _isReadOnly = false;
+  private _yText: Y.Text;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
   private _onKeyDown: (event: KeyboardEvent) => void = () => {
@@ -39,26 +127,30 @@ export class VEditor {
   signals: {
     updateVRange: Signal<UpdateVRangeProp>;
   };
-  yText: Y.Text;
+
+  get yText() {
+    return this._yText;
+  }
+  get rootElement() {
+    assertExists(this._rootElement);
+    return this._rootElement;
+  }
 
   constructor(
     yText: VEditor['yText'],
     opts: {
       renderElement?: (delta: DeltaInsert) => TextElement;
-      onKeyDown?: (event: KeyboardEvent) => void;
     } = {}
   ) {
-    this.yText = yText;
-    const { renderElement, onKeyDown } = opts;
+    if (!yText.doc) {
+      throw new Error('yText must be attached to a Y.Doc');
+    }
+
+    this._yText = yText;
+    const { renderElement } = opts;
 
     if (renderElement) {
       this._renderElement = renderElement;
-    }
-
-    if (onKeyDown) {
-      this._onKeyDown = e => {
-        onKeyDown(e);
-      };
     }
 
     this.signals = {
@@ -66,6 +158,10 @@ export class VEditor {
     };
 
     this.signals.updateVRange.on(this._onUpdateVRange);
+  }
+
+  bindKeyDownHandler(handler: (event: KeyboardEvent) => void) {
+    this._onKeyDown = handler;
   }
 
   mount(rootElement: HTMLElement): void {
@@ -133,15 +229,9 @@ export class VEditor {
 
   getNativeSelection(): Selection | null {
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return null;
-    }
-
-    if (selection.rangeCount === 0) {
-      return null;
-    }
+    if (!selection) return null;
+    if (selection.rangeCount === 0) return null;
 
     return selection;
   }
@@ -161,7 +251,66 @@ export class VEditor {
     return null;
   }
 
+  getTextPoint(rangeIndex: VRange['index']): TextPoint {
+    assertExists(this._rootElement);
+    const textElements = Array.from(
+      this._rootElement.querySelectorAll('[data-virgo-text="true"]')
+    );
+
+    let index = 0;
+    for (const textElement of textElements) {
+      if (!textElement.textContent) {
+        throw new Error('text element should have textContent');
+      }
+      if (textElement.textContent === ZERO_WIDTH_SPACE) {
+        continue;
+      }
+      if (index + textElement.textContent.length >= rangeIndex) {
+        const text = getTextNodeFromElement(textElement);
+        if (!text) {
+          throw new Error('text node should have text content');
+        }
+        return [text, rangeIndex - index];
+      }
+      index += textElement.textContent.length;
+    }
+
+    throw new Error('failed to find leaf');
+  }
+
+  // the number is releated to the VirgoLine's textLength
+  getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
+    assertExists(this._rootElement);
+    const lineElements = Array.from(
+      this._rootElement.querySelectorAll('virgo-line')
+    );
+
+    let index = 0;
+    for (const lineElement of lineElements) {
+      if (rangeIndex >= index && rangeIndex < index + lineElement.textLength) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      if (
+        rangeIndex === index + lineElement.textLength &&
+        rangeIndex === this.yText.length
+      ) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      index += lineElement.textLength + 1;
+    }
+
+    throw new Error('failed to find line');
+  }
+
+  /**
+   * In following example, the vRange is { index: 3, length: 3 } and
+   * conatins three deltas
+   *   aaa|bbb|ccc
+   * getDeltasByVRange(...) will just return bbb delta
+   */
   getDeltasByVRange(vRange: VRange): DeltaEntry[] {
+    if (vRange.length <= 0) return [];
+
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     const result: DeltaEntry[] = [];
@@ -169,7 +318,7 @@ export class VEditor {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= vRange.index &&
+        index + delta.insert.length > vRange.index &&
         index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
@@ -178,10 +327,6 @@ export class VEditor {
     }
 
     return result;
-  }
-
-  getRootElement(): HTMLElement | null {
-    return this._rootElement;
   }
 
   getVRange(): VRange | null {
@@ -237,7 +382,7 @@ export class VEditor {
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
-    const { match = () => true, mode = 'replace' } = options;
+    const { match = () => true, mode = 'merge' } = options;
     const deltas = this.getDeltasByVRange(vRange);
 
     for (const [delta, deltaVRange] of deltas) {
@@ -300,7 +445,6 @@ export class VEditor {
 
         if (newRange) {
           const selectionRoot = findDocumentOrShadowRoot(this);
-          // @ts-ignore
           const selection = selectionRoot.getSelection();
           if (selection) {
             selection.removeAllRanges();
@@ -403,29 +547,37 @@ export class VEditor {
    */
   toVRange(selection: Selection): VRange | null {
     assertExists(this._rootElement);
+    const root = this._rootElement;
 
     const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
     if (!anchorNode || !focusNode) {
       return null;
     }
 
-    const [anchorText, anchorTextOffset] = getTextAndOffset(
+    const anchorTextPoint = VEditor.nativePointToTextPoint(
       anchorNode,
       anchorOffset
     );
-    const [focusText, focusTextOffset] = getTextAndOffset(
+    const focusTextPoint = VEditor.nativePointToTextPoint(
       focusNode,
       focusOffset
     );
 
+    if (!anchorTextPoint || !focusTextPoint) {
+      return null;
+    }
+
+    const [anchorText, anchorTextOffset] = anchorTextPoint;
+    const [focusText, focusTextOffset] = focusTextPoint;
+
     // case 1
-    if (anchorText && focusText) {
-      const anchorDomPoint = textPointToDomPoint(
+    if (root.contains(anchorText) && root.contains(focusText)) {
+      const anchorDomPoint = VEditor.textPointToDomPoint(
         anchorText,
         anchorTextOffset,
         this._rootElement
       );
-      const focusDomPoint = textPointToDomPoint(
+      const focusDomPoint = VEditor.textPointToDomPoint(
         focusText,
         focusTextOffset,
         this._rootElement
@@ -441,49 +593,34 @@ export class VEditor {
       };
     }
 
-    // case 2
-    if (anchorText && !focusText) {
-      const anchorDomPoint = textPointToDomPoint(
-        anchorText,
-        anchorTextOffset,
-        this._rootElement
-      );
-
-      if (!anchorDomPoint) {
-        return null;
-      }
-
+    // case 2.1
+    if (!root.contains(anchorText) && root.contains(focusText)) {
       if (isSelectionBackwards(selection)) {
-        return {
-          index: 0,
-          length: anchorDomPoint.index,
-        };
-      } else {
+        const anchorDomPoint = VEditor.textPointToDomPoint(
+          anchorText,
+          anchorTextOffset,
+          this._rootElement
+        );
+
+        if (!anchorDomPoint) {
+          return null;
+        }
+
         return {
           index: anchorDomPoint.index,
-          length: anchorDomPoint.text.wholeText.length - anchorDomPoint.index,
-        };
-      }
-    }
-
-    // case 2
-    if (!anchorText && focusText) {
-      const focusDomPoint = textPointToDomPoint(
-        focusText,
-        focusTextOffset,
-        this._rootElement
-      );
-
-      if (!focusDomPoint) {
-        return null;
-      }
-
-      if (isSelectionBackwards(selection)) {
-        return {
-          index: focusDomPoint.index,
-          length: focusDomPoint.text.wholeText.length - focusDomPoint.index,
+          length: this.yText.length - anchorDomPoint.index,
         };
       } else {
+        const focusDomPoint = VEditor.textPointToDomPoint(
+          focusText,
+          focusTextOffset,
+          this._rootElement
+        );
+
+        if (!focusDomPoint) {
+          return null;
+        }
+
         return {
           index: 0,
           length: focusDomPoint.index,
@@ -491,12 +628,43 @@ export class VEditor {
       }
     }
 
+    // case 2.2
+    if (root.contains(anchorText) && !root.contains(focusText)) {
+      if (isSelectionBackwards(selection)) {
+        const focusDomPoint = VEditor.textPointToDomPoint(
+          focusText,
+          focusTextOffset,
+          this._rootElement
+        );
+
+        if (!focusDomPoint) {
+          return null;
+        }
+
+        return {
+          index: 0,
+          length: focusDomPoint.index,
+        };
+      } else {
+        const anchorDomPoint = VEditor.textPointToDomPoint(
+          anchorText,
+          anchorTextOffset,
+          this._rootElement
+        );
+
+        if (!anchorDomPoint) {
+          return null;
+        }
+
+        return {
+          index: anchorDomPoint.index,
+          length: this.yText.length - anchorDomPoint.index,
+        };
+      }
+    }
+
     // case 3
-    if (
-      !anchorText &&
-      !focusText &&
-      selection.containsNode(this._rootElement)
-    ) {
+    if (!root.contains(anchorText) && !root.contains(focusText)) {
       return {
         index: 0,
         length: this.yText.length,
@@ -518,57 +686,58 @@ export class VEditor {
     }
 
     const { inputType, data } = event;
+    const currentVRange = this._vRange;
 
-    if (inputType === 'insertText' && this._vRange.index >= 0 && data) {
-      this.insertText(this._vRange, data);
-
+    if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
       this.signals.updateVRange.emit([
         {
-          index: this._vRange.index + data.length,
+          index: currentVRange.index + data.length,
           length: 0,
         },
         'input',
       ]);
-    } else if (inputType === 'insertParagraph' && this._vRange.index >= 0) {
-      this.insertLineBreak(this._vRange);
 
+      this.insertText(currentVRange, data);
+    } else if (inputType === 'insertParagraph' && currentVRange.index >= 0) {
       this.signals.updateVRange.emit([
         {
-          index: this._vRange.index + 1,
+          index: currentVRange.index + 1,
           length: 0,
         },
         'input',
       ]);
+
+      this.insertLineBreak(currentVRange);
     } else if (
       inputType === 'deleteContentBackward' &&
-      this._vRange.index >= 0
+      currentVRange.index >= 0
     ) {
-      if (this._vRange.length > 0) {
-        this.deleteText(this._vRange);
-
+      if (currentVRange.length > 0) {
         this.signals.updateVRange.emit([
           {
-            index: this._vRange.index,
+            index: currentVRange.index,
             length: 0,
           },
           'input',
         ]);
-      } else if (this._vRange.index > 0) {
+
+        this.deleteText(currentVRange);
+      } else if (currentVRange.index > 0) {
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-        const tmpString = this.yText.toString().slice(0, this._vRange.index);
+        const tmpString = this.yText.toString().slice(0, currentVRange.index);
         const deletedCharacter = [...tmpString].slice(-1).join('');
+        this.signals.updateVRange.emit([
+          {
+            index: currentVRange.index - deletedCharacter.length,
+            length: 0,
+          },
+          'input',
+        ]);
+
         this.deleteText({
-          index: this._vRange.index - deletedCharacter.length,
+          index: currentVRange.index - deletedCharacter.length,
           length: deletedCharacter.length,
         });
-
-        this.signals.updateVRange.emit([
-          {
-            index: this._vRange.index - deletedCharacter.length,
-            length: 0,
-          },
-          'input',
-        ]);
       }
     }
   }
@@ -600,13 +769,15 @@ export class VEditor {
   }
 
   private _onYTextChange = () => {
-    assertExists(this._rootElement);
+    Promise.resolve().then(() => {
+      assertExists(this._rootElement);
 
-    renderDeltas(
-      this.yText.toDelta() as DeltaInsert[],
-      this._rootElement,
-      this._renderElement
-    );
+      renderDeltas(
+        this.yText.toDelta() as DeltaInsert[],
+        this._rootElement,
+        this._renderElement
+      );
+    });
   };
 
   private _onSelectionChange = () => {
@@ -616,24 +787,12 @@ export class VEditor {
     }
 
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return;
-    }
+    if (!selection) return;
+    if (selection.rangeCount === 0) return;
 
-    if (selection.rangeCount === 0) {
-      return;
-    }
-
-    const { anchorNode, focusNode } = selection;
-
-    if (
-      !this._rootElement.contains(anchorNode) ||
-      !this._rootElement.contains(focusNode)
-    ) {
-      return;
-    }
+    const range = selection.getRangeAt(0);
+    if (!range || !range.intersectsNode(this._rootElement)) return;
 
     const vRange = this.toVRange(selection);
     if (vRange) {
@@ -658,8 +817,8 @@ export class VEditor {
     }
   };
 
-  private _onUpdateVRange = ([newRangStatic, origin]: UpdateVRangeProp) => {
-    this._vRange = newRangStatic;
+  private _onUpdateVRange = ([newVRange, origin]: UpdateVRangeProp) => {
+    this._vRange = newVRange;
 
     if (origin === 'native') {
       return;
@@ -669,14 +828,25 @@ export class VEditor {
     this._rootElement?.blur();
 
     const fn = () => {
+      if (!newVRange) {
+        return;
+      }
+
       // when using input method _vRange will return to the starting point,
-      // so we need to reassign
-      this._vRange = newRangStatic;
-      this.syncVRange();
+      // so we need to resync
+      const newRange = this.toDomRange(newVRange);
+      if (newRange) {
+        const selectionRoot = findDocumentOrShadowRoot(this);
+        const selection = selectionRoot.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
     };
 
     // updates in lit are performed asynchronously
-    setTimeout(fn, 0);
+    requestAnimationFrame(fn);
   };
 
   private _transact(fn: () => void): void {
@@ -687,56 +857,6 @@ export class VEditor {
 
     doc.transact(fn, doc.clientID);
   }
-}
-
-function textPointToDomPoint(
-  text: Text,
-  offset: number,
-  rootElement: HTMLElement
-): DomPoint | null {
-  if (rootElement.dataset.virgoRoot !== 'true') {
-    throw new Error(
-      'textRangeToDomPoint should be called with editor root element'
-    );
-  }
-
-  if (!rootElement.contains(text)) {
-    throw new Error('text is not in root element');
-  }
-
-  const textNodes = Array.from(
-    rootElement.querySelectorAll('[data-virgo-text="true"]')
-  ).map(textElement => getTextNodeFromElement(textElement));
-  const goalIndex = textNodes.indexOf(text);
-  let index = 0;
-  for (const textNode of textNodes.slice(0, goalIndex)) {
-    if (!textNode) {
-      return null;
-    }
-
-    index += calculateTextLength(textNode);
-  }
-
-  if (text.wholeText !== ZERO_WIDTH_SPACE) {
-    index += offset;
-  }
-
-  const textElement = text.parentElement;
-  if (!textElement) {
-    throw new Error('text element not found');
-  }
-
-  const lineElement = textElement.closest('virgo-line');
-
-  if (!lineElement) {
-    throw new Error('line element not found');
-  }
-
-  const lineIndex = Array.from(
-    rootElement.querySelectorAll('virgo-line')
-  ).indexOf(lineElement);
-
-  return { text, index: index + lineIndex };
 }
 
 function isSelectionBackwards(selection: Selection): boolean {
@@ -800,34 +920,8 @@ function isVLine(element: unknown): element is HTMLElement {
   );
 }
 
-function getTextAndOffset(node: unknown, offset: number) {
-  let text: Text | null = null;
-  let textOffset = offset;
-  if (isVText(node)) {
-    text = node;
-    textOffset = offset;
-  } else if (isVElement(node)) {
-    const textNode = getTextNodeFromElement(node);
-    if (textNode) {
-      text = textNode;
-      textOffset = offset;
-    }
-  } else if (isVLine(node)) {
-    const firstTextElement = node.querySelector('v-text');
-    if (firstTextElement) {
-      const textNode = getTextNodeFromElement(firstTextElement);
-      if (textNode) {
-        text = textNode;
-        textOffset = 0;
-      }
-    }
-  }
-
-  return [text, textOffset] as const;
-}
-
-function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
-  const el = editor.getRootElement();
+function findDocumentOrShadowRoot(editor: VEditor): Document {
+  const el = editor.rootElement;
 
   if (!el) {
     throw new Error('editor root element not found');
@@ -837,8 +931,7 @@ function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
 
   if (
     (root instanceof Document || root instanceof ShadowRoot) &&
-    // @ts-ignore
-    root.getSelection != null
+    'getSelection' in root
   ) {
     return root;
   }

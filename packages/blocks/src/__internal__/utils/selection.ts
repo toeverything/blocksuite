@@ -96,17 +96,18 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
-  const titleElement = document.querySelector(
-    '.affine-default-page-block-title'
-  ) as HTMLTextAreaElement | null;
-  if (!titleElement) {
-    throw new Error("Can't find title element");
+  // TODO support SelectionPosition
+  const pageComponent = document.querySelector('affine-default-page');
+  if (!pageComponent) {
+    throw new Error("Can't find page component!");
   }
-  if (index > titleElement.value.length) {
-    index = titleElement.value.length;
+  if (!pageComponent.titleVEditor) {
+    throw new Error("Can't find title vEditor!");
   }
-  titleElement.setSelectionRange(index, index);
-  titleElement.focus();
+  if (index > pageComponent.titleVEditor.yText.length) {
+    index = pageComponent.titleVEditor.yText.length;
+  }
+  pageComponent.titleVEditor.setVRange({ index, length: 0 });
 }
 
 export async function focusRichText(
@@ -144,7 +145,7 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
-  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'] as const)) {
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
@@ -155,7 +156,7 @@ export function focusBlockByModel(
       'affine:divider',
       'affine:code',
       'affine:database',
-    ])
+    ] as const)
   ) {
     if (!defaultPageBlock.selection) {
       // TODO fix this
@@ -168,7 +169,7 @@ export function focusBlockByModel(
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
-    if (matchFlavours(model, ['affine:database'])) {
+    if (matchFlavours(model, ['affine:database'] as const)) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
         .filter(
@@ -470,7 +471,7 @@ function handleClickRetargeting(page: Page, e: SelectionEvent) {
   const shouldRetarget = matchFlavours(parentModel, [
     'affine:frame',
     'affine:page',
-  ]);
+  ] as const);
   if (!shouldRetarget) return;
 
   const { clientX, clientY } = e.raw;

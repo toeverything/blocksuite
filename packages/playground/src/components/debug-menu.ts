@@ -16,9 +16,7 @@ import {
   createEvent,
   type FrameBlockModel,
   getCurrentBlockRange,
-  MouseMode,
   NonShadowLitElement,
-  ShapeMouseMode,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
@@ -28,14 +26,9 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ShapeType } from '@blocksuite/phasor';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
-import type {
-  SlColorPicker,
-  SlDropdown,
-  SlSelect,
-} from '@shoelace-style/shoelace';
+import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
@@ -66,54 +59,31 @@ export class DebugMenu extends NonShadowLitElement {
   editor!: EditorContainer;
 
   @state()
-  connected = true;
+  private _connected = true;
 
   @state()
-  canUndo = false;
+  private _canUndo = false;
 
   @state()
-  canRedo = false;
+  private _canRedo = false;
 
-  @state()
+  @property()
   mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  mouseModeType: MouseMode['type'] = 'default';
+  private _showGrid = false;
 
-  @state()
-  showGrid = false;
-
-  @state()
-  shapeModeColor: ShapeMouseMode['color'] = '#000000';
-
-  @state()
-  shapeModeShape: ShapeMouseMode['shape'] = 'rect';
-
-  @state()
+  @property()
   readonly = false;
 
   @state()
-  hasOffset = false;
+  private _hasOffset = false;
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
 
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
-
-  get mouseMode(): MouseMode {
-    if (this.mouseModeType === 'default') {
-      return {
-        type: this.mouseModeType,
-      };
-    } else {
-      return {
-        type: this.mouseModeType,
-        color: this.shapeModeColor,
-        shape: this.shapeModeShape,
-      };
-    }
-  }
 
   get page() {
     return this.editor.page;
@@ -128,18 +98,18 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   private _toggleConnection() {
-    if (this.connected) {
+    if (this._connected) {
       this.workspace.providers.forEach(provider => {
         if (!provider || !provider.disconnect) return;
         provider.disconnect();
       });
-      this.connected = false;
+      this._connected = false;
     } else {
       this.workspace.providers.forEach(provider => {
         if (!provider || !provider.connect) return;
         provider.connect();
       });
-      this.connected = true;
+      this._connected = true;
     }
   }
 
@@ -191,7 +161,7 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   private _switchOffsetMode() {
-    this.hasOffset = !this.hasOffset;
+    this._hasOffset = !this._hasOffset;
   }
 
   private _addFrame() {
@@ -211,12 +181,8 @@ export class DebugMenu extends NonShadowLitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, frameId);
   }
 
-  private _switchMouseMode() {
-    this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
-  }
-
   private _switchShowGrid() {
-    this.showGrid = !this.showGrid;
+    this._showGrid = !this._showGrid;
   }
 
   private _exportHtml() {
@@ -259,8 +225,8 @@ export class DebugMenu extends NonShadowLitElement {
 
   firstUpdated() {
     this.page.signals.historyUpdated.on(() => {
-      this.canUndo = this.page.canUndo;
-      this.canRedo = this.page.canRedo;
+      this._canUndo = this.page.canUndo;
+      this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 350;
@@ -286,25 +252,32 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (
-      changedProperties.has('mouseModeType') ||
-      changedProperties.has('shapeModeColor') ||
-      changedProperties.has('shapeModeShape')
-    ) {
-      const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
-      window.dispatchEvent(event);
-    }
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
     }
-    if (changedProperties.has('showGrid')) {
+    if (changedProperties.has('_showGrid')) {
       window.dispatchEvent(
-        createEvent('affine:switch-edgeless-display-mode', this.showGrid)
+        createEvent('affine:switch-edgeless-display-mode', this._showGrid)
       );
     }
-    if (changedProperties.has('hasOffset')) {
-      document.body.style.margin = this.hasOffset ? '60px 0 0 40px' : '0';
+    if (changedProperties.has('_hasOffset')) {
+      const appRoot = document.getElementById('app');
+      if (!appRoot) return;
+      const style: Partial<CSSStyleDeclaration> = this._hasOffset
+        ? {
+            margin: '60px 40px 240px 40px',
+            overflow: 'auto',
+            height: '400px',
+            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
+          }
+        : {
+            margin: '0',
+            overflow: 'initial',
+            height: 'initial',
+            boxShadow: 'initial',
+          };
+      Object.assign(appRoot.style, style);
     }
     super.update(changedProperties);
   }
@@ -355,7 +328,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-button
                 size="small"
                 content="Undo"
-                .disabled=${!this.canUndo}
+                .disabled=${!this._canUndo}
                 @click=${() => this.page.undo()}
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
@@ -366,7 +339,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-button
                 size="small"
                 content="Redo"
-                .disabled=${!this.canRedo}
+                .disabled=${!this._canRedo}
                 @click=${() => this.page.redo()}
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
@@ -461,7 +434,7 @@ export class DebugMenu extends NonShadowLitElement {
             </sl-button>
             <sl-menu>
               <sl-menu-item @click=${this._toggleConnection}>
-                ${this.connected ? 'Disconnect' : 'Connect'}
+                ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
               <sl-menu-item @click=${this._setReadonlyOthers}>
@@ -514,50 +487,10 @@ export class DebugMenu extends NonShadowLitElement {
               content="Show Grid"
               @click=${this._switchShowGrid}
             >
-              <sl-icon name=${!this.showGrid ? 'square' : 'grid-3x3'}>
+              <sl-icon name=${!this._showGrid ? 'square' : 'grid-3x3'}>
               </sl-icon>
             </sl-button>
           </sl-tooltip>
-          <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Mouse Mode"
-              @click=${this._switchMouseMode}
-            >
-              <sl-icon
-                name=${this.mouseMode.type === 'default'
-                  ? 'cursor'
-                  : 'pentagon'}
-              >
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-color-picker
-            size="small"
-            value="#000000"
-            hoist
-            label="Shape Color"
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlColorPicker;
-              this.shapeModeColor = target.value as `#${string}`;
-            }}
-          ></sl-color-picker>
-          <sl-select
-            placeholder="Shape Type"
-            size="small"
-            value=${this.shapeModeShape}
-            aria-label="Shape Type"
-            hoist
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlSelect;
-              this.shapeModeShape = target.value as ShapeType;
-            }}
-          >
-            <sl-menu-item value="rectangle">Rectangle</sl-menu-item>
-            <sl-menu-item value="triangle">Triangle</sl-menu-item>
-            <sl-menu-item value="ellipse">Ellipse</sl-menu-item>
-          </sl-select>
         </div>
       </div>
     `;

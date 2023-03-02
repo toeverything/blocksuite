@@ -1,4 +1,4 @@
-export const codeLaguages = [
+export const codeLanguages = [
   'TypeScript',
   'Rust',
   'Python',
@@ -87,6 +87,7 @@ export const codeLaguages = [
   'haxe',
   'hsp',
   'http',
+  'html',
   'hy',
   'inform7',
   'ini',
@@ -193,7 +194,7 @@ export const codeLaguages = [
   'zephir',
 ];
 
-const laguagesWithShortName: Record<string, string> = {
+const languagesWithShortName: Record<string, string> = {
   clj: 'clojure',
 
   'c#': 'csharp',
@@ -223,6 +224,14 @@ const laguagesWithShortName: Record<string, string> = {
   yml: 'yaml',
 };
 
-export const getCodeLaguage = (shortName: string) => {
-  return laguagesWithShortName[shortName];
+export const getCodeLanguage = (languageName: string) => {
+  const language = codeLanguages.find(codeLanguage => {
+    return codeLanguage.toLowerCase() === languageName.toLowerCase();
+  });
+
+  if (language) {
+    return language;
+  }
+
+  return languagesWithShortName[languageName];
 };

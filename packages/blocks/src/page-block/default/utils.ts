@@ -170,7 +170,7 @@ function binarySearchBlockEditingState(
         options
       );
       return result;
-    } else if (matchFlavours(block, ['affine:database'])) {
+    } else if (matchFlavours(block, ['affine:database'] as const)) {
       // double check when current block is database block
       const result = binarySearchBlockEditingState(
         blocks,
@@ -521,10 +521,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         targetModel,
         distanceToTop < distanceToBottom
       );
-      defaultPageBlock.signals.updateSelectedRects.emit([]);
-      defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
-      defaultPageBlock.signals.updateEmbedEditingState.emit(null);
-      defaultPageBlock.signals.updateEmbedRects.emit([]);
+      const type = defaultPageBlock.selection.state.type;
+      defaultPageBlock.selection.clear();
+      defaultPageBlock.selection.state.type = type;
 
       requestAnimationFrame(() => {
         // update selection rects
@@ -543,10 +542,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
       } else if (selectedBlocks) {
         const { position, index } = selectedBlocks;
-        defaultPageBlock.selection.selectBlocksByIndexAndBounding(
-          index,
-          position
-        );
+        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
       }
     },
     getSelectedBlocks() {

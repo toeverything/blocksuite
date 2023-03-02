@@ -1,3 +1,4 @@
+import type { BlockModels } from '@blocksuite/global/types';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
@@ -99,7 +100,7 @@ export class BaseBlockModel<Props = unknown>
   implements BlockSuiteInternal.IBaseBlockProps
 {
   static version: number;
-  flavour!: keyof BlockSuiteInternal.BlockModels & string;
+  flavour!: keyof BlockModels & string;
   tag!: StaticValue;
   id: string;
 

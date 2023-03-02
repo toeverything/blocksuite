@@ -10,7 +10,7 @@ export class PageBlockService extends BaseService {
     begin?: number,
     end?: number
   ) {
-    return `<div>${block.title}${childText}</div>`;
+    return `<div>${block.title.toString()}${childText}</div>`;
   }
 
   override block2Text(
@@ -19,7 +19,7 @@ export class PageBlockService extends BaseService {
     begin?: number,
     end?: number
   ) {
-    const text = (block.title || '').slice(begin || 0, end);
+    const text = (block.title.toString() || '').slice(begin || 0, end);
     return `${text}${childText}`;
   }
 }

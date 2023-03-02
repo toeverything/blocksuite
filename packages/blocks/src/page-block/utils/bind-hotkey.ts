@@ -1,18 +1,17 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertEquals,
+  assertExists,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import {
-  getBlockElementByModel,
-  hasNativeSelection,
-  hotkey,
-} from '../../__internal__/index.js';
+import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
-  BlockComponentElement,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -21,18 +20,16 @@ import {
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
-  getStartModelBySelection,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
-import {
-  handleBlockSelectionBatchDelete,
-  handleMultiBlockBackspace,
-  handleSelectAll,
-} from '../utils/index.js';
+import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
-import { updateBlockType } from './container-operations.js';
+import {
+  deleteModelsByRange,
+  updateBlockType,
+} from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -87,12 +84,42 @@ export function removeCommonHotKey() {
 
 export function handleUp(
   e: KeyboardEvent,
+  page: Page,
   selection?: DefaultSelectionManager
 ) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  if (blockRange.type === 'Block') {
+    if (!selection) {
+      console.error(
+        'Failed to handle up: selection is not provided',
+        blockRange
+      );
+      return;
+    }
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const pageBlock = getDefaultPageBlock(selectedModel);
+    selection.clear();
+    focusPreviousBlock(
+      selectedModel,
+      pageBlock.lastSelectionPosition instanceof Point
+        ? pageBlock.lastSelectionPosition
+        : 'end'
+    );
+    e.preventDefault();
+    return;
+  }
   // Assume the native selection is collapsed
-  if (hasNativeSelection()) {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
+  if (blockRange.type === 'Native') {
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle up! range is not collapsed'
+    );
+    const model = blockRange.models[0];
     const previousBlock = getPreviousBlock(model);
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
@@ -133,30 +160,55 @@ export function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
-  if (selection) {
-    const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const page = getDefaultPageBlock(selectedModel);
-    selection.clear();
-    focusPreviousBlock(
-      selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
-        : 'end'
-    );
-    e.preventDefault();
-  }
 }
 
 export function handleDown(
   e: KeyboardEvent,
+  page: Page,
   selection?: DefaultSelectionManager
 ) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  if (blockRange.type === 'Block' && selection) {
+    if (!selection) {
+      console.error(
+        'Failed to handle down: selection is not provided',
+        blockRange
+      );
+      return;
+    }
+    const { state } = selection;
+    const lastEle = state.selectedBlocks.at(-1);
+    if (!lastEle) {
+      throw new Error(
+        "Failed to handleDown! Can't find last selected element!"
+      );
+    }
+    const selectedModel = getModelByElement(lastEle);
+    selection.clear();
+    const page = getDefaultPageBlock(selectedModel);
+    focusNextBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'start'
+    );
+    e.preventDefault();
+  }
   // Assume the native selection is collapsed
-  if (hasNativeSelection()) {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
-    if (matchFlavours(model, ['affine:code'])) {
+  if (blockRange.type === 'Native') {
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle down! range is not collapsed'
+    );
+    const model = blockRange.models[0];
+    if (
+      matchFlavours(model, ['affine:code'] as const) ||
+      matchFlavours(model, ['affine:page'] as const)
+    ) {
       return;
     }
     const range = getCurrentNativeRange();
@@ -196,25 +248,6 @@ export function handleDown(
     focusNextBlock(model, new Point(left, bottom));
     return;
   }
-  if (selection) {
-    const { state } = selection;
-    const lastEle = state.selectedBlocks.at(-1);
-    if (!lastEle) {
-      throw new Error(
-        "Failed to handleDown! Can't find last selected element!"
-      );
-    }
-    const selectedModel = getModelByElement(lastEle);
-    selection.clear();
-    const page = getDefaultPageBlock(selectedModel);
-    focusNextBlock(
-      selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
-        : 'start'
-    );
-    e.preventDefault();
-  }
   return;
 }
 
@@ -246,16 +279,9 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         getModelByElement(block)
       );
       handleMultiBlockIndent(page, models);
-
       requestAnimationFrame(() => {
-        selection.state.type = 'block';
-        // get fresh elements
-        selection.state.selectedBlocks = models
-          .map(model => getBlockElementByModel(model))
-          .filter(block => block !== null) as BlockComponentElement[];
-        selection.refreshSelectedBlocksRects();
+        selection.refreshSelectedBlocksRectsByModels(models);
       });
-      selection.clear();
       break;
     }
   }
@@ -290,8 +316,6 @@ export function bindHotkeys(
       return;
     }
     if (blockRange.type === 'Block') {
-      e.stopPropagation();
-      e.preventDefault();
       const endModel = blockRange.models[blockRange.models.length - 1];
       const parentModel = page.getParent(endModel);
       const index = parentModel?.children.indexOf(endModel);
@@ -307,23 +331,26 @@ export function bindHotkeys(
       selection.clear();
       return;
     }
-    // TODO fix native selection enter
+    // Native selection
+    // Avoid print extra enter
+    e.preventDefault();
+    const startModel = blockRange.models[0];
+    startModel.text?.delete(
+      blockRange.startOffset,
+      startModel.text.length - blockRange.startOffset
+    );
+    const endModel = blockRange.models[blockRange.models.length - 1];
+    endModel.text?.delete(0, blockRange.endOffset);
+    blockRange.models.slice(1, -1).forEach(model => {
+      page.deleteBlock(model);
+    });
+    focusBlockByModel(endModel, 'start');
     return;
   });
 
   hotkey.addListener(BACKSPACE, e => {
-    const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
-    if (blockRange.type === 'Native') {
-      handleMultiBlockBackspace(page, e);
-      return;
-    }
-
     // delete blocks
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    selection.clear();
+    deleteModelsByRange(page);
     e.preventDefault();
     return;
   });
@@ -335,62 +362,46 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(e, selection);
+    handleUp(e, page, selection);
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(e, selection);
+    handleDown(e, page, selection);
   });
   hotkey.addListener(LEFT, e => {
-    let model: BaseBlockModel | null = null;
-    const {
-      state: { selectedBlocks, type },
-    } = selection;
-    if (
-      selectedBlocks.length &&
-      !(type === 'native' && window.getSelection()?.rangeCount)
-    ) {
-      model = getModelByElement(selection.state.selectedBlocks[0]);
-      signals.updateSelectedRects.emit([]);
-      selection.state.clear();
-      e.preventDefault();
-    } else {
-      const range = window.getSelection()?.getRangeAt(0);
-      if (range && range.collapsed && range.startOffset === 0) {
-        model = getStartModelBySelection();
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-    model && focusPreviousBlock(model, 'end');
+    if (blockRange.type === 'Block') {
+      // Do nothing
+      return;
+    }
+    // Assume native selection is collapsed
+    if (blockRange.models.length > 1) {
+      throw new Error(
+        "Failed to handle arrow left! Native selection can't be multi-block!"
+      );
+    }
+    focusPreviousBlock(blockRange.models[0], 'end');
+    return;
   });
   hotkey.addListener(RIGHT, e => {
-    let model: BaseBlockModel | null = null;
-    const {
-      state: { selectedBlocks, type },
-    } = selection;
-    if (
-      selectedBlocks.length &&
-      !(type === 'native' && window.getSelection()?.rangeCount)
-    ) {
-      model = getModelByElement(
-        selection.state.selectedBlocks[
-          selection.state.selectedBlocks.length - 1
-        ]
-      );
-      signals.updateSelectedRects.emit([]);
-      selection.state.clear();
-      e.preventDefault();
-    } else {
-      const range = window.getSelection()?.getRangeAt(0);
-      const textModel = getStartModelBySelection();
-      if (
-        range &&
-        range.collapsed &&
-        range.startOffset === textModel.text?.length
-      ) {
-        // handleUp(this.selection, this.signals);
-        model = getStartModelBySelection();
-      }
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
     }
-    model && focusNextBlock(model, 'start');
+    if (blockRange.type === 'Block') {
+      // Do nothing
+      return;
+    }
+    // Assume native selection is collapsed
+    if (blockRange.models.length > 1) {
+      throw new Error(
+        "Failed to handle arrow right! Native selection can't be multi-block!"
+      );
+    }
+    focusNextBlock(blockRange.models[0], 'start');
+    return;
   });
 
   hotkey.addListener(TAB, () => handleTab(page, selection));

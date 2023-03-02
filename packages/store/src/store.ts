@@ -78,8 +78,7 @@ const flagsPreset = {
 
   enable_database: false,
   enable_toggle_block: false,
-  enable_hide_children: false,
-  enable_block_selection_format_bar: false,
+  enable_block_selection_format_bar: true,
 
   readonly: {},
 } satisfies BlockSuiteFlags;

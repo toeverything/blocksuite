@@ -1,4 +1,9 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import {
+  getCurrentBlockRange,
+  getDefaultPageBlock,
+  handleBlockSelectionBatchDelete,
+  OpenBlockInfo,
+} from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   getStartModelBySelection,
@@ -52,6 +57,20 @@ export class PasteManager {
         e.preventDefault();
         e.stopPropagation();
         const blocks: OpenBlockInfo[] = await blocksPromise;
+        const page = this._editor.page;
+        const blockRange = getCurrentBlockRange(page);
+        if (blockRange && blockRange.type !== 'Native') {
+          if (
+            !blockRange.models.every(model => model.flavour === 'affine:list')
+          ) {
+            handleBlockSelectionBatchDelete(page, blockRange.models);
+            const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+            pageBlock.selection.clear();
+            requestAnimationFrame(() => {
+              this.insertBlocks(blocks);
+            });
+          }
+        }
         this.insertBlocks(blocks);
       }
     }
@@ -106,8 +125,9 @@ export class PasteManager {
     }
 
     const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+    const maybeModel = getStartModelBySelection();
     const shouldNotSplitBlock =
-      getStartModelBySelection().flavour === 'affine:code';
+      maybeModel && maybeModel.flavour === 'affine:code';
     if (shouldNotSplitBlock) {
       return [{ text: [{ insert: textClipData }], children: [] }];
     }
@@ -191,7 +211,7 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
@@ -248,7 +268,7 @@ export class PasteManager {
           // instead of appending a new image block, if this paragraph is empty.
           if (
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
@@ -263,7 +283,7 @@ export class PasteManager {
             insertLen > 0 &&
             parent &&
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
@@ -334,7 +354,7 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {

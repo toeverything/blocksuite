@@ -24,7 +24,7 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
-  isTitleElement,
+  isInsidePageTitle,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
@@ -36,6 +36,7 @@ import type {
   ImageBlockComponent,
 } from '../../embed-block/index.js';
 import {
+  calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/position.js';
@@ -60,7 +61,6 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   );
 }
 
-// `parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY`
 /*
 function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   return (
@@ -71,6 +71,11 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   );
 }
 */
+function contains(parent: Element, node: Element) {
+  return (
+    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
+  );
+}
 
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
@@ -99,11 +104,7 @@ function filterSelectedBlockWithoutSubtree(
       } else {
         let prevBlock = entries[prevIndex][0];
         // prev block before and contains block
-        if (
-          prevBlock.compareDocumentPosition(block) ===
-          (Node.DOCUMENT_POSITION_FOLLOWING |
-            Node.DOCUMENT_POSITION_CONTAINED_BY)
-        ) {
+        if (contains(prevBlock, block)) {
           // not continuous block
           if (results.length > 1) {
             continue;
@@ -118,8 +119,7 @@ function filterSelectedBlockWithoutSubtree(
           if (
             previousElementSibling &&
             previousElementSibling !== prevBlock &&
-            previousElementSibling.compareDocumentPosition(prevBlock) &
-              Node.DOCUMENT_POSITION_CONTAINED_BY
+            contains(previousElementSibling, prevBlock)
           ) {
             let n = i;
             let m = results.length;
@@ -147,7 +147,7 @@ function filterSelectedBlockWithoutSubtree(
 
 // Find the current focused block and its substree.
 // The `selectionRect` is a rect of block element.
-function filterSelectedBlockByIndex(
+function filterSelectedBlockByIndexAndBound(
   blockCache: Map<BlockComponentElement, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
@@ -164,30 +164,59 @@ function filterSelectedBlockByIndex(
   const entries = Array.from(blockCache.entries());
   const len = entries.length;
   const results = [];
-  let once = true;
   let prevBlock: Element | null = null;
 
   for (let i = focusedBlockIndex; i < len; i++) {
     const [block, rect] = entries[i];
-    if (once) {
+    if (prevBlock) {
+      // prev block contains block
+      if (contains(prevBlock, block)) {
+        results.push(block);
+      } else {
+        break;
+      }
+    } else {
       const richText = block.querySelector('rich-text');
       const nextRect = richText?.getBoundingClientRect() || rect;
 
       if (nextRect && intersects(rect, selectionRect, offset)) {
         prevBlock = block;
         results.push(block);
-        once = false;
       }
-    } else if (prevBlock) {
-      // prev block contains block
-      if (
-        prevBlock.compareDocumentPosition(block) &
-        Node.DOCUMENT_POSITION_CONTAINED_BY
-      ) {
-        results.push(block);
-      } else {
-        break;
-      }
+    }
+  }
+
+  return results;
+}
+
+// Find the current focused block and its substree.
+function filterSelectedBlockByIndex(
+  blockCache: Map<BlockComponentElement, DOMRect>,
+  index: number
+): BlockComponentElement[] {
+  const blocks = Array.from(blockCache.keys());
+  // SELECT_ALL
+  if (index === -1) {
+    return blocks;
+  }
+
+  const len = blocks.length;
+  const results: BlockComponentElement[] = [];
+
+  if (index > len - 1) {
+    return results;
+  }
+
+  const prevBlock = blocks[index];
+
+  results.push(prevBlock);
+
+  for (let i = index + 1; i < len; i++) {
+    // prev block contains block
+    if (contains(prevBlock, blocks[i])) {
+      results.push(blocks[i]);
+    } else {
+      break;
     }
   }
 
@@ -202,10 +231,7 @@ function clearSubtree(
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     // prev block contains block
-    if (
-      prevBlock.compareDocumentPosition(block) &
-      Node.DOCUMENT_POSITION_CONTAINED_BY
-    ) {
+    if (contains(prevBlock, block)) {
       return false;
     } else {
       prevBlock = block;
@@ -226,15 +252,9 @@ function findBlocksWithSubtree(
   const len = selectedBlocksWithoutSubtree.length;
 
   for (let i = 0; i < len; i++) {
-    const { block, index } = selectedBlocksWithoutSubtree[i];
+    const { index } = selectedBlocksWithoutSubtree[i];
     // find block's subtree
-    results.push(
-      ...filterSelectedBlockByIndex(
-        blockCache,
-        index,
-        blockCache.get(block) as DOMRect
-      )
-    );
+    results.push(...filterSelectedBlockByIndex(blockCache, index));
   }
 
   return results;
@@ -365,6 +385,17 @@ export class PageSelectionState {
     }
   }
 
+  blur() {
+    resetNativeSelection(null);
+    // deactivate quill keyboard event handler
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+  }
+
   clearRaf() {
     if (this.rafID) {
       this.rafID = void cancelAnimationFrame(this.rafID);
@@ -447,6 +478,7 @@ export class DefaultSelectionManager {
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
+        // TODO merge these two functions
         this._onSelectionChangeWithDebounce,
         this._onSelectionChangeWithoutDebounce
       )
@@ -521,6 +553,8 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
+    // rich-text should be unfocused
+    this.state.blur();
     this.state.type = 'block';
     this._container.updateViewportState();
     const { scrollLeft, scrollTop } = this._container.viewportState;
@@ -529,8 +563,6 @@ export class DefaultSelectionManager {
       scrollLeft,
     });
     this.state.refreshBlockRectCache();
-    // deactivate quill keyboard event handler
-    (document.activeElement as HTMLDivElement).blur();
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
@@ -609,7 +641,8 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    this.state.resetStartRange(e);
+    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
     }
@@ -674,7 +707,15 @@ export class DefaultSelectionManager {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ page: this.page, direction });
+      showFormatQuickBar({
+        page: this.page,
+        direction,
+        anchorEl: {
+          getBoundingClientRect: () => {
+            return calcCurrentSelectionPosition(direction, this.state);
+          },
+        },
+      });
     } else if (this.state.type === 'block') {
       if (
         !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
@@ -693,15 +734,7 @@ export class DefaultSelectionManager {
           // After update block type, the block selection will be cleared and refreshed.
           // So we need to get the targe block's rect dynamic.
           getBoundingClientRect: () => {
-            const blocks = this.state.selectedBlocks;
-            if (!blocks.length) {
-              throw new Error("Failed to get format bar's anchor element");
-            }
-            const firstBlock = blocks[0];
-            const lastBlock = blocks[blocks.length - 1];
-            const targetBlock =
-              direction === 'center-bottom' ? lastBlock : firstBlock;
-            return targetBlock.getBoundingClientRect();
+            return calcCurrentSelectionPosition(direction, this.state);
           },
         },
       });
@@ -746,7 +779,10 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      matchFlavours(clickBlockInfo.model, [
+        'affine:embed',
+        'affine:divider',
+      ] as const)
     ) {
       window.getSelection()?.removeAllRanges();
 
@@ -767,7 +803,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isTitleElement(target) || isDatabaseInput(target)) {
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;
@@ -786,7 +822,18 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
+    const direction = 'center-bottom';
+
+    // Show format quick bar when double click on text
+    showFormatQuickBar({
+      page: this.page,
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
+    });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -834,6 +881,14 @@ export class DefaultSelectionManager {
       return;
     }
 
+    // filter out selection change event from title
+    if (
+      isInsidePageTitle(selection.anchorNode) ||
+      isInsidePageTitle(selection.focusNode)
+    ) {
+      return;
+    }
+
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;
@@ -848,17 +903,24 @@ export class DefaultSelectionManager {
     }
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
-    let direction: 'left-right' | 'right-left' | 'none' = 'none';
+    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
 
     if (offsetDelta > 0) {
-      direction = 'right-left';
+      selectionDirection = 'right-left';
     } else if (offsetDelta < 0) {
-      direction = 'left-right';
+      selectionDirection = 'left-right';
     }
+    const direction =
+      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, this.state);
+        },
+      },
     });
   };
 
@@ -975,6 +1037,13 @@ export class DefaultSelectionManager {
     }
   }
 
+  refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
+    this.state.selectedBlocks = models
+      .map(model => getBlockElementByModel(model))
+      .filter((block): block is BlockComponentElement => block !== null);
+    this.refreshSelectedBlocksRects();
+  }
+
   refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
@@ -996,7 +1065,10 @@ export class DefaultSelectionManager {
   }
 
   // Click on drag-handle button
-  selectBlocksByIndexAndBounding(index: number, boundRect: DOMRect) {
+  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+    // rich-text should be unfocused
+    this.state.blur();
+
     this.state.focusedBlockIndex = index;
 
     const { blockCache, focusedBlockIndex } = this.state;
@@ -1010,8 +1082,7 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
-      focusedBlockIndex,
-      boundRect
+      focusedBlockIndex
     );
 
     // only current focused-block
@@ -1037,8 +1108,7 @@ export class DefaultSelectionManager {
     const boundRect = blockCache.get(blockElement) as DOMRect;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
-      focusedBlockIndex,
-      boundRect
+      focusedBlockIndex
     );
 
     // only current focused-block
@@ -1053,7 +1123,7 @@ export class DefaultSelectionManager {
       focusedBlockIndex,
       selectedBlocks: prevSelectedBlocks,
     } = this.state;
-    const selectedBlocks = filterSelectedBlockByIndex(
+    const selectedBlocks = filterSelectedBlockByIndexAndBound(
       blockCache,
       focusedBlockIndex,
       hitRect

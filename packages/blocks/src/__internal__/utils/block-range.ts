@@ -1,8 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
-  BlockComponentElement,
-  getBlockElementByModel,
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
@@ -159,13 +157,10 @@ export function restoreSelection(blockRange: BlockRange) {
     // In the edgeless mode
     return;
   }
-  defaultPageBlock.selection.clear();
-  // get fresh elements
   defaultPageBlock.selection.state.type = 'block';
-  defaultPageBlock.selection.state.selectedBlocks = blockRange.models
-    .map(model => getBlockElementByModel(model))
-    .filter(Boolean) as BlockComponentElement[];
-  defaultPageBlock.selection.refreshSelectedBlocksRects();
+  defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
+    blockRange.models
+  );
   // Try clean native selection
   resetNativeSelection(null);
   (document.activeElement as HTMLElement).blur();

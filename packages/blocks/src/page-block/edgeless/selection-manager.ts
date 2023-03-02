@@ -10,8 +10,10 @@ import {
 } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
+import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { initWheelEventHandlers } from './utils.js';
 
@@ -128,6 +130,8 @@ export class EdgelessSelectionManager {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
+  private _lastMouseMode: MouseMode | null = null;
+
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
@@ -146,9 +150,15 @@ export class EdgelessSelectionManager {
   }
 
   set mouseMode(mode: MouseMode) {
+    const currentMouseMode = this._mouseMode;
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._lastMouseMode = currentMouseMode;
+  }
+
+  get lastMouseMode(): MouseMode | null {
+    return this._lastMouseMode;
   }
 
   get blockSelectionState() {
@@ -185,6 +195,8 @@ export class EdgelessSelectionManager {
     this._controllers = {
       default: new DefaultModeController(this._container),
       shape: new ShapeModeController(this._container),
+      brush: new BrushModeController(this._container),
+      pan: new PanModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,

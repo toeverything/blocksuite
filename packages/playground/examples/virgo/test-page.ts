@@ -14,7 +14,7 @@ function toggleStyle(
     return;
   }
 
-  const root = vEditor.getRootElement();
+  const root = vEditor.rootElement;
   if (!root) {
     return;
   }
@@ -117,8 +117,8 @@ export class ToolBar extends LitElement {
     const boldButton = this.shadowRoot.querySelector('.bold');
     const italicButton = this.shadowRoot.querySelector('.italic');
     const underlineButton = this.shadowRoot.querySelector('.underline');
-    const strikethroughButton = this.shadowRoot.querySelector('.strikethrough');
-    const inlineCode = this.shadowRoot.querySelector('.inline-code');
+    const strikeButton = this.shadowRoot.querySelector('.strike');
+    const code = this.shadowRoot.querySelector('.code');
     const resetButton = this.shadowRoot.querySelector('.reset');
     const undoButton = this.shadowRoot.querySelector('.undo');
     const redoButton = this.shadowRoot.querySelector('.redo');
@@ -127,8 +127,8 @@ export class ToolBar extends LitElement {
       !boldButton ||
       !italicButton ||
       !underlineButton ||
-      !strikethroughButton ||
-      !inlineCode ||
+      !strikeButton ||
+      !code ||
       !resetButton ||
       !undoButton ||
       !redoButton
@@ -174,11 +174,11 @@ export class ToolBar extends LitElement {
       undoManager.stopCapturing();
       toggleStyle(this.vEditor, { underline: true });
     });
-    strikethroughButton.addEventListener('click', () => {
+    strikeButton.addEventListener('click', () => {
       undoManager.stopCapturing();
       toggleStyle(this.vEditor, { strike: true });
     });
-    inlineCode.addEventListener('click', () => {
+    code.addEventListener('click', () => {
       undoManager.stopCapturing();
       toggleStyle(this.vEditor, { code: true });
     });
@@ -198,8 +198,8 @@ export class ToolBar extends LitElement {
         <sl-button class="bold">bold</sl-button>
         <sl-button class="italic">italic</sl-button>
         <sl-button class="underline">underline</sl-button>
-        <sl-button class="strikethrough">strikethrough</sl-button>
-        <sl-button class="inline-code">inline-code</sl-button>
+        <sl-button class="strike">strike</sl-button>
+        <sl-button class="code">code</sl-button>
         <sl-button class="reset">reset</sl-button>
         <sl-button class="undo">undo</sl-button>
         <sl-button class="redo">redo</sl-button>
@@ -231,15 +231,10 @@ export class TestPage extends LitElement {
 
     .editors > div {
       height: 600px;
-      width: 600px;
+      width: 400px;
       display: grid;
       grid-template-rows: 100px 1fr;
       overflow-y: scroll;
-    }
-
-    .editors tool-bar,
-    .editors rich-text {
-      width: 570px;
     }
   `;
 

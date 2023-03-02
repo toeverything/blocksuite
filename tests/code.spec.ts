@@ -17,6 +17,7 @@ import {
   selectAllByKeyboard,
   type,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -150,9 +151,7 @@ test('change code language can work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:code
       prop:language="Rust"
@@ -275,9 +274,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:code
       prop:language="JavaScript"
@@ -313,7 +310,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   );
 
   await page.mouse.move(position.x, position.y);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.mouse.click(position.x, position.y);
 
   await focusRichText(page, 1);
@@ -321,9 +318,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:code
       prop:language="JavaScript"

@@ -41,14 +41,20 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
     const bound = new Bound(modelX, modelY, 0, 0);
     const { shape, color } = this.mouseMode;
-    const id = this._surface.addShapeElement(bound, shape, color);
+
+    const shapeType = shape === 'roundedRect' ? 'rect' : shape;
+    const shapeProps = {
+      strokeColor: color,
+      radius: shape === 'roundedRect' ? 0.1 : 0,
+    };
+    const id = this._surface.addShapeElement(bound, shapeType, shapeProps);
     this._draggingElementId = id;
 
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
     };
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: SelectionEvent) {
@@ -72,14 +78,14 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const bound = new Bound(x, y, w, h);
     const id = this._draggingElementId;
     this._surface.setElementBound(id, bound);
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: SelectionEvent) {
     this._draggingElementId = null;
     this._draggingArea = null;
     this._page.captureSync();
-    this._edgeless.signals.shapeUpdated.emit();
+    this._edgeless.signals.surfaceUpdated.emit();
   }
 
   onContainerMouseMove(e: SelectionEvent) {
@@ -91,6 +97,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   }
 
   syncSelectionRect() {
+    noop();
+  }
+
+  clearSelection() {
     noop();
   }
 }

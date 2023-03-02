@@ -1,3 +1,7 @@
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import type { BlockModels } from './types.js';
+
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
 export { Signal } from './utils/signal.js';
@@ -11,9 +15,12 @@ export function isPrimitive(
   return a !== Object(a);
 }
 
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
+export function assertExists<T>(
+  val: T | null | undefined,
+  message = 'val does not exist'
+): asserts val is T {
   if (val === null || val === undefined) {
-    throw new Error('val does not exist');
+    throw new Error(message);
   }
 }
 
@@ -23,17 +30,27 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   }
 }
 
-export function matchFlavours<
-  Key extends keyof BlockSuiteInternal.BlockModels &
-    string = keyof BlockSuiteInternal.BlockModels & string
->(
-  model: { flavour: Key },
-  expected: readonly Key[]
-): boolean /* model is BlockModels[Key] */ {
-  return expected.includes(model.flavour as Key);
-}
+type BlockModelKey = keyof BlockModels;
+type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
+export function matchFlavours<Key extends Readonly<Array<string>>>(
+  model: BaseBlockModel,
+  expected: Key
+): model is Flavours<Writeable<Key>> {
+  return expected.includes(model.flavour);
+}
+// export function matchFlavours<
+//   Key extends keyof BlockModels &
+//     string = keyof BlockModels & string
+// >(
+//   model: { flavour: Key },
+//   expected: readonly Key[]
+// ): model is BlockModels[Key] {
+//   return expected.includes(model.flavour as Key);
+// }
+
+export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:database',
   'affine:divider',
   'affine:embed',
@@ -41,11 +58,10 @@ export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
 ];
 
 export const isNonTextBlock = <
-  Key extends keyof BlockSuiteInternal.BlockModels &
-    string = keyof BlockSuiteInternal.BlockModels & string
->(model: {
-  flavour: Key;
-}) => matchFlavours(model, nonTextBlock);
+  Key extends keyof BlockModels & string = keyof BlockModels & string
+>(
+  model: BaseBlockModel
+) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
   | void
@@ -58,10 +74,11 @@ type Allowed =
   | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
-  expected: U
+  expected: U,
+  message = 'val is not same as expected'
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new Error('val is not same as expected');
+    throw new Error(message);
   }
 }
 

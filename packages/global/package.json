@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/global",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha.0",
   "types": "./index.d.ts",
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
   "exports": {
     ".": "./index.d.ts",
     "./database": "./src/database.ts",
+    "./types": "./src/types.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
     "./config": "./src/config/index.ts",
