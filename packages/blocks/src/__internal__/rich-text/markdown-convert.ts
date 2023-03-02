@@ -405,14 +405,6 @@ export function tryMatchSpaceHotkey(
     case '*':
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
-    case '>>':
-      page.awarenessStore.setFlag('enable_toggle_block', true); // TODO find the right way to set this flag and turn it off by default
-      if (page.awarenessStore.getFlag('enable_toggle_block')) {
-        isConverted = convertToList(page, model, 'toggle', prefix, {
-          hideChildren: false,
-        });
-      }
-      break;
     case '***':
     case '---':
       isConverted = convertToDivider(page, model, prefix);

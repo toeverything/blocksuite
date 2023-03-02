@@ -409,14 +409,14 @@ export class DebugMenu extends NonShadowLitElement {
                 Numbered List
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
-              >
-                Toggle List
-              </sl-menu-item>
-              <sl-menu-item
                 @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}
               >
                 Todo List
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+              >
+                Toggle List
               </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item
