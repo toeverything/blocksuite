@@ -210,9 +210,8 @@ export class DefaultPageBlockComponent
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new VEditor(title.yText, {
-      onKeyDown: this._onTitleKeyDown,
-    });
+    this._titleVEditor = new VEditor(title.yText);
+    this._titleVEditor.bindKeyDownHandler(this._onTitleKeyDown);
     this._titleVEditor.mount(this._titleContainer);
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
