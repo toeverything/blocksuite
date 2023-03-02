@@ -6,7 +6,6 @@ import {
   ConnectorIcon,
   HandIcon,
   ImageIcon,
-  PenIcon,
   SelectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
