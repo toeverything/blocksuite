@@ -223,6 +223,9 @@ export class DefaultPageBlockComponent
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
+    if (e.isComposing) {
+      return;
+    }
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
     const defaultFrame = model.children[0];
@@ -241,6 +244,7 @@ export class DefaultPageBlockComponent
       if (block) {
         asyncFocusRichText(page, block.id);
       }
+
       const newFirstParagraphId = page.addBlockByFlavour(
         'affine:paragraph',
         { text: right },
@@ -248,6 +252,7 @@ export class DefaultPageBlockComponent
         0
       );
       asyncFocusRichText(page, newFirstParagraphId);
+      return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
       const firstParagraph = model.children[0].children[0];
@@ -262,6 +267,7 @@ export class DefaultPageBlockComponent
         );
         asyncFocusRichText(page, newFirstParagraphId);
       }
+      return;
     }
   };
 

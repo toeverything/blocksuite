@@ -1,5 +1,9 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertEquals,
+  assertExists,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
@@ -16,7 +20,6 @@ import {
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
-  getStartModelBySelection,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultPageSignals } from '../default/default-page-block.js';
@@ -111,8 +114,12 @@ export function handleUp(
   }
   // Assume the native selection is collapsed
   if (blockRange.type === 'Native') {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle up! range is not collapsed'
+    );
+    const model = blockRange.models[0];
     const previousBlock = getPreviousBlock(model);
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
@@ -192,8 +199,12 @@ export function handleDown(
   }
   // Assume the native selection is collapsed
   if (blockRange.type === 'Native') {
-    // TODO fix event trigger out of editor
-    const model = getStartModelBySelection();
+    assertEquals(
+      blockRange.models.length,
+      1,
+      'Failed to handle down! range is not collapsed'
+    );
+    const model = blockRange.models[0];
     if (
       matchFlavours(model, ['affine:code'] as const) ||
       matchFlavours(model, ['affine:page'] as const)
