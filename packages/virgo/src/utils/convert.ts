@@ -1,7 +1,10 @@
 import type { DeltaInsert } from '../types.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
-export function transformDelta(delta: DeltaInsert): (DeltaInsert | '\n')[] {
-  const result: (DeltaInsert | '\n')[] = [];
+export function transformDelta<TextAttributes extends BaseTextAttributes>(
+  delta: DeltaInsert<TextAttributes>
+): (DeltaInsert<TextAttributes> | '\n')[] {
+  const result: (DeltaInsert<TextAttributes> | '\n')[] = [];
 
   let tmpString = delta.insert;
   while (tmpString.length > 0) {
@@ -31,22 +34,24 @@ export function transformDelta(delta: DeltaInsert): (DeltaInsert | '\n')[] {
 /**
  * convert a delta insert array to chunks, each chunk is a line
  */
-export function deltaInsertsToChunks(delta: DeltaInsert[]): DeltaInsert[][] {
+export function deltaInsertsToChunks<TextAttributes extends BaseTextAttributes>(
+  delta: DeltaInsert<TextAttributes>[]
+): DeltaInsert<TextAttributes>[][] {
   if (delta.length === 0) {
     return [[]];
   }
 
   const transformedDelta = delta.flatMap(transformDelta);
 
-  function* chunksGenerator(arr: (DeltaInsert | '\n')[]) {
+  function* chunksGenerator(arr: (DeltaInsert<TextAttributes> | '\n')[]) {
     let start = 0;
     for (let i = 0; i < arr.length; i++) {
       if (arr[i] === '\n') {
         const chunk = arr.slice(start, i);
         start = i + 1;
-        yield chunk as DeltaInsert[];
+        yield chunk as DeltaInsert<TextAttributes>[];
       } else if (i === arr.length - 1) {
-        yield arr.slice(start) as DeltaInsert[];
+        yield arr.slice(start) as DeltaInsert<TextAttributes>[];
       }
     }
 
