@@ -223,6 +223,9 @@ export class DefaultPageBlockComponent
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
+    if (e.isComposing) {
+      return;
+    }
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
 
@@ -248,9 +251,12 @@ export class DefaultPageBlockComponent
       }
       const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       asyncFocusRichText(this.page, newFirstParagraphId);
-    } else if (e.key === 'ArrowDown' && hasContent) {
+      return;
+    }
+    if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
       asyncFocusRichText(page, model.children[0].children[0].id);
+      return;
     }
   };
 
