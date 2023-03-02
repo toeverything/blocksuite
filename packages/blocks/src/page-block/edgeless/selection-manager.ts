@@ -13,6 +13,7 @@ import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
+import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { initWheelEventHandlers } from './utils.js';
 
@@ -187,6 +188,7 @@ export class EdgelessSelectionManager {
       default: new DefaultModeController(this._container),
       shape: new ShapeModeController(this._container),
       brush: new BrushModeController(this._container),
+      pan: new PanModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
