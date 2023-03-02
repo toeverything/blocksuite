@@ -33,6 +33,7 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
 type BlockModelKey = keyof BlockModels;
 type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+type LiteralUnion<T extends U, U = string> = T | (U & { _?: never });
 
 export function matchFlavours<Key extends Readonly<Array<string>>>(
   model: BaseBlockModel,
@@ -74,10 +75,11 @@ type Allowed =
   | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
-  expected: U
+  expected: U,
+  message = 'val is not same as expected'
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new Error('val is not same as expected');
+    throw new Error(message);
   }
 }
 

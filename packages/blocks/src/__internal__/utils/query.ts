@@ -191,8 +191,12 @@ export function getStartModelBySelection() {
       ? (range.startContainer.parentElement as HTMLElement)
       : (range.startContainer as HTMLElement);
 
-  const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
-  // TODO Fix this, this cast is not safe
+  const startComponent = startContainer.closest(
+    `[${ATTR}]`
+  ) as ContainerBlock | null;
+  if (!startComponent) {
+    return null;
+  }
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -207,7 +211,11 @@ export function getRichTextByModel(model: BaseBlockModel) {
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
-    return [getStartModelBySelection()];
+    const model = getStartModelBySelection();
+    if (!model) {
+      return [];
+    }
+    return [model];
   }
   if (
     commonAncestor.attributes &&
@@ -241,7 +249,11 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     });
     return intersectedModels;
   }
-  return [getStartModelBySelection()];
+  const model = getStartModelBySelection();
+  if (!model) {
+    return [];
+  }
+  return [model];
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
