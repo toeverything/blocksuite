@@ -136,6 +136,9 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
+  // when using shortcut to enter pan mode, should roll back to last mouse mode
+  private _enterPanMouseModeByShortcut = false;
+
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
@@ -183,6 +186,7 @@ export class EdgelessPageBlockComponent
         return;
       }
 
+      // when user is editing, shouldn't enter pan mode
       if (
         mouseMode.type === 'default' &&
         blockSelectionState.type === 'single' &&
@@ -191,10 +195,15 @@ export class EdgelessPageBlockComponent
         return;
       }
 
-      this.mouseMode = { type: 'pan', temporary: true };
+      this.mouseMode = { type: 'pan' };
+      this._enterPanMouseModeByShortcut = true;
     }
     if (event.type === 'keyup') {
-      if (mouseMode.type === 'pan' && mouseMode.temporary && lastMouseMode) {
+      if (
+        mouseMode.type === 'pan' &&
+        this._enterPanMouseModeByShortcut &&
+        lastMouseMode
+      ) {
         this.mouseMode = lastMouseMode;
       }
     }
