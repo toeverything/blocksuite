@@ -1,6 +1,7 @@
 /// <reference types="@blocksuite/global" />
 import type { IBound } from './consts.js';
 
+export type { Color, StrokeStyle } from './consts.js';
 export * from './elements/index.js';
 export { Renderer } from './renderer.js';
 export * from './surface.js';
