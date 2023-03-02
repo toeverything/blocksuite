@@ -29,15 +29,12 @@ export function createLink(page: Page) {
 
   // User can cancel link by pressing shortcut again
   const format = getVEditorFormat(vEditor, vRange);
+  delete format.link;
   if (format.link) {
     page.captureSync();
-    vEditor.formatText(
-      vRange,
-      { ...format, link: undefined },
-      {
-        mode: 'replace',
-      }
-    );
+    vEditor.formatText(vRange, format, {
+      mode: 'replace',
+    });
     return;
   }
 
@@ -62,6 +59,6 @@ export function createLink(page: Page) {
     const link = linkState.link;
 
     page.captureSync();
-    vEditor.formatText(vRange, { link }, { mode: 'merge' });
+    vEditor.formatText(vRange, { link });
   });
 }

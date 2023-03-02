@@ -122,8 +122,14 @@ export function deleteModelsByRange(
   });
 
   const firstRichText = getRichTextByModel(startModel);
+  assertExists(firstRichText);
+  const vEditor = firstRichText.vEditor;
+  assertExists(vEditor);
   // TODO update focus API
-  firstRichText && firstRichText.quill.setSelection(blockRange.startOffset, 0);
+  vEditor.setVRange({
+    index: blockRange.startOffset,
+    length: 0,
+  });
 }
 
 /**

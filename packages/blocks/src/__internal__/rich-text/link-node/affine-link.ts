@@ -178,7 +178,7 @@ export class AffineLink extends NonShadowLitElement {
             index: domPoint.index,
             length: text.length,
           },
-          { ...oldDelta.attributes, link }
+          { link }
         );
       } else {
         page.captureSync();
@@ -187,7 +187,7 @@ export class AffineLink extends NonShadowLitElement {
             index: domPoint.index,
             length: oldDelta.insert.length,
           },
-          { ...oldDelta.attributes, link }
+          { link }
         );
       }
     } else {

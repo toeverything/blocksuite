@@ -14,7 +14,7 @@ function toggleStyle(
     return;
   }
 
-  const root = vEditor.getRootElement();
+  const root = vEditor.rootElement;
   if (!root) {
     return;
   }

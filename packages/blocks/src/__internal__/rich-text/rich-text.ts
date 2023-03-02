@@ -5,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { renderElement } from './virgo/render-element.js';
 
 @customElement('rich-text')
@@ -57,6 +58,17 @@ export class RichText extends NonShadowLitElement {
     this._vEditor = new VEditor(this.model.text.yText, {
       renderElement,
     });
+
+    const keyboardBindings = createKeyboardBindings(
+      this.model.page,
+      this.model
+    );
+    const keyDownHandler = createKeyDownHandler(
+      this._vEditor,
+      keyboardBindings
+    );
+    this._vEditor.bindKeyDownHandler(keyDownHandler);
+
     this._vEditor.mount(this._virgoContainer);
   }
 

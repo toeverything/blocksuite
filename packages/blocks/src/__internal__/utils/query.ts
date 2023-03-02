@@ -341,7 +341,7 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   }
   const vEditor = richText.vEditor;
   assertExists(vEditor);
-  const [leaf, leafOffset] = vEditor.getLeaf(offset);
+  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
   return [leaf, leafOffset] as const;
 }
 

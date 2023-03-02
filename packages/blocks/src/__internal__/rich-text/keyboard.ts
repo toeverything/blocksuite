@@ -1,7 +1,8 @@
+import { getVEditorFormat } from '@blocksuite/blocks';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { Quill, RangeStatic } from 'quill';
+import type { VEditor, VRange } from '@blocksuite/virgo';
 
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
@@ -23,8 +24,6 @@ import {
 
 // Type definitions is ported from quill
 // https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
-
-type QuillRange = RangeStatic;
 
 interface BindingContext {
   collapsed: boolean;
@@ -52,20 +51,20 @@ type KeyboardBinding = {
   ctrlKey?: boolean | null;
 };
 
+type KeyboardBindingHandler = (
+  this: KeyboardEventThis,
+  range: VRange,
+  context: BindingContext
+) => boolean;
+
 export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
-  quill: Quill;
+  vEditor: VEditor;
   options: {
     bindings: KeyboardBindings;
   };
 }
-
-type KeyboardBindingHandler = (
-  this: KeyboardEventThis,
-  range: RangeStatic,
-  context: BindingContext
-) => boolean;
 
 // If a block is soft enterable, the rule is:
 // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
@@ -79,35 +78,38 @@ function isSoftEnterable(model: BaseBlockModel) {
   return false;
 }
 
-export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
+export function createKeyboardBindings(
+  page: Page,
+  model: BaseBlockModel
+): KeyboardBindings {
   function enterMarkdownMatch(
     this: KeyboardEventThis,
-    range: QuillRange,
+    range: VRange,
     context: BindingContext
   ) {
     const { prefix } = context;
-    markdownConvert(this.quill, model, prefix);
+    markdownConvert(this.vEditor, model, prefix);
     return ALLOW_DEFAULT;
   }
 
   function spaceMarkdownMatch(
     this: KeyboardEventThis,
-    range: QuillRange,
+    range: VRange,
     context: BindingContext
   ) {
     const { prefix } = context;
-    return markdownConvert(this.quill, model, prefix)
+    return markdownConvert(this.vEditor, model, prefix)
       ? PREVENT_DEFAULT
       : ALLOW_DEFAULT;
   }
 
   function hardEnter(
     e: KeyboardEvent,
-    range: QuillRange,
+    range: VRange,
     /**
      * @deprecated
      */
-    quill: Quill,
+    vEditor: VEditor,
     shortKey = false
   ) {
     e.stopPropagation();
@@ -158,7 +160,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
 
       if (shouldSoftEnter) {
         // TODO handle ctrl+enter in code/quote block or other force soft enter block
-        onSoftEnter(range, quill);
+        onSoftEnter(range, vEditor);
         return PREVENT_DEFAULT;
       }
 
@@ -179,7 +181,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
 
     const isSoftEnterBlock = isSoftEnterable(model);
     if (isSoftEnterBlock) {
-      onSoftEnter(range, quill);
+      onSoftEnter(range, vEditor);
       return PREVENT_DEFAULT;
     }
 
@@ -188,14 +190,17 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onSoftEnter(
-    range: QuillRange,
+    range: VRange,
     /**
      * @deprecated
      */
-    quill: Quill
+    vEditor: VEditor
   ) {
     handleSoftEnter(page, model, range.index, range.length);
-    quill.setSelection(range.index + 1, 0);
+    vEditor.setVRange({
+      index: range.index + 1,
+      length: 0,
+    });
     return PREVENT_DEFAULT;
   }
 
@@ -203,7 +208,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     if (matchFlavours(model, ['affine:code'] as const)) {
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const vRange = this.vEditor.getVRange();
+    assertExists(vRange);
+    const index = vRange.index;
     handleIndent(page, model, index);
     return PREVENT_DEFAULT;
   }
@@ -212,12 +219,14 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     if (matchFlavours(model, ['affine:code'] as const)) {
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const vRange = this.vEditor.getVRange();
+    assertExists(vRange);
+    const index = vRange.index;
     handleUnindent(page, model, index);
     return PREVENT_DEFAULT;
   }
 
-  function onKeyLeft(e: KeyboardEvent, range: QuillRange) {
+  function onKeyLeft(e: KeyboardEvent, range: VRange) {
     // range.length === 0 means collapsed selection
     if (range.length !== 0) {
       e.stopPropagation();
@@ -232,7 +241,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onKeyRight(e: KeyboardEvent, range: QuillRange) {
+  function onKeyRight(e: KeyboardEvent, range: VRange) {
     if (range.length !== 0) {
       e.stopPropagation();
       return ALLOW_DEFAULT;
@@ -250,17 +259,17 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
 
   function onSpace(
     this: KeyboardEventThis,
-    range: QuillRange,
+    range: VRange,
     context: BindingContext
   ) {
-    const { quill } = this;
+    const { vEditor } = this;
     const { prefix } = context;
-    return tryMatchSpaceHotkey(page, model, quill, prefix, range);
+    return tryMatchSpaceHotkey(page, model, vEditor, prefix, range);
   }
 
-  function onBackspace(e: KeyboardEvent, quill: Quill) {
+  function onBackspace(e: KeyboardEvent, vEditor: VEditor) {
     e.stopPropagation();
-    if (isCollapsedAtBlockStart(quill)) {
+    if (isCollapsedAtBlockStart(vEditor)) {
       handleLineStartBackspace(page, model);
       return PREVENT_DEFAULT;
     }
@@ -300,14 +309,14 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     hardEnter: {
       key: 'Enter',
       handler(range, context) {
-        return hardEnter(context.event, range, this.quill);
+        return hardEnter(context.event, range, this.vEditor);
       },
     },
     softEnter: {
       key: 'Enter',
       shiftKey: true,
       handler(range, context) {
-        return onSoftEnter(range, this.quill);
+        return onSoftEnter(range, this.vEditor);
       },
     },
     // shortKey+enter
@@ -315,7 +324,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'Enter',
       shortKey: true,
       handler(range, context) {
-        return hardEnter(context.event, range, this.quill, true);
+        return hardEnter(context.event, range, this.vEditor, true);
       },
     },
     tab: {
@@ -341,21 +350,21 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     backspace: {
       key: 'Backspace',
       handler(range, context) {
-        return onBackspace(context.event, this.quill);
+        return onBackspace(context.event, this.vEditor);
       },
     },
     up: {
       key: 'ArrowUp',
       shiftKey: false,
       handler(range, context) {
-        return handleKeyUp(context.event, this.quill.root);
+        return handleKeyUp(context.event, this.vEditor.rootElement);
       },
     },
     down: {
       key: 'ArrowDown',
       shiftKey: false,
       handler(range, context) {
-        return handleKeyDown(context.event, this.quill.root);
+        return handleKeyDown(context.event, this.vEditor.rootElement);
       },
     },
     left: {
@@ -408,4 +417,90 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   };
 
   return keyboardBindings;
+}
+
+export function createKeyDownHandler(
+  vEditor: VEditor,
+  bindings: KeyboardBindings
+): (evt: KeyboardEvent) => void {
+  const bindingStore: Record<string, KeyboardBinding[]> = {};
+
+  function match(evt: KeyboardEvent, binding: KeyboardBinding) {
+    if (
+      (
+        ['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as Array<
+          'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey'
+        >
+      ).some(key => {
+        return !!binding[key] !== evt[key] && binding[key] !== null;
+      })
+    ) {
+      return false;
+    }
+    return binding.key === evt.key || binding.key === evt.which;
+  }
+
+  function addBinding(binding: KeyboardBinding) {
+    const keys = Array.isArray(binding.key) ? binding.key : [binding.key];
+    keys.forEach(key => {
+      bindingStore[key] = bindingStore[key] ?? [];
+      bindingStore[key].push(binding);
+    });
+  }
+
+  Object.values(bindings).forEach(binding => {
+    addBinding(binding);
+  });
+
+  function keyDownHandler(evt: KeyboardEvent) {
+    if (evt.defaultPrevented || evt.isComposing) return;
+    const keyBindings = bindingStore[evt.key] ?? [];
+    const matches = keyBindings.filter(binding => match(evt, binding));
+    if (matches.length === 0) return;
+
+    const vRange = vEditor.getVRange();
+    if (!vRange) return;
+
+    const [line, offset] = vEditor.getLine(vRange.index);
+    const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
+    const [leafEnd, offsetEnd] =
+      vRange.length === 0
+        ? [leafStart, offsetStart]
+        : vEditor.getTextPoint(vRange.index + vRange.length);
+    const prefixText = leafStart.textContent
+      ? leafStart.textContent.slice(0, offsetStart)
+      : '';
+    const suffixText = leafEnd.textContent
+      ? leafEnd.textContent.slice(offsetEnd)
+      : '';
+    const curContext = {
+      collapsed: vRange.length === 0,
+      empty: vRange.length === 0 && line.textLength <= 1,
+      format: getVEditorFormat(vEditor, vRange),
+      line,
+      offset,
+      prefix: prefixText,
+      suffix: suffixText,
+      event: evt,
+    };
+    const prevented = matches.some(binding => {
+      return (
+        binding.handler.call(
+          {
+            vEditor,
+            options: {
+              bindings,
+            },
+          },
+          vRange,
+          curContext
+        ) !== true
+      );
+    });
+    if (prevented) {
+      evt.preventDefault();
+    }
+  }
+
+  return keyDownHandler;
 }

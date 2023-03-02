@@ -17,6 +17,10 @@ export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 
 export type DeltaEntry = [DeltaInsert, VRange];
 
+// corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
+export type NativePoint = readonly [Node, number];
+// the number here is relative to the text node
+export type TextPoint = readonly [Text, number];
 export interface DomPoint {
   // which text node this point is in
   text: Text;
@@ -28,7 +32,7 @@ export class VEditor {
   static nativePointToTextPoint(
     node: unknown,
     offset: number
-  ): readonly [Text, number] | null {
+  ): TextPoint | null {
     let text: Text | null = null;
     let textOffset = offset;
     if (isVText(node)) {
@@ -113,6 +117,7 @@ export class VEditor {
   private _vRange: VRange | null = null;
   private _isComposing = false;
   private _isReadOnly = false;
+  private _yText: Y.Text;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
   private _onKeyDown: (event: KeyboardEvent) => void = () => {
@@ -122,28 +127,30 @@ export class VEditor {
   signals: {
     updateVRange: Signal<UpdateVRangeProp>;
   };
-  yText: Y.Text;
+
+  get yText() {
+    return this._yText;
+  }
+  get rootElement() {
+    assertExists(this._rootElement);
+    return this._rootElement;
+  }
 
   constructor(
     yText: VEditor['yText'],
     opts: {
       renderElement?: (delta: DeltaInsert) => TextElement;
-      onKeyDown?: (event: KeyboardEvent) => void;
     } = {}
   ) {
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
 
-    this.yText = yText;
-    const { renderElement, onKeyDown } = opts;
+    this._yText = yText;
+    const { renderElement } = opts;
 
     if (renderElement) {
       this._renderElement = renderElement;
-    }
-
-    if (onKeyDown) {
-      this._onKeyDown = onKeyDown;
     }
 
     this.signals = {
@@ -151,6 +158,10 @@ export class VEditor {
     };
 
     this.signals.updateVRange.on(this._onUpdateVRange);
+  }
+
+  bindKeyDownHandler(handler: (event: KeyboardEvent) => void) {
+    this._onKeyDown = handler;
   }
 
   mount(rootElement: HTMLElement): void {
@@ -240,7 +251,7 @@ export class VEditor {
     return null;
   }
 
-  getLeaf(rangeIndex: VRange['index']): [Text, number] {
+  getTextPoint(rangeIndex: VRange['index']): TextPoint {
     assertExists(this._rootElement);
     const textElements = Array.from(
       this._rootElement.querySelectorAll('[data-virgo-text="true"]')
@@ -265,6 +276,23 @@ export class VEditor {
     }
 
     throw new Error('failed to find leaf');
+  }
+
+  getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
+    assertExists(this._rootElement);
+    const lineElements = Array.from(
+      this._rootElement.querySelectorAll('virgo-line')
+    );
+
+    let index = 0;
+    for (const lineElement of lineElements) {
+      if (rangeIndex >= index && rangeIndex < index + lineElement.textLength) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      index += lineElement.textLength + 1;
+    }
+
+    throw new Error('failed to find line');
   }
 
   /**
@@ -292,10 +320,6 @@ export class VEditor {
     }
 
     return result;
-  }
-
-  getRootElement(): HTMLElement | null {
-    return this._rootElement;
   }
 
   getVRange(): VRange | null {
@@ -351,7 +375,7 @@ export class VEditor {
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
-    const { match = () => true, mode = 'replace' } = options;
+    const { match = () => true, mode = 'merge' } = options;
     const deltas = this.getDeltasByVRange(vRange);
 
     for (const [delta, deltaVRange] of deltas) {
@@ -890,7 +914,7 @@ function isVLine(element: unknown): element is HTMLElement {
 }
 
 function findDocumentOrShadowRoot(editor: VEditor): Document {
-  const el = editor.getRootElement();
+  const el = editor.rootElement;
 
   if (!el) {
     throw new Error('editor root element not found');

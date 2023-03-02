@@ -1,7 +1,7 @@
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { Quill } from 'quill';
+import type { VEditor } from '@blocksuite/virgo';
 
 import type { ExtendedModel } from './types.js';
 
@@ -13,10 +13,9 @@ export function asyncFocusRichText(page: Page, id: string) {
   });
 }
 
-export function isCollapsedAtBlockStart(quill: Quill) {
-  return (
-    quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
-  );
+export function isCollapsedAtBlockStart(vEditor: VEditor) {
+  const vRange = vEditor.getVRange();
+  return vRange?.index === 0 && vRange?.length === 0;
 }
 
 export function doesInSamePath(
