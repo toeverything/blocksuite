@@ -33,7 +33,6 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
 type BlockModelKey = keyof BlockModels;
 type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
-type LiteralUnion<T extends U, U = string> = T | (U & { _?: never });
 
 export function matchFlavours<Key extends Readonly<Array<string>>>(
   model: BaseBlockModel,
