@@ -16,6 +16,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
+import { getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -32,9 +33,8 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  /** @deprecated escape hatch for full traversal of elements */
-  get elements() {
-    return this._elements.values();
+  getElementsBound(): IBound | null {
+    return getCommonBound([...this._elements.values()]);
   }
 
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
