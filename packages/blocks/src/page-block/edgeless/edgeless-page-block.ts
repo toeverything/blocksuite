@@ -136,10 +136,15 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
+  // when user enters pan mode by pressing 'Space',
+  // we should roll back to the last mouse mode once user releases the key;
+  private _enterPanMouseModeByShortcut = false;
+
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
     hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
     bindCommonHotkey(this.page);
   }
 
@@ -172,6 +177,36 @@ export class EdgelessPageBlockComponent
         return;
       }
       handleMultiBlockBackspace(this.page, e);
+    }
+  };
+
+  private _handleSpace = (event: KeyboardEvent) => {
+    const { mouseMode, lastMouseMode, blockSelectionState } = this._selection;
+    if (event.type === 'keydown') {
+      if (mouseMode.type === 'pan') {
+        return;
+      }
+
+      // when user is editing, shouldn't enter pan mode
+      if (
+        mouseMode.type === 'default' &&
+        blockSelectionState.type === 'single' &&
+        blockSelectionState.active
+      ) {
+        return;
+      }
+
+      this.mouseMode = { type: 'pan' };
+      this._enterPanMouseModeByShortcut = true;
+    }
+    if (event.type === 'keyup') {
+      if (
+        mouseMode.type === 'pan' &&
+        this._enterPanMouseModeByShortcut &&
+        lastMouseMode
+      ) {
+        this.mouseMode = lastMouseMode;
+      }
     }
   };
 

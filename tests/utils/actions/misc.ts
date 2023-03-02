@@ -68,9 +68,9 @@ async function initEmptyEditor(
 
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
-      const blockHub = await editor.createBlockHub();
-      document.body.appendChild(blockHub);
-
+      editor.createBlockHub().then(blockHub => {
+        document.body.appendChild(blockHub);
+      });
       window.debugMenu = debugMenu;
       window.editor = editor;
       window.page = page;

@@ -14,7 +14,7 @@ function toggleStyle(vEditor: VEditor, attrs: TextAttributes): void {
     return;
   }
 
-  const root = vEditor.getRootElement();
+  const root = vEditor.rootElement;
   if (!root) {
     return;
   }
@@ -80,9 +80,8 @@ class TextCell extends DatabaseCellLitElement {
         schemaId: this.column.id,
         value: yText,
       });
-      this.vEditor = new VEditor(yText, {
-        onKeyDown: this._handleKeyDown,
-      });
+      this.vEditor = new VEditor(yText);
+      this.vEditor.bindKeyDownHandler(this._handleKeyDown);
       this.vEditor.mount(this._container);
       this.vEditor.focusEnd();
     }
@@ -144,9 +143,8 @@ class TextCell extends DatabaseCellLitElement {
     super.update(changedProperties);
     if (this.tag && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.vEditor = new VEditor(this.tag.value as any, {
-        onKeyDown: this._handleKeyDown,
-      });
+      this.vEditor = new VEditor(this.tag.value as any);
+      this.vEditor.bindKeyDownHandler(this._handleKeyDown);
 
       this.vEditor.mount(this._container);
     } else if (!this.tag && this.vEditor) {
