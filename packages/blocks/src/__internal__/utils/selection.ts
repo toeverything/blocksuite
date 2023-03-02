@@ -96,6 +96,7 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
+  // TODO support SelectionPosition
   const pageComponent = document.querySelector('affine-default-page');
   if (!pageComponent) {
     throw new Error("Can't find page component!");

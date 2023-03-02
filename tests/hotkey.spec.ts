@@ -24,6 +24,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
+  assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
   assertTypeFormat,
@@ -718,4 +719,66 @@ test('should bracket complete with backtick works', async ({ page }) => {
 />`,
     paragraphId
   );
+});
+
+test('pressing enter when selecting multiple blocks should create new block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await pressEnter(page);
+  await assertRichTexts(page, ['1', '89']);
+  await assertSelection(page, 1, 0, 0);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+});
+
+test('should left/right key navigator works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await focusRichText(page, 0);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await assertSelection(page, 0, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 0);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 1, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 1, 3);
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 2, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 1, 3);
+});
+
+test('should up/down key navigator works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await focusRichText(page, 0);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 1, 3);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 2, 3);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await assertSelection(page, 2, 0);
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 1, 0);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 0, 1);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 1, 1);
 });

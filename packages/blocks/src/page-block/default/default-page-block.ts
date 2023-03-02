@@ -18,6 +18,7 @@ import {
   type BlockHost,
   getCurrentNativeRange,
   getRichTextByModel,
+  hasNativeSelection,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
@@ -228,6 +229,7 @@ export class DefaultPageBlockComponent
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
+      e.stopPropagation();
       assertExists(this._titleVEditor);
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
@@ -357,6 +359,7 @@ export class DefaultPageBlockComponent
     this.isCompositionStart = false;
   };
 
+  // TODO migrate to bind-hotkey
   // Fixes: https://github.com/toeverything/blocksuite/issues/200
   // We shouldn't prevent user input, because there could have CN/JP/KR... input,
   //  that have pop-up for selecting local characters.
@@ -366,10 +369,7 @@ export class DefaultPageBlockComponent
       return;
     }
     // Only the length of character buttons is 1
-    if (
-      (e.key.length === 1 || e.key === 'Enter') &&
-      window.getSelection()?.type === 'Range'
-    ) {
+    if (e.key.length === 1 && hasNativeSelection()) {
       const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);

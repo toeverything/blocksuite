@@ -1,4 +1,5 @@
 import { DebugElement, type PhasorElement } from '../elements/index.js';
+import { setXYWH } from '../index.js';
 import type { SurfaceManager } from '../surface.js';
 
 const DEBUG_ELEMENT_MAX = 150;
@@ -19,7 +20,8 @@ function createMockElement(id: number, rangeX: number, rangeY: number) {
   const size = randomInt(DEBUG_ELEMENT_MAX, DEBUG_ELEMENT_MIN);
   const element = new DebugElement(`${id}`);
   element.color = randomColor();
-  element.setBound(x, y, size, size);
+  setXYWH(element, { x, y, w: size, h: size });
+
   return element;
 }
 

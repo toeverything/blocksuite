@@ -4,12 +4,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
+  decreaseZoomLevel,
+  getEdgelessHoverRect,
   getFrameSize,
+  increaseZoomLevel,
   setMouseMode,
   switchEditorMode,
 } from './utils/actions/edgeless.js';
 import {
-  assertEdgelessHoverRect,
+  addBasicBrushElement,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -17,11 +20,13 @@ import {
   initEmptyEdgelessState,
   pressEnter,
   redoByClick,
+  resizeElementByLeftTopHandle,
   type,
   undoByClick,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertEdgelessHoverRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
@@ -48,6 +53,31 @@ test('switch to edgeless mode', async ({ page }) => {
 
   // FIXME: got very flaky result on cursor keeping
   // await assertNativeSelectionRangeCount(page, 1);
+});
+
+test('can zoom viewport', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await assertFrameXYWH(page, [0, 0, 720, 24]);
+  await page.mouse.move(CENTER_X, CENTER_Y);
+
+  const original = [90, 288, 768, 72];
+  await assertEdgelessHoverRect(page, original);
+
+  await decreaseZoomLevel(page);
+  await decreaseZoomLevel(page);
+  await page.mouse.move(CENTER_X, CENTER_Y);
+
+  const box = await getEdgelessHoverRect(page);
+  const zoomed = [box.x, box.y, original[2] * 0.8, original[3] * 0.8];
+  await assertEdgelessHoverRect(page, zoomed);
+
+  await increaseZoomLevel(page);
+  await increaseZoomLevel(page);
+  await page.mouse.move(CENTER_X, CENTER_Y);
+  await assertEdgelessHoverRect(page, original);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {
@@ -146,7 +176,40 @@ test('add shape element', async ({ page }) => {
   await setMouseMode(page, 'default');
 
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('add brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+});
+
+test('resize brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  const delta = { x: 20, y: 40 };
+  await resizeElementByLeftTopHandle(page, delta, 10);
+
+  await page.mouse.move(start.x + 25, start.y + 45);
+  await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {
@@ -250,7 +313,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  await assertEdgelessHoverRect(page, 650, 450, 100, 100);
+  await assertEdgelessHoverRect(page, [650, 450, 100, 100]);
 });
 
 test('hovering on shape should not have effect on underlying block', async ({
@@ -276,5 +339,5 @@ test('hovering on shape should not have effect on underlying block', async ({
   await setMouseMode(page, 'default');
 
   await page.mouse.move(x + 50, y + 50);
-  await assertEdgelessHoverRect(page, x, y, 100, 100);
+  await assertEdgelessHoverRect(page, [x, y, 100, 100]);
 });

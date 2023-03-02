@@ -43,8 +43,10 @@ export async function pressSpace(page: Page) {
   await page.keyboard.press('Space', { delay: 50 });
 }
 
-export async function pressArrowLeft(page: Page) {
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
+export async function pressArrowLeft(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('ArrowLeft', { delay: 50 });
+  }
 }
 
 export async function pressEnter(page: Page) {

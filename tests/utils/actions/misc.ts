@@ -163,21 +163,28 @@ export async function resetHistory(page: Page) {
 }
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
-export async function enterPlaygroundWithList(page: Page) {
+export async function enterPlaygroundWithList(
+  page: Page,
+  contents: string[] = ['', '', '']
+) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   await initEmptyEditor(page);
 
-  await page.evaluate(() => {
+  await page.evaluate(contents => {
     const { page } = window;
     const pageId = page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
     });
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    for (let i = 0; i < 3; i++) {
-      page.addBlockByFlavour('affine:list', {}, frameId);
+    for (let i = 0; i < contents.length; i++) {
+      page.addBlockByFlavour(
+        'affine:list',
+        contents.length > 0 ? { text: new page.Text(contents[i]) } : {},
+        frameId
+      );
     }
-  });
+  }, contents);
   await waitNextFrame(page);
 }
 
@@ -268,6 +275,7 @@ export async function initThreeParagraphs(page: Page) {
   await type(page, '456');
   await pressEnter(page);
   await type(page, '789');
+  await resetHistory(page);
 }
 
 export async function initThreeLists(page: Page) {
@@ -517,23 +525,6 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export async function assertEdgelessHoverRect(
-  page: Page,
-  x: number,
-  y: number,
-  w: number,
-  h: number
-) {
-  const hoverRect = page.locator('.affine-edgeless-hover-rect');
-  const box = await hoverRect.boundingBox();
-  if (!box) throw new Error('Missing edgeless hover rect');
-
-  expect(box.x).toBeCloseTo(x, 0);
-  expect(box.y).toBeCloseTo(y, 0);
-  expect(box.width).toBeCloseTo(w, 0);
-  expect(box.height).toBeCloseTo(h, 0);
-}
-
 export function virgoEditorInnerTextToString(innerText: string): string {
   return innerText.replace('\u200B', '');
 }
@@ -548,4 +539,19 @@ export async function focusTitle(page: Page) {
     defaultPageComponent.titleVEditor.focusEnd();
   });
   await waitNextFrame(page);
+}
+
+/**
+ * XXX: this is a workaround for the bug in Playwright
+ */
+export async function shamefullyBlurActiveElement(page: Page) {
+  await page.evaluate(() => {
+    if (
+      !document.activeElement ||
+      !(document.activeElement instanceof HTMLElement)
+    ) {
+      throw new Error("document.activeElement doesn't exist");
+    }
+    document.activeElement.blur();
+  });
 }

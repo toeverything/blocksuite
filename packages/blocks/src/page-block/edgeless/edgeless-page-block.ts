@@ -1,8 +1,9 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
+import './view-control-bar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import type { XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -45,11 +46,12 @@ export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
+  readonly surface: SurfaceManager;
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
     updateSelection: Signal<EdgelessSelectionState>;
-    shapeUpdated: Signal;
+    surfaceUpdated: Signal;
   };
 }
 
@@ -121,7 +123,7 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Signal(),
     updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
-    shapeUpdated: new Signal(),
+    surfaceUpdated: new Signal(),
     mouseModeUpdated: new Signal<MouseMode>(),
   };
 
@@ -136,8 +138,8 @@ export class EdgelessPageBlockComponent
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e));
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
     bindCommonHotkey(this.page);
   }
 
@@ -161,6 +163,14 @@ export class EdgelessPageBlockComponent
       // } else {
       //   handleMultiBlockBackspace(this.page, e);
       // }
+      const { selected } = this._selection.blockSelectionState;
+
+      if (this.surface.hasElement(selected.id)) {
+        this.surface.removeElement(selected.id);
+        this._selection.currentController.clearSelection();
+        this.signals.updateSelection.emit(this._selection.blockSelectionState);
+        return;
+      }
       handleMultiBlockBackspace(this.page, e);
     }
   };
@@ -170,7 +180,7 @@ export class EdgelessPageBlockComponent
     this.viewport.setSize(bound.width, bound.height);
 
     const frame = this.pageModel.children[0] as FrameBlockModel;
-    const [modelX, modelY, modelW, modelH] = JSON.parse(frame.xywh) as XYWH;
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
@@ -245,8 +255,9 @@ export class EdgelessPageBlockComponent
     });
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this.signals.shapeUpdated.on(() => this.requestUpdate());
+    this.signals.surfaceUpdated.on(() => this.requestUpdate());
     this.signals.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
+
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
       this.requestUpdate();
@@ -279,7 +290,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
-    this.signals.shapeUpdated.dispose();
+    this.signals.surfaceUpdated.dispose();
     this.signals.mouseModeUpdated.dispose();
     this._disposables.dispose();
     this._selection.dispose();
@@ -363,6 +374,10 @@ export class EdgelessPageBlockComponent
             ></edgeless-toolbar>
           `
         : nothing}
+      <edgeless-view-control-bar
+        .edgeless=${this}
+        .zoom=${this.viewport.zoom}
+      ></edgeless-view-control-bar>
     `;
   }
 }

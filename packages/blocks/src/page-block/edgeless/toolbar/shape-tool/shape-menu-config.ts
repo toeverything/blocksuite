@@ -22,30 +22,27 @@ export const ShapeComponentConfig: {
     disabled: false,
   },
   {
-    // TODO update new shape value
-    name: 'rect',
+    name: 'ellipse',
     icon: EllipseIcon,
     tooltip: 'Ellipse',
-    disabled: true,
+    disabled: false,
   },
   {
-    // TODO update new shape value
-    name: 'rect',
+    name: 'diamond',
     icon: DiamondIcon,
     tooltip: 'Diamond',
-    disabled: true,
+    disabled: false,
   },
   {
     name: 'triangle',
     icon: TriangleIcon,
     tooltip: 'Triangle',
-    disabled: true,
+    disabled: false,
   },
   {
-    // TODO update new shape value
-    name: 'rect',
+    name: 'roundedRect',
     icon: RoundedRectangleIcon,
     tooltip: 'Rounded rectangle',
-    disabled: true,
+    disabled: false,
   },
 ];
