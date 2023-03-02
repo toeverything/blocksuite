@@ -39,7 +39,10 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
     const pageBlock = getDefaultPageBlock(page.root);
     if (pageBlock.selection) {
       const selectedBlocks = pageBlock.selection.state.selectedBlocks;
-      const models = selectedBlocks
+      // Add embeds block to fix click image and delete case
+      const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+      // Fix order may be wrong
+      const models = [...selectedBlocks, ...selectedEmbeds]
         .map(element => getModelByElement(element))
         .filter(Boolean);
       if (models.length) {
