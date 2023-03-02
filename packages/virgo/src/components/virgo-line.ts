@@ -15,6 +15,10 @@ export class VirgoLine<
     return this.elements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
 
+  get textContent() {
+    return this.elements.reduce((acc, el) => acc + el.delta.insert, '');
+  }
+
   render() {
     return html`
       <style>

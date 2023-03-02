@@ -321,6 +321,7 @@ export class VEditor<
     throw new Error('failed to find leaf');
   }
 
+  // the number is releated to the VirgoLine's textLength
   getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
     assertExists(this._rootElement);
     const lineElements = Array.from(
@@ -330,6 +331,12 @@ export class VEditor<
     let index = 0;
     for (const lineElement of lineElements) {
       if (rangeIndex >= index && rangeIndex < index + lineElement.textLength) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      if (
+        rangeIndex === index + lineElement.textLength &&
+        rangeIndex === this.yText.length
+      ) {
         return [lineElement, rangeIndex - index] as const;
       }
       index += lineElement.textLength + 1;
@@ -878,7 +885,7 @@ export class VEditor<
     };
 
     // updates in lit are performed asynchronously
-    setTimeout(fn, 0);
+    requestAnimationFrame(fn);
   };
 
   private _transact(fn: () => void): void {

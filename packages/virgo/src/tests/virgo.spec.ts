@@ -5,6 +5,7 @@ import {
   enterVirgoPlayground,
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
+  getVirgoRichTextLine,
   press,
   setVirgoRichTextRange,
   type,
@@ -39,6 +40,7 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abcdefg');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'Backspace');
   await press(page, 'Backspace');
   await press(page, 'Backspace');
@@ -58,6 +60,7 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'Enter');
   await press(page, 'Enter');
   await type(page, 'bbb');
@@ -78,6 +81,7 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'Backspace');
   await press(page, 'Backspace');
   await press(page, 'Backspace');
@@ -97,6 +101,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await type(page, 'bb');
@@ -117,6 +122,7 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abbbcdd');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'Enter');
@@ -204,6 +210,7 @@ test('basic styles', async ({ page }) => {
   await setVirgoRichTextRange(page, { index: 2, length: 3 });
 
   editorABold.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -221,6 +228,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAItalic.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -239,6 +247,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAUnderline.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -258,6 +267,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAStrike.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -278,6 +288,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorACode.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -301,6 +312,7 @@ test('basic styles', async ({ page }) => {
   editorAUndo.click({
     clickCount: 5,
   });
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -311,6 +323,7 @@ test('basic styles', async ({ page }) => {
   editorARedo.click({
     clickCount: 5,
   });
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -332,6 +345,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorABold.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -352,6 +366,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAItalic.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -371,6 +386,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAUnderline.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -389,6 +405,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorAStrike.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -406,6 +423,7 @@ test('basic styles', async ({ page }) => {
   ]);
 
   editorACode.click();
+  page.waitForTimeout(50);
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -606,6 +624,7 @@ test('input continuous spaces', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc   def');
 
   await focusVirgoRichText(page);
+  await page.waitForTimeout(50);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
@@ -664,4 +683,44 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe('aghi');
   expect(await editorB.innerText()).toBe('aghi');
+});
+
+test('getLine', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await type(page, 'abc');
+  await press(page, 'Enter');
+  await type(page, 'def');
+  await press(page, 'Enter');
+  await type(page, 'ghi');
+
+  expect(await editorA.innerText()).toBe('abc\ndef\nghi');
+  expect(await editorB.innerText()).toBe('abc\ndef\nghi');
+
+  const [line1, offset1] = await getVirgoRichTextLine(page, 0);
+  const [line2, offset2] = await getVirgoRichTextLine(page, 1);
+  const [line3, offset3] = await getVirgoRichTextLine(page, 4);
+  const [line4, offset4] = await getVirgoRichTextLine(page, 5);
+  const [line5, offset5] = await getVirgoRichTextLine(page, 8);
+  const [line6, offset6] = await getVirgoRichTextLine(page, 11);
+
+  expect(line1).toEqual('abc');
+  expect(offset1).toEqual(0);
+  expect(line2).toEqual('abc');
+  expect(offset2).toEqual(1);
+  expect(line3).toEqual('def');
+  expect(offset3).toEqual(0);
+  expect(line4).toEqual('def');
+  expect(offset4).toEqual(1);
+  expect(line5).toEqual('ghi');
+  expect(offset5).toEqual(0);
+  expect(line6).toEqual('ghi');
+  expect(offset6).toEqual(3);
 });

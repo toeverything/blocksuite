@@ -264,8 +264,23 @@ export class DebugMenu extends NonShadowLitElement {
         createEvent('affine:switch-edgeless-display-mode', this._showGrid)
       );
     }
-    if (changedProperties.has('hasOffset')) {
-      document.body.style.margin = this._hasOffset ? '60px 0 0 40px' : '0';
+    if (changedProperties.has('_hasOffset')) {
+      const appRoot = document.getElementById('app');
+      if (!appRoot) return;
+      const style: Partial<CSSStyleDeclaration> = this._hasOffset
+        ? {
+            margin: '60px 40px 240px 40px',
+            overflow: 'auto',
+            height: '400px',
+            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
+          }
+        : {
+            margin: '0',
+            overflow: 'initial',
+            height: 'initial',
+            boxShadow: 'initial',
+          };
+      Object.assign(appRoot.style, style);
     }
     super.update(changedProperties);
   }
