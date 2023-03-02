@@ -18,9 +18,9 @@ export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 export type DeltaEntry = [DeltaInsert, VRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
-export type NativePoint = readonly [Node, number];
+export type NativePoint = readonly [node: Node, offset: number];
 // the number here is relative to the text node
-export type TextPoint = readonly [Text, number];
+export type TextPoint = readonly [text: Text, offset: number];
 export interface DomPoint {
   // which text node this point is in
   text: Text;
