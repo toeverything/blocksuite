@@ -143,13 +143,13 @@ export function getOptions(): Pick<
     // because all clients will count id from 0.
     idGenerator = Generator.AutoIncrement;
   }
-  const enable_toggle_block = featureArgs.includes('toggle');
+
   return {
     room,
     providers,
     idGenerator,
     defaultFlags: {
-      enable_toggle_block,
+      enable_toggle_block: featureArgs.includes('toggle'),
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,

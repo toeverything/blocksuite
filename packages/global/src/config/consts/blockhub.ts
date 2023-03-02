@@ -16,7 +16,6 @@ import {
   QuoteIcon,
   TextIcon,
   TodoIcon,
-  ToggleIcon,
 } from '../icons.js';
 
 export type BlockConfig<
@@ -87,13 +86,6 @@ export const paragraphConfig = [
     name: 'Bulleted List',
     hotkey: 'command+option+8,ctrl+shift+8',
     icon: BulletedListIcon,
-  },
-  {
-    flavour: 'affine:list',
-    type: 'toggle',
-    name: 'Toggle List',
-    hotkey: null,
-    icon: ToggleIcon,
   },
   {
     flavour: 'affine:list',
@@ -222,14 +214,6 @@ export const BLOCKHUB_LIST_ITEMS = [
     description: 'A simple bulleted list.',
     icon: BulletedListIcon,
     toolTip: 'Drag to insert Bulleted List',
-  },
-  {
-    flavour: 'affine:list',
-    type: 'toggle',
-    name: 'Toggle List',
-    description: 'a simple toggle list.',
-    icon: ToggleIcon,
-    toolTip: 'Drag to insert Toggle List.',
   },
   {
     flavour: 'affine:list',

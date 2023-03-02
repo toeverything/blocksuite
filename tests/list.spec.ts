@@ -40,38 +40,20 @@ test('add new bulleted list', async ({ page }) => {
   await assertBlockCount(page, 'list', 3);
 });
 
-test('add new Toggle list', async ({ page }) => {
+test('add new toggle list', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Toggle List');
-  await page.keyboard.type('top');
+  await type(page, 'top');
   await pressTab(page);
   await pressEnter(page);
-  await page.keyboard.type('kid 1');
+  await type(page, 'kid 1');
   await pressEnter(page);
 
   await assertRichTexts(page, ['top', 'kid 1', '\n']);
-  // await assertBlockCount(page, 'list', 3);
-});
-test('add new Toggle list via slash', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
-  await focusRichText(page, 0);
-  await type(page, '/toggle');
-  // await expect(slashItems).toHaveCount(1);
-  await pressEnter(page);
-  await clickBlockTypeMenuItem(page, 'Toggle List');
-  await page.keyboard.type('top');
-  await pressTab(page);
-  await pressEnter(page);
-  await page.keyboard.type('kid 1');
-  await pressEnter(page);
-
-  await assertRichTexts(page, ['top', 'kid 1', '\n']);
-  // await assertBlockCount(page, 'list', 3);
+  await assertBlockCount(page, 'list', 3);
 });
 
 test('convert to numbered list block', async ({ page }) => {

@@ -849,20 +849,6 @@ export const CollapseDownIcon = html`<svg
   />
 </svg>`;
 
-export const ToggleIcon = html`<svg
-  xmlns="http://www.w3.org/2000/svg"
-  data-is-toggle-icon="true"
-  width="1em"
-  height="1em"
-  viewBox="0 0 20 20"
->
-  <path
-    data-is-toggle-icon="true"
-    fill="currentColor"
-    d="m15.795 11.272l-8 5A1.5 1.5 0 0 1 5.5 15V5a1.5 1.5 0 0 1 2.295-1.272l8 5a1.5 1.5 0 0 1 0 2.544Z"
-  />
-</svg>`;
-
 export const MinusIcon = html`<svg
   width="24"
   height="24"
