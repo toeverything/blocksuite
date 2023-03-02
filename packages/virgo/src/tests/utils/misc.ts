@@ -1,10 +1,5 @@
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import type {
-  DeltaInsert,
-  VEditor,
-  VirgoLine,
-  VRange,
-} from '@blocksuite/virgo';
+import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
 
 export async function type(page: Page, content: string) {
