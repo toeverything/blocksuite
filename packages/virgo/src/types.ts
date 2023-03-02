@@ -1,4 +1,7 @@
-import type { BaseText, BaseTextAttributes } from './components/base-text.js';
+import type { TemplateResult } from 'lit';
+
+import type { VirgoUnitText } from './components/index.js';
+import type { BaseTextAttributes } from './utils/index.js';
 
 export interface CustomTypes {
   [key: string]: unknown;
@@ -10,9 +13,14 @@ type ExtendedType<K extends ExtendableKeys, B> = unknown extends CustomTypes[K]
   : CustomTypes[K];
 
 export type TextAttributes = ExtendedType<'Attributes', BaseTextAttributes>;
-export type TextElement = ExtendedType<'Element', BaseText>;
 
-export type DeltaInsert<A extends TextAttributes = TextAttributes> = {
+export type DeltaInsert<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+> = {
   insert: string;
-  attributes?: A;
+  attributes?: TextAttributes;
 };
+
+export type AttributesRenderer<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+> = (unitText: VirgoUnitText, attributes?: TextAttributes) => TemplateResult<1>;
