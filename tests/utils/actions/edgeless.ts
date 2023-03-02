@@ -30,9 +30,17 @@ export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
 
+export function locatorPanButton(page: Page, innerContainer = true) {
+  const panButton = page.locator('edgeless-tool-icon-button').filter({
+    hasText: 'Hand',
+  });
+
+  return innerContainer ? panButton.locator('.icon-container') : panButton;
+}
+
 export async function setMouseMode(
   page: Page,
-  mode: 'default' | 'shape' | 'brush'
+  mode: 'default' | 'shape' | 'brush' | 'pan'
 ) {
   if (mode === 'default') {
     const defaultModeButton = page.locator('edgeless-tool-icon-button').filter({
@@ -52,6 +60,9 @@ export async function setMouseMode(
       hasText: 'Pen',
     });
     await brushButton.click();
+  } else if (mode === 'pan') {
+    const panButton = locatorPanButton(page, false);
+    await panButton.click();
   }
 }
 
@@ -87,6 +98,16 @@ export async function addBasicBrushElement(
 ) {
   await setMouseMode(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
+  await setMouseMode(page, 'default');
+}
+
+export async function addBasicRectShapeElement(
+  page: Page,
+  start: { x: number; y: number },
+  end: { x: number; y: number }
+) {
+  await setMouseMode(page, 'shape');
+  await dragBetweenCoords(page, start, end, { steps: 10 });
   await setMouseMode(page, 'default');
 }
 

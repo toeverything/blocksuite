@@ -134,7 +134,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container .ql-syntax {
-      width: 620px;
+      width: 89%;
       margin: 0;
       overflow-x: auto;
       /*scrollbar-color: #fff0 #fff0;*/

@@ -44,6 +44,15 @@ function getFormatBar(page: Page) {
   const bulletedBtn = formatQuickBar.getByTestId('affine:list/bulleted');
   const codeBlockBtn = formatQuickBar.getByTestId('affine:code/');
 
+  const assertBoundingBox = async (x: number, y: number) => {
+    const boundingBox = await formatQuickBar.boundingBox();
+    if (!boundingBox) {
+      throw new Error("formatQuickBar doesn't exist");
+    }
+    assertAlmostEqual(boundingBox.x, x, 6);
+    assertAlmostEqual(boundingBox.y, y, 6);
+  };
+
   return {
     formatQuickBar,
     boldBtn,
@@ -59,6 +68,8 @@ function getFormatBar(page: Page) {
     h1Btn,
     bulletedBtn,
     codeBlockBtn,
+
+    assertBoundingBox,
   };
 }
 
@@ -951,9 +962,14 @@ test('should format quick bar show after convert to code block', async ({
   const formatBarController = getFormatBar(page);
   await dragBetweenIndices(page, [2, 3], [0, 0]);
   await expect(formatBarController.formatQuickBar).toBeVisible();
+  await formatBarController.assertBoundingBox(20, 92);
+
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatQuickBar).toBeVisible();
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(1);
+  await formatBarController.assertBoundingBox(395, 99);
   await assertStoreMatchJSX(
     page,
     `
