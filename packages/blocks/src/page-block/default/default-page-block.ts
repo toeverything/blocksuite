@@ -229,6 +229,7 @@ export class DefaultPageBlockComponent
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
+      e.stopPropagation();
       assertExists(this._titleVEditor);
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
