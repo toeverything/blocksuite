@@ -226,6 +226,7 @@ export class DefaultPageBlockComponent
   private _onTitleKeyDown = (e: KeyboardEvent) => {
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
+    const defaultFrame = model.children[0];
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
@@ -235,23 +236,33 @@ export class DefaultPageBlockComponent
       assertExists(vRange);
       const right = model.title.split(vRange.index);
 
-      const defaultFrame = model.children[0];
-      const props = {
-        flavour: 'affine:paragraph',
-        text: right,
-      };
-
       const block = defaultFrame.children.find(block =>
         getRichTextByModel(block)
       );
       if (block) {
-        asyncFocusRichText(this.page, block.id);
+        asyncFocusRichText(page, block.id);
       }
-      const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
-      asyncFocusRichText(this.page, newFirstParagraphId);
+      const newFirstParagraphId = page.addBlockByFlavour(
+        'affine:paragraph',
+        { text: right },
+        defaultFrame,
+        0
+      );
+      asyncFocusRichText(page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      asyncFocusRichText(page, model.children[0].children[0].id);
+      const firstParagraph = model.children[0].children[0];
+      if (firstParagraph) {
+        asyncFocusRichText(page, firstParagraph.id);
+      } else {
+        const newFirstParagraphId = page.addBlockByFlavour(
+          'affine:paragraph',
+          {},
+          defaultFrame,
+          0
+        );
+        asyncFocusRichText(page, newFirstParagraphId);
+      }
     }
   };
 
