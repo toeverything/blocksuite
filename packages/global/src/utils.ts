@@ -74,10 +74,11 @@ type Allowed =
   | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
-  expected: U
+  expected: U,
+  message = 'val is not same as expected'
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new Error('val is not same as expected');
+    throw new Error(message);
   }
 }
 

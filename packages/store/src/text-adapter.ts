@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DeltaInsert, TextAttributes } from '@blocksuite/virgo';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
 import type { DeltaOperation, Quill } from 'quill';
 import * as Y from 'yjs';
 
@@ -259,7 +259,7 @@ export class Text {
     index: number,
     length: number,
     content: string,
-    attributes?: TextAttributes
+    attributes?: BaseTextAttributes
   ) {
     if (index < 0 || length < 0 || index + length > this._yText.length) {
       throw new Error(

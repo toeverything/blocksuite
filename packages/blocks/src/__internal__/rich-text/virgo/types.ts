@@ -1,7 +1,5 @@
+import type { VEditor } from '@blocksuite/virgo';
 import { z } from 'zod';
-
-import type { AffineLink } from '../link-node/index.js';
-import type { AffineText } from './affine-text.js';
 
 export const affineTextAttributes = z.object({
   bold: z.boolean().optional(),
@@ -14,9 +12,4 @@ export const affineTextAttributes = z.object({
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
 
-declare module '@blocksuite/virgo' {
-  interface CustomTypes {
-    Attributes: AffineTextAttributes;
-    Element: AffineText | AffineLink;
-  }
-}
+export type AffineVEditor = VEditor<AffineTextAttributes>;

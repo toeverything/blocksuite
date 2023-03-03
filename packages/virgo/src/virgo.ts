@@ -1,12 +1,16 @@
 import { assertExists, Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
+import type { z } from 'zod';
 
-import { BaseText } from './components/base-text.js';
 import { VirgoLine } from './components/virgo-line.js';
+import { VirgoText } from './components/virgo-text.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
-import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
+import type { AttributesRenderer, DeltaInsert } from './types.js';
+import { getDefaultAttributeRenderer } from './utils/attributes-renderer.js';
 import { deltaInsertsToChunks } from './utils/convert.js';
-import { baseRenderElement } from './utils/render.js';
+import type { BaseTextAttributes } from './utils/index.js';
+import { baseTextAttributes } from './utils/index.js';
+import { renderElement } from './utils/render.js';
 
 export interface VRange {
   index: number;
@@ -18,9 +22,9 @@ export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 export type DeltaEntry = [DeltaInsert, VRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
-export type NativePoint = readonly [Node, number];
+export type NativePoint = readonly [node: Node, offset: number];
 // the number here is relative to the text node
-export type TextPoint = readonly [Text, number];
+export type TextPoint = readonly [text: Text, offset: number];
 export interface DomPoint {
   // which text node this point is in
   text: Text;
@@ -28,7 +32,9 @@ export interface DomPoint {
   index: number;
 }
 
-export class VEditor {
+export class VEditor<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+> {
   static nativePointToTextPoint(
     node: unknown,
     offset: number
@@ -118,10 +124,49 @@ export class VEditor {
   private _isComposing = false;
   private _isReadOnly = false;
   private _yText: Y.Text;
-  private _renderElement: (delta: DeltaInsert) => TextElement =
-    baseRenderElement;
+
+  private _attributesRenderer: AttributesRenderer<TextAttributes> =
+    getDefaultAttributeRenderer<TextAttributes>();
+
+  private _attributesSchema: z.ZodSchema<TextAttributes> =
+    baseTextAttributes as z.ZodSchema<TextAttributes>;
+
   private _onKeyDown: (event: KeyboardEvent) => void = () => {
     return;
+  };
+
+  private _parseSchema = (textAttributes?: TextAttributes) => {
+    return this._attributesSchema.optional().parse(textAttributes);
+  };
+
+  private _renderDeltas = () => {
+    assertExists(this._rootElement);
+
+    const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
+    const chunks = deltaInsertsToChunks(deltas);
+
+    // every chunk is a line
+    const lines = chunks.map(chunk => {
+      const virgoLine = new VirgoLine<TextAttributes>();
+
+      if (chunk.length === 0) {
+        virgoLine.elements.push(new VirgoText());
+      } else {
+        chunk.forEach(delta => {
+          const element = renderElement(
+            delta,
+            this._parseSchema,
+            this._attributesRenderer
+          );
+
+          virgoLine.elements.push(element);
+        });
+      }
+
+      return virgoLine;
+    });
+
+    this._rootElement.replaceChildren(...lines);
   };
 
   signals: {
@@ -131,27 +176,18 @@ export class VEditor {
   get yText() {
     return this._yText;
   }
+
   get rootElement() {
     assertExists(this._rootElement);
     return this._rootElement;
   }
 
-  constructor(
-    yText: VEditor['yText'],
-    opts: {
-      renderElement?: (delta: DeltaInsert) => TextElement;
-    } = {}
-  ) {
+  constructor(yText: VEditor['yText']) {
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
 
     this._yText = yText;
-    const { renderElement } = opts;
-
-    if (renderElement) {
-      this._renderElement = renderElement;
-    }
 
     this.signals = {
       updateVRange: new Signal<UpdateVRangeProp>(),
@@ -159,6 +195,14 @@ export class VEditor {
 
     this.signals.updateVRange.on(this._onUpdateVRange);
   }
+
+  setAttributesSchema = (schema: z.ZodSchema<TextAttributes>) => {
+    this._attributesSchema = schema;
+  };
+
+  setAttributesRenderer = (renderer: AttributesRenderer<TextAttributes>) => {
+    this._attributesRenderer = renderer;
+  };
 
   bindKeyDownHandler(handler: (event: KeyboardEvent) => void) {
     this._onKeyDown = handler;
@@ -174,8 +218,7 @@ export class VEditor {
 
     this._rootElementAbort = new AbortController();
 
-    const deltas = this.yText.toDelta() as DeltaInsert[];
-    renderDeltas(deltas, this._rootElement, this._renderElement);
+    this._renderDeltas();
 
     this._rootElement.addEventListener(
       'beforeinput',
@@ -278,6 +321,7 @@ export class VEditor {
     throw new Error('failed to find leaf');
   }
 
+  // the number is releated to the VirgoLine's textLength
   getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
     assertExists(this._rootElement);
     const lineElements = Array.from(
@@ -686,7 +730,7 @@ export class VEditor {
 
     const { inputType, data } = event;
     const currentVRange = this._vRange;
-    console.log(event);
+
     if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
       this.signals.updateVRange.emit([
         {
@@ -771,11 +815,7 @@ export class VEditor {
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
-      renderDeltas(
-        this.yText.toDelta() as DeltaInsert[],
-        this._rootElement,
-        this._renderElement
-      );
+      this._renderDeltas();
     });
   };
 
@@ -919,7 +959,9 @@ function isVLine(element: unknown): element is HTMLElement {
   );
 }
 
-function findDocumentOrShadowRoot(editor: VEditor): Document {
+function findDocumentOrShadowRoot<TextAttributes extends BaseTextAttributes>(
+  editor: VEditor<TextAttributes>
+): Document {
   const el = editor.rootElement;
 
   if (!el) {
@@ -936,31 +978,4 @@ function findDocumentOrShadowRoot(editor: VEditor): Document {
   }
 
   return el.ownerDocument;
-}
-
-function renderDeltas(
-  deltas: DeltaInsert[],
-  rootElement: HTMLElement,
-  render: (delta: DeltaInsert) => TextElement
-) {
-  const chunks = deltaInsertsToChunks(deltas);
-
-  // every chunk is a line
-  const lines = chunks.map(chunk => {
-    const virgoLine = new VirgoLine();
-
-    if (chunk.length === 0) {
-      virgoLine.elements.push(new BaseText());
-    } else {
-      chunk.forEach(delta => {
-        const element = render(delta);
-
-        virgoLine.elements.push(element);
-      });
-    }
-
-    return virgoLine;
-  });
-
-  rootElement.replaceChildren(...lines);
 }

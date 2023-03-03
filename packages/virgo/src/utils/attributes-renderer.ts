@@ -1,13 +1,11 @@
-import { VirgoUnitText } from '@blocksuite/virgo';
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NonShadowLitElement } from '../../index.js';
-import type { AffineTextAttributes } from './types.js';
+import type { AttributesRenderer } from '../types.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
-function affineTextStyles(
-  props: AffineTextAttributes
+function virgoTextStyles(
+  props: BaseTextAttributes
 ): ReturnType<typeof styleMap> {
   let textDecorations = '';
   if (props.underline) {
@@ -40,24 +38,10 @@ function affineTextStyles(
   });
 }
 
-@customElement('affine-text')
-export class AffineText extends NonShadowLitElement {
-  @property({ type: Object })
-  textAttributes: AffineTextAttributes = {};
+export const getDefaultAttributeRenderer =
+  <T extends BaseTextAttributes>(): AttributesRenderer<T> =>
+  (unitText, attributes) => {
+    const style = attributes ? virgoTextStyles(attributes) : styleMap({});
 
-  @property({ type: Object })
-  unitText: VirgoUnitText = new VirgoUnitText();
-
-  render() {
-    const style = affineTextStyles(this.textAttributes);
-    // we need to avoid \n appearing before and after the span element, which will
-    // cause the unexpected space
-    return html`<span style=${style}>${this.unitText}</span>`;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-text': AffineText;
-  }
-}
+    return html`<span style=${style}>${unitText}</span>`;
+  };

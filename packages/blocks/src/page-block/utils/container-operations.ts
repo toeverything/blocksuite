@@ -4,7 +4,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
-import type { TextAttributes, VEditor, VRange } from '@blocksuite/virgo';
+import type { VRange } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -15,6 +15,10 @@ import {
   isMultiBlockRange,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import type {
+  AffineTextAttributes,
+  AffineVEditor,
+} from '../../__internal__/rich-text/virgo/types.js';
 import {
   BlockRange,
   getCurrentBlockRange,
@@ -35,9 +39,9 @@ import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function getVEditorFormat(
-  vEditor: VEditor,
+  vEditor: AffineVEditor,
   vRange: VRange
-): TextAttributes {
+): AffineTextAttributes {
   const deltas = vEditor.getDeltasByVRange(vRange);
 
   const result: {
@@ -55,7 +59,7 @@ export function getVEditorFormat(
     }
   }
 
-  return result as TextAttributes;
+  return result as AffineTextAttributes;
 }
 
 export function handleBlockSelectionBatchDelete(
@@ -242,14 +246,14 @@ function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
  *
  * Used for format quick bar.
  */
-function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
+function mergeFormat(formatArr: AffineTextAttributes[]): AffineTextAttributes {
   if (!formatArr.length) {
     return {};
   }
   return formatArr.reduce((acc, cur) => {
-    const newFormat: TextAttributes = {};
+    const newFormat: AffineTextAttributes = {};
     for (const key in acc) {
-      const typedKey = key as keyof TextAttributes;
+      const typedKey = key as keyof AffineTextAttributes;
       if (acc[typedKey] === cur[typedKey]) {
         // This cast is secure because we have checked that the value of the key is the same.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,7 +264,9 @@ function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
   });
 }
 
-export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
+export function getCombinedFormat(
+  blockRange: BlockRange
+): AffineTextAttributes {
   if (blockRange.models.length === 1) {
     const richText = getRichTextByModel(blockRange.models[0]);
     assertExists(richText);
@@ -325,7 +331,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   return mergeFormat(formatArr);
 }
 
-export function getCurrentCombinedFormat(page: Page): TextAttributes {
+export function getCurrentCombinedFormat(page: Page): AffineTextAttributes {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) {
     return {};
@@ -333,7 +339,10 @@ export function getCurrentCombinedFormat(page: Page): TextAttributes {
   return getCombinedFormat(blockRange);
 }
 
-function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
+function formatBlockRange(
+  blockRange: BlockRange,
+  key: keyof AffineTextAttributes
+) {
   const { startOffset, endOffset } = blockRange;
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -383,7 +392,7 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
   }
 }
 
-export function handleFormat(page: Page, key: keyof TextAttributes) {
+export function handleFormat(page: Page, key: keyof AffineTextAttributes) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;
   page.captureSync();

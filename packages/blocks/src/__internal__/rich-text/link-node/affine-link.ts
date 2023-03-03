@@ -1,12 +1,6 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  DeltaInsert,
-  TextAttributes,
-  VEditor,
-  VirgoUnitText,
-  ZERO_WIDTH_SPACE,
-} from '@blocksuite/virgo';
+import { VEditor, VirgoUnitText } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -17,8 +11,11 @@ import {
   getModelByElement,
   NonShadowLitElement,
 } from '../../utils/index.js';
+import type { AffineTextAttributes } from '../virgo/types.js';
 
-function affineLinkStyles(props: TextAttributes): ReturnType<typeof styleMap> {
+function affineLinkStyles(
+  props: AffineTextAttributes
+): ReturnType<typeof styleMap> {
   let textDecorations = '';
   if (props.underline) {
     textDecorations += 'underline';
@@ -53,15 +50,13 @@ function affineLinkStyles(props: TextAttributes): ReturnType<typeof styleMap> {
 @customElement('affine-link')
 export class AffineLink extends NonShadowLitElement {
   @property({ type: Object })
-  delta: DeltaInsert<TextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
-    attributes: {
-      link: '',
-    },
-  };
+  textAttributes: AffineTextAttributes = {};
+
+  @property({ type: Object })
+  unitText: VirgoUnitText = new VirgoUnitText();
 
   get link() {
-    const link = this.delta.attributes?.link;
+    const link = this.textAttributes?.link;
     if (!link) {
       return '';
     }
@@ -119,7 +114,7 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   async onDelayHover(e: MouseEvent) {
-    const text = this.delta.insert;
+    const text = this.unitText.str;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
       text,
@@ -146,7 +141,8 @@ export class AffineLink extends NonShadowLitElement {
   private _updateLink(link?: string, text?: string) {
     const model = getModelByElement(this);
     const { page: page } = model;
-    const oldDelta = this.delta;
+    const oldStr = this.unitText.str;
+    const oldTextAttributes = this.textAttributes;
 
     const textElement = this.querySelector('[data-virgo-text="true"]');
     assertExists(textElement);
@@ -185,19 +181,19 @@ export class AffineLink extends NonShadowLitElement {
         vEditor.formatText(
           {
             index: domPoint.index,
-            length: oldDelta.insert.length,
+            length: oldStr.length,
           },
           { link }
         );
       }
     } else {
       page.captureSync();
-      const newAttributes = { ...oldDelta.attributes };
+      const newAttributes = { ...oldTextAttributes };
       delete newAttributes.link;
       vEditor.formatText(
         {
           index: domPoint.index,
-          length: oldDelta.insert.length,
+          length: oldStr.length,
         },
         newAttributes,
         {
@@ -213,19 +209,14 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   render() {
-    const unitText = new VirgoUnitText();
-    unitText.str = this.delta.insert;
-    const style = this.delta.attributes
-      ? affineLinkStyles(this.delta.attributes)
-      : styleMap({});
+    const style = affineLinkStyles(this.textAttributes);
 
     return html`<a
       href=${this.link}
       rel="noopener noreferrer"
       target="_blank"
       style=${style}
-      data-virgo-element="true"
-      >${FontLinkIcon}${unitText}</a
+      >${FontLinkIcon}${this.unitText}</a
     >`;
   }
 }

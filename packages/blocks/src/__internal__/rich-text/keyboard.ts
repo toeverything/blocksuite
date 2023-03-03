@@ -2,7 +2,7 @@ import { getVEditorFormat } from '@blocksuite/blocks';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VEditor, VRange } from '@blocksuite/virgo';
+import type { VRange } from '@blocksuite/virgo';
 
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
@@ -21,6 +21,7 @@ import {
   handleSoftEnter,
   handleUnindent,
 } from './rich-text-operations.js';
+import type { AffineVEditor } from './virgo/types.js';
 
 // Type definitions is ported from quill
 // https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
@@ -60,7 +61,7 @@ type KeyboardBindingHandler = (
 export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
-  vEditor: VEditor;
+  vEditor: AffineVEditor;
   options: {
     bindings: KeyboardBindings;
   };
@@ -109,7 +110,7 @@ export function createKeyboardBindings(
     /**
      * @deprecated
      */
-    vEditor: VEditor,
+    vEditor: AffineVEditor,
     shortKey = false
   ) {
     e.stopPropagation();
@@ -194,7 +195,7 @@ export function createKeyboardBindings(
     /**
      * @deprecated
      */
-    vEditor: VEditor
+    vEditor: AffineVEditor
   ) {
     handleSoftEnter(page, model, range.index, range.length);
     vEditor.setVRange({
@@ -267,7 +268,7 @@ export function createKeyboardBindings(
     return tryMatchSpaceHotkey(page, model, vEditor, prefix, range);
   }
 
-  function onBackspace(e: KeyboardEvent, vEditor: VEditor) {
+  function onBackspace(e: KeyboardEvent, vEditor: AffineVEditor) {
     e.stopPropagation();
     if (isCollapsedAtBlockStart(vEditor)) {
       handleLineStartBackspace(page, model);
@@ -429,7 +430,7 @@ export function createKeyboardBindings(
 }
 
 export function createKeyDownHandler(
-  vEditor: VEditor,
+  vEditor: AffineVEditor,
   bindings: KeyboardBindings
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};

@@ -12,11 +12,11 @@ import {
   Page,
   Signal,
 } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   getCurrentBlockRange,
   restoreSelection,
@@ -69,7 +69,7 @@ export class FormatQuickBar extends LitElement {
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  private _format: TextAttributes = {};
+  private _format: AffineTextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;

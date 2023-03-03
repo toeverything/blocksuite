@@ -125,8 +125,9 @@ export class PasteManager {
     }
 
     const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+    const maybeModel = getStartModelBySelection();
     const shouldNotSplitBlock =
-      getStartModelBySelection().flavour === 'affine:code';
+      maybeModel && maybeModel.flavour === 'affine:code';
     if (shouldNotSplitBlock) {
       return [{ text: [{ insert: textClipData }], children: [] }];
     }

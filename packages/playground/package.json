@@ -22,7 +22,7 @@
     "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.5.46"
+    "yjs": "^13.5.48"
   },
   "license": "MPL-2.0",
   "devDependencies": {

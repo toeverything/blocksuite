@@ -18,6 +18,7 @@ export function createLink(page: Page) {
   if (!isRangeNativeSelection()) return;
 
   const startModel = getStartModelBySelection();
+  if (!startModel) return;
   const richText = getRichTextByModel(startModel);
   if (!richText) return;
 

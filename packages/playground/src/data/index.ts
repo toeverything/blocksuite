@@ -29,11 +29,8 @@ export const empty: InitFn = (workspace: Workspace) => {
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       // Add paragraph block inside frame block
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
-
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
-      });
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');
@@ -113,10 +110,8 @@ export const preset: InitFn = (workspace: Workspace) => {
       // Import preset markdown content inside frame block
       await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
 
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
-      });
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');
@@ -222,10 +217,8 @@ export const database: InitFn = (workspace: Workspace) => {
       // Add a paragraph after database
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
-      });
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');

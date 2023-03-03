@@ -1,7 +1,7 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VEditor, VRange } from '@blocksuite/virgo';
+import type { VRange } from '@blocksuite/virgo';
 
 import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
 import {
@@ -10,13 +10,14 @@ import {
   convertToParagraph,
   ExtendedModel,
 } from '../utils/index.js';
+import type { AffineVEditor } from './virgo/types.js';
 
 type Match = {
   name: string;
   pattern: RegExp;
   action: (
     model: BaseBlockModel,
-    vEditor: VEditor,
+    vEditor: AffineVEditor,
     text: string,
     selection: VRange,
     pattern: RegExp
@@ -29,7 +30,7 @@ const matches: Match[] = [
     pattern: /(?:\*){3}(.+?)(?:\*){3}$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -93,7 +94,7 @@ const matches: Match[] = [
     pattern: /(?:\*){2}(.+?)(?:\*){2}$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -153,7 +154,7 @@ const matches: Match[] = [
     pattern: /(?:\*){1}(.+?)(?:\*){1}$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -213,7 +214,7 @@ const matches: Match[] = [
     pattern: /(?:~~)(.+?)(?:~~)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -273,7 +274,7 @@ const matches: Match[] = [
     pattern: /(?:~)(.+?)(?:~)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -333,7 +334,7 @@ const matches: Match[] = [
     pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -393,7 +394,7 @@ const matches: Match[] = [
     pattern: /^```([a-zA-Z0-9]*)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -423,7 +424,7 @@ const matches: Match[] = [
       /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -472,7 +473,7 @@ const matches: Match[] = [
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: VEditor,
+      vEditor: AffineVEditor,
       text: string,
       selection: VRange,
       pattern: RegExp
@@ -532,7 +533,7 @@ const matches: Match[] = [
  * Returns true if markdown matches and converts to the appropriate format
  */
 export function markdownConvert(
-  vEditor: VEditor,
+  vEditor: AffineVEditor,
   model: BaseBlockModel,
   prefix: string
 ): boolean {
@@ -553,7 +554,7 @@ export function markdownConvert(
 export function tryMatchSpaceHotkey(
   page: Page,
   model: ExtendedModel,
-  vEditor: VEditor,
+  vEditor: AffineVEditor,
   prefix: string,
   range: { index: number; length: number }
 ) {
