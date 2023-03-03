@@ -698,7 +698,7 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   const rect = await page.evaluate(() => {
     const secondRichText = document.querySelector(
-      '[data-block-id="3"] .ql-editor'
+      '[data-block-id="3"] .virgo-editor'
     );
     if (!secondRichText) {
       throw new Error();
@@ -2017,7 +2017,7 @@ test('undo should clear block selection', async ({ page }) => {
   await pressEnter(page);
 
   const rect = await page
-    .locator('[data-block-id="2"] .ql-editor')
+    .locator('[data-block-id="2"] .virgo-editor')
     .boundingBox();
   if (!rect) {
     throw new Error();

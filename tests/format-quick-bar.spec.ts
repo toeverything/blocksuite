@@ -674,7 +674,7 @@ test('should format quick bar position correct at the start of second line', asy
     return paragraphId;
   });
   // await focusRichText(page);
-  const locator = page.locator('.ql-editor').nth(0);
+  const locator = page.locator('.virgo-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");

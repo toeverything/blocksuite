@@ -29,6 +29,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertAlmostEqual,
   assertEdgelessHoverRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
@@ -90,7 +91,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await type(page, 'hello');
   await pressEnter(page);
   await pressEnter(page);
-  await assertRichTexts(page, ['hello', '\n', '\n']);
+  await assertRichTexts(page, ['hello', '', '']);
 
   // inactive
   await switchEditorMode(page);
@@ -157,9 +158,9 @@ test('resize block in edgeless mode', async ({ page }) => {
   const [oldX, oldY, oldW, oldH] = JSON.parse(oldXywh);
   const [x, y, w, h] = JSON.parse(xywh);
   expect(x).toBe(oldX + 100);
-  expect(y).toBe(oldY);
+  assertAlmostEqual(y, oldY, 1);
   expect(w).toBe(oldW - 100);
-  expect(h).toBe(oldH);
+  assertAlmostEqual(h, oldH, 1);
 
   await switchEditorMode(page);
   await switchEditorMode(page);

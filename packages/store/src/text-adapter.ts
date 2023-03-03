@@ -1,9 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
-import type { DeltaOperation, Quill } from 'quill';
+import type { Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { Space } from './space.js';
+
+export interface OptionalAttributes {
+  attributes?: {
+    [key: string]: any;
+  };
+}
+export type DeltaOperation = {
+  insert?: any;
+  delete?: number;
+  retain?: number;
+} & OptionalAttributes;
 
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {

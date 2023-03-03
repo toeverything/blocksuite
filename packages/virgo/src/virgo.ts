@@ -119,7 +119,8 @@ export class VEditor<
   }
 
   private _rootElement: HTMLElement | null = null;
-  private _rootElementAbort: AbortController | null = null;
+  private _mountAbort: AbortController | null = null;
+  private _handlerAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
   private _isReadOnly = false;
@@ -131,9 +132,10 @@ export class VEditor<
   private _attributesSchema: z.ZodSchema<TextAttributes> =
     baseTextAttributes as z.ZodSchema<TextAttributes>;
 
-  private _onKeyDown: (event: KeyboardEvent) => void = () => {
-    return;
-  };
+  private _handlers: {
+    keydown?: (event: KeyboardEvent) => void;
+    paste?: (event: ClipboardEvent) => void;
+  } = {};
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
     return this._attributesSchema.optional().parse(textAttributes);
@@ -204,8 +206,46 @@ export class VEditor<
     this._attributesRenderer = renderer;
   };
 
-  bindKeyDownHandler(handler: (event: KeyboardEvent) => void) {
-    this._onKeyDown = handler;
+  bindHandlers(
+    handlers: VEditor['_handlers'] = {
+      paste: (event: ClipboardEvent) => {
+        const data = event.clipboardData?.getData('text/plain');
+        if (data) {
+          const vRange = this._vRange;
+          if (vRange) {
+            this.insertText(vRange, data);
+            this.signals.updateVRange.emit([
+              {
+                index: vRange.index + data.length,
+                length: 0,
+              },
+              'input',
+            ]);
+          }
+        }
+      },
+    }
+  ) {
+    this._handlers = handlers;
+
+    if (this._handlerAbort) {
+      this._handlerAbort.abort();
+    }
+
+    this._handlerAbort = new AbortController();
+
+    assertExists(this._rootElement, 'you need to mount the editor first');
+    if (this._handlers.paste) {
+      this._rootElement.addEventListener('paste', this._handlers.paste, {
+        signal: this._handlerAbort.signal,
+      });
+    }
+
+    if (this._handlers.keydown) {
+      this._rootElement.addEventListener('keydown', this._handlers.keydown, {
+        signal: this._handlerAbort.signal,
+      });
+    }
   }
 
   mount(rootElement: HTMLElement): void {
@@ -216,7 +256,7 @@ export class VEditor<
     this.yText.observe(this._onYTextChange);
     document.addEventListener('selectionchange', this._onSelectionChange);
 
-    this._rootElementAbort = new AbortController();
+    this._mountAbort = new AbortController();
 
     this._renderDeltas();
 
@@ -224,7 +264,7 @@ export class VEditor<
       'beforeinput',
       this._onBeforeInput.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
     this._rootElement
@@ -239,30 +279,28 @@ export class VEditor<
       'compositionstart',
       this._onCompositionStart.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
     this._rootElement.addEventListener(
       'compositionend',
       this._onCompositionEnd.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
-
-    this._rootElement.addEventListener('keydown', this._onKeyDown, {
-      signal: this._rootElementAbort.signal,
-    });
-    this._rootElement.addEventListener('paste', this._onPaste, {
-      signal: this._rootElementAbort.signal,
-    });
   }
 
   unmount(): void {
     document.removeEventListener('selectionchange', this._onSelectionChange);
-    if (this._rootElementAbort) {
-      this._rootElementAbort.abort();
-      this._rootElementAbort = null;
+    if (this._mountAbort) {
+      this._mountAbort.abort();
+      this._mountAbort = null;
+    }
+
+    if (this._handlerAbort) {
+      this._handlerAbort.abort();
+      this._handlerAbort = null;
     }
 
     this._rootElement?.replaceChildren();
@@ -304,9 +342,6 @@ export class VEditor<
     for (const textElement of textElements) {
       if (!textElement.textContent) {
         throw new Error('text element should have textContent');
-      }
-      if (textElement.textContent === ZERO_WIDTH_SPACE) {
-        continue;
       }
       if (index + textElement.textContent.length >= rangeIndex) {
         const text = getTextNodeFromElement(textElement);
@@ -836,23 +871,6 @@ export class VEditor<
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.signals.updateVRange.emit([vRange, 'native']);
-    }
-  };
-
-  private _onPaste = (event: ClipboardEvent) => {
-    const data = event.clipboardData?.getData('text/plain');
-    if (data) {
-      const vRange = this._vRange;
-      if (vRange) {
-        this.insertText(vRange, data);
-        this.signals.updateVRange.emit([
-          {
-            index: vRange.index + data.length,
-            length: 0,
-          },
-          'input',
-        ]);
-      }
     }
   };
 

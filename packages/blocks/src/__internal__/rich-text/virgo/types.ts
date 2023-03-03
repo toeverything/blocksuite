@@ -1,4 +1,4 @@
-import type { VEditor } from '@blocksuite/virgo';
+import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
 import { z } from 'zod';
 
 export const affineTextAttributes = z.object({
@@ -11,5 +11,7 @@ export const affineTextAttributes = z.object({
 });
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
+
+export type AffineDeltaInsert = DeltaInsert<AffineTextAttributes>;
 
 export type AffineVEditor = VEditor<AffineTextAttributes>;

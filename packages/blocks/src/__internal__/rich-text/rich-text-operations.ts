@@ -149,7 +149,6 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
-  // FIXME: after quill onload
   requestAnimationFrame(() => {
     assertExists(model);
     const richText = getRichTextByModel(model);
@@ -200,7 +199,6 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
       children: [...previousSibling.children, model, ...children],
     });
 
-    // FIXME: after quill onload
     requestAnimationFrame(() => {
       assertExists(model);
       const richText = getRichTextByModel(model);
@@ -272,7 +270,6 @@ export function handleUnindent(
     ],
   });
 
-  // FIXME: after quill onload
   requestAnimationFrame(() => {
     assertExists(model);
     const richText = getRichTextByModel(model);

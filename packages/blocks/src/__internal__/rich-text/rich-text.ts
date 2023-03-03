@@ -68,9 +68,11 @@ export class RichText extends NonShadowLitElement {
       this._vEditor,
       keyboardBindings
     );
-    this._vEditor.bindKeyDownHandler(keyDownHandler);
 
     this._vEditor.mount(this._virgoContainer);
+    this._vEditor.bindHandlers({
+      keydown: keyDownHandler,
+    });
   }
 
   render() {
