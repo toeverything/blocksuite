@@ -1,4 +1,4 @@
-import { Signal, sleep } from '@blocksuite/global/utils';
+import { sleep, Slot } from '@blocksuite/global/utils';
 import ky from 'ky';
 
 import type { BlobOptionsGetter } from './duplex-provider.js';
@@ -23,8 +23,8 @@ export class CloudSyncManager {
 
   private _workspace!: string;
 
-  readonly signals: BlobProvider['signals'] = {
-    onBlobSyncStateChange: new Signal(),
+  readonly slotss: BlobProvider['slots'] = {
+    onBlobSyncStateChange: new Slot(),
   };
 
   constructor(workspace: string, blobOptionsGetter: BlobOptionsGetter) {
@@ -79,7 +79,7 @@ export class CloudSyncManager {
         );
 
         if (resp.status === 404) {
-          this.signals.onBlobSyncStateChange.emit({
+          this.slotss.onBlobSyncStateChange.emit({
             id: task.id,
             state: BlobSyncState.Syncing,
           });
@@ -88,7 +88,7 @@ export class CloudSyncManager {
           });
 
           if (response.status === 200) {
-            this.signals.onBlobSyncStateChange.emit({
+            this.slotss.onBlobSyncStateChange.emit({
               id: task.id,
               state: BlobSyncState.Success,
             });
@@ -102,7 +102,7 @@ export class CloudSyncManager {
             }
             await this._db.set(task.id, { ...task, failed: true });
             this._failed.push({ ...task, failed: true });
-            this.signals.onBlobSyncStateChange.emit({
+            this.slotss.onBlobSyncStateChange.emit({
               id: task.id,
               state: BlobSyncState.Failed,
             });
@@ -116,7 +116,7 @@ export class CloudSyncManager {
         }
       } catch (e) {
         console.warn('Error while syncing blob', e);
-        this.signals.onBlobSyncStateChange.emit({
+        this.slotss.onBlobSyncStateChange.emit({
           id: task.id,
           state: BlobSyncState.Failed,
         });
@@ -138,7 +138,7 @@ export class CloudSyncManager {
       retry: 0,
     });
     this._runTasks();
-    this.signals.onBlobSyncStateChange.emit({
+    this.slotss.onBlobSyncStateChange.emit({
       id,
       state: BlobSyncState.Waiting,
     });

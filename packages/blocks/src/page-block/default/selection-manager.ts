@@ -42,7 +42,7 @@ import {
 } from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
-  DefaultPageSignals,
+  DefaultPageSlots,
   EmbedEditingState,
   ViewportState,
 } from './default-page-block.js';
@@ -443,30 +443,30 @@ export class DefaultSelectionManager {
   private readonly _mouseRoot: HTMLElement;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
-  private readonly _signals: DefaultPageSignals;
+  private readonly _slots: DefaultPageSlots;
   private readonly _embedResizeManager: EmbedResizeManager;
   private readonly _threshold: number; // distance to the upper and lower boundaries of the viewport
 
   constructor({
     page,
     mouseRoot,
-    signals,
+    slots,
     container,
     threshold,
   }: {
     page: Page;
     mouseRoot: HTMLElement;
-    signals: DefaultPageSignals;
+    slots: DefaultPageSlots;
     container: DefaultPageBlockComponent;
     threshold: number;
   }) {
     this.page = page;
-    this._signals = signals;
+    this._slots = slots;
     this._mouseRoot = mouseRoot;
     this._container = container;
     this._threshold = threshold;
 
-    this._embedResizeManager = new EmbedResizeManager(this.state, signals);
+    this._embedResizeManager = new EmbedResizeManager(this.state, slots);
     this._disposables.add(
       initMouseEventHandlers(
         this._mouseRoot,
@@ -535,7 +535,7 @@ export class DefaultSelectionManager {
     this.state.type = selectionType ?? this.state.type;
 
     if (rects) {
-      this._signals.updateSelectedRects.emit(rects);
+      this._slots.updateSelectedRects.emit(rects);
       return;
     }
 
@@ -549,7 +549,7 @@ export class DefaultSelectionManager {
       selectionType
     );
     this.state.type = newSelectionType;
-    this._signals.updateSelectedRects.emit(calculatedRects);
+    this._slots.updateSelectedRects.emit(calculatedRects);
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -621,14 +621,14 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
     this.state.clearBlockSelectionRect();
-    this._signals.updateFrameSelectionRect.emit(null);
+    this._slots.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
     this.state.resetStartRange(e);
     this.state.type = 'native';
-    this._signals.nativeSelection.emit(false);
+    this._slots.nativeSelection.emit(false);
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -637,7 +637,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(_: SelectionEvent) {
-    this._signals.nativeSelection.emit(true);
+    this._slots.nativeSelection.emit(true);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -796,11 +796,11 @@ export class DefaultSelectionManager {
         this.state.selectedEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
+        this._slots.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
         this.state.type = 'block';
         this.state.selectedBlocks.push(this.state.activeComponent);
-        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
+        this._slots.updateSelectedRects.emit([clickBlockInfo.position]);
       }
       return;
     }
@@ -862,13 +862,13 @@ export class DefaultSelectionManager {
       } else {
         hoverEditingState.position.x = hoverEditingState.position.right + 10;
       }
-      this._signals.updateEmbedEditingState.emit(hoverEditingState);
+      this._slots.updateEmbedEditingState.emit(hoverEditingState);
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
-      this._signals.updateCodeBlockOption.emit(hoverEditingState);
+      this._slots.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      this._signals.updateEmbedEditingState.emit(null);
-      this._signals.updateCodeBlockOption.emit(null);
+      this._slots.updateEmbedEditingState.emit(null);
+      this._slots.updateCodeBlockOption.emit(null);
     }
   };
 
@@ -932,26 +932,26 @@ export class DefaultSelectionManager {
 
   // clear selection: `block`, `embed`, `native`
   clear() {
-    const { state, _signals } = this;
+    const { state, _slots } = this;
     const { type } = state;
     if (type === 'block') {
       state.clearBlock();
-      _signals.updateSelectedRects.emit([]);
-      _signals.updateFrameSelectionRect.emit(null);
+      _slots.updateSelectedRects.emit([]);
+      _slots.updateFrameSelectionRect.emit(null);
     } else if (type === 'embed') {
       state.clearEmbed();
-      _signals.updateEmbedRects.emit([]);
-      _signals.updateEmbedEditingState.emit(null);
+      _slots.updateEmbedRects.emit([]);
+      _slots.updateEmbedEditingState.emit(null);
     } else if (type === 'native') {
       state.clearNative();
     }
   }
 
   dispose() {
-    this._signals.updateSelectedRects.dispose();
-    this._signals.updateFrameSelectionRect.dispose();
-    this._signals.updateEmbedEditingState.dispose();
-    this._signals.updateEmbedRects.dispose();
+    this._slots.updateSelectedRects.dispose();
+    this._slots.updateFrameSelectionRect.dispose();
+    this._slots.updateEmbedEditingState.dispose();
+    this._slots.updateEmbedRects.dispose();
     this._disposables.dispose();
   }
 
@@ -963,7 +963,7 @@ export class DefaultSelectionManager {
       this.state.focusedBlockIndex = -1;
     }
     const selectionRect = createSelectionRect(endPoint, startPoint);
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    this._slots.updateFrameSelectionRect.emit(selectionRect);
     return selectionRect;
   }
 
@@ -1011,7 +1011,7 @@ export class DefaultSelectionManager {
     } else {
       this.state.setStartPoint(null);
       this.state.setEndPoint(null);
-      this._signals.updateFrameSelectionRect.emit(null);
+      this._slots.updateFrameSelectionRect.emit(null);
       this.refreshSelectedBlocksRects();
     }
   }
@@ -1030,10 +1030,10 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, firstBlock).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._signals.updateSelectedRects.emit(rects);
+      this._slots.updateSelectedRects.emit(rects);
     } else {
       // only current focused-block
-      this._signals.updateSelectedRects.emit([
+      this._slots.updateSelectedRects.emit([
         blockCache.get(firstBlock) as DOMRect,
       ]);
     }
@@ -1061,7 +1061,7 @@ export class DefaultSelectionManager {
           }
         }
 
-        this._signals.updateEmbedRects.emit([rect]);
+        this._slots.updateEmbedRects.emit([rect]);
       }
     }
   }

@@ -121,7 +121,7 @@ export class EdgelessBrushMenu extends LitElement {
     if (this.mouseMode.type !== 'brush') return;
 
     const { lineWidth } = this.mouseMode;
-    this.edgeless.signals.mouseModeUpdated.emit({
+    this.edgeless.slots.mouseModeUpdated.emit({
       type: 'brush',
       color,
       lineWidth,
@@ -132,7 +132,7 @@ export class EdgelessBrushMenu extends LitElement {
     if (this.mouseMode.type !== 'brush') return;
 
     const { color } = this.mouseMode;
-    this.edgeless.signals.mouseModeUpdated.emit({
+    this.edgeless.slots.mouseModeUpdated.emit({
       type: 'brush',
       color,
       lineWidth,

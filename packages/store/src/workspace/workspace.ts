@@ -1,4 +1,4 @@
-import { Signal } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -35,10 +35,10 @@ class WorkspaceMeta<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends Space<WorkspaceMetaFields, Flags> {
   private _prevPages = new Set<string>();
-  pageAdded = new Signal<string>();
-  pageRemoved = new Signal<string>();
-  pagesUpdated = new Signal();
-  commonFieldsUpdated = new Signal();
+  pageAdded = new Slot<string>();
+  pageRemoved = new Slot<string>();
+  pagesUpdated = new Slot();
+  commonFieldsUpdated = new Slot();
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     super(id, doc, awarenessStore, {
@@ -140,7 +140,7 @@ class WorkspaceMeta<
     const versions = this.proxy.versions.toJSON();
     const dataFlavours = Object.keys(versions);
 
-    // TODO: emit data validation error signals
+    // TODO: emit data validation error slots
     if (dataFlavours.length === 0) {
       throw new Error(
         'Invalid workspace data, missing versions field. Please make sure the data is valid.'
@@ -230,10 +230,10 @@ export class Workspace {
 
   meta: WorkspaceMeta;
 
-  signals: {
-    pagesUpdated: Signal;
-    pageAdded: Signal<string>;
-    pageRemoved: Signal<string>;
+  slots: {
+    pagesUpdated: Slot;
+    pageAdded: Slot<string>;
+    pageRemoved: Slot<string>;
   };
 
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
@@ -250,7 +250,7 @@ export class Workspace {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
-        blobStorage?.signals.onBlobSyncStateChange.on(state => {
+        blobStorage?.slots.onBlobSyncStateChange.on(state => {
           const blobId = state.id;
           const syncState = state.state;
           if (
@@ -278,7 +278,7 @@ export class Workspace {
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
-    this.signals = {
+    this.slots = {
       pagesUpdated: this.meta.pagesUpdated,
       pageAdded: this.meta.pageAdded,
       pageRemoved: this.meta.pageRemoved,
@@ -346,7 +346,7 @@ export class Workspace {
   }
 
   private _handlePageEvent() {
-    this.signals.pageAdded.on(pageId => {
+    this.slots.pageAdded.on(pageId => {
       const page = new Page(
         this,
         pageId,
@@ -359,7 +359,7 @@ export class Workspace {
       this._indexer.onCreatePage(pageId);
     });
 
-    this.signals.pageRemoved.on(id => {
+    this.slots.pageRemoved.on(id => {
       const page = this.getPage(id) as Page;
       page.dispose();
       this._store.removeSpace(page);

@@ -44,7 +44,7 @@ export class EdgelessShapeMenu extends LitElement {
               @tool.click=${() => {
                 if (disabled) return;
 
-                this.edgeless.signals.mouseModeUpdated.emit({
+                this.edgeless.slots.mouseModeUpdated.emit({
                   type: 'shape',
                   shape: name,
                   color: '#000000',

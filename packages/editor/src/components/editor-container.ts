@@ -5,7 +5,7 @@ import {
   PageBlockModel,
 } from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
-import { Page, Signal } from '@blocksuite/store';
+import { Page, Slot } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -77,7 +77,7 @@ export class EditorContainer extends NonShadowLitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
+      this.page.awarenessStore.slots.update.subscribe(
         msg => msg.state?.flags.readonly[this.page.prefixedId],
         rd => {
           if (typeof rd === 'boolean' && rd !== this.readonly) {
@@ -92,7 +92,7 @@ export class EditorContainer extends NonShadowLitElement {
 
     // Question: Why do we prevent this?
     this._disposables.add(
-      Signal.disposableListener(window, 'keydown', e => {
+      Slot.disposableListener(window, 'keydown', e => {
         if (e.altKey && e.metaKey && e.code === 'KeyC') {
           e.preventDefault();
         }
@@ -124,7 +124,7 @@ export class EditorContainer extends NonShadowLitElement {
 
     // connect mouse mode event changes
     this._disposables.add(
-      Signal.disposableListener(
+      Slot.disposableListener(
         window,
         'affine.switch-mouse-mode',
         ({ detail }) => {
@@ -134,7 +134,7 @@ export class EditorContainer extends NonShadowLitElement {
     );
 
     this._disposables.add(
-      Signal.disposableListener(
+      Slot.disposableListener(
         window,
         'affine:switch-edgeless-display-mode',
         ({ detail }) => {
@@ -145,12 +145,12 @@ export class EditorContainer extends NonShadowLitElement {
 
     // subscribe store
     this._disposables.add(
-      this.page.signals.rootAdded.on(() => {
+      this.page.slots.rootAdded.on(() => {
         this.requestUpdate();
       })
     );
     this._disposables.add(
-      this.page.signals.blockUpdated.on(async ({ type, id }) => {
+      this.page.slots.blockUpdated.on(async ({ type, id }) => {
         const block = this.page.getBlockById(id);
 
         if (!block) return;
@@ -168,7 +168,7 @@ export class EditorContainer extends NonShadowLitElement {
   public async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
-      await new Promise(res => this.page.signals.rootAdded.once(res));
+      await new Promise(res => this.page.slots.rootAdded.once(res));
     }
     return createBlockHub(this, this.page);
   }
