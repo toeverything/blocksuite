@@ -14,7 +14,7 @@ hotkeys.filter = (event: KeyboardEvent) => {
 
 function isUndoRedo(event: KeyboardEvent) {
   // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
-  if (event.metaKey && !event.altKey && event.key === 'z') {
+  if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key === 'z') {
     return true;
   }
   return false;
@@ -31,7 +31,7 @@ function shouldFilterHotkey(event: KeyboardEvent) {
   // - code block language search input
   // - image caption
   // - link create/edit popover
-  if (!isInsideRichText(event.target) && !isInsidePageTitle(event.target)) {
+  if (!isInsideRichText(event.target)) {
     // TODO Remove ad-hoc
     // This ad-hoc should be moved to the caption input for processing
     // Enter on caption should jump out of input
@@ -41,7 +41,6 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     }
     // undo/redo should work in page title
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
-      event.preventDefault();
       return false;
     }
     // Some event dispatch from body
