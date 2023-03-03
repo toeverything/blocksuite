@@ -6,6 +6,7 @@ import {
   focusTitle,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pressArrowDown,
   pressArrowLeft,
   pressBackspace,
   pressEnter,
