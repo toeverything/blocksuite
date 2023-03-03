@@ -19,6 +19,8 @@ import {
   isPureFileInClipboard,
   performNativeCopy,
 } from './utils.js';
+
+// TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 export class PageClipboard implements Clipboard {
   private _pageBlock!: DefaultPageBlockComponent;
   // The event handler will get the most needed clipboard data based on this array order
@@ -130,10 +132,13 @@ export class PageClipboard implements Clipboard {
     // FIXME: remove ts-ignore
     // @ts-ignore
     const html = service.block2html(model, { begin, end });
+    // FIXME: remove ts-ignore
+    // @ts-ignore
     const text = service.block2Text(model, { begin, end });
-
-    // FIXME: shouldHaveClipboard is not enough
-    // Children json info is collected by its parent,
+    // FIXME: the presence of children is not considered
+    // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
+    // FIXME: remove ts-ignore
+    // @ts-ignore
     const json = service.block2Json(model, begin, end);
 
     return {
@@ -167,7 +172,6 @@ export class PageClipboard implements Clipboard {
     }
 
     const optimalClipboardData = this._getOptimalClipboardData(clipboardData);
-    console.log('optimalClipboardData', optimalClipboardData);
 
     if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
       return JSON.parse(optimalClipboardData.data);
@@ -189,30 +193,47 @@ export class PageClipboard implements Clipboard {
       assertExists(parent);
 
       if (blocks.length === 1) {
-        if (shouldMergeFirstBlock) {
-          focusedBlock.text?.insertList(firstBlock.text, range.startOffset);
-
-          // TODO: optimize textLength
-          const textLength = firstBlock.text.reduce((sum, data) => {
+        // TODO: optimize textLength
+        const textLength =
+          firstBlock?.text?.reduce((sum, data) => {
             return sum + (data.insert?.length || 0);
-          }, 0);
+          }, 0) ?? 0;
+
+        if (shouldMergeFirstBlock) {
+          focusedBlock.text?.insertList(
+            firstBlock.text || [],
+            range.startOffset
+          );
+
           getRichTextByModel(focusedBlock)?.quill.setSelection(
             range.startOffset + textLength,
             0
           );
         } else {
-          handleBlockSplit(
-            this._pageBlock.page,
-            focusedBlock,
-            range.startOffset,
-            0
-          );
-          this._addBlocks(
+          const shouldSplitBlock =
+            focusedBlock.text?.length !== range.endOffset;
+
+          shouldSplitBlock &&
+            handleBlockSplit(
+              this._pageBlock.page,
+              focusedBlock,
+              range.startOffset,
+              0
+            );
+          const [id] = this._addBlocks(
             blocks,
             parent,
-            parent.children.indexOf(focusedBlock)
+            parent.children.indexOf(focusedBlock) + 1
           );
-          // TODO: set selection
+
+          const model = this._pageBlock.page.getBlockById(id);
+
+          assertExists(model);
+          if (model.text) {
+            getRichTextByModel(model)?.quill.setSelection(textLength, 0);
+          } else {
+            // TODO: set embed block selection
+          }
         }
         return;
       }
@@ -225,7 +246,7 @@ export class PageClipboard implements Clipboard {
       );
 
       if (shouldMergeFirstBlock) {
-        focusedBlock.text?.insertList(firstBlock.text, range.startOffset);
+        focusedBlock.text?.insertList(firstBlock.text || [], range.startOffset);
       }
 
       const insertPosition =
@@ -253,7 +274,7 @@ export class PageClipboard implements Clipboard {
             0
           );
         } else {
-          // TODO: set selection
+          // TODO: set embed block selection
         }
       }
     });
@@ -289,7 +310,7 @@ export class PageClipboard implements Clipboard {
         block.text && model?.text?.applyDelta(block.text);
       }
 
-      model && this._addBlocks(block.children, model, 0);
+      model && block.children && this._addBlocks(block.children, model, 0);
     }
     return addedBlockIds;
   }

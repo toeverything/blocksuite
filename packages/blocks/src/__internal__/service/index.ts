@@ -52,10 +52,12 @@ export class BaseService implements IService {
       flavour: block.flavour,
       type: block.type as string,
       text: delta,
-      children: block.children.map((child, index) => {
+      children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
+          // @ts-ignore
           return getService(child.flavour).block2Json(child, 0, end);
         }
+        // @ts-ignore
         return getService(child.flavour).block2Json(child);
       }),
     };
@@ -96,7 +98,7 @@ export class BaseService implements IService {
       await import('../rich-text/rich-text-operations.js')
     ).handleUnindent;
     // we need to unindent the first child of the block if it not
-    // support children
+    // supports children
     if (supportsChildren(block)) {
       return;
     }

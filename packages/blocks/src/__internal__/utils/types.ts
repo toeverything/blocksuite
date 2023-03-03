@@ -67,7 +67,7 @@ export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 export type OpenBlockInfo = {
   flavour: keyof BlockModelProps;
   type?: string;
-  text: {
+  text?: {
     insert?: string;
     delete?: number;
     retain?: number;
@@ -79,7 +79,7 @@ export type OpenBlockInfo = {
     retain?: number;
   }[];
   checked?: boolean;
-  children: OpenBlockInfo[];
+  children?: OpenBlockInfo[];
   sourceId?: string;
   caption?: string;
   width?: number;
