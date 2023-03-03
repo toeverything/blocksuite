@@ -62,7 +62,7 @@ jobs:
           path: ./packages/playground/dist
 
   e2e-test:
-    name: Playground E2E test (${{ matrix.shard }}/${{ strategy.job-total }})
+    name: Playground E2E test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -104,7 +104,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: test-results-${{ matrix.shard }}/${{ strategy.job-total }}
+          name: test-results-main
           path: ./test-results
           if-no-files-found: ignore
 
