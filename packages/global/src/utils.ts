@@ -117,4 +117,5 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export const getDefaultPlaygroundURL = (isE2E: boolean): URL =>
-  new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);
+  new URL(`http://localhost:5173/`);
+// new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);
