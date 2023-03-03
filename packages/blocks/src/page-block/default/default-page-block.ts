@@ -117,9 +117,10 @@ export class DefaultPageBlockComponent
       background-color: transparent;
     }
 
+    /*
     .affine-default-page-block-title-container {
-      margin-top: 78px;
     }
+    */
   `;
 
   @property()
