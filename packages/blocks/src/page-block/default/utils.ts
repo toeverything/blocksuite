@@ -265,7 +265,9 @@ function binarySearchBlockEditingState(
         const { detectRect: prevDetectRect } = getBlockAndRect(blocks, end);
         const { detectRect: nextDetectRect } = getBlockAndRect(blocks, start);
         if (
-          Math.abs(prevDetectRect.bottom - y) < Math.abs(y - nextDetectRect.top)
+          y <
+          prevDetectRect.bottom +
+            (nextDetectRect.top - prevDetectRect.bottom) / 2
         ) {
           // nearer to prevDetectRect
           targetIndex = end;
