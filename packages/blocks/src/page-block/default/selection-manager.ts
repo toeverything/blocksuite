@@ -844,8 +844,8 @@ export class DefaultSelectionManager {
     this.state.refreshBlockRectCache();
     const hoverEditingState = getBlockEditingStateByPosition(
       this._allowSelectedBlocks,
-      e.raw.pageX,
-      e.raw.pageY
+      e.raw.clientX,
+      e.raw.clientY
     );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
