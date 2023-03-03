@@ -225,8 +225,7 @@ export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
-  private _blobOptionsGetter?: BlobOptionsGetter = (k: string) =>
-    ({ api: '/api/workspace' }[k]);
+  private _blobOptionsGetter?: BlobOptionsGetter;
 
   meta: WorkspaceMeta;
 
