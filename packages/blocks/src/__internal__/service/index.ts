@@ -4,6 +4,7 @@ import type { DeltaOperation } from 'quill';
 import { getService } from '../service.js';
 import type { IService, OpenBlockInfo } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
+import { json2block } from './json2block.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -61,6 +62,13 @@ export class BaseService implements IService {
         return getService(child.flavour).block2Json(child);
       }),
     };
+  }
+
+  // json2block is triggered when paste behavior occurs(now),
+  // at this time cursor is focus on one block, and is must a caret in this block(since selection has been handled in paste callback)
+  // this is the common handler for most block, but like code block, it should be overridden this
+  json2Block(focusedBlockModel: BaseBlockModel, pastedBlocks: OpenBlockInfo[]) {
+    return json2block(focusedBlockModel, pastedBlocks);
   }
 
   private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {

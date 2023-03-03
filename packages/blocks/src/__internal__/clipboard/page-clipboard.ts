@@ -1,15 +1,12 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists, Text } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import type { DefaultPageBlockComponent } from '../../page-block/index.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
-import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import {
   getCurrentBlockRange,
   getCurrentNativeRange,
-  getRichTextByModel,
   hasNativeSelection,
-  OpenBlockInfo,
   resetNativeSelection,
 } from '../utils/index.js';
 import { ClipboardItem } from './clipboard-item.js';
@@ -79,7 +76,13 @@ export class PageClipboard implements Clipboard {
     deleteModelsByRange(this._pageBlock.page);
 
     const blocks = this._clipboardData2Blocks(e.clipboardData);
-    this._insertClipboardBlocks(blocks);
+    if (blocks.length) {
+      const range = getCurrentBlockRange(this._pageBlock.page);
+      const focusedBlockModel = range?.models[0];
+      assertExists(focusedBlockModel);
+      const service = this._pageBlock.getService(focusedBlockModel.flavour);
+      service.json2Block(focusedBlockModel, blocks);
+    }
   }
 
   copy() {
@@ -176,142 +179,8 @@ export class PageClipboard implements Clipboard {
     if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
       return JSON.parse(optimalClipboardData.data);
     }
-  }
-
-  private _insertClipboardBlocks(blocks: OpenBlockInfo[]) {
-    // If selected is block not native selection, need to wait for a requestAnimationFrame to get the correct range
-    requestAnimationFrame(() => {
-      const range = getCurrentBlockRange(this._pageBlock.page);
-      assertExists(range);
-      // After deleteModelsByRange, selected block is must only, and selection is must caret
-      const focusedBlock = range.models[0];
-      const firstBlock = blocks[0];
-      const lastBlock = blocks[blocks.length - 1];
-      const shouldMergeFirstBlock = firstBlock.text && focusedBlock.text;
-      const shouldMergeLastBlock = focusedBlock.text && lastBlock.text;
-      const parent = this._pageBlock.page.getParent(focusedBlock);
-      assertExists(parent);
-
-      if (blocks.length === 1) {
-        // TODO: optimize textLength
-        const textLength =
-          firstBlock?.text?.reduce((sum, data) => {
-            return sum + (data.insert?.length || 0);
-          }, 0) ?? 0;
-
-        if (shouldMergeFirstBlock) {
-          focusedBlock.text?.insertList(
-            firstBlock.text || [],
-            range.startOffset
-          );
-
-          getRichTextByModel(focusedBlock)?.quill.setSelection(
-            range.startOffset + textLength,
-            0
-          );
-        } else {
-          const shouldSplitBlock =
-            focusedBlock.text?.length !== range.endOffset;
-
-          shouldSplitBlock &&
-            handleBlockSplit(
-              this._pageBlock.page,
-              focusedBlock,
-              range.startOffset,
-              0
-            );
-          const [id] = this._addBlocks(
-            blocks,
-            parent,
-            parent.children.indexOf(focusedBlock) + 1
-          );
-
-          const model = this._pageBlock.page.getBlockById(id);
-
-          assertExists(model);
-          if (model.text) {
-            getRichTextByModel(model)?.quill.setSelection(textLength, 0);
-          } else {
-            // TODO: set embed block selection
-          }
-        }
-        return;
-      }
-
-      handleBlockSplit(
-        this._pageBlock.page,
-        focusedBlock,
-        range.startOffset,
-        0
-      );
-
-      if (shouldMergeFirstBlock) {
-        focusedBlock.text?.insertList(firstBlock.text || [], range.startOffset);
-      }
-
-      const insertPosition =
-        parent.children.indexOf(focusedBlock) + (shouldMergeFirstBlock ? 1 : 0);
-      const ids = this._addBlocks(
-        blocks.slice(shouldMergeFirstBlock ? 1 : 0),
-        parent,
-        insertPosition
-      );
-
-      const lastModel = this._pageBlock.page.getBlockById(ids[ids.length - 1]);
-      if (shouldMergeLastBlock) {
-        assertExists(lastModel);
-        const rangeOffset = lastModel.text?.length || 0;
-        const nextSiblingModel = this._pageBlock.page.getNextSibling(lastModel);
-        lastModel.text?.join(nextSiblingModel?.text as Text);
-        assertExists(nextSiblingModel);
-        this._pageBlock.page.deleteBlock(nextSiblingModel);
-
-        getRichTextByModel(lastModel)?.quill.setSelection(rangeOffset, 0);
-      } else {
-        if (lastModel?.text) {
-          getRichTextByModel(lastModel)?.quill.setSelection(
-            lastModel.text?.length,
-            0
-          );
-        } else {
-          // TODO: set embed block selection
-        }
-      }
-    });
-  }
-
-  // TODO: used old code, need optimize
-  private _addBlocks(
-    blocks: OpenBlockInfo[],
-    parent: BaseBlockModel,
-    index: number
-  ) {
-    const addedBlockIds = [];
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      const blockProps = {
-        flavour: block.flavour as string,
-        type: block.type as string,
-        checked: block.checked,
-        sourceId: block.sourceId,
-        caption: block.caption,
-        width: block.width,
-        height: block.height,
-        language: block.language,
-      };
-      const id = this._pageBlock.page.addBlock(blockProps, parent, index + i);
-      addedBlockIds.push(id);
-      const model = this._pageBlock.page.getBlockById(id);
-
-      const flavour = model?.flavour;
-      const initialProps =
-        flavour && this._pageBlock.page.getInitialPropsMapByFlavour(flavour);
-      if (initialProps && initialProps.text instanceof Text) {
-        block.text && model?.text?.applyDelta(block.text);
-      }
-
-      model && block.children && this._addBlocks(block.children, model, 0);
+    if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML) {
+      console.log('html');
     }
-    return addedBlockIds;
   }
 }
