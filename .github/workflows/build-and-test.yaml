@@ -65,6 +65,7 @@ jobs:
     name: Playground E2E test
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
     steps:
