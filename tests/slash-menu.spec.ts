@@ -175,7 +175,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(22);
+  await expect(slashItems).toHaveCount(21);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
