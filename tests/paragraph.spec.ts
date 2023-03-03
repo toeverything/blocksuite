@@ -78,8 +78,6 @@ test('drag over paragraph title', async ({ page }) => {
   await dragOverTitle(page);
   await page.keyboard.press('Backspace', { delay: 100 });
   await assertTitle(page, '');
-  // TODO fix playwright environment issue
-  await focusTitle(page);
 
   await undoByKeyboard(page);
   await assertTitle(page, 'hello');

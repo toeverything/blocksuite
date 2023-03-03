@@ -14,7 +14,7 @@ hotkeys.filter = (event: KeyboardEvent) => {
 
 function isUndoRedo(event: KeyboardEvent) {
   // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
-  if (event.metaKey && !event.altKey && event.key === 'z') {
+  if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key === 'z') {
     return true;
   }
   return false;
