@@ -64,8 +64,6 @@ jobs:
   e2e-test:
     name: Playground E2E test (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
-    needs:
-      - build-playground
     strategy:
       matrix:
         shard: [1, 2, 3, 4]
@@ -81,12 +79,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: playground-artifact
-          path: ./packages/playground/dist
 
       - name: Install playwright browsers
         run: npx playwright install chromium
