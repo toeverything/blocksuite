@@ -1,11 +1,11 @@
 import './tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
+import './brush-tool/brush-tool-button.js';
 
 import {
   ConnectorIcon,
   HandIcon,
   ImageIcon,
-  PenIcon,
   SelectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
@@ -99,18 +99,10 @@ export class EdgelessToolbar extends LitElement {
         >
           ${ConnectorIcon}
         </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Pen'}
-          .active=${type === 'brush'}
-          @tool.click=${() =>
-            this._setMouseMode({
-              type: 'brush',
-              color: '#000000',
-              lineWidth: 4,
-            })}
-        >
-          ${PenIcon}
-        </edgeless-tool-icon-button>
+        <edgeless-brush-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+        ></edgeless-brush-tool-button>
         <edgeless-tool-icon-button
           .tooltip=${'Hand'}
           .active=${type === 'pan'}
