@@ -198,6 +198,9 @@ export function getStartModelBySelection() {
     return null;
   }
   const startModel = startComponent.model as BaseBlockModel;
+  if (matchFlavours(startModel, ['affine:frame', 'affine:page'] as const)) {
+    return null;
+  }
   return startModel;
 }
 
@@ -208,6 +211,7 @@ export function getRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
+// TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
@@ -242,7 +246,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        blockElement?.tagName !== 'AFFINE-FRAME'
+        !matchFlavours(block.model, ['affine:frame', 'affine:page'] as const)
       ) {
         intersectedModels.push(block.model);
       }
@@ -386,6 +390,13 @@ export function isInsidePageTitle(element: unknown): boolean {
   if (!titleElement) return false;
 
   return titleElement.contains(element as Node);
+}
+
+export function isToggleIcon(element: unknown): element is SVGPathElement {
+  return (
+    element instanceof SVGPathElement &&
+    element.getAttribute('data-is-toggle-icon') === 'true'
+  );
 }
 
 export function isDatabaseInput(element: unknown): boolean {

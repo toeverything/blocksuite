@@ -113,10 +113,7 @@ export class DebugMenu extends NonShadowLitElement {
     }
   }
 
-  private _convertToList(
-    e: PointerEvent,
-    listType: 'bulleted' | 'numbered' | 'todo'
-  ) {
+  private _convertToList(e: PointerEvent, listType: ListType) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
     const blockRange = getCurrentBlockRange(this.page);
@@ -277,7 +274,8 @@ export class DebugMenu extends NonShadowLitElement {
         : {
             margin: '0',
             overflow: 'initial',
-            height: 'initial',
+            // edgeless needs the container height
+            height: '100%',
             boxShadow: 'initial',
           };
       Object.assign(appRoot.style, style);
@@ -415,6 +413,11 @@ export class DebugMenu extends NonShadowLitElement {
                 @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}
               >
                 Todo List
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+              >
+                Toggle List
               </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item

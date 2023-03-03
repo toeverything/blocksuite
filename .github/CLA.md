@@ -45,8 +45,8 @@ Example:
 - Yifeng Wang, @doodlewind, 2022/09/11
 -->
 
-- gotjoshua, @gotjoshua, 2023/02/10
 - Innei, @Innei, 2023/02/09
+- gotjoshua, @gotjoshua, 2023/02/10
 - Fangdun Tsai, @fundon, 2023/02/13
 - Zhilin Liu, @lzlme, 2023/02/16
 - zqran, @zqran, 2023/02/17

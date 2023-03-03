@@ -628,3 +628,7 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
 }
+
+export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
+  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
+}

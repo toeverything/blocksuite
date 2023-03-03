@@ -725,6 +725,8 @@ export class DefaultSelectionManager {
       if (!this.state.selectedBlocks.length) {
         return;
       }
+      // TODO Check if there are valid blocks in the selection before showing the format bar
+      // If all the selected blocks are images, the format bar should not be displayed.
 
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
@@ -844,8 +846,8 @@ export class DefaultSelectionManager {
     this.state.refreshBlockRectCache();
     const hoverEditingState = getBlockEditingStateByPosition(
       this._allowSelectedBlocks,
-      e.raw.pageX,
-      e.raw.pageY
+      e.raw.clientX,
+      e.raw.clientY
     );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 

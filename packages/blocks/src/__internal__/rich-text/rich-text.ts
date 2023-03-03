@@ -37,7 +37,7 @@ export class RichText extends NonShadowLitElement {
     return this._virgoContainer;
   }
 
-  @property({ hasChanged: () => true })
+  @property()
   host!: BlockHost;
 
   @property()

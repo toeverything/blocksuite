@@ -56,7 +56,7 @@ export function doesInSamePath(
 export function convertToList(
   page: Page,
   model: ExtendedModel,
-  listType: 'bulleted' | 'numbered' | 'todo',
+  listType: ListType,
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {

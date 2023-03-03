@@ -4,7 +4,7 @@ import {
   assertExists,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
@@ -251,39 +251,23 @@ export function handleDown(
   return;
 }
 
-function handleTab(page: Page, selection: DefaultSelectionManager) {
-  switch (selection.state.type) {
-    case 'native': {
-      const range = getCurrentNativeRange();
-      const start = range.startContainer;
-      const end = range.endContainer;
-      const startModel = getModelByElement(start.parentElement as HTMLElement);
-      const endModel = getModelByElement(end.parentElement as HTMLElement);
-      if (startModel && endModel) {
-        let currentModel: BaseBlockModel | null = startModel;
-        const models: BaseBlockModel[] = [];
-        while (currentModel) {
-          const next = page.getNextSibling(currentModel);
-          models.push(currentModel);
-          if (currentModel.id === endModel.id) {
-            break;
-          }
-          currentModel = next;
-        }
-        handleMultiBlockIndent(page, models);
-      }
-      break;
-    }
-    case 'block': {
-      const models = selection.state.selectedBlocks.map(block =>
-        getModelByElement(block)
-      );
-      handleMultiBlockIndent(page, models);
-      requestAnimationFrame(() => {
-        selection.refreshSelectedBlocksRectsByModels(models);
-      });
-      break;
-    }
+function handleTab(
+  e: KeyboardEvent,
+  page: Page,
+  selection: DefaultSelectionManager
+) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  e.preventDefault();
+  const models = blockRange.models;
+  handleMultiBlockIndent(page, models);
+
+  if (blockRange.type === 'Block') {
+    requestAnimationFrame(() => {
+      selection.refreshSelectedBlocksRectsByModels(models);
+    });
   }
 }
 
@@ -404,7 +388,7 @@ export function bindHotkeys(
     return;
   });
 
-  hotkey.addListener(TAB, () => handleTab(page, selection));
+  hotkey.addListener(TAB, e => handleTab(e, page, selection));
 
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up

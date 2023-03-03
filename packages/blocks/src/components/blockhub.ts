@@ -107,8 +107,8 @@ export class BlockHub extends NonShadowLitElement {
     e: DragEvent,
     lastModelState: EditingState
   ) => Promise<void>;
-  private _currentPageX = 0;
-  private _currentPageY = 0;
+  private _currentClientX = 0;
+  private _currentClientY = 0;
   private _indicator!: DragIndicator;
   private _indicatorHTMLTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
@@ -675,19 +675,19 @@ export class BlockHub extends NonShadowLitElement {
 
   private _onMouseDown = (e: MouseEvent) => {
     if (isFirefox) {
-      this._currentPageX = e.pageX;
-      this._currentPageY = e.pageY;
+      this._currentClientX = e.clientX;
+      this._currentClientY = e.clientY;
     }
 
     this._refreshCursor(e);
   };
 
   private _refreshCursor = (e: MouseEvent) => {
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
     const blocks = this.getAllowedBlocks();
     const modelState = getBlockEditingStateByPosition(blocks, x, y, {
@@ -699,13 +699,13 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
 
     const modelState = this._cursor
@@ -743,8 +743,8 @@ export class BlockHub extends NonShadowLitElement {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
-    this._currentPageX = e.pageX;
-    this._currentPageY = e.pageY;
+    this._currentClientX = e.clientX;
+    this._currentClientY = e.clientY;
   };
 
   private _onDragEnd = (e: DragEvent) => {

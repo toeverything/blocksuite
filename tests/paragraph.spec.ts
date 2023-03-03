@@ -6,6 +6,7 @@ import {
   focusTitle,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pressArrowDown,
   pressArrowLeft,
   pressBackspace,
   pressEnter,
@@ -141,6 +142,18 @@ test('backspace on line start of the first block', async ({ page }) => {
   await redoByClick(page);
   await assertTitle(page, 'helloabc');
   await assertRichTexts(page, []);
+});
+
+test('backspace on line start of the first empty block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+
+  await pressArrowDown(page);
+  await pressBackspace(page);
+
+  await pressArrowDown(page);
+  await assertSelection(page, 0, 0, 0);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {

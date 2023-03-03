@@ -205,25 +205,31 @@ export function createKeyboardBindings(
     return PREVENT_DEFAULT;
   }
 
-  function onTab(this: KeyboardEventThis) {
+  function onTab(this: KeyboardEventThis, e: KeyboardEvent, vRange: VRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const vRange = this.vEditor.getVRange();
-    assertExists(vRange);
+
     const index = vRange.index;
     handleIndent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
-  function onShiftTab(this: KeyboardEventThis) {
+  function onShiftTab(
+    this: KeyboardEventThis,
+    e: KeyboardEvent,
+    vRange: VRange
+  ) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const vRange = this.vEditor.getVRange();
-    assertExists(vRange);
+
     const index = vRange.index;
     handleUnindent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
@@ -330,12 +336,16 @@ export function createKeyboardBindings(
     },
     tab: {
       key: 'Tab',
-      handler: onTab,
+      handler(range, context) {
+        return onTab.call(this, context.event, range);
+      },
     },
     shiftTab: {
       key: 'Tab',
       shiftKey: true,
-      handler: onShiftTab,
+      handler(range, context) {
+        return onShiftTab.call(this, context.event, range);
+      },
     },
     spaceMarkdownMatch: {
       key: ' ',
