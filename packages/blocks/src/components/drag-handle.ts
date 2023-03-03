@@ -210,16 +210,10 @@ export class DragHandle extends LitElement {
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
-  public showBySelectionEvent(event: SelectionEvent) {
-    if (!this._getBlockEditingStateByPosition) {
-      return;
-    }
-    const modelState = this._getBlockEditingStateByPosition(
-      this.getDropAllowedBlocks(null),
-      event.raw.clientX,
-      event.raw.clientY,
-      true
-    );
+  public showBySelectionEvent(
+    event: SelectionEvent,
+    modelState: EditingState | null
+  ) {
     if (modelState) {
       this._handleAnchorState = modelState;
       this._cursor = modelState.index;

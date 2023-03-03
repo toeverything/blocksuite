@@ -486,10 +486,14 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateEmbedEditingState.on(embedEditingState => {
+      if (this._embedEditingState === embedEditingState) return;
+
       this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
     this.signals.updateCodeBlockOption.on(codeBlockOption => {
+      if (this.codeBlockOption === codeBlockOption) return;
+
       this.codeBlockOption = codeBlockOption;
       this.requestUpdate();
     });

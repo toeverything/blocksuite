@@ -847,25 +847,33 @@ export class DefaultSelectionManager {
     const hoverEditingState = getBlockEditingStateByPosition(
       this._allowSelectedBlocks,
       e.raw.clientX,
-      e.raw.clientY
+      e.raw.clientY,
+      {
+        skipX: true,
+      }
     );
-    if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     if (this._container.components.dragHandle) {
-      this._container.components.dragHandle.showBySelectionEvent(e);
+      this._container.components.dragHandle.showBySelectionEvent(
+        e,
+        hoverEditingState
+      );
     }
-    if (hoverEditingState?.model.type === 'image') {
-      const { position } = hoverEditingState;
+
+    if (hoverEditingState) {
+      const { model, position } = hoverEditingState;
       // when image size is too large, the option popup should show inside
-      if (position.width > 680) {
-        hoverEditingState.position.x = hoverEditingState.position.right - 50;
-      } else {
-        hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      if (model.type === 'image') {
+        if (position.width > 680) {
+          position.x = position.right - 50;
+        } else {
+          position.x = position.right + 10;
+        }
+        this._signals.updateEmbedEditingState.emit(hoverEditingState);
+      } else if (model.flavour === 'affine:code') {
+        position.x = position.right + 12;
+        this._signals.updateCodeBlockOption.emit(hoverEditingState);
       }
-      this._signals.updateEmbedEditingState.emit(hoverEditingState);
-    } else if (hoverEditingState?.model.flavour === 'affine:code') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 12;
-      this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
