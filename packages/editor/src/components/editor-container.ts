@@ -11,7 +11,6 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { ClipboardManager, ContentParser } from '../managers/index.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
@@ -32,13 +31,6 @@ export class EditorContainer extends NonShadowLitElement {
 
   @state()
   private showGrid = false;
-
-  // TODO only select block
-  @property()
-  clipboard = new ClipboardManager(this, this);
-
-  @property()
-  contentParser = new ContentParser(this);
 
   get model() {
     return [this.page.root, this.page.surface] as [

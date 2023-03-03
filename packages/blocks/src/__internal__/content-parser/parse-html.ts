@@ -1,8 +1,9 @@
 import type { OpenBlockInfo } from '@blocksuite/blocks';
+import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
-import type { EditorContainer } from '../../../components/index.js';
 import type { ContentParser } from './index.js';
 
 // There are these uncommon in-line tags that have not been added
@@ -29,11 +30,11 @@ const INLINE_TAGS = [
 
 export class HtmlParser {
   private _contentParser: ContentParser;
-  private _editor: EditorContainer;
+  private _page: Page;
 
-  constructor(contentParser: ContentParser, editor: EditorContainer) {
+  constructor(contentParser: ContentParser, page: Page) {
     this._contentParser = contentParser;
-    this._editor = editor;
+    this._page = page;
   }
 
   public registerParsers() {
@@ -283,7 +284,7 @@ export class HtmlParser {
     }
 
     return {
-      flavour: flavour,
+      flavour: flavour as keyof BlockSchemas,
       type: type,
       checked: checked,
       text: textValues,
@@ -319,7 +320,7 @@ export class HtmlParser {
           ];
     }
 
-    const childTexts = childNodes
+    return childNodes
       .reduce((result, childNode) => {
         const textBlocks = this._commonHTML2Text(
           childNode,
@@ -333,7 +334,6 @@ export class HtmlParser {
         return result;
       }, [] as DeltaOperation[])
       .filter(v => v);
-    return childTexts;
   }
 
   private _listItemParser = async (
@@ -369,15 +369,12 @@ export class HtmlParser {
         checked = true;
       }
     }
-    const result = this._contentParser.getParserHtmlText2Block(
-      'commonParser'
-    )?.({
+    return this._contentParser.getParserHtmlText2Block('commonParser')?.({
       element: element,
       flavour: 'affine:list',
       type: type,
       checked: checked,
     });
-    return result;
   };
 
   private _blockQuoteParser = async (
@@ -386,13 +383,13 @@ export class HtmlParser {
     const getText = (list: OpenBlockInfo[]): OpenBlockInfo['text'] => {
       const result: OpenBlockInfo['text'] = [];
       list.forEach(item => {
-        const texts = item.text.filter(textItem => textItem.insert);
+        const texts = item.text?.filter(textItem => textItem.insert) || [];
         if (result.length > 0 && texts.length > 0) {
           result.push({ insert: '\n' });
         }
         result.push(...texts);
 
-        const childTexts = getText(item.children);
+        const childTexts = getText(item.children || []) || [];
         if (result.length > 0 && childTexts.length > 0) {
           result.push({ insert: '\n' });
         }
@@ -467,7 +464,7 @@ export class HtmlParser {
       if (!imgBlob.type.startsWith('image/')) {
         return result;
       }
-      const storage = await this._editor.page.blobs;
+      const storage = await this._page.blobs;
       assertExists(storage);
       const id = await storage.set(imgBlob);
       result = [

@@ -1,7 +1,7 @@
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import { BaseBlockModel, Page, Text, Workspace } from '@blocksuite/store';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
 
@@ -16,9 +16,6 @@ import { EditorContainer } from './editor-container.js';
 export class SimpleAffineEditor extends NonShadowLitElement {
   readonly workspace: Workspace;
   page!: Page;
-
-  @query('editor-container')
-  private _editorContainer!: EditorContainer;
 
   constructor() {
     super();
@@ -50,12 +47,6 @@ export class SimpleAffineEditor extends NonShadowLitElement {
 
   setTitle(title: Text) {
     this.page.updateBlock(this.page.root as BaseBlockModel, { title });
-  }
-
-  importMarkdown(content: string) {
-    const root = this.page.root as BaseBlockModel;
-    const { _editorContainer } = this;
-    _editorContainer.clipboard.importMarkdown(content, root.id);
   }
 }
 

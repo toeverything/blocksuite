@@ -4,6 +4,7 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
+import { ContentParser } from '@blocksuite/blocks';
 import { Page, Text, Workspace } from '@blocksuite/store';
 
 export interface InitFn {
@@ -111,7 +112,8 @@ export const preset: InitFn = (workspace: Workspace) => {
       // Add frame block inside page block
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       // Import preset markdown content inside frame block
-      await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+      const contentParser = new ContentParser(page);
+      await contentParser.importMarkdown(presetMarkdown, frameId);
 
       requestAnimationFrame(() => {
         page.resetHistory();

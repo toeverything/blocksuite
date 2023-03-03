@@ -107,7 +107,7 @@ export const json2block = (
 };
 
 // TODO: used old code, need optimize
-const addBlocks = (
+export const addBlocks = (
   page: Page,
   blocks: OpenBlockInfo[],
   parent: BaseBlockModel,

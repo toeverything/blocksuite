@@ -1,5 +1,4 @@
 export * from './components/index.js';
-export * from './managers/index.js';
 export * from './utils/index.js';
 
 const env =

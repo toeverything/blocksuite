@@ -19,6 +19,7 @@ import { EmbedBlockModelSchema } from './embed-block/embed-model.js';
 import { EmbedBlockService } from './embed-block/embed-service.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
 import { FrameBlockModelSchema } from './frame-block/frame-model.js';
+import { FrameBlockService } from './frame-block/frame-service.js';
 import type { ListBlockModel } from './list-block/list-model.js';
 import { ListBlockModelSchema } from './list-block/list-model.js';
 import { ListBlockService } from './list-block/list-service.js';
@@ -80,6 +81,7 @@ export const blockService = {
   'affine:list': ListBlockService,
   'affine:embed': EmbedBlockService,
   'affine:divider': DividerBlockService,
+  'affine:frame': FrameBlockService,
 } satisfies {
   [key in Flavour]?: { new (): BaseService };
 };

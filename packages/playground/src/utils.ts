@@ -1,4 +1,5 @@
 import * as blocks from '@blocksuite/blocks';
+import { ContentParser } from '@blocksuite/blocks';
 import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import {
@@ -100,7 +101,9 @@ async function initWithMarkdownContent(workspace: Workspace, url: URL) {
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());
-  return window.editor.clipboard.importMarkdown(content, page.root.id);
+  const frames = page.getBlockByFlavour('affine:frame');
+  const contentParser = new ContentParser(page);
+  await contentParser.importMarkdown(content, frames[0].id);
 }
 
 export async function tryInitExternalContent(

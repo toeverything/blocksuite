@@ -13,6 +13,7 @@ import './surface-block/index.js';
 import './components/slash-menu/index.js';
 import './database-block/index.js';
 
+export * from './__internal__/content-parser/index.js';
 export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service.js';
 export type { BaseService } from './__internal__/service/index.js';
