@@ -92,7 +92,9 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
-  private _onClickIcon = () => {
+  private _onClickIcon = (e: MouseEvent) => {
+    e.stopPropagation();
+
     if (this.model.type === 'toggle') {
       this.showChildren = !this.showChildren;
       return;
