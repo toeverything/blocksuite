@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { Page, Signal } from '@blocksuite/store';
+import { matchFlavours, Page, Signal } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
@@ -41,8 +41,24 @@ export const showFormatQuickBar = async ({
 
   // Init format quick bar
 
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  blockRange.models = blockRange.models.filter(model =>
+    matchFlavours(model, [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+    ] as const)
+  );
+  if (blockRange.models.length === 0) {
+    return;
+  }
+
   const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.page = page;
+  formatQuickBar.models = blockRange.models;
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
