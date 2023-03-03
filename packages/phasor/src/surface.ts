@@ -15,6 +15,7 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import type { ViewportState } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
@@ -25,12 +26,51 @@ export class SurfaceManager {
   private _elements = new Map<string, PhasorElement>();
   private _lastIndex = 'a0';
 
-  constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
-    this._renderer = new Renderer(canvas);
+  constructor(yContainer: Y.Map<unknown>, root?: HTMLElement) {
+    this._renderer = new Renderer(root);
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
 
     this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
+  }
+
+  get viewport(): ViewportState {
+    const {
+      width,
+      height,
+      centerX,
+      centerY,
+      zoom,
+      viewportX,
+      viewportY,
+      toModelCoord,
+      toViewCoord,
+      setCenter,
+      setZoom,
+      applyDeltaZoom,
+      applyDeltaCenter,
+    } = this._renderer;
+    return {
+      width,
+      height,
+      centerX,
+      centerY,
+      zoom,
+      viewportX,
+      viewportY,
+
+      toModelCoord,
+      toViewCoord,
+
+      setCenter,
+      setZoom,
+      applyDeltaZoom,
+      applyDeltaCenter,
+    };
+  }
+
+  attach(root: HTMLElement) {
+    this._renderer.attach(root);
   }
 
   getElementsBound(): IBound | null {
@@ -119,10 +159,6 @@ export class SurfaceManager {
 
   toViewCoord(modelX: number, modelY: number): [number, number] {
     return this._renderer.toViewCoord(modelX, modelY);
-  }
-
-  setViewport(centerX: number, centerY: number, zoom: number) {
-    this._renderer.setViewport(centerX, centerY, zoom);
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {

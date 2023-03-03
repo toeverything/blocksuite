@@ -60,12 +60,14 @@ export class EdgelessViewControlBar extends LitElement {
   zoom!: number;
 
   private _setZoom(zoom: number) {
-    this.edgeless.viewport.setZoom(zoom);
+    const { viewport } = this.edgeless.surface;
+    viewport.setZoom(zoom);
     this.edgeless.signals.viewportUpdated.emit();
   }
 
   private _zoomToFit() {
-    const { width, height } = this.edgeless.viewport;
+    const { viewport } = this.edgeless.surface;
+    const { width, height } = viewport;
     const frame = this.edgeless.pageModel.children[0] as FrameBlockModel;
     const frameXYWH = deserializeXYWH(frame.xywh);
     const frameBound = new Bound(...frameXYWH);
@@ -84,17 +86,18 @@ export class EdgelessViewControlBar extends LitElement {
 
     const cx = bound.x + bound.w / 2;
     const cy = bound.y + bound.h / 2;
-    this.edgeless.viewport.setZoom(zoom);
-    this.edgeless.viewport.setCenter(cx, cy);
+    viewport.setZoom(zoom);
+    viewport.setCenter(cx, cy);
     this.edgeless.signals.viewportUpdated.emit();
   }
 
   render() {
+    const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     return html`
       <div class="edgeless-view-control-bar-container">
         <edgeless-tool-icon-button
-          @tool.click=${() => this._setZoom(this.edgeless.viewport.zoom - 0.1)}
+          @tool.click=${() => this._setZoom(viewport.zoom - 0.1)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -102,7 +105,7 @@ export class EdgelessViewControlBar extends LitElement {
           >${formattedZoom}</span
         >
         <edgeless-tool-icon-button
-          @tool.click=${() => this._setZoom(this.edgeless.viewport.zoom + 0.1)}
+          @tool.click=${() => this._setZoom(viewport.zoom + 0.1)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

@@ -1,9 +1,9 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
+import type { SurfaceElement, ViewportState } from '@blocksuite/phasor';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { Selectable, ViewportState } from './selection-manager.js';
+import type { Selectable } from './selection-manager.js';
 
 export const DEFAULT_SPACING = 64;
 
@@ -58,7 +58,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
   const wheelHandler = (e: WheelEvent) => {
     e.preventDefault();
 
-    const { viewport } = container;
+    const { viewport } = container.surface;
 
     // pan
     if (!e.ctrlKey) {

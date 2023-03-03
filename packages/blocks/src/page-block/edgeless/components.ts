@@ -1,10 +1,10 @@
 import '../../__internal__/index.js';
 
+import type { ViewportState, XYWH } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
   serializeXYWH,
   SurfaceManager,
-  XYWH,
 } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Page } from '@blocksuite/store';
@@ -22,7 +22,6 @@ import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
 import type {
   EdgelessHoverState,
   EdgelessSelectionState,
-  ViewportState,
 } from './selection-manager.js';
 import {
   FRAME_MIN_LENGTH,

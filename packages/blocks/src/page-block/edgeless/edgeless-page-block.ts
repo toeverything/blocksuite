@@ -39,12 +39,10 @@ import {
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
-  ViewportState,
 } from './selection-manager.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
-  readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
   readonly surface: SurfaceManager;
   readonly signals: {
@@ -79,7 +77,7 @@ export class EdgelessPageBlockComponent
       height: 100%;
     }
 
-    .affine-surface-canvas {
+    .affine-edgeless-surface-block-container canvas {
       width: 100%;
       height: 100%;
       position: relative;
@@ -116,8 +114,8 @@ export class EdgelessPageBlockComponent
   @state()
   private _toolbarEnabled = false;
 
-  @query('.affine-surface-canvas')
-  private _canvas!: HTMLCanvasElement;
+  @query('.affine-edgeless-surface-block-container')
+  private _surfaceContainer!: HTMLDivElement;
 
   signals = {
     viewportUpdated: new Signal(),
@@ -128,8 +126,6 @@ export class EdgelessPageBlockComponent
   };
 
   surface!: SurfaceManager;
-
-  viewport = new ViewportState();
 
   getService = getService;
 
@@ -210,15 +206,6 @@ export class EdgelessPageBlockComponent
     }
   };
 
-  private _initViewport() {
-    const bound = this.mouseRoot.getBoundingClientRect();
-    this.viewport.setSize(bound.width, bound.height);
-
-    const frame = this.pageModel.children[0] as FrameBlockModel;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-    this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
-  }
-
   private _clearSelection() {
     requestAnimationFrame(() => {
       if (!this._selection.isActive) {
@@ -227,21 +214,15 @@ export class EdgelessPageBlockComponent
     });
   }
 
-  private _syncSurfaceViewport() {
-    this.surface.setViewport(
-      this.viewport.centerX,
-      this.viewport.centerY,
-      this.viewport.zoom
-    );
-  }
-
-  // Should be called in requestAnimationFrame,
-  // so as to avoid DOM mutation in SurfaceManager constructor
+  // just init surface, attach to dom later
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this.surface = new SurfaceManager(this._canvas, yContainer);
-    this._syncSurfaceViewport();
+    this.surface = new SurfaceManager(yContainer);
+
+    const frame = this.pageModel.children[0] as FrameBlockModel;
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+    this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
   private _handleToolbarFlag() {
@@ -264,6 +245,9 @@ export class EdgelessPageBlockComponent
   }
 
   update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('page')) {
+      this._initSurface();
+    }
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
@@ -281,9 +265,7 @@ export class EdgelessPageBlockComponent
     });
 
     this.signals.viewportUpdated.on(() => {
-      this.style.setProperty('--affine-zoom', `${this.viewport.zoom}`);
-
-      this._syncSurfaceViewport();
+      this.style.setProperty('--affine-zoom', `${this.surface.viewport.zoom}`);
 
       this._selection.syncSelectionRect();
       this.requestUpdate();
@@ -300,16 +282,17 @@ export class EdgelessPageBlockComponent
     this._disposables.add(historyDisposable);
     this._bindHotkeys();
 
-    tryUpdateFrameSize(this.page, this.viewport.zoom);
+    tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateFrameSize(this.page, this.viewport.zoom);
+      tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
     });
 
     requestAnimationFrame(() => {
-      this._initViewport();
-      this._initSurface();
+      // Should be called in requestAnimationFrame,
+      // so as to avoid DOM mutation in SurfaceManager constructor
+      this.surface.attach(this._surfaceContainer);
       // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();
       this.requestUpdate();
@@ -340,16 +323,18 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
+    const { viewport } = this.surface;
+
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.pageModel,
       this,
-      this.viewport
+      this.surface.viewport
     );
 
-    const { _selection, viewport, page } = this;
+    const { _selection, page } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
-    const { zoom, viewportX, viewportY } = this.viewport;
+    const { zoom, viewportX, viewportY } = viewport;
     const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
     const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
 
@@ -365,7 +350,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <canvas class="affine-surface-canvas"></canvas>
+        <!-- attach canvas later in Phasor -->
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>
@@ -374,8 +359,7 @@ export class EdgelessPageBlockComponent
             position: relative;
             overflow: hidden;
             height: 100%;
-            background-size: ${20 * this.viewport.zoom}px
-              ${20 * this.viewport.zoom}px;
+            background-size: ${20 * zoom}px ${20 * zoom}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: #fff;
           }
@@ -411,7 +395,7 @@ export class EdgelessPageBlockComponent
         : nothing}
       <edgeless-view-control-bar
         .edgeless=${this}
-        .zoom=${this.viewport.zoom}
+        .zoom=${zoom}
       ></edgeless-view-control-bar>
     `;
   }
