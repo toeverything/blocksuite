@@ -1,15 +1,30 @@
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { VEditor } from '@blocksuite/virgo';
+import type { VEditor, VRange } from '@blocksuite/virgo';
 
+import { getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
-// XXX: workaround quill lifecycle issue
-export function asyncFocusRichText(page: Page, id: string) {
+export function asyncFocusRichText(
+  page: Page,
+  id: string,
+  vRange: VRange = { index: 0, length: 0 }
+) {
   requestAnimationFrame(() => {
-    const adapter = page.richTextAdapters.get(id);
-    adapter?.quill.focus();
+    const model = page.getBlockById(id);
+    if (!model) {
+      throw new Error(`Cannot find block with id ${id}`);
+    }
+    const richText = getRichTextByModel(model);
+    if (!richText) {
+      throw new Error(`Cannot find rich text with id ${id}`);
+    }
+    const vEditor = richText.vEditor;
+    if (!vEditor) {
+      throw new Error(`Cannot find vEditor with id ${id}`);
+    }
+    vEditor.setVRange(vRange);
   });
 }
 
