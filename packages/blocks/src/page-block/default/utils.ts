@@ -136,12 +136,22 @@ function binarySearchBlockEditingState(
     containerLeft = firstBlock.blockRect.left;
   }
 
+  let inside = false;
   while (start <= end) {
     const mid = start + Math.floor((end - start) / 2);
     const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
       blocks,
       mid
     );
+
+    // if the detectRect is not in the view port, it's definitely not the block we want
+    if (detectRect.top > window.innerHeight) {
+      end = mid - 1;
+      continue;
+    } else if (detectRect.bottom < 0) {
+      start = mid + 1;
+      continue;
+    }
 
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
@@ -185,7 +195,7 @@ function binarySearchBlockEditingState(
       }
     }
 
-    const inside = y >= detectRect.top && y <= detectRect.bottom;
+    !inside && (inside = y >= detectRect.top && y <= detectRect.bottom);
 
     if (inside) {
       assertExists(blockRect);
@@ -241,6 +251,33 @@ function binarySearchBlockEditingState(
       end = mid - 1;
     } else if (detectRect.bottom < y) {
       start = mid + 1;
+    }
+
+    // if search failed, it may be caused by the mouse fall between two blocks
+    if (start > end) {
+      let targetIndex = -1;
+      // now start = end + 1, eg: [0, 1, ..., end start ..., blocks.length - 1]
+      if (start === blocks.length) {
+        targetIndex = end;
+      } else if (end === -1) {
+        targetIndex = start;
+      } else {
+        const { detectRect: prevDetectRect } = getBlockAndRect(blocks, end);
+        const { detectRect: nextDetectRect } = getBlockAndRect(blocks, start);
+        if (
+          y <
+          prevDetectRect.bottom +
+            (nextDetectRect.top - prevDetectRect.bottom) / 2
+        ) {
+          // nearer to prevDetectRect
+          targetIndex = end;
+        } else {
+          // nearer to nextDetectRect
+          targetIndex = start;
+        }
+      }
+      inside = true;
+      start = end = targetIndex;
     }
   }
 
