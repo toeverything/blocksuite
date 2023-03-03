@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-export class SelectEvent extends CustomEvent<Color> {}
+export class ColorEvent extends CustomEvent<Color> {}
 
 const colors: Color[] = [
   '#00000000',
@@ -71,7 +71,7 @@ export class EdgelessColorPanel extends LitElement {
 
   private _select(value: Color) {
     this.dispatchEvent(
-      new SelectEvent('select', {
+      new ColorEvent('select', {
         detail: value,
         composed: true,
         bubbles: true,
@@ -81,7 +81,7 @@ export class EdgelessColorPanel extends LitElement {
   }
 
   render() {
-    return html`${repeat(
+    return repeat(
       colors,
       color => color,
       color => {
@@ -89,22 +89,24 @@ export class EdgelessColorPanel extends LitElement {
         const isTransparent = color === '#00000000';
         const additionalIcon = isTransparent ? TransparentIcon : nothing;
 
-        return html` <div
-          class="color-container"
-          ?active=${color === this.value}
-          @click=${() => this._select(color)}
-        >
+        return html`
           <div
-            class="color-unit"
-            aria-label=${color}
-            ?bordered=${color === '#ffffff'}
-            style=${styleMap(style)}
+            class="color-container"
+            ?active=${color === this.value}
+            @click=${() => this._select(color)}
           >
-            ${additionalIcon}
+            <div
+              class="color-unit"
+              aria-label=${color}
+              ?bordered=${color === '#ffffff'}
+              style=${styleMap(style)}
+            >
+              ${additionalIcon}
+            </div>
           </div>
-        </div>`;
+        `;
       }
-    )}`;
+    );
   }
 }
 

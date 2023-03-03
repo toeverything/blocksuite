@@ -8,19 +8,17 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { EdgelessBrushToolMenu } from './brush-menu.js';
+import type { EdgelessBrushMenu } from './brush-menu.js';
 
-interface BrushToolMenuPopper {
-  element: EdgelessBrushToolMenu;
+interface BrushMenuPopper {
+  element: EdgelessBrushMenu;
   dispose: () => void;
 }
 
-function createBrushToolMenuPopper(
-  reference: HTMLElement
-): BrushToolMenuPopper {
-  const brushToolMenu = document.createElement('edgeless-brush-tool-menu');
-  document.body.appendChild(brushToolMenu);
-  const popper = createPopper(reference, brushToolMenu, {
+function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
+  const brushMenu = document.createElement('edgeless-brush-menu');
+  document.body.appendChild(brushMenu);
+  const popper = createPopper(reference, brushMenu, {
     placement: 'top',
     modifiers: [
       {
@@ -33,9 +31,9 @@ function createBrushToolMenuPopper(
   });
 
   return {
-    element: brushToolMenu,
+    element: brushMenu,
     dispose: () => {
-      brushToolMenu.remove();
+      brushMenu.remove();
       popper.destroy();
     },
   };
@@ -55,38 +53,38 @@ export class EdgelessBrushToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _brushToolMenu: BrushToolMenuPopper | null = null;
+  private _brushMenu: BrushMenuPopper | null = null;
 
-  private _toggleBrushToolMenu() {
-    if (this._brushToolMenu) {
-      this._brushToolMenu.dispose();
-      this._brushToolMenu = null;
+  private _toggleBrushMenu() {
+    if (this._brushMenu) {
+      this._brushMenu.dispose();
+      this._brushMenu = null;
     } else {
-      this._brushToolMenu = createBrushToolMenuPopper(this);
-      this._brushToolMenu.element.mouseMode = this.mouseMode;
-      this._brushToolMenu.element.edgeless = this.edgeless;
+      this._brushMenu = createBrushMenuPopper(this);
+      this._brushMenu.element.mouseMode = this.mouseMode;
+      this._brushMenu.element.edgeless = this.edgeless;
     }
   }
 
-  private _tryToSetDefaultBrushMouseMode() {
-    if (this.mouseMode.type !== 'brush') {
-      this.edgeless.signals.mouseModeUpdated.emit({
-        type: 'brush',
-        lineWidth: 4,
-        color: '#010101',
-      });
-    }
+  private _trySetBrushMode() {
+    if (this.mouseMode.type === 'brush') return;
+
+    this.edgeless.signals.mouseModeUpdated.emit({
+      type: 'brush',
+      lineWidth: 4,
+      color: '#010101',
+    });
   }
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'brush') {
-        this._brushToolMenu?.dispose();
-        this._brushToolMenu = null;
+        this._brushMenu?.dispose();
+        this._brushMenu = null;
       }
-      if (this._brushToolMenu) {
-        this._brushToolMenu.element.mouseMode = this.mouseMode;
-        this._brushToolMenu.element.edgeless = this.edgeless;
+      if (this._brushMenu) {
+        this._brushMenu.element.mouseMode = this.mouseMode;
+        this._brushMenu.element.edgeless = this.edgeless;
       }
     }
   }
@@ -99,8 +97,8 @@ export class EdgelessBrushToolButton extends LitElement {
         .tooltip=${'Pen'}
         .active=${type === 'brush'}
         @tool.click=${() => {
-          this._tryToSetDefaultBrushMouseMode();
-          this._toggleBrushToolMenu();
+          this._trySetBrushMode();
+          this._toggleBrushMenu();
         }}
       >
         ${PenIcon}

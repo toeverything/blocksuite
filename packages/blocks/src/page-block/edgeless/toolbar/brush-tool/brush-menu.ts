@@ -8,10 +8,49 @@ import { customElement, property } from 'lit/decorators.js';
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { toolTipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { SelectEvent } from './color-panel.js';
+import type { ColorEvent } from './color-panel.js';
 
-@customElement('edgeless-brush-tool-menu')
-export class EdgelessBrushToolMenu extends LitElement {
+function BrushSizeButtonGroup(
+  mouseMode: MouseMode,
+  setBrushWidth: (width: number) => void
+) {
+  if (mouseMode.type !== 'brush') return nothing;
+
+  const { lineWidth } = mouseMode;
+  /**
+   * There is little hacky on rendering tooltip.
+   * We don't want either tooltip overlap the top button or tooltip on left.
+   * So we put the lower button's tooltip as the first element of the button group container
+   */
+  return html`
+    <div class="brush-size-button-group has-tool-tip">
+      <!-- This tooltip is for the last button(Thick) -->
+      <tool-tip inert role="tooltip" tip-position="top" arrow>Thick</tool-tip>
+
+      <div
+        class="brush-size-button has-tool-tip"
+        ?active=${lineWidth === 4}
+        @click=${() => setBrushWidth(4)}
+      >
+        <div class="thin"></div>
+        <tool-tip inert role="tooltip" tip-position="top" arrow>
+          Thin
+        </tool-tip>
+      </div>
+
+      <div
+        class="brush-size-button"
+        ?active=${lineWidth === 16}
+        @click=${() => setBrushWidth(16)}
+      >
+        <div class="thick"></div>
+      </div>
+    </div>
+  `;
+}
+
+@customElement('edgeless-brush-menu')
+export class EdgelessBrushMenu extends LitElement {
   static styles = css`
     :host {
       width: 260px;
@@ -78,89 +117,52 @@ export class EdgelessBrushToolMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor(color: Color) {
-    if (this.mouseMode.type !== 'brush') {
-      return;
-    }
+  private _setBrushColor = (color: Color) => {
+    if (this.mouseMode.type !== 'brush') return;
+
     const { lineWidth } = this.mouseMode;
     this.edgeless.signals.mouseModeUpdated.emit({
       type: 'brush',
       color,
       lineWidth,
     });
-  }
+  };
 
-  private _setBrushWidth(lineWidth: number) {
-    if (this.mouseMode.type !== 'brush') {
-      return;
-    }
+  private _setBrushWidth = (lineWidth: number) => {
+    if (this.mouseMode.type !== 'brush') return;
+
     const { color } = this.mouseMode;
     this.edgeless.signals.mouseModeUpdated.emit({
       type: 'brush',
       color,
       lineWidth,
     });
-  }
-
-  private _renderBrushSizeButtonGroup() {
-    if (this.mouseMode.type !== 'brush') {
-      return nothing;
-    }
-    const { lineWidth } = this.mouseMode;
-
-    /**
-     * There is little hacky on rendering tooltip.
-     * We don't want either tooltip overlap the top button or tooltip on left.
-     * So we put the lower button's tooltip as the first element of the button group container
-     */
-    return html`
-      <div class="brush-size-button-group has-tool-tip">
-        <!-- This tooltip is for the last button(Thick) -->
-        <tool-tip inert role="tooltip" tip-position="top" arrow>Thick</tool-tip>
-
-        <div
-          class="brush-size-button has-tool-tip"
-          ?active=${lineWidth === 4}
-          @click=${() => this._setBrushWidth(4)}
-        >
-          <div class="thin"></div>
-          <tool-tip inert role="tooltip" tip-position="top" arrow
-            >Thin</tool-tip
-          >
-        </div>
-
-        <div
-          class="brush-size-button"
-          ?active=${lineWidth === 16}
-          @click=${() => this._setBrushWidth(16)}
-        >
-          <div class="thick"></div>
-        </div>
-      </div>
-    </div>`;
-  }
+  };
 
   render() {
-    if (this.mouseMode.type !== 'brush') {
-      return nothing;
-    }
+    if (this.mouseMode.type !== 'brush') return nothing;
+
     const { color } = this.mouseMode;
+    const brushSizeButtonGroup = BrushSizeButtonGroup(
+      this.mouseMode,
+      this._setBrushWidth
+    );
 
-    const brushSizeButtonGroup = this._renderBrushSizeButtonGroup();
-
-    return html`<div class="container">
-      ${brushSizeButtonGroup}
-      <div class="divider"></div>
-      <edgeless-color-panel
-        .value=${color}
-        @select=${(e: SelectEvent) => this._setBrushColor(e.detail)}
-      ></edgeless-color-panel>
-    </div>`;
+    return html`
+      <div class="container">
+        ${brushSizeButtonGroup}
+        <div class="divider"></div>
+        <edgeless-color-panel
+          .value=${color}
+          @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
+        ></edgeless-color-panel>
+      </div>
+    `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-brush-tool-menu': EdgelessBrushToolMenu;
+    'edgeless-brush-menu': EdgelessBrushMenu;
   }
 }
