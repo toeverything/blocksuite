@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import type { Signal } from '@blocksuite/global/utils';
+import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
 import { DividerBlockModelSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -32,8 +32,8 @@ function serialize(page: Page) {
   return page.doc.toJSON();
 }
 
-function waitOnce<T>(signal: Signal<T>) {
-  return new Promise<T>(resolve => signal.once(val => resolve(val)));
+function waitOnce<T>(slot: Slot<T>) {
+  return new Promise<T>(resolve => slot.once(val => resolve(val)));
 }
 
 async function createRoot(page: Page) {
@@ -42,13 +42,13 @@ async function createRoot(page: Page) {
       title: new page.Text(),
     })
   );
-  const root = await waitOnce(page.signals.rootAdded);
+  const root = await waitOnce(page.slots.rootAdded);
   return root;
 }
 
 async function createPage(workspace: Workspace, pageId = 'page0') {
   queueMicrotask(() => workspace.createPage(pageId));
-  await waitOnce(workspace.signals.pageAdded);
+  await waitOnce(workspace.slots.pageAdded);
   const page = workspace.getPage(pageId);
   assertExists(page);
   return page;
@@ -170,7 +170,7 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can observe signal events', async () => {
+  it('can observe slot events', async () => {
     const page = await createTestPage();
 
     queueMicrotask(() =>
@@ -178,7 +178,7 @@ describe.concurrent('addBlock', () => {
         title: new page.Text(),
       })
     );
-    const block = await waitOnce(page.signals.rootAdded);
+    const block = await waitOnce(page.slots.rootAdded);
     if (Array.isArray(block)) {
       throw new Error('');
     }
@@ -193,7 +193,7 @@ describe.concurrent('addBlock', () => {
         title: new page.Text(),
       })
     );
-    const roots = await waitOnce(page.signals.rootAdded);
+    const roots = await waitOnce(page.slots.rootAdded);
     const root = Array.isArray(roots) ? roots[0] : roots;
     if (Array.isArray(root)) {
       throw new Error('');

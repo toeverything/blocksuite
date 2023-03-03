@@ -6,7 +6,11 @@ import {
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
+import {
+  focusBlockByModel,
+  hotkey,
+  isPageMode,
+} from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
@@ -22,7 +26,7 @@ import {
   getRichTextByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type { DefaultPageSlots } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
@@ -123,7 +127,7 @@ export function handleUp(
     const previousBlock = getPreviousBlock(model);
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
-    if (!previousBlock) {
+    if (!previousBlock && isPageMode(page)) {
       focusTitle();
       return;
     }
@@ -275,7 +279,7 @@ function handleTab(
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
-  signals: DefaultPageSignals
+  slots: DefaultPageSlots
 ) {
   const {
     BACKSPACE,

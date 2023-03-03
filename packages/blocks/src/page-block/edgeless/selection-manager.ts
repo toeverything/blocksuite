@@ -123,7 +123,7 @@ export class EdgelessSelectionManager {
     };
 
     this._initMouseAndWheelEvents();
-    this._selectionUpdateCallback = this._container.signals.updateSelection.on(
+    this._selectionUpdateCallback = this._container.slots.updateSelection.on(
       state => {
         if (this._prevSelectedShapeId) {
           /*

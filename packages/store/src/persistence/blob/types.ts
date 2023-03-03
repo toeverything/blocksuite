@@ -1,4 +1,4 @@
-import type { Signal } from '@blocksuite/global/utils';
+import type { Slot } from '@blocksuite/global/utils';
 
 export type BlobId = string;
 export type BlobURL = string;
@@ -18,8 +18,8 @@ export interface BlobSyncStateChangeEvent {
 export interface BlobProvider {
   uploading: boolean;
   blobs: Promise<string[]>;
-  signals: {
-    onBlobSyncStateChange: Signal<BlobSyncStateChangeEvent>;
+  slots: {
+    onBlobSyncStateChange: Slot<BlobSyncStateChangeEvent>;
   };
   get(id: BlobId): Promise<BlobURL | null>;
   set(blob: Blob): Promise<BlobId>;

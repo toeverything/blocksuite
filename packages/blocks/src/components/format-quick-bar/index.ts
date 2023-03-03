@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { matchFlavours, Page, Signal } from '@blocksuite/store';
+import { matchFlavours, Page, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
@@ -60,8 +60,8 @@ export const showFormatQuickBar = async ({
   formatQuickBar.page = page;
   formatQuickBar.models = blockRange.models;
   formatQuickBar.abortController = abortController;
-  const positionUpdatedSignal = new Signal();
-  formatQuickBar.positionUpdated = positionUpdatedSignal;
+  const positionUpdatedSlot = new Slot();
+  formatQuickBar.positionUpdated = positionUpdatedSlot;
 
   formatQuickBarInstance = formatQuickBar;
   abortController.signal.addEventListener('abort', () => {
@@ -107,7 +107,7 @@ export const showFormatQuickBar = async ({
     // Note: in edgeless mode, the scroll container is not exist!
     scrollContainer.addEventListener('scroll', updatePos, { passive: true });
   }
-  positionUpdatedSignal.on(updatePos);
+  positionUpdatedSlot.on(updatePos);
   window.addEventListener('resize', updatePos, { passive: true });
 
   // Mount
@@ -158,7 +158,7 @@ export const showFormatQuickBar = async ({
     document.removeEventListener('mouseup', mouseDownHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
-    positionUpdatedSignal.dispose();
+    positionUpdatedSlot.dispose();
   });
   return formatQuickBar;
 };

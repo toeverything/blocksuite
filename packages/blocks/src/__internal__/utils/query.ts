@@ -1,6 +1,6 @@
 import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
 import type { DefaultPageBlockComponent } from '../../index.js';
@@ -160,11 +160,35 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
   return page;
 }
 
+/**
+ * @deprecated Use {@link getEditorContainer} instead
+ */
 export function getContainerByModel(model: BaseBlockModel) {
   const page = getDefaultPageBlock(model);
   const container = page.closest('editor-container');
   assertExists(container);
   return container;
+}
+
+export function getEditorContainer(page: Page) {
+  assertExists(
+    page.root,
+    'Failed to check paper mode! Page root is not exists!'
+  );
+  const pageBlock = document.querySelector(`[${ATTR}="${page.root.id}"]`);
+  // EditorContainer
+  const editorContainer = pageBlock?.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer;
+}
+
+export function isPageMode(page: Page) {
+  const editor = getEditorContainer(page);
+  if (!('mode' in editor)) {
+    throw new Error('Failed to check paper mode! Editor mode is not exists!');
+  }
+  const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
+  return mode === 'page';
 }
 
 export function getBlockElementByModel(

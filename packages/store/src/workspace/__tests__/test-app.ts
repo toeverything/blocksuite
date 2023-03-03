@@ -28,7 +28,7 @@ export class TestApp extends LitElement {
   firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
 
-    this.workspace.signals.pagesUpdated.on(() => {
+    this.workspace.slots.pagesUpdated.on(() => {
       this.pages = this.workspace.meta.pageMetas.map(page => ({
         title: page.title,
         favorite: page.favorite,
@@ -36,7 +36,7 @@ export class TestApp extends LitElement {
       this.requestUpdate();
     });
 
-    this.workspace.signals;
+    this.workspace.slots;
   }
 
   render() {

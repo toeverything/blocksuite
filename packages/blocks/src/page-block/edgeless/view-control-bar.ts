@@ -62,7 +62,7 @@ export class EdgelessViewControlBar extends LitElement {
   private _setZoom(zoom: number) {
     const { viewport } = this.edgeless.surface;
     viewport.setZoom(zoom);
-    this.edgeless.signals.viewportUpdated.emit();
+    this.edgeless.slots.viewportUpdated.emit();
   }
 
   private _zoomToFit() {
@@ -88,7 +88,7 @@ export class EdgelessViewControlBar extends LitElement {
     const cy = bound.y + bound.h / 2;
     viewport.setZoom(zoom);
     viewport.setCenter(cx, cy);
-    this.edgeless.signals.viewportUpdated.emit();
+    this.edgeless.slots.viewportUpdated.emit();
   }
 
   render() {

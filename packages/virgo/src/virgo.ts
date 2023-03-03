@@ -1,4 +1,4 @@
-import { assertExists, Signal } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -169,8 +169,8 @@ export class VEditor<
     this._rootElement.replaceChildren(...lines);
   };
 
-  signals: {
-    updateVRange: Signal<UpdateVRangeProp>;
+  slots: {
+    updateVRange: Slot<UpdateVRangeProp>;
   };
 
   get yText() {
@@ -189,11 +189,11 @@ export class VEditor<
 
     this._yText = yText;
 
-    this.signals = {
-      updateVRange: new Signal<UpdateVRangeProp>(),
+    this.slots = {
+      updateVRange: new Slot<UpdateVRangeProp>(),
     };
 
-    this.signals.updateVRange.on(this._onUpdateVRange);
+    this.slots.updateVRange.on(this._onUpdateVRange);
   }
 
   setAttributesSchema = (schema: z.ZodSchema<TextAttributes>) => {
@@ -385,7 +385,7 @@ export class VEditor<
   }
 
   setVRange(vRange: VRange): void {
-    this.signals.updateVRange.emit([vRange, 'other']);
+    this.slots.updateVRange.emit([vRange, 'other']);
   }
 
   focusEnd(): void {
@@ -732,7 +732,7 @@ export class VEditor<
     const currentVRange = this._vRange;
 
     if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
-      this.signals.updateVRange.emit([
+      this.slots.updateVRange.emit([
         {
           index: currentVRange.index + data.length,
           length: 0,
@@ -742,7 +742,7 @@ export class VEditor<
 
       this.insertText(currentVRange, data);
     } else if (inputType === 'insertParagraph' && currentVRange.index >= 0) {
-      this.signals.updateVRange.emit([
+      this.slots.updateVRange.emit([
         {
           index: currentVRange.index + 1,
           length: 0,
@@ -756,7 +756,7 @@ export class VEditor<
       currentVRange.index >= 0
     ) {
       if (currentVRange.length > 0) {
-        this.signals.updateVRange.emit([
+        this.slots.updateVRange.emit([
           {
             index: currentVRange.index,
             length: 0,
@@ -769,7 +769,7 @@ export class VEditor<
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
         const tmpString = this.yText.toString().slice(0, currentVRange.index);
         const deletedCharacter = [...tmpString].slice(-1).join('');
-        this.signals.updateVRange.emit([
+        this.slots.updateVRange.emit([
           {
             index: currentVRange.index - deletedCharacter.length,
             length: 0,
@@ -801,7 +801,7 @@ export class VEditor<
     if (this._vRange.index >= 0 && data) {
       this.insertText(this._vRange, data);
 
-      this.signals.updateVRange.emit([
+      this.slots.updateVRange.emit([
         {
           index: this._vRange.index + data.length,
           length: 0,
@@ -835,7 +835,7 @@ export class VEditor<
 
     const vRange = this.toVRange(selection);
     if (vRange) {
-      this.signals.updateVRange.emit([vRange, 'native']);
+      this.slots.updateVRange.emit([vRange, 'native']);
     }
   };
 
@@ -845,7 +845,7 @@ export class VEditor<
       const vRange = this._vRange;
       if (vRange) {
         this.insertText(vRange, data);
-        this.signals.updateVRange.emit([
+        this.slots.updateVRange.emit([
           {
             index: vRange.index + data.length,
             length: 0,

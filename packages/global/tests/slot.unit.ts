@@ -1,44 +1,44 @@
-import { Signal } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { describe, expect, test, vi } from 'vitest';
-describe('signal', () => {
+describe('slot', () => {
   test('init', () => {
-    const signal = new Signal();
-    expect(signal).is.toBeDefined();
+    const slot = new Slot();
+    expect(slot).is.toBeDefined();
   });
 
   test('emit', () => {
-    const signal = new Signal<void>();
+    const slot = new Slot<void>();
     const callback = vi.fn();
-    signal.on(callback);
-    signal.emit();
+    slot.on(callback);
+    slot.emit();
     expect(callback).toBeCalled();
   });
 
   test('emit with value', () => {
-    const signal = new Signal<number>();
+    const slot = new Slot<number>();
     const callback = vi.fn(v => expect(v).toBe(5));
-    signal.on(callback);
-    signal.emit(5);
+    slot.on(callback);
+    slot.emit(5);
     expect(callback).toBeCalled();
   });
 
   test('listen once', () => {
-    const signal = new Signal<number>();
+    const slot = new Slot<number>();
     const callback = vi.fn(v => expect(v).toBe(5));
-    signal.once(callback);
-    signal.emit(5);
-    signal.emit(6);
+    slot.once(callback);
+    slot.emit(5);
+    slot.emit(6);
     expect(callback).toBeCalledTimes(1);
   });
 
   test('listen once with dispose', () => {
-    const signal = new Signal<void>();
+    const slot = new Slot<void>();
     const callback = vi.fn(() => {
       throw new Error('');
     });
-    const disposable = signal.once(callback);
+    const disposable = slot.once(callback);
     disposable.dispose();
-    signal.emit();
+    slot.emit();
     expect(callback).toBeCalledTimes(0);
   });
 
@@ -47,10 +47,10 @@ describe('signal', () => {
       name: string;
       age: number;
     };
-    const signal = new Signal<Data>();
+    const slot = new Slot<Data>();
     const callback = vi.fn(v => expect(v).toBe('田所'));
-    signal.subscribe(v => v.name, callback);
-    signal.emit({ name: '田所', age: 24 });
+    slot.subscribe(v => v.name, callback);
+    slot.emit({ name: '田所', age: 24 });
     expect(callback).toBeCalledTimes(1);
   });
 });

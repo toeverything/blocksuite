@@ -14,7 +14,7 @@ import {
   assertExists,
   DisposableGroup,
   isFirefox,
-  Signal,
+  Slot,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, TemplateResult } from 'lit';
@@ -56,10 +56,10 @@ export class BlockHub extends NonShadowLitElement {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+  updateSelectedRectsSlot: Slot<DOMRect[]> | null = null;
 
   @property()
-  blockHubStatusUpdated: Signal<boolean> = new Signal<boolean>();
+  blockHubStatusUpdated: Slot<boolean> = new Slot<boolean>();
 
   @property()
   bottom = 70;
@@ -355,29 +355,27 @@ export class BlockHub extends NonShadowLitElement {
     super.connectedCallback();
     const disposables = this._disposables;
     disposables.add(
-      Signal.disposableListener(this, 'dragstart', this._onDragStart)
+      Slot.disposableListener(this, 'dragstart', this._onDragStart)
     );
-    disposables.add(Signal.disposableListener(this, 'drag', this._onDrag));
-    disposables.add(
-      Signal.disposableListener(this, 'dragend', this._onDragEnd)
-    );
+    disposables.add(Slot.disposableListener(this, 'drag', this._onDrag));
+    disposables.add(Slot.disposableListener(this, 'dragend', this._onDragEnd));
 
     disposables.add(
-      Signal.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
+      Slot.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
     );
     disposables.add(
-      Signal.disposableListener(this._mouseRoot, 'drop', this._onDrop)
+      Slot.disposableListener(this._mouseRoot, 'drop', this._onDrop)
     );
     isFirefox &&
       disposables.add(
-        Signal.disposableListener(
+        Slot.disposableListener(
           this._mouseRoot,
           'dragover',
           this._onDragOverDocument
         )
       );
     disposables.add(
-      Signal.disposableListener(this, 'mousedown', this._onMouseDown)
+      Slot.disposableListener(this, 'mousedown', this._onMouseDown)
     );
     this._onResize();
   }
@@ -386,15 +384,15 @@ export class BlockHub extends NonShadowLitElement {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
       disposables.add(
-        Signal.disposableListener(card, 'mousedown', this._onCardMouseDown)
+        Slot.disposableListener(card, 'mousedown', this._onCardMouseDown)
       );
       disposables.add(
-        Signal.disposableListener(card, 'mouseup', this._onCardMouseUp)
+        Slot.disposableListener(card, 'mouseup', this._onCardMouseUp)
       );
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.add(
-        Signal.disposableListener(
+        Slot.disposableListener(
           blockHubMenu,
           'mouseover',
           this._onBlockHubMenuMouseOver
@@ -402,14 +400,14 @@ export class BlockHub extends NonShadowLitElement {
       );
       if (blockHubMenu.getAttribute('type') === 'blank') {
         disposables.add(
-          Signal.disposableListener(
+          Slot.disposableListener(
             blockHubMenu,
             'mousedown',
             this._onBlankMenuMouseDown
           )
         );
         disposables.add(
-          Signal.disposableListener(
+          Slot.disposableListener(
             blockHubMenu,
             'mouseup',
             this._onBlankMenuMouseUp
@@ -418,32 +416,28 @@ export class BlockHub extends NonShadowLitElement {
       }
     }
     disposables.add(
-      Signal.disposableListener(
+      Slot.disposableListener(
         this._blockHubMenuEntry,
         'mouseover',
         this._onBlockHubEntryMouseOver
       )
     );
+    disposables.add(Slot.disposableListener(document, 'click', this._onClick));
     disposables.add(
-      Signal.disposableListener(document, 'click', this._onClick)
-    );
-    disposables.add(
-      Signal.disposableListener(
+      Slot.disposableListener(
         this._blockHubButton,
         'click',
         this._onBlockHubButtonClick
       )
     );
     disposables.add(
-      Signal.disposableListener(
+      Slot.disposableListener(
         this._blockHubIconsContainer,
         'transitionstart',
         this._onTransitionStart
       )
     );
-    disposables.add(
-      Signal.disposableListener(window, 'resize', this._onResize)
-    );
+    disposables.add(Slot.disposableListener(window, 'resize', this._onResize));
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
@@ -670,7 +664,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this.updateSelectedRectsSignal && this.updateSelectedRectsSignal.emit([]);
+    this.updateSelectedRectsSlot && this.updateSelectedRectsSlot.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {

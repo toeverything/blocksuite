@@ -2,12 +2,7 @@
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
-import {
-  BaseBlockModel,
-  DisposableGroup,
-  Page,
-  Signal,
-} from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
 import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -61,13 +56,13 @@ export interface ViewportState {
 
 export type CodeBlockOption = EmbedEditingState;
 
-export interface DefaultPageSignals {
-  updateFrameSelectionRect: Signal<DOMRect | null>;
-  updateSelectedRects: Signal<DOMRect[]>;
-  updateEmbedRects: Signal<DOMRect[]>;
-  updateEmbedEditingState: Signal<EmbedEditingState | null>;
-  updateCodeBlockOption: Signal<CodeBlockOption | null>;
-  nativeSelection: Signal<boolean>;
+export interface DefaultPageSlots {
+  updateFrameSelectionRect: Slot<DOMRect | null>;
+  updateSelectedRects: Slot<DOMRect[]>;
+  updateEmbedRects: Slot<DOMRect[]>;
+  updateEmbedEditingState: Slot<EmbedEditingState | null>;
+  updateCodeBlockOption: Slot<CodeBlockOption | null>;
+  nativeSelection: Slot<boolean>;
 }
 
 @customElement('affine-default-page')
@@ -122,9 +117,10 @@ export class DefaultPageBlockComponent
       background-color: transparent;
     }
 
+    /*
     .affine-default-page-block-title-container {
-      margin-top: 78px;
     }
+    */
   `;
 
   @property()
@@ -183,13 +179,13 @@ export class DefaultPageBlockComponent
   @query('.affine-default-viewport')
   defaultViewportElement!: HTMLDivElement;
 
-  signals: DefaultPageSignals = {
-    updateFrameSelectionRect: new Signal<DOMRect | null>(),
-    updateSelectedRects: new Signal<DOMRect[]>(),
-    updateEmbedRects: new Signal<DOMRect[]>(),
-    updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
-    updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
-    nativeSelection: new Signal<boolean>(),
+  slots: DefaultPageSlots = {
+    updateFrameSelectionRect: new Slot<DOMRect | null>(),
+    updateSelectedRects: new Slot<DOMRect[]>(),
+    updateEmbedRects: new Slot<DOMRect[]>(),
+    updateEmbedEditingState: new Slot<EmbedEditingState | null>(),
+    updateCodeBlockOption: new Slot<CodeBlockOption | null>(),
+    nativeSelection: new Slot<boolean>(),
   };
 
   public isCompositionStart = false;
@@ -357,7 +353,7 @@ export class DefaultPageBlockComponent
       this.selection = new DefaultSelectionManager({
         page: this.page,
         mouseRoot: this.mouseRoot,
-        signals: this.signals,
+        slots: this.slots,
         container: this,
         threshold: SCROLL_THRESHOLD / 2, // 50
       });
@@ -430,7 +426,7 @@ export class DefaultPageBlockComponent
       createHandle();
     }
     this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
+      this.page.awarenessStore.slots.update.subscribe(
         msg => msg.state?.flags.enable_drag_handle,
         enable => {
           if (enable) {
@@ -466,35 +462,35 @@ export class DefaultPageBlockComponent
   }
 
   firstUpdated() {
-    bindHotkeys(this.page, this.selection, this.signals);
+    bindHotkeys(this.page, this.selection, this.slots);
 
     hotkey.enableHotkey();
 
-    this.signals.updateFrameSelectionRect.on(rect => {
+    this.slots.updateFrameSelectionRect.on(rect => {
       this._frameSelectionRect = rect;
       this.requestUpdate();
     });
-    this.signals.updateSelectedRects.on(rects => {
+    this.slots.updateSelectedRects.on(rects => {
       this._selectedRects = rects;
       this.requestUpdate();
     });
-    this.signals.updateEmbedRects.on(rects => {
+    this.slots.updateEmbedRects.on(rects => {
       this._selectedEmbedRects = rects;
       if (rects.length === 0) {
         this._embedEditingState = null;
       }
       this.requestUpdate();
     });
-    this.signals.updateEmbedEditingState.on(embedEditingState => {
+    this.slots.updateEmbedEditingState.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
-    this.signals.updateCodeBlockOption.on(codeBlockOption => {
+    this.slots.updateCodeBlockOption.on(codeBlockOption => {
       this.codeBlockOption = codeBlockOption;
       this.requestUpdate();
     });
 
-    this.signals.nativeSelection.on(bind => {
+    this.slots.nativeSelection.on(bind => {
       if (bind) {
         window.addEventListener('keydown', this._handleNativeKeydown);
       } else {
@@ -577,7 +573,7 @@ export class DefaultPageBlockComponent
     );
     const embedEditingContainer = EmbedEditingContainer(
       readonly ? null : this._embedEditingState,
-      this.signals,
+      this.slots,
       this.viewportState
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(

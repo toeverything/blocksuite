@@ -1,14 +1,14 @@
 import { isInsideRichText } from '@blocksuite/blocks/std';
-import { Signal } from '@blocksuite/store';
+import { Slot } from '@blocksuite/store';
 
 import { checkEditorElementActive } from '../../utils/editor.js';
 import { ClipboardAction } from './types.js';
 
 export class ClipboardEventDispatcher {
-  readonly signals = {
-    [ClipboardAction.copy]: new Signal<ClipboardEvent>(),
-    [ClipboardAction.cut]: new Signal<ClipboardEvent>(),
-    [ClipboardAction.paste]: new Signal<ClipboardEvent>(),
+  readonly slots = {
+    [ClipboardAction.copy]: new Slot<ClipboardEvent>(),
+    [ClipboardAction.cut]: new Slot<ClipboardEvent>(),
+    [ClipboardAction.paste]: new Slot<ClipboardEvent>(),
   };
 
   constructor(clipboardTarget: HTMLElement) {
@@ -64,27 +64,27 @@ export class ClipboardEventDispatcher {
   private _onCopy = (e: ClipboardEvent) => {
     if (!this._isValidClipboardEvent(e)) return;
 
-    this.signals.copy.emit(e);
+    this.slots.copy.emit(e);
   };
 
   private _onCut = (e: ClipboardEvent) => {
     if (!this._isValidClipboardEvent(e)) return;
 
-    this.signals.cut.emit(e);
+    this.slots.cut.emit(e);
   };
 
   private _onPaste = (e: ClipboardEvent) => {
     if (!this._isValidClipboardEvent(e)) return;
 
     if (ClipboardEventDispatcher.editorElementActive()) {
-      this.signals.paste.emit(e);
+      this.slots.paste.emit(e);
     }
   };
 
   dispose(clipboardTarget: HTMLElement) {
-    this.signals.copy.dispose();
-    this.signals.cut.dispose();
-    this.signals.paste.dispose();
+    this.slots.copy.dispose();
+    this.slots.cut.dispose();
+    this.slots.paste.dispose();
     this.disposeClipboardTargetEvent(clipboardTarget);
   }
 }

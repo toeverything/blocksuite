@@ -65,7 +65,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
       const dx = e.deltaX / viewport.zoom;
       const dy = e.deltaY / viewport.zoom;
       viewport.applyDeltaCenter(dx, dy);
-      container.signals.viewportUpdated.emit();
+      container.slots.viewportUpdated.emit();
     }
     // zoom
     else {
@@ -89,7 +89,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
       const newCenterY = baseY + offsetY * (prevZoom / newZoom);
       viewport.setCenter(newCenterX, newCenterY);
 
-      container.signals.viewportUpdated.emit();
+      container.slots.viewportUpdated.emit();
     }
   };
 

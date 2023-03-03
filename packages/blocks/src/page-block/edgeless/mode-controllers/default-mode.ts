@@ -80,7 +80,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       selected,
       rect: getSelectionBoxBound(viewport, xywh),
     };
-    this._edgeless.signals.updateSelection.emit(this._blockSelectionState);
+    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
@@ -149,7 +149,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._handleClickOnSelected(selected, e);
     } else {
       this._setNoneSelectionState();
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
   }
@@ -179,7 +179,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         end: new DOMPoint(e.x, e.y),
       };
 
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
 
@@ -267,7 +267,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const blocks = pick(this._blocks, modelX, modelY);
 
     this._updateHoverState(shape ?? blocks);
-    this._edgeless.signals.hoverUpdated.emit();
+    this._edgeless.slots.hoverUpdated.emit();
   }
 
   onContainerMouseOut(_: SelectionEvent) {
@@ -283,7 +283,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       const xywh = getXYWH(selected);
       const rect = getSelectionBoxBound(viewport, xywh);
       this.blockSelectionState.rect = rect;
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
     }
 
     this._updateHoverState(this._hoverState?.content || null);
