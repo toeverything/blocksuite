@@ -184,8 +184,7 @@ export function getBlockElementByModel(
   return element as BlockComponentElement | null;
 }
 
-export function getStartModelBySelection() {
-  const range = getCurrentNativeRange();
+export function getStartModelBySelection(range = getCurrentNativeRange()) {
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
@@ -215,7 +214,7 @@ export function getRichTextByModel(model: BaseBlockModel) {
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
-    const model = getStartModelBySelection();
+    const model = getStartModelBySelection(range);
     if (!model) {
       return [];
     }
@@ -233,8 +232,19 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
   }
   const intersectedModels: BaseBlockModel[] = [];
   const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
-  if (blockElementArray.length > 1) {
-    blockElementArray.forEach(ele => {
+  if (!blockElementArray.length) {
+    return [];
+  }
+  if (blockElementArray.length === 1) {
+    const model = getStartModelBySelection(range);
+    if (!model) {
+      return [];
+    }
+    return [model];
+  }
+  Array.from(blockElementArray)
+    .filter(ele => 'model' in ele)
+    .forEach(ele => {
       const block = ele as ContainerBlock;
       assertExists(block.model);
       const blockElement = getBlockElementByModel(block.model);
@@ -251,13 +261,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
         intersectedModels.push(block.model);
       }
     });
-    return intersectedModels;
-  }
-  const model = getStartModelBySelection();
-  if (!model) {
-    return [];
-  }
-  return [model];
+  return intersectedModels;
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
