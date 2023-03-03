@@ -158,6 +158,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
+  if (!models.length) return;
   const previousSibling = page.getPreviousSibling(models[0]);
 
   if (!previousSibling || !supportsChildren(previousSibling)) {
