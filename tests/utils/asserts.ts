@@ -571,30 +571,6 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
-export async function assertEdgelessPointColor(
-  page: Page,
-  x: number,
-  y: number,
-  color: `#${string}`
-) {
-  const pickedColor = await page.evaluate(
-    ({ x, y }) => {
-      const node = document.querySelector(
-        '.affine-surface-canvas'
-      ) as HTMLCanvasElement;
-      const ctx = node?.getContext('2d');
-      if (!ctx) throw new Error('Cannot get canvas context');
-      const pixelData = ctx.getImageData(x, y, 1, 1).data;
-
-      return (
-        '#' +
-        ((1 << 24) + (pixelData[0] << 16) + (pixelData[1] << 8) + pixelData[2])
-          .toString(16)
-          .slice(1)
-      );
-    },
-    { x, y }
-  );
-
-  expect(pickedColor.toLowerCase()).toEqual(color.toLowerCase());
+export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
+  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }

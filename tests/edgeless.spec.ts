@@ -8,6 +8,7 @@ import {
   getEdgelessHoverRect,
   getFrameSize,
   increaseZoomLevel,
+  pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
   setMouseMode,
@@ -29,10 +30,10 @@ import {
 } from './utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessPointColor,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
+  assertSameColor,
   assertSelection,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -227,7 +228,8 @@ test('add brush element with color', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await dragBetweenCoords(page, start, end, { steps: 100 });
 
-  await assertEdgelessPointColor(page, 110, 110, '#B638FF');
+  const [color] = await pickColorAtPoints(page, [[110, 110]]);
+  assertSameColor(color, '#B638FF');
 });
 
 test('add brush element with different size', async ({ page }) => {
@@ -243,14 +245,21 @@ test('add brush element with different size', async ({ page }) => {
   const end = { x: 200, y: 100 };
   await dragBetweenCoords(page, start, end, { steps: 100 });
 
-  // Select two points on the top and bottom border of the line,
-  // their color should be the same as the specified color
-  await assertEdgelessPointColor(page, 110, 115, '#B638FF');
-  await assertEdgelessPointColor(page, 110, 100, '#B638FF');
-  // Select two points close to the upper and lower boundaries of the line,
-  // their color should be different from the specified color
-  await assertEdgelessPointColor(page, 110, 99, '#000000');
-  await assertEdgelessPointColor(page, 110, 116, '#000000');
+  const [topEdge, bottomEdge, nearTopEdge, nearBottomEdge] =
+    await pickColorAtPoints(page, [
+      // Select two points on the top and bottom border of the line,
+      // their color should be the same as the specified color
+      [110, 100],
+      [110, 115],
+      // Select two points close to the upper and lower boundaries of the line,
+      // their color should be different from the specified color
+      [110, 99],
+      [110, 116],
+    ]);
+  assertSameColor(topEdge, '#B638FF');
+  assertSameColor(bottomEdge, '#B638FF');
+  assertSameColor(nearTopEdge, '#000000');
+  assertSameColor(nearBottomEdge, '#000000');
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {

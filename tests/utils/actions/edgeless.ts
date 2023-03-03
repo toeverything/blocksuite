@@ -122,3 +122,31 @@ export async function selectBrushSize(page: Page, size: 4 | 16) {
   );
   await sizeButton.click();
 }
+
+export async function pickColorAtPoints(page: Page, points: number[][]) {
+  const pickedColors: `#${string}`[] = await page.evaluate(points => {
+    const node = document.querySelector(
+      '.affine-surface-canvas'
+    ) as HTMLCanvasElement;
+    const w = node.width;
+    const h = node.height;
+    const ctx = node?.getContext('2d');
+    if (!ctx) throw new Error('Cannot get canvas context');
+    const pixelData = ctx.getImageData(0, 0, w, h).data;
+
+    const colors = points.map(([x, y]) => {
+      const startPosition = (y * w + x) * 4;
+      return ('#' +
+        (
+          (1 << 24) +
+          (pixelData[startPosition] << 16) +
+          (pixelData[startPosition + 1] << 8) +
+          pixelData[startPosition + 2]
+        )
+          .toString(16)
+          .slice(1)) as `#${string}`;
+    });
+    return colors;
+  }, points);
+  return pickedColors;
+}
