@@ -215,11 +215,10 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
     const model = getStartModelBySelection(range);
-    if (!model) {
-      return [];
-    }
+    if (!model) return [];
     return [model];
   }
+
   if (
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
@@ -230,29 +229,27 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       commonAncestor = parentElement;
     }
   }
+
   const intersectedModels: BaseBlockModel[] = [];
-  const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
-  if (!blockElementArray.length) {
-    return [];
-  }
-  if (blockElementArray.length === 1) {
+  const blockElements = commonAncestor.querySelectorAll(`[${ATTR}]`);
+
+  if (!blockElements.length) return [];
+
+  if (blockElements.length === 1) {
     const model = getStartModelBySelection(range);
-    if (!model) {
-      return [];
-    }
+    if (!model) return [];
     return [model];
   }
-  Array.from(blockElementArray)
-    .filter(ele => 'model' in ele)
-    .forEach(ele => {
-      const block = ele as ContainerBlock;
-      assertExists(block.model);
-      const blockElement = getBlockElementByModel(block.model);
+
+  Array.from(blockElements)
+    .filter(element => 'model' in element)
+    .forEach(element => {
+      const block = element as ContainerBlock;
+      if (!block.model) return;
+
       const mainElement = matchFlavours(block.model, ['affine:page'] as const)
-        ? blockElement?.querySelector(
-            '.affine-default-page-block-title-container'
-          )
-        : blockElement?.querySelector('rich-text');
+        ? element?.querySelector('.affine-default-page-block-title-container')
+        : element?.querySelector('rich-text');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
