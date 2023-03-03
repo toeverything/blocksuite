@@ -199,21 +199,25 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onTab(this: KeyboardEventThis) {
+  function onTab(e: KeyboardEvent, range: QuillRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const index = range.index;
     handleIndent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
-  function onShiftTab(this: KeyboardEventThis) {
+  function onShiftTab(e: KeyboardEvent, range: QuillRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const index = range.index;
     handleUnindent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
@@ -320,12 +324,16 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     tab: {
       key: 'Tab',
-      handler: onTab,
+      handler(range, context) {
+        return onTab(context.event, range);
+      },
     },
     shiftTab: {
       key: 'Tab',
       shiftKey: true,
-      handler: onShiftTab,
+      handler(range, context) {
+        return onShiftTab(context.event, range);
+      },
     },
     spaceMarkdownMatch: {
       key: ' ',
