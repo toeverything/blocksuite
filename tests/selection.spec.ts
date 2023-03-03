@@ -522,13 +522,20 @@ test('click the list icon can select and copy', async ({ page }) => {
   await initThreeLists(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await clickListIcon(page, 0);
+  // copy 123
   await copyByKeyboard(page);
+
+  await focusRichText(page, 2);
   await pasteByKeyboard(page);
-  await assertRichTexts(page, ['123', '123', '456', '789']);
+  await assertRichTexts(page, ['123', '456', '789123']);
+
+  // copy 789123
   await clickListIcon(page, 2);
   await copyByKeyboard(page);
+
+  await focusRichText(page, 0);
   await pasteByKeyboard(page);
-  await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
+  await assertRichTexts(page, ['123789123', '456', '789123']);
 });
 
 test('click the list icon can select and delete', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { css, html, svg } from 'lit';
+import { html, svg } from 'lit';
 
 // Use icons from `@blocksuite/icons`
 
@@ -370,7 +370,7 @@ export const LinkIcon = html`<svg
 // Control Icons with Font Size
 // Set the width and height to be 1em, which will be the font-size of its parent element
 // See https://css-tricks.com/control-icons-with-font-size/
-const iconStyle = css`
+const iconStyle = `
   width: 1em;
   height: 1em;
   vertical-align: middle;

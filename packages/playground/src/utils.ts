@@ -23,6 +23,7 @@ import { fileOpen } from 'browser-fs-access';
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const featureArgs = (params.get('features') ?? '').split(',');
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
@@ -148,6 +149,7 @@ export function getOptions(): Pick<
     providers,
     idGenerator,
     defaultFlags: {
+      enable_toggle_block: featureArgs.includes('toggle'),
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,

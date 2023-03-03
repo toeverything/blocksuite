@@ -3,7 +3,7 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
@@ -13,7 +13,7 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import type { ListBlockModel } from './list-model.js';
-import { getListIcon } from './utils/get-list-icon.js';
+import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 function selectList(model: ListBlockModel) {
@@ -89,6 +89,24 @@ export class ListBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
+  @state()
+  showChildren = true;
+
+  private _onClickIcon = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    if (this.model.type === 'toggle') {
+      this.showChildren = !this.showChildren;
+      return;
+    } else if (this.model.type === 'todo') {
+      this.host.page.captureSync();
+      const checkedPropObj = { checked: !this.model.checked };
+      this.host.page.updateBlock(this.model, checkedPropObj);
+      return;
+    }
+    selectList(this.model);
+  };
+
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -97,26 +115,14 @@ export class ListBlockComponent extends NonShadowLitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const { deep, index } = getListInfo(this.host, this.model);
-    const listIcon = getListIcon({
-      model: this.model,
-      deep,
-      index,
-      onClick: () => {
-        if (this.model.type !== 'todo') {
-          selectList(this.model);
-          return;
-        }
-        this.host.page.captureSync();
-        this.host.page.updateBlock(this.model, {
-          checked: !this.model.checked,
-        });
-      },
-    });
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
+    const { model, showChildren, _onClickIcon } = this;
+    const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);
+
+    const childrenContainer = this.showChildren
+      ? BlockChildrenContainer(this.model, this.host, () =>
+          this.requestUpdate()
+        )
+      : null;
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
 

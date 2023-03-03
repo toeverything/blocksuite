@@ -441,6 +441,13 @@ export function isInsidePageTitle(element: unknown): boolean {
   return titleElement.contains(element as Node);
 }
 
+export function isToggleIcon(element: unknown): element is SVGPathElement {
+  return (
+    element instanceof SVGPathElement &&
+    element.getAttribute('data-is-toggle-icon') === 'true'
+  );
+}
+
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
