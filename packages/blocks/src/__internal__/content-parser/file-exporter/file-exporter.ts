@@ -186,13 +186,13 @@ export const FileExporter = {
           | {
               [Symbol.replace](
                 string: string,
-                replacer: (substring: string, ...args: any[]) => string
+                replacer: (substring: string, ...args: unknown[]) => string
               ): string;
             }
           | string
           | RegExp
           | { [Symbol.replace](string: string, replaceValue: string): string },
-        replacer: ((substring: string, ...args: any[]) => string) | string
+        replacer: ((substring: string, ...args: unknown[]) => string) | string
       ): string {
         return '';
       },
