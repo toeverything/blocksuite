@@ -135,9 +135,9 @@ export class EdgelessSelectionManager {
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
-  private _mouseDisposeCallback: () => void;
+  private _mouseDisposeCallback: () => void = noop;
   private _selectionUpdateCallback: Disposable;
-  private _wheelDisposeCallback: () => void;
+  private _wheelDisposeCallback: () => void = noop;
 
   private _prevSelectedShapeId: string | null = null;
 
@@ -198,19 +198,8 @@ export class EdgelessSelectionManager {
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
     };
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._container,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu,
-      noop,
-      this._onSelectionChangeWithoutDebounce
-    );
+
+    this._initMouseAndWheelEvents();
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {
         if (this._prevSelectedShapeId) {
@@ -235,7 +224,28 @@ export class EdgelessSelectionManager {
         }
       }
     );
-    this._wheelDisposeCallback = initWheelEventHandlers(container);
+  }
+
+  private async _initMouseAndWheelEvents() {
+    // due to surface initializing after one frame, the events handler should register after that.
+    if (!this._container.surface) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    this._mouseDisposeCallback = initMouseEventHandlers(
+      this._container,
+      this._onContainerDragStart,
+      this._onContainerDragMove,
+      this._onContainerDragEnd,
+      this._onContainerClick,
+      this._onContainerDblClick,
+      this._onContainerMouseMove,
+      this._onContainerMouseOut,
+      this._onContainerContextMenu,
+      noop,
+      this._onSelectionChangeWithoutDebounce
+    );
+
+    this._wheelDisposeCallback = initWheelEventHandlers(this._container);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {

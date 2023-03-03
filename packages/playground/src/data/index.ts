@@ -6,6 +6,8 @@
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
 
+import { addShapeElement } from './utils';
+
 export interface InitFn {
   (workspace: Workspace): Promise<string>;
   id: string;
@@ -109,6 +111,22 @@ export const preset: InitFn = (workspace: Workspace) => {
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       // Import preset markdown content inside frame block
       await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+      addShapeElement(page, {
+        id: '0',
+        index: 'a0',
+        type: 'shape',
+        xywh: '[0,0,100,100]',
+
+        shapeType: 'rect',
+
+        radius: 0,
+        filled: false,
+        fillColor: '#ffffff',
+        strokeWidth: 4,
+        strokeColor: '#010101',
+        strokeStyle: 'solid',
+      });
 
       page.resetHistory();
       resolve(pageId);
