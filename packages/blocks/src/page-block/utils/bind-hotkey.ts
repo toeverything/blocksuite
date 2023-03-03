@@ -266,6 +266,7 @@ function handleTab(
 
   if (blockRange.type === 'Block') {
     requestAnimationFrame(() => {
+      // TODO update model is not elegant
       selection.refreshSelectedBlocksRectsByModels(models);
     });
   }

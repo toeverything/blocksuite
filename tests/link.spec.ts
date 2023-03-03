@@ -54,9 +54,8 @@ test('basic link', async ({ page }) => {
   // Edit link
   const text2 = 'link2';
   const link2 = 'https://github.com';
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
-  await pressEnter(page);
+  const editLinkBtn = linkPopoverLocator.getByTestId('edit');
+  await editLinkBtn.click();
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopoverLocator).toBeVisible();
@@ -267,7 +266,7 @@ test('should keyboard work in link popover', async ({ page }) => {
   // wait for popover delay open
   await page.waitForTimeout(200);
   await expect(linkPopover).toBeVisible();
-  const editLinkBtn = linkPopover.locator(`[data-testid=edit]`);
+  const editLinkBtn = linkPopover.getByTestId('edit');
   await editLinkBtn.click();
 
   const editLinkPopover = page.locator('.affine-link-edit-popover');
