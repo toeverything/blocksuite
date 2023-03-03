@@ -66,7 +66,12 @@ async function initEmptyEditor(
       debugMenu.workspace = workspace;
       debugMenu.editor = editor;
 
-      document.body.appendChild(editor);
+      // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+      const appRoot = document.querySelector('#app');
+      if (!appRoot) {
+        throw new Error('Cannot find app root element(#app).');
+      }
+      appRoot.appendChild(editor);
       document.body.appendChild(debugMenu);
       editor.createBlockHub().then(blockHub => {
         document.body.appendChild(blockHub);
