@@ -69,7 +69,7 @@ export class EdgelessColorPanel extends LitElement {
   @property()
   value?: Color;
 
-  private _select(value: Color) {
+  private _onSelect(value: Color) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,
@@ -93,7 +93,7 @@ export class EdgelessColorPanel extends LitElement {
           <div
             class="color-container"
             ?active=${color === this.value}
-            @click=${() => this._select(color)}
+            @click=${() => this._onSelect(color)}
           >
             <div
               class="color-unit"
