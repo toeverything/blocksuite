@@ -277,7 +277,8 @@ export class DebugMenu extends NonShadowLitElement {
         : {
             margin: '0',
             overflow: 'initial',
-            height: 'initial',
+            // edgeless needs the container height
+            height: '100%',
             boxShadow: 'initial',
           };
       Object.assign(appRoot.style, style);
