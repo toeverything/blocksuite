@@ -4,6 +4,7 @@
 
 import './declare-test-window.js';
 
+import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
 import { expect, Locator, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
@@ -22,7 +23,10 @@ import {
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
-import { captureHistory } from './actions/misc.js';
+import {
+  captureHistory,
+  virgoEditorInnerTextToString,
+} from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -34,7 +38,7 @@ export const defaultStore: SerializedStore = {
     ],
     versions: {
       'affine:paragraph': 1,
-      'affine:page': 1,
+      'affine:page': 2,
       'affine:database': 1,
       'affine:list': 1,
       'affine:frame': 1,
@@ -57,7 +61,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,30]',
+      'prop:xywh': '[0,0,720,24]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -74,9 +78,9 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
-  const actual = await locator.inputValue();
-  expect(actual).toBe(text);
+  const vEditor = page.locator('[data-block-is-title="true"]');
+  const vText = virgoEditorInnerTextToString(await vEditor.innerText());
+  expect(vText).toBe(text);
 }
 
 export async function assertText(page: Page, text: string) {
@@ -146,7 +150,7 @@ export async function assertSelection(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
-  rangeLength: number
+  rangeLength = 0
 ) {
   const actual = await page.evaluate(
     ({ richTextIndex }) => {
@@ -169,6 +173,21 @@ export async function assertNativeSelectionRangeCount(
     return selection?.rangeCount;
   });
   expect(actual).toEqual(count);
+}
+
+export async function assertFrameXYWH(
+  page: Page,
+  expected: [number, number, number, number]
+) {
+  const actual = await page.evaluate(() => {
+    const root = window.page.root as PageBlockModel;
+    const frame = root.children[0] as FrameBlockModel;
+    return JSON.parse(frame.xywh) as number[];
+  });
+  expect(actual[0]).toBeCloseTo(expected[0]);
+  expect(actual[1]).toBeCloseTo(expected[1]);
+  expect(actual[2]).toBeCloseTo(expected[2]);
+  expect(actual[3]).toBeCloseTo(expected[3]);
 }
 
 export async function assertTextFormat(
@@ -336,7 +355,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
     if (node['sys:flavour'] === 'affine:page') {
-      return (node['prop:title'] as string) ?? '';
+      return (node['prop:title'] as Text).toString() ?? '';
     }
     if (!('prop:type' in node)) {
       return '[? unknown node]';
@@ -538,4 +557,20 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await page.keyboard.press(`${SHORT_KEY}+a`);
   await page.keyboard.press(`${SHORT_KEY}+x`);
   await expect(locator).toHaveValue('');
+}
+
+export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless hover rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
+
+export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
+  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }

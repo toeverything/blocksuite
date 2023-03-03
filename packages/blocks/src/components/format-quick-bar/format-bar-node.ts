@@ -17,16 +17,12 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  getCurrentRange,
-  getModelsByRange,
-  getRichTextByModel,
-} from '../../__internal__/utils/index.js';
+import { restoreSelection } from '../../__internal__/utils/block-range.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
-  DragDirection,
-  getFormat,
-  updateSelectedTextType,
+  getCurrentCombinedFormat,
+  updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import { toast } from '../toast.js';
@@ -35,6 +31,9 @@ import { formatQuickBarStyle } from './styles.js';
 @customElement('format-quick-bar')
 export class FormatQuickBar extends LitElement {
   static styles = formatQuickBarStyle;
+
+  @property()
+  page!: Page;
 
   @property()
   left: string | null = null;
@@ -49,32 +48,25 @@ export class FormatQuickBar extends LitElement {
   @property()
   positionUpdated = new Signal();
 
-  // for update position
   @property()
-  direction!: DragDirection;
-
-  @state()
   models: BaseBlockModel[] = [];
 
   @state()
-  page: Page | null = null;
+  private _paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
-  paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
+  private _paragraphPanelHoverDelay = 150;
 
   @state()
-  paragraphPanelHoverDelay = 150;
+  private _paragraphPanelTimer = 0;
 
   @state()
-  paragraphPanelTimer = 0;
-
-  @state()
-  showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+  private _showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
 
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  format: TextAttributes = {};
+  private _format: TextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
@@ -83,16 +75,10 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // TODO handle multiple selection
-    const models = getModelsByRange(getCurrentRange());
-    this.models = models;
-    if (!models.length) {
-      return;
-    }
-    const startModel = models[0];
-    this.format = getFormat();
-    this.paragraphType = `${startModel.flavour}/${startModel.type}`;
-    this.page = startModel.page as Page;
+
+    const startModel = this.models[0];
+    this._paragraphType = `${startModel.flavour}/${startModel.type}`;
+    this._format = getCurrentCombinedFormat(this.page);
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
@@ -103,9 +89,12 @@ export class FormatQuickBar extends LitElement {
     });
 
     const mutationObserver = new MutationObserver(() => {
-      this.format = getFormat();
+      if (!this.page) {
+        return;
+      }
+      this._format = getCurrentCombinedFormat(this.page);
     });
-    models.forEach(model => {
+    this.models.forEach(model => {
       const richText = getRichTextByModel(model);
       if (!richText) {
         console.warn(
@@ -133,31 +122,31 @@ export class FormatQuickBar extends LitElement {
   }
 
   private _onHover() {
-    if (this.showParagraphPanel !== 'hidden') {
-      clearTimeout(this.paragraphPanelTimer);
+    if (this._showParagraphPanel !== 'hidden') {
+      clearTimeout(this._paragraphPanelTimer);
       return;
     }
 
-    this.paragraphPanelTimer = window.setTimeout(async () => {
+    this._paragraphPanelTimer = window.setTimeout(async () => {
       const { placement, height } = compareTopAndBottomSpace(
         this.formatQuickBarElement,
         document.body,
         10
       );
-      this.showParagraphPanel = placement;
+      this._showParagraphPanel = placement;
       this.paragraphPanelMaxHeight = height + 'px';
-    }, this.paragraphPanelHoverDelay);
+    }, this._paragraphPanelHoverDelay);
   }
 
   private _onHoverEnd() {
-    if (this.showParagraphPanel !== 'hidden') {
+    if (this._showParagraphPanel !== 'hidden') {
       // Prepare to disappear
-      this.paragraphPanelTimer = window.setTimeout(async () => {
-        this.showParagraphPanel = 'hidden';
-      }, this.paragraphPanelHoverDelay * 2);
+      this._paragraphPanelTimer = window.setTimeout(async () => {
+        this._showParagraphPanel = 'hidden';
+      }, this._paragraphPanelHoverDelay * 2);
       return;
     }
-    clearTimeout(this.paragraphPanelTimer);
+    clearTimeout(this._paragraphPanelTimer);
   }
 
   private _onCopy() {
@@ -167,37 +156,49 @@ export class FormatQuickBar extends LitElement {
   }
 
   private _paragraphPanelTemplate() {
-    if (this.showParagraphPanel === 'hidden') {
+    if (this._showParagraphPanel === 'hidden') {
       return html``;
     }
     const styles = styleMap({
       left: '0',
-      top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
+      top: this._showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
+      bottom: this._showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
       maxHeight: this.paragraphPanelMaxHeight,
     });
     const updateParagraphType = (
       flavour: BlockConfig['flavour'],
       type?: string
     ) => {
-      if (!this.page) {
-        throw new Error('Failed to format paragraph! Page not found.');
+      // Already in the target format, should convert back to text
+      const alreadyTargetType = this._paragraphType === `${flavour}/${type}`;
+      const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+      const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
+      const targetType = alreadyTargetType ? defaultType : type;
+      const newModels = updateBlockType(this.models, targetFlavour, targetType);
+
+      // Reset selection if the target is code block
+      if (targetFlavour === 'affine:code') {
+        if (newModels.length !== 1) {
+          throw new Error(
+            "Failed to reset selection! New model length isn't 1"
+          );
+        }
+        const codeModel = newModels[0];
+        requestAnimationFrame(() =>
+          restoreSelection({
+            type: 'Block',
+            startOffset: 0,
+            endOffset: codeModel.text?.length ?? 0,
+            models: [codeModel],
+          })
+        );
       }
-      if (this.paragraphType === `${flavour}/${type}`) {
-        // Already in the target format, convert back to text
-        const { flavour: defaultFlavour, type: defaultType } =
-          paragraphConfig[0];
-        if (this.paragraphType === defaultType) return;
-        updateSelectedTextType(defaultFlavour, defaultType);
-        this.paragraphType = `${defaultFlavour}/${defaultType}`;
-        return;
-      }
-      updateSelectedTextType(flavour, type);
-      this.paragraphType = `${flavour}/${type}`;
+      this.models = newModels;
+      this._paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
 
-    return html` <div
+    return html`<div
       class="paragraph-panel"
       style="${styles}"
       @mouseover=${this._onHover}
@@ -222,7 +223,7 @@ export class FormatQuickBar extends LitElement {
 
     if (!this.models.length || !page) {
       console.error(
-        'Failed to render format-quick-bar! page not found!',
+        'Failed to render format-quick-bar! no model or page not found!',
         this.models,
         page
       );
@@ -230,7 +231,7 @@ export class FormatQuickBar extends LitElement {
     }
     const paragraphIcon =
       paragraphConfig.find(
-        ({ flavour, type }) => `${flavour}/${type}` === this.paragraphType
+        ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
       )?.icon ?? paragraphConfig[0].icon;
     const paragraphItems = html` <format-bar-button
       class="paragraph-button"
@@ -248,13 +249,15 @@ export class FormatQuickBar extends LitElement {
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen(this.format)}
+          ?active=${activeWhen(this._format)}
           @click=${() => {
             action({
               page,
               abortController: this.abortController,
-              format: this.format,
+              format: this._format,
             });
+            // format state need to update after format
+            this._format = getCurrentCombinedFormat(page);
             this.positionUpdated.emit();
           }}
         >

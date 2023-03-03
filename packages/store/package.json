@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha.0",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
@@ -24,7 +24,7 @@
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
     "ky": "^0.33.2",
-    "lib0": "^0.2.62",
+    "lib0": "^0.2.63",
     "merge": "^2.1.1",
     "nanoid": "^4.0.1",
     "y-protocols": "^1.0.5",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "lit": "^2.6.1",
-    "yjs": "^13.5.46"
+    "yjs": "^13.5.48"
   },
   "peerDependencies": {
     "yjs": "^13"

@@ -1,10 +1,13 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import {
+  getCurrentBlockRange,
+  getDefaultPageBlock,
+  handleBlockSelectionBatchDelete,
+  OpenBlockInfo,
+} from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   getStartModelBySelection,
   handleBlockSplit,
-  SelectionInfo,
-  SelectionUtils,
 } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Text } from '@blocksuite/store';
@@ -13,6 +16,7 @@ import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
 import { CLIPBOARD_MIMETYPE } from './types.js';
+import { getSelectInfo } from './utils.js';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -53,6 +57,20 @@ export class PasteManager {
         e.preventDefault();
         e.stopPropagation();
         const blocks: OpenBlockInfo[] = await blocksPromise;
+        const page = this._editor.page;
+        const blockRange = getCurrentBlockRange(page);
+        if (blockRange && blockRange.type !== 'Native') {
+          if (
+            !blockRange.models.every(model => model.flavour === 'affine:list')
+          ) {
+            handleBlockSelectionBatchDelete(page, blockRange.models);
+            const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+            pageBlock.selection.clear();
+            requestAnimationFrame(() => {
+              this.insertBlocks(blocks);
+            });
+          }
+        }
         this.insertBlocks(blocks);
       }
     }
@@ -107,8 +125,9 @@ export class PasteManager {
     }
 
     const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+    const maybeModel = getStartModelBySelection();
     const shouldNotSplitBlock =
-      getStartModelBySelection().flavour === 'affine:code';
+      maybeModel && maybeModel.flavour === 'affine:code';
     if (shouldNotSplitBlock) {
       return [{ text: [{ insert: textClipData }], children: [] }];
     }
@@ -177,26 +196,22 @@ export class PasteManager {
   }
 
   // TODO Max 15 deeper
-  public insertBlocks(blocks: OpenBlockInfo[], selectInfo?: SelectionInfo) {
+  public insertBlocks(
+    blocks: OpenBlockInfo[],
+    selectionInfo = getSelectInfo(this._editor.page)
+  ) {
     if (blocks.length === 0) {
       return;
     }
 
-    const currentSelectionInfo =
-      selectInfo || SelectionUtils.getSelectInfo(this._editor.page);
-    if (
-      currentSelectionInfo.type === 'Range' ||
-      currentSelectionInfo.type === 'Caret'
-    ) {
+    if (selectionInfo.type === 'Range' || selectionInfo.type === 'Caret') {
       const lastBlock =
-        currentSelectionInfo.selectedBlocks[
-          currentSelectionInfo.selectedBlocks.length - 1
-        ];
+        selectionInfo.selectedBlocks[selectionInfo.selectedBlocks.length - 1];
       const selectedBlock = this._editor.page.getBlockById(lastBlock.id);
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
@@ -253,7 +268,7 @@ export class PasteManager {
           // instead of appending a new image block, if this paragraph is empty.
           if (
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
@@ -268,20 +283,19 @@ export class PasteManager {
             insertLen > 0 &&
             parent &&
             lastBlockModel &&
-            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            matchFlavours(lastBlockModel, ['affine:paragraph'] as const) &&
             lastBlockModel?.text?.length === 0 &&
             lastBlockModel?.children.length === 0
           ) {
             this._addBlocks(blocks.slice(0, 1), parent, index, addBlockIds);
             this._editor.page.deleteBlock(lastBlockModel);
           } else {
-            if (currentSelectionInfo.type === 'Range') {
+            if (selectionInfo.type === 'Range') {
               const textLength = selectedBlock.text?.length as number;
               deleteModelsByRange(this._editor.page);
-              const startPos = currentSelectionInfo.selectedBlocks[0]
+              const startPos = selectionInfo.selectedBlocks[0]
                 .startPos as number;
-              const endPos = currentSelectionInfo.selectedBlocks[0]
-                .endPos as number;
+              const endPos = selectionInfo.selectedBlocks[0].endPos as number;
               if (startPos + endPos === textLength + 1) {
                 selectedBlock?.text?.insertList(insertTexts, startPos);
               } else {
@@ -332,17 +346,15 @@ export class PasteManager {
       } else {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
-    } else if (currentSelectionInfo.type === 'Block') {
+    } else if (selectionInfo.type === 'Block') {
       const selectedBlock = this._editor.page.getBlockById(
-        currentSelectionInfo.selectedBlocks[
-          currentSelectionInfo.selectedBlocks.length - 1
-        ].id
+        selectionInfo.selectedBlocks[selectionInfo.selectedBlocks.length - 1].id
       );
 
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (matchFlavours(selectedBlock, ['affine:page'])) {
+        if (matchFlavours(selectedBlock, ['affine:page'] as const)) {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {

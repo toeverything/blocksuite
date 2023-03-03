@@ -2,16 +2,18 @@ import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
+  DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
+  BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
   OpenBlockInfo,
   resetNativeSelection,
@@ -28,6 +30,7 @@ export interface EditingState {
   model: BaseBlockModel;
   position: DOMRect;
   index: number;
+  element: BlockComponentElement;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -85,8 +88,10 @@ export function getBlockEditingStateByPosition(
     skipX?: boolean;
   }
 ) {
-  const start = 0;
   const end = blocks.length - 1;
+  if (end === -1) return null;
+
+  const start = 0;
   return binarySearchBlockEditingState(blocks, x, y, start, end, options);
 }
 
@@ -101,9 +106,12 @@ export function getBlockEditingStateByCursor(
     dragging?: boolean;
   }
 ): EditingState | null {
+  let end = blocks.length - 1;
+  if (end === -1) return null;
+
   const size = options?.size || 5;
   const start = Math.max(cursor - size, 0);
-  const end = Math.min(cursor + size, blocks.length - 1);
+  end = Math.min(cursor + size, end);
   return binarySearchBlockEditingState(blocks, x, y, start, end, options);
 }
 
@@ -119,13 +127,31 @@ function binarySearchBlockEditingState(
     dragging?: boolean;
   }
 ): EditingState | null {
+  const noSkipX = !options?.skipX;
   const dragging = Boolean(options?.dragging);
+  let containerLeft = 0;
+
+  if (noSkipX) {
+    const firstBlock = getBlockAndRect(blocks, 0);
+    containerLeft = firstBlock.blockRect.left;
+  }
+
+  let inside = false;
   while (start <= end) {
     const mid = start + Math.floor((end - start) / 2);
     const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
       blocks,
       mid
     );
+
+    // if the detectRect is not in the view port, it's definitely not the block we want
+    if (detectRect.top > window.innerHeight) {
+      end = mid - 1;
+      continue;
+    } else if (detectRect.bottom < 0) {
+      start = mid + 1;
+      continue;
+    }
 
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
@@ -154,7 +180,7 @@ function binarySearchBlockEditingState(
         options
       );
       return result;
-    } else if (matchFlavours(block, ['affine:database'])) {
+    } else if (matchFlavours(block, ['affine:database'] as const)) {
       // double check when current block is database block
       const result = binarySearchBlockEditingState(
         blocks,
@@ -169,34 +195,40 @@ function binarySearchBlockEditingState(
       }
     }
 
-    const in_block = y >= detectRect.top && y <= detectRect.bottom;
+    !inside && (inside = y >= detectRect.top && y <= detectRect.bottom);
 
-    if (in_block) {
+    if (inside) {
       assertExists(blockRect);
 
-      if (!options?.skipX) {
+      if (noSkipX) {
         if (dragging) {
-          if (block.depth && block.parentIndex !== undefined) {
+          x = Math.max(x + DRAG_HANDLE_OFFSET_LEFT, containerLeft);
+          let n = mid - 1;
+          if (n > 0) {
             let depth = Math.floor(
-              (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+              (blockRect.left - containerLeft) /
+                BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
             );
-            if (depth > 0) {
-              let result = getBlockAndRect(blocks, block.parentIndex);
-
-              while (
-                depth > 1 &&
-                result.block.depth &&
-                result.block.parentIndex !== undefined
+            while (n >= 0 && depth >= 0) {
+              const result = getBlockAndRect(blocks, n);
+              if (
+                result.hoverDom.compareDocumentPosition(hoverDom) &
+                Node.DOCUMENT_POSITION_CONTAINED_BY
               ) {
-                result = getBlockAndRect(blocks, result.block.parentIndex);
-                depth -= 1;
+                if (x >= result.blockRect.left && x < blockRect.left) {
+                  return {
+                    index: mid,
+                    position: result.blockRect,
+                    model: result.block,
+                    element: result.hoverDom,
+                  };
+                } else {
+                  depth--;
+                  n--;
+                }
+              } else {
+                n--;
               }
-
-              return {
-                index: mid,
-                position: result.blockRect,
-                model: result.block,
-              };
             }
           }
         } else {
@@ -211,6 +243,7 @@ function binarySearchBlockEditingState(
         index: mid,
         position: blockRect,
         model: block,
+        element: hoverDom,
       };
     }
 
@@ -218,6 +251,33 @@ function binarySearchBlockEditingState(
       end = mid - 1;
     } else if (detectRect.bottom < y) {
       start = mid + 1;
+    }
+
+    // if search failed, it may be caused by the mouse fall between two blocks
+    if (start > end) {
+      let targetIndex = -1;
+      // now start = end + 1, eg: [0, 1, ..., end start ..., blocks.length - 1]
+      if (start === blocks.length) {
+        targetIndex = end;
+      } else if (end === -1) {
+        targetIndex = start;
+      } else {
+        const { detectRect: prevDetectRect } = getBlockAndRect(blocks, end);
+        const { detectRect: nextDetectRect } = getBlockAndRect(blocks, start);
+        if (
+          y <
+          prevDetectRect.bottom +
+            (nextDetectRect.top - prevDetectRect.bottom) / 2
+        ) {
+          // nearer to prevDetectRect
+          targetIndex = end;
+        } else {
+          // nearer to nextDetectRect
+          targetIndex = start;
+        }
+      }
+      inside = true;
+      start = end = targetIndex;
     }
   }
 
@@ -228,9 +288,20 @@ function isPointIn(x: number, detectRect: DOMRect) {
   return x >= detectRect.left && x <= detectRect.left + detectRect.width;
 }
 
+const offscreen = document.createElement(
+  'div'
+) as unknown as BlockComponentElement;
+
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
-  const hoverDom = getBlockById(block.id);
+  let hoverDom = getBlockById(block.id);
+
+  // Give an empty position (xywh=0,0,0,0) for invisible blocks.
+  // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
+  if (!hoverDom) {
+    hoverDom = offscreen;
+  }
+
   assertExists(hoverDom);
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
@@ -405,7 +476,7 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   quill.setSelection(0, quill.getLength());
   document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
 
-  const range = getCurrentRange();
+  const range = getCurrentNativeRange();
   range.setStart(richText, 0);
   range.setEnd(richText, 0);
   resetNativeSelection(range);
@@ -431,36 +502,24 @@ export function getAllowSelectedBlocks(
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];
   const blocks = model.children.slice();
-  if (!blocks) {
-    return [];
-  }
 
-  const dfs = (
-    blocks: BaseBlockModel[],
-    depth: number,
-    parentIndex: number
-  ) => {
+  const dfs = (blocks: BaseBlockModel[]) => {
     for (const block of blocks) {
       if (block.flavour !== 'affine:frame') {
         result.push(block);
       }
-      block.depth = depth;
-      if (parentIndex !== -1) {
-        block.parentIndex = parentIndex;
-      }
-      block.children.length &&
-        dfs(block.children, depth + 1, result.length - 1);
+      block.children.length && dfs(block.children);
     }
   };
 
-  dfs(blocks, 0, -1);
+  dfs(blocks);
   return result;
 }
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
-    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
+    container: defaultPageBlock.mouseRoot as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,
@@ -481,31 +540,50 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         skipX,
       });
     },
-    onDropCallback(e, start, end): void {
+    onDropCallback(e, blocks, end): void {
       const page = defaultPageBlock.page;
-      const startModel = start.model;
       const rect = end.position;
-      const nextModel = end.model;
-      if (doesInSamePath(page, nextModel, startModel)) {
+      const targetModel = end.model;
+      if (
+        blocks.length === 1 &&
+        doesInSamePath(page, targetModel, blocks[0].model)
+      ) {
         return;
       }
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      page.moveBlock(startModel, nextModel, distanceToTop < distanceToBottom);
-      defaultPageBlock.signals.updateSelectedRects.emit([]);
-      defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
-      defaultPageBlock.signals.updateEmbedEditingState.emit(null);
-      defaultPageBlock.signals.updateEmbedRects.emit([]);
-    },
-    setSelectedBlocks(selectedBlocks: EditingState | null): void {
-      if (selectedBlocks) {
-        const { position, index } = selectedBlocks;
-        defaultPageBlock.selection.selectBlocksByIndexAndBounding(
-          index,
-          position
+      page.moveBlocks(
+        blocks.map(b => b.model),
+        targetModel,
+        distanceToTop < distanceToBottom
+      );
+      const type = defaultPageBlock.selection.state.type;
+      defaultPageBlock.selection.clear();
+      defaultPageBlock.selection.state.type = type;
+
+      requestAnimationFrame(() => {
+        // update selection rects
+        // block may change its flavour after moved.
+        defaultPageBlock.selection.setSelectedBlocks(
+          blocks
+            .map(b => getBlockById(b.model.id))
+            .filter((b): b is BlockComponentElement => !!b)
         );
+      });
+    },
+    setSelectedBlocks(
+      selectedBlocks: EditingState | BlockComponentElement[] | null
+    ): void {
+      if (Array.isArray(selectedBlocks)) {
+        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
+      } else if (selectedBlocks) {
+        const { position, index } = selectedBlocks;
+        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
       }
+    },
+    getSelectedBlocks() {
+      return defaultPageBlock.selection.state.selectedBlocks;
     },
   });
 }

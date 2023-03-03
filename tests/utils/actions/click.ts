@@ -15,7 +15,7 @@ export async function clickBlockById(page: Page, id: string) {
 }
 
 export async function doubleClickBlockById(page: Page, id: string) {
-  await page.click(`[data-block-id="${id}"]`);
+  await page.dblclick(`[data-block-id="${id}"]`);
 }
 
 export async function disconnectByClick(page: Page) {
@@ -55,28 +55,6 @@ export async function addCodeBlock(page: Page) {
     const loader = document.querySelector('affine-code loader-element');
     return !loader;
   });
-}
-
-export async function switchEditorMode(page: Page) {
-  await page.click('sl-button[content="Switch Editor Mode"]');
-}
-
-export async function switchMouseMode(page: Page) {
-  await page.click('sl-button[content="Switch Mouse Mode"]');
-}
-
-export async function switchShapeColor(page: Page, color: string) {
-  await page.evaluate(color => {
-    window.debugMenu.shapeModeColor =
-      color as typeof window.debugMenu.shapeModeColor;
-  }, color);
-}
-
-export async function switchShapeType(page: Page, shapeType: string) {
-  await page.click('sl-select[aria-label="Shape Type"]');
-
-  const menuItem = page.getByRole('menuitem', { name: shapeType });
-  await menuItem.click();
 }
 
 export async function switchReadonly(page: Page) {

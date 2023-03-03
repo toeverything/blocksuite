@@ -13,7 +13,6 @@ import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
 const RICH_TEXT_SELECTOR = '.ql-editor';
-const TITLE_SELECTOR = '.affine-default-page-block-title';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   if (!process.env.CI) {
@@ -67,11 +66,16 @@ async function initEmptyEditor(
       debugMenu.workspace = workspace;
       debugMenu.editor = editor;
 
-      document.body.appendChild(editor);
+      // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+      const appRoot = document.querySelector('#app');
+      if (!appRoot) {
+        throw new Error('Cannot find app root element(#app).');
+      }
+      appRoot.appendChild(editor);
       document.body.appendChild(debugMenu);
-      const blockHub = await editor.createBlockHub();
-      document.body.appendChild(blockHub);
-
+      editor.createBlockHub().then(blockHub => {
+        document.body.appendChild(blockHub);
+      });
       window.debugMenu = debugMenu;
       window.editor = editor;
       window.page = page;
@@ -112,6 +116,11 @@ export async function enterPlaygroundRoom(
     if (message.type() === 'error') {
       console.error('Unexpected console error: ' + message.text());
     }
+  });
+
+  // Log all uncaught errors
+  page.on('pageerror', exception => {
+    throw new Error(`Uncaught exception: "${exception}"`);
   });
 
   await initEmptyEditor(page, flags);
@@ -164,19 +173,28 @@ export async function resetHistory(page: Page) {
 }
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
-export async function enterPlaygroundWithList(page: Page) {
+export async function enterPlaygroundWithList(
+  page: Page,
+  contents: string[] = ['', '', '']
+) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   await initEmptyEditor(page);
 
-  await page.evaluate(() => {
+  await page.evaluate(contents => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    for (let i = 0; i < 3; i++) {
-      page.addBlockByFlavour('affine:list', {}, frameId);
+    for (let i = 0; i < contents.length; i++) {
+      page.addBlockByFlavour(
+        'affine:list',
+        contents.length > 0 ? { text: new page.Text(contents[i]) } : {},
+        frameId
+      );
     }
-  });
+  }, contents);
   await waitNextFrame(page);
 }
 
@@ -187,7 +205,9 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
     page.captureSync();
 
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page');
+      pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
     }
 
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
@@ -202,7 +222,9 @@ export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
 
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     page.addBlockByFlavour('affine:surface', {}, null);
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
@@ -218,7 +240,9 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page');
+      pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
     }
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     const paragraphId = page.addBlockByFlavour(
@@ -248,11 +272,6 @@ export async function initEmptyCodeBlockState(page: Page) {
   return ids;
 }
 
-export async function focusTitle(page: Page) {
-  const locator = page.locator(TITLE_SELECTOR);
-  await locator.click();
-}
-
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
@@ -266,6 +285,7 @@ export async function initThreeParagraphs(page: Page) {
   await type(page, '456');
   await pressEnter(page);
   await type(page, '789');
+  await resetHistory(page);
 }
 
 export async function initThreeLists(page: Page) {
@@ -513,4 +533,35 @@ export async function getIndexCoordinate(
     }
   );
   return coord;
+}
+
+export function virgoEditorInnerTextToString(innerText: string): string {
+  return innerText.replace('\u200B', '');
+}
+
+export async function focusTitle(page: Page) {
+  await page.evaluate(() => {
+    const defaultPageComponent = document.querySelector('affine-default-page');
+    if (!defaultPageComponent) {
+      throw new Error('default page component not found');
+    }
+
+    defaultPageComponent.titleVEditor.focusEnd();
+  });
+  await waitNextFrame(page);
+}
+
+/**
+ * XXX: this is a workaround for the bug in Playwright
+ */
+export async function shamefullyBlurActiveElement(page: Page) {
+  await page.evaluate(() => {
+    if (
+      !document.activeElement ||
+      !(document.activeElement instanceof HTMLElement)
+    ) {
+      throw new Error("document.activeElement doesn't exist");
+    }
+    document.activeElement.blur();
+  });
 }

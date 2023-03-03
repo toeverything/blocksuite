@@ -13,7 +13,7 @@ import {
 } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-const getPlaceholder = (model: ParagraphBlockModel) => {
+function getPlaceholder(model: ParagraphBlockModel) {
   const { type } = model;
   switch (type) {
     case 'h1':
@@ -31,7 +31,7 @@ const getPlaceholder = (model: ParagraphBlockModel) => {
     default:
       return '';
   }
-};
+}
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends NonShadowLitElement {
@@ -150,6 +150,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
   @property()
   host!: BlockHost;
+
+  @property()
+  placeholder?: string;
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

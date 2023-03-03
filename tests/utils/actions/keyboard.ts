@@ -43,6 +43,18 @@ export async function pressSpace(page: Page) {
   await page.keyboard.press('Space', { delay: 50 });
 }
 
+export async function pressArrowLeft(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('ArrowLeft', { delay: 50 });
+  }
+}
+
+export async function pressArrowDown(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('ArrowDown', { delay: 50 });
+  }
+}
+
 export async function pressEnter(page: Page) {
   // avoid flaky test by simulate real user input
   await page.keyboard.press('Enter', { delay: 50 });

@@ -19,6 +19,7 @@ import {
   undoByKeyboard,
   waitDefaultPageLoaded,
   waitForRemoteUpdateSignal,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
@@ -48,7 +49,9 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text('hello'),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
     const text = new page.Text('world');
@@ -74,25 +77,30 @@ test('basic init with external text', async ({ page }) => {
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
-  await pageA.keyboard.type('hello');
+  await waitNextFrame(pageA);
+  await waitDefaultPageLoaded(pageA);
+  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
-  await pageB.keyboard.type(' world');
+  await type(pageB, ' world');
   await assertTitle(pageA, 'hello world');
 });
 
 test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
+  await waitNextFrame(pageA);
   await focusRichText(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -108,11 +116,14 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
+  await waitNextFrame(pageA);
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
+  await waitNextFrame(pageB);
   await focusRichText(pageB);
+
   const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
   await signal;
@@ -138,12 +149,19 @@ test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   // click together, both init with default id should lead to conflicts
   await initEmptyParagraphState(pageA);
   await initEmptyParagraphState(pageB);
-  await focusRichText(pageA);
-  await focusRichText(pageB);
-  await pageA.keyboard.type('');
-  await pageB.keyboard.type('');
 
-  await pageA.keyboard.type('hello');
+  await waitNextFrame(pageA);
+  await focusRichText(pageA);
+  await waitNextFrame(pageB);
+  await focusRichText(pageB);
+  await waitNextFrame(pageA);
+
+  await type(pageA, '');
+  await waitNextFrame(pageB);
+  await type(pageB, '');
+  await waitNextFrame(pageA);
+  await type(pageA, 'hello');
+  await waitNextFrame(pageB);
 
   await assertText(pageB, 'hello');
   await assertText(pageA, 'hello'); // actually '\n'
@@ -252,6 +270,8 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
 test('should undo/redo work on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await waitNextFrame(page);
+
   await focusTitle(page);
   await type(page, 'title');
   await focusRichText(page);
@@ -269,6 +289,7 @@ test('should undo/redo work on title', async ({ page }) => {
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello ']);
 
+  await focusRichText(page);
   await undoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello world']);

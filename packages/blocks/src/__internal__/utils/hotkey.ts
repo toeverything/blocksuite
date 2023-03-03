@@ -1,24 +1,26 @@
 import type { KeyHandler } from 'hotkeys-js';
 import hotkeys from 'hotkeys-js';
 
-import { isCaptionElement, isInsideRichText, isTitleElement } from './query.js';
+import {
+  isCaptionElement,
+  isInsidePageTitle,
+  isInsideRichText,
+} from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
-  if (shouldFilterHotKey(event)) {
-    return false;
-  }
+  if (shouldFilterHotkey(event)) return false;
   return true;
 };
 
 function isUndoRedo(event: KeyboardEvent) {
   // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
-  if (event.metaKey && !event.altKey && event.key === 'z') {
+  if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key === 'z') {
     return true;
   }
   return false;
 }
 
-function shouldFilterHotKey(event: KeyboardEvent) {
+function shouldFilterHotkey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
   if (!target) {
@@ -38,8 +40,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
       return false;
     }
     // undo/redo should work in page title
-    if (isTitleElement(event.target) && isUndoRedo(event)) {
-      event.preventDefault();
+    if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
       return false;
     }
     // Some event dispatch from body
@@ -79,9 +80,14 @@ class HotkeyManager {
   addListener(
     hotkey: string,
     listener: KeyHandler,
-    scope: string = SCOPE.AFFINE_PAGE
+    options: {
+      scope?: string;
+      keyup?: boolean;
+      keydown?: boolean;
+    } = {}
   ): void {
-    this._hotkeys(hotkey, { scope }, listener);
+    const scope = options.scope ?? SCOPE.AFFINE_PAGE;
+    this._hotkeys(hotkey, { ...options, scope }, listener);
   }
 
   removeListener(

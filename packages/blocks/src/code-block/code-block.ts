@@ -88,7 +88,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container {
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
@@ -105,7 +105,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     .affine-code-block-container .container {
       position: absolute;
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;
@@ -134,7 +134,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container .ql-syntax {
-      width: 620px;
+      width: 89%;
       margin: 0;
       overflow-x: auto;
       /*scrollbar-color: #fff0 #fff0;*/
@@ -158,7 +158,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    .lang-container code-block-button {
+    .lang-container icon-button {
       padding: 4px 0 0 12px;
       justify-content: flex-start;
     }
@@ -199,13 +199,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   langListElement!: HTMLElement;
 
   @state()
-  showLangList = 'hidden';
-
-  @state()
-  disposeTimer = 0;
-
-  @state()
-  filterText = '';
+  private _showLangList = 'hidden';
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
@@ -218,7 +212,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _onClick() {
-    this.showLangList = this.showLangList === 'visible' ? 'hidden' : 'visible';
+    this._showLangList =
+      this._showLangList === 'visible' ? 'hidden' : 'visible';
   }
 
   render() {
@@ -239,20 +234,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
-        ${isHovering || this.showLangList !== 'hidden'
+        ${isHovering || this._showLangList !== 'hidden'
           ? html` <div class="container">
               <div class="lang-container" @click=${this._onClick}>
-                <code-block-button
+                <icon-button
                   width="101px"
                   height="24px"
-                  fontSize="14px"
-                  class="${this.showLangList === 'hidden' ? '' : 'clicked'}"
+                  class="${this._showLangList === 'hidden' ? '' : 'clicked'}"
                 >
                   ${this.model.language} ${ArrowDownIcon}
-                </code-block-button>
+                </icon-button>
               </div>
               <lang-list
-                showLangList=${this.showLangList}
+                showLangList=${this._showLangList}
                 id=${this.model.id}
                 @selected-language-changed=${(e: CustomEvent) => {
                   this.host
@@ -260,7 +254,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
                     .setLang(this.model, e.detail.language);
                 }}
                 @dispose=${() => {
-                  this.showLangList = 'hidden';
+                  this._showLangList = 'hidden';
                 }}
               ></lang-list>
             </div>`

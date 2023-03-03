@@ -34,7 +34,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
+import { toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -68,22 +68,22 @@ export class BlockHub extends NonShadowLitElement {
   right = 24;
 
   @state()
-  _expanded = false;
+  private _expanded = false;
 
   @state()
-  _isGrabbing = false;
+  private _isGrabbing = false;
 
   @state()
-  _isCardListVisible = false;
+  private _isCardListVisible = false;
 
   @state()
-  _cardVisibleType: CardListType | null = null;
+  private _cardVisibleType: CardListType | null = null;
 
   @state()
-  _showToolTip = true;
+  private _showToolTip = true;
 
   @state()
-  _maxHeight = 2000;
+  private _maxHeight = 2000;
 
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
@@ -107,8 +107,8 @@ export class BlockHub extends NonShadowLitElement {
     e: DragEvent,
     lastModelState: EditingState
   ) => Promise<void>;
-  private _currentPageX = 0;
-  private _currentPageY = 0;
+  private _currentClientX = 0;
+  private _currentClientY = 0;
   private _indicator!: DragIndicator;
   private _indicatorHTMLTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
@@ -193,7 +193,7 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .card-container:hover {
-      background: var(--affine-block-hub-hover-background);
+      background: var(--affine-card-hover-background);
       fill: var(--affine-primary-color);
       top: -2px;
       left: -2px;
@@ -213,6 +213,7 @@ export class BlockHub extends NonShadowLitElement {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       color: var(--affine-secondary-text-color);
+      white-space: pre;
     }
 
     .card-container:hover.grabbing {
@@ -320,12 +321,8 @@ export class BlockHub extends NonShadowLitElement {
       margin: 4px 0;
     }
 
-    tool-tip:is([tip-position='left']) {
-      left: 0;
-      right: unset;
-      top: 10px;
-      transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0 10px;
+    [role='menu-entry'] tool-tip {
+      font-size: var(--affine-font-sm);
     }
 
     .block-hub-icons-container {
@@ -333,7 +330,6 @@ export class BlockHub extends NonShadowLitElement {
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
     }
 
-    ${centeredToolTipStyle}
     ${toolTipStyle}
   `;
 
@@ -516,9 +512,8 @@ export class BlockHub extends NonShadowLitElement {
             inert
             role="tooltip"
             tip-position="left"
-            style="top: 5px"
             ?hidden=${!this._showToolTip}
-            >Drag to Insert blank line
+            >Drag to insert blank line
           </tool-tip>
         </div>
         <div
@@ -564,7 +559,6 @@ export class BlockHub extends NonShadowLitElement {
                   inert
                   role="tooltip"
                   tip-position="left"
-                  style="top: 5px"
                   ?hidden=${!this._showToolTip}
                 >
                   Drag to create a database
@@ -612,16 +606,17 @@ export class BlockHub extends NonShadowLitElement {
                     <div class="description">${description}</div>
                   </div>
                   <div class="card-icon-container">${icon}</div>
-                  <centered-tool-tip
+                  <tool-tip
                     tip-position=${shouldScroll &&
                     index === blockHubItems.length - 1
                       ? 'top'
                       : 'bottom'}
-                    style="display: ${this._showToolTip
+                    style="${this._showToolTip
                       ? ''
-                      : 'none'}; z-index: ${blockHubItems.length - index}"
-                    >${toolTip}
-                  </centered-tool-tip>
+                      : 'display: none'}; z-index: ${blockHubItems.length -
+                    index}"
+                    >${toolTip}</tool-tip
+                  >
                 </div>
               </div>
             `;
@@ -680,19 +675,19 @@ export class BlockHub extends NonShadowLitElement {
 
   private _onMouseDown = (e: MouseEvent) => {
     if (isFirefox) {
-      this._currentPageX = e.pageX;
-      this._currentPageY = e.pageY;
+      this._currentClientX = e.clientX;
+      this._currentClientY = e.clientY;
     }
 
     this._refreshCursor(e);
   };
 
   private _refreshCursor = (e: MouseEvent) => {
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
     const blocks = this.getAllowedBlocks();
     const modelState = getBlockEditingStateByPosition(blocks, x, y, {
@@ -704,13 +699,13 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
 
     const modelState = this._cursor
@@ -748,8 +743,8 @@ export class BlockHub extends NonShadowLitElement {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
-    this._currentPageX = e.pageX;
-    this._currentPageY = e.pageY;
+    this._currentClientX = e.clientX;
+    this._currentClientY = e.clientY;
   };
 
   private _onDragEnd = (e: DragEvent) => {

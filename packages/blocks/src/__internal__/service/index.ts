@@ -2,6 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
 import type { IService } from '../utils/index.js';
+import { supportsChildren } from '../utils/std.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -55,5 +56,25 @@ export class BaseService implements IService {
       text = `<a href='${attributes.link}'>${text}</a>`;
     }
     return text;
+  }
+
+  /**
+   * side effect when update block
+   */
+  async updateEffect(block: BaseBlockModel) {
+    const handleUnindent = (
+      await import('../rich-text/rich-text-operations.js')
+    ).handleUnindent;
+    // we need to unindent the first child of the block if it not
+    // support children
+    if (supportsChildren(block)) {
+      return;
+    }
+
+    if (!block.children.length) {
+      return;
+    }
+
+    handleUnindent(block.page, block.children[0], 0, false);
   }
 }

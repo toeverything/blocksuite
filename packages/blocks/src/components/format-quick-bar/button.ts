@@ -33,17 +33,7 @@ export class FormatBarButton extends IconButton {
 
   override connectedCallback() {
     super.connectedCallback();
-
     this.addEventListener('mousedown', this._mousedown);
-
-    this.style.setProperty(
-      '--button-width',
-      typeof this.width === 'string' ? this.width : `${this.width}px`
-    );
-    this.style.setProperty(
-      '--button-height',
-      typeof this.height === 'string' ? this.height : `${this.height}px`
-    );
   }
 
   override disconnectedCallback() {

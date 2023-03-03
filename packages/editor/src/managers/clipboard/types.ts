@@ -1,3 +1,5 @@
+import type { DomSelectionType } from '@blocksuite/blocks';
+
 export enum CLIPBOARD_MIMETYPE {
   BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
@@ -17,11 +19,20 @@ export enum ClipboardAction {
   paste = 'paste',
 }
 
+/**
+ * @deprecated Use `BlockRange` instead
+ */
 export interface SelectedBlock {
   id: string;
   startPos?: number;
   endPos?: number;
   children: SelectedBlock[];
-  sourceId?: string;
-  caption?: string;
+}
+
+/**
+ * @deprecated Use `BlockRange` instead
+ */
+export interface SelectionInfo {
+  type: 'Block' | DomSelectionType;
+  selectedBlocks: SelectedBlock[];
 }

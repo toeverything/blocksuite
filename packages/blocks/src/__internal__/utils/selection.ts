@@ -12,6 +12,7 @@ import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
+  BlockComponentElement,
   getBlockElementByModel,
   getDefaultPageBlock,
   getElementFromEventTarget,
@@ -19,23 +20,16 @@ import {
   getModelsByRange,
   getNextBlock,
   getPreviousBlock,
-  getQuillIndexByNativeSelection,
-  getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type {
-  DomSelectionType,
-  SelectedBlock,
-  SelectionInfo,
-  SelectionPosition,
-} from './types.js';
+import type { SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-export function setStartRange(editableContainer: Element) {
+function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -48,7 +42,7 @@ export function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-export function setEndRange(editableContainer: Element) {
+function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -102,17 +96,18 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
-  const titleElement = document.querySelector(
-    '.affine-default-page-block-title'
-  ) as HTMLTextAreaElement | null;
-  if (!titleElement) {
-    throw new Error("Can't find title element");
+  // TODO support SelectionPosition
+  const pageComponent = document.querySelector('affine-default-page');
+  if (!pageComponent) {
+    throw new Error("Can't find page component!");
   }
-  if (index > titleElement.value.length) {
-    index = titleElement.value.length;
+  if (!pageComponent.titleVEditor) {
+    throw new Error("Can't find title vEditor!");
   }
-  titleElement.setSelectionRange(index, index);
-  titleElement.focus();
+  if (index > pageComponent.titleVEditor.yText.length) {
+    index = pageComponent.titleVEditor.yText.length;
+  }
+  pageComponent.titleVEditor.setVRange({ index, length: 0 });
 }
 
 export async function focusRichText(
@@ -140,7 +135,6 @@ export async function focusRichText(
         newLeft = right - 1;
       }
       range = caretRangeFromPoint(newLeft, newTop);
-      resetNativeSelection(range);
       break;
     }
   }
@@ -151,7 +145,7 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
-  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'] as const)) {
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
@@ -162,7 +156,7 @@ export function focusBlockByModel(
       'affine:divider',
       'affine:code',
       'affine:database',
-    ])
+    ] as const)
   ) {
     if (!defaultPageBlock.selection) {
       // TODO fix this
@@ -175,10 +169,12 @@ export function focusBlockByModel(
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
-    if (matchFlavours(model, ['affine:database'])) {
+    if (matchFlavours(model, ['affine:database'] as const)) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
-        .filter((element): element is HTMLElement => element !== null);
+        .filter(
+          (element): element is BlockComponentElement => element !== null
+        );
       defaultPageBlock.selection.state.selectedBlocks.push(...elements);
     }
     defaultPageBlock.selection.state.type = 'block';
@@ -299,7 +295,7 @@ export function isRangeNativeSelection() {
  *
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
-export function isMultiBlockRange(range = getCurrentRange()) {
+export function isMultiBlockRange(range = getCurrentNativeRange()) {
   return getModelsByRange(range).length > 1;
 }
 
@@ -315,7 +311,7 @@ export function isMultiBlockRange(range = getCurrentRange()) {
  * this function will return true,
  * but {@link isMultiBlockRange} will return false.
  */
-export function isMultiLineRange(range = getCurrentRange()) {
+export function isMultiLineRange(range = getCurrentNativeRange()) {
   // Get the selection height
   const { height } = range.getBoundingClientRect();
 
@@ -326,7 +322,7 @@ export function isMultiLineRange(range = getCurrentRange()) {
   return height > oneLineHeight;
 }
 
-export function getCurrentRange(selection = window.getSelection()) {
+export function getCurrentNativeRange(selection = window.getSelection()) {
   // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
   if (!selection) {
@@ -343,84 +339,6 @@ export function getCurrentRange(selection = window.getSelection()) {
     console.warn('getCurrentRange may be wrong, rangeCount > 1');
   }
   return selection.getRangeAt(0);
-}
-
-function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
-  const result = [];
-  const parentMap = new Map<string, SelectedBlock>();
-  for (let i = 0; i < models.length; i++) {
-    const model = models[i];
-    const parent = model.page.getParent(model);
-    const block = { id: model.id, children: [] };
-    if (!parent || !parentMap.has(parent.id)) {
-      result.push(block);
-    } else {
-      parentMap.get(parent.id)?.children.push(block);
-    }
-    parentMap.set(model.id, block);
-  }
-  return result;
-}
-
-function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
-  if (blocks.length === 0) {
-    return null;
-  }
-  const last = blocks[blocks.length - 1];
-  if (last.children.length === 0) {
-    return last;
-  }
-  return getLastSelectBlock(last.children);
-}
-
-export function getSelectInfo(page: Page): SelectionInfo {
-  if (!page.root) {
-    return {
-      type: 'None',
-      selectedBlocks: [],
-    };
-  }
-
-  let type: SelectionInfo['type'] = 'None';
-  let selectedBlocks: SelectedBlock[] = [];
-  let selectedModels: BaseBlockModel[] = [];
-  const pageBlock = getDefaultPageBlock(page.root);
-  // FIXME: missing selection in edgeless mode
-  const state = pageBlock.selection?.state;
-  const nativeSelection = window.getSelection();
-  if (state?.type === 'block') {
-    type = 'Block';
-    const { selectedBlocks } = state;
-    selectedModels = selectedBlocks.map(block => getModelByElement(block));
-  } else if (nativeSelection && nativeSelection.type !== 'None') {
-    type = nativeSelection.type as DomSelectionType;
-    selectedModels = getModelsByRange(getCurrentRange());
-  }
-  if (type !== 'None') {
-    selectedBlocks = getSelectedBlock(selectedModels);
-    if (type !== 'Block' && nativeSelection && selectedBlocks.length > 0) {
-      const range = nativeSelection.getRangeAt(0);
-      const firstIndex = getQuillIndexByNativeSelection(
-        range.startContainer,
-        range.startOffset as number,
-        true
-      );
-      const endIndex = getQuillIndexByNativeSelection(
-        range.endContainer,
-        range.endOffset as number,
-        false
-      );
-      selectedBlocks[0].startPos = firstIndex;
-      const lastBlock = getLastSelectBlock(selectedBlocks);
-      if (lastBlock) {
-        lastBlock.endPos = endIndex;
-      }
-    }
-  }
-  return {
-    type,
-    selectedBlocks,
-  };
 }
 
 function handleInFrameDragMove(
@@ -553,7 +471,7 @@ function handleClickRetargeting(page: Page, e: SelectionEvent) {
   const shouldRetarget = matchFlavours(parentModel, [
     'affine:frame',
     'affine:page',
-  ]);
+  ] as const);
   if (!shouldRetarget) return;
 
   const { clientX, clientY } = e.raw;
@@ -885,66 +803,16 @@ export function isEmbed(e: SelectionEvent) {
 }
 
 export function isDatabase(e: SelectionEvent) {
-  if ((e.raw.target as HTMLElement).className.startsWith('affine-database')) {
+  const target = e.raw.target;
+  if (!(target instanceof HTMLElement)) {
+    // When user click on the list indicator,
+    // the target is not an `HTMLElement`, instead `SVGElement`.
+    return false;
+  }
+  if (target.className.startsWith('affine-database')) {
     return true;
   }
   return false;
-}
-
-/**
- * Save the current block selection. Can be restored with {@link restoreSelection}.
- *
- * See also {@link restoreSelection}
- *
- * Note: If only one block is selected, this function will return the same block twice still.
- * Note: If select multiple blocks, blocks in the middle will be skipped, only the first and last block will be returned.
- */
-export const saveBlockSelection = (
-  selection = window.getSelection()
-): [SelectedBlock, SelectedBlock] => {
-  assertExists(selection);
-  const models = getModelsByRange(getCurrentRange(selection));
-  const startPos = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endPos = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-
-  return [
-    { id: models[0].id, startPos, children: [] },
-    { id: models[models.length - 1].id, endPos, children: [] },
-  ];
-};
-
-/**
- * Restore the block selection.
- * See also {@link resetNativeSelection}
- */
-export function restoreSelection(selectedBlocks: SelectedBlock[]) {
-  const startBlock = selectedBlocks[0];
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
-
-  const endBlock = selectedBlocks[selectedBlocks.length - 1];
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
-  if (!startNode || !endNode) {
-    console.warn(
-      'restoreSelection: startNode or endNode is null',
-      startNode,
-      endNode
-    );
-    return;
-  }
-
-  const range = getCurrentRange();
-  range.setStart(startNode, startOffset);
-  range.setEnd(endNode, endOffset);
-  resetNativeSelection(range);
-  return range;
 }
 
 /**

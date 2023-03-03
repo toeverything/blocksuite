@@ -4,6 +4,7 @@ import { expect, Page } from '@playwright/test';
 
 import {
   activeEmbed,
+  dragBetweenCoords,
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
@@ -62,13 +63,13 @@ test('can drag resize image by left menu', async ({ page }) => {
   await assertImageSize(page, { width: 704, height: 528 });
 
   await dragEmbedResizeByTopLeft(page);
-  await assertImageSize(page, { width: 365, height: 274 });
+  await assertImageSize(page, { width: 304, height: 228 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 704, height: 528 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 365, height: 274 });
+  await assertImageSize(page, { width: 304, height: 228 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -81,13 +82,13 @@ test('can drag resize image by right menu', async ({ page }) => {
   await assertImageSize(page, { width: 704, height: 528 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 365, height: 274 });
+  await assertImageSize(page, { width: 304, height: 228 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 704, height: 528 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 365, height: 274 });
+  await assertImageSize(page, { width: 304, height: 228 });
 });
 
 test('can click and delete image', async ({ page }) => {
@@ -193,10 +194,9 @@ test('image loading', async ({ page }) => {
 
   await page.waitForTimeout(100);
 
-  const deliveringContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
-    .innerText();
-  expect(deliveringContent).toBe('Delivering content...');
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toContainText('Delivering content...');
 
   await page.waitForTimeout(3000);
 
@@ -266,10 +266,9 @@ test('image get message from awareness', async ({ page, browser }) => {
 
   await page.waitForTimeout(100);
 
-  const deliveringContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
-    .innerText();
-  expect(deliveringContent).toBe('Delivering content...');
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toHaveText('Delivering content...');
 
   await pageB.evaluate(async () => {
     const { page } = window;
@@ -354,4 +353,28 @@ test('popup menu should follow position of image when scrolling', async ({
 
   // < 1.059180567624251
   expect(imageRect.top).toBeCloseTo(menuRect.top, -0.325);
+});
+
+test('select image should not show format bar', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  const image = page.locator('affine-image');
+  const rect = await image.boundingBox();
+  if (!rect) {
+    throw new Error('image not found');
+  }
+  await dragBetweenCoords(
+    page,
+    { x: rect.x + 20, y: rect.y + 20 },
+    { x: rect.x - 20, y: rect.y - 20 }
+  );
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(1);
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).not.toBeVisible();
+  await page.mouse.wheel(0, rect.y + rect.height);
+  await expect(formatQuickBar).not.toBeVisible();
+  await page.mouse.click(0, 0);
 });

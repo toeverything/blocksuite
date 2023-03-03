@@ -7,6 +7,7 @@ import {
   getCenterPosition,
   initEmptyParagraphState,
   initThreeParagraphs,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -113,13 +114,11 @@ test('drag blank line into text area', async ({ page }) => {
     { steps: 50 }
   );
 
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -171,14 +170,12 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -229,14 +226,12 @@ test('drag numbered list block from list menu into text area and blockHub list c
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"

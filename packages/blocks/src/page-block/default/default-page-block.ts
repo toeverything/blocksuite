@@ -7,9 +7,8 @@ import {
   DisposableGroup,
   Page,
   Signal,
-  Text,
 } from '@blocksuite/store';
-import autosize from 'autosize';
+import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -17,8 +16,9 @@ import {
   asyncFocusRichText,
   BlockChildrenContainer,
   type BlockHost,
-  getCurrentRange,
+  getCurrentNativeRange,
   getRichTextByModel,
+  hasNativeSelection,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
@@ -70,14 +70,6 @@ export interface DefaultPageSignals {
   nativeSelection: Signal<boolean>;
 }
 
-// https://stackoverflow.com/a/2345915
-function focusTextEnd(input: HTMLTextAreaElement) {
-  const current = input.value;
-  input.focus();
-  input.value = '';
-  input.value = current;
-}
-
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
   extends NonShadowLitElement
@@ -103,14 +95,10 @@ export class DefaultPageBlockComponent
       cursor: default;
 
       min-height: calc(100% - 78px);
-      height: auto;
-      overflow: hidden;
       padding-bottom: 150px;
     }
 
     .affine-default-page-block-title {
-      /* autosize will calculate height automatically */
-      height: 0;
       width: 100%;
       font-size: 40px;
       line-height: 50px;
@@ -120,10 +108,14 @@ export class DefaultPageBlockComponent
       border: 0;
       font-family: inherit;
       color: inherit;
+      cursor: text;
     }
 
-    .affine-default-page-block-title::placeholder {
+    .affine-default-page-block-title-empty::before {
+      content: 'Title';
       color: var(--affine-placeholder-color);
+      position: absolute;
+      opacity: 0.5;
     }
 
     .affine-default-page-block-title:disabled {
@@ -163,9 +155,9 @@ export class DefaultPageBlockComponent
   mouseRoot!: HTMLElement;
 
   @state()
-  frameSelectionRect: DOMRect | null = null;
+  private _frameSelectionRect: DOMRect | null = null;
 
-  @state()
+  @property()
   viewportState: ViewportState = {
     left: 0,
     top: 0,
@@ -177,15 +169,15 @@ export class DefaultPageBlockComponent
   };
 
   @state()
-  selectedRects: DOMRect[] = [];
+  private _selectedRects: DOMRect[] = [];
 
   @state()
-  selectedEmbedRects: DOMRect[] = [];
+  private _selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  embedEditingState!: EmbedEditingState | null;
+  private _embedEditingState!: EmbedEditingState | null;
 
-  @state()
+  @property()
   codeBlockOption!: CodeBlockOption | null;
 
   @query('.affine-default-viewport')
@@ -206,62 +198,78 @@ export class DefaultPageBlockComponent
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
-  private _title!: HTMLTextAreaElement;
+  private _titleContainer!: HTMLElement;
+  private _titleVEditor: VEditor | null = null;
 
-  private async _onTitleKeyDown(e: KeyboardEvent) {
+  get titleVEditor() {
+    assertExists(this._titleVEditor);
+    return this._titleVEditor;
+  }
+
+  private initTitleVEditor() {
+    const { model } = this;
+    const title = model.title;
+
+    this._titleVEditor = new VEditor(title.yText);
+    this._titleVEditor.bindKeyDownHandler(this._onTitleKeyDown);
+    this._titleVEditor.mount(this._titleContainer);
+    this.model.title.yText.observe(() => {
+      this.page.workspace.setPageMeta(this.page.id, {
+        title: this.model.title.toString(),
+      });
+      this.requestUpdate();
+    });
+    this._titleVEditor.focusEnd();
+  }
+
+  private _onTitleKeyDown = (e: KeyboardEvent) => {
+    if (e.isComposing) {
+      return;
+    }
     const hasContent = !this.page.isEmpty;
-    const { page, model, _title } = this;
+    const { page, model } = this;
+    const defaultFrame = model.children[0];
 
     if (e.key === 'Enter' && hasContent) {
-      assertExists(_title.selectionStart);
-      const titleCursorIndex = _title.selectionStart;
-      const contentLeft = _title.value.slice(0, titleCursorIndex);
-      const contentRight = _title.value.slice(titleCursorIndex);
+      e.preventDefault();
+      assertExists(this._titleVEditor);
+      const vRange = this._titleVEditor.getVRange();
+      assertExists(vRange);
+      const right = model.title.split(vRange.index);
 
-      const defaultFrame = model.children[0];
-      const props = {
-        flavour: 'affine:paragraph',
-        text: new Text(contentRight),
-      };
-      // Fixes: https://github.com/toeverything/blocksuite/pull/1008
-      //  A workaround that fixes rich-text still be listened when press enter on title.
-      //  Other solutions like `quill.disable()` or remove all listener when blur will won't work.
       const block = defaultFrame.children.find(block =>
         getRichTextByModel(block)
       );
       if (block) {
-        await asyncFocusRichText(this.page, block.id);
+        asyncFocusRichText(page, block.id);
       }
-      const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
-      page.updateBlock(model, { title: contentLeft });
-      page.workspace.setPageMeta(page.id, { title: contentLeft });
-      asyncFocusRichText(this.page, newFirstParagraphId);
+
+      const newFirstParagraphId = page.addBlockByFlavour(
+        'affine:paragraph',
+        { text: right },
+        defaultFrame,
+        0
+      );
+      asyncFocusRichText(page, newFirstParagraphId);
+      return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      asyncFocusRichText(page, model.children[0].children[0].id);
-    }
-  }
-
-  private _onTitleInput(e: InputEvent) {
-    const { page } = this;
-
-    if (!this.model.id) {
-      const title = (e.target as HTMLTextAreaElement).value;
-      const pageId = page.addBlock({ flavour: 'affine:page', title });
-      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-      page.addBlock({ flavour: 'affine:paragraph' }, frameId);
+      const firstParagraph = model.children[0].children[0];
+      if (firstParagraph) {
+        asyncFocusRichText(page, firstParagraph.id);
+      } else {
+        const newFirstParagraphId = page.addBlockByFlavour(
+          'affine:paragraph',
+          {},
+          defaultFrame,
+          0
+        );
+        asyncFocusRichText(page, newFirstParagraphId);
+      }
       return;
     }
+  };
 
-    let title = (e.target as HTMLTextAreaElement).value;
-    if (title.endsWith('\n')) {
-      title = title.slice(0, -1);
-    }
-    page.updateBlock(this.model, { title });
-    page.workspace.setPageMeta(page.id, { title });
-  }
-
-  // FIXME: keep embed selected rects after scroll
   // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
     const { selection } = this;
@@ -318,7 +326,7 @@ export class DefaultPageBlockComponent
     if (type === 'block') {
       selection.refreshSelectionRectAndSelecting(viewportState);
     } else if (type === 'embed') {
-      selection.refresEmbedRects(this.embedEditingState);
+      selection.refreshEmbedRects(this._embedEditingState);
     } else if (type === 'native') {
       const { startRange, rangePoint } = selection.state;
       if (startRange && rangePoint) {
@@ -332,6 +340,18 @@ export class DefaultPageBlockComponent
     }
   };
 
+  updated(changedProperties: Map<string, unknown>) {
+    if (this._titleVEditor && changedProperties.has('readonly')) {
+      this._titleVEditor.setReadOnly(this.readonly);
+    }
+
+    if (changedProperties.has('model')) {
+      if (this.model && !this._titleVEditor) {
+        this.initTitleVEditor();
+      }
+    }
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
@@ -343,21 +363,7 @@ export class DefaultPageBlockComponent
       });
     }
 
-    this._tryUpdateMetaTitle();
     super.update(changedProperties);
-  }
-
-  // happens on undo/redo (model update)
-  private _tryUpdateMetaTitle() {
-    const { _title } = this;
-    if (!_title || _title.value === undefined) {
-      return;
-    }
-
-    const { page } = this;
-    if (_title.value !== page.meta.title) {
-      page.workspace.setPageMeta(page.id, { title: this._title.value });
-    }
   }
 
   private _handleCompositionStart = () => {
@@ -368,6 +374,7 @@ export class DefaultPageBlockComponent
     this.isCompositionStart = false;
   };
 
+  // TODO migrate to bind-hotkey
   // Fixes: https://github.com/toeverything/blocksuite/issues/200
   // We shouldn't prevent user input, because there could have CN/JP/KR... input,
   //  that have pop-up for selecting local characters.
@@ -377,11 +384,8 @@ export class DefaultPageBlockComponent
       return;
     }
     // Only the length of character buttons is 1
-    if (
-      (e.key.length === 1 || e.key === 'Enter') &&
-      window.getSelection()?.type === 'Range'
-    ) {
-      const range = getCurrentRange();
+    if (e.key.length === 1 && hasNativeSelection()) {
+      const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);
       }
@@ -395,20 +399,28 @@ export class DefaultPageBlockComponent
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
         if (
-          draggingBlock &&
+          draggingBlockIds &&
+          draggingBlockIds.length === 1 &&
           Utils.doesInsideBlockByFlavour(
             this.page,
-            draggingBlock,
+            draggingBlockIds[0],
             'affine:database'
           )
         ) {
           return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlock) as BaseBlockModel
+            this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
           );
         }
-        return getAllowSelectedBlocks(this.model);
+
+        if (!draggingBlockIds || draggingBlockIds.length === 1) {
+          return getAllowSelectedBlocks(this.model);
+        } else {
+          return getAllowSelectedBlocks(this.model).filter(block => {
+            return !draggingBlockIds?.includes(block.id);
+          });
+        }
       };
     };
     if (
@@ -454,36 +466,27 @@ export class DefaultPageBlockComponent
   }
 
   firstUpdated() {
-    autosize(this._title);
-
     bindHotkeys(this.page, this.selection, this.signals);
 
     hotkey.enableHotkey();
-    this.model.propsUpdated.on(() => {
-      if (this.model.title !== this._title.value) {
-        this._title.value = this.model.title || '';
-        this.requestUpdate();
-        autosize.update(this._title);
-      }
-    });
 
     this.signals.updateFrameSelectionRect.on(rect => {
-      this.frameSelectionRect = rect;
+      this._frameSelectionRect = rect;
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
-      this.selectedRects = rects;
+      this._selectedRects = rects;
       this.requestUpdate();
     });
     this.signals.updateEmbedRects.on(rects => {
-      this.selectedEmbedRects = rects;
+      this._selectedEmbedRects = rects;
       if (rects.length === 0) {
-        this.embedEditingState = null;
+        this._embedEditingState = null;
       }
       this.requestUpdate();
     });
     this.signals.updateEmbedEditingState.on(embedEditingState => {
-      this.embedEditingState = embedEditingState;
+      this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
     this.signals.updateCodeBlockOption.on(codeBlockOption => {
@@ -526,7 +529,6 @@ export class DefaultPageBlockComponent
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    focusTextEnd(this._title);
   }
 
   private _disposables = new DisposableGroup();
@@ -564,17 +566,17 @@ export class DefaultPageBlockComponent
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
+    const selectionRect = FrameSelectionRect(this._frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
-      this.selectedRects,
+      this._selectedRects,
       this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectedEmbedRects,
+      this._selectedEmbedRects,
       this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
-      readonly ? null : this.embedEditingState,
+      readonly ? null : this._embedEditingState,
       this.signals,
       this.viewportState
     );
@@ -585,22 +587,19 @@ export class DefaultPageBlockComponent
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
-          ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
-            <textarea
-              ?disabled=${this.readonly}
-              .value=${this.model.title}
-              placeholder="Title"
+            <div
               data-block-is-title="true"
-              class="affine-default-page-block-title"
-              @keydown=${this._onTitleKeyDown}
-              @input=${this._onTitleInput}
-            ></textarea>
+              class="affine-default-page-block-title ${!this._titleContainer ||
+              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+                ? 'affine-default-page-block-title-empty'
+                : ''}"
+            ></div>
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
-        ${codeBlockOptionContainer}
+        ${selectedRectsContainer} ${selectionRect} ${selectedEmbedContainer}
+        ${embedEditingContainer} ${codeBlockOptionContainer}
       </div>
     `;
   }

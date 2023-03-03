@@ -23,6 +23,56 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
+function getFormatBar(page: Page) {
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  const boldBtn = formatQuickBar.getByTestId('bold');
+  const italicBtn = formatQuickBar.getByTestId('italic');
+  const underlineBtn = formatQuickBar.getByTestId('underline');
+  const strikeBtn = formatQuickBar.getByTestId('strike');
+  const codeBtn = formatQuickBar.getByTestId('code');
+  const linkBtn = formatQuickBar.getByTestId('link');
+  const copyBtn = formatQuickBar.getByTestId('copy');
+
+  const paragraphBtn = formatQuickBar.locator(`.paragraph-button`);
+  const openParagraphMenu = async () => {
+    await expect(formatQuickBar).toBeVisible();
+    await paragraphBtn.hover();
+  };
+
+  const textBtn = formatQuickBar.getByTestId('affine:paragraph/text');
+  const h1Btn = formatQuickBar.getByTestId('affine:paragraph/h1');
+  const bulletedBtn = formatQuickBar.getByTestId('affine:list/bulleted');
+  const codeBlockBtn = formatQuickBar.getByTestId('affine:code/');
+
+  const assertBoundingBox = async (x: number, y: number) => {
+    const boundingBox = await formatQuickBar.boundingBox();
+    if (!boundingBox) {
+      throw new Error("formatQuickBar doesn't exist");
+    }
+    assertAlmostEqual(boundingBox.x, x, 6);
+    assertAlmostEqual(boundingBox.y, y, 6);
+  };
+
+  return {
+    formatQuickBar,
+    boldBtn,
+    italicBtn,
+    underlineBtn,
+    strikeBtn,
+    codeBtn,
+    linkBtn,
+    copyBtn,
+
+    openParagraphMenu,
+    textBtn,
+    h1Btn,
+    bulletedBtn,
+    codeBlockBtn,
+
+    assertBoundingBox,
+  };
+}
+
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -36,7 +86,7 @@ test('should format quick bar show when select text', async ({ page }) => {
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 260, 10);
+  assertAlmostEqual(box.y, 230, 10);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
@@ -69,7 +119,7 @@ test('should format quick bar show when select text by keyboard', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(leftBox.x, 20, 3);
-  assertAlmostEqual(leftBox.y, 106, 3);
+  assertAlmostEqual(leftBox.y, 100, 10);
 
   await page.keyboard.press('ArrowLeft');
   await expect(formatQuickBar).not.toBeVisible();
@@ -90,7 +140,7 @@ test('should format quick bar show when select text by keyboard', async ({
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
   assertAlmostEqual(rightBox.x, 20, 6);
-  assertAlmostEqual(rightBox.y, 180, 6);
+  assertAlmostEqual(rightBox.y, 165, 10);
 });
 
 test('should format quick bar can only display one at a time', async ({
@@ -611,7 +661,9 @@ test('should format quick bar position correct at the start of second line', asy
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const text = new page.Text('a'.repeat(100));
     const paragraphId = page.addBlockByFlavour(
@@ -642,7 +694,7 @@ test('should format quick bar position correct at the start of second line', asy
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(formatBox.x, 20, 5);
-  assertAlmostEqual(formatBox.y, 132, 5);
+  assertAlmostEqual(formatBox.y, 123, 9);
 });
 
 test('should format quick bar action status updated while undo', async ({
@@ -662,4 +714,271 @@ test('should format quick bar action status updated while undo', async ({
   await expect(boldBtn).toHaveAttribute('active', '');
   await undoByKeyboard(page);
   await expect(boldBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format quick bar work in single block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [1, 0],
+    [1, 3],
+    { x: -10, y: -10 },
+    { x: 0, y: 0 }
+  );
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(1);
+
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 285, 5);
+  assertAlmostEqual(box.y, 200, 8);
+
+  const boldBtn = formatQuickBar.getByTestId('bold');
+  await boldBtn.click();
+  const italicBtn = formatQuickBar.getByTestId('italic');
+  await italicBtn.click();
+  const underlineBtn = formatQuickBar.getByTestId('underline');
+  await underlineBtn.click();
+  // Cancel italic
+  await italicBtn.click();
+
+  await expect(blockSelections).toHaveCount(1);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="456"
+          italic={false}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await page.mouse.click(0, 0);
+  await expect(formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar work in multiple block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(3);
+
+  const formatBarController = getFormatBar(page);
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+
+  const box = await formatBarController.formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 303, 5);
+  assertAlmostEqual(box.y, 100, 10);
+
+  await formatBarController.boldBtn.click();
+  await formatBarController.italicBtn.click();
+  await formatBarController.underlineBtn.click();
+  // Cancel italic
+  await formatBarController.italicBtn.click();
+
+  await expect(blockSelections).toHaveCount(3);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="123"
+          italic={false}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="456"
+          italic={false}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="789"
+          italic={false}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await page.mouse.click(0, 0);
+  await expect(formatBarController.formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar with block selection works when update block type', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(3);
+
+  const formatBarController = getFormatBar(page);
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+
+  await formatBarController.openParagraphMenu();
+  await formatBarController.bulletedBtn.click();
+  await expect(blockSelections).toHaveCount(3);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:list
+    prop:checked={false}
+    prop:text="123"
+    prop:type="bulleted"
+  />
+  <affine:list
+    prop:checked={false}
+    prop:text="456"
+    prop:type="bulleted"
+  />
+  <affine:list
+    prop:checked={false}
+    prop:text="789"
+    prop:type="bulleted"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  await formatBarController.h1Btn.click();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="h1"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="h1"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="h1"
+  />
+</affine:frame>`,
+    frameId
+  );
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  await expect(blockSelections).toHaveCount(3);
+  await page.mouse.click(0, 0);
+  await expect(formatBarController.formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar show after convert to code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  const formatBarController = getFormatBar(page);
+  await dragBetweenIndices(page, [2, 3], [0, 0]);
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  await formatBarController.assertBoundingBox(20, 92);
+
+  await formatBarController.openParagraphMenu();
+  await formatBarController.codeBlockBtn.click();
+  await expect(formatBarController.formatQuickBar).toBeVisible();
+  const rects = page.locator('.affine-page-selected-rects-container > *');
+  await expect(rects).toHaveCount(1);
+  await formatBarController.assertBoundingBox(395, 99);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:code
+    prop:language="JavaScript"
+    prop:text="123\n456\n789"
+  />
+</affine:frame>`,
+    frameId
+  );
 });

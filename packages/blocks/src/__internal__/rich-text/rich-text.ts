@@ -4,7 +4,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { LeafBlot } from 'parchment';
 import type { DeltaStatic, Quill as QuillType } from 'quill';
 import Quill from 'quill';
-import QuillCursors from 'quill-cursors';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import type { BlockHost } from '../utils/index.js';
@@ -13,7 +12,6 @@ import { createKeyboardBindings } from './keyboard.js';
 import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
-Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
@@ -91,7 +89,7 @@ export class RichText extends NonShadowLitElement {
 
   quill!: QuillType;
 
-  @property({ hasChanged: () => true })
+  @property()
   host!: BlockHost;
 
   @property()
@@ -103,40 +101,13 @@ export class RichText extends NonShadowLitElement {
   @property({ hasChanged: () => true })
   modules: Record<string, unknown> = {};
 
-  firstUpdated() {
-    const { host, model, placeholder, _textContainer } = this;
-    const { page } = host;
-    const keyboardBindings = createKeyboardBindings(page, model);
+  // If one types a character after the code or link node,
+  // the character should not be inserted into the code or link node.
+  // So we check and remove the corresponding format manually.
+  private _handleInlineBoundaryInput() {
+    this.quill.on('text-change', (delta: DeltaStatic, oldDelta, source) => {
+      if (source !== 'user') return;
 
-    this.quill = new Quill(_textContainer, {
-      modules: Object.assign(
-        {
-          cursors: true,
-          toolbar: false,
-          history: {
-            maxStack: 0,
-            userOnly: true,
-          },
-          keyboard: {
-            bindings: keyboardBindings,
-          },
-        },
-        this.modules
-      ),
-      placeholder,
-    });
-
-    page.attachRichText(model.id, this.quill);
-    page.awarenessStore.updateLocalCursor(page);
-    this.model.propsUpdated.on(() => this.requestUpdate());
-
-    if (this.modules.syntax && this.quill.getText() === '\n') {
-      this.quill.focus();
-    }
-    // If you type a character after the code or link node,
-    // the character should not be inserted into the code or link node.
-    // So we check and remove the corresponding format manually.
-    this.quill.on('text-change', (delta: DeltaStatic) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
@@ -180,7 +151,7 @@ export class RichText extends NonShadowLitElement {
             // At the edge of the node, need to remove format
             nextEmbedElement !== currentEmbedElement
           ) {
-            model.text?.replace(
+            this.model.text?.replace(
               retain,
               insertedString.length,
               ' ' + insertedString,
@@ -194,7 +165,39 @@ export class RichText extends NonShadowLitElement {
     });
   }
 
-  override connectedCallback() {
+  firstUpdated() {
+    const { host, model, placeholder, _textContainer } = this;
+    const { page } = host;
+    const keyboardBindings = createKeyboardBindings(page, model);
+
+    this.quill = new Quill(_textContainer, {
+      modules: Object.assign(
+        {
+          toolbar: false,
+          history: {
+            maxStack: 0,
+            userOnly: true,
+          },
+          keyboard: {
+            bindings: keyboardBindings,
+          },
+        },
+        this.modules
+      ),
+      placeholder,
+    });
+
+    page.attachRichText(model.id, this.quill);
+    this.model.propsUpdated.on(() => this.requestUpdate());
+
+    if (this.modules.syntax && this.quill.getText() === '\n') {
+      this.quill.focus();
+    }
+
+    this._handleInlineBoundaryInput();
+  }
+
+  connectedCallback() {
     super.connectedCallback();
     const { model, host } = this;
     if (this.quill) {
@@ -202,7 +205,7 @@ export class RichText extends NonShadowLitElement {
     }
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     this.host.page.detachRichText(this.model.id);
@@ -219,9 +222,11 @@ export class RichText extends NonShadowLitElement {
   }
 
   render() {
-    return html`<div class="affine-rich-text quill-container ql-container">
-      <slot></slot>
-    </div>`;
+    return html`
+      <div class="affine-rich-text quill-container ql-container">
+        <slot></slot>
+      </div>
+    `;
   }
 }
 

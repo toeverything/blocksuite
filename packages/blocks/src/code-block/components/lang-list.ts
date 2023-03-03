@@ -4,7 +4,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
-import { codeLaguages } from '../utils/code-laguages.js';
+import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -52,17 +52,6 @@ export class LangList extends NonShadowLitElement {
         margin-bottom: 5px;
       }
 
-      code-block-button {
-        font-size: var(--affine-font-sm);
-        text-align: justify;
-        line-height: 22px;
-      }
-
-      code-block-button:hover {
-        color: var(--affine-primary-color);
-        background: var(--affine-hover-background);
-      }
-
       #filter-input {
         display: flex;
         align-items: center;
@@ -98,7 +87,7 @@ export class LangList extends NonShadowLitElement {
   }
 
   @state()
-  filterText = '';
+  private _filterText = '';
 
   @property()
   id!: string;
@@ -112,13 +101,10 @@ export class LangList extends NonShadowLitElement {
   @query('#filter-input')
   filterInput!: HTMLInputElement;
 
-  @state()
-  disposeTimer = 0;
-
   @property()
   delay = 150;
 
-  static languages = codeLaguages;
+  static languages = codeLanguages;
 
   protected updated() {
     if (this.showLangList !== 'hidden') {
@@ -144,7 +130,7 @@ export class LangList extends NonShadowLitElement {
   private _dispose() {
     this.dispatchEvent(createEvent('dispose', null));
     document.removeEventListener('click', this._clickHandler);
-    this.filterText = '';
+    this._filterText = '';
   }
 
   private _onLanguageClicked(language: string) {
@@ -159,10 +145,10 @@ export class LangList extends NonShadowLitElement {
 
   render() {
     const filteredLanguages = LangList.languages.filter(language => {
-      if (!this.filterText) {
+      if (!this._filterText) {
         return true;
       }
-      return language.toLowerCase().startsWith(this.filterText.toLowerCase());
+      return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
     if (this.showLangList === 'hidden') {
@@ -183,20 +169,21 @@ export class LangList extends NonShadowLitElement {
             id="filter-input"
             type="text"
             placeholder="Search"
-            value=${this.filterText}
-            @keyup=${() => (this.filterText = this.filterInput?.value)}
+            value=${this._filterText}
+            @keyup=${() => (this._filterText = this.filterInput?.value)}
           />
         </div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
             language => html`
-              <code-block-button
+              <icon-button
                 width="100%"
+                height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
               >
                 ${language}
-              </code-block-button>
+              </icon-button>
             `
           )}
         </div>

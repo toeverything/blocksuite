@@ -19,6 +19,7 @@ export const point2 = () => {
     </svg>
   `;
 };
+
 export const point3 = () => {
   return html`
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -28,6 +29,7 @@ export const point3 = () => {
     </svg>
   `;
 };
+
 export const point4 = () => {
   return html`
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -40,6 +42,79 @@ export const point4 = () => {
     </svg>
   `;
 };
+
+export const toggleRight = (enabled = true) => {
+  return html`
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      data-is-toggle-icon="true"
+      width="1em"
+      height="1em"
+      viewBox="0 0 20 20"
+    >
+      <path
+        data-is-toggle-icon="true"
+        fill="currentColor"
+        opacity="${!enabled ? '0.6' : '1'}"
+        d="m15.795 11.272l-8 5A1.5 1.5 0 0 1 5.5 15V5a1.5 1.5 0 0 1 2.295-1.272l8 5a1.5 1.5 0 0 1 0 2.544Z"
+      />
+    </svg>
+  `;
+};
+export const toggleDown = () => {
+  return html`
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      data-is-toggle-icon="true"
+      width="1em"
+      height="1em"
+      viewBox="0 0 20 20"
+      @mousedown="${(e: MouseEvent) => {
+        // console.log('preventing def svg');
+        // e.preventDefault();
+      }}"
+    >
+      <path
+        data-is-toggle-icon="true"
+        fill="currentColor"
+        d="m8.728 15.795l-5-8A1.5 1.5 0 0 1 5 5.5h10a1.5 1.5 0 0 1 1.272 2.295l-5 8a1.5 1.5 0 0 1-2.544 0Z"
+      />
+    </svg>
+  `;
+};
+
+export const chevronCircleRight = (enabled = true) => {
+  return html`
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 512 512"
+    >
+      <path
+        fill="currentColor"
+        opacity="${!enabled ? '0.6' : '1'}"
+        d="M256 8c137 0 248 111 248 248S393 504 256 504S8 393 8 256S119 8 256 8zm113.9 231L234.4 103.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L285.1 256L183.5 357.6c-9.4 9.4-9.4 24.6 0 33.9l17 17c9.4 9.4 24.6 9.4 33.9 0L369.9 273c9.4-9.4 9.4-24.6 0-34z"
+      />
+    </svg>
+  `;
+};
+export const chevronCircleDown = () => {
+  return html`
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 512 512"
+    >
+      <path
+        fill="currentColor"
+        d="M504 256c0 137-111 248-248 248S8 393 8 256S119 8 256 8s248 111 248 248zM273 369.9l135.5-135.5c9.4-9.4 9.4-24.6 0-33.9l-17-17c-9.4-9.4-24.6-9.4-33.9 0L256 285.1L154.4 183.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L239 369.9c9.4 9.4 24.6 9.4 34 0z"
+      />
+    </svg>
+  `;
+};
+
 export const checkboxChecked = () => {
   return html`
     <svg

@@ -1,4 +1,9 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import {
+  getCurrentBlockRange,
+  getDefaultPageBlock,
+  handleBlockSelectionBatchDelete,
+  OpenBlockInfo,
+} from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   EmbedBlockModel,
@@ -6,13 +11,13 @@ import {
   ListBlockModel,
   SelectionUtils,
 } from '@blocksuite/blocks';
-import { matchFlavours } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, SelectedBlock } from './types.js';
+import { getSelectInfo } from './utils.js';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -40,12 +45,25 @@ export class CopyCutManager {
 
   public handleCut = async (e: ClipboardEvent) => {
     await this.handleCopy(e);
-    deleteModelsByRange(this._editor.page);
+    const page = this._editor.page;
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
+    }
+    if (blockRange.type === 'Native') {
+      deleteModelsByRange(page);
+      return;
+    }
+    handleBlockSelectionBatchDelete(page, blockRange.models);
+    const pageBlock = getDefaultPageBlock(blockRange.models[0]);
+    pageBlock.selection.clear();
+    e.preventDefault();
+    return;
   };
 
   private async _getClipItems() {
     const clips: ClipboardItem[] = [];
-    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
+    const selectionInfo = getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = await this._getCustomClip(selectedBlocks);
@@ -102,7 +120,7 @@ export class CopyCutManager {
 
     let { flavour, type } = model;
     let delta: DeltaOperation[] = [];
-    if (matchFlavours(model, ['affine:page'])) {
+    if (matchFlavours(model, ['affine:page'] as const)) {
       flavour = 'affine:paragraph';
       type = 'text';
       const service = await getServiceOrRegister(model.flavour);
@@ -117,7 +135,7 @@ export class CopyCutManager {
           insert: text,
         },
       ];
-    } else if (matchFlavours(model, ['affine:embed'])) {
+    } else if (matchFlavours(model, ['affine:embed'] as const)) {
       flavour = 'affine:embed';
       type = 'image';
       const service = await getServiceOrRegister(model.flavour);
@@ -128,11 +146,12 @@ export class CopyCutManager {
         },
       ];
     } else {
-      delta =
-        model.text?.sliceToDelta(
-          selectedBlock.startPos || 0,
-          selectedBlock.endPos
-        ) || [];
+      delta = model.text?.yText.doc
+        ? model.text?.sliceToDelta(
+            selectedBlock.startPos || 0,
+            selectedBlock.endPos
+          )
+        : [];
     }
 
     const children: OpenBlockInfo[] = [];
@@ -221,7 +240,9 @@ export class CopyCutManager {
   // TODO: Optimization
   // TODO: is not compatible with safari
   private _copyToClipboardFromPc(clips: ClipboardItem[]): boolean {
-    const curRange = SelectionUtils.getCurrentRange();
+    const savedRange = SelectionUtils.hasNativeSelection()
+      ? SelectionUtils.getCurrentNativeRange()
+      : null;
 
     let success = false;
     /**
@@ -251,7 +272,7 @@ export class CopyCutManager {
     } finally {
       tempElem.removeEventListener('copy', listener);
       document.body.removeChild(tempElem);
-      SelectionUtils.resetNativeSelection(curRange);
+      savedRange && SelectionUtils.resetNativeSelection(savedRange);
     }
     return success;
   }

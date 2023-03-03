@@ -24,6 +24,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
+  assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
   assertTypeFormat,
@@ -67,15 +68,41 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
 
 test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await page.keyboard.press('ArrowRight');
+  await assertTextFormat(page, 0, 5, { code: true });
+
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
+  // TODO fix the `code={false}` text
   // block suite should not be code
-  await assertTextFormat(page, 0, 6, {});
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        code={true}
+        insert="Hello"
+      />
+      <text
+        code={false}
+        insert=" b"
+      />
+      <text
+        insert="lock suite"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
@@ -648,4 +675,110 @@ test('should bracket complete works', async ({ page }) => {
   await type(page, ')');
   // Should not trigger bracket complete when type right bracket
   await assertRichTexts(page, ['(()){']);
+});
+
+test('should bracket complete with backtick works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello world');
+
+  await dragBetweenIndices(page, [0, 2], [0, 5]);
+  await resetHistory(page);
+  await type(page, '`');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="he"
+      />
+      <text
+        code={true}
+        insert="llo"
+      />
+      <text
+        insert=" world"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await undoByClick(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello world"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+});
+
+test('pressing enter when selecting multiple blocks should create new block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await pressEnter(page);
+  await assertRichTexts(page, ['1', '89']);
+  await assertSelection(page, 1, 0, 0);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+});
+
+test('should left/right key navigator works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await focusRichText(page, 0);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await assertSelection(page, 0, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 0);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 1, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 1, 3);
+  await page.keyboard.press('ArrowRight');
+  await assertSelection(page, 2, 0);
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 1, 3);
+});
+
+test('should up/down key navigator works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await focusRichText(page, 0);
+  await assertSelection(page, 0, 3);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 1, 3);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 2, 3);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await assertSelection(page, 2, 0);
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 1, 0);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 0, 1);
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 1, 1);
 });

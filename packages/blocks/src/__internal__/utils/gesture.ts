@@ -1,6 +1,6 @@
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 
-import { isDatabaseInput, isTitleElement } from './query.js';
+import { isDatabaseInput, isInsidePageTitle } from './query.js';
 import { debounce } from './std.js';
 
 export interface IPoint {
@@ -94,7 +94,8 @@ export function initMouseEventHandlers(
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
-  onSelectionChange: (e: Event) => void
+  onSelectionChangeWithDebounce: (e: Event) => void,
+  onSelectionChangeWithOutDebounce: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -110,7 +111,7 @@ export function initMouseEventHandlers(
 
   const mouseDownHandler = (e: MouseEvent) => {
     if (shouldFilterMouseEvent(e)) return;
-    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -128,7 +129,7 @@ export function initMouseEventHandlers(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     if (shouldFilterMouseEvent(e)) return;
-    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -162,7 +163,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
 
@@ -199,30 +200,45 @@ export function initMouseEventHandlers(
     );
   };
 
-  const selectionChangeHandler = debounce<
-    Event[],
-    (this: unknown, ...args: Event[]) => void
-  >(e => {
+  const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
       return;
     }
 
-    onSelectionChange(e as Event);
+    onSelectionChangeWithDebounce(e as Event);
   }, 300);
+
+  const selectionChangeHandlerWithOutDebounce = (e: Event) => {
+    onSelectionChangeWithOutDebounce(e);
+  };
 
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
-  document.addEventListener('selectionchange', selectionChangeHandler);
+  document.addEventListener(
+    'selectionchange',
+    selectionChangeHandlerWithDebounce
+  );
+  document.addEventListener(
+    'selectionchange',
+    selectionChangeHandlerWithOutDebounce
+  );
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
-    document.removeEventListener('selectionchange', selectionChangeHandler);
+    document.removeEventListener(
+      'selectionchange',
+      selectionChangeHandlerWithDebounce
+    );
+    document.removeEventListener(
+      'selectionchange',
+      selectionChangeHandlerWithOutDebounce
+    );
   };
   return dispose;
 }
