@@ -151,36 +151,35 @@ export class ImageBlockComponent extends NonShadowLitElement {
       const isBlobUploadingOnInit =
         this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
 
-      const disposeSignal = this.model.page.awarenessStore.signals.update.on(
-        () => {
-          const isBlobUploading =
-            this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+      const disposeSlot = this.model.page.awarenessStore.slots.update.on(() => {
+        const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
+          this.model.sourceId
+        );
 
-          /**
-           * case:
-           * clientA send image, but network latency is high,
-           * clientB got ydoc, but doesn't get awareness,
-           * clientC has a good network, and send awareness because of cursor changed,
-           * clientB receives awareness change from clientC,
-           * this listener will be called,
-           * but clientB doesn't get uploading state from clientA.
-           */
-          if (
-            isBlobUploadingOnInit === isBlobUploading &&
-            isBlobUploading === false
-          ) {
-            return;
-          }
-
-          if (!isBlobUploading) {
-            clearTimeout(timer);
-            resolve();
-          }
+        /**
+         * case:
+         * clientA send image, but network latency is high,
+         * clientB got ydoc, but doesn't get awareness,
+         * clientC has a good network, and send awareness because of cursor changed,
+         * clientB receives awareness change from clientC,
+         * this listener will be called,
+         * but clientB doesn't get uploading state from clientA.
+         */
+        if (
+          isBlobUploadingOnInit === isBlobUploading &&
+          isBlobUploading === false
+        ) {
+          return;
         }
-      );
+
+        if (!isBlobUploading) {
+          clearTimeout(timer);
+          resolve();
+        }
+      });
 
       this._imageReady.dispose = () => {
-        disposeSignal.dispose();
+        disposeSlot.dispose();
         clearTimeout(timer);
         resolve();
       };

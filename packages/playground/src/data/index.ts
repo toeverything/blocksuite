@@ -15,7 +15,7 @@ export interface InitFn {
 
 export const empty: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.slots.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -43,7 +43,7 @@ empty.description = 'Start from empty editor';
 
 export const heavy: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.slots.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -96,7 +96,7 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(async pageId => {
+    workspace.slots.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -124,7 +124,7 @@ preset.description = 'Start from friendly introduction';
 
 export const database: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(async pageId => {
+    workspace.slots.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
       page.awarenessStore.setFlag('enable_database', true);
 

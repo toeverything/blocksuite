@@ -22,9 +22,9 @@ export class ClipboardManager {
       this._clipboardTarget
     );
 
-    this._clipboardEventDispatcher.signals.copy.on(this._copy.handleCopy);
-    this._clipboardEventDispatcher.signals.cut.on(this._copy.handleCut);
-    this._clipboardEventDispatcher.signals.paste.on(this._paste.handlePaste);
+    this._clipboardEventDispatcher.slots.copy.on(this._copy.handleCopy);
+    this._clipboardEventDispatcher.slots.cut.on(this._copy.handleCut);
+    this._clipboardEventDispatcher.slots.paste.on(this._paste.handlePaste);
   }
 
   set clipboardTarget(clipboardTarget: HTMLElement) {

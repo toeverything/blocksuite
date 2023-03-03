@@ -1,4 +1,4 @@
-import { isWeb, Signal } from '@blocksuite/global/utils';
+import { isWeb, Slot } from '@blocksuite/global/utils';
 import type { Awareness } from 'y-protocols/awareness';
 // @ts-ignore
 import { Room, WebrtcProvider } from 'y-webrtc';
@@ -25,7 +25,7 @@ const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 
 export class DebugDocProvider extends WebrtcProvider implements DocProvider {
   private readonly _doc: Y.Doc;
-  public remoteUpdateSignal = new Signal<unknown>();
+  public remoteUpdateSlot = new Slot<unknown>();
   constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
     super(room, doc, {
       awareness: options?.awareness,
@@ -36,7 +36,7 @@ export class DebugDocProvider extends WebrtcProvider implements DocProvider {
 
   private _handleRemoteUpdate = (update: unknown, origin: unknown) => {
     if (origin instanceof Room) {
-      this.remoteUpdateSignal.emit(update);
+      this.remoteUpdateSlot.emit(update);
     }
   };
 

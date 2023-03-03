@@ -1,4 +1,4 @@
-import { assertExists, Signal } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 
 import { CloudSyncManager } from './cloud-sync-manager.js';
 import type {
@@ -34,8 +34,8 @@ export class DuplexBlobProvider implements BlobProvider {
   private readonly _localDB: IDBInstance;
   private readonly _cloudManager?: CloudSyncManager;
 
-  readonly signals = {
-    onBlobSyncStateChange: new Signal<BlobSyncStateChangeEvent>(),
+  readonly slots = {
+    onBlobSyncStateChange: new Slot<BlobSyncStateChangeEvent>(),
   };
 
   static async init(
@@ -54,8 +54,8 @@ export class DuplexBlobProvider implements BlobProvider {
       assertExists(optionsGetter);
       this._cloudManager = new CloudSyncManager(workspace, optionsGetter);
 
-      this._cloudManager.signals.onBlobSyncStateChange.on(blobState => {
-        this.signals.onBlobSyncStateChange.emit(blobState);
+      this._cloudManager.slotss.onBlobSyncStateChange.on(blobState => {
+        this.slots.onBlobSyncStateChange.emit(blobState);
       });
     }
   }

@@ -1,5 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup, Signal } from '@blocksuite/store';
+import { DisposableGroup, Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -55,16 +55,16 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposableGroup.add(
-      Signal.disposableListener(window, 'mousedown', this._clickAwayListener)
+      Slot.disposableListener(window, 'mousedown', this._clickAwayListener)
     );
     this._disposableGroup.add(
-      Signal.disposableListener(window, 'keydown', this._keyDownListener, {
+      Slot.disposableListener(window, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
         capture: true,
       })
     );
     this._disposableGroup.add(
-      Signal.disposableListener(this, 'mousedown', e => {
+      Slot.disposableListener(this, 'mousedown', e => {
         // Prevent input from losing focus
         e.preventDefault();
       })
@@ -79,13 +79,13 @@ export class SlashMenu extends LitElement {
       return;
     }
     this._disposableGroup.add(
-      Signal.disposableListener(richText, 'keydown', this._keyDownListener, {
+      Slot.disposableListener(richText, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
         capture: true,
       })
     );
     this._disposableGroup.add(
-      Signal.disposableListener(richText, 'focusout', this._clickAwayListener)
+      Slot.disposableListener(richText, 'focusout', this._clickAwayListener)
     );
   }
 

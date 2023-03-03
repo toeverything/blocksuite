@@ -47,7 +47,7 @@ async function testBasic() {
     let called = false;
     let idCalled: string | null = null;
 
-    storage.signals.onBlobSyncStateChange.on(state => {
+    storage.slots.onBlobSyncStateChange.on(state => {
       called = true;
       idCalled = state.id;
     });
