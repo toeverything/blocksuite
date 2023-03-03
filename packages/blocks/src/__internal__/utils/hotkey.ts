@@ -41,7 +41,6 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     }
     // undo/redo should work in page title
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
-      event.preventDefault();
       return false;
     }
     // Some event dispatch from body
