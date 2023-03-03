@@ -104,7 +104,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: test-results-main
+          name: test-results-${{ matrix.shard }}/${{ strategy.job-total }}
           path: ./test-results
           if-no-files-found: ignore
 
