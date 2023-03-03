@@ -6,7 +6,11 @@ import {
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import { focusBlockByModel, hotkey } from '../../__internal__/index.js';
+import {
+  focusBlockByModel,
+  hotkey,
+  isPageMode,
+} from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
@@ -123,7 +127,7 @@ export function handleUp(
     const previousBlock = getPreviousBlock(model);
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
-    if (!previousBlock) {
+    if (!previousBlock && isPageMode(page)) {
       focusTitle();
       return;
     }
