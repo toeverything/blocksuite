@@ -1,4 +1,3 @@
-import { getVEditorFormat } from '@blocksuite/blocks';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -494,6 +493,16 @@ export function createKeyDownHandler(
     const vRange = vEditor.getVRange();
     if (!vRange) return;
 
+    // if it is multi block selection, we should not handle the keydown event
+    const range = getCurrentNativeRange();
+    if (!range) return;
+    if (
+      !vEditor.rootElement.contains(range.startContainer) ||
+      !vEditor.rootElement.contains(range.endContainer)
+    ) {
+      return;
+    }
+
     const [line, offset] = vEditor.getLine(vRange.index);
     const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
     const [leafEnd, offsetEnd] =
@@ -509,7 +518,7 @@ export function createKeyDownHandler(
     const curContext = {
       collapsed: vRange.length === 0,
       empty: vRange.length === 0 && line.textLength <= 1,
-      format: getVEditorFormat(vEditor, vRange),
+      format: vEditor.getFormat(vRange),
       line,
       offset,
       prefix: prefixText,

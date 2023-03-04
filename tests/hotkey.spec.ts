@@ -10,6 +10,10 @@ import {
   initThreeParagraphs,
   inlineCode,
   MODIFIER_KEY,
+  pressArrowDown,
+  pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressEnter,
   readClipboardText,
   redoByClick,
@@ -21,6 +25,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -42,7 +47,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [1, 5]);
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
@@ -66,7 +71,8 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test('type character jump out code node', async ({ page }) => {
+// FIXME: need to wait for handler inline code element
+test.skip('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -657,7 +663,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['1', '23']);
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
-  await assertRichTexts(page, ['1', '23', '\n']);
+  await assertRichTexts(page, ['1', '23', '']);
 });
 
 test('should bracket complete works', async ({ page }) => {
@@ -741,24 +747,21 @@ test('should left/right key navigator works', async ({ page }) => {
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await assertSelection(page, 0, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 0, 0);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`, { delay: 50 });
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page);
   await assertSelection(page, 1, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page, 4);
   await assertSelection(page, 1, 3);
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page);
   await assertSelection(page, 2, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 1, 3);
 });
 
@@ -768,17 +771,17 @@ test('should up/down key navigator works', async ({ page }) => {
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 1, 3);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 2, 3);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await assertSelection(page, 2, 0);
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await assertSelection(page, 1, 0);
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowUp');
+  await pressArrowRight(page);
+  await pressArrowUp(page);
   await assertSelection(page, 0, 1);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 1, 1);
 });

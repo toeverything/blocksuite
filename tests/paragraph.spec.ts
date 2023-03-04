@@ -44,13 +44,13 @@ test('init paragraph by page title enter at last', async ({ page }) => {
   await type(page, 'world');
 
   await assertTitle(page, 'hello');
-  await assertRichTexts(page, ['world', '\n']);
+  await assertRichTexts(page, ['world', '']);
 
   //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
   await page.keyboard.press('ArrowLeft');
   await focusTitle(page);
   await pressEnter(page);
-  await assertRichTexts(page, ['\n', 'world', '\n']);
+  await assertRichTexts(page, ['', 'world', '']);
   //#endregion
 });
 
@@ -65,7 +65,7 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
   await pressEnter(page);
 
   await assertTitle(page, 'he');
-  await assertRichTexts(page, ['llo', '\n']);
+  await assertRichTexts(page, ['llo', '']);
 });
 
 test('drag over paragraph title', async ({ page }) => {
@@ -164,7 +164,7 @@ test('append new paragraph block by enter', async ({ page }) => {
   await assertSelection(page, 0, 5, 0);
 
   await pressEnter(page);
-  await assertRichTexts(page, ['hello', '\n']);
+  await assertRichTexts(page, ['hello', '']);
   await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
@@ -172,7 +172,7 @@ test('append new paragraph block by enter', async ({ page }) => {
   await assertSelection(page, 0, 5, 0);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['hello', '\n']);
+  await assertRichTexts(page, ['hello', '']);
   await assertSelection(page, 1, 0, 0);
 });
 
@@ -182,15 +182,15 @@ test('insert new paragraph block by enter', async ({ page }) => {
   await focusRichText(page);
   await pressEnter(page);
   await pressEnter(page);
-  await assertRichTexts(page, ['\n', '\n', '\n']);
+  await assertRichTexts(page, ['', '', '']);
 
   await focusRichText(page, 1);
   await type(page, 'hello');
-  await assertRichTexts(page, ['\n', 'hello', '\n']);
+  await assertRichTexts(page, ['', 'hello', '']);
 
   await pressEnter(page);
   await type(page, 'world');
-  await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
+  await assertRichTexts(page, ['', 'hello', 'world', '']);
   await assertBlockChildrenFlavours(page, '1', [
     'affine:paragraph',
     'affine:paragraph',
@@ -272,14 +272,14 @@ test('add multi line by soft enter', async ({ page }) => {
   await assertSelection(page, 0, 2, 0);
 
   await pressShiftEnter(page);
-  await assertRichTexts(page, ['he\n\nllo']);
+  await assertRichTexts(page, ['he\nllo']);
   await assertSelection(page, 0, 3, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['he\n\nllo']);
+  await assertRichTexts(page, ['he\nllo']);
 });
 
 test('indent and unindent existing paragraph block', async ({ page }) => {
@@ -652,11 +652,11 @@ test('get focus from page title enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await type(page, 'hello');
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await pressEnter(page);
   await type(page, 'world');
-  await assertRichTexts(page, ['world', '\n']);
+  await assertRichTexts(page, ['world', '']);
 });
 
 test('handling keyup when cursor located in first paragraph', async ({
@@ -665,11 +665,11 @@ test('handling keyup when cursor located in first paragraph', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await type(page, 'hello');
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await pressEnter(page);
   await type(page, 'world');
-  await assertRichTexts(page, ['world', '\n']);
+  await assertRichTexts(page, ['world', '']);
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await assertPageTitleFocus(page);
 });
@@ -710,7 +710,7 @@ test('press tab in paragraph children', async ({ page }) => {
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await page.keyboard.press('ArrowLeft', { delay: 50 });
   await type(page, '- ');
-  await assertRichTexts(page, ['1', '2', '3', '\n']);
+  await assertRichTexts(page, ['1', '2', '3', '']);
 });
 
 test('press left in first paragraph start should not change cursor position', async ({
@@ -841,7 +841,7 @@ test('press arrow down in indent line should not move caret to the start of line
   await page.keyboard.press('ArrowDown');
   // Now the caret should be at the end of the last paragraph
   await type(page, '1');
-  await assertRichTexts(page, ['\n', '\n', '\n', '01']);
+  await assertRichTexts(page, ['', '', '', '01']);
 
   await focusRichText(page, 2);
   // Insert a new long text to wrap the line
@@ -853,5 +853,5 @@ test('press arrow down in indent line should not move caret to the start of line
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await type(page, '2');
-  await assertRichTexts(page, ['\n', '\n', '0'.repeat(100), '012']);
+  await assertRichTexts(page, ['', '', '0'.repeat(100), '012']);
 });

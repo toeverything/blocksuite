@@ -4,7 +4,6 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -15,10 +14,7 @@ import {
   isMultiBlockRange,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type {
-  AffineTextAttributes,
-  AffineVEditor,
-} from '../../__internal__/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   BlockRange,
   getCurrentBlockRange,
@@ -37,30 +33,6 @@ import {
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
-
-export function getVEditorFormat(
-  vEditor: AffineVEditor,
-  vRange: VRange
-): AffineTextAttributes {
-  const deltas = vEditor.getDeltasByVRange(vRange);
-
-  const result: {
-    [key: string]: unknown;
-  } = {};
-  for (const [delta] of deltas) {
-    if (delta.attributes) {
-      for (const [key, value] of Object.entries(delta.attributes)) {
-        if (typeof result[key] === 'boolean') {
-          result[key] = result[key] && value;
-          continue;
-        }
-        result[key] = value;
-      }
-    }
-  }
-
-  return result as AffineTextAttributes;
-}
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -105,13 +77,34 @@ export function deleteModelsByRange(
   if (!startModel.text || !endModel.text) {
     throw new Error('startModel or endModel does not have text');
   }
+
+  const firstRichText = getRichTextByModel(startModel);
+  assertExists(firstRichText);
+  const vEditor = firstRichText.vEditor;
+  assertExists(vEditor);
+
   // Only select one block
   if (startModel === endModel) {
     page.captureSync();
+    if (
+      blockRange.startOffset === blockRange.endOffset &&
+      blockRange.startOffset > 0
+    ) {
+      startModel.text.delete(blockRange.startOffset - 1, 1);
+      vEditor.setVRange({
+        index: blockRange.startOffset - 1,
+        length: 0,
+      });
+      return;
+    }
     startModel.text.delete(
       blockRange.startOffset,
       blockRange.endOffset - blockRange.startOffset
     );
+    vEditor.setVRange({
+      index: blockRange.startOffset,
+      length: 0,
+    });
     return;
   }
   page.captureSync();
@@ -125,11 +118,6 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  const firstRichText = getRichTextByModel(startModel);
-  assertExists(firstRichText);
-  const vEditor = firstRichText.vEditor;
-  assertExists(vEditor);
-  // TODO update focus API
   vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
@@ -216,11 +204,11 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  // Focus last new block
   const lastModel = newModels.at(-1);
-  if (lastModel) asyncFocusRichText(page, lastModel.id);
   if (savedBlockRange) {
     requestAnimationFrame(() => restoreSelection(savedBlockRange));
+  } else {
+    if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
   return newModels;
 }
@@ -272,7 +260,7 @@ export function getCombinedFormat(
     assertExists(richText);
     const { vEditor } = richText;
     assertExists(vEditor);
-    const format = getVEditorFormat(vEditor, {
+    const format = vEditor.getFormat({
       index: blockRange.startOffset,
       length: blockRange.endOffset - blockRange.startOffset,
     });
@@ -290,7 +278,7 @@ export function getCombinedFormat(
     const startRichText = getRichTextByModel(startModel);
     assertExists(startRichText);
     assertExists(startRichText.vEditor);
-    const startFormat = getVEditorFormat(startRichText.vEditor, {
+    const startFormat = startRichText.vEditor.getFormat({
       index: blockRange.startOffset,
       length: startRichText.vEditor.yText.length - blockRange.startOffset,
     });
@@ -306,7 +294,7 @@ export function getCombinedFormat(
     const endRichText = getRichTextByModel(endModel);
     assertExists(endRichText);
     assertExists(endRichText.vEditor);
-    const endFormat = getVEditorFormat(endRichText.vEditor, {
+    const endFormat = endRichText.vEditor.getFormat({
       index: 0,
       length: blockRange.endOffset,
     });
@@ -321,7 +309,7 @@ export function getCombinedFormat(
       const richText = getRichTextByModel(model);
       assertExists(richText);
       assertExists(richText.vEditor);
-      const format = getVEditorFormat(richText.vEditor, {
+      const format = richText.vEditor.getFormat({
         index: 0,
         length: richText.vEditor.yText.length - 1,
       });

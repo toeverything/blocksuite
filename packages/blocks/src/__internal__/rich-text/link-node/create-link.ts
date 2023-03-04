@@ -1,6 +1,5 @@
 import './affine-link.js';
 
-import { getVEditorFormat } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -29,13 +28,14 @@ export function createLink(page: Page) {
   // TODO support selection with multiple blocks
 
   // User can cancel link by pressing shortcut again
-  const format = getVEditorFormat(vEditor, vRange);
-  delete format.link;
+  const format = vEditor.getFormat(vRange);
   if (format.link) {
+    delete format.link;
     page.captureSync();
     vEditor.formatText(vRange, format, {
       mode: 'replace',
     });
+    vEditor.setVRange(vRange);
     return;
   }
 

@@ -321,7 +321,7 @@ export async function initThreeDividers(page: Page) {
   await type(page, '123');
 }
 
-export async function getQuillSelectionIndex(page: Page) {
+export async function getVirgoSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
@@ -332,7 +332,7 @@ export async function getQuillSelectionIndex(page: Page) {
   });
 }
 
-export async function getQuillSelectionText(page: Page) {
+export async function getVirgoSelectionText(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
@@ -341,7 +341,7 @@ export async function getQuillSelectionText(page: Page) {
   });
 }
 
-export async function getSelectedTextByQuill(page: Page) {
+export async function getSelectedTextByVirgo(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);

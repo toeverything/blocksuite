@@ -31,7 +31,6 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertText,
-  assertTextFormat,
   assertTextFormats,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';

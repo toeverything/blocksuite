@@ -202,38 +202,24 @@ export async function assertFrameXYWH(
 export async function assertTextFormat(
   page: Page,
   richTextIndex: number,
+  index: number,
   resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex }) => {
+    ({ richTextIndex, index }) => {
       const richText = document.querySelectorAll('rich-text')[richTextIndex];
       const vEditor = richText.vEditor;
       if (!vEditor) {
         throw new Error('vEditor is undefined');
       }
 
-      const deltas = vEditor.getDeltasByVRange({
-        index: 0,
-        length: vEditor.yText.length,
+      const result = vEditor.getFormat({
+        index,
+        length: 0,
       });
-
-      const result: {
-        [key: string]: unknown;
-      } = {};
-      for (const [delta] of deltas) {
-        if (delta.attributes) {
-          for (const [key, value] of Object.entries(delta.attributes)) {
-            if (typeof result[key] === 'boolean') {
-              result[key] = result[key] && value;
-              continue;
-            }
-            result[key] = value;
-          }
-        }
-      }
       return result;
     },
-    { richTextIndex }
+    { richTextIndex, index }
   );
   expect(actual).toEqual(resultObj);
 }
@@ -255,25 +241,10 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
         throw new Error('vEditor is undefined');
       }
 
-      const deltas = vEditor.getDeltasByVRange({
+      const result = vEditor.getFormat({
         index: 0,
         length: vEditor.yText.length,
       });
-
-      const result: {
-        [key: string]: unknown;
-      } = {};
-      for (const [delta] of deltas) {
-        if (delta.attributes) {
-          for (const [key, value] of Object.entries(delta.attributes)) {
-            if (typeof result[key] === 'boolean') {
-              result[key] = result[key] && value;
-              continue;
-            }
-            result[key] = value;
-          }
-        }
-      }
       return result;
     });
   });

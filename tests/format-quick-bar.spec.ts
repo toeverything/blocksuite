@@ -9,9 +9,11 @@ import {
   initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
+  setSelection,
   switchReadonly,
   type,
   undoByKeyboard,
+  waitNextFrame,
   withPressKey,
 } from './utils/actions/index.js';
 import {
@@ -234,6 +236,8 @@ test('should format quick bar be able to format text', async ({ page }) => {
   await underlineBtn.click();
   await codeBtn.click();
 
+  await waitNextFrame(page);
+
   // The bold button should be inactive after click again
   await expect(boldBtn).not.toHaveAttribute('active', '');
   await expect(italicBtn).toHaveAttribute('active', '');
@@ -415,7 +419,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     frameId
   );
 
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
+  await setSelection(page, 3, 0, 3, 3);
   // The link button should be active after click
   await expect(linkBtn).toHaveAttribute('active', '');
   await linkBtn.click();
@@ -429,14 +433,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="456"
-          link={false}
-        />
-      </>
-    }
+    prop:text="456"
     prop:type="text"
   />
   <affine:paragraph
@@ -488,6 +485,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     .locator(`.format-quick-bar`)
     .getByTestId('affine:list/bulleted');
   await bulletedBtn.click();
+  await paragraphBtn.hover();
   await assertStoreMatchJSX(
     page,
     `
@@ -561,7 +559,9 @@ test('should format quick bar show when double click text', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
+  await page.dblclick('.affine-rich-text', {
+    position: { x: 10, y: 10 },
+  });
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
 });
@@ -576,7 +576,7 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).not.toBeVisible();
 
-  await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
+  await page.dblclick('.affine-rich-text', { position: { x: 10, y: 10 } });
   await expect(formatQuickBar).not.toBeVisible();
 });
 
