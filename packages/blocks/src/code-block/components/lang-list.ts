@@ -1,4 +1,4 @@
-import { BLOCK_ID_ATTR, SearchIcon } from '@blocksuite/global/config';
+import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -67,6 +67,7 @@ export class LangList extends NonShadowLitElement {
         box-sizing: border-box;
         color: inherit;
         background: transparent;
+        z-index: 1;
       }
 
       #filter-input:focus {
@@ -90,13 +91,7 @@ export class LangList extends NonShadowLitElement {
   private _filterText = '';
 
   @property()
-  id!: string;
-
-  @property()
   selectedLanguage = '';
-
-  @property()
-  showLangList = 'hidden';
 
   @query('#filter-input')
   filterInput!: HTMLInputElement;
@@ -106,32 +101,25 @@ export class LangList extends NonShadowLitElement {
 
   static languages = codeLanguages;
 
-  protected updated() {
-    if (this.showLangList !== 'hidden') {
-      this.filterInput.focus();
-    }
-  }
-
-  protected firstUpdated() {
-    document.addEventListener('click', (e: MouseEvent) => {
-      this._clickHandler(e);
+  override connectedCallback() {
+    super.connectedCallback();
+    // Avoid triggering click away listener on initial render
+    requestAnimationFrame(() => {
+      document.addEventListener('click', this._clickAwayListener);
     });
   }
 
-  private _clickHandler(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      !target.closest('.container')?.closest(`[${BLOCK_ID_ATTR}="${this.id}"]`)
-    ) {
-      this._dispose();
-    }
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('click', this._clickAwayListener);
   }
 
-  private _dispose() {
+  private _clickAwayListener = (e: Event) => {
+    if (this.contains(e.target as Node)) {
+      return;
+    }
     this.dispatchEvent(createEvent('dispose', null));
-    document.removeEventListener('click', this._clickHandler);
-    this._filterText = '';
-  }
+  };
 
   private _onLanguageClicked(language: string) {
     this.selectedLanguage = language;
@@ -140,7 +128,6 @@ export class LangList extends NonShadowLitElement {
         language: this.selectedLanguage ?? 'JavaScript',
       })
     );
-    this._dispose();
   }
 
   render() {
@@ -151,44 +138,38 @@ export class LangList extends NonShadowLitElement {
       return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
-    if (this.showLangList === 'hidden') {
-      return html``;
-    }
-
     const styles = styleMap({
       display: 'flex',
       'padding-top': '8px',
       'padding-left': '4px',
     });
 
-    return html`
-      <div class="lang-list-container">
-        <div style="${styles}">
-          <div class="search-icon">${SearchIcon}</div>
-          <input
-            id="filter-input"
-            type="text"
-            placeholder="Search"
-            value=${this._filterText}
-            @keyup=${() => (this._filterText = this.filterInput?.value)}
-          />
-        </div>
-        <div class="lang-list-button-container">
-          ${filteredLanguages.map(
-            language => html`
-              <icon-button
-                width="100%"
-                height="32px"
-                @click="${() => this._onLanguageClicked(language)}"
-                class="lang-item"
-              >
-                ${language}
-              </icon-button>
-            `
-          )}
-        </div>
+    return html`<div class="lang-list-container">
+      <div style="${styles}">
+        <div class="search-icon">${SearchIcon}</div>
+        <input
+          id="filter-input"
+          autofocus
+          type="text"
+          placeholder="Search"
+          @input=${() => (this._filterText = this.filterInput?.value)}
+        />
       </div>
-    `;
+      <div class="lang-list-button-container">
+        ${filteredLanguages.map(
+          language => html`
+            <icon-button
+              width="100%"
+              height="32px"
+              @click="${() => this._onLanguageClicked(language)}"
+              class="lang-item"
+            >
+              ${language}
+            </icon-button>
+          `
+        )}
+      </div>
+    </div> `;
   }
 }
 
