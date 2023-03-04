@@ -4,7 +4,7 @@ import type { BlockModels } from './types.js';
 
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
-export { Signal } from './utils/signal.js';
+export { Slot } from './utils/slot.js';
 export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -117,4 +117,5 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export const getDefaultPlaygroundURL = (isE2E: boolean): URL =>
-  new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);
+  new URL(`http://localhost:5173/`);
+// new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);

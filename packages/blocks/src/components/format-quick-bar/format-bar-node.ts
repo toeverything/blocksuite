@@ -6,12 +6,7 @@ import {
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import {
-  BaseBlockModel,
-  DisposableGroup,
-  Page,
-  Signal,
-} from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -46,7 +41,7 @@ export class FormatQuickBar extends LitElement {
 
   // Sometimes the quick bar need to update position
   @property()
-  positionUpdated = new Signal();
+  positionUpdated = new Slot();
 
   @property()
   models: BaseBlockModel[] = [];

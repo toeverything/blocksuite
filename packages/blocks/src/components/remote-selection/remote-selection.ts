@@ -82,7 +82,7 @@ export class RemoteSelection extends LitElement {
 
   protected firstUpdated() {
     assertExists(this.page);
-    this.page.awarenessStore.signals.update.subscribe(
+    this.page.awarenessStore.slots.update.subscribe(
       msg => msg,
       msg => {
         if (!msg || !msg.state?.rangeMap) {

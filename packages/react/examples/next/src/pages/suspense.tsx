@@ -22,7 +22,7 @@ const localWorkspace = new Workspace({
 localWorkspace.register(builtInSchemas);
 
 const promise = new Promise<Page>(resolve => {
-  localWorkspace.signals.pageAdded.once(pageId => {
+  localWorkspace.slots.pageAdded.once(pageId => {
     const page = localWorkspace.getPage(pageId) as Page;
     setTimeout(() => {
       pagePromiseLike = page;

@@ -1,6 +1,6 @@
 import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
 import type { DefaultPageBlockComponent } from '../../index.js';
@@ -160,11 +160,35 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
   return page;
 }
 
+/**
+ * @deprecated Use {@link getEditorContainer} instead
+ */
 export function getContainerByModel(model: BaseBlockModel) {
   const page = getDefaultPageBlock(model);
   const container = page.closest('editor-container');
   assertExists(container);
   return container;
+}
+
+export function getEditorContainer(page: Page) {
+  assertExists(
+    page.root,
+    'Failed to check paper mode! Page root is not exists!'
+  );
+  const pageBlock = document.querySelector(`[${ATTR}="${page.root.id}"]`);
+  // EditorContainer
+  const editorContainer = pageBlock?.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer;
+}
+
+export function isPageMode(page: Page) {
+  const editor = getEditorContainer(page);
+  if (!('mode' in editor)) {
+    throw new Error('Failed to check paper mode! Editor mode is not exists!');
+  }
+  const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
+  return mode === 'page';
 }
 
 export function getBlockElementByModel(
@@ -184,8 +208,7 @@ export function getBlockElementByModel(
   return element as BlockComponentElement | null;
 }
 
-export function getStartModelBySelection() {
-  const range = getCurrentNativeRange();
+export function getStartModelBySelection(range = getCurrentNativeRange()) {
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
@@ -215,12 +238,11 @@ export function getRichTextByModel(model: BaseBlockModel) {
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
-    const model = getStartModelBySelection();
-    if (!model) {
-      return [];
-    }
+    const model = getStartModelBySelection(range);
+    if (!model) return [];
     return [model];
   }
+
   if (
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
@@ -231,18 +253,27 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       commonAncestor = parentElement;
     }
   }
+
   const intersectedModels: BaseBlockModel[] = [];
-  const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
-  if (blockElementArray.length > 1) {
-    blockElementArray.forEach(ele => {
-      const block = ele as ContainerBlock;
-      assertExists(block.model);
-      const blockElement = getBlockElementByModel(block.model);
+  const blockElements = commonAncestor.querySelectorAll(`[${ATTR}]`);
+
+  if (!blockElements.length) return [];
+
+  if (blockElements.length === 1) {
+    const model = getStartModelBySelection(range);
+    if (!model) return [];
+    return [model];
+  }
+
+  Array.from(blockElements)
+    .filter(element => 'model' in element)
+    .forEach(element => {
+      const block = element as ContainerBlock;
+      if (!block.model) return;
+
       const mainElement = matchFlavours(block.model, ['affine:page'] as const)
-        ? blockElement?.querySelector(
-            '.affine-default-page-block-title-container'
-          )
-        : blockElement?.querySelector('rich-text');
+        ? element?.querySelector('.affine-default-page-block-title-container')
+        : element?.querySelector('rich-text');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
@@ -251,13 +282,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
         intersectedModels.push(block.model);
       }
     });
-    return intersectedModels;
-  }
-  const model = getStartModelBySelection();
-  if (!model) {
-    return [];
-  }
-  return [model];
+  return intersectedModels;
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {

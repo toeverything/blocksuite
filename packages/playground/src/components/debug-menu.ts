@@ -224,7 +224,7 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   firstUpdated() {
-    this.page.signals.historyUpdated.on(() => {
+    this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });

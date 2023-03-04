@@ -42,9 +42,27 @@ export function caretRangeFromPoint(
     range.setStart(caret.offsetNode, caret.offset);
     return range;
   }
+
   const range = document.caretRangeFromPoint(clientX, clientY);
+
   if (!range) {
     return null;
+  }
+
+  // See https://github.com/toeverything/blocksuite/issues/1382
+  const rangeRects = range?.getClientRects();
+  if (
+    rangeRects &&
+    rangeRects.length === 2 &&
+    range.startOffset === range.endOffset &&
+    clientY < rangeRects[0].y + rangeRects[0].height
+  ) {
+    const deltaX = (rangeRects[0].x | 0) - (rangeRects[1].x | 0);
+
+    if (deltaX > 0) {
+      range.setStart(range.startContainer, range.startOffset - 1);
+      range.setEnd(range.endContainer, range.endOffset - 1);
+    }
   }
   // This is a workaround
   // Sometimes the point be covered by the format bar,
