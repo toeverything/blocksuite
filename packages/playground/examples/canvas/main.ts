@@ -88,7 +88,8 @@ function main() {
   const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
   const yContainer = doc.getMap('container');
-  const surface = new SurfaceManager(yContainer, container);
+  const surface = new SurfaceManager(yContainer);
+  surface.attach(container);
 
   surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
   surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
