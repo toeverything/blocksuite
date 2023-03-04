@@ -7,6 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  addImageFromOutside,
   BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
@@ -159,6 +160,14 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
+  async handleDrop(event: DragEvent) {
+    event.preventDefault();
+    const files = event.dataTransfer?.files;
+    if (files) {
+      await addImageFromOutside(this.model, files);
+    }
+  }
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
@@ -171,7 +180,11 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     const placeholder = getPlaceholder(this.model);
 
     return html`
-      <div class="affine-paragraph-block-container ${type}">
+      <div
+        class="affine-paragraph-block-container ${type}"
+        @dragover="${(event: DragEvent) => event.preventDefault()}"
+        @drop="${this.handleDrop}"
+      >
         <rich-text
           .host=${this.host}
           .model=${this.model}

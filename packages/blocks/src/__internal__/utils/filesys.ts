@@ -52,3 +52,25 @@ export const uploadImageFromLocal = async (
   fileInput.click();
   return await pending;
 };
+
+export const addImageFromOutside = async (
+  model: BaseBlockModel,
+  files: FileList
+): Promise<void> => {
+  const page = model.page;
+  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
+  const storage = await page.blobs;
+  assertExists(storage);
+  if (files.length === 1) {
+    const id = await storage.set(files[0]);
+    page.addSiblingBlocks(model, [{ ...baseProps, sourceId: id }]);
+  } else {
+    const res = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const id = await storage.set(file);
+      res.push({ ...baseProps, sourceId: id });
+    }
+    page.addSiblingBlocks(model, res);
+  }
+};
