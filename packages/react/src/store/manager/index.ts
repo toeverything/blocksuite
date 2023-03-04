@@ -15,7 +15,7 @@ export function bindWorkspaceWithPages(workspace: Workspace) {
     return;
   }
   workspacePages.set(workspace, []);
-  workspace.signals.pageAdded.on(id => {
+  workspace.slots.pageAdded.on(id => {
     console.log('add', id);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const page = workspace.getPage(id)!;
@@ -27,7 +27,7 @@ export function bindWorkspaceWithPages(workspace: Workspace) {
       console.error('not possible');
     }
   });
-  workspace.signals.pageRemoved.on(id => {
+  workspace.slots.pageRemoved.on(id => {
     if (workspacePages.has(workspace)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const oldPages = workspacePages.get(workspace)!;

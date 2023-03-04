@@ -19,7 +19,7 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
-  waitForRemoteUpdateSignal,
+  waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
@@ -125,9 +125,9 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await waitNextFrame(pageB);
   await focusRichText(pageB);
 
-  const signal = waitForRemoteUpdateSignal(pageA);
-  await type(pageB, 'hello');
-  await signal;
+  const slot = waitForRemoteUpdateSlot(pageA);
+  await pageB.keyboard.type('hello');
+  await slot;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
   await assertText(pageB, 'hello');

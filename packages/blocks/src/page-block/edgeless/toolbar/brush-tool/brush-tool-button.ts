@@ -69,7 +69,7 @@ export class EdgelessBrushToolButton extends LitElement {
   private _trySetBrushMode() {
     if (this.mouseMode.type === 'brush') return;
 
-    this.edgeless.signals.mouseModeUpdated.emit({
+    this.edgeless.slots.mouseModeUpdated.emit({
       type: 'brush',
       lineWidth: 4,
       color: '#010101',

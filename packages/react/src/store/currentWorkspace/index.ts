@@ -59,7 +59,7 @@ export const currentWorkspaceSideEffect = (
   store: CreateBlockSuiteStore
 ) => {
   const dispose: Disposable[] = [
-    workspace.signals.pageAdded.on(id => {
+    workspace.slots.pageAdded.on(id => {
       store.setState(state => {
         return {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -67,7 +67,7 @@ export const currentWorkspaceSideEffect = (
         };
       });
     }),
-    workspace.signals.pageRemoved.on(id => {
+    workspace.slots.pageRemoved.on(id => {
       store.setState(state => {
         const index = state.pages.findIndex(page => page.id === id);
         state.pages.splice(index, 1);
@@ -90,7 +90,7 @@ export const currentWorkspaceSideEffect = (
       if (prev !== workspace) {
         dispose.forEach(d => d.dispose());
       }
-      const disposeAdded = workspace.signals.pageAdded.on(id => {
+      const disposeAdded = workspace.slots.pageAdded.on(id => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const page = workspace.getPage(id)!;
         store.setState(state => {
@@ -99,7 +99,7 @@ export const currentWorkspaceSideEffect = (
           };
         });
       });
-      const disposeRemoved = workspace.signals.pageRemoved.on(id => {
+      const disposeRemoved = workspace.slots.pageRemoved.on(id => {
         store.setState(state => {
           const index = state.pages.findIndex(page => page.id === id);
           state.pages.splice(index, 1);

@@ -42,7 +42,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
 
     this._edgeless.viewport.applyDeltaCenter(deltaX, deltaY);
 
-    this._edgeless.signals.viewportUpdated.emit();
+    this._edgeless.slots.viewportUpdated.emit();
   }
 
   onContainerDragEnd() {

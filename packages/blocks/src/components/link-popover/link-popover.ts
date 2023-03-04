@@ -336,7 +336,6 @@ export class LinkPopover extends LitElement {
   }
 }
 
-// TODO use signal to control the popover
 declare global {
   interface HTMLElementTagNameMap {
     'edit-link-panel': LinkPopover;

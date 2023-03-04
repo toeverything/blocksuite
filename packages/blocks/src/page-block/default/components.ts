@@ -12,7 +12,7 @@ import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
-  DefaultPageSignals,
+  DefaultPageSlots,
   EmbedEditingState,
   ViewportState,
 } from './default-page-block.js';
@@ -116,7 +116,7 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  signals: DefaultPageSignals,
+  slots: DefaultPageSlots,
   viewportState: ViewportState
 ) {
   if (!embedEditingState) return null;
@@ -149,7 +149,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click=${() => {
             focusCaption(model);
-            signals.updateEmbedRects.emit([]);
+            slots.updateEmbedRects.emit([]);
           }}
         >
           ${CaptionIcon}
@@ -186,7 +186,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click="${() => {
             model.page.deleteBlock(model);
-            signals.updateEmbedRects.emit([]);
+            slots.updateEmbedRects.emit([]);
           }}"
         >
           ${DeleteIcon}

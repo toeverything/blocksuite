@@ -2,7 +2,7 @@ import { Disposable, flattenDisposable } from './disposable.js';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
-export class Signal<T = void> implements Disposable {
+export class Slot<T = void> implements Disposable {
   private _emitting = false;
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
@@ -42,8 +42,8 @@ export class Signal<T = void> implements Disposable {
     };
   }
 
-  filter(testFun: (v: T) => boolean): Signal<T> {
-    const result = new Signal<T>();
+  filter(testFun: (v: T) => boolean): Slot<T> {
+    const result = new Slot<T>();
     // if result is disposed, dispose this too
     result._disposables.push({ dispose: () => this.dispose() });
 
@@ -146,7 +146,7 @@ export class Signal<T = void> implements Disposable {
     this._emitting = prevEmitting;
   }
 
-  pipe(that: Signal<T>): Signal<T> {
+  pipe(that: Slot<T>): Slot<T> {
     this._callbacks.push(v => that.emit(v));
     return this;
   }
@@ -156,7 +156,7 @@ export class Signal<T = void> implements Disposable {
     this._callbacks.length = 0;
   }
 
-  toDispose(disposables: Disposable[]): Signal<T> {
+  toDispose(disposables: Disposable[]): Slot<T> {
     disposables.push(this);
     return this;
   }

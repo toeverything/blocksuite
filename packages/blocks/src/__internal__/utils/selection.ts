@@ -165,7 +165,7 @@ export function focusBlockByModel(
     }
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
+    rect && defaultPageBlock.slots.updateSelectedRects.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
