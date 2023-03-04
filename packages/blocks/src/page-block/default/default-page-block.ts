@@ -220,6 +220,10 @@ export class DefaultPageBlockComponent
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
     if (e.isComposing) {
+      this.page.workspace.setPageMeta(this.page.id, {
+        title: '',
+      });
+      this.requestUpdate();
       return;
     }
     const hasContent = !this.page.isEmpty;
