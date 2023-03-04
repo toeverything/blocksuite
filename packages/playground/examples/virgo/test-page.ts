@@ -1,13 +1,13 @@
 import '@shoelace-style/shoelace';
 
-import { TextAttributes, VEditor } from '@blocksuite/virgo';
+import { BaseTextAttributes, VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
 function toggleStyle(
   vEditor: VEditor,
-  attrs: NonNullable<TextAttributes>
+  attrs: NonNullable<BaseTextAttributes>
 ): void {
   const vRange = vEditor.getVRange();
   if (!vRange) {
@@ -20,7 +20,7 @@ function toggleStyle(
   }
 
   const deltas = vEditor.getDeltasByVRange(vRange);
-  let oldAttributes: NonNullable<TextAttributes> = {};
+  let oldAttributes: NonNullable<BaseTextAttributes> = {};
 
   for (const [delta] of deltas) {
     const attributes = delta.attributes;
