@@ -38,7 +38,7 @@ function toggleStyle(
         typeof v === 'boolean' &&
         v === (oldAttributes as { [k: string]: unknown })[k]
       ) {
-        return [k, !v];
+        return [k, null];
       } else {
         return [k, v];
       }

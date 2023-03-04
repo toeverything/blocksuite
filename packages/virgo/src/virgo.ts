@@ -119,7 +119,8 @@ export class VEditor<
   }
 
   private _rootElement: HTMLElement | null = null;
-  private _rootElementAbort: AbortController | null = null;
+  private _mountAbort: AbortController | null = null;
+  private _handlerAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
   private _isReadOnly = false;
@@ -131,9 +132,10 @@ export class VEditor<
   private _attributesSchema: z.ZodSchema<TextAttributes> =
     baseTextAttributes as z.ZodSchema<TextAttributes>;
 
-  private _onKeyDown: (event: KeyboardEvent) => void = () => {
-    return;
-  };
+  private _handlers: {
+    keydown?: (event: KeyboardEvent) => void;
+    paste?: (event: ClipboardEvent) => void;
+  } = {};
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
     return this._attributesSchema.optional().parse(textAttributes);
@@ -204,8 +206,46 @@ export class VEditor<
     this._attributesRenderer = renderer;
   };
 
-  bindKeyDownHandler(handler: (event: KeyboardEvent) => void) {
-    this._onKeyDown = handler;
+  bindHandlers(
+    handlers: VEditor['_handlers'] = {
+      paste: (event: ClipboardEvent) => {
+        const data = event.clipboardData?.getData('text/plain');
+        if (data) {
+          const vRange = this._vRange;
+          if (vRange) {
+            this.insertText(vRange, data);
+            this.slots.updateVRange.emit([
+              {
+                index: vRange.index + data.length,
+                length: 0,
+              },
+              'input',
+            ]);
+          }
+        }
+      },
+    }
+  ) {
+    this._handlers = handlers;
+
+    if (this._handlerAbort) {
+      this._handlerAbort.abort();
+    }
+
+    this._handlerAbort = new AbortController();
+
+    assertExists(this._rootElement, 'you need to mount the editor first');
+    if (this._handlers.paste) {
+      this._rootElement.addEventListener('paste', this._handlers.paste, {
+        signal: this._handlerAbort.signal,
+      });
+    }
+
+    if (this._handlers.keydown) {
+      this._rootElement.addEventListener('keydown', this._handlers.keydown, {
+        signal: this._handlerAbort.signal,
+      });
+    }
   }
 
   mount(rootElement: HTMLElement): void {
@@ -216,7 +256,7 @@ export class VEditor<
     this.yText.observe(this._onYTextChange);
     document.addEventListener('selectionchange', this._onSelectionChange);
 
-    this._rootElementAbort = new AbortController();
+    this._mountAbort = new AbortController();
 
     this._renderDeltas();
 
@@ -224,7 +264,7 @@ export class VEditor<
       'beforeinput',
       this._onBeforeInput.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
     this._rootElement
@@ -239,30 +279,28 @@ export class VEditor<
       'compositionstart',
       this._onCompositionStart.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
     this._rootElement.addEventListener(
       'compositionend',
       this._onCompositionEnd.bind(this),
       {
-        signal: this._rootElementAbort.signal,
+        signal: this._mountAbort.signal,
       }
     );
-
-    this._rootElement.addEventListener('keydown', this._onKeyDown, {
-      signal: this._rootElementAbort.signal,
-    });
-    this._rootElement.addEventListener('paste', this._onPaste, {
-      signal: this._rootElementAbort.signal,
-    });
   }
 
   unmount(): void {
     document.removeEventListener('selectionchange', this._onSelectionChange);
-    if (this._rootElementAbort) {
-      this._rootElementAbort.abort();
-      this._rootElementAbort = null;
+    if (this._mountAbort) {
+      this._mountAbort.abort();
+      this._mountAbort = null;
+    }
+
+    if (this._handlerAbort) {
+      this._handlerAbort.abort();
+      this._handlerAbort = null;
     }
 
     this._rootElement?.replaceChildren();
@@ -305,9 +343,6 @@ export class VEditor<
       if (!textElement.textContent) {
         throw new Error('text element should have textContent');
       }
-      if (textElement.textContent === ZERO_WIDTH_SPACE) {
-        continue;
-      }
       if (index + textElement.textContent.length >= rangeIndex) {
         const text = getTextNodeFromElement(textElement);
         if (!text) {
@@ -345,15 +380,7 @@ export class VEditor<
     throw new Error('failed to find line');
   }
 
-  /**
-   * In following example, the vRange is { index: 3, length: 3 } and
-   * conatins three deltas
-   *   aaa|bbb|ccc
-   * getDeltasByVRange(...) will just return bbb delta
-   */
   getDeltasByVRange(vRange: VRange): DeltaEntry[] {
-    if (vRange.length <= 0) return [];
-
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     const result: DeltaEntry[] = [];
@@ -361,8 +388,9 @@ export class VEditor<
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length > vRange.index &&
-        index < vRange.index + vRange.length
+        index + delta.insert.length >= vRange.index &&
+        (index < vRange.index + vRange.length ||
+          (vRange.length === 0 && index === vRange.index))
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
       }
@@ -378,6 +406,27 @@ export class VEditor<
 
   getReadOnly(): boolean {
     return this._isReadOnly;
+  }
+
+  getFormat(vRange: VRange): TextAttributes {
+    const deltas = this.getDeltasByVRange(vRange);
+
+    const result: {
+      [key: string]: unknown;
+    } = {};
+    for (const [delta] of deltas) {
+      if (delta.attributes) {
+        for (const [key, value] of Object.entries(delta.attributes)) {
+          if (typeof value === 'boolean' && !value) {
+            delete result[key];
+          } else {
+            result[key] = value;
+          }
+        }
+      }
+    }
+
+    return result as TextAttributes;
   }
 
   setReadOnly(isReadOnly: boolean): void {
@@ -406,7 +455,7 @@ export class VEditor<
   insertText(vRange: VRange, text: string): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text);
+      this.yText.insert(vRange.index, text, {});
     });
   }
 
@@ -419,7 +468,9 @@ export class VEditor<
 
   formatText(
     vRange: VRange,
-    attributes: TextAttributes,
+    attributes: Partial<
+      Record<keyof TextAttributes, TextAttributes[keyof TextAttributes] | null>
+    >,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
@@ -836,23 +887,6 @@ export class VEditor<
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.slots.updateVRange.emit([vRange, 'native']);
-    }
-  };
-
-  private _onPaste = (event: ClipboardEvent) => {
-    const data = event.clipboardData?.getData('text/plain');
-    if (data) {
-      const vRange = this._vRange;
-      if (vRange) {
-        this.insertText(vRange, data);
-        this.slots.updateVRange.emit([
-          {
-            index: vRange.index + data.length,
-            length: 0,
-          },
-          'input',
-        ]);
-      }
     }
   };
 

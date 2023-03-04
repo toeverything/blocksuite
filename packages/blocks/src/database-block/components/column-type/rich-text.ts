@@ -81,8 +81,10 @@ class TextCell extends DatabaseCellLitElement {
         value: yText,
       });
       this.vEditor = new VEditor(yText);
-      this.vEditor.bindKeyDownHandler(this._handleKeyDown);
       this.vEditor.mount(this._container);
+      this.vEditor.bindHandlers({
+        keydown: this._handleKeyDown,
+      });
       this.vEditor.focusEnd();
     }
   }
@@ -144,9 +146,10 @@ class TextCell extends DatabaseCellLitElement {
     if (this.tag && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.tag.value as any);
-      this.vEditor.bindKeyDownHandler(this._handleKeyDown);
-
       this.vEditor.mount(this._container);
+      this.vEditor.bindHandlers({
+        keydown: this._handleKeyDown,
+      });
     } else if (!this.tag && this.vEditor) {
       this.vEditor.unmount();
       this.vEditor = null;
