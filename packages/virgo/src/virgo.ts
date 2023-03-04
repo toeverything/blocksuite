@@ -345,15 +345,7 @@ export class VEditor<
     throw new Error('failed to find line');
   }
 
-  /**
-   * In following example, the vRange is { index: 3, length: 3 } and
-   * conatins three deltas
-   *   aaa|bbb|ccc
-   * getDeltasByVRange(...) will just return bbb delta
-   */
   getDeltasByVRange(vRange: VRange): DeltaEntry[] {
-    if (vRange.length <= 0) return [];
-
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     const result: DeltaEntry[] = [];
@@ -361,8 +353,9 @@ export class VEditor<
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length > vRange.index &&
-        index < vRange.index + vRange.length
+        index + delta.insert.length >= vRange.index &&
+        (index < vRange.index + vRange.length ||
+          (vRange.length === 0 && index === vRange.index))
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
       }
@@ -378,6 +371,27 @@ export class VEditor<
 
   getReadOnly(): boolean {
     return this._isReadOnly;
+  }
+
+  getFormat(vRange: VRange): TextAttributes {
+    const deltas = this.getDeltasByVRange(vRange);
+
+    const result: {
+      [key: string]: unknown;
+    } = {};
+    for (const [delta] of deltas) {
+      if (delta.attributes) {
+        for (const [key, value] of Object.entries(delta.attributes)) {
+          if (typeof value === 'boolean' && !value) {
+            delete result[key];
+          } else {
+            result[key] = value;
+          }
+        }
+      }
+    }
+
+    return result as TextAttributes;
   }
 
   setReadOnly(isReadOnly: boolean): void {
@@ -406,7 +420,7 @@ export class VEditor<
   insertText(vRange: VRange, text: string): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text);
+      this.yText.insert(vRange.index, text, {});
     });
   }
 
@@ -419,7 +433,9 @@ export class VEditor<
 
   formatText(
     vRange: VRange,
-    attributes: TextAttributes,
+    attributes: Partial<
+      Record<keyof TextAttributes, TextAttributes[keyof TextAttributes] | null>
+    >,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';

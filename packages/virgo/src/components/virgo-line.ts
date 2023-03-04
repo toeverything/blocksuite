@@ -20,14 +20,12 @@ export class VirgoLine<
   }
 
   render() {
-    return html`
-      <style>
+    return html`<style>
         virgo-line {
           display: block;
         }
       </style>
-      <div>${this.elements}</div>
-    `;
+      <div>${this.elements}</div>`;
   }
 
   createRenderRoot() {
