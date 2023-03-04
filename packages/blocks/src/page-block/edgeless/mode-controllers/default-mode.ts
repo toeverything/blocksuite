@@ -69,6 +69,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _setNoneSelectionState() {
     this._blockSelectionState = { type: 'none' };
+    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
+    resetNativeSelection(null);
   }
 
   private _setSingleSelectionState(selected: Selectable, active: boolean) {
@@ -147,8 +149,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._handleClickOnSelected(selected, e);
     } else {
       this._setNoneSelectionState();
-      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
     }
   }
 
@@ -164,10 +164,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const selected = this._pick(e.x, e.y);
 
     if (selected) {
-      if (isTopLevelBlock(selected)) {
-        switch (this.blockSelectionState.type) {
-          case 'none':
-            this._setSingleSelectionState(selected, true);
+      if (this._blockSelectionState.type === 'single') {
+        if (this._blockSelectionState.selected !== selected) {
+          this._setNoneSelectionState();
+        }
+      } else {
+        if (isTopLevelBlock(selected)) {
+          this._setSingleSelectionState(selected, true);
         }
       }
     } else {
@@ -176,9 +179,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         start: new DOMPoint(e.x, e.y),
         end: new DOMPoint(e.x, e.y),
       };
-
-      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
     }
 
     const [x, y] = [e.raw.clientX, e.raw.clientY];
