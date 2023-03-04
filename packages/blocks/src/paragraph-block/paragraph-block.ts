@@ -161,9 +161,12 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   }
 
   async handleDrop(event: DragEvent) {
-    event.preventDefault();
     const files = event.dataTransfer?.files;
-    if (files) {
+    if (
+      files?.length &&
+      Array.from(files).every(file => /^image\//.test(file.type))
+    ) {
+      event.preventDefault();
       await addImageFromOutside(this.model, files);
     }
   }
