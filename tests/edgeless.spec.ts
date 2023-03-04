@@ -493,3 +493,23 @@ test('should cancel select when the selected point is outside the current select
   await page.mouse.move(150, 150);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
+
+test('shape element should not move when the selected state is inactive', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'shape');
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await setMouseMode(page, 'default');
+  await dragBetweenCoords(
+    page,
+    { x: 50, y: 50 },
+    { x: 150, y: 150 },
+    { steps: 2 }
+  );
+
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
