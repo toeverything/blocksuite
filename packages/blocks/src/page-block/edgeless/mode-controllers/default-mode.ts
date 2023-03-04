@@ -164,6 +164,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const selected = this._pick(e.x, e.y);
 
     if (selected) {
+      // See https://github.com/toeverything/blocksuite/pull/1484
       if (this._blockSelectionState.type === 'single') {
         if (this._blockSelectionState.selected !== selected) {
           this._setNoneSelectionState();
