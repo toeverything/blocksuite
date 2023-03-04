@@ -469,3 +469,27 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   const panButton = locatorPanButton(page);
   expect(await panButton.getAttribute('active')).toBeNull();
 });
+
+test('should cancel select when the selected point is outside the current selected element', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const firstStart = { x: 100, y: 100 };
+  const firstEnd = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, firstStart, firstEnd);
+
+  const secondStart = { x: 300, y: 300 };
+  const secondEnd = { x: 400, y: 400 };
+  await addBasicRectShapeElement(page, secondStart, secondEnd);
+
+  // select the first rect
+  await page.mouse.click(150, 150);
+
+  await dragBetweenCoords(page, { x: 350, y: 350 }, { x: 350, y: 450 });
+
+  await page.mouse.move(150, 150);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
