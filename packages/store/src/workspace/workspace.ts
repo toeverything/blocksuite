@@ -27,8 +27,8 @@ export interface PageMeta {
 type WorkspaceMetaFields = {
   pages: Y.Array<unknown>;
   versions: Y.Map<unknown>;
-  name: string;
-  avatar: string;
+  name?: string;
+  avatar?: string;
 };
 
 class WorkspaceMeta<
@@ -45,8 +45,6 @@ class WorkspaceMeta<
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
-        avatar: () => '',
-        name: () => '',
       },
     });
     this.origin.observeDeep(this._handleEvents);
