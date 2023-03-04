@@ -67,7 +67,6 @@ export class LangList extends NonShadowLitElement {
         box-sizing: border-box;
         color: inherit;
         background: transparent;
-        z-index: 1;
       }
 
       #filter-input:focus {
