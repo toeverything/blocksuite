@@ -251,7 +251,7 @@ test.describe('slash menu with code block', () => {
     await codeBlock.waitFor({ state: 'hidden' });
 
     await type(page, 'const a = 10;');
-    await assertRichTexts(page, ['const a = 10;\n']);
+    await assertRichTexts(page, ['const a = 10;']);
   });
 
   test('should focus on code blocks created by the slash menu', async ({
@@ -271,6 +271,6 @@ test.describe('slash menu with code block', () => {
     await codeBlock.waitFor({ state: 'hidden' });
 
     await type(page, '111');
-    await assertRichTexts(page, ['111000\n']);
+    await assertRichTexts(page, ['111000']);
   });
 });
