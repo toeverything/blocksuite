@@ -47,83 +47,6 @@ export interface SelectionArea {
   end: DOMPoint;
 }
 
-const MIN_ZOOM = 0.3;
-
-export class ViewportState {
-  private _width = 0;
-  private _height = 0;
-  private _zoom = 1.0;
-  private _centerX = 0.0;
-  private _centerY = 0.0;
-
-  get zoom() {
-    return this._zoom;
-  }
-
-  get centerX() {
-    return this._centerX;
-  }
-
-  get centerY() {
-    return this._centerY;
-  }
-
-  get viewportX() {
-    return this._centerX - this._width / 2 / this._zoom;
-  }
-
-  get viewportY() {
-    return this._centerY - this._height / 2 / this._zoom;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get height() {
-    return this._height;
-  }
-
-  toModelCoord(viewX: number, viewY: number): [number, number] {
-    return [
-      this.viewportX + viewX / this._zoom,
-      this.viewportY + viewY / this._zoom,
-    ];
-  }
-
-  toViewCoord(modelX: number, modelY: number): [number, number] {
-    return [
-      (modelX - this.viewportX) * this._zoom,
-      (modelY - this.viewportY) * this._zoom,
-    ];
-  }
-
-  setSize(width: number, height: number) {
-    this._width = width;
-    this._height = height;
-  }
-
-  setZoom(val: number) {
-    this._zoom = val;
-  }
-
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
-    this.setZoom(newZoom);
-  }
-
-  applyDeltaCenter(deltaX: number, deltaY: number) {
-    this._centerX += deltaX;
-    this._centerY += deltaY;
-  }
-
-  setCenter(centerX: number, centerY: number) {
-    this._centerX = centerX;
-    this._centerY = centerY;
-  }
-}
-
 export class EdgelessSelectionManager {
   readonly page: Page;
 
@@ -135,9 +58,9 @@ export class EdgelessSelectionManager {
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
-  private _mouseDisposeCallback: () => void;
+  private _mouseDisposeCallback: () => void = noop;
   private _selectionUpdateCallback: Disposable;
-  private _wheelDisposeCallback: () => void;
+  private _wheelDisposeCallback: () => void = noop;
 
   private _prevSelectedShapeId: string | null = null;
 
@@ -198,19 +121,8 @@ export class EdgelessSelectionManager {
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
     };
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._container,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu,
-      noop,
-      this._onSelectionChangeWithoutDebounce
-    );
+
+    this._initMouseAndWheelEvents();
     this._selectionUpdateCallback = this._container.slots.updateSelection.on(
       state => {
         if (this._prevSelectedShapeId) {
@@ -235,7 +147,28 @@ export class EdgelessSelectionManager {
         }
       }
     );
-    this._wheelDisposeCallback = initWheelEventHandlers(container);
+  }
+
+  private async _initMouseAndWheelEvents() {
+    // due to surface initializing after one frame, the events handler should register after that.
+    if (!this._container.surface) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    this._mouseDisposeCallback = initMouseEventHandlers(
+      this._container,
+      this._onContainerDragStart,
+      this._onContainerDragMove,
+      this._onContainerDragEnd,
+      this._onContainerClick,
+      this._onContainerDblClick,
+      this._onContainerMouseMove,
+      this._onContainerMouseOut,
+      this._onContainerContextMenu,
+      noop,
+      this._onSelectionChangeWithoutDebounce
+    );
+
+    this._wheelDisposeCallback = initWheelEventHandlers(this._container);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {

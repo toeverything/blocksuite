@@ -86,9 +86,10 @@ function addShapeElements(surface: SurfaceManager) {
 
 function main() {
   const doc = new Y.Doc();
-  const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+  const container = document.querySelector('#container') as HTMLDivElement;
   const yContainer = doc.getMap('container');
-  const surface = new SurfaceManager(canvas, yContainer);
+  const surface = new SurfaceManager(yContainer);
+  surface.attach(container);
 
   surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
   surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
@@ -101,7 +102,7 @@ function main() {
   // initMockData(surface, 100, 1000, 1000);
 
   surface.initDefaultGestureHandler();
-  canvas.addEventListener('click', e => testClick(surface, e));
+  container.addEventListener('click', e => testClick(surface, e));
 
   // @ts-ignore
   window.surface = surface;

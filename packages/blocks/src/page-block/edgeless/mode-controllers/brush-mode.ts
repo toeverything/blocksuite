@@ -36,9 +36,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._page.captureSync();
+    const { viewport } = this._edgeless.surface;
 
     // create a shape block when drag start
-    const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const { color, lineWidth } = this.mouseMode;
     const points = [[0, 0]];
 
