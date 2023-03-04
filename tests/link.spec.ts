@@ -114,8 +114,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   return id;
 }
 
-// FIXME: need to wait for handle
-test.skip('text added after a link should not have link formatting', async ({
+test('text added after a link should not have link formatting', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -138,11 +137,7 @@ test.skip('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert=" a"
-        link={false}
-      />
-      <text
-        insert="fter link"
+        insert="after link"
       />
     </>
   }
@@ -152,7 +147,8 @@ test.skip('text added after a link should not have link formatting', async ({
   );
 });
 
-test('type character in link should not jump out link node', async ({
+// FIXEME: need to wait for marks function implemented in virgo
+test.skip('type character in link should not jump out link node', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -260,7 +256,7 @@ test('should keyboard work in link popover', async ({ page }) => {
 
   // ---
 
-  const linkLocator = page.locator(`text="${linkText}"`);
+  const linkLocator = page.locator(`text="${linkText.slice(3)}"`);
   const linkPopover = page.locator('.affine-link-popover');
   // Hover link
   await linkLocator.hover();

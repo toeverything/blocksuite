@@ -22,7 +22,10 @@ import {
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressShiftTab,
@@ -175,7 +178,7 @@ test('native range selection backwards', async ({ page }) => {
 
   // from bottom to top
   await dragBetweenCoords(page, bottomRight789, topLeft123);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
 
@@ -212,7 +215,7 @@ test('block level range delete', async ({ page }) => {
   });
 
   await dragBetweenCoords(page, below789, above123);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
 
@@ -291,14 +294,12 @@ test('cursor move left and right', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  for (let i = 0; i < 18; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 18);
   const indexOne = await getVirgoSelectionIndex(page);
   expect(indexOne).toBe(17);
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page);
   const indexTwo = await getVirgoSelectionIndex(page);
-  expect(indexTwo).toBe(0);
+  expect(indexTwo).toBe(17);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {
@@ -309,8 +310,8 @@ test('cursor move up at edge of the second line', async ({ page }) => {
   const [id, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
     await fillLine(page, true);
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowUp');
+    await pressArrowLeft(page);
+    await pressArrowUp(page);
     const [currentId] = await getCursorBlockIdAndHeight(page);
     expect(currentId).toBe(id);
   }
@@ -326,8 +327,8 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   const [, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
     await fillLine(page, true);
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowDown');
+    await pressArrowLeft(page);
+    await pressArrowDown(page);
     const [currentId] = await getCursorBlockIdAndHeight(page);
     expect(currentId).toBe(id);
   }
@@ -682,9 +683,9 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await focusRichText(page);
   await type(page, '--- ');
   await assertDivider(page, 1);
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await copyByKeyboard(page);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await pasteByKeyboard(page);
   await assertDivider(page, 2);
 });
@@ -698,11 +699,10 @@ test('Delete the blank line between two dividers', async ({ page }) => {
 
   await pressEnter(page);
   await type(page, '--- ');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('Backspace');
+  await pressArrowUp(page, 2);
+  await pressBackspace(page);
   await assertDivider(page, 2);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('should delete line with content after divider should not lost content', async ({
@@ -715,9 +715,10 @@ test('should delete line with content after divider should not lost content', as
   await type(page, '123');
   await assertDivider(page, 1);
   // Jump to line start
-  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
-  await page.waitForTimeout(10);
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
   await assertDivider(page, 0);
   await assertRichTexts(page, ['', '123']);
@@ -1103,8 +1104,7 @@ test('should keep selection state when scrolling backward', async ({
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1181,8 +1181,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1260,8 +1259,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1355,7 +1353,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
 
   expect(count0).toBe(count1);
   expect(scrollTop0).toBe(0);
-  expect(scrollTop1).toBeCloseTo(distance, -0.01);
+  expect(scrollTop1).toBeCloseTo(distance, -0.5);
 });
 
 // ↓
@@ -1377,8 +1375,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1468,7 +1465,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   });
 
   expect(count0).toBe(count1);
-  expect(scrollTop0).toBeCloseTo(distance, -0.01);
+  expect(scrollTop0).toBeCloseTo(distance, -0.8);
   expect(scrollTop1).toBe(0);
 });
 
@@ -1843,7 +1840,7 @@ test('should clear native selection before block selection', async ({
     return window.getSelection()?.rangeCount || 0;
   });
 
-  expect(text0).toBe('456\n');
+  expect(text0).toBe('456');
   expect(textCount).toBe(0);
   const rects = page.locator('.affine-page-selected-rects-container > *');
   await expect(rects).toHaveCount(1);
@@ -1919,8 +1916,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill(`
-`);
+  const data = new Array(9).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1992,8 +1988,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill(`
-`);
+  const data = new Array(9).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);

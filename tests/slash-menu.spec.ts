@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 import {
+  pressBackspace,
   pressEnter,
   SHORT_KEY,
   type,
@@ -9,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
+  waitNextFrame,
 } from 'utils/actions/misc.js';
 import {
   assertAlmostEqual,
@@ -90,11 +92,12 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/_']);
 
     // And pressing backspace immediately should reappear the slash menu
-    await page.keyboard.press('Backspace');
+    await pressBackspace(page);
+    await waitNextFrame(page);
     await expect(slashMenu).toBeVisible();
 
     await type(page, '__');
-    await page.keyboard.press('Backspace');
+    await pressBackspace(page);
     await expect(slashMenu).not.toBeVisible();
   });
 

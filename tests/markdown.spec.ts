@@ -184,7 +184,7 @@ test('markdown shortcut', async ({ page }) => {
 });
 
 // TODO: need to handle
-test.skip('markdown inline-text', async ({ page }) => {
+test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -223,6 +223,7 @@ test.skip('markdown inline-text', async ({ page }) => {
   await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['~~test~~ ']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);

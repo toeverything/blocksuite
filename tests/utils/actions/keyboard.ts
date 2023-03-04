@@ -155,7 +155,7 @@ export async function fillLine(page: Page, toNext = false) {
     let nextHeight;
     // type until current block height is changed, means has new line
     do {
-      await page.keyboard.type('a');
+      await page.keyboard.type('a', { delay: 50 });
       [, nextHeight] = await getCursorBlockIdAndHeight(page);
     } while (nextHeight === height);
     if (!toNext) {

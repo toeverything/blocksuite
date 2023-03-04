@@ -36,6 +36,9 @@ export function createLink(page: Page) {
       mode: 'replace',
     });
     vEditor.setVRange(vRange);
+    setTimeout(() => {
+      createLink(page);
+    });
     return;
   }
 

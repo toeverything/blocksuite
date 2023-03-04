@@ -274,6 +274,7 @@ export function createKeyboardBindings(
   }
 
   function onBackspace(e: KeyboardEvent, vEditor: AffineVEditor) {
+    console.log(1, e, e.composedPath());
     e.stopPropagation();
     if (isCollapsedAtBlockStart(vEditor)) {
       handleLineStartBackspace(page, model);

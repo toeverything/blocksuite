@@ -351,8 +351,9 @@ export async function getSelectedTextByVirgo(page: Page) {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    // @ts-expect-error
-    const { index, length } = component.quill.getSelection();
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { index, length } = component!.vEditor!.getVRange()!;
     return component?.vEditor?.yText.toString().slice(index, length) || '';
   });
 }

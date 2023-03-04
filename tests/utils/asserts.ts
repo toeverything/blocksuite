@@ -19,6 +19,9 @@ import type {
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 import {
+  pressArrowLeft,
+  pressArrowRight,
+  pressBackspace,
   redoByKeyboard,
   SHORT_KEY,
   type,
@@ -560,7 +563,7 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await type(page, '1234');
   await expect(locator).toHaveValue('1234');
   await captureHistory(page);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await expect(locator).toHaveValue('123');
 
   // undo/redo
@@ -570,21 +573,20 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await expect(locator).toHaveValue('123');
 
   // keyboard
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Backspace');
+  await pressArrowLeft(page, 2);
+  await pressArrowRight(page, 1);
+  await pressBackspace(page);
   await expect(locator).toHaveValue('13');
 
   // copy/cut/paste
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+c`);
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
+  await pressBackspace(page);
   await expect(locator).toHaveValue('');
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
   await expect(locator).toHaveValue('13');
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
   await expect(locator).toHaveValue('');
 }
 

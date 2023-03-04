@@ -19,6 +19,7 @@ import {
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';
@@ -386,6 +387,34 @@ export class DefaultPageBlockComponent
       const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);
+
+        // handle user input
+        const blockRange = getCurrentBlockRange(this.page);
+        if (
+          !blockRange ||
+          blockRange.models.length === 0 ||
+          blockRange.type !== 'Native'
+        ) {
+          return;
+        }
+        const startBlock = blockRange.models[0];
+        const richText = getRichTextByModel(startBlock);
+        if (richText) {
+          const vEditor = richText.vEditor;
+          if (vEditor) {
+            vEditor.insertText(
+              {
+                index: blockRange.startOffset,
+                length: 0,
+              },
+              e.key
+            );
+            vEditor.setVRange({
+              index: blockRange.startOffset + 1,
+              length: 0,
+            });
+          }
+        }
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {

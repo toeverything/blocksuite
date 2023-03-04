@@ -92,6 +92,7 @@ test('blockHub card items can disappear when clicking blank area', async ({
   }, '.affine-block-hub-container[type="text"]');
 
   await page.mouse.click(bbox.left - 10, bbox.top - 10);
+  await waitNextFrame(page);
   await expect(blockHubTextContainer).toBeHidden();
 });
 

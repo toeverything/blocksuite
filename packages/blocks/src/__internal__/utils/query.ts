@@ -236,6 +236,15 @@ export function getRichTextByModel(model: BaseBlockModel) {
 
 // TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
+  // filter comment
+  if (
+    range.startContainer.nodeType === Node.COMMENT_NODE ||
+    range.endContainer.nodeType === Node.COMMENT_NODE ||
+    range.commonAncestorContainer.nodeType === Node.COMMENT_NODE
+  ) {
+    return [];
+  }
+
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
     const model = getStartModelBySelection(range);

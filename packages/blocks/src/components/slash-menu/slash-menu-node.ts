@@ -84,9 +84,9 @@ export class SlashMenu extends LitElement {
         capture: true,
       })
     );
-    this._disposableGroup.add(
-      Slot.disposableListener(richText, 'focusout', this._clickAwayListener)
-    );
+    // this._disposableGroup.add(
+    //   Slot.disposableListener(richText, 'focusout', this._clickAwayListener)
+    // );
   }
 
   override disconnectedCallback() {

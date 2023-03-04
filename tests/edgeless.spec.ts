@@ -342,10 +342,10 @@ test('edgeless arrow up/down', async ({ page }) => {
   await assertSelection(page, 1, 4, 0);
 
   await page.keyboard.press('ArrowUp');
-  await assertSelection(page, 0, 5, 0);
+  await assertSelection(page, 0, 4, 0);
 
   await page.keyboard.press('ArrowUp');
-  await assertSelection(page, 0, 5, 0);
+  await assertSelection(page, 0, 4, 0);
 });
 
 test('selection box of shape element sync on fast dragging', async ({

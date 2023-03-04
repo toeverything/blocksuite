@@ -41,6 +41,7 @@ export class VEditor<
   ): TextPoint | null {
     let text: Text | null = null;
     let textOffset = offset;
+
     if (isVText(node)) {
       text = node;
       textOffset = offset;
@@ -57,6 +58,69 @@ export class VEditor<
         if (textNode) {
           text = textNode;
           textOffset = 0;
+        }
+      }
+    } else if (isVRoot(node)) {
+      const firstLineElement = node.querySelector('virgo-line');
+      if (firstLineElement) {
+        const firstTextElement = firstLineElement.querySelector('v-text');
+        if (firstTextElement) {
+          const textNode = getTextNodeFromElement(firstTextElement);
+          if (textNode) {
+            text = textNode;
+            textOffset = 0;
+          }
+        }
+      }
+    } else {
+      if (node instanceof Node) {
+        const vLine = node.parentElement?.closest('virgo-line');
+        if (vLine) {
+          const vTexts = Array.from(vLine.querySelectorAll('v-text'));
+          for (let i = 0; i < vTexts.length; i++) {
+            if (
+              node.compareDocumentPosition(vTexts[i]) ===
+                Node.DOCUMENT_POSITION_CONTAINED_BY ||
+              node.compareDocumentPosition(vTexts[i]) === 20
+            ) {
+              text = getTextNodeFromElement(vTexts[0]);
+              if (!text) return null;
+              textOffset = 0;
+              break;
+            }
+
+            if (
+              i === 0 &&
+              node.compareDocumentPosition(vTexts[i]) ===
+                Node.DOCUMENT_POSITION_FOLLOWING
+            ) {
+              text = getTextNodeFromElement(vTexts[i]);
+              if (!text) return null;
+              textOffset = 0;
+              break;
+            } else if (
+              i === vTexts.length - 1 &&
+              node.compareDocumentPosition(vTexts[i]) ===
+                Node.DOCUMENT_POSITION_PRECEDING
+            ) {
+              text = getTextNodeFromElement(vTexts[i]);
+              if (!text) return null;
+              textOffset = calculateTextLength(text);
+              break;
+            }
+
+            if (
+              i < vTexts.length - 1 &&
+              node.compareDocumentPosition(vTexts[i]) ===
+                Node.DOCUMENT_POSITION_PRECEDING &&
+              node.compareDocumentPosition(vTexts[i + 1]) ===
+                Node.DOCUMENT_POSITION_FOLLOWING
+            ) {
+              text = getTextNodeFromElement(vTexts[i]);
+              if (!text) return null;
+              textOffset = calculateTextLength(text);
+            }
+          }
         }
       }
     }
@@ -334,23 +398,30 @@ export class VEditor<
 
   getTextPoint(rangeIndex: VRange['index']): TextPoint {
     assertExists(this._rootElement);
-    const textElements = Array.from(
-      this._rootElement.querySelectorAll('[data-virgo-text="true"]')
-    );
+
+    const vLines = Array.from(this._rootElement.querySelectorAll('virgo-line'));
 
     let index = 0;
-    for (const textElement of textElements) {
-      if (!textElement.textContent) {
-        throw new Error('text element should have textContent');
-      }
-      if (index + textElement.textContent.length >= rangeIndex) {
-        const text = getTextNodeFromElement(textElement);
-        if (!text) {
-          throw new Error('text node should have text content');
+    for (const vLine of vLines) {
+      const textElements = Array.from(
+        vLine.querySelectorAll('virgo-unit-text')
+      );
+
+      for (const textElement of textElements) {
+        if (!textElement.textContent) {
+          throw new Error('text element should have textContent');
         }
-        return [text, rangeIndex - index];
+        if (index + textElement.textContent.length >= rangeIndex) {
+          const text = getTextNodeFromElement(textElement);
+          if (!text) {
+            throw new Error('text node should have text content');
+          }
+          return [text, rangeIndex - index];
+        }
+        index += textElement.textContent.length;
       }
-      index += textElement.textContent.length;
+
+      index += 1;
     }
 
     throw new Error('failed to find leaf');
@@ -988,9 +1059,11 @@ function isVElement(element: unknown): element is HTMLElement {
 }
 
 function isVLine(element: unknown): element is HTMLElement {
-  return (
-    element instanceof HTMLElement && element.parentElement instanceof VirgoLine
-  );
+  return element instanceof HTMLElement && element instanceof VirgoLine;
+}
+
+function isVRoot(element: unknown): element is HTMLElement {
+  return element instanceof HTMLElement && element.dataset.virgoRoot === 'true';
 }
 
 function findDocumentOrShadowRoot<TextAttributes extends BaseTextAttributes>(

@@ -166,8 +166,14 @@ export function convertToDivider(
     };
     // space.deleteBlock(model);
     page.addBlock(blockProps, parent, index);
-    const id = page.id;
-    asyncFocusRichText(page, id);
+
+    const nextBlock = parent.children[index + 1];
+    if (nextBlock) {
+      asyncFocusRichText(page, nextBlock.id);
+    } else {
+      const nextId = page.addBlockByFlavour('affine:paragraph', {}, parent);
+      asyncFocusRichText(page, nextId);
+    }
   }
   return true;
 }

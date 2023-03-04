@@ -114,6 +114,10 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   async onDelayHover(e: MouseEvent) {
+    if (!(e.target instanceof HTMLElement) || !document.contains(e.target)) {
+      return;
+    }
+
     const text = this.unitText.str;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,

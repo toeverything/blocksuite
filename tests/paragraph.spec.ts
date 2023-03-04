@@ -491,12 +491,12 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await type(page, '123');
   await pressEnter(page);
   await page.keyboard.press('Tab');
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
   await type(page, '456');
   await focusRichText(page, 0);
   await pressEnter(page);
   await page.keyboard.press('Backspace');
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
   await type(page, 'now');
 
   // TODO FIXME wait for frame bounding box update

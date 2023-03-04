@@ -126,7 +126,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
-  await pageB.keyboard.type('hello');
+  await type(pageB, 'hello');
   await slot;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
