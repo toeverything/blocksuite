@@ -211,7 +211,9 @@ class WorkspaceMeta<
         hasKey('pages')
       ) {
         this._handlePageEvent();
-      } else if (hasKey('name') || hasKey('avatar')) {
+      }
+
+      if (hasKey('name') || hasKey('avatar')) {
         this._handleCommonFieldsEvent();
       }
     });
