@@ -26,8 +26,8 @@ export class SurfaceManager {
   private _elements = new Map<string, PhasorElement>();
   private _lastIndex = 'a0';
 
-  constructor(yContainer: Y.Map<unknown>, root?: HTMLElement) {
-    this._renderer = new Renderer(root);
+  constructor(yContainer: Y.Map<unknown>) {
+    this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
 
     this._syncFromExistingContainer();
@@ -38,8 +38,8 @@ export class SurfaceManager {
     return this._renderer;
   }
 
-  attach(root: HTMLElement) {
-    this._renderer.attach(root);
+  attach(container: HTMLElement) {
+    this._renderer.attach(container);
   }
 
   getElementsBound(): IBound | null {
@@ -275,8 +275,7 @@ export class SurfaceManager {
   /** @internal Only for testing */
   initDefaultGestureHandler() {
     const { _renderer } = this;
-    const mouseRoot = _renderer.canvas;
-    mouseRoot.addEventListener('wheel', e => {
+    _renderer.canvas.addEventListener('wheel', e => {
       e.preventDefault();
       // pan
       if (!e.ctrlKey) {

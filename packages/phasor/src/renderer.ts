@@ -1,3 +1,5 @@
+import { assertNotExists } from '@blocksuite/global/utils';
+
 import { MIN_ZOOM } from './consts.js';
 import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
@@ -26,7 +28,7 @@ export class Renderer implements SurfaceViewport {
   ctx: CanvasRenderingContext2D;
   gridManager = new GridManager();
 
-  private _root!: HTMLElement;
+  private _container!: HTMLElement;
   private _width = 0;
   private _height = 0;
 
@@ -37,12 +39,9 @@ export class Renderer implements SurfaceViewport {
 
   private _resizeObserver!: ResizeObserver;
 
-  constructor(root?: HTMLElement) {
+  constructor() {
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    if (root) {
-      this.attach(root);
-    }
   }
 
   get width() {
@@ -125,36 +124,41 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
-  attach(root: HTMLElement) {
-    if (this._root) {
-      throw new Error('Phasor is attached multiple times');
-    }
-    this._root = root;
-    root.appendChild(this.canvas);
+  attach(container: HTMLElement) {
+    assertNotExists(
+      this._container,
+      'Phasor surface is attached multiple times'
+    );
 
-    this._initSize();
-    this._loop();
+    this._container = container;
+    container.appendChild(this.canvas);
 
-    this._resizeObserver = new ResizeObserver(() => {
-      const oldWidth = this.width;
-      const oldHeight = this.height;
-
-      this._initSize();
-
-      this.setCenter(
-        this._centerX - (oldWidth - this.width) / 2,
-        this._centerY - (oldHeight - this.height) / 2
-      );
-
-      // Re-render once canvas's size changed. Otherwise, it will flicker.
-      // Because the observer is called after the element rendered, but the canvas's content is not flush.
-      this._render();
-      this._shouldUpdate = false;
-    });
+    this._resetSize();
+    this._resizeObserver = new ResizeObserver(() => this._onResize());
     this._resizeObserver.observe(this.canvas);
+
+    this._loop();
   }
 
-  private _initSize() {
+  private _onResize() {
+    const oldWidth = this.width;
+    const oldHeight = this.height;
+
+    this._resetSize();
+
+    this.setCenter(
+      this._centerX - (oldWidth - this.width) / 2,
+      this._centerY - (oldHeight - this.height) / 2
+    );
+
+    // Re-render once the canvas size changed. Otherwise it will flicker.
+    // Because the observer will be called after DOM element rendered,
+    // by the time the canvas content is stale.
+    this._render();
+    this._shouldUpdate = false;
+  }
+
+  private _resetSize() {
     const { canvas } = this;
     const dpr = window.devicePixelRatio;
 
