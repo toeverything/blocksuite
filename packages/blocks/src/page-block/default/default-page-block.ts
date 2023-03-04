@@ -211,8 +211,10 @@ export class DefaultPageBlockComponent
     const title = model.title;
 
     this._titleVEditor = new VEditor(title.yText);
-    this._titleVEditor.bindKeyDownHandler(this._onTitleKeyDown);
     this._titleVEditor.mount(this._titleContainer);
+    this._titleVEditor.bindHandlers({
+      keydown: this._onTitleKeyDown,
+    });
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
