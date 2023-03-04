@@ -181,7 +181,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: CodeBlockModel;
 
   @property()
@@ -199,11 +199,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   get highlight() {
     const service = this.host.getService(this.model.flavour);
     return service.hljs.default.highlight;
-  }
-
-  firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   private _onClick() {
