@@ -4,6 +4,7 @@ import type { BlockModels } from './types.js';
 
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
+export { Dom } from './utils/dom.js';
 export { Slot } from './utils/slot.js';
 export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
