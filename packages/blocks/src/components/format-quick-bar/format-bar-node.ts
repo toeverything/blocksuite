@@ -7,7 +7,6 @@ import {
   paragraphConfig,
 } from '@blocksuite/global/config';
 import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

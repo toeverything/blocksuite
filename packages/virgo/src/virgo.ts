@@ -214,7 +214,7 @@ export class VEditor<
           const vRange = this._vRange;
           if (vRange) {
             this.insertText(vRange, data);
-            this.signals.updateVRange.emit([
+            this.slots.updateVRange.emit([
               {
                 index: vRange.index + data.length,
                 length: 0,
