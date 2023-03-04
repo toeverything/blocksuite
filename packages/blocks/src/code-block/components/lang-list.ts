@@ -106,6 +106,7 @@ export class LangList extends NonShadowLitElement {
     // Avoid triggering click away listener on initial render
     requestAnimationFrame(() => {
       document.addEventListener('click', this._clickAwayListener);
+      this.filterInput.focus();
     });
   }
 
@@ -149,7 +150,6 @@ export class LangList extends NonShadowLitElement {
         <div class="search-icon">${SearchIcon}</div>
         <input
           id="filter-input"
-          autofocus
           type="text"
           placeholder="Search"
           @input=${() => (this._filterText = this.filterInput?.value)}
