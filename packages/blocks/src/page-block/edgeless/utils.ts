@@ -1,4 +1,4 @@
-import type { SurfaceElement, ViewportState } from '@blocksuite/phasor';
+import type { SurfaceElement, SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
@@ -48,7 +48,7 @@ export function pick(
   return null;
 }
 
-export function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
+export function getSelectionBoxBound(viewport: SurfaceViewport, xywh: string) {
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const [x, y] = viewport.toViewCoord(modelX, modelY);
   return new DOMRect(x, y, modelW * viewport.zoom, modelH * viewport.zoom);

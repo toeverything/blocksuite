@@ -43,7 +43,6 @@ import {
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
-  readonly mouseRoot: HTMLElement;
   readonly surface: SurfaceManager;
   readonly slots: {
     hoverUpdated: Slot;
@@ -96,9 +95,6 @@ export class EdgelessPageBlockComponent
 
   @property()
   readonly = false;
-
-  @property()
-  mouseRoot!: HTMLElement;
 
   @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
@@ -235,8 +231,6 @@ export class EdgelessPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-    }
-    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
     if (changedProperties.has('mouseMode')) {

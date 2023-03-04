@@ -15,7 +15,7 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
-import type { ViewportState } from './renderer.js';
+import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
@@ -34,39 +34,8 @@ export class SurfaceManager {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  get viewport(): ViewportState {
-    const {
-      width,
-      height,
-      centerX,
-      centerY,
-      zoom,
-      viewportX,
-      viewportY,
-      toModelCoord,
-      toViewCoord,
-      setCenter,
-      setZoom,
-      applyDeltaZoom,
-      applyDeltaCenter,
-    } = this._renderer;
-    return {
-      width,
-      height,
-      centerX,
-      centerY,
-      zoom,
-      viewportX,
-      viewportY,
-
-      toModelCoord,
-      toViewCoord,
-
-      setCenter,
-      setZoom,
-      applyDeltaZoom,
-      applyDeltaCenter,
-    };
+  get viewport(): SurfaceViewport {
+    return this._renderer;
   }
 
   attach(root: HTMLElement) {

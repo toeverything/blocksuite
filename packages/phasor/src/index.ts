@@ -2,7 +2,7 @@
 
 export type { Color, StrokeStyle } from './consts.js';
 export * from './elements/index.js';
-export type { ViewportState } from './renderer.js';
+export type { SurfaceViewport } from './renderer.js';
 export { Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';

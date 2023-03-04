@@ -3,7 +3,7 @@ import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
-export interface ViewportState {
+export interface SurfaceViewport {
   readonly width: number;
   readonly height: number;
   readonly centerX: number;
@@ -21,12 +21,12 @@ export interface ViewportState {
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
-export class Renderer implements ViewportState {
-  root?: HTMLElement;
+export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   gridManager = new GridManager();
 
+  private _root!: HTMLElement;
   private _width = 0;
   private _height = 0;
 
@@ -35,7 +35,7 @@ export class Renderer implements ViewportState {
   private _centerY = 0.0;
   private _shouldUpdate = false;
 
-  private _canvasResizeObserver!: ResizeObserver;
+  private _resizeObserver!: ResizeObserver;
 
   constructor(root?: HTMLElement) {
     this.canvas = document.createElement('canvas');
@@ -73,36 +73,36 @@ export class Renderer implements ViewportState {
     return this.centerY - this.height / 2 / this._zoom;
   }
 
-  toModelCoord = (viewX: number, viewY: number): [number, number] => {
+  toModelCoord(viewX: number, viewY: number): [number, number] {
     return [
       this.viewportX + viewX / this._zoom,
       this.viewportY + viewY / this._zoom,
     ];
-  };
+  }
 
-  toViewCoord = (logicalX: number, logicalY: number): [number, number] => {
+  toViewCoord(logicalX: number, logicalY: number): [number, number] {
     return [
       (logicalX - this.viewportX) * this._zoom,
       (logicalY - this.viewportY) * this._zoom,
     ];
-  };
+  }
 
-  setCenter = (centerX: number, centerY: number) => {
+  setCenter(centerX: number, centerY: number) {
     this._centerX = centerX;
     this._centerY = centerY;
     this._shouldUpdate = true;
-  };
+  }
 
-  setZoom = (zoom: number) => {
+  setZoom(zoom: number) {
     this._zoom = zoom;
     this._shouldUpdate = true;
-  };
+  }
 
-  applyDeltaZoom = (delta: number) => {
+  applyDeltaZoom(delta: number) {
     const val = (this.zoom * (100 + delta)) / 100;
     const newZoom = Math.max(val, MIN_ZOOM);
     this.setZoom(newZoom);
-  };
+  }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {
     this.setCenter(this._centerX + deltaX, this._centerY + deltaY);
@@ -126,17 +126,16 @@ export class Renderer implements ViewportState {
   }
 
   attach(root: HTMLElement) {
-    if (this.root) {
+    if (this._root) {
       throw new Error('Phasor is attached multiple times');
     }
-    this.root = root;
+    this._root = root;
     root.appendChild(this.canvas);
 
     this._initSize();
-
     this._loop();
 
-    this._canvasResizeObserver = new ResizeObserver(() => {
+    this._resizeObserver = new ResizeObserver(() => {
       const oldWidth = this.width;
       const oldHeight = this.height;
 
@@ -152,7 +151,7 @@ export class Renderer implements ViewportState {
       this._render();
       this._shouldUpdate = false;
     });
-    this._canvasResizeObserver.observe(this.canvas);
+    this._resizeObserver.observe(this.canvas);
   }
 
   private _initSize() {
@@ -219,6 +218,6 @@ export class Renderer implements ViewportState {
   }
 
   dispose() {
-    this._canvasResizeObserver.disconnect();
+    this._resizeObserver.disconnect();
   }
 }

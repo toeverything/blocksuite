@@ -1,6 +1,6 @@
 import '../../__internal__/index.js';
 
-import type { ViewportState, XYWH } from '@blocksuite/phasor';
+import type { SurfaceViewport, XYWH } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -153,7 +153,7 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 function EdgelessBlockChild(
   model: TopLevelBlockModel,
   host: BlockHost,
-  viewport: ViewportState
+  viewport: SurfaceViewport
 ) {
   const { xywh } = model;
   const isSurfaceElement = false;
@@ -186,7 +186,7 @@ function EdgelessBlockChild(
 export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
-  viewport: ViewportState
+  viewport: SurfaceViewport
 ) {
   return html`
     ${repeat(
@@ -209,7 +209,7 @@ export class EdgelessSelectedRect extends LitElement {
   lock!: boolean;
 
   @property()
-  viewport!: ViewportState;
+  viewport!: SurfaceViewport;
 
   @property({ type: Number })
   zoom!: number;
