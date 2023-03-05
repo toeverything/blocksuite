@@ -16,8 +16,29 @@ export type PageSelectionType =
   | 'embed'
   | 'database';
 
+export interface PageViewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  clientWidth: number;
+  // scrollWidth: number,
+}
+
 export class PageSelectionState {
   type: PageSelectionType;
+  viewport: PageViewport = {
+    left: 0,
+    top: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+    scrollHeight: 0,
+    clientHeight: 0,
+    clientWidth: 0,
+  };
+
   selectedEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: BlockComponentElement[] = [];
   // -1: SELECT_ALL
