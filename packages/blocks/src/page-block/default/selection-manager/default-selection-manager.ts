@@ -41,10 +41,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../utils.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import {
-  PageSelectionState,
-  type PageSelectionType,
-} from './selection-state.js';
+import { PageSelectionState } from './selection-state.js';
 import {
   clearSubtree,
   createDraggingArea,
@@ -115,10 +112,6 @@ export class DefaultSelectionManager {
    */
   private get _allowSelectedBlocks(): BaseBlockModel[] {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
-  }
-
-  setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
-    setSelectedBlocks(this.state, this.slots, selectedBlocks);
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -658,30 +651,8 @@ export class DefaultSelectionManager {
     setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
   }
 
-  // Called on clicking on the prefix icon of list block
-  resetSelectedBlockByRect(
-    blockElement: BlockComponentElement,
-    pageSelectionType: PageSelectionType = 'block'
-  ) {
-    this.setFocusedBlockIndexByElement(blockElement);
-
-    const { blockCache, focusedBlockIndex } = this.state;
-
-    if (focusedBlockIndex === -1) {
-      return;
-    }
-
-    this.state.type = pageSelectionType;
-    this.state.refreshBlockRectCache();
-
-    const boundRect = blockCache.get(blockElement) as DOMRect;
-    const selectedBlocks = filterSelectedBlockByIndex(
-      blockCache,
-      focusedBlockIndex
-    );
-
-    // only current focused-block
-    setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
+  setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
+    setSelectedBlocks(this.state, this.slots, selectedBlocks);
   }
 
   // Called on `CMD-A`
