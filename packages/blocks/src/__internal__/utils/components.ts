@@ -1,11 +1,14 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import '../../components/loader.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BLOCK_ID_ATTR,
+} from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { matchFlavours } from '@blocksuite/store';
 import { repeat } from 'lit/directives/repeat.js';
-import { html } from 'lit/static-html.js';
+import { html, unsafeStatic } from 'lit/static-html.js';
 
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
@@ -30,6 +33,7 @@ export function BlockElement(
         <${model.tag}
           .model=${model}
           .host=${host}
+          ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
         ></${model.tag}>
       `;
     case 'affine:embed':
@@ -47,6 +51,7 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
         <affine-image
           .model=${model as EmbedBlockModel}
           .host=${host}
+          ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
         ></affine-image>
       `;
     default:
@@ -70,7 +75,7 @@ export function BlockElementWithService(
       state.then(() => {
         onLoaded();
       });
-      return html` <loader-element .hostModel=${model}> </loader-element> `;
+      return html`<loader-element .hostModel=${model}></loader-element>`;
     }
 
     return BlockElement(model, host);
