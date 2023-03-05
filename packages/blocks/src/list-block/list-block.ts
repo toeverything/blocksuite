@@ -16,14 +16,14 @@ import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 function selectList(model: ListBlockModel) {
-  const selectionManager = getDefaultPageBlock(model).selection;
+  const { selection } = getDefaultPageBlock(model);
 
   const blockElement = getBlockElementByModel(model);
   if (!blockElement) {
     console.error('list block model:', model, 'blockElement:', blockElement);
     throw new Error('Failed to select list! blockElement not found!');
   }
-  selectionManager.resetSelectedBlockByRect(blockElement);
+  selection.resetSelectedBlockByRect(blockElement);
 }
 
 @customElement('affine-list')

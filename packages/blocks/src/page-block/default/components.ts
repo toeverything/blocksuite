@@ -146,7 +146,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click=${() => {
             focusCaption(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}
         >
           ${CaptionIcon}
@@ -183,7 +183,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click="${() => {
             model.page.deleteBlock(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}"
         >
           ${DeleteIcon}

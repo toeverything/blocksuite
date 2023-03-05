@@ -56,7 +56,7 @@ export class BlockHub extends NonShadowLitElement {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  updateSelectedRectsSlot: Slot<DOMRect[]> | null = null;
+  selectedRectsUpdated: Slot<DOMRect[]> | null = null;
 
   @property()
   blockHubStatusUpdated: Slot<boolean> = new Slot<boolean>();
@@ -664,7 +664,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this.updateSelectedRectsSlot && this.updateSelectedRectsSlot.emit([]);
+    this.selectedRectsUpdated && this.selectedRectsUpdated.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {

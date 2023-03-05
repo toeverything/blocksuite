@@ -54,8 +54,7 @@ export const createBlockHub: (
   if (editor.mode === 'page') {
     const defaultPageBlock = editor.querySelector('affine-default-page');
     assertExists(defaultPageBlock);
-    blockHub.updateSelectedRectsSlot =
-      defaultPageBlock.slots.updateSelectedRects;
+    blockHub.selectedRectsUpdated = defaultPageBlock.slots.selectedRectsUpdated;
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(defaultPageBlock.model);
   } else {
