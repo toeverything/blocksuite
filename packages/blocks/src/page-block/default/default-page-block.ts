@@ -31,7 +31,7 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components.js';
-import { DefaultSelectionManager } from './selection-manager.js';
+import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
   getAllowSelectedBlocks,
@@ -132,6 +132,7 @@ export class DefaultPageBlockComponent
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
+
   getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
