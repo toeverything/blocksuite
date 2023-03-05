@@ -623,7 +623,7 @@ test('selection on heavy page', async ({ page }) => {
     {
       beforeMouseUp: async () => {
         const rect = await page
-          .locator('.affine-page-frame-selection-rect')
+          .locator('.affine-page-dragging-area')
           .evaluate(element => element.getBoundingClientRect());
         assertAlmostEqual(rect.x, first.x - 1, 1);
         assertAlmostEqual(rect.y, first.y - 1, 1);
