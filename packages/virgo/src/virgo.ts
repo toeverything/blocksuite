@@ -505,6 +505,7 @@ export class VEditor<
   }
 
   setReadOnly(isReadOnly: boolean): void {
+    this.rootElement.contentEditable = isReadOnly ? 'false' : 'true';
     this._isReadOnly = isReadOnly;
   }
 

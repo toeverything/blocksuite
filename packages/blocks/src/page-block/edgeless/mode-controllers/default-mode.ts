@@ -44,9 +44,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     return selectedShape ? selectedShape : pick(this._blocks, modelX, modelY);
   }
 
-  private _updateFrameSelectionState(x: number, y: number) {
-    if (this._frameSelectionState) {
-      this._frameSelectionState.end = new DOMPoint(x, y);
+  private _updateDraggingArea(x: number, y: number) {
+    if (this._draggingArea) {
+      this._draggingArea.end = new DOMPoint(x, y);
     }
     if (this._hoverState) {
       this._setSingleSelectionState(this._hoverState.content, false);
@@ -178,7 +178,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
     } else {
       this._setNoneSelectionState();
-      this._frameSelectionState = {
+      this._draggingArea = {
         start: new DOMPoint(e.x, e.y),
         end: new DOMPoint(e.x, e.y),
       };
@@ -211,7 +211,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         }
 
         // Is frame-dragging over a non-active frame
-        if (this._frameSelectionState) {
+        if (this._draggingArea) {
           noop();
         }
         // Is dragging a selected (but not active) frame, move it
@@ -221,8 +221,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
     }
 
-    if (this._frameSelectionState) {
-      this._updateFrameSelectionState(e.x, e.y);
+    if (this._draggingArea) {
+      this._updateDraggingArea(e.x, e.y);
     }
     this._dragLastPos = {
       x: e.raw.clientX,
@@ -255,11 +255,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     } else if (this.blockSelectionState.type === 'single') {
-      if (!this._frameSelectionState) {
+      if (!this._draggingArea) {
         this._page.captureSync();
       }
     }
-    this._frameSelectionState = null;
+    this._draggingArea = null;
   }
 
   onContainerMouseMove(e: SelectionEvent) {
@@ -278,7 +278,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   // Selection rect can be used for both top-level blocks and surface elements
-  syncSelectionRect() {
+  syncDraggingArea() {
     const { viewport } = this._edgeless.surface;
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;

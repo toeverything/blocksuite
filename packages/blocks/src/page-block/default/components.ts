@@ -12,7 +12,7 @@ import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
-  DefaultPageSlots,
+  DefaulSelectionSlots,
   EmbedEditingState,
   ViewportState,
 } from './default-page-block.js';
@@ -25,7 +25,7 @@ import {
   toggleWrap,
 } from './utils.js';
 
-export function FrameSelectionRect(rect: DOMRect | null) {
+export function DraggingArea(rect: DOMRect | null) {
   if (rect === null) return null;
 
   const style = {
@@ -36,17 +36,14 @@ export function FrameSelectionRect(rect: DOMRect | null) {
   };
   return html`
     <style>
-      .affine-page-frame-selection-rect {
+      .affine-page-dragging-area {
         position: absolute;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
       }
     </style>
-    <div
-      class="affine-page-frame-selection-rect"
-      style=${styleMap(style)}
-    ></div>
+    <div class="affine-page-dragging-area" style=${styleMap(style)}></div>
   `;
 }
 
@@ -116,7 +113,7 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  slots: DefaultPageSlots,
+  slots: DefaulSelectionSlots,
   viewportState: ViewportState
 ) {
   if (!embedEditingState) return null;

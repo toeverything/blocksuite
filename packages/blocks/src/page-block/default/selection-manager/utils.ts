@@ -1,4 +1,9 @@
+import { getCurrentBlockRange } from '@blocksuite/blocks';
+import type { Page, UserRange } from '@blocksuite/store';
+
+import { getModelByElement } from '../../../__internal__/index.js';
 import type { BlockComponentElement, IPoint } from '../../../std.js';
+import type { PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -29,10 +34,10 @@ function contains(parent: Element, node: Element) {
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
 // for more context.
 //
-// The `selectionRect` is a rect of drag-and-drop selection.
+// The `bound` is a rect of drag-and-drop selection.
 export function filterSelectedBlockWithoutSubtree(
   blockCache: Map<BlockComponentElement, DOMRect>,
-  selectionRect: DOMRect,
+  bound: DOMRect,
   offset: IPoint
 ) {
   const entries = Array.from(blockCache.entries());
@@ -46,7 +51,7 @@ export function filterSelectedBlockWithoutSubtree(
 
   for (let i = 0; i < len; i++) {
     const [block, rect] = entries[i];
-    if (intersects(rect, selectionRect, offset)) {
+    if (intersects(rect, bound, offset)) {
       if (prevIndex === -1) {
         prevIndex = i;
       } else {
@@ -94,11 +99,11 @@ export function filterSelectedBlockWithoutSubtree(
 }
 
 // Find the current focused block and its substree.
-// The `selectionRect` is a rect of block element.
+// The `bound` is a rect of block element.
 export function filterSelectedBlockByIndexAndBound(
   blockCache: Map<BlockComponentElement, DOMRect>,
   focusedBlockIndex: number,
-  selectionRect: DOMRect,
+  bound: DOMRect,
   offset: IPoint = {
     x: 0,
     y: 0,
@@ -127,7 +132,7 @@ export function filterSelectedBlockByIndexAndBound(
       const richText = block.querySelector('rich-text');
       const nextRect = richText?.getBoundingClientRect() || rect;
 
-      if (nextRect && intersects(rect, selectionRect, offset)) {
+      if (nextRect && intersects(rect, bound, offset)) {
         prevBlock = block;
         results.push(block);
       }
@@ -208,19 +213,7 @@ export function findBlocksWithSubtree(
   return results;
 }
 
-// TODO
-// function filterSelectedEmbed(
-//   embedCache: Map<EmbedBlockComponent, DOMRect>,
-//   selectionRect: DOMRect
-// ): EmbedBlockComponent[] {
-//   const embeds = Array.from(embedCache.keys());
-//   return embeds.filter(embed => {
-//     const rect = embed.getBoundingClientRect();
-//     return intersects(rect, selectionRect);
-//   });
-// }
-
-export function createSelectionRect(
+export function createDraggingArea(
   current: { x: number; y: number },
   start: { x: number; y: number }
 ) {
@@ -229,4 +222,48 @@ export function createSelectionRect(
   const left = Math.min(current.x, start.x);
   const top = Math.min(current.y, start.y);
   return new DOMRect(left, top, width, height);
+}
+
+export function computeSelectionType(
+  selectedBlocks: Element[],
+  selectionType?: PageSelectionType
+) {
+  let newSelectionType: PageSelectionType = selectionType ?? 'native';
+  const isOnlyBlock = selectedBlocks.length === 1;
+  for (const block of selectedBlocks) {
+    if (selectionType) continue;
+    if (!('model' in block)) continue;
+
+    // Calculate selection type
+    const model = getModelByElement(block);
+    newSelectionType = 'block';
+
+    // Other selection types are possible if only one block is selected
+    if (!isOnlyBlock) continue;
+
+    const flavour = model.flavour;
+    switch (flavour) {
+      case 'affine:embed': {
+        newSelectionType = 'embed';
+        break;
+      }
+      case 'affine:database': {
+        newSelectionType = 'database';
+        break;
+      }
+    }
+  }
+  return newSelectionType;
+}
+
+export function updateLocalSelectionRange(page: Page) {
+  const blockRange = getCurrentBlockRange(page);
+  if (blockRange && blockRange.type === 'Native') {
+    const userRange: UserRange = {
+      startOffset: blockRange.startOffset,
+      endOffset: blockRange.endOffset,
+      blockIds: blockRange.models.map(m => m.id),
+    };
+    page.awarenessStore.setLocalRange(page, userRange);
+  }
 }

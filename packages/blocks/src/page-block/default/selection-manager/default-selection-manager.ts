@@ -1,8 +1,7 @@
 import '../../../components/drag-handle.js';
 
-import { getCurrentBlockRange } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { Page, UserRange } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
@@ -10,7 +9,6 @@ import {
   getBlockElementByModel,
   getCurrentNativeRange,
   getDefaultPageBlock,
-  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -33,8 +31,8 @@ import {
   repairContextMenuRange,
 } from '../../utils/position.js';
 import type {
+  DefaulSelectionSlots,
   DefaultPageBlockComponent,
-  DefaultPageSlots,
   EmbedEditingState,
   ViewportState,
 } from '../default-page-block.js';
@@ -49,20 +47,25 @@ import {
 } from './selection-state.js';
 import {
   clearSubtree,
-  createSelectionRect,
+  computeSelectionType,
+  createDraggingArea,
   filterSelectedBlockByIndex,
   filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
   findBlocksWithSubtree,
+  updateLocalSelectionRange,
 } from './utils.js';
 
+/**
+ * The selection manager used in default mode.
+ */
 export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
   private readonly _mouseRoot: HTMLElement;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
-  private readonly _slots: DefaultPageSlots;
+  private readonly _slots: DefaulSelectionSlots;
   private readonly _embedResizeManager: EmbedResizeManager;
   private readonly _threshold: number; // distance to the upper and lower boundaries of the viewport
 
@@ -75,7 +78,7 @@ export class DefaultSelectionManager {
   }: {
     page: Page;
     mouseRoot: HTMLElement;
-    slots: DefaultPageSlots;
+    slots: DefaulSelectionSlots;
     container: DefaultPageBlockComponent;
     threshold: number;
   }) {
@@ -113,38 +116,6 @@ export class DefaultSelectionManager {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
-  private _computeSelectionType(
-    selectedBlocks: Element[],
-    selectionType?: PageSelectionType
-  ): PageSelectionType {
-    let newSelectionType: PageSelectionType = selectionType ?? 'native';
-    const isOnlyBlock = selectedBlocks.length === 1;
-    for (const block of selectedBlocks) {
-      if (selectionType) continue;
-      if (!('model' in block)) continue;
-
-      // Calculate selection type
-      const model = getModelByElement(block);
-      newSelectionType = 'block';
-
-      // Other selection types are possible if only one block is selected
-      if (!isOnlyBlock) continue;
-
-      const flavour = model.flavour;
-      switch (flavour) {
-        case 'affine:embed': {
-          newSelectionType = 'embed';
-          break;
-        }
-        case 'affine:database': {
-          newSelectionType = 'database';
-          break;
-        }
-      }
-    }
-    return newSelectionType;
-  }
-
   setSelectedBlocks(
     selectedBlocks: BlockComponentElement[],
     rects?: DOMRect[],
@@ -163,7 +134,7 @@ export class DefaultSelectionManager {
       calculatedRects.push(block.getBoundingClientRect());
     }
 
-    const newSelectionType = this._computeSelectionType(
+    const newSelectionType = computeSelectionType(
       selectedBlocks,
       selectionType
     );
@@ -192,7 +163,7 @@ export class DefaultSelectionManager {
     let { scrollTop } = viewportState;
     const max = scrollHeight - clientHeight;
 
-    this.state.setEndPoint({ x: x + scrollLeft, y: y + scrollTop });
+    this.state.updateEndPoint({ x: x + scrollLeft, y: y + scrollTop });
 
     const { startPoint, endPoint } = this.state;
 
@@ -217,7 +188,7 @@ export class DefaultSelectionManager {
         endPoint.y += d;
         auto = Math.ceil(scrollTop) < max;
         viewport.scrollTop = scrollTop;
-        this.updateSelectionRect(startPoint, endPoint);
+        this.updateDraggingArea(startPoint, endPoint);
       } else if (scrollTop > 0 && y < this._threshold) {
         // ↑
         const d = (y - this._threshold) * 0.25;
@@ -225,11 +196,11 @@ export class DefaultSelectionManager {
         endPoint.y += d;
         auto = scrollTop > 0;
         viewport.scrollTop = scrollTop;
-        this.updateSelectionRect(startPoint, endPoint);
+        this.updateDraggingArea(startPoint, endPoint);
       } else {
         auto = false;
-        const selectionRect = this.updateSelectionRect(startPoint, endPoint);
-        this.selecting(this.state.blockCache, selectionRect, viewportState);
+        const draggingArea = this.updateDraggingArea(startPoint, endPoint);
+        this.selecting(this.state.blockCache, draggingArea, viewportState);
       }
     };
 
@@ -239,15 +210,15 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
-    this.state.clearBlockSelectionRect();
-    this._slots.updateFrameSelectionRect.emit(null);
+    this.state.clearDraggingArea();
+    this._slots.updateDraggingArea.emit(null);
     // do not clear selected rects here
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
     this.state.resetStartRange(e);
     this.state.type = 'native';
-    this._slots.nativeSelection.emit(false);
+    this._slots.toggleNativeSelection.emit(false);
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -256,7 +227,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(_: SelectionEvent) {
-    this._slots.nativeSelection.emit(true);
+    this._slots.toggleNativeSelection.emit(true);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -546,7 +517,7 @@ export class DefaultSelectionManager {
   };
 
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
-    this.updateLocalSelection();
+    updateLocalSelectionRange(this.page);
   };
 
   // clear selection: `block`, `embed`, `native`
@@ -554,47 +525,49 @@ export class DefaultSelectionManager {
     const { state, _slots } = this;
     const { type } = state;
     if (type === 'block') {
-      state.clearBlock();
+      state.clearBlockSelection();
       _slots.updateSelectedRects.emit([]);
-      _slots.updateFrameSelectionRect.emit(null);
+      _slots.updateDraggingArea.emit(null);
     } else if (type === 'embed') {
-      state.clearEmbed();
+      state.clearEmbedSelection();
       _slots.updateEmbedRects.emit([]);
       _slots.updateEmbedEditingState.emit(null);
     } else if (type === 'native') {
-      state.clearNative();
+      state.clearNativeSelection();
     }
   }
 
   dispose() {
     this._slots.updateSelectedRects.dispose();
-    this._slots.updateFrameSelectionRect.dispose();
+    this._slots.updateDraggingArea.dispose();
     this._slots.updateEmbedEditingState.dispose();
     this._slots.updateEmbedRects.dispose();
+    this._slots.updateCodeBlockOption.dispose();
+    this._slots.toggleNativeSelection.dispose();
     this._disposables.dispose();
   }
 
-  updateSelectionRect(
+  updateDraggingArea(
     startPoint: { x: number; y: number },
     endPoint: { x: number; y: number }
   ): DOMRect {
     if (this.state.focusedBlockIndex !== -1) {
       this.state.focusedBlockIndex = -1;
     }
-    const selectionRect = createSelectionRect(endPoint, startPoint);
-    this._slots.updateFrameSelectionRect.emit(selectionRect);
-    return selectionRect;
+    const draggingArea = createDraggingArea(endPoint, startPoint);
+    this._slots.updateDraggingArea.emit(draggingArea);
+    return draggingArea;
   }
 
   selecting(
     blockCache: Map<BlockComponentElement, DOMRect>,
-    selectionRect: DOMRect,
+    draggingArea: DOMRect,
     viewportState: ViewportState
   ) {
     const { scrollLeft, scrollTop, left, top } = viewportState;
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
-      selectionRect,
+      draggingArea,
       // subtracting the left/top of the container is required.
       {
         y: scrollTop - top,
@@ -620,17 +593,17 @@ export class DefaultSelectionManager {
     }
   }
 
-  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
+  refreshDragingArea(viewportState: ViewportState) {
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
       this.state.refreshBlockRectCache();
-      const selectionRect = createSelectionRect(endPoint, startPoint);
-      this.selecting(blockCache, selectionRect, viewportState);
+      const draggingArea = createDraggingArea(endPoint, startPoint);
+      this.selecting(blockCache, draggingArea, viewportState);
     } else {
-      this.state.setStartPoint(null);
-      this.state.setEndPoint(null);
-      this._slots.updateFrameSelectionRect.emit(null);
+      this.state.updateStartPoint(null);
+      this.state.updateEndPoint(null);
+      this._slots.updateDraggingArea.emit(null);
       this.refreshSelectedBlocksRects();
     }
   }
@@ -818,18 +791,5 @@ export class DefaultSelectionManager {
     }
 
     return null;
-  }
-
-  updateLocalSelection() {
-    const page = this.page;
-    const blockRange = getCurrentBlockRange(page);
-    if (blockRange && blockRange.type === 'Native') {
-      const userRange: UserRange = {
-        startOffset: blockRange.startOffset,
-        endOffset: blockRange.endOffset,
-        blockIds: blockRange.models.map(m => m.id),
-      };
-      page.awarenessStore.setLocalRange(page, userRange);
-    }
   }
 }

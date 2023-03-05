@@ -33,7 +33,7 @@ import {
 } from '../utils/index.js';
 import {
   EdgelessBlockChildrenContainer,
-  EdgelessFrameSelectionRect,
+  EdgelessDraggingArea,
   EdgelessHoverRect,
 } from './components.js';
 import {
@@ -243,13 +243,13 @@ export class EdgelessPageBlockComponent
     // this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
-      frame.propsUpdated.on(() => this._selection.syncSelectionRect());
+      frame.propsUpdated.on(() => this._selection.syncDraggingArea());
     });
 
     this.slots.viewportUpdated.on(() => {
       this.style.setProperty('--affine-zoom', `${this.surface.viewport.zoom}`);
 
-      this._selection.syncSelectionRect();
+      this._selection.syncDraggingArea();
       this.requestUpdate();
     });
     this.slots.hoverUpdated.on(() => this.requestUpdate());
@@ -314,10 +314,9 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection, page } = this;
-    const { frameSelectionRect } = _selection;
-    const selectionState = this._selection.blockSelectionState;
+    const selectionState = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
-    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
+    const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
     const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
 
     const translateX = -viewportX * zoom;
@@ -352,7 +351,7 @@ export class EdgelessPageBlockComponent
         >
           ${childrenContainer}
         </div>
-        ${hoverRect} ${selectionRect}
+        ${hoverRect} ${draggingArea}
         ${selectionState.type !== 'none'
           ? html`
               <edgeless-selected-rect

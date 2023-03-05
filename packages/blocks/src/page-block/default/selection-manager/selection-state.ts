@@ -99,11 +99,11 @@ export class PageSelectionState {
     this._endPoint = { x, y };
   }
 
-  setStartPoint(point: { x: number; y: number } | null) {
+  updateStartPoint(point: { x: number; y: number } | null) {
     this._startPoint = point;
   }
 
-  setEndPoint(point: { x: number; y: number } | null) {
+  updateEndPoint(point: { x: number; y: number } | null) {
     this._endPoint = point;
   }
 
@@ -133,7 +133,13 @@ export class PageSelectionState {
     }
   }
 
-  clearNative() {
+  clearDraggingArea() {
+    this.clearRaf();
+    this._startPoint = null;
+    this._endPoint = null;
+  }
+
+  clearNativeSelection() {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
@@ -141,29 +147,23 @@ export class PageSelectionState {
     resetNativeSelection(null);
   }
 
-  clearBlockSelectionRect() {
-    this.clearRaf();
-    this._startPoint = null;
-    this._endPoint = null;
-  }
-
-  clearBlock() {
+  clearBlockSelection() {
     this.type = 'none';
     this._activeComponent = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
-    this.clearBlockSelectionRect();
+    this.clearDraggingArea();
   }
 
-  clearEmbed() {
+  clearEmbedSelection() {
     this.type = 'none';
     this.selectedEmbeds = [];
     this._activeComponent = null;
   }
 
-  clear() {
-    this.clearBlock();
-    this.clearEmbed();
-    this.clearNative();
+  clearSelection() {
+    this.clearBlockSelection();
+    this.clearEmbedSelection();
+    this.clearNativeSelection();
   }
 }
