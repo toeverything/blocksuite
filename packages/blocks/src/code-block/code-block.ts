@@ -2,8 +2,9 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
+import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
@@ -187,18 +188,30 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  @query('.lang-container')
-  langContainerElement!: HTMLElement;
-
-  @query('lang-list')
-  langListElement!: HTMLElement;
-
   @state()
   private _showLangList = false;
+
+  @state()
+  private _disposableGroup = new DisposableGroup();
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
     return service.hljs.default.highlight;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposableGroup.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+    this._disposableGroup.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposableGroup.dispose();
   }
 
   private _onClick() {
