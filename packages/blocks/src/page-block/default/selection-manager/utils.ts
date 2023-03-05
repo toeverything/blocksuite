@@ -1,4 +1,9 @@
+import { getCurrentBlockRange } from '@blocksuite/blocks';
+import type { Page, UserRange } from '@blocksuite/store';
+
+import { getModelByElement } from '../../../__internal__/index.js';
 import type { BlockComponentElement, IPoint } from '../../../std.js';
+import type { PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -229,4 +234,48 @@ export function createSelectionRect(
   const left = Math.min(current.x, start.x);
   const top = Math.min(current.y, start.y);
   return new DOMRect(left, top, width, height);
+}
+
+export function computeSelectionType(
+  selectedBlocks: Element[],
+  selectionType?: PageSelectionType
+) {
+  let newSelectionType: PageSelectionType = selectionType ?? 'native';
+  const isOnlyBlock = selectedBlocks.length === 1;
+  for (const block of selectedBlocks) {
+    if (selectionType) continue;
+    if (!('model' in block)) continue;
+
+    // Calculate selection type
+    const model = getModelByElement(block);
+    newSelectionType = 'block';
+
+    // Other selection types are possible if only one block is selected
+    if (!isOnlyBlock) continue;
+
+    const flavour = model.flavour;
+    switch (flavour) {
+      case 'affine:embed': {
+        newSelectionType = 'embed';
+        break;
+      }
+      case 'affine:database': {
+        newSelectionType = 'database';
+        break;
+      }
+    }
+  }
+  return newSelectionType;
+}
+
+export function updateLocalSelectionRange(page: Page) {
+  const blockRange = getCurrentBlockRange(page);
+  if (blockRange && blockRange.type === 'Native') {
+    const userRange: UserRange = {
+      startOffset: blockRange.startOffset,
+      endOffset: blockRange.endOffset,
+      blockIds: blockRange.models.map(m => m.id),
+    };
+    page.awarenessStore.setLocalRange(page, userRange);
+  }
 }
