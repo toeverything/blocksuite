@@ -197,7 +197,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       case 'single':
         if (isSurfaceElement(blockSelectionState.selected)) {
-          this._handleSurfaceDragMove(blockSelectionState.selected, e);
+          if (blockSelectionState.active) {
+            this._handleSurfaceDragMove(blockSelectionState.selected, e);
+          }
           break;
         }
 
