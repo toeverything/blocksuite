@@ -33,7 +33,7 @@
     "test:store": "pnpm --filter @blocksuite/store test",
     "test:virgo": "pnpm --filter @blocksuite/virgo test",
     "format": "prettier --write --cache packages tests",
-    "build": "pnpm -r build",
+    "build": "pnpm --filter !@blocksuite/next-example --filter !@blocksuite/playground -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "./scripts/clean.sh",
     "preinstall": "npx only-allow pnpm",
