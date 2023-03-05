@@ -346,7 +346,7 @@ export class DefaultPageBlockComponent
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
         page: this.page,
-        mouseRoot: this.mouseRoot,
+        mouseRoot: this.defaultViewportElement,
         slots: this.slots,
         container: this,
         threshold: SCROLL_THRESHOLD / 2, // 50
