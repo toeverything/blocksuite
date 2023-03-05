@@ -57,12 +57,12 @@ export interface ViewportState {
 export type CodeBlockOption = EmbedEditingState;
 
 export interface DefaulSelectionSlots {
-  updateDraggingArea: Slot<DOMRect | null>;
-  updateSelectedRects: Slot<DOMRect[]>;
-  updateEmbedRects: Slot<DOMRect[]>;
-  updateEmbedEditingState: Slot<EmbedEditingState | null>;
-  updateCodeBlockOption: Slot<CodeBlockOption | null>;
-  toggleNativeSelection: Slot<boolean>;
+  draggingAreaUpdated: Slot<DOMRect | null>;
+  selectedRectsUpdated: Slot<DOMRect[]>;
+  embedRectsUpdated: Slot<DOMRect[]>;
+  embedEditingStateUpdated: Slot<EmbedEditingState | null>;
+  codeBlockOptionUpdated: Slot<CodeBlockOption | null>;
+  nativeSelectionToggled: Slot<boolean>;
 }
 
 @customElement('affine-default-page')
@@ -179,12 +179,12 @@ export class DefaultPageBlockComponent
   defaultViewportElement!: HTMLDivElement;
 
   slots: DefaulSelectionSlots = {
-    updateDraggingArea: new Slot<DOMRect | null>(),
-    updateSelectedRects: new Slot<DOMRect[]>(),
-    updateEmbedRects: new Slot<DOMRect[]>(),
-    updateEmbedEditingState: new Slot<EmbedEditingState | null>(),
-    updateCodeBlockOption: new Slot<CodeBlockOption | null>(),
-    toggleNativeSelection: new Slot<boolean>(),
+    draggingAreaUpdated: new Slot<DOMRect | null>(),
+    selectedRectsUpdated: new Slot<DOMRect[]>(),
+    embedRectsUpdated: new Slot<DOMRect[]>(),
+    embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
+    codeBlockOptionUpdated: new Slot<CodeBlockOption | null>(),
+    nativeSelectionToggled: new Slot<boolean>(),
   };
 
   @property({ hasChanged: () => true })
@@ -447,46 +447,47 @@ export class DefaultPageBlockComponent
     };
   }
 
-  firstUpdated() {
-    bindHotkeys(this.page, this.selection, this.slots);
+  private _initSlotEffects() {
+    const { slots } = this;
 
-    hotkey.enableHotkey();
-
-    this.slots.updateDraggingArea.on(rect => {
+    slots.draggingAreaUpdated.on(rect => {
       this._draggingArea = rect;
       this.requestUpdate();
     });
-    this.slots.updateSelectedRects.on(rects => {
+    slots.selectedRectsUpdated.on(rects => {
       this._selectedRects = rects;
       this.requestUpdate();
     });
-    this.slots.updateEmbedRects.on(rects => {
+    slots.embedRectsUpdated.on(rects => {
       this._selectedEmbedRects = rects;
       if (rects.length === 0) {
         this._embedEditingState = null;
       }
       this.requestUpdate();
     });
-    this.slots.updateEmbedEditingState.on(embedEditingState => {
+    slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
-    this.slots.updateCodeBlockOption.on(codeBlockOption => {
+    slots.codeBlockOptionUpdated.on(codeBlockOption => {
       this.codeBlockOption = codeBlockOption;
       this.requestUpdate();
     });
-
-    this.slots.toggleNativeSelection.on(flag => {
+    slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
     });
+  }
 
+  private _initFrameSizeEffect() {
     tryUpdateFrameSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       tryUpdateFrameSize(this.page, 1);
     });
+  }
 
+  private _initResizeEffect() {
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
@@ -500,6 +501,17 @@ export class DefaultPageBlockComponent
     );
     resizeObserver.observe(this.defaultViewportElement);
     this._resizeObserver = resizeObserver;
+  }
+
+  firstUpdated() {
+    const { page, selection, slots } = this;
+
+    bindHotkeys(page, selection, slots);
+    hotkey.enableHotkey();
+
+    this._initSlotEffects();
+    this._initFrameSizeEffect();
+    this._initResizeEffect();
 
     this.defaultViewportElement.addEventListener('wheel', this._onWheel);
     this.defaultViewportElement.addEventListener('scroll', this._onScroll);

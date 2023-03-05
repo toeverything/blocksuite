@@ -60,7 +60,7 @@ export class EmbedResizeManager {
 
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
-        this.slots.updateEmbedRects.emit([
+        this.slots.embedRectsUpdated.emit([
           new DOMRect(
             left,
             this._dropContainer.getBoundingClientRect().top,

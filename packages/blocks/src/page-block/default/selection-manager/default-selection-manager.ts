@@ -47,12 +47,13 @@ import {
 } from './selection-state.js';
 import {
   clearSubtree,
-  computeSelectionType,
   createDraggingArea,
   filterSelectedBlockByIndex,
   filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
   findBlocksWithSubtree,
+  getBlockWithIndexByElement,
+  setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
 
@@ -62,10 +63,10 @@ import {
 export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
+  readonly slots: DefaulSelectionSlots;
   private readonly _mouseRoot: HTMLElement;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
-  private readonly _slots: DefaulSelectionSlots;
   private readonly _embedResizeManager: EmbedResizeManager;
   private readonly _threshold: number; // distance to the upper and lower boundaries of the viewport
 
@@ -83,7 +84,7 @@ export class DefaultSelectionManager {
     threshold: number;
   }) {
     this.page = page;
-    this._slots = slots;
+    this.slots = slots;
     this._mouseRoot = mouseRoot;
     this._container = container;
     this._threshold = threshold;
@@ -116,30 +117,8 @@ export class DefaultSelectionManager {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
-  setSelectedBlocks(
-    selectedBlocks: BlockComponentElement[],
-    rects?: DOMRect[],
-    selectionType?: PageSelectionType
-  ) {
-    this.state.selectedBlocks = selectedBlocks;
-    this.state.type = selectionType ?? this.state.type;
-
-    if (rects) {
-      this._slots.updateSelectedRects.emit(rects);
-      return;
-    }
-
-    const calculatedRects = [] as DOMRect[];
-    for (const block of selectedBlocks) {
-      calculatedRects.push(block.getBoundingClientRect());
-    }
-
-    const newSelectionType = computeSelectionType(
-      selectedBlocks,
-      selectionType
-    );
-    this.state.type = newSelectionType;
-    this._slots.updateSelectedRects.emit(calculatedRects);
+  setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
+    setSelectedBlocks(this.state, this.slots, selectedBlocks);
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -200,7 +179,11 @@ export class DefaultSelectionManager {
       } else {
         auto = false;
         const draggingArea = this.updateDraggingArea(startPoint, endPoint);
-        this.selecting(this.state.blockCache, draggingArea, viewportState);
+        this._selectBlocksByDraggingArea(
+          this.state.blockCache,
+          draggingArea,
+          viewportState
+        );
       }
     };
 
@@ -211,14 +194,14 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
     this.state.clearDraggingArea();
-    this._slots.updateDraggingArea.emit(null);
+    this.slots.draggingAreaUpdated.emit(null);
     // do not clear selected rects here
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
     this.state.resetStartRange(e);
     this.state.type = 'native';
-    this._slots.toggleNativeSelection.emit(false);
+    this.slots.nativeSelectionToggled.emit(false);
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -227,7 +210,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(_: SelectionEvent) {
-    this._slots.toggleNativeSelection.emit(true);
+    this.slots.nativeSelectionToggled.emit(true);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -386,11 +369,11 @@ export class DefaultSelectionManager {
         this.state.selectedEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this._slots.updateEmbedRects.emit([clickBlockInfo.position]);
+        this.slots.embedRectsUpdated.emit([clickBlockInfo.position]);
       } else {
         this.state.type = 'block';
         this.state.selectedBlocks.push(this.state.activeComponent);
-        this._slots.updateSelectedRects.emit([clickBlockInfo.position]);
+        this.slots.selectedRectsUpdated.emit([clickBlockInfo.position]);
       }
       return;
     }
@@ -452,13 +435,13 @@ export class DefaultSelectionManager {
       } else {
         hoverEditingState.position.x = hoverEditingState.position.right + 10;
       }
-      this._slots.updateEmbedEditingState.emit(hoverEditingState);
+      this.slots.embedEditingStateUpdated.emit(hoverEditingState);
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
-      this._slots.updateCodeBlockOption.emit(hoverEditingState);
+      this.slots.codeBlockOptionUpdated.emit(hoverEditingState);
     } else {
-      this._slots.updateEmbedEditingState.emit(null);
-      this._slots.updateCodeBlockOption.emit(null);
+      this.slots.embedEditingStateUpdated.emit(null);
+      this.slots.codeBlockOptionUpdated.emit(null);
     }
   };
 
@@ -520,46 +503,7 @@ export class DefaultSelectionManager {
     updateLocalSelectionRange(this.page);
   };
 
-  // clear selection: `block`, `embed`, `native`
-  clear() {
-    const { state, _slots } = this;
-    const { type } = state;
-    if (type === 'block') {
-      state.clearBlockSelection();
-      _slots.updateSelectedRects.emit([]);
-      _slots.updateDraggingArea.emit(null);
-    } else if (type === 'embed') {
-      state.clearEmbedSelection();
-      _slots.updateEmbedRects.emit([]);
-      _slots.updateEmbedEditingState.emit(null);
-    } else if (type === 'native') {
-      state.clearNativeSelection();
-    }
-  }
-
-  dispose() {
-    this._slots.updateSelectedRects.dispose();
-    this._slots.updateDraggingArea.dispose();
-    this._slots.updateEmbedEditingState.dispose();
-    this._slots.updateEmbedRects.dispose();
-    this._slots.updateCodeBlockOption.dispose();
-    this._slots.toggleNativeSelection.dispose();
-    this._disposables.dispose();
-  }
-
-  updateDraggingArea(
-    startPoint: { x: number; y: number },
-    endPoint: { x: number; y: number }
-  ): DOMRect {
-    if (this.state.focusedBlockIndex !== -1) {
-      this.state.focusedBlockIndex = -1;
-    }
-    const draggingArea = createDraggingArea(endPoint, startPoint);
-    this._slots.updateDraggingArea.emit(draggingArea);
-    return draggingArea;
-  }
-
-  selecting(
+  private _selectBlocksByDraggingArea(
     blockCache: Map<BlockComponentElement, DOMRect>,
     draggingArea: DOMRect,
     viewportState: ViewportState
@@ -578,10 +522,41 @@ export class DefaultSelectionManager {
       ({ block }) => blockCache.get(block) as DOMRect
     );
 
-    this.setSelectedBlocks(
+    setSelectedBlocks(
+      this.state,
+      this.slots,
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
+  }
+
+  // clear selection: `block`, `embed`, `native`
+  clear() {
+    const { state, slots } = this;
+    const { type } = state;
+    if (type === 'block') {
+      state.clearBlockSelection();
+      slots.selectedRectsUpdated.emit([]);
+      slots.draggingAreaUpdated.emit(null);
+    } else if (type === 'embed') {
+      state.clearEmbedSelection();
+      slots.embedRectsUpdated.emit([]);
+      slots.embedEditingStateUpdated.emit(null);
+    } else if (type === 'native') {
+      state.clearNativeSelection();
+    }
+  }
+
+  updateDraggingArea(
+    startPoint: { x: number; y: number },
+    endPoint: { x: number; y: number }
+  ): DOMRect {
+    if (this.state.focusedBlockIndex !== -1) {
+      this.state.focusedBlockIndex = -1;
+    }
+    const draggingArea = createDraggingArea(endPoint, startPoint);
+    this.slots.draggingAreaUpdated.emit(draggingArea);
+    return draggingArea;
   }
 
   refresh() {
@@ -599,11 +574,11 @@ export class DefaultSelectionManager {
     if (startPoint && endPoint) {
       this.state.refreshBlockRectCache();
       const draggingArea = createDraggingArea(endPoint, startPoint);
-      this.selecting(blockCache, draggingArea, viewportState);
+      this._selectBlocksByDraggingArea(blockCache, draggingArea, viewportState);
     } else {
       this.state.updateStartPoint(null);
       this.state.updateEndPoint(null);
-      this._slots.updateDraggingArea.emit(null);
+      this.slots.draggingAreaUpdated.emit(null);
       this.refreshSelectedBlocksRects();
     }
   }
@@ -622,10 +597,10 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, firstBlock).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._slots.updateSelectedRects.emit(rects);
+      this.slots.selectedRectsUpdated.emit(rects);
     } else {
       // only current focused-block
-      this._slots.updateSelectedRects.emit([
+      this.slots.selectedRectsUpdated.emit([
         blockCache.get(firstBlock) as DOMRect,
       ]);
     }
@@ -653,12 +628,12 @@ export class DefaultSelectionManager {
           }
         }
 
-        this._slots.updateEmbedRects.emit([rect]);
+        this.slots.embedRectsUpdated.emit([rect]);
       }
     }
   }
 
-  // Click on drag-handle button
+  // Called on clicking on drag-handle button
   selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
     // rich-text should be unfocused
     this.state.blur();
@@ -680,10 +655,10 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this.setSelectedBlocks(selectedBlocks, [boundRect]);
+    setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
   }
 
-  // Click on the prefix icon of list block
+  // Called on clicking on the prefix icon of list block
   resetSelectedBlockByRect(
     blockElement: BlockComponentElement,
     pageSelectionType: PageSelectionType = 'block'
@@ -706,10 +681,10 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this.setSelectedBlocks(selectedBlocks, [boundRect]);
+    setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
   }
 
-  // `CMD-A`
+  // Called on `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshBlockRectCache();
     const {
@@ -742,17 +717,16 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, firstBlock).map(
         block => blockCache.get(block) as DOMRect
       );
-      this.setSelectedBlocks(selectedBlocks, rects);
+      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
     } else {
+      const rects = [blockCache.get(firstBlock) as DOMRect];
       // only current focused-block
-      this.setSelectedBlocks(selectedBlocks, [
-        blockCache.get(firstBlock) as DOMRect,
-      ]);
+      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
     }
   }
 
   setFocusedBlockIndexByElement(blockElement: Element) {
-    const result = this.getBlockWithIndexByElement(blockElement);
+    const result = getBlockWithIndexByElement(this.state, blockElement);
     if (result) {
       this.state.focusedBlockIndex = result.index;
     } else {
@@ -760,36 +734,13 @@ export class DefaultSelectionManager {
     }
   }
 
-  getBlockWithIndexByElement(blockElement: Element) {
-    const entries = Array.from(this.state.blockCache.entries());
-    const len = entries.length;
-    const boundRect = blockElement.getBoundingClientRect();
-    const top = boundRect.top;
-
-    if (!boundRect) return null;
-
-    // fake a small rectangle: { top: top, bottom: top + h }
-    const h = 5;
-    let start = 0;
-    let end = len - 1;
-
-    // binary search block
-    while (start <= end) {
-      const mid = start + Math.floor((end - start) / 2);
-      const [block, rect] = entries[mid];
-      if (top <= rect.top + h) {
-        if (mid === 0 || top >= rect.top) {
-          return { block, index: mid };
-        }
-      }
-
-      if (rect.top > top) {
-        end = mid - 1;
-      } else if (rect.top + h < top) {
-        start = mid + 1;
-      }
-    }
-
-    return null;
+  dispose() {
+    this.slots.selectedRectsUpdated.dispose();
+    this.slots.draggingAreaUpdated.dispose();
+    this.slots.embedEditingStateUpdated.dispose();
+    this.slots.embedRectsUpdated.dispose();
+    this.slots.codeBlockOptionUpdated.dispose();
+    this.slots.nativeSelectionToggled.dispose();
+    this._disposables.dispose();
   }
 }
