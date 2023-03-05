@@ -1,7 +1,6 @@
 import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -215,7 +214,6 @@ export class ImageBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

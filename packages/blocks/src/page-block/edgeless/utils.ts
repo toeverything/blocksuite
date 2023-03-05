@@ -1,9 +1,9 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
+import type { SurfaceElement, SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { Selectable, ViewportState } from './selection-manager.js';
+import type { Selectable } from './selection-manager.js';
 
 export const DEFAULT_SPACING = 64;
 
@@ -48,7 +48,7 @@ export function pick(
   return null;
 }
 
-export function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
+export function getSelectionBoxBound(viewport: SurfaceViewport, xywh: string) {
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const [x, y] = viewport.toViewCoord(modelX, modelY);
   return new DOMRect(x, y, modelW * viewport.zoom, modelH * viewport.zoom);
@@ -58,7 +58,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
   const wheelHandler = (e: WheelEvent) => {
     e.preventDefault();
 
-    const { viewport } = container;
+    const { viewport } = container.surface;
 
     // pan
     if (!e.ctrlKey) {

@@ -36,9 +36,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._page.captureSync();
+    const { viewport } = this._edgeless.surface;
 
     // create a shape block when drag start
-    const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const bound = new Bound(modelX, modelY, 0, 0);
     const { shape, color } = this.mouseMode;
 
@@ -62,18 +63,21 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
+
+    const { viewport } = this._edgeless.surface;
+
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    const [x, y] = this._edgeless.viewport.toModelCoord(
+    const [x, y] = viewport.toModelCoord(
       Math.min(this._draggingArea.start.x, this._draggingArea.end.x),
       Math.min(this._draggingArea.start.y, this._draggingArea.end.y)
     );
     const w =
       Math.abs(this._draggingArea.start.x - this._draggingArea.end.x) /
-      this._edgeless.viewport.zoom;
+      viewport.zoom;
     const h =
       Math.abs(this._draggingArea.start.y - this._draggingArea.end.y) /
-      this._edgeless.viewport.zoom;
+      viewport.zoom;
 
     const bound = new Bound(x, y, w, h);
     const id = this._draggingElementId;

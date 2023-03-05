@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -39,7 +38,6 @@ export class DividerBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

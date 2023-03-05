@@ -15,6 +15,7 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
@@ -25,12 +26,20 @@ export class SurfaceManager {
   private _elements = new Map<string, PhasorElement>();
   private _lastIndex = 'a0';
 
-  constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
-    this._renderer = new Renderer(canvas);
+  constructor(yContainer: Y.Map<unknown>) {
+    this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
 
     this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
+  }
+
+  get viewport(): SurfaceViewport {
+    return this._renderer;
+  }
+
+  attach(container: HTMLElement) {
+    this._renderer.attach(container);
   }
 
   getElementsBound(): IBound | null {
@@ -119,10 +128,6 @@ export class SurfaceManager {
 
   toViewCoord(modelX: number, modelY: number): [number, number] {
     return this._renderer.toViewCoord(modelX, modelY);
-  }
-
-  setViewport(centerX: number, centerY: number, zoom: number) {
-    this._renderer.setViewport(centerX, centerY, zoom);
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
@@ -270,8 +275,7 @@ export class SurfaceManager {
   /** @internal Only for testing */
   initDefaultGestureHandler() {
     const { _renderer } = this;
-    const mouseRoot = _renderer.canvas;
-    mouseRoot.addEventListener('wheel', e => {
+    _renderer.canvas.addEventListener('wheel', e => {
       e.preventDefault();
       // pan
       if (!e.ctrlKey) {

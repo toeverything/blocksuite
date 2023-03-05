@@ -1,87 +1,89 @@
 import '../__internal__/rich-text/rich-text.js';
+import './components/lang-list.js';
 
-import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { ArrowDownIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
   BlockHost,
-  getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { toolTipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 
+const hljsStyles = css`
+  //<editor-fold desc="highlight.js/styles/color-brewer.css">
+  pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+  }
+
+  code.hljs {
+    padding: 3px 5px;
+  }
+
+  .hljs {
+    color: #000;
+    background: #fff;
+  }
+
+  .hljs-addition,
+  .hljs-meta,
+  .hljs-string,
+  .hljs-symbol,
+  .hljs-template-tag,
+  .hljs-template-variable {
+    color: #756bb1;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #636363;
+  }
+
+  .hljs-bullet,
+  .hljs-link,
+  .hljs-literal,
+  .hljs-number,
+  .hljs-regexp {
+    color: #31a354;
+  }
+
+  .hljs-deletion,
+  .hljs-variable {
+    color: #88f;
+  }
+
+  .hljs-built_in,
+  .hljs-doctag,
+  .hljs-keyword,
+  .hljs-name,
+  .hljs-section,
+  .hljs-selector-class,
+  .hljs-selector-id,
+  .hljs-selector-tag,
+  .hljs-strong,
+  .hljs-tag,
+  .hljs-title,
+  .hljs-type {
+    color: #3182bd;
+  }
+
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-attribute {
+    color: #e6550d;
+  }
+`;
+
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
   static styles = css`
-    //<editor-fold desc="highlight.js/styles/color-brewer.css">
-    pre code.hljs {
-      display: block;
-      overflow-x: auto;
-      padding: 1em;
-    }
-
-    code.hljs {
-      padding: 3px 5px;
-    }
-
-    .hljs {
-      color: #000;
-      background: #fff;
-    }
-
-    .hljs-addition,
-    .hljs-meta,
-    .hljs-string,
-    .hljs-symbol,
-    .hljs-template-tag,
-    .hljs-template-variable {
-      color: #756bb1;
-    }
-
-    .hljs-comment,
-    .hljs-quote {
-      color: #636363;
-    }
-
-    .hljs-bullet,
-    .hljs-link,
-    .hljs-literal,
-    .hljs-number,
-    .hljs-regexp {
-      color: #31a354;
-    }
-
-    .hljs-deletion,
-    .hljs-variable {
-      color: #88f;
-    }
-
-    .hljs-built_in,
-    .hljs-doctag,
-    .hljs-keyword,
-    .hljs-name,
-    .hljs-section,
-    .hljs-selector-class,
-    .hljs-selector-id,
-    .hljs-selector-tag,
-    .hljs-strong,
-    .hljs-tag,
-    .hljs-title,
-    .hljs-type {
-      color: #3182bd;
-    }
-
-    .hljs-emphasis {
-      font-style: italic;
-    }
-
-    .hljs-attribute {
-      color: #e6550d;
-    }
-
     code-block {
       position: relative;
       z-index: 1;
@@ -103,12 +105,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
       font-variant-ligatures: none;
     }
 
-    .affine-code-block-container .container {
+    .affine-code-block-container .lang-list-wrapper {
       position: absolute;
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;
+    }
+
+    .affine-code-block-container > .lang-list-wrapper {
+      visibility: hidden;
+    }
+    .affine-code-block-container:hover > .lang-list-wrapper {
+      visibility: visible;
     }
 
     .affine-code-block-container.selected {
@@ -158,11 +167,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    .lang-container icon-button {
-      padding: 4px 0 0 12px;
-      justify-content: flex-start;
-    }
-
     .code-block-option {
       box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
         0 3px 16px -6px rgba(24, 39, 75, 0.04);
@@ -174,15 +178,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin: 0;
     }
 
-    .code-block-option {
-      /*fill: #6880ff;*/
-    }
-
-    .clicked {
-      color: var(--affine-primary-color) !important;
-      background: var(--affine-hover-background) !important;
-    }
-
+    ${hljsStyles}
     ${toolTipStyle}
   `;
 
@@ -199,7 +195,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   langListElement!: HTMLElement;
 
   @state()
-  private _showLangList = 'hidden';
+  private _showLangList = false;
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
@@ -212,53 +208,45 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _onClick() {
-    this._showLangList =
-      this._showLangList === 'visible' ? 'hidden' : 'visible';
+    this._showLangList = !this._showLangList;
+  }
+
+  private _langListTemplate() {
+    return html`<div
+      class="lang-list-wrapper"
+      style="${this._showLangList ? 'visibility: visible;' : ''}"
+    >
+      <div class="lang-container" @click=${this._onClick}>
+        <icon-button width="101px" height="24px" ?hover=${this._showLangList}>
+          ${this.model.language} ${ArrowDownIcon}
+        </icon-button>
+      </div>
+      ${this._showLangList
+        ? html`<lang-list
+            @selected-language-changed=${(e: CustomEvent) => {
+              this.host
+                .getService('affine:code')
+                .setLang(this.model, e.detail.language);
+              this._showLangList = false;
+            }}
+            @dispose=${() => {
+              this._showLangList = false;
+            }}
+          ></lang-list>`
+        : ''}
+    </div>`;
   }
 
   render() {
-    const page = getDefaultPageBlock(this.model);
-    const codeBlockOption = page?.codeBlockOption;
-    const boundingClientRect = this.getBoundingClientRect();
-    // when there are multiple code blocks, decide whether mouse is hovering on the current code block
-    const isHovering = codeBlockOption
-      ? codeBlockOption.position.y + boundingClientRect.height >
-          boundingClientRect.top &&
-        codeBlockOption.position.y < boundingClientRect.bottom
-      : false;
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()
     );
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+
     return html`
       <div class="affine-code-block-container">
-        ${isHovering || this._showLangList !== 'hidden'
-          ? html` <div class="container">
-              <div class="lang-container" @click=${this._onClick}>
-                <icon-button
-                  width="101px"
-                  height="24px"
-                  class="${this._showLangList === 'hidden' ? '' : 'clicked'}"
-                >
-                  ${this.model.language} ${ArrowDownIcon}
-                </icon-button>
-              </div>
-              <lang-list
-                showLangList=${this._showLangList}
-                id=${this.model.id}
-                @selected-language-changed=${(e: CustomEvent) => {
-                  this.host
-                    .getService('affine:code')
-                    .setLang(this.model, e.detail.language);
-                }}
-                @dispose=${() => {
-                  this._showLangList = 'hidden';
-                }}
-              ></lang-list>
-            </div>`
-          : html``}
+        ${this._langListTemplate()}
         <rich-text
           .host=${this.host}
           .model=${this.model}

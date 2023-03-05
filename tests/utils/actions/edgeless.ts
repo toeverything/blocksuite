@@ -147,7 +147,7 @@ export async function selectBrushSize(page: Page, size: 4 | 16) {
 export async function pickColorAtPoints(page: Page, points: number[][]) {
   const pickedColors: `#${string}`[] = await page.evaluate(points => {
     const node = document.querySelector(
-      '.affine-surface-canvas'
+      '.affine-edgeless-surface-block-container canvas'
     ) as HTMLCanvasElement;
     const w = node.width;
     const h = node.height;

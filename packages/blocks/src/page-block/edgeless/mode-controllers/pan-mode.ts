@@ -34,13 +34,15 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     if (!this._lastPoint) return;
 
+    const { viewport } = this._edgeless.surface;
+
     const [lastX, lastY] = this._lastPoint;
     const deltaX = lastX - e.x;
     const deltaY = lastY - e.y;
 
     this._lastPoint = [e.x, e.y];
 
-    this._edgeless.viewport.applyDeltaCenter(deltaX, deltaY);
+    viewport.applyDeltaCenter(deltaX, deltaY);
 
     this._edgeless.slots.viewportUpdated.emit();
   }

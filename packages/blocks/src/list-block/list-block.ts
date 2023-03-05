@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -113,7 +112,6 @@ export class ListBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);
