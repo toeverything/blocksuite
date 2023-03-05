@@ -147,8 +147,7 @@ test('text added after a link should not have link formatting', async ({
   );
 });
 
-// FIXEME: need to wait for marks function implemented in virgo
-test.skip('type character in link should not jump out link node', async ({
+test('type character in link should not jump out link node', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

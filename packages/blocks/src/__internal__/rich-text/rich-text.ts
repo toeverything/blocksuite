@@ -72,6 +72,27 @@ export class RichText extends NonShadowLitElement {
     this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
       keydown: keyDownHandler,
+      virgoInput: e => {
+        const vEditor = this._vEditor;
+        assertExists(vEditor);
+        const vRange = vEditor.getVRange();
+        if (!vRange || vRange.length !== 0) {
+          return false;
+        }
+
+        const deltas = vEditor.getDeltasByVRange(vRange);
+        if (deltas.length === 1 && e.data && e.data !== '\n') {
+          const attributes = deltas[0][0].attributes;
+          vEditor.insertText(vRange, e.data, attributes);
+          vEditor.setVRange({
+            index: vRange.index + 1,
+            length: 0,
+          });
+          return true;
+        }
+
+        return false;
+      },
     });
   }
 

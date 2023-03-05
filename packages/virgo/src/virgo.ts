@@ -199,7 +199,27 @@ export class VEditor<
   private _handlers: {
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
+    virgoInput?: (event: InputEvent) => boolean;
   } = {};
+
+  private _defaultHandlers: VEditor['_handlers'] = {
+    paste: (event: ClipboardEvent) => {
+      const data = event.clipboardData?.getData('text/plain');
+      if (data) {
+        const vRange = this._vRange;
+        if (vRange) {
+          this.insertText(vRange, data);
+          this.slots.updateVRange.emit([
+            {
+              index: vRange.index + data.length,
+              length: 0,
+            },
+            'input',
+          ]);
+        }
+      }
+    },
+  };
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
     return this._attributesSchema.optional().parse(textAttributes);
@@ -270,26 +290,7 @@ export class VEditor<
     this._attributesRenderer = renderer;
   };
 
-  bindHandlers(
-    handlers: VEditor['_handlers'] = {
-      paste: (event: ClipboardEvent) => {
-        const data = event.clipboardData?.getData('text/plain');
-        if (data) {
-          const vRange = this._vRange;
-          if (vRange) {
-            this.insertText(vRange, data);
-            this.slots.updateVRange.emit([
-              {
-                index: vRange.index + data.length,
-                length: 0,
-              },
-              'input',
-            ]);
-          }
-        }
-      },
-    }
-  ) {
+  bindHandlers(handlers: VEditor['_handlers'] = this._defaultHandlers) {
     this._handlers = handlers;
 
     if (this._handlerAbort) {
@@ -366,6 +367,8 @@ export class VEditor<
       this._handlerAbort.abort();
       this._handlerAbort = null;
     }
+
+    this._handlers = this._defaultHandlers;
 
     this._rootElement?.replaceChildren();
 
@@ -523,10 +526,14 @@ export class VEditor<
     });
   }
 
-  insertText(vRange: VRange, text: string): void {
+  insertText(
+    vRange: VRange,
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text, {});
+      this.yText.insert(vRange.index, text, attributes);
     });
   }
 
@@ -841,6 +848,15 @@ export class VEditor<
 
   private _onBeforeInput(event: InputEvent): void {
     event.preventDefault();
+
+    let ifSkip = false;
+    if (this._handlers.virgoInput) {
+      ifSkip = this._handlers.virgoInput(event);
+    }
+
+    if (ifSkip) {
+      return;
+    }
 
     if (this._isReadOnly) {
       return;
