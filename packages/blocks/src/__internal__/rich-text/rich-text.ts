@@ -100,6 +100,14 @@ export class RichText extends NonShadowLitElement {
         return false;
       },
     });
+
+    this._vEditor.setReadOnly(this.host.readonly);
+  }
+
+  updated() {
+    if (this._vEditor) {
+      this._vEditor.setReadOnly(this.host.readonly);
+    }
   }
 
   render() {
