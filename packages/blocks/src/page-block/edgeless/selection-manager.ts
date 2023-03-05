@@ -172,19 +172,19 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.readonly) return;
 
     return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.readonly) return;
 
     return this.currentController.onContainerDragMove(e);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.readonly) return;
 
     return this.currentController.onContainerDragEnd(e);
   };
@@ -216,6 +216,10 @@ export class EdgelessSelectionManager {
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
     this.updateLocalSelection();
   };
+
+  get readonly() {
+    return this.page.awarenessStore.getFlag('readonly');
+  }
 
   dispose() {
     this._mouseDisposeCallback();
