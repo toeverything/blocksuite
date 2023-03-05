@@ -264,13 +264,15 @@ test('should single line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [0, 4]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -301,13 +303,15 @@ test('should single line format hotkey work', async ({ page }) => {
   );
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -347,13 +351,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -412,13 +418,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
   );
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,

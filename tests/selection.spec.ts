@@ -942,6 +942,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
     return secondRichText.getBoundingClientRect();
   });
   await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+  await waitNextFrame(page);
   await type(page, 'ABC');
   await assertRichTexts(page, [
     '123',

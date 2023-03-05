@@ -176,6 +176,7 @@ test('markdown shortcut', async ({ page }) => {
   await assertRichTexts(page, ['--- ']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);
+  await waitNextFrame(page);
   await type(page, '*** ');
   await undoByClick(page);
   await assertRichTexts(page, ['*** ']);
@@ -183,7 +184,6 @@ test('markdown shortcut', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-// TODO: need to handle
 test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -200,6 +200,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByKeyboard(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '**test** ');
   await assertTextFormat(page, 0, 0, { bold: true });
   await type(page, 'test');
@@ -209,6 +210,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '*test* ');
   await assertTextFormat(page, 0, 0, { italic: true });
   await type(page, 'test');
@@ -218,6 +220,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '~~test~~ ');
   await assertTextFormat(page, 0, 0, { strike: true });
   await type(page, 'test');
@@ -228,6 +231,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '~test~ ');
   await assertTextFormat(page, 0, 0, { underline: true });
   await type(page, 'test');
@@ -237,6 +241,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '`test` ');
   await assertTextFormat(page, 0, 0, { code: true });
   await type(page, 'test');
@@ -246,6 +251,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, '[test](www.test.com) ');
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await type(page, 'test');
@@ -255,6 +261,7 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
+  await waitNextFrame(page);
   await type(page, 'www.test.com ');
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await type(page, 'test');

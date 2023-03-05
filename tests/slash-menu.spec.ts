@@ -93,7 +93,6 @@ test.describe('slash menu should show and hide correctly', () => {
 
     // And pressing backspace immediately should reappear the slash menu
     await pressBackspace(page);
-    await waitNextFrame(page);
     await expect(slashMenu).toBeVisible();
 
     await type(page, '__');
