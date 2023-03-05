@@ -31,7 +31,7 @@ import {
   resetNativeSelection,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
-import type { DefaultSelectionManager } from '../default/selection-manager.js';
+import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function handleBlockSelectionBatchDelete(
