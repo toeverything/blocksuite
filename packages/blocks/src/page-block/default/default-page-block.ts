@@ -43,17 +43,6 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
-export interface ViewportState {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollHeight: number;
-  clientHeight: number;
-  clientWidth: number;
-  // scrollWidth: number,
-}
-
 export type CodeBlockOption = EmbedEditingState;
 
 export interface DefaulSelectionSlots {
@@ -150,17 +139,6 @@ export class DefaultPageBlockComponent
   @state()
   private _draggingArea: DOMRect | null = null;
 
-  @property()
-  viewportState: ViewportState = {
-    left: 0,
-    top: 0,
-    scrollLeft: 0,
-    scrollTop: 0,
-    scrollHeight: 0,
-    clientHeight: 0,
-    clientWidth: 0,
-  };
-
   @state()
   private _selectedRects: DOMRect[] = [];
 
@@ -176,7 +154,7 @@ export class DefaultPageBlockComponent
   codeBlockOption!: CodeBlockOption | null;
 
   @query('.affine-default-viewport')
-  defaultViewportElement!: HTMLDivElement;
+  viewportElement!: HTMLDivElement;
 
   slots: DefaulSelectionSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
@@ -269,15 +247,15 @@ export class DefaultPageBlockComponent
   private _onWheel = (e: WheelEvent) => {
     const { selection } = this;
     const { state } = selection;
-    const { type } = state;
+    const { type, viewport } = state;
 
     if (type === 'native') {
       return;
     }
 
     if (type === 'block') {
-      const { viewportState, defaultViewportElement } = this;
-      const { scrollTop, scrollHeight, clientHeight } = viewportState;
+      const { viewportElement } = this;
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
       const max = scrollHeight - clientHeight;
       let top = e.deltaY / 2;
       if (top > 0) {
@@ -294,9 +272,9 @@ export class DefaultPageBlockComponent
       if (startPoint && endPoint) {
         e.preventDefault();
 
-        viewportState.scrollTop += top;
+        viewport.scrollTop += top;
         // FIXME: need smooth
-        defaultViewportElement.scrollTop += top;
+        viewportElement.scrollTop += top;
 
         endPoint.y += top;
         selection.updateDraggingArea(startPoint, endPoint);
@@ -307,14 +285,14 @@ export class DefaultPageBlockComponent
   };
 
   private _onScroll = (e: Event) => {
-    const { selection, viewportState } = this;
-    const { type } = selection.state;
+    const { selection } = this;
+    const { type, viewport } = selection.state;
     const { scrollLeft, scrollTop } = e.target as Element;
-    viewportState.scrollLeft = scrollLeft;
-    viewportState.scrollTop = scrollTop;
+    viewport.scrollLeft = scrollLeft;
+    viewport.scrollTop = scrollTop;
 
     if (type === 'block') {
-      selection.refreshDragingArea(viewportState);
+      selection.refreshDraggingArea(viewport);
     } else if (type === 'embed') {
       selection.refreshEmbedRects(this._embedEditingState);
     } else if (type === 'native') {
@@ -431,19 +409,17 @@ export class DefaultPageBlockComponent
     );
   };
 
-  updateViewportState() {
-    const viewport = this.defaultViewportElement;
-    const { scrollLeft, scrollTop, scrollHeight, clientHeight, clientWidth } =
-      viewport;
-    const { top, left } = viewport.getBoundingClientRect();
-    this.viewportState = {
+  updateViewport() {
+    const { viewportElement } = this;
+    const { top, left } = viewportElement.getBoundingClientRect();
+    this.selection.state.viewport = {
       top,
       left,
-      scrollTop,
-      scrollLeft,
-      scrollHeight,
-      clientHeight,
-      clientWidth,
+      scrollTop: viewportElement.scrollTop,
+      scrollLeft: viewportElement.scrollLeft,
+      scrollHeight: viewportElement.scrollHeight,
+      clientHeight: viewportElement.clientHeight,
+      clientWidth: viewportElement.clientWidth,
     };
   }
 
@@ -491,15 +467,15 @@ export class DefaultPageBlockComponent
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
-          if (target === this.defaultViewportElement) {
-            this.updateViewportState();
-            this.selection.refresh();
+          if (target === this.viewportElement) {
+            this.updateViewport();
+            this.selection.updateRects();
             break;
           }
         }
       }
     );
-    resizeObserver.observe(this.defaultViewportElement);
+    resizeObserver.observe(this.viewportElement);
     this._resizeObserver = resizeObserver;
   }
 
@@ -513,8 +489,8 @@ export class DefaultPageBlockComponent
     this._initFrameSizeEffect();
     this._initResizeEffect();
 
-    this.defaultViewportElement.addEventListener('wheel', this._onWheel);
-    this.defaultViewportElement.addEventListener('scroll', this._onScroll);
+    this.viewportElement.addEventListener('wheel', this._onWheel);
+    this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
   }
@@ -538,12 +514,13 @@ export class DefaultPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
-    this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
+    this.viewportElement.removeEventListener('wheel', this._onWheel);
+    this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 
   render() {
-    const { readonly } = this;
+    const { readonly, selection } = this;
+    const { viewport } = selection.state;
 
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
@@ -551,16 +528,16 @@ export class DefaultPageBlockComponent
     const draggingArea = DraggingArea(this._draggingArea);
     const selectedRectsContainer = SelectedRectsContainer(
       this._selectedRects,
-      this.viewportState
+      viewport
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
-      this.viewportState
+      viewport
     );
     const embedEditingContainer = EmbedEditingContainer(
       readonly ? null : this._embedEditingState,
       this.slots,
-      this.viewportState
+      viewport
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
       readonly ? null : this.codeBlockOption
