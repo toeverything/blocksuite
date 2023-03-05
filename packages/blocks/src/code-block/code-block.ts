@@ -146,11 +146,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
       width: 89%;
       margin: 0;
       overflow-x: auto;
-      /*scrollbar-color: #fff0 #fff0;*/
     }
 
     .affine-code-block-container .ql-syntax::-webkit-scrollbar {
-      /*background: none;*/
+      display: none;
     }
 
     .affine-code-block-container .wrap {
