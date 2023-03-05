@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -14,17 +15,6 @@ import {
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
-
-function selectList(model: ListBlockModel) {
-  const { selection } = getDefaultPageBlock(model);
-
-  const blockElement = getBlockElementByModel(model);
-  if (!blockElement) {
-    console.error('list block model:', model, 'blockElement:', blockElement);
-    throw new Error('Failed to select list! blockElement not found!');
-  }
-  selection.resetSelectedBlockByRect(blockElement);
-}
 
 @customElement('affine-list')
 export class ListBlockComponent extends NonShadowLitElement {
@@ -91,6 +81,17 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
+  private _select(model: ListBlockModel) {
+    const { selection } = getDefaultPageBlock(model);
+    const blockElement = getBlockElementByModel(model);
+    assertExists(
+      blockElement,
+      'Failed to select list, blockElement not found!'
+    );
+
+    selection.setSelectedBlocks([blockElement]);
+  }
+
   private _onClickIcon = (e: MouseEvent) => {
     e.stopPropagation();
 
@@ -103,7 +104,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       this.host.page.updateBlock(this.model, checkedPropObj);
       return;
     }
-    selectList(this.model);
+    this._select(this.model);
   };
 
   firstUpdated() {
