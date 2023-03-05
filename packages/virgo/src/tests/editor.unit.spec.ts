@@ -275,4 +275,96 @@ test('getDeltasByVRange', () => {
       },
     ],
   ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 0,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 1,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 2,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 4,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+    [
+      {
+        insert: 'ccc',
+        attributes: {
+          underline: true,
+        },
+      },
+      {
+        index: 6,
+        length: 3,
+      },
+    ],
+  ]);
 });
