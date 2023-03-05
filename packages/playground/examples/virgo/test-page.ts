@@ -1,9 +1,66 @@
 import '@shoelace-style/shoelace';
 
-import { BaseTextAttributes, VEditor } from '@blocksuite/virgo';
+import { BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
+
+function virgoTextStyles(
+  props: BaseTextAttributes
+): ReturnType<typeof styleMap> {
+  let textDecorations = '';
+  if (props.underline) {
+    textDecorations += 'underline';
+  }
+  if (props.strike) {
+    textDecorations += ' line-through';
+  }
+
+  let inlineCodeStyle = {};
+  if (props.code) {
+    inlineCodeStyle = {
+      'font-family':
+        '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
+      'line-height': 'normal',
+      background: 'rgba(135,131,120,0.15)',
+      color: '#EB5757',
+      'border-radius': '3px',
+      'font-size': '85%',
+      padding: '0.2em 0.4em',
+    };
+  }
+
+  return styleMap({
+    'white-space': 'break-spaces',
+    'font-weight': props.bold ? 'bold' : 'normal',
+    'font-style': props.italic ? 'italic' : 'normal',
+    'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
+    ...inlineCodeStyle,
+  });
+}
+
+const attributeRenderer = (
+  vText: VText,
+  attributes: BaseTextAttributes = {}
+) => {
+  const style = attributes ? virgoTextStyles(attributes) : styleMap({});
+
+  // just for test
+  if (vText.str.length > 4) {
+    const leftStr = vText.str.slice(0, 3);
+    const rightStr = vText.str.slice(3);
+
+    const leftVText = new VText();
+    leftVText.str = leftStr;
+    const rightVText = new VText();
+    rightVText.str = rightStr;
+
+    return html`<span style=${style}>${leftVText}${rightVText}</span>`;
+  }
+
+  return html`<span style=${style}>${vText}</span>`;
+};
 
 function toggleStyle(
   vEditor: VEditor,
@@ -253,6 +310,7 @@ export class TestPage extends LitElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA);
+    editorA.setAttributesRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
     const editorB = new VEditor(textB);

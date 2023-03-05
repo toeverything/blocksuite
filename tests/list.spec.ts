@@ -107,7 +107,7 @@ test('unindent list block', async ({ page }) => {
   await enterPlaygroundWithList(page); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
-  await page.keyboard.press('Tab'); // 0(1(2(3)4))
+  await page.keyboard.press('Tab', { delay: 50 }); // 0(1(2(3)4))
 
   await assertBlockChildrenIds(page, '1', ['2', '4']);
   await assertBlockChildrenIds(page, '2', ['3']);

@@ -2,14 +2,14 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { BaseTextAttributes } from '../utils/index.js';
-import type { VirgoText } from './virgo-text.js';
+import type { VirgoElement } from './virgo-element.js';
 
-@customElement('virgo-line')
+@customElement('v-line')
 export class VirgoLine<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
 > extends LitElement {
   @property({ attribute: false })
-  elements: VirgoText<TextAttributes>[] = [];
+  elements: VirgoElement<TextAttributes>[] = [];
 
   get textLength() {
     return this.elements.reduce((acc, el) => acc + el.delta.insert.length, 0);
@@ -21,7 +21,7 @@ export class VirgoLine<
 
   render() {
     return html`<style>
-        virgo-line {
+        v-line {
           display: block;
         }
       </style>
@@ -35,6 +35,6 @@ export class VirgoLine<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'virgo-line': VirgoLine;
+    'v-line': VirgoLine;
   }
 }

@@ -423,6 +423,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   // The link button should be active after click
   await expect(linkBtn).toHaveAttribute('active', '');
   await linkBtn.click();
+  await waitNextFrame(page);
   await expect(linkBtn).not.toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,

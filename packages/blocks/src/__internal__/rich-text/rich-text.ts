@@ -81,7 +81,13 @@ export class RichText extends NonShadowLitElement {
         }
 
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (deltas.length === 1 && e.data && e.data !== '\n') {
+        if (
+          deltas.length === 1 &&
+          vRange.index !== 0 &&
+          vRange.index !== vEditor.yText.length &&
+          e.data &&
+          e.data !== '\n'
+        ) {
           const attributes = deltas[0][0].attributes;
           vEditor.insertText(vRange, e.data, attributes);
           vEditor.setVRange({

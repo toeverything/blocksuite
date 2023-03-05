@@ -7,22 +7,22 @@ import { html } from 'lit';
 import type { AffineTextAttributes } from './types.js';
 
 export const attributesRenderer: AttributesRenderer<AffineTextAttributes> = (
-  unitText,
+  vText,
   attributes
 ) => {
   if (attributes?.link) {
     return html`<affine-link
-      .unitText=${unitText}
+      .vText=${vText}
       .textAttributes=${attributes}
     ></affine-link>`;
   }
 
   if (attributes) {
     return html`<affine-text
-      .unitText=${unitText}
+      .vText=${vText}
       .textAttributes=${attributes}
     ></affine-text>`;
   } else {
-    return html`<affine-text .unitText=${unitText}></affine-text>`;
+    return html`<affine-text .vText=${vText}></affine-text>`;
   }
 };

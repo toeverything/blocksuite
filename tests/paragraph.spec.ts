@@ -562,8 +562,8 @@ test('delete at start of paragraph block', async ({ page }) => {
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
 
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await pressBackspace(page);
   await assertBlockType(page, '3', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '3']);
 

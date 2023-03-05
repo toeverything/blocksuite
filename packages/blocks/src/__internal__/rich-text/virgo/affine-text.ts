@@ -1,4 +1,4 @@
-import { VirgoUnitText } from '@blocksuite/virgo';
+import { VText } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -46,13 +46,13 @@ export class AffineText extends NonShadowLitElement {
   textAttributes: AffineTextAttributes = {};
 
   @property({ type: Object })
-  unitText: VirgoUnitText = new VirgoUnitText();
+  vText: VText = new VText();
 
   render() {
     const style = affineTextStyles(this.textAttributes);
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
-    return html`<span style=${style}>${this.unitText}</span>`;
+    return html`<span style=${style}>${this.vText}</span>`;
   }
 }
 

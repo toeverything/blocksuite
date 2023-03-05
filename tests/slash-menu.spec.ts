@@ -10,7 +10,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
-  waitNextFrame,
 } from 'utils/actions/misc.js';
 import {
   assertAlmostEqual,

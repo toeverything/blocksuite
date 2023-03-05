@@ -1,6 +1,6 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { VEditor, VirgoUnitText } from '@blocksuite/virgo';
+import { VEditor, VText } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -53,7 +53,7 @@ export class AffineLink extends NonShadowLitElement {
   textAttributes: AffineTextAttributes = {};
 
   @property({ type: Object })
-  unitText: VirgoUnitText = new VirgoUnitText();
+  vText: VText = new VText();
 
   get link() {
     const link = this.textAttributes?.link;
@@ -118,7 +118,7 @@ export class AffineLink extends NonShadowLitElement {
       return;
     }
 
-    const text = this.unitText.str;
+    const text = this.vText.str;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
       text,
@@ -145,7 +145,7 @@ export class AffineLink extends NonShadowLitElement {
   private _updateLink(link?: string, text?: string) {
     const model = getModelByElement(this);
     const { page: page } = model;
-    const oldStr = this.unitText.str;
+    const oldStr = this.vText.str;
     const oldTextAttributes = this.textAttributes;
 
     const textElement = this.querySelector('[data-virgo-text="true"]');
@@ -220,7 +220,7 @@ export class AffineLink extends NonShadowLitElement {
       rel="noopener noreferrer"
       target="_blank"
       style=${style}
-      >${FontLinkIcon}${this.unitText}</a
+      >${FontLinkIcon}${this.vText}</a
     >`;
   }
 }
