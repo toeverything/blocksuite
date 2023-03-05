@@ -149,7 +149,7 @@ export function restoreSelection(blockRange: BlockRange) {
       // In the edgeless mode
       return;
     }
-    defaultPageBlock.selection.state.clearBlock();
+    defaultPageBlock.selection.state.clearBlockSelection();
     defaultPageBlock.selection.state.type = 'native';
     return;
   }
