@@ -101,10 +101,10 @@ export class EdgelessSelectionManager {
     return false;
   }
 
-  get frameSelectionRect() {
-    if (!this.currentController.frameSelectionState) return null;
+  get draggingArea() {
+    if (!this.currentController.draggingArea) return null;
 
-    const { start, end } = this.currentController.frameSelectionState;
+    const { start, end } = this.currentController.draggingArea;
     const minX = Math.min(start.x, end.x);
     const minY = Math.min(start.y, end.y);
     const maxX = Math.max(start.x, end.x);
@@ -193,8 +193,8 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncSelectionRect() {
-    return this.currentController.syncSelectionRect();
+  syncDraggingArea() {
+    return this.currentController.syncDraggingArea();
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

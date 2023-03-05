@@ -138,14 +138,10 @@ export class DefaultPageBlockComponent
   lastSelectionPosition: SelectionPosition = 'start';
 
   /**
-   * shard components
+   * Shared components
    */
-  components: {
-    dragHandle: DragHandle | null;
-    resizeObserver: ResizeObserver | null;
-  } = {
-    dragHandle: null,
-    resizeObserver: null,
+  components = {
+    dragHandle: <DragHandle | null>null,
   };
 
   @property()
@@ -173,6 +169,8 @@ export class DefaultPageBlockComponent
 
   @state()
   private _embedEditingState!: EmbedEditingState | null;
+
+  private _resizeObserver: ResizeObserver | null = null;
 
   @property()
   codeBlockOption!: CodeBlockOption | null;
@@ -316,7 +314,7 @@ export class DefaultPageBlockComponent
     viewportState.scrollTop = scrollTop;
 
     if (type === 'block') {
-      selection.refreshSelectionRectAndSelecting(viewportState);
+      selection.refreshDragingArea(viewportState);
     } else if (type === 'embed') {
       selection.refreshEmbedRects(this._embedEditingState);
     } else if (type === 'native') {
@@ -501,7 +499,7 @@ export class DefaultPageBlockComponent
       }
     );
     resizeObserver.observe(this.defaultViewportElement);
-    this.components.resizeObserver = resizeObserver;
+    this._resizeObserver = resizeObserver;
 
     this.defaultViewportElement.addEventListener('wheel', this._onWheel);
     this.defaultViewportElement.addEventListener('scroll', this._onScroll);
@@ -524,9 +522,9 @@ export class DefaultPageBlockComponent
     removeHotkeys();
     this.selection.clear();
     this.selection.dispose();
-    if (this.components.resizeObserver) {
-      this.components.resizeObserver.disconnect();
-      this.components.resizeObserver = null;
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
     }
     this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
     this.defaultViewportElement.removeEventListener('scroll', this._onScroll);

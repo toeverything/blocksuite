@@ -48,7 +48,7 @@ import {
 import {
   clearSubtree,
   computeSelectionType,
-  createSelectionRect,
+  createDraggingArea,
   filterSelectedBlockByIndex,
   filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
@@ -163,7 +163,7 @@ export class DefaultSelectionManager {
     let { scrollTop } = viewportState;
     const max = scrollHeight - clientHeight;
 
-    this.state.setEndPoint({ x: x + scrollLeft, y: y + scrollTop });
+    this.state.updateEndPoint({ x: x + scrollLeft, y: y + scrollTop });
 
     const { startPoint, endPoint } = this.state;
 
@@ -199,8 +199,8 @@ export class DefaultSelectionManager {
         this.updateDraggingArea(startPoint, endPoint);
       } else {
         auto = false;
-        const selectionRect = this.updateDraggingArea(startPoint, endPoint);
-        this.selecting(this.state.blockCache, selectionRect, viewportState);
+        const draggingArea = this.updateDraggingArea(startPoint, endPoint);
+        this.selecting(this.state.blockCache, draggingArea, viewportState);
       }
     };
 
@@ -210,7 +210,7 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
-    this.state.clearBlockSelectionRect();
+    this.state.clearDraggingArea();
     this._slots.updateDraggingArea.emit(null);
     // do not clear selected rects here
   }
@@ -525,15 +525,15 @@ export class DefaultSelectionManager {
     const { state, _slots } = this;
     const { type } = state;
     if (type === 'block') {
-      state.clearBlock();
+      state.clearBlockSelection();
       _slots.updateSelectedRects.emit([]);
       _slots.updateDraggingArea.emit(null);
     } else if (type === 'embed') {
-      state.clearEmbed();
+      state.clearEmbedSelection();
       _slots.updateEmbedRects.emit([]);
       _slots.updateEmbedEditingState.emit(null);
     } else if (type === 'native') {
-      state.clearNative();
+      state.clearNativeSelection();
     }
   }
 
@@ -554,9 +554,9 @@ export class DefaultSelectionManager {
     if (this.state.focusedBlockIndex !== -1) {
       this.state.focusedBlockIndex = -1;
     }
-    const selectionRect = createSelectionRect(endPoint, startPoint);
-    this._slots.updateDraggingArea.emit(selectionRect);
-    return selectionRect;
+    const draggingArea = createDraggingArea(endPoint, startPoint);
+    this._slots.updateDraggingArea.emit(draggingArea);
+    return draggingArea;
   }
 
   selecting(
@@ -593,16 +593,16 @@ export class DefaultSelectionManager {
     }
   }
 
-  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
+  refreshDragingArea(viewportState: ViewportState) {
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
       this.state.refreshBlockRectCache();
-      const selectionRect = createSelectionRect(endPoint, startPoint);
-      this.selecting(blockCache, selectionRect, viewportState);
+      const draggingArea = createDraggingArea(endPoint, startPoint);
+      this.selecting(blockCache, draggingArea, viewportState);
     } else {
-      this.state.setStartPoint(null);
-      this.state.setEndPoint(null);
+      this.state.updateStartPoint(null);
+      this.state.updateEndPoint(null);
       this._slots.updateDraggingArea.emit(null);
       this.refreshSelectedBlocksRects();
     }
