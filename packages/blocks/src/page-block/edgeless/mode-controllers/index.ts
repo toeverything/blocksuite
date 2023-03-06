@@ -13,7 +13,8 @@ import type {
 export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
   protected _blockSelectionState: EdgelessSelectionState = {
-    type: 'none',
+    selected: [],
+    active: false,
   };
 
   protected _hoverState: EdgelessHoverState | null = null;
@@ -24,10 +25,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   get isActive() {
-    return (
-      this._blockSelectionState.type === 'single' &&
-      this._blockSelectionState.active
-    );
+    return this._blockSelectionState.active;
   }
 
   get hoverState() {

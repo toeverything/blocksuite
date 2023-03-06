@@ -24,23 +24,30 @@ export interface EdgelessHoverState {
   content: Selectable;
 }
 
-/* Indicates there is no selected block */
-interface NoneSelectionState {
-  type: 'none';
-}
+// /* Indicates there is no selected block */
+// interface NoneSelectionState {
+//   type: 'none';
+// }
 
-/* Indicates there is one selected block */
-interface SingleSelectionState {
-  type: 'single';
+// /* Indicates there is one selected block */
+// interface SingleSelectionState {
+//   type: 'single';
+//   /* The selected block or surface element */
+//   selected: Selectable;
+//   /* Rect of the selected content */
+//   rect: DOMRect;
+//   /* True if the selected content is active (like after double click) */
+//   active: boolean;
+// }
+
+// export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
+
+export interface EdgelessSelectionState {
   /* The selected block or surface element */
-  selected: Selectable;
-  /* Rect of the selected content */
-  rect: DOMRect;
+  selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
 }
-
-export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
 
 export interface SelectionArea {
   start: DOMPoint;
@@ -136,15 +143,15 @@ export class EdgelessSelectionManager {
           */
           this._prevSelectedShapeId = null;
         }
-        if (state.type === 'single') {
-          // if (matchFlavours(state.selected, ['affine:shape'])) {
-          //   const element = getBlockById<'affine-shape'>(state.selected.id);
-          //   if (element) {
-          //     element.selected = true;
-          //   }
-          //   this._previousSelectedShape = state.selected as ShapeBlockModel;
-          // }
-        }
+        // if (state.type === 'single') {
+        // if (matchFlavours(state.selected, ['affine:shape'])) {
+        //   const element = getBlockById<'affine-shape'>(state.selected.id);
+        //   if (element) {
+        //     element.selected = true;
+        //   }
+        //   this._previousSelectedShape = state.selected as ShapeBlockModel;
+        // }
+        // }
       }
     );
   }

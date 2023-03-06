@@ -1,4 +1,4 @@
-import type { SurfaceViewport } from '@blocksuite/phasor';
+import { getCommonBound, SurfaceViewport } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -42,8 +42,34 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property({ type: Object })
-  rect!: DOMRect;
+  get rect() {
+    const { viewport } = this.surface;
+    const { selected } = this.state;
+    if (selected.length === 0) {
+      return new DOMRect(0, 0, 0, 0);
+    }
+    const rects = selected.map(selectable => {
+      const { x, y, width, height } = getSelectionBoxBound(
+        viewport,
+        getXYWH(selectable)
+      );
+
+      return {
+        x,
+        y,
+        w: width,
+        h: height,
+      };
+    });
+
+    const commonBound = getCommonBound(rects);
+    return new DOMRect(
+      commonBound?.x,
+      commonBound?.y,
+      commonBound?.w,
+      commonBound?.h
+    );
+  }
 
   private _dragStartInfo: {
     startMouseX: number;
@@ -97,7 +123,7 @@ export class EdgelessSelectedRect extends LitElement {
       `;
     } else {
       let handles: TemplateResult | null = null;
-      if (this.state.type === 'none') return handles;
+      if (this.state.selected.length === 0) return handles;
       if (!this.state.active) {
         const leftCenter = [
           rect.x,
@@ -128,9 +154,11 @@ export class EdgelessSelectedRect extends LitElement {
   private _onHandleMouseDown = (e: MouseEvent, direction: HandleDirection) => {
     // prevent selection action being fired
     e.stopPropagation();
-    if (this.state?.type === 'single') {
-      const { rect, selected } = this.state;
-      const [x, y] = deserializeXYWH(getXYWH(selected));
+    if (this.state?.selected.length === 1) {
+      const { selected } = this.state;
+      const xywh = getXYWH(selected[0]);
+      const [x, y] = deserializeXYWH(xywh);
+      const rect = getSelectionBoxBound(this.viewport, xywh);
 
       this._dragStartInfo = {
         startMouseX: e.clientX,
@@ -149,11 +177,11 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   private _onDragMove = (e: MouseEvent) => {
-    if (this.state.type === 'single') {
-      const { viewport } = this;
+    if (this.state.selected.length === 1) {
       const { selected } = this.state;
+      const selectedElement = selected[0];
 
-      const xywh = getXYWH(selected);
+      const xywh = getXYWH(selectedElement);
       const [x, y, w, h] = deserializeXYWH(xywh);
       let newX = x;
       let newY = y;
@@ -211,25 +239,21 @@ export class EdgelessSelectedRect extends LitElement {
         return;
       }
 
-      if (!isTopLevelBlock(selected)) {
+      if (!isTopLevelBlock(selectedElement)) {
         if (!this.lock) {
           this.page.captureSync();
           this.lock = true;
         }
-        this.surface.setElementBound(selected.id, {
+        this.surface.setElementBound(selectedElement.id, {
           x: newX,
           y: newY,
           w: newW,
           h: newH,
         });
-        this.state.rect = getSelectionBoxBound(
-          viewport,
-          serializeXYWH(newX, newY, newW, newH)
-        );
         return;
       }
 
-      const frameBlock = getBlockById<'div'>(selected.id);
+      const frameBlock = getBlockById<'div'>(selectedElement.id);
       const frameContainer = frameBlock?.parentElement;
       // first change container`s x/w directly for get frames real height
       if (frameContainer) {
@@ -243,39 +267,33 @@ export class EdgelessSelectedRect extends LitElement {
           this.page.captureSync();
           this.lock = true;
         }
-        if (this.state.type === 'single') {
-          this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
-        } else {
-          console.error('unexpected state.type:', this.state.type);
-        }
+
         const newXywh = JSON.stringify([
           newX,
           newY,
           newW,
           (frameBlock?.getBoundingClientRect().height || 0) / this.zoom,
         ]);
-        selected.xywh = newXywh;
-        this.page.updateBlock(selected, { xywh: newXywh });
+        // selected.xywh = newXywh;
+        this.page.updateBlock(selectedElement, { xywh: newXywh });
       });
     }
   };
 
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
-    if (this.state.type === 'single') {
+    if (this.state.selected.length === 1) {
       this.page.captureSync();
-    } else {
-      console.error('unexpected state.type:', this.state.type);
     }
     this.parentElement?.removeEventListener('mousemove', this._onDragMove);
     this.parentElement?.removeEventListener('mouseup', this._onDragEnd);
   };
 
   render() {
-    if (this.state.type === 'none') return null;
+    if (this.state.selected.length === 0) return null;
 
-    const isSurfaceElement = !isTopLevelBlock(this.state.selected);
-    // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
+    const isSurfaceElement = !isTopLevelBlock(this.state.selected[0]);
+
     const style = {
       border: `${
         this.state.active ? 2 : 1

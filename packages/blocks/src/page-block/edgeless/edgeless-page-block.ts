@@ -143,11 +143,12 @@ export class EdgelessPageBlockComponent
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {
-    if (this._selection.blockSelectionState.type === 'single') {
-      const { selected } = this._selection.blockSelectionState;
+    const { selected } = this._selection.blockSelectionState;
+    if (selected.length === 1) {
+      const element = selected[0];
 
-      if (this.surface.hasElement(selected.id)) {
-        this.surface.removeElement(selected.id);
+      if (this.surface.hasElement(element.id)) {
+        this.surface.removeElement(element.id);
         this._selection.currentController.clearSelection();
         this.slots.updateSelection.emit(this._selection.blockSelectionState);
         return;
@@ -164,11 +165,7 @@ export class EdgelessPageBlockComponent
       }
 
       // when user is editing, shouldn't enter pan mode
-      if (
-        mouseMode.type === 'default' &&
-        blockSelectionState.type === 'single' &&
-        blockSelectionState.active
-      ) {
+      if (mouseMode.type === 'default' && blockSelectionState.active) {
         return;
       }
 
@@ -353,13 +350,12 @@ export class EdgelessPageBlockComponent
           ${childrenContainer}
         </div>
         ${hoverRect} ${draggingArea}
-        ${selectionState.type !== 'none'
+        ${selectionState.selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
                 .viewport=${viewport}
                 .state=${selectionState}
-                .rect=${selectionState.rect}
                 .zoom=${zoom}
                 .surface=${this.surface}
               ></edgeless-selected-rect>

@@ -68,19 +68,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _setNoneSelectionState() {
-    this._blockSelectionState = { type: 'none' };
+    this._blockSelectionState = { selected: [], active: false };
     this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
     resetNativeSelection(null);
   }
 
   private _setSingleSelectionState(selected: Selectable, active: boolean) {
-    const { viewport } = this._edgeless.surface;
-    const xywh = getXYWH(selected);
     this._blockSelectionState = {
-      type: 'single',
       active,
-      selected,
-      rect: getSelectionBoxBound(viewport, xywh),
+      selected: [selected],
     };
     this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
   }
@@ -94,12 +90,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
     // block
     else {
-      switch (this.blockSelectionState.type) {
-        case 'none':
+      switch (this.blockSelectionState.selected.length) {
+        case 0:
           this._setSingleSelectionState(selected, false);
           break;
-        case 'single':
-          if (this.blockSelectionState.selected === selected) {
+        case 1:
+          if (this.blockSelectionState.selected[0] === selected) {
             this._setSingleSelectionState(selected, true);
           } else {
             this._setSingleSelectionState(selected, false);
@@ -167,8 +163,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     if (selected) {
       // See https://github.com/toeverything/blocksuite/pull/1484
-      if (this._blockSelectionState.type === 'single') {
-        if (this._blockSelectionState.selected !== selected) {
+      if (this._blockSelectionState.selected.length === 1) {
+        if (this._blockSelectionState.selected[0] !== selected) {
           this._setNoneSelectionState();
         }
       } else {
@@ -192,13 +188,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragMove(e: SelectionEvent) {
     const { blockSelectionState } = this;
 
-    switch (blockSelectionState.type) {
-      case 'none':
+    switch (blockSelectionState.selected.length) {
+      case 0:
         break;
-      case 'single':
-        if (isSurfaceElement(blockSelectionState.selected)) {
+      case 1:
+        if (isSurfaceElement(blockSelectionState.selected[0])) {
           if (blockSelectionState.active) {
-            this._handleSurfaceDragMove(blockSelectionState.selected, e);
+            this._handleSurfaceDragMove(blockSelectionState.selected[0], e);
           }
           break;
         }
@@ -216,7 +212,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         }
         // Is dragging a selected (but not active) frame, move it
         else {
-          this._handleBlockDragMove(blockSelectionState.selected, e);
+          this._handleBlockDragMove(blockSelectionState.selected[0], e);
         }
         break;
     }
@@ -254,7 +250,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           },
         },
       });
-    } else if (this.blockSelectionState.type === 'single') {
+    } else if (this.blockSelectionState.selected.length === 1) {
       if (!this._draggingArea) {
         this._page.captureSync();
       }
@@ -279,13 +275,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   // Selection rect can be used for both top-level blocks and surface elements
   syncDraggingArea() {
-    const { viewport } = this._edgeless.surface;
-    if (this.blockSelectionState.type === 'single') {
-      const selected = this.blockSelectionState.selected;
-
-      const xywh = getXYWH(selected);
-      const rect = getSelectionBoxBound(viewport, xywh);
-      this.blockSelectionState.rect = rect;
+    if (this.blockSelectionState.selected.length === 1) {
       this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
     }
 
@@ -294,7 +284,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   clearSelection() {
     this._blockSelectionState = {
-      type: 'none',
+      selected: [],
+      active: false,
     };
     this._hoverState = null;
   }
