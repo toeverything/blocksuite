@@ -237,13 +237,13 @@ export class CodeBlockComponent extends NonShadowLitElement {
       }, HOVER_DELAY);
     });
     this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseover', e => {
+      Slot.fromEvent(this, 'mouseover', e => {
         this.hoverState.emit(true);
       })
     );
     const HOVER_DELAY = 300;
     this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseleave', e => {
+      Slot.fromEvent(this, 'mouseleave', e => {
         this.hoverState.emit(false);
       })
     );
