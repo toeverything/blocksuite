@@ -2,7 +2,10 @@ import { assertExists, BaseBlockModel } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import type { Highlighter, Lang } from 'shiki';
+import { z } from 'zod';
 
+import { getCodeLineRenderer } from '../../code-block/utils/code-line-render.js';
 import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
@@ -49,6 +52,12 @@ export class RichText extends NonShadowLitElement {
   @property({ hasChanged: () => true })
   modules: Record<string, unknown> = {};
 
+  @property()
+  codeBlockGetHighlighterOptions?: () => {
+    lang: Lang;
+    highlighter: Highlighter | null;
+  };
+
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
     return this._vEditor;
@@ -57,8 +66,15 @@ export class RichText extends NonShadowLitElement {
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
-    this._vEditor.setAttributesRenderer(attributesRenderer);
-    this._vEditor.setAttributesSchema(affineTextAttributes);
+    if (this.codeBlockGetHighlighterOptions) {
+      this._vEditor.setAttributesSchema(z.object({}));
+      this._vEditor.setAttributesRenderer(
+        getCodeLineRenderer(this.codeBlockGetHighlighterOptions)
+      );
+    } else {
+      this._vEditor.setAttributesRenderer(attributesRenderer);
+      this._vEditor.setAttributesSchema(affineTextAttributes);
+    }
 
     const keyboardBindings = createKeyboardBindings(
       this.model.page,

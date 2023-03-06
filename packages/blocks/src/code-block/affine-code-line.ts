@@ -1,0 +1,57 @@
+import { assertExists } from '@blocksuite/store';
+import { VText } from '@blocksuite/virgo';
+import { html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import type { Highlighter, Lang } from 'shiki';
+
+import { NonShadowLitElement } from '../std.js';
+
+@customElement('affine-code-line')
+export class AffineCodeLine extends NonShadowLitElement {
+  @property({ type: Object })
+  vText: VText = new VText();
+
+  @property()
+  getHighlightOptions:
+    | (() => {
+        lang: Lang;
+        highlighter: Highlighter | null;
+      })
+    | null = null;
+
+  render() {
+    assertExists(this.getHighlightOptions, 'getHighlightOptions is not set');
+    const { lang, highlighter } = this.getHighlightOptions();
+
+    if (!highlighter) {
+      const vText = new VText();
+      vText.str = this.vText.str;
+      vText.styles = styleMap({
+        whiteSpace: 'pre',
+      });
+      return html`<span>${vText}</span>`;
+    }
+
+    const tokens = highlighter.codeToThemedTokens(this.vText.str, lang)[0];
+    const vTexts = tokens.map(token => {
+      const styles = styleMap({
+        color: token.color,
+        whiteSpace: 'pre',
+      });
+      const vText = new VText();
+      vText.str = token.content;
+      vText.styles = styles;
+
+      return vText;
+    });
+
+    return html`<span>${vTexts}</span>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-code-line': AffineCodeLine;
+  }
+}

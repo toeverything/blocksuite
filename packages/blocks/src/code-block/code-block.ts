@@ -2,8 +2,10 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { css, html } from 'lit';
+import { assertExists, Slot } from '@blocksuite/store';
+import { css, html, PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { getHighlighter, Highlighter, Lang } from 'shiki';
 
 import {
   BlockChildrenContainer,
@@ -12,74 +14,7 @@ import {
 } from '../__internal__/index.js';
 import { toolTipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
-
-const hljsStyles = css`
-  //<editor-fold desc="highlight.js/styles/color-brewer.css">
-  pre code.hljs {
-    display: block;
-    overflow-x: auto;
-    padding: 1em;
-  }
-
-  code.hljs {
-    padding: 3px 5px;
-  }
-
-  .hljs {
-    color: #000;
-    background: #fff;
-  }
-
-  .hljs-addition,
-  .hljs-meta,
-  .hljs-string,
-  .hljs-symbol,
-  .hljs-template-tag,
-  .hljs-template-variable {
-    color: #756bb1;
-  }
-
-  .hljs-comment,
-  .hljs-quote {
-    color: #636363;
-  }
-
-  .hljs-bullet,
-  .hljs-link,
-  .hljs-literal,
-  .hljs-number,
-  .hljs-regexp {
-    color: #31a354;
-  }
-
-  .hljs-deletion,
-  .hljs-variable {
-    color: #88f;
-  }
-
-  .hljs-built_in,
-  .hljs-doctag,
-  .hljs-keyword,
-  .hljs-name,
-  .hljs-section,
-  .hljs-selector-class,
-  .hljs-selector-id,
-  .hljs-selector-tag,
-  .hljs-strong,
-  .hljs-tag,
-  .hljs-title,
-  .hljs-type {
-    color: #3182bd;
-  }
-
-  .hljs-emphasis {
-    font-style: italic;
-  }
-
-  .hljs-attribute {
-    color: #e6550d;
-  }
-`;
+import { codeLanguages } from './utils/code-languages.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -100,7 +35,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
 
-    .affine-code-block-container pre {
+    .affine-code-block-container .virgo-editor {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
     }
@@ -136,17 +71,32 @@ export class CodeBlockComponent extends NonShadowLitElement {
       color: var(--affine-line-number-color);
     }
 
-    .affine-code-block-container .ql-container {
+    .affine-code-block-container .rich-text-container {
       left: 40px;
       border-radius: 5px;
-      padding: 2px 12px;
+      padding: 2px 12px 2px 28px;
     }
 
-    .affine-code-block-container .ql-syntax {
-      width: 89%;
+    .affine-code-block-container .virgo-editor {
+      width: 90%;
       margin: 0;
       overflow-x: auto;
       /*scrollbar-color: #fff0 #fff0;*/
+    }
+
+    .affine-code-block-container v-line {
+      display: inline;
+    }
+
+    .affine-code-block-container v-line > div {
+      display: inline;
+    }
+    .affine-code-block-container affine-code-line span {
+      white-space: nowrap;
+    }
+
+    .affine-code-block-container affine-code-line span v-text {
+      display: inline-block;
     }
 
     .affine-code-block-container .ql-syntax::-webkit-scrollbar {
@@ -178,7 +128,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin: 0;
     }
 
-    ${hljsStyles}
     ${toolTipStyle}
   `;
 
@@ -202,9 +151,52 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return service.hljs.default.highlight;
   }
 
+  private langUpdated = new Slot<{
+    lang: Lang;
+    highlighter: Highlighter;
+  }>();
+
+  private _preLang: Lang | null = null;
+  private _highlighter: Highlighter | null = null;
+  private async _startHighlight(langs: Lang[]) {
+    this._highlighter = await getHighlighter({
+      theme: 'github-light',
+      langs,
+      paths: {
+        wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
+        themes: 'https://cdn.jsdelivr.net/npm/shiki/themes',
+        languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
+      },
+    });
+
+    this.requestUpdate();
+  }
+
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    this._startHighlight(codeLanguages);
+  }
+
+  updated(changedProperties: PropertyValues) {
+    if (
+      changedProperties.has('model') &&
+      this._highlighter &&
+      this.model.language !== this._preLang
+    ) {
+      this._preLang = this.model.language as Lang;
+      this.langUpdated.emit({
+        lang: this.model.language.toLowerCase() as Lang,
+        highlighter: this._highlighter,
+      });
+
+      const richText = this.querySelector('rich-text');
+      assertExists(richText);
+      const vEditor = richText.vEditor;
+      assertExists(vEditor);
+      vEditor.requestUpdate();
+    }
   }
 
   private _onClick() {
@@ -247,19 +239,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return html`
       <div class="affine-code-block-container">
         ${this._langListTemplate()}
-        <rich-text
-          .host=${this.host}
-          .model=${this.model}
-          .modules=${{
-            syntax: {
-              highlight: this.highlight,
-              codeBlockElement: this,
-              language: this.model.language,
-            },
-          }}
-        >
-          <div id="line-number"></div>
-        </rich-text>
+        <div class="rich-text-container">
+          <rich-text
+            .host=${this.host}
+            .model=${this.model}
+            .codeBlockGetHighlighterOptions=${() => ({
+              lang: this.model.language.toLowerCase() as Lang,
+              highlighter: this._highlighter,
+            })}
+          >
+            <div id="line-number"></div>
+          </rich-text>
+        </div>
         ${childrenContainer}
       </div>
     `;
