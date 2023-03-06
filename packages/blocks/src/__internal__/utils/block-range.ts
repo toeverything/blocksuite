@@ -61,7 +61,6 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   }
   return null;
 }
-
 export function blockRangeToNativeRange(blockRange: BlockRange) {
   const models = blockRange.models.filter(model => model.text);
   if (!models.length) {

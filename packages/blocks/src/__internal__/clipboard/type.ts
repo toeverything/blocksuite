@@ -1,11 +1,6 @@
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
-} from '../../page-block/index.js';
-
-type ClipboardTarget = DefaultPageBlockComponent | EdgelessPageBlockComponent;
+import type { Page } from '@blocksuite/store';
 
 export interface Clipboard {
-  init(clipboardTarget: ClipboardTarget): void;
-  dispose(): void;
+  initEvent(page: Page): void;
+  disposeEvent(): void;
 }

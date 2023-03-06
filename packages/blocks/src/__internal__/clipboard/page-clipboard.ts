@@ -1,208 +1,68 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, Page } from '@blocksuite/store';
 
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import { getService } from '../../__internal__/service.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
-import { ContentParser } from '../content-parser/index.js';
-import {
-  getCurrentBlockRange,
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../utils/index.js';
-import { ClipboardItem } from './clipboard-item.js';
-import markdownUtils from './markdown-utils.js';
+import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
-  CLIPBOARD_MIMETYPE,
-  isPureFileInClipboard,
-  performNativeCopy,
+  clipboardData2Blocks,
+  copy,
+  shouldClipboardHandlerContinue,
 } from './utils.js';
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
-export class PageClipboard implements Clipboard {
-  private _pageBlock!: DefaultPageBlockComponent;
-  contentParser!: ContentParser;
-  // The event handler will get the most needed clipboard data based on this array order
-  private _optimalMimeTypes: string[] = [
-    CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-    CLIPBOARD_MIMETYPE.HTML,
-    CLIPBOARD_MIMETYPE.TEXT,
-  ];
-  public init(pageBlock: DefaultPageBlockComponent) {
-    this._pageBlock = pageBlock;
-    this.contentParser = new ContentParser(this._pageBlock.page);
-    document.body.addEventListener('cut', this._onCut.bind(this));
-    document.body.addEventListener('copy', this._onCopy.bind(this));
-    document.body.addEventListener('paste', this._onPaste.bind(this));
+
+export class pageBlockClipboard implements Clipboard {
+  _page!: Page;
+
+  initEvent(page: Page) {
+    this._page = page;
+    document.body.addEventListener('cut', this._onCut);
+    document.body.addEventListener('copy', this._onCopy);
+    document.body.addEventListener('paste', this._onPaste);
   }
-  public dispose() {
+
+  disposeEvent() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
     document.body.removeEventListener('paste', this._onPaste);
   }
 
-  private _shouldContinue() {
-    const range = getCurrentBlockRange(this._pageBlock.page);
+  private _onPaste = async (e: ClipboardEvent) => {
+    if (!shouldClipboardHandlerContinue(this._page) || !e.clipboardData) {
+      return;
+    }
+    e.preventDefault();
+    deleteModelsByRange(this._page);
 
-    const { focusedBlockIndex, selectedBlocks, selectedEmbeds } =
-      this._pageBlock.selection.state;
+    const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
 
-    return (
-      focusedBlockIndex !== -1 ||
-      !!selectedBlocks.length ||
-      !!selectedEmbeds.length ||
-      !range ||
-      !range?.models.find(model => model.flavour === 'affine:page')
-    );
-  }
+    if (blocks.length) {
+      const range = getCurrentBlockRange(this._page);
+      const focusedBlockModel = range?.models[0];
+      assertExists(focusedBlockModel);
+      const service = getService(focusedBlockModel.flavour);
+      assertExists(range);
+      service.json2Block(focusedBlockModel, blocks, range);
+    }
+  };
 
-  private _onCut(e: ClipboardEvent) {
-    if (!this._shouldContinue()) {
+  private _onCopy = (e: ClipboardEvent) => {
+    if (!shouldClipboardHandlerContinue(this._page)) {
+      return;
+    }
+    e.preventDefault();
+    const range = getCurrentBlockRange(this._page);
+    assertExists(range);
+    copy(range);
+  };
+
+  private _onCut = (e: ClipboardEvent) => {
+    if (!shouldClipboardHandlerContinue(this._page)) {
       return;
     }
     e.preventDefault();
     this._onCopy(e);
-    deleteModelsByRange(this._pageBlock.page);
-  }
-  private _onCopy(e: ClipboardEvent) {
-    if (!this._shouldContinue()) {
-      return;
-    }
-    e.preventDefault();
-    this.copy();
-  }
-  private async _onPaste(e: ClipboardEvent) {
-    if (!this._shouldContinue() || !e.clipboardData) {
-      return;
-    }
-    e.preventDefault();
-    deleteModelsByRange(this._pageBlock.page);
-
-    const blocks = await this._clipboardData2Blocks(e.clipboardData);
-
-    if (blocks.length) {
-      const range = getCurrentBlockRange(this._pageBlock.page);
-      const focusedBlockModel = range?.models[0];
-      assertExists(focusedBlockModel);
-      const service = this._pageBlock.getService(focusedBlockModel.flavour);
-      assertExists(range);
-      service.json2Block(focusedBlockModel, blocks, range);
-    }
-  }
-
-  copy() {
-    const range = getCurrentBlockRange(this._pageBlock.page);
-    if (!range) {
-      return;
-    }
-
-    const clipGroups = range.models.map((model, index) => {
-      if (index === 0) {
-        return this.getBlockClipboardInfo(
-          model,
-          range.startOffset,
-          index === range.models.length - 1 ? range.endOffset : undefined
-        );
-      }
-      if (index === range.models.length - 1) {
-        return this.getBlockClipboardInfo(model, undefined, range.endOffset);
-      }
-      return this.getBlockClipboardInfo(model);
-    });
-
-    const textClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.TEXT,
-      clipGroups.map(group => group.text).join('')
-    );
-    const htmlClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.HTML,
-      clipGroups.map(group => group.html).join('')
-    );
-    const customClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-      JSON.stringify(
-        clipGroups.filter(group => group.json).map(group => group.json)
-      )
-    );
-
-    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-
-    performNativeCopy([
-      textClipboardItem,
-      htmlClipboardItem,
-      customClipboardItem,
-    ]);
-
-    savedRange && resetNativeSelection(savedRange);
-  }
-  getBlockClipboardInfo(model: BaseBlockModel, begin?: number, end?: number) {
-    const service = this._pageBlock.getService(model.flavour);
-    // FIXME: remove ts-ignore
-    // @ts-ignore
-    const html = service.block2html(model, { begin, end });
-    // FIXME: remove ts-ignore
-    // @ts-ignore
-    const text = service.block2Text(model, { begin, end });
-    // FIXME: the presence of children is not considered
-    // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-    // FIXME: remove ts-ignore
-    // @ts-ignore
-    const json = service.block2Json(model, begin, end);
-
-    return {
-      html,
-      text,
-      json,
-    };
-  }
-
-  private _getOptimalClipboardData(
-    clipboardData: ClipboardEvent['clipboardData']
-  ) {
-    for (let i = 0; i < this._optimalMimeTypes.length; i++) {
-      const mimeType = this._optimalMimeTypes[i];
-      const data = clipboardData?.getData(mimeType);
-      if (data) {
-        return {
-          type: mimeType,
-          data,
-        };
-      }
-    }
-    return null;
-  }
-
-  private async _clipboardData2Blocks(
-    clipboardData: ClipboardEvent['clipboardData']
-  ) {
-    if (!clipboardData) {
-      return;
-    }
-    if (isPureFileInClipboard(clipboardData)) {
-      return this.contentParser.file2Blocks(clipboardData);
-    }
-
-    const optimalClipboardData = this._getOptimalClipboardData(clipboardData);
-
-    if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
-      return JSON.parse(optimalClipboardData.data);
-    }
-
-    const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
-    const shouldConvertMarkdown =
-      markdownUtils.checkIfTextContainsMd(textClipData);
-    if (
-      optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML &&
-      !shouldConvertMarkdown
-    ) {
-      return await this.contentParser.htmlText2Block(optimalClipboardData.data);
-    }
-
-    if (shouldConvertMarkdown) {
-      return await this.contentParser.markdown2Block(textClipData);
-    }
-
-    return this.contentParser.text2blocks(textClipData);
-  }
+    deleteModelsByRange(this._page);
+  };
 }

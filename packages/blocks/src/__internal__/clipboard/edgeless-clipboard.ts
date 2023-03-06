@@ -1,33 +1,35 @@
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { Page } from '@blocksuite/store';
 
-export class EdgelessClipboard {
-  private _edgelessBlock!: EdgelessPageBlockComponent;
-  constructor() {
-    console.log(this._edgelessBlock);
-  }
-  public init(edgelessBlock: EdgelessPageBlockComponent) {
-    this._edgelessBlock = edgelessBlock;
+import type { Clipboard } from './type.js';
 
-    document.body.addEventListener('cut', this._onCut.bind(this));
-    document.body.addEventListener('copy', this._onCopy.bind(this));
-    document.body.addEventListener('paste', this._onPaste.bind(this));
+export class EdgelessClipboard implements Clipboard {
+  private _page!: Page;
+  constructor(page: Page) {
+    this._page = page;
+    console.log('_page', this._page);
   }
-  public dispose() {
+  public initEvent(page: Page = this._page) {
+    this._page = page;
+    document.body.addEventListener('cut', this._onCut);
+    document.body.addEventListener('copy', this._onCopy);
+    document.body.addEventListener('paste', this._onPaste);
+  }
+  public disposeEvent() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
     document.body.removeEventListener('paste', this._onPaste);
   }
 
-  private _onCut(e: ClipboardEvent) {
+  private _onCut = (e: ClipboardEvent) => {
     e.preventDefault();
     // TODO: Implement cut
-  }
-  private _onCopy(e: ClipboardEvent) {
+  };
+  private _onCopy = (e: ClipboardEvent) => {
     e.preventDefault();
     // TODO: Implement copy
-  }
-  private _onPaste(e: ClipboardEvent) {
+  };
+  private _onPaste = (e: ClipboardEvent) => {
     e.preventDefault();
     //TODO: Implement paste
-  }
+  };
 }

@@ -8,6 +8,7 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { CodeBlockModel } from '../../code-block/index.js';
 import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
@@ -228,7 +229,7 @@ export function CodeBlockOptionContainer(
       <div style=${styleMap(style)} class="code-block-option">
         <format-bar-button
           class="has-tool-tip"
-          @click=${() => copyCode(codeBlockOption)}
+          @click=${() => copyCode(codeBlockOption.model as CodeBlockModel)}
         >
           ${CopyIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"

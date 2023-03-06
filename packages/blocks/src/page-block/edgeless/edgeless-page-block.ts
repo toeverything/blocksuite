@@ -90,12 +90,13 @@ export class EdgelessPageBlockComponent
   `;
 
   flavour = 'edgeless' as const;
-  clipboard = new EdgelessClipboard();
   @property()
   showGrid = false;
 
   @property()
   page!: Page;
+
+  clipboard = new EdgelessClipboard(this.page);
 
   @property()
   readonly = false;
@@ -277,12 +278,12 @@ export class EdgelessPageBlockComponent
   }
 
   override connectedCallback() {
-    this.clipboard.init(this);
+    this.clipboard.initEvent(this.page);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
+    this.clipboard.disposeEvent();
 
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();

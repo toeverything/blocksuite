@@ -41,9 +41,6 @@ export function registerService(
 export function getService<Key extends Flavour>(
   flavour: Key
 ): BlockServiceInstance[Key] {
-  console.log('flavour', flavour);
-  console.log('services', services);
-
   const service = services.get(flavour);
   if (!service) {
     throw new Error(`cannot find service by flavour ${flavour}`);

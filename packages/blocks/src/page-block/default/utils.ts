@@ -7,17 +7,15 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getService } from '../../__internal__/service.js';
+import { copy } from '../../__internal__/clipboard/index.js';
 import {
   BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getCurrentNativeRange,
-  getRichTextByModel,
   OpenBlockInfo,
-  resetNativeSelection,
 } from '../../__internal__/utils/index.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
@@ -35,8 +33,7 @@ export interface EditingState {
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.flavour === 'affine:embed' && block.type === 'image') return true;
-  return false;
+  return block.flavour === 'affine:embed' && block.type === 'image';
 }
 
 function getBlockWithOptionBarRect(
@@ -202,7 +199,7 @@ function binarySearchBlockEditingState(
             while (n >= 0 && depth >= 0) {
               const result = getBlockAndRect(blocks, n);
               if (
-                result.hoverDom.compareDocumentPosition(hoverDom) &
+                result.hoverDom.compareDocumentPosition(hoverDom) &&
                 Node.DOCUMENT_POSITION_CONTAINED_BY
               ) {
                 if (x >= result.blockRect.left && x < blockRect.left) {
@@ -309,32 +306,14 @@ export async function downloadImage(model: BaseBlockModel) {
 }
 
 export async function copyImage(model: EmbedBlockModel) {
-  const copyType = 'blocksuite/x-c+w';
-  const service = getService(model.flavour);
-  const text = service.block2Text(model);
-  const delta = [
-    {
-      insert: text,
-    },
-  ];
-  const copyData = JSON.stringify({
-    data: [
-      {
-        type: model.type,
-        sourceId: model.sourceId,
-        width: model.width,
-        height: model.height,
-        caption: model.caption,
-        flavour: model.flavour,
-        text: delta,
-        children: model.children,
-      },
-    ],
+  copy({
+    type: 'Block',
+    models: [model],
+    startOffset: 0,
+    endOffset: 0,
   });
-  const copySuccess = performNativeCopy([
-    { mimeType: copyType, data: copyData },
-  ]);
-  copySuccess && toast('Copied image to clipboard');
+
+  toast('Copied image to clipboard');
 }
 
 function getTextDelta(model: BaseBlockModel) {
@@ -359,11 +338,13 @@ export async function copyBlock(model: BaseBlockModel) {
       },
     ],
   };
-  const copySuccess = performNativeCopy([
+  return performNativeCopy([
     { mimeType: copyType, data: JSON.stringify(copyData) },
-    { mimeType: 'text/plain', data: model.text?.toString() || '' },
+    {
+      mimeType: 'text/plain',
+      data: model.text?.toString() || '',
+    },
   ]);
-  return copySuccess;
 }
 
 interface ClipboardItem {
@@ -413,25 +394,20 @@ export function focusCaption(model: BaseBlockModel) {
 async function getUrlByModel(model: BaseBlockModel) {
   assertExists(model.sourceId);
   const store = await model.page.blobs;
-  const url = store?.get(model.sourceId);
-  return url;
+  return store?.get(model.sourceId);
 }
 
 export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function copyCode(codeBlockOption: CodeBlockOption) {
-  const richText = getRichTextByModel(codeBlockOption.model);
-  assertExists(richText);
-  const quill = richText.quill;
-  quill.setSelection(0, quill.getLength());
-  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
-
-  const range = getCurrentNativeRange();
-  range.setStart(richText, 0);
-  range.setEnd(richText, 0);
-  resetNativeSelection(range);
+export function copyCode(codeBlockModel: CodeBlockModel) {
+  copy({
+    type: 'Block',
+    models: [codeBlockModel],
+    startOffset: 0,
+    endOffset: 0,
+  });
 
   toast('Copied to clipboard');
 }
