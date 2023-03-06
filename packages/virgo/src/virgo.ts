@@ -372,6 +372,14 @@ export class VEditor<
     this._rootElement = null;
   }
 
+  requestUpdate(): void {
+    Promise.resolve().then(() => {
+      assertExists(this._rootElement);
+
+      this._renderDeltas();
+    });
+  }
+
   getNativeSelection(): Selection | null {
     const selectionRoot = findDocumentOrShadowRoot(this);
     const selection = selectionRoot.getSelection();
