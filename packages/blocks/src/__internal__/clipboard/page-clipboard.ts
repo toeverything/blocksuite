@@ -33,18 +33,23 @@ export class pageBlockClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    deleteModelsByRange(this._page);
 
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
-
-    if (blocks.length) {
-      const range = getCurrentBlockRange(this._page);
-      const focusedBlockModel = range?.models[0];
-      assertExists(focusedBlockModel);
-      const service = getService(focusedBlockModel.flavour);
-      assertExists(range);
-      service.json2Block(focusedBlockModel, blocks, range);
+    if (!blocks.length) {
+      return;
     }
+    this._page.captureSync();
+
+    deleteModelsByRange(this._page);
+
+    const range = getCurrentBlockRange(this._page);
+    const focusedBlockModel = range?.models[0];
+    assertExists(focusedBlockModel);
+    const service = getService(focusedBlockModel.flavour);
+    assertExists(range);
+    service.json2Block(focusedBlockModel, blocks, range);
+
+    this._page.captureSync();
   };
 
   private _onCopy = (e: ClipboardEvent) => {
@@ -52,9 +57,13 @@ export class pageBlockClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
+    this._page.captureSync();
+
     const range = getCurrentBlockRange(this._page);
     assertExists(range);
     copy(range);
+
+    this._page.captureSync();
   };
 
   private _onCut = (e: ClipboardEvent) => {

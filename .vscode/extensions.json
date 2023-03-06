@@ -1,7 +1,0 @@
-{
-  "recommendations": [
-    "runem.lit-plugin",
-    "ms-playwright.playwright",
-    "esbenp.prettier-vscode"
-  ]
-}

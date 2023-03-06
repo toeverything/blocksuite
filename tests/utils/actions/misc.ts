@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import { ContentParser } from '@blocksuite/blocks';
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 
@@ -208,6 +209,24 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyFrameState(page: Page, pageId?: string) {
+  return await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+
+    if (!pageId) {
+      pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
+    }
+
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+
+    page.captureSync();
+    return { pageId, frameId };
+  }, pageId);
+}
+
 export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
@@ -367,26 +386,42 @@ export async function setQuillSelection(
 
 export async function pasteContent(
   page: Page,
-  clipData: Record<string, unknown>
+  clipData: Record<string, unknown>,
+  targetBlockId?: string
 ) {
   await page.evaluate(
     ({ clipData }) => {
-      const e = {
-        target: document.body,
-        preventDefault: () => null,
-        stopPropagation: () => null,
-        clipboardData: {
-          types: Object.keys(clipData),
-          getData: (mime: string) => {
-            return clipData[mime];
-          },
-        },
-      };
-      document
-        .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_onPaste'](
-          e as unknown as ClipboardEvent
-        );
+      // const e = {
+      //   target: document.body,
+      //   preventDefault: () => null,
+      //   stopPropagation: () => null,
+      //   clipboardData: {
+      //     types: Object.keys(clipData),
+      //     getData: (mime: string) => {
+      //       return clipData[mime];
+      //     },
+      //   },
+      // };
+      // document
+      //   .getElementsByTagName('editor-container')[0]
+      //   .clipboard['_clipboardEventDispatcher']['_onPaste'](
+      //     e as unknown as ClipboardEvent
+      //   );
+
+      // =====================  ====================
+      const e = new ClipboardEvent('paste', {
+        clipboardData: new DataTransfer(),
+      });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
+      Object.keys(clipData).forEach(key => {
+        e.clipboardData?.setData(key, clipData[key] as string);
+      });
+      document.body.dispatchEvent(e);
+
+      // =====================  ====================
     },
     { clipData }
   );
@@ -399,6 +434,11 @@ export async function importMarkdown(
 ) {
   await page.evaluate(
     ({ data, insertPositionId }) => {
+      const { workspace } = window;
+
+      const page = workspace.getPage(pageId) as StorePage;
+
+      const contentParser = new ContentParser(page);
       document
         .getElementsByTagName('editor-container')[0]
         .clipboard.importMarkdown(data, insertPositionId);

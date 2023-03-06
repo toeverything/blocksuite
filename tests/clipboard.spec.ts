@@ -65,9 +65,7 @@ test('clipboard paste html', async ({ page }) => {
         value: document.body,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document
-        .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
+      document.body.dispatchEvent(e);
     },
     { clipData }
   );
@@ -189,7 +187,7 @@ test('split block when paste', async ({ page }) => {
   await page.waitForTimeout(100);
   await pasteContent(page, clipData);
 
-  await assertRichTexts(page, ['atext', 'h1', 'c']);
+  await assertRichTexts(page, ['atext', 'h1c']);
   await assertSelection(page, 1, 2, 0);
 
   // FIXME: one redundant step in clipboard operation

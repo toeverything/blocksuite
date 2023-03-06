@@ -18,7 +18,9 @@ export const json2block = (
   // After deleteModelsByRange, selected block is must only, and selection is must caret
   const firstBlock = pastedBlocks[0];
   const lastBlock = pastedBlocks[pastedBlocks.length - 1];
-  const shouldMergeFirstBlock = firstBlock.text && focusedBlockModel.text;
+  const isFocusedBlockEmpty = !focusedBlockModel.text?.length;
+  const shouldMergeFirstBlock =
+    !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
   const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;
   const parent = page.getParent(focusedBlockModel);
   assertExists(parent);
@@ -62,6 +64,8 @@ export const json2block = (
         // TODO: set embed block selection
       }
     }
+
+    isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
     return;
   }
 
@@ -84,7 +88,10 @@ export const json2block = (
     insertPosition
   );
 
+  isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
+
   const lastModel = page.getBlockById(ids[ids.length - 1]);
+
   if (shouldMergeLastBlock) {
     assertExists(lastModel);
     const rangeOffset = lastModel.text?.length || 0;
@@ -93,7 +100,10 @@ export const json2block = (
     assertExists(nextSiblingModel);
     page.deleteBlock(nextSiblingModel);
 
-    getRichTextByModel(lastModel)?.quill.setSelection(rangeOffset, 0);
+    // Wait for the block's rich text mounted
+    requestAnimationFrame(() => {
+      getRichTextByModel(lastModel)?.quill.setSelection(rangeOffset, 0);
+    });
   } else {
     if (lastModel?.text) {
       getRichTextByModel(lastModel)?.quill.setSelection(
