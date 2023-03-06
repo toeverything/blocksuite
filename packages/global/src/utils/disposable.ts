@@ -1,7 +1,7 @@
-// type DisposeCallback = () => void;
+type DisposeCallback = () => void;
 
 export interface Disposable {
-  dispose(): void;
+  dispose: DisposeCallback;
 }
 
 export class DisposableGroup implements Disposable {
@@ -16,10 +16,13 @@ export class DisposableGroup implements Disposable {
    * Add to group to be disposed with others.
    * This will be immediately disposed if this group has already been disposed.
    */
-  add(disposable: Disposable) {
-    if (disposable) {
-      if (this._disposed) disposable.dispose();
-      else this._disposables.push(disposable);
+  add(d: Disposable | DisposeCallback) {
+    if (typeof d === 'function') {
+      if (this._disposed) d();
+      else this._disposables.push({ dispose: d });
+    } else {
+      if (this._disposed) d.dispose();
+      else this._disposables.push(d);
     }
   }
 
