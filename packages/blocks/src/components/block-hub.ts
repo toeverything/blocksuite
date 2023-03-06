@@ -37,6 +37,217 @@ import {
 import type { DragIndicator } from './drag-handle.js';
 import { toolTipStyle } from './tooltip/tooltip.js';
 
+const styles = css`
+  affine-block-hub {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .affine-block-hub-container {
+    width: 274px;
+    position: absolute;
+    right: calc(100% + 8px);
+    top: calc(50%);
+    overflow-y: unset;
+    transform: translateY(-50%);
+    display: none;
+    justify-content: center;
+    fill: var(--affine-icon-color);
+    font-size: var(--affine-font-sm);
+    background: var(--affine-hub-background);
+    box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
+    border-radius: 10px;
+  }
+
+  .affine-block-hub-container[type='text'] {
+    top: unset;
+    bottom: 0;
+    transform: unset;
+    right: calc(100% + 4px);
+  }
+
+  .visible {
+    display: block;
+  }
+
+  .invisible {
+    display: none;
+  }
+
+  .card-container-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-container {
+    display: flex;
+    position: relative;
+    align-items: center;
+    width: 250px;
+    height: 54px;
+    background: var(--affine-page-background);
+    box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    cursor: grab;
+    top: 0;
+    left: 0;
+    transition: all 0.1s ease-in-out;
+  }
+
+  .card-icon-container {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 12px;
+  }
+
+  .card-icon-container > svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .card-container:hover {
+    background: var(--affine-card-hover-background);
+    fill: var(--affine-primary-color);
+    top: -2px;
+    left: -2px;
+  }
+
+  .card-description-container {
+    display: block;
+    width: 190px;
+    color: var(--affine-text-color);
+    font-size: var(--affine-font-base);
+    line-height: var(--affine-line-height);
+    margin: 8px 0 8px 12px;
+    text-align: justify;
+  }
+
+  .affine-block-hub-container .description {
+    font-size: var(--affine-font-sm);
+    line-height: var(--affine-line-height);
+    color: var(--affine-secondary-text-color);
+    white-space: pre;
+  }
+
+  .card-container:hover.grabbing {
+    top: unset;
+    left: unset;
+    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+      0 0 12px rgba(66, 65, 73, 0.08);
+  }
+
+  .grabbing {
+    cursor: grabbing;
+  }
+
+  .grab {
+    cursor: grab;
+  }
+
+  .affine-block-hub-title-container {
+    margin: 16px 0 20px 12px;
+    color: var(--affine-secondary-text-color);
+    font-size: var(--affine-font-base);
+  }
+
+  .prominent {
+    z-index: 1;
+  }
+
+  .block-hub-menu-container {
+    display: flex;
+    font-family: var(--affine-font-family);
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    width: 44px;
+    background: var(--affine-page-background);
+    border-radius: 10px;
+  }
+
+  .block-hub-menu-container[expanded] {
+    box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+  }
+
+  .block-hub-icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    position: relative;
+    background: var(--affine-page-background);
+    border-radius: 5px;
+    fill: var(--affine-line-number-color);
+    height: 36px;
+  }
+
+  .block-hub-icon-container[selected='true'] {
+    fill: var(--affine-primary-color);
+  }
+
+  .block-hub-icon-container:hover {
+    background: var(--affine-hover-background);
+    border-radius: 5px;
+  }
+
+  .new-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--affine-page-background);
+    border-radius: 10px;
+    fill: var(--affine-line-number-color);
+  }
+
+  .block-hub-menu-container[expanded] .new-icon {
+    border-radius: 5px;
+  }
+
+  .new-icon:hover {
+    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+    fill: var(--affine-primary-color);
+    background: var(--affine-page-background);
+  }
+
+  .icon-expanded {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon-expanded:hover {
+    background: var(--affine-hover-background);
+    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+  }
+
+  .divider {
+    height: 1px;
+    width: 36px;
+    background: var(--affine-border-color);
+    margin: 4px 0;
+  }
+
+  [role='menuitem'] tool-tip {
+    font-size: var(--affine-font-sm);
+  }
+
+  .block-hub-icons-container {
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
+  }
+
+  ${toolTipStyle}
+`;
+
 type BlockHubItem = {
   flavour: string;
   type: string | null;
@@ -46,7 +257,7 @@ type BlockHubItem = {
   toolTip: string;
 };
 
-export type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
+type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
 
 const TRANSITION_DELAY = 200;
 const BOTTOM_OFFSET = 70;
@@ -283,218 +494,7 @@ export class BlockHub extends NonShadowLitElement {
   private _mouseRoot: HTMLElement;
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  static styles = css`
-    affine-block-hub {
-      position: absolute;
-      z-index: 1;
-    }
-
-    .affine-block-hub-container {
-      width: 274px;
-      position: absolute;
-      right: calc(100% + 8px);
-      top: calc(50%);
-      overflow-y: unset;
-      transform: translateY(-50%);
-      display: none;
-      justify-content: center;
-      fill: var(--affine-icon-color);
-      font-size: var(--affine-font-sm);
-      background: var(--affine-hub-background);
-      box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
-      border-radius: 10px;
-    }
-
-    .affine-block-hub-container[type='text'] {
-      top: unset;
-      bottom: 0;
-      transform: unset;
-      right: calc(100% + 4px);
-    }
-
-    .visible {
-      display: block;
-    }
-
-    .invisible {
-      display: none;
-    }
-
-    .card-container-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      position: relative;
-    }
-
-    .card-container {
-      display: flex;
-      position: relative;
-      align-items: center;
-      width: 250px;
-      height: 54px;
-      background: var(--affine-page-background);
-      box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      cursor: grab;
-      top: 0;
-      left: 0;
-      transition: all 0.1s ease-in-out;
-    }
-
-    .card-icon-container {
-      display: flex;
-      align-items: center;
-      position: absolute;
-      right: 12px;
-    }
-
-    .card-icon-container > svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .card-container:hover {
-      background: var(--affine-card-hover-background);
-      fill: var(--affine-primary-color);
-      top: -2px;
-      left: -2px;
-    }
-
-    .card-description-container {
-      display: block;
-      width: 190px;
-      color: var(--affine-text-color);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
-      margin: 8px 0 8px 12px;
-      text-align: justify;
-    }
-
-    .affine-block-hub-container .description {
-      font-size: var(--affine-font-sm);
-      line-height: var(--affine-line-height);
-      color: var(--affine-secondary-text-color);
-      white-space: pre;
-    }
-
-    .card-container:hover.grabbing {
-      top: unset;
-      left: unset;
-      box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-        0 0 12px rgba(66, 65, 73, 0.08);
-    }
-
-    .grabbing {
-      cursor: grabbing;
-    }
-
-    .grab {
-      cursor: grab;
-    }
-
-    .affine-block-hub-title-container {
-      margin: 16px 0 20px 12px;
-      color: var(--affine-secondary-text-color);
-      font-size: var(--affine-font-base);
-    }
-
-    .prominent {
-      z-index: 1;
-    }
-
-    .block-hub-menu-container {
-      display: flex;
-      font-family: var(--affine-font-family);
-      flex-flow: column;
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      width: 44px;
-      background: var(--affine-page-background);
-      border-radius: 10px;
-    }
-
-    .block-hub-menu-container[expanded] {
-      box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
-    }
-
-    .block-hub-icon-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 8px;
-      position: relative;
-      background: var(--affine-page-background);
-      border-radius: 5px;
-      fill: var(--affine-line-number-color);
-      height: 36px;
-    }
-
-    .block-hub-icon-container[selected='true'] {
-      fill: var(--affine-primary-color);
-    }
-
-    .block-hub-icon-container:hover {
-      background: var(--affine-hover-background);
-      border-radius: 5px;
-    }
-
-    .new-icon {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: var(--affine-page-background);
-      border-radius: 10px;
-      fill: var(--affine-line-number-color);
-    }
-
-    .block-hub-menu-container[expanded] .new-icon {
-      border-radius: 5px;
-    }
-
-    .new-icon:hover {
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
-      fill: var(--affine-primary-color);
-      background: var(--affine-page-background);
-    }
-
-    .icon-expanded {
-      width: 36px;
-      height: 36px;
-    }
-
-    .icon-expanded:hover {
-      background: var(--affine-hover-background);
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
-    }
-
-    .divider {
-      height: 1px;
-      width: 36px;
-      background: var(--affine-border-color);
-      margin: 4px 0;
-    }
-
-    [role='menuitem'] tool-tip {
-      font-size: var(--affine-font-sm);
-    }
-
-    .block-hub-icons-container {
-      overflow: hidden;
-      transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
-    }
-
-    ${toolTipStyle}
-  `;
+  static styles = styles;
 
   constructor(options: {
     mouseRoot: HTMLElement;
