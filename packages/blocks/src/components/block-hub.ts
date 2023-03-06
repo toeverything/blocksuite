@@ -17,7 +17,7 @@ import {
   Slot,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, TemplateResult } from 'lit';
+import { css, html } from 'lit';
 import {
   customElement,
   property,
@@ -276,7 +276,6 @@ export class BlockHub extends NonShadowLitElement {
   private _currentClientY = 0;
   private _isCardListVisible = false;
   private _indicator!: DragIndicator;
-  private _indicatorTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
   private _cursor = 0;
   private _timer: number | null = null;
@@ -605,9 +604,6 @@ export class BlockHub extends NonShadowLitElement {
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
-    if (!this._indicator) {
-      this._indicatorTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
-    }
   }
 
   disconnectedCallback() {
@@ -859,7 +855,7 @@ export class BlockHub extends NonShadowLitElement {
         </div>
         ${blockHubCards}
       </div>
-      ${this._indicatorTemplate}
+      <affine-drag-indicator></affine-drag-indicator>
     `;
   }
 }
