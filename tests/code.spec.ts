@@ -598,11 +598,8 @@ test('should code block wrap active after click', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.mouse.move(0, 0);
-  await page.waitForTimeout(300);
   const codeBlockController = getCodeBlock(page);
-  const codeBlock = codeBlockController.codeBlock;
-  await codeBlock.hover();
+  await codeBlockController.codeBlock.hover();
   await expect(codeBlockController.wrapButton).toBeVisible();
   await expect(codeBlockController.wrapButton).not.toHaveAttribute(
     'active',
