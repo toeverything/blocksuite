@@ -9,11 +9,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type CodeBlockOption, copyCode, toolTipStyle } from '../../index.js';
+import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import { copyCode } from '../../page-block/default/utils.js';
 
-export function toggleWrap(codeBlockOption: CodeBlockOption) {
+export function toggleWrap(model: BaseBlockModel) {
   const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
+    `[${BLOCK_ID_ATTR}="${model.id}"] .ql-syntax`
   );
   assertExists(syntaxElem);
   syntaxElem.classList.toggle('wrap');
@@ -55,7 +56,7 @@ export function CodeBlockOptionContainer(codeBlockOption: {
       <div style=${styleMap(style)} class="code-block-option">
         <format-bar-button
           class="has-tool-tip"
-          @click=${() => copyCode(codeBlockOption)}
+          @click=${() => copyCode(codeBlockOption.model)}
         >
           ${CopyIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"
@@ -64,7 +65,7 @@ export function CodeBlockOptionContainer(codeBlockOption: {
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-          @click=${() => toggleWrap(codeBlockOption)}
+          @click=${() => toggleWrap(codeBlockOption.model)}
         >
           ${LineWrapIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"
