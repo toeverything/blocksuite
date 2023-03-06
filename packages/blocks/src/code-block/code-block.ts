@@ -1,6 +1,6 @@
 import '../__internal__/rich-text/rich-text.js';
 import './components/lang-list.js';
-import './components/code-block-option.js';
+import './components/code-option.js';
 import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
@@ -15,7 +15,7 @@ import {
 } from '../__internal__/index.js';
 import { toolTipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
-import { CodeBlockOptionContainer } from './components/code-block-option.js';
+import { CodeOptionTemplate } from './components/code-option.js';
 
 const hljsStyles = css`
   //<editor-fold desc="highlight.js/styles/color-brewer.css">
@@ -298,7 +298,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     );
 
     const rect = this.getBoundingClientRect();
-    const codeBlockOptionPortal = CodeBlockOptionContainer({
+    const codeBlockOptionPortal = CodeOptionTemplate({
       model: this.model,
       position: { x: rect.right + 12, y: rect.top },
       hoverState: this.hoverState,

@@ -20,7 +20,7 @@ export function toggleWrap(model: BaseBlockModel) {
   syntaxElem.classList.toggle('wrap');
 }
 
-export function CodeBlockOptionContainer(codeBlockOption: {
+export function CodeOptionTemplate(codeBlockOption: {
   position: { x: number; y: number };
   model: BaseBlockModel;
   hoverState: Slot<boolean>;
@@ -60,8 +60,8 @@ export function CodeBlockOptionContainer(codeBlockOption: {
         >
           ${CopyIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"
-            >Copy to Clipboard
-          </tool-tip>
+            >Copy to Clipboard</tool-tip
+          >
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip ${isWrapped ? 'filled' : ''}"
@@ -69,22 +69,23 @@ export function CodeBlockOptionContainer(codeBlockOption: {
         >
           ${LineWrapIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"
-            >Wrap code
-          </tool-tip>
+            >Wrap code</tool-tip
+          >
         </format-bar-button>
         ${readonly
           ? ''
           : html`<format-bar-button
               class="has-tool-tip"
               @click=${() => {
+                if (readonly) return;
                 const model = codeBlockOption.model;
                 model.page.deleteBlock(model);
               }}
             >
               ${DeleteIcon}
               <tool-tip inert tip-position="right-start" role="tooltip"
-                >Delete
-              </tool-tip>
+                >Delete</tool-tip
+              >
             </format-bar-button>`}
       </div>
     </div>
