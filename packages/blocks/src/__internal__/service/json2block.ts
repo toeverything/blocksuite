@@ -3,18 +3,18 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import {
-  getCurrentBlockRange,
+  BlockRange,
   getRichTextByModel,
   OpenBlockInfo,
 } from '../utils/index.js';
 
 export const json2block = (
   focusedBlockModel: BaseBlockModel,
-  pastedBlocks: OpenBlockInfo[]
+  pastedBlocks: OpenBlockInfo[],
+  range?: BlockRange
 ) => {
-  const { page } = focusedBlockModel;
-  const range = getCurrentBlockRange(page);
   assertExists(range);
+  const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
   const firstBlock = pastedBlocks[0];
   const lastBlock = pastedBlocks[pastedBlocks.length - 1];
@@ -33,11 +33,11 @@ export const json2block = (
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
-        range.startOffset
+        range?.startOffset || 0
       );
 
       getRichTextByModel(focusedBlockModel)?.quill.setSelection(
-        range.startOffset + textLength,
+        (range?.startOffset || 0) + textLength,
         0
       );
     } else {

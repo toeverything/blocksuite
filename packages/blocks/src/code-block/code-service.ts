@@ -1,9 +1,11 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type { OpenBlockInfo } from '../__internal__/utils/index.js';
+import type { BlockRange } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
 export class CodeBlockService extends BaseService {
@@ -46,8 +48,10 @@ export class CodeBlockService extends BaseService {
 
   override json2Block(
     focusedBlockModel: BaseBlockModel,
-    pastedBlocks: OpenBlockInfo[]
+    pastedBlocks: OpenBlockInfo[],
+    range?: BlockRange
   ): void {
+    assertExists(range);
     const pastedDelta = pastedBlocks.reduce(
       (deltas: DeltaOperation[], block) => {
         block.text && deltas.push(...block.text);
@@ -56,6 +60,6 @@ export class CodeBlockService extends BaseService {
       []
     );
 
-    focusedBlockModel.text?.insertList(pastedDelta, 0);
+    focusedBlockModel.text?.insertList(pastedDelta, range.startOffset);
   }
 }

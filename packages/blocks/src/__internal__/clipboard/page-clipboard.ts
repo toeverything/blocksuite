@@ -86,7 +86,8 @@ export class PageClipboard implements Clipboard {
       const focusedBlockModel = range?.models[0];
       assertExists(focusedBlockModel);
       const service = this._pageBlock.getService(focusedBlockModel.flavour);
-      service.json2Block(focusedBlockModel, blocks);
+      assertExists(range);
+      service.json2Block(focusedBlockModel, blocks, range);
     }
   }
 
