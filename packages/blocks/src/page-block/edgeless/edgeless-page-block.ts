@@ -93,9 +93,6 @@ export class EdgelessPageBlockComponent
   @property()
   page!: Page;
 
-  @property()
-  readonly = false;
-
   @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
 
@@ -360,7 +357,6 @@ export class EdgelessPageBlockComponent
                 .state=${selectionState}
                 .rect=${selectionState.rect}
                 .zoom=${zoom}
-                .readonly=${this.readonly}
                 .surface=${this.surface}
               ></edgeless-selected-rect>
             `

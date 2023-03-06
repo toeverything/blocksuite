@@ -57,7 +57,7 @@ function setEndRange(editableContainer: Element) {
 
 async function setNewTop(y: number, editableContainer: Element) {
   const scrollContainer = editableContainer.closest('.affine-default-viewport');
-  const { top, bottom } = Rect.fromDom(editableContainer);
+  const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
     Number(
@@ -115,7 +115,7 @@ export async function focusRichText(
   position: SelectionPosition = 'end'
 ) {
   // TODO optimize how get scroll container
-  const { left, right } = Rect.fromDom(editableContainer);
+  const { left, right } = Rect.fromDOM(editableContainer);
   let range: Range | null = null;
   switch (position) {
     case 'start':

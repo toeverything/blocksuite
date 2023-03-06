@@ -1,4 +1,7 @@
-import { DefaulSelectionSlots, getCurrentBlockRange } from '@blocksuite/blocks';
+import {
+  DefaultSelectionSlots,
+  getCurrentBlockRange,
+} from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';
 
 import { getModelByElement } from '../../../__internal__/index.js';
@@ -213,17 +216,6 @@ export function findBlocksWithSubtree(
   return results;
 }
 
-export function createDraggingArea(
-  current: { x: number; y: number },
-  start: { x: number; y: number }
-) {
-  const width = Math.abs(current.x - start.x);
-  const height = Math.abs(current.y - start.y);
-  const left = Math.min(current.x, start.x);
-  const top = Math.min(current.y, start.y);
-  return new DOMRect(left, top, width, height);
-}
-
 export function updateLocalSelectionRange(page: Page) {
   const blockRange = getCurrentBlockRange(page);
   if (blockRange && blockRange.type === 'Native') {
@@ -306,7 +298,7 @@ function computeSelectionType(
 
 export function setSelectedBlocks(
   state: PageSelectionState,
-  slots: DefaulSelectionSlots,
+  slots: DefaultSelectionSlots,
   selectedBlocks: BlockComponentElement[],
   rects?: DOMRect[],
   selectionType?: PageSelectionType

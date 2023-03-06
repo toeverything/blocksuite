@@ -17,6 +17,8 @@ import {
   isDatabaseInput,
   isEmbed,
   isInsidePageTitle,
+  Point,
+  Rect,
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
@@ -30,8 +32,8 @@ import {
   repairContextMenuRange,
 } from '../../utils/position.js';
 import type {
-  DefaulSelectionSlots,
   DefaultPageBlockComponent,
+  DefaultSelectionSlots,
   EmbedEditingState,
 } from '../default-page-block.js';
 import {
@@ -44,7 +46,6 @@ import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, PageViewport } from './selection-state.js';
 import {
   clearSubtree,
-  createDraggingArea,
   filterSelectedBlockByIndex,
   filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
@@ -60,7 +61,7 @@ import {
 export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
-  readonly slots: DefaulSelectionSlots;
+  readonly slots: DefaultSelectionSlots;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
@@ -73,7 +74,7 @@ export class DefaultSelectionManager {
   }: {
     page: Page;
     mouseRoot: HTMLElement;
-    slots: DefaulSelectionSlots;
+    slots: DefaultSelectionSlots;
     container: DefaultPageBlockComponent;
   }) {
     this.page = page;
@@ -143,7 +144,7 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     if (this.state.type === 'block') {
       BlockDragHandlers.onMove(this, e);
@@ -164,7 +165,7 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
     }
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
@@ -277,7 +278,7 @@ export class DefaultSelectionManager {
     const direction = 'center-bottom';
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     if (!range || range.collapsed) return;
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     // Show format quick bar when double click on text
     showFormatQuickBar({
@@ -316,12 +317,8 @@ export class DefaultSelectionManager {
         hoverEditingState.position.x = hoverEditingState.position.right + 10;
       }
       this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-    } else if (hoverEditingState?.model.flavour === 'affine:code') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 12;
-      this.slots.codeBlockOptionUpdated.emit(hoverEditingState);
     } else {
       this.slots.embedEditingStateUpdated.emit(null);
-      this.slots.codeBlockOptionUpdated.emit(null);
     }
   };
 
@@ -349,7 +346,7 @@ export class DefaultSelectionManager {
 
     const range = getCurrentNativeRange(selection);
     if (range.collapsed) return;
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
@@ -377,10 +374,6 @@ export class DefaultSelectionManager {
     updateLocalSelectionRange(this.page);
   };
 
-  get readonly() {
-    return this.page.awarenessStore.isReadonly(this.page);
-  }
-
   get viewportElement() {
     return this._container.viewportElement;
   }
@@ -402,16 +395,16 @@ export class DefaultSelectionManager {
     }
   }
 
-  updateDraggingArea(
-    startPoint: { x: number; y: number },
-    endPoint: { x: number; y: number }
-  ): DOMRect {
+  updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
     if (this.state.focusedBlockIndex !== -1) {
       this.state.focusedBlockIndex = -1;
     }
-    const draggingArea = createDraggingArea(endPoint, startPoint);
-    this.slots.draggingAreaUpdated.emit(draggingArea);
-    return draggingArea;
+    const rect = Rect.fromPoints(
+      draggingArea.start,
+      draggingArea.end
+    ).toDOMRect();
+    this.slots.draggingAreaUpdated.emit(rect);
+    return rect;
   }
 
   updateViewport() {
@@ -438,15 +431,16 @@ export class DefaultSelectionManager {
   }
 
   refreshDraggingArea(viewport: PageViewport) {
-    const { blockCache, startPoint, endPoint } = this.state;
-
-    if (startPoint && endPoint) {
-      this.state.refreshBlockRectCache();
-      const draggingArea = createDraggingArea(endPoint, startPoint);
-      this.selectBlocksByDraggingArea(blockCache, draggingArea, viewport);
+    const { blockCache, draggingArea } = this.state;
+    if (draggingArea) {
+      this.selectBlocksByDraggingArea(
+        blockCache,
+        Rect.fromPoints(draggingArea.start, draggingArea.end).toDOMRect(),
+        viewport,
+        true
+      );
     } else {
-      this.state.updateStartPoint(null);
-      this.state.updateEndPoint(null);
+      this.state.draggingArea = null;
       this.slots.draggingAreaUpdated.emit(null);
       this.refreshSelectedBlocksRects();
     }
@@ -530,8 +524,12 @@ export class DefaultSelectionManager {
   selectBlocksByDraggingArea(
     blockCache: Map<BlockComponentElement, DOMRect>,
     draggingArea: DOMRect,
-    viewport: PageViewport
+    viewport: PageViewport,
+    isScrolling = false
   ) {
+    if (isScrolling) {
+      this.state.refreshBlockRectCache();
+    }
     const { scrollLeft, scrollTop, left, top } = viewport;
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
@@ -613,7 +611,6 @@ export class DefaultSelectionManager {
     this.slots.draggingAreaUpdated.dispose();
     this.slots.embedEditingStateUpdated.dispose();
     this.slots.embedRectsUpdated.dispose();
-    this.slots.codeBlockOptionUpdated.dispose();
     this.slots.nativeSelectionToggled.dispose();
     this._disposables.dispose();
   }

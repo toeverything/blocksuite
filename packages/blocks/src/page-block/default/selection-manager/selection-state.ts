@@ -2,6 +2,7 @@ import type { EmbedBlockComponent } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
   getAllBlocks,
+  Point,
   resetNativeSelection,
   type SelectionEvent,
 } from '@blocksuite/blocks/std';
@@ -39,6 +40,7 @@ export class PageSelectionState {
     clientWidth: 0,
   };
 
+  draggingArea: { start: Point; end: Point } | null = null;
   selectedEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: BlockComponentElement[] = [];
   // -1: SELECT_ALL
@@ -46,9 +48,7 @@ export class PageSelectionState {
   focusedBlockIndex = -1;
   rafID?: number;
   private _startRange: Range | null = null;
-  private _rangePoint: { x: number; y: number } | null = null;
-  private _startPoint: { x: number; y: number } | null = null;
-  private _endPoint: { x: number; y: number } | null = null;
+  private _rangePoint: Point | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<BlockComponentElement, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
@@ -74,14 +74,6 @@ export class PageSelectionState {
     return this._rangePoint;
   }
 
-  get startPoint() {
-    return this._startPoint;
-  }
-
-  get endPoint() {
-    return this._endPoint;
-  }
-
   get richTextCache() {
     return this._richTextCache;
   }
@@ -102,10 +94,10 @@ export class PageSelectionState {
   }
 
   updateRangePoint(x: number, y: number) {
-    this._rangePoint = { x, y };
+    this._rangePoint = new Point(x, y);
   }
 
-  resetStartPoint(
+  resetDraggingArea(
     e: SelectionEvent,
     offset: { scrollLeft: number; scrollTop: number } = {
       scrollLeft: 0,
@@ -116,16 +108,11 @@ export class PageSelectionState {
     let { x, y } = e;
     x += scrollLeft;
     y += scrollTop;
-    this._startPoint = { x, y };
-    this._endPoint = { x, y };
-  }
-
-  updateStartPoint(point: { x: number; y: number } | null) {
-    this._startPoint = point;
-  }
-
-  updateEndPoint(point: { x: number; y: number } | null) {
-    this._endPoint = point;
+    const end = new Point(x, y);
+    this.draggingArea = {
+      start: end.clone(),
+      end,
+    };
   }
 
   refreshBlockRectCache() {
@@ -156,8 +143,7 @@ export class PageSelectionState {
 
   clearDraggingArea() {
     this.clearRaf();
-    this._startPoint = null;
-    this._endPoint = null;
+    this.draggingArea = null;
   }
 
   clearNativeSelection() {

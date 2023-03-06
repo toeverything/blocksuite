@@ -16,7 +16,7 @@ export const createBlockHub: (
 ) => BlockHub = (editor: EditorContainer, page: Page) => {
   const blockHub = new BlockHub({
     mouseRoot: editor,
-    enable_database: !!page.awarenessStore.getFlag('enable_database'),
+    enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onDropCallback: async (e, end) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
@@ -54,7 +54,7 @@ export const createBlockHub: (
   if (editor.mode === 'page') {
     const defaultPageBlock = editor.querySelector('affine-default-page');
     assertExists(defaultPageBlock);
-    blockHub.selectedRectsUpdated = defaultPageBlock.slots.selectedRectsUpdated;
+    blockHub.slots = defaultPageBlock.slots;
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(defaultPageBlock.model);
   } else {

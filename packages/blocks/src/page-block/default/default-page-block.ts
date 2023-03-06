@@ -25,7 +25,6 @@ import type { PageBlockModel } from '../index.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
-  CodeBlockOptionContainer,
   DraggingArea,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
@@ -43,14 +42,12 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
-export type CodeBlockOption = EmbedEditingState;
-
-export interface DefaulSelectionSlots {
+export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EmbedEditingState | null>;
-  codeBlockOptionUpdated: Slot<CodeBlockOption | null>;
+  codeBlockOptionUpdated?: Slot;
   nativeSelectionToggled: Slot<boolean>;
 }
 
@@ -115,9 +112,6 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
-  @property()
-  readonly = false;
-
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -150,18 +144,14 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  @property()
-  codeBlockOption!: CodeBlockOption | null;
-
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
-  slots: DefaulSelectionSlots = {
+  slots: DefaultSelectionSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
-    codeBlockOptionUpdated: new Slot<CodeBlockOption | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
@@ -177,7 +167,7 @@ export class DefaultPageBlockComponent
     return this._titleVEditor;
   }
 
-  private initTitleVEditor() {
+  private _initTitleVEditor() {
     const { model } = this;
     const title = model.title;
 
@@ -186,6 +176,7 @@ export class DefaultPageBlockComponent
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
     });
+    this._titleVEditor.setReadonly(this.page.readonly);
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -193,7 +184,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this._titleVEditor.focusEnd();
-    this._titleVEditor.setReadOnly(this.readonly);
+    this._titleVEditor.setReadonly(this.page.readonly);
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
@@ -244,7 +235,7 @@ export class DefaultPageBlockComponent
     }
   };
 
-  // TODO: disable it on scroll's thresold
+  // TODO: disable it on scroll's threshold
   private _onWheel = (e: WheelEvent) => {
     const { selection } = this;
     const { state } = selection;
@@ -269,16 +260,16 @@ export class DefaultPageBlockComponent
         top = Math.max(top, -scrollTop);
       }
 
-      const { startPoint, endPoint } = state;
-      if (startPoint && endPoint) {
+      const { draggingArea } = state;
+      if (draggingArea) {
         e.preventDefault();
 
         viewport.scrollTop += top;
         // FIXME: need smooth
         viewportElement.scrollTop += top;
 
-        endPoint.y += top;
-        selection.updateDraggingArea(startPoint, endPoint);
+        draggingArea.end.y += top;
+        selection.updateDraggingArea(draggingArea);
       }
     }
 
@@ -310,13 +301,9 @@ export class DefaultPageBlockComponent
   };
 
   updated(changedProperties: Map<string, unknown>) {
-    if (this._titleVEditor && changedProperties.has('readonly')) {
-      this._titleVEditor.setReadOnly(this.readonly);
-    }
-
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
-        this.initTitleVEditor();
+        this._initTitleVEditor();
       }
     }
   }
@@ -431,10 +418,6 @@ export class DefaultPageBlockComponent
       this._embedEditingState = embedEditingState;
       this.requestUpdate();
     });
-    slots.codeBlockOptionUpdated.on(codeBlockOption => {
-      this.codeBlockOption = codeBlockOption;
-      this.requestUpdate();
-    });
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
@@ -505,7 +488,7 @@ export class DefaultPageBlockComponent
   }
 
   render() {
-    const { readonly, selection } = this;
+    const { page, selection } = this;
     const { viewport } = selection.state;
 
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
@@ -521,12 +504,9 @@ export class DefaultPageBlockComponent
       viewport
     );
     const embedEditingContainer = EmbedEditingContainer(
-      readonly ? null : this._embedEditingState,
+      page.readonly ? null : this._embedEditingState,
       this.slots,
       viewport
-    );
-    const codeBlockOptionContainer = CodeBlockOptionContainer(
-      readonly ? null : this.codeBlockOption
     );
 
     return html`
@@ -544,7 +524,7 @@ export class DefaultPageBlockComponent
           ${childrenContainer}
         </div>
         ${selectedRectsContainer} ${draggingArea} ${selectedEmbedContainer}
-        ${embedEditingContainer} ${codeBlockOptionContainer}
+        ${embedEditingContainer}
       </div>
     `;
   }
