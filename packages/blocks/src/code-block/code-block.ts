@@ -1,8 +1,10 @@
 import '../__internal__/rich-text/rich-text.js';
 import './components/lang-list.js';
+import './components/code-block-option.js';
+import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { DisposableGroup } from '@blocksuite/store';
+import { DisposableGroup, Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -13,6 +15,7 @@ import {
 } from '../__internal__/index.js';
 import { toolTipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
+import { CodeBlockOptionContainer } from './components/code-block-option.js';
 
 const hljsStyles = css`
   //<editor-fold desc="highlight.js/styles/color-brewer.css">
@@ -101,6 +104,17 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
 
+    /* hover area */
+    .affine-code-block-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 100%;
+      transform: translateX(100%);
+    }
+
     .affine-code-block-container pre {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
@@ -161,12 +175,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       fill: var(--affine-primary-color);
     }
 
-    .lang-container {
-      line-height: var(--affine-line-height);
-      text-align: justify;
-      position: relative;
-    }
-
     .code-block-option {
       box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
         0 3px 16px -6px rgba(24, 39, 75, 0.04);
@@ -194,10 +202,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   private _disposableGroup = new DisposableGroup();
 
+  @state()
+  private _showOption = true;
+
   get highlight() {
     const service = this.host.getService(this.model.flavour);
     return service.hljs.default.highlight;
   }
+
+  get readonly() {
+    return this.model.page.readonly;
+  }
+
+  hoverState = new Slot<boolean>();
 
   override connectedCallback() {
     super.connectedCallback();
@@ -207,6 +224,29 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this._disposableGroup.add(
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
+
+    let timer: number;
+    this.hoverState.on(hover => {
+      clearTimeout(timer);
+      if (hover) {
+        this._showOption = true;
+        return;
+      }
+      timer = window.setTimeout(() => {
+        this._showOption = false;
+      }, HOVER_DELAY);
+    });
+    this._disposableGroup.add(
+      Slot.disposableListener(this, 'mouseover', e => {
+        this.hoverState.emit(true);
+      })
+    );
+    const HOVER_DELAY = 300;
+    this._disposableGroup.add(
+      Slot.disposableListener(this, 'mouseleave', e => {
+        this.hoverState.emit(false);
+      })
+    );
   }
 
   override disconnectedCallback() {
@@ -215,6 +255,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _onClick() {
+    if (this.readonly) return;
     this._showLangList = !this._showLangList;
   }
 
@@ -223,11 +264,15 @@ export class CodeBlockComponent extends NonShadowLitElement {
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
-      <div class="lang-container" @click=${this._onClick}>
-        <icon-button width="101px" height="24px" ?hover=${this._showLangList}>
-          ${this.model.language} ${ArrowDownIcon}
-        </icon-button>
-      </div>
+      <icon-button
+        width="101px"
+        height="24px"
+        ?hover=${this._showLangList}
+        ?disabled=${this.readonly}
+        @click=${this._onClick}
+      >
+        ${this.model.language} ${ArrowDownIcon}
+      </icon-button>
       ${this._showLangList
         ? html`<lang-list
             @selected-language-changed=${(e: CustomEvent) => {
@@ -251,8 +296,14 @@ export class CodeBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
-    return html`
-      <div class="affine-code-block-container">
+    const rect = this.getBoundingClientRect();
+    const codeBlockOptionPortal = CodeBlockOptionContainer({
+      model: this.model,
+      position: { x: rect.right + 12, y: rect.top },
+      hoverState: this.hoverState,
+    });
+
+    return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <rich-text
           .host=${this.host}
@@ -269,7 +320,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
         </rich-text>
         ${childrenContainer}
       </div>
-    `;
+      ${this._showOption
+        ? html`<affine-portal
+            .template=${codeBlockOptionPortal}
+          ></affine-portal>`
+        : ''}`;
   }
 }
 
