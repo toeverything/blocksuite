@@ -26,6 +26,20 @@ export class DisposableGroup implements Disposable {
     }
   }
 
+  addFromEvent(
+    element: HTMLElement | Window | Document,
+    eventName: string,
+    handler: (e: Event) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ) {
+    this.add({
+      dispose: () => {
+        element.removeEventListener(eventName, handler, eventOptions);
+      },
+    });
+    element.addEventListener(eventName, handler, eventOptions);
+  }
+
   dispose() {
     disposeAll(this._disposables);
     this._disposables = [];

@@ -66,7 +66,7 @@ export class FormatQuickBar extends LitElement {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -106,12 +106,12 @@ export class FormatQuickBar extends LitElement {
         subtree: true,
       });
     });
-    this._disposableGroup.add(() => mutationObserver.disconnect());
+    this._disposables.add(() => mutationObserver.disconnect());
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   private _onHover() {

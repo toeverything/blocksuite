@@ -196,7 +196,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _showLangList = false;
 
   @state()
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   @state()
   private _optionPosition: { x: number; y: number } | null = null;
@@ -217,10 +217,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposableGroup.add(
+    this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
-    this._disposableGroup.add(
+    this._disposables.add(
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
 
@@ -236,19 +236,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
         this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(this, 'mouseover', e => {
         this.hoverState.emit(true);
       })
     );
     const HOVER_DELAY = 300;
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(this, 'mouseleave', e => {
         this.hoverState.emit(false);
       })
     );
 
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(document, 'wheel', e => {
         if (!this._optionPosition) return;
         // Update option position when scrolling
@@ -260,7 +260,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   private _onClickWrapBtn() {

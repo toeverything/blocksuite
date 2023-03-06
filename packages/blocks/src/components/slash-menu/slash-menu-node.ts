@@ -50,20 +50,20 @@ export class SlashMenu extends LitElement {
    */
   private _searchString = '';
 
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(window, 'mousedown', this._clickAwayListener)
     );
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(window, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
         capture: true,
       })
     );
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(this, 'mousedown', e => {
         // Prevent input from losing focus
         e.preventDefault();
@@ -78,20 +78,20 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(richText, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
         capture: true,
       })
     );
-    this._disposableGroup.add(
+    this._disposables.add(
       Slot.fromEvent(richText, 'focusout', this._clickAwayListener)
     );
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   // Handle click outside
