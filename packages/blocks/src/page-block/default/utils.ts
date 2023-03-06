@@ -341,8 +341,8 @@ export async function downloadImage(model: BaseBlockModel) {
   if (!imgSrc) {
     return;
   }
-  const r = await (await fetch(imgSrc)).arrayBuffer();
-  const buffer = new Uint8Array(r);
+  const arrayBuffer = await (await fetch(imgSrc)).arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
   let fileType: string;
   if (
     buffer[0] === 0x47 &&
@@ -370,7 +370,9 @@ export async function downloadImage(model: BaseBlockModel) {
     console.error('unknown image type');
     fileType = 'image/png';
   }
-  const downloadUrl = URL.createObjectURL(new Blob([r], { type: fileType }));
+  const downloadUrl = URL.createObjectURL(
+    new Blob([arrayBuffer], { type: fileType })
+  );
   const a = document.createElement('a');
   const event = new MouseEvent('click');
   a.download = 'image';
