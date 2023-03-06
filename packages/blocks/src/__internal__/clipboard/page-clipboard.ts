@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/store';
 
 import type { DefaultPageBlockComponent } from '../../page-block/index.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
+import { ContentParser } from '../content-parser/index.js';
 import {
   getCurrentBlockRange,
   getCurrentNativeRange,
@@ -10,6 +11,7 @@ import {
   resetNativeSelection,
 } from '../utils/index.js';
 import { ClipboardItem } from './clipboard-item.js';
+import markdownUtils from './markdown-utils.js';
 import type { Clipboard } from './type.js';
 import {
   CLIPBOARD_MIMETYPE,
@@ -20,6 +22,7 @@ import {
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 export class PageClipboard implements Clipboard {
   private _pageBlock!: DefaultPageBlockComponent;
+  contentParser!: ContentParser;
   // The event handler will get the most needed clipboard data based on this array order
   private _optimalMimeTypes: string[] = [
     CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
@@ -28,6 +31,7 @@ export class PageClipboard implements Clipboard {
   ];
   public init(pageBlock: DefaultPageBlockComponent) {
     this._pageBlock = pageBlock;
+    this.contentParser = new ContentParser(this._pageBlock.page);
     document.body.addEventListener('cut', this._onCut.bind(this));
     document.body.addEventListener('copy', this._onCopy.bind(this));
     document.body.addEventListener('paste', this._onPaste.bind(this));
@@ -68,14 +72,15 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
     this.copy();
   }
-  private _onPaste(e: ClipboardEvent) {
+  private async _onPaste(e: ClipboardEvent) {
     if (!this._shouldContinue() || !e.clipboardData) {
       return;
     }
     e.preventDefault();
     deleteModelsByRange(this._pageBlock.page);
 
-    const blocks = this._clipboardData2Blocks(e.clipboardData);
+    const blocks = await this._clipboardData2Blocks(e.clipboardData);
+
     if (blocks.length) {
       const range = getCurrentBlockRange(this._pageBlock.page);
       const focusedBlockModel = range?.models[0];
@@ -167,10 +172,13 @@ export class PageClipboard implements Clipboard {
     return null;
   }
 
-  private _clipboardData2Blocks(
+  private async _clipboardData2Blocks(
     clipboardData: ClipboardEvent['clipboardData']
   ) {
-    if (clipboardData && isPureFileInClipboard(clipboardData)) {
+    if (!clipboardData) {
+      return;
+    }
+    if (isPureFileInClipboard(clipboardData)) {
       return;
     }
 
@@ -179,8 +187,21 @@ export class PageClipboard implements Clipboard {
     if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
       return JSON.parse(optimalClipboardData.data);
     }
-    if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML) {
-      console.log('html');
+
+    const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+    const shouldConvertMarkdown =
+      markdownUtils.checkIfTextContainsMd(textClipData);
+    if (
+      optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML &&
+      !shouldConvertMarkdown
+    ) {
+      return await this.contentParser.htmlText2Block(optimalClipboardData.data);
     }
+
+    if (shouldConvertMarkdown) {
+      return await this.contentParser.markdown2Block(textClipData);
+    }
+
+    return this.contentParser.text2blocks(textClipData);
   }
 }
