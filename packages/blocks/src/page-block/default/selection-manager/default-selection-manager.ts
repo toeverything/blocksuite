@@ -6,11 +6,11 @@ import { DisposableGroup } from '@blocksuite/store';
 
 import {
   type BlockComponentElement,
-  getBlockByPoint2,
   getBlockElementByModel,
+  getClosestBlockElementByPoint,
   getCurrentNativeRange,
   getDefaultPageBlock,
-  getModelByElement,
+  getModelByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   initMouseEventHandlers,
@@ -39,6 +39,7 @@ import type {
   EmbedEditingState,
 } from '../default-page-block.js';
 import {
+  type EditingState,
   getAllowSelectedBlocks,
   getBlockEditingStateByPosition,
 } from '../utils.js';
@@ -306,33 +307,33 @@ export class DefaultSelectionManager {
     assertExists(blockContainer);
     const { left, width } = blockContainer.getBoundingClientRect();
     const { clientHeight, top } = viewport;
-    let hoverEditingState = null;
+    let hoverEditingState: EditingState | null = null;
 
-    const block = getBlockByPoint2(
+    const blockElement = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
       Rect.fromLWTH(
         left,
-        width,
+        Math.min(width, window.innerWidth),
         top,
         Math.min(clientHeight, window.innerHeight)
       )
     );
 
-    if (block) {
+    if (blockElement) {
       hoverEditingState = {
-        model: getModelByElement(block),
-        position: block.getBoundingClientRect(),
+        model: getModelByBlockElement(blockElement),
+        position: blockElement.getBoundingClientRect(),
+        element: blockElement as BlockComponentElement,
+        index: 0,
       };
     }
 
-    // const hoverEditingState = getBlockEditingStateByPosition(
-    //   this._selectableBlocks,
-    //   e.raw.clientX,
-    //   e.raw.clientY
-    // );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
-    this._container.components.dragHandle?.onContainerMouseMove(e);
+    this._container.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
 
     if (hoverEditingState?.model.type === 'image') {
       const { position } = hoverEditingState;
@@ -435,15 +436,17 @@ export class DefaultSelectionManager {
 
   updateViewport() {
     const { viewportElement } = this._container;
+    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
+      viewportElement;
     const { top, left } = viewportElement.getBoundingClientRect();
     this.state.viewport = {
       top,
       left,
-      scrollTop: viewportElement.scrollTop,
-      scrollLeft: viewportElement.scrollLeft,
-      scrollHeight: viewportElement.scrollHeight,
-      clientHeight: viewportElement.clientHeight,
-      clientWidth: viewportElement.clientWidth,
+      clientHeight,
+      clientWidth,
+      scrollHeight,
+      scrollLeft,
+      scrollTop,
     };
   }
 

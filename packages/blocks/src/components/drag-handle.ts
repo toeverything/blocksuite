@@ -219,9 +219,7 @@ export class DragHandle extends LitElement {
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
-  onContainerMouseMove(event: SelectionEvent) {
-    if (!this._getBlockEditingStateByPosition) return;
-
+  onContainerMouseMove(event: SelectionEvent, modelState: EditingState | null) {
     const frameBlock = this._container.querySelector(
       '.affine-frame-block-container'
     );
@@ -230,15 +228,8 @@ export class DragHandle extends LitElement {
     // See https://github.com/toeverything/blocksuite/issues/1611
     if (event.raw.clientY < frameBlockRect.y) {
       this.hide();
-      return;
     }
 
-    const modelState = this._getBlockEditingStateByPosition(
-      this.getDropAllowedBlocks(null),
-      event.raw.clientX,
-      event.raw.clientY,
-      true
-    );
     if (modelState) {
       this._handleAnchorState = modelState;
       this._cursor = modelState.index;

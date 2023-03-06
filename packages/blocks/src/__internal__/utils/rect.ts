@@ -1,4 +1,4 @@
-import { clamp } from '../index.js';
+import { clamp } from './std.js';
 
 export class Point {
   public x: number;
