@@ -4,8 +4,8 @@ import {
 } from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';
 
-import { getModelByElement } from '../../../__internal__/index.js';
 import type { BlockComponentElement, IPoint } from '../../../std.js';
+import { contains, getModelByElement } from '../../../std.js';
 import type { PageSelectionState, PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
@@ -14,22 +14,6 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
     a.right + offset.x >= b.left &&
     a.top + offset.y <= b.bottom &&
     a.bottom + offset.y >= b.top
-  );
-}
-
-/*
-function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
-  return (
-    a.left >= bound.left + offset.x &&
-    a.right <= bound.right + offset.x &&
-    a.top >= bound.top + offset.y &&
-    a.bottom <= bound.bottom + offset.y
-  );
-}
-*/
-function contains(parent: Element, node: Element) {
-  return (
-    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
   );
 }
 

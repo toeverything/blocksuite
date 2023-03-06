@@ -194,7 +194,7 @@ export class Rect {
   }
 
   clamp(p: Point) {
-    Point.clamp(p, this.min, this.max);
+    return Point.clamp(p, this.min, this.max);
   }
 
   clone() {

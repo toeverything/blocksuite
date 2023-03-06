@@ -7,6 +7,7 @@
 export * from './block-range.js';
 export * from './common-operations.js';
 export * from './components.js';
+export * from './dom.js';
 export * from './filesys.js';
 export * from './gesture.js';
 export * from './hotkey.js';
