@@ -53,7 +53,7 @@ export function getClosestBlockElementByPoint(
   do {
     elem = document.elementFromPoint(point.x, point.y);
     if (elem) {
-      if (!elem.getAttribute(BLOCK_ID_ATTR)) {
+      if (elem.hasAttribute(BLOCK_ID_ATTR)) {
         elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
       }
       if (elem) {
