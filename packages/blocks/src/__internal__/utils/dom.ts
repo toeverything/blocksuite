@@ -25,23 +25,29 @@ export function contains(parent: Element, node: Element) {
   );
 }
 
-export function isBlockElement(element: Element) {
-  return (
-    element.tagName !== 'AFFINE-DEFAULT-PAGE' &&
-    element.tagName !== 'AFFINE-FRAME'
-  );
+/**
+ * Returns `true` if element is page or frame.
+ */
+export function isPageOrFrame({ tagName }: Element) {
+  return tagName === 'AFFINE-DEFAULT-PAGE' || tagName === 'AFFINE-FRAME';
 }
 
+/**
+ * Returns the closest block element by a point in the rect.
+ */
 export function getClosestBlockElementByPoint(
   point: Point,
-  rect: Rect
+  { left, top, right, bottom }: Rect
 ): Element | null {
-  const y = point.y;
+  const { y } = point;
+
+  if (point.x > right || y < top || y > bottom) return null;
+
   let elem = null;
   let n = 1;
 
   point.x = Math.floor(
-    Math.min(Math.max(point.x, rect.left) + DRAG_HANDLE_OFFSET_X, rect.right)
+    Math.min(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X, right)
   );
 
   do {
@@ -51,7 +57,7 @@ export function getClosestBlockElementByPoint(
         elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
       }
       if (elem) {
-        if (isBlockElement(elem)) {
+        if (!isPageOrFrame(elem)) {
           return elem;
         }
         elem = null;
@@ -64,11 +70,14 @@ export function getClosestBlockElementByPoint(
       n--;
     }
     n *= -1;
-  } while (n <= STEPS && point.y >= rect.top && point.y <= rect.bottom);
+  } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
   return elem;
 }
 
+/**
+ * Returns the model of the block element.
+ */
 export function getModelByBlockElement(element: Element) {
   const containerBlock = element as ContainerBlock;
   // In extreme cases, the block may be loading, and the model is not yet available.
