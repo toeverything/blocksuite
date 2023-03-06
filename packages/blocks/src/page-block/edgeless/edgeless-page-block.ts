@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
 import './view-control-bar.js';
+import './components/edgeless-selected-rect.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
@@ -31,11 +32,9 @@ import {
   removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
-import {
-  EdgelessBlockChildrenContainer,
-  EdgelessDraggingArea,
-  EdgelessHoverRect,
-} from './components.js';
+import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
+import { EdgelessDraggingArea } from './components/dragging-area.js';
+import { EdgelessHoverRect } from './components/hover-Rect.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,

@@ -1,198 +1,26 @@
-import '../../__internal__/index.js';
-
-import type { SurfaceViewport, XYWH } from '@blocksuite/phasor';
+import type { SurfaceViewport } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  BlockElement,
-  BlockHost,
-  getBlockById,
-} from '../../__internal__/index.js';
-import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
-import type {
-  EdgelessHoverState,
-  EdgelessSelectionState,
-} from './selection-manager.js';
+import { getBlockById } from '../../../__internal__/index.js';
+import type { EdgelessSelectionState } from '../selection-manager.js';
 import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
   getXYWH,
-  isSurfaceElement,
   isTopLevelBlock,
   PADDING_X,
   PADDING_Y,
-} from './utils.js';
-
-const SHAPE_PADDING = 48;
-
-function getCommonRectStyle(
-  rect: DOMRect,
-  zoom: number,
-  isSurfaceElement = false,
-  selected = false
-) {
-  return {
-    position: 'absolute',
-    left: rect.x + 'px',
-    top: rect.y + 'px',
-    width: rect.width + (isSurfaceElement ? 0 : PADDING_X) * zoom + 'px',
-    height: rect.height + (isSurfaceElement ? 0 : PADDING_Y) * zoom + 'px',
-    borderRadius: isSurfaceElement ? '0' : `${10 * zoom}px`,
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-    zIndex: '1',
-    backgroundColor:
-      isSurfaceElement && selected ? 'var(--affine-selected-color)' : '',
-  };
-}
-
-export function EdgelessHoverRect(
-  hoverState: EdgelessHoverState | null,
-  zoom: number
-) {
-  if (!hoverState) return null;
-  const rect = hoverState.rect;
-  const isInSurface = isSurfaceElement(hoverState.content);
-
-  const style = {
-    ...getCommonRectStyle(rect, zoom, isInSurface),
-    border: '1px solid var(--affine-primary-color)',
-  };
-
-  return html`
-    <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>
-  `;
-}
-
-enum HandleDirection {
-  Left = 'left',
-  Right = 'right',
-  LeftTop = 'left-top',
-  LeftBottom = 'left-bottom',
-  RightTop = 'right-top',
-  RightBottom = 'right-bottom',
-}
-
-const directionCursors = {
-  [HandleDirection.Right]: 'ew-resize',
-  [HandleDirection.Left]: 'ew-resize',
-  [HandleDirection.LeftTop]: 'nw-resize',
-  [HandleDirection.RightTop]: 'ne-resize',
-  [HandleDirection.LeftBottom]: 'sw-resize',
-  [HandleDirection.RightBottom]: 'se-resize',
-} as const;
-
-function Handle(
-  centerX: number,
-  centerY: number,
-  handleDirection: HandleDirection,
-  onMouseDown?: (e: MouseEvent, direction: HandleDirection) => void
-) {
-  const style = {
-    position: 'absolute',
-    left: centerX - 6 + 'px',
-    top: centerY - 6 + 'px',
-    width: '12px',
-    height: '12px',
-    boxSizing: 'border-box',
-    borderRadius: '6px',
-    zIndex: '10',
-    border: '2px var(--affine-primary-color) solid',
-    background: 'white',
-    cursor: directionCursors[handleDirection],
-  };
-
-  const handlerMouseDown = (e: MouseEvent) => {
-    onMouseDown && onMouseDown(e, handleDirection);
-  };
-
-  return html`
-    <div
-      aria-label=${`handle-${handleDirection}`}
-      style=${styleMap(style)}
-      @mousedown=${handlerMouseDown}
-    ></div>
-  `;
-}
-
-export function EdgelessDraggingArea(rect: DOMRect | null) {
-  if (rect === null) return html``;
-
-  const style = {
-    left: rect.left + 'px',
-    top: rect.top + 'px',
-    width: rect.width + 'px',
-    height: rect.height + 'px',
-  };
-  return html`
-    <style>
-      .affine-edgeless-dragging-area {
-        position: absolute;
-        background: var(--affine-selected-color);
-        z-index: 1;
-        pointer-events: none;
-      }
-    </style>
-    <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
-  `;
-}
-
-function EdgelessBlockChild(
-  model: TopLevelBlockModel,
-  host: BlockHost,
-  viewport: SurfaceViewport
-) {
-  const { xywh } = model;
-  const isSurfaceElement = false;
-  const { zoom, viewportX, viewportY } = viewport;
-  const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
-  const translateX =
-    (modelX - viewportX - (isSurfaceElement ? SHAPE_PADDING / 2 : 0)) * zoom;
-  const translateY =
-    (modelY - viewportY - (isSurfaceElement ? SHAPE_PADDING / 2 : 0)) * zoom;
-
-  const style = {
-    position: 'absolute',
-    transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
-    transformOrigin: '0 0',
-    width: modelW + (isSurfaceElement ? SHAPE_PADDING : PADDING_X) + 'px',
-    height: modelH + (isSurfaceElement ? SHAPE_PADDING : PADDING_Y) + 'px',
-    padding: isSurfaceElement ? '0' : `${PADDING_X / 2}px`,
-    background: isSurfaceElement ? 'transparent' : 'white',
-    pointerEvents: isSurfaceElement ? 'none' : 'all',
-    zIndex: '0',
-  };
-
-  return html`
-    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
-      ${BlockElement(model, host, true)}
-    </div>
-  `;
-}
-
-export function EdgelessBlockChildrenContainer(
-  model: BaseBlockModel,
-  host: BlockHost,
-  viewport: SurfaceViewport
-) {
-  return html`
-    ${repeat(
-      model.children,
-      child => child.id,
-      child => EdgelessBlockChild(child as FrameBlockModel, host, viewport)
-    )}
-  `;
-}
+} from '../utils.js';
+import { HandleDirection, SelectedHandle } from './selected-handle.js';
+import { getCommonRectStyle } from './utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
@@ -242,25 +70,25 @@ export class EdgelessSelectedRect extends LitElement {
       const leftBottom = [rect.x, rect.y + rect.height];
       const rightBottom = [rect.x + rect.width, rect.y + rect.height];
       return html`
-        ${Handle(
+        ${SelectedHandle(
           leftTop[0],
           leftTop[1],
           HandleDirection.LeftTop,
           this._onHandleMouseDown
         )}
-        ${Handle(
+        ${SelectedHandle(
           rightTop[0],
           rightTop[1],
           HandleDirection.RightTop,
           this._onHandleMouseDown
         )}
-        ${Handle(
+        ${SelectedHandle(
           leftBottom[0],
           leftBottom[1],
           HandleDirection.LeftBottom,
           this._onHandleMouseDown
         )}
-        ${Handle(
+        ${SelectedHandle(
           rightBottom[0],
           rightBottom[1],
           HandleDirection.RightBottom,
@@ -279,13 +107,13 @@ export class EdgelessSelectedRect extends LitElement {
           rect.x + rect.width + PADDING_X * this.zoom,
           rect.y + rect.height / 2 + (PADDING_Y * this.zoom) / 2,
         ];
-        const handleLeft = Handle(
+        const handleLeft = SelectedHandle(
           leftCenter[0],
           leftCenter[1],
           HandleDirection.Left,
           this._onHandleMouseDown
         );
-        const handleRight = Handle(
+        const handleRight = SelectedHandle(
           rightCenter[0],
           rightCenter[1],
           HandleDirection.Right,
