@@ -10,6 +10,7 @@ import {
   getBlockElementByModel,
   getCurrentNativeRange,
   getDefaultPageBlock,
+  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   initMouseEventHandlers,
@@ -305,7 +306,9 @@ export class DefaultSelectionManager {
     assertExists(blockContainer);
     const { left, width } = blockContainer.getBoundingClientRect();
     const { clientHeight, top } = viewport;
-    const hoverEditingState = getBlockByPoint2(
+    let hoverEditingState = null;
+
+    const block = getBlockByPoint2(
       new Point(e.raw.clientX, e.raw.clientY),
       Rect.fromLWTH(
         left,
@@ -314,6 +317,13 @@ export class DefaultSelectionManager {
         Math.min(clientHeight, window.innerHeight)
       )
     );
+
+    if (block) {
+      hoverEditingState = {
+        model: getModelByElement(block),
+        position: block.getBoundingClientRect(),
+      };
+    }
 
     // const hoverEditingState = getBlockEditingStateByPosition(
     //   this._selectableBlocks,
