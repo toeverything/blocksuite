@@ -147,8 +147,8 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  @property()
-  codeBlockOption!: CodeBlockOption | null;
+  @state()
+  private _codeBlockOption!: CodeBlockOption | null;
 
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
@@ -408,26 +408,21 @@ export class DefaultPageBlockComponent
 
     slots.draggingAreaUpdated.on(rect => {
       this._draggingArea = rect;
-      this.requestUpdate();
     });
     slots.selectedRectsUpdated.on(rects => {
       this._selectedRects = rects;
-      this.requestUpdate();
     });
     slots.embedRectsUpdated.on(rects => {
       this._selectedEmbedRects = rects;
       if (rects.length === 0) {
         this._embedEditingState = null;
       }
-      this.requestUpdate();
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-      this.requestUpdate();
     });
     slots.codeBlockOptionUpdated.on(codeBlockOption => {
-      this.codeBlockOption = codeBlockOption;
-      this.requestUpdate();
+      this._codeBlockOption = codeBlockOption;
     });
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
@@ -520,7 +515,7 @@ export class DefaultPageBlockComponent
       viewport
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
-      page.readonly ? null : this.codeBlockOption
+      page.readonly ? null : this._codeBlockOption
     );
 
     return html`
