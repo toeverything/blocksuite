@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-import { toolTipStyle } from '../tooltip/tooltip.js';
+import { tooltipStyle } from '../tooltip/tooltip.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {
@@ -48,5 +48,5 @@ export const formatQuickBarStyle = css`
   }
 
   ${paragraphPanelStyle}
-  ${toolTipStyle}
+  ${tooltipStyle}
 `;
