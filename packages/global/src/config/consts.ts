@@ -1,5 +1,5 @@
 export * from './consts/affine-style-consts.js';
-export * from './consts/blockhub.js';
+export * from './consts/block-hub.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';

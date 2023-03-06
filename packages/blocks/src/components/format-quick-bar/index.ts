@@ -101,7 +101,7 @@ export const showFormatQuickBar = async ({
     throw new Error("Failed to get page's root element");
   }
   const pageBlock = getDefaultPageBlock(page.root);
-  const scrollContainer = pageBlock.defaultViewportElement;
+  const scrollContainer = pageBlock.viewportElement;
 
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!

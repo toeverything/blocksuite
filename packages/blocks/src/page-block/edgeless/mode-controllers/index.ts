@@ -17,7 +17,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   };
 
   protected _hoverState: EdgelessHoverState | null = null;
-  protected _frameSelectionState: SelectionArea | null = null;
+  protected _draggingArea: SelectionArea | null = null;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     this._edgeless = edgeless;
@@ -41,8 +41,8 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return this._blockSelectionState;
   }
 
-  get frameSelectionState() {
-    return this._frameSelectionState;
+  get draggingArea() {
+    return this._draggingArea;
   }
 
   protected get _surface() {
@@ -67,7 +67,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseOut(e: SelectionEvent): void;
   abstract onContainerContextMenu(e: SelectionEvent): void;
 
-  abstract syncSelectionRect(): void;
+  abstract syncDraggingArea(): void;
 
   abstract clearSelection(): void;
 }

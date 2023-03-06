@@ -12,10 +12,10 @@ import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
-  DefaultPageSlots,
+  DefaulSelectionSlots,
   EmbedEditingState,
-  ViewportState,
 } from './default-page-block.js';
+import type { PageViewport } from './selection-manager/selection-state.js';
 import {
   copyCode,
   copyImage,
@@ -25,7 +25,7 @@ import {
   toggleWrap,
 } from './utils.js';
 
-export function FrameSelectionRect(rect: DOMRect | null) {
+export function DraggingArea(rect: DOMRect | null) {
   if (rect === null) return null;
 
   const style = {
@@ -36,25 +36,22 @@ export function FrameSelectionRect(rect: DOMRect | null) {
   };
   return html`
     <style>
-      .affine-page-frame-selection-rect {
+      .affine-page-dragging-area {
         position: absolute;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
       }
     </style>
-    <div
-      class="affine-page-frame-selection-rect"
-      style=${styleMap(style)}
-    ></div>
+    <div class="affine-page-dragging-area" style=${styleMap(style)}></div>
   `;
 }
 
 export function EmbedSelectedRectsContainer(
   rects: { left: number; top: number; width: number; height: number }[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -86,9 +83,9 @@ export function EmbedSelectedRectsContainer(
 
 export function SelectedRectsContainer(
   rects: DOMRect[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
@@ -116,12 +113,12 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  slots: DefaultPageSlots,
-  viewportState: ViewportState
+  slots: DefaulSelectionSlots,
+  viewport: PageViewport
 ) {
   if (!embedEditingState) return null;
 
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   const {
     position: { x, y },
     model,
@@ -149,7 +146,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click=${() => {
             focusCaption(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}
         >
           ${CaptionIcon}
@@ -186,7 +183,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click="${() => {
             model.page.deleteBlock(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}"
         >
           ${DeleteIcon}

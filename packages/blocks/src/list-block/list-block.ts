@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -15,17 +15,6 @@ import {
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
-
-function selectList(model: ListBlockModel) {
-  const selectionManager = getDefaultPageBlock(model).selection;
-
-  const blockElement = getBlockElementByModel(model);
-  if (!blockElement) {
-    console.error('list block model:', model, 'blockElement:', blockElement);
-    throw new Error('Failed to select list! blockElement not found!');
-  }
-  selectionManager.resetSelectedBlockByRect(blockElement);
-}
 
 @customElement('affine-list')
 export class ListBlockComponent extends NonShadowLitElement {
@@ -92,6 +81,17 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
+  private _select(model: ListBlockModel) {
+    const { selection } = getDefaultPageBlock(model);
+    const blockElement = getBlockElementByModel(model);
+    assertExists(
+      blockElement,
+      'Failed to select list, blockElement not found!'
+    );
+
+    selection.setSelectedBlocks([blockElement]);
+  }
+
   private _onClickIcon = (e: MouseEvent) => {
     e.stopPropagation();
 
@@ -104,7 +104,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       this.host.page.updateBlock(this.model, checkedPropObj);
       return;
     }
-    selectList(this.model);
+    this._select(this.model);
   };
 
   firstUpdated() {
@@ -113,7 +113,6 @@ export class ListBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);

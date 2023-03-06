@@ -1,6 +1,6 @@
 import type { TemplateResult } from 'lit';
 
-import type { VirgoUnitText } from './components/index.js';
+import type { VText } from './components/index.js';
 import type { BaseTextAttributes } from './utils/index.js';
 
 export interface CustomTypes {
@@ -23,4 +23,4 @@ export type DeltaInsert<
 
 export type AttributesRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
-> = (unitText: VirgoUnitText, attributes?: TextAttributes) => TemplateResult<1>;
+> = (vText: VText, attributes?: TextAttributes) => TemplateResult<1>;

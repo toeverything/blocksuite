@@ -2,8 +2,8 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import type { z } from 'zod';
 
+import { VirgoElement } from './components/virgo-element.js';
 import { VirgoLine } from './components/virgo-line.js';
-import { VirgoText } from './components/virgo-text.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
 import type { AttributesRenderer, DeltaInsert } from './types.js';
 import { getDefaultAttributeRenderer } from './utils/attributes-renderer.js';
@@ -41,22 +41,80 @@ export class VEditor<
   ): TextPoint | null {
     let text: Text | null = null;
     let textOffset = offset;
+
     if (isVText(node)) {
       text = node;
       textOffset = offset;
     } else if (isVElement(node)) {
-      const textNode = getTextNodeFromElement(node);
-      if (textNode) {
-        text = textNode;
-        textOffset = offset;
+      const texts = VEditor.getTextNodesFromElement(node);
+      for (let i = 0; i < texts.length; i++) {
+        if (offset <= texts[i].length) {
+          text = texts[i];
+          textOffset = offset;
+          break;
+        }
+        offset -= texts[i].length;
       }
-    } else if (isVLine(node)) {
-      const firstTextElement = node.querySelector('v-text');
-      if (firstTextElement) {
-        const textNode = getTextNodeFromElement(firstTextElement);
-        if (textNode) {
-          text = textNode;
-          textOffset = 0;
+    } else if (isVLine(node) || isVRoot(node)) {
+      const texts = VEditor.getTextNodesFromElement(node);
+      if (texts.length > 0) {
+        text = texts[0];
+        textOffset = 0;
+      }
+    } else {
+      if (node instanceof Node) {
+        const vLine = node.parentElement?.closest('v-line');
+        if (vLine) {
+          const vElements = Array.from(vLine.querySelectorAll('v-element'));
+          for (let i = 0; i < vElements.length; i++) {
+            if (
+              node.compareDocumentPosition(vElements[i]) ===
+                Node.DOCUMENT_POSITION_CONTAINED_BY ||
+              node.compareDocumentPosition(vElements[i]) === 20
+            ) {
+              const texts = VEditor.getTextNodesFromElement(vElements[0]);
+              if (texts.length === 0) return null;
+              text = texts[0];
+              textOffset = 0;
+              break;
+            }
+
+            if (
+              i === 0 &&
+              node.compareDocumentPosition(vElements[i]) ===
+                Node.DOCUMENT_POSITION_FOLLOWING
+            ) {
+              const texts = VEditor.getTextNodesFromElement(vElements[i]);
+              if (texts.length === 0) return null;
+              text = texts[0];
+              textOffset = 0;
+              break;
+            } else if (
+              i === vElements.length - 1 &&
+              node.compareDocumentPosition(vElements[i]) ===
+                Node.DOCUMENT_POSITION_PRECEDING
+            ) {
+              const texts = VEditor.getTextNodesFromElement(vElements[i]);
+              if (texts.length === 0) return null;
+              text = texts[0];
+              textOffset = calculateTextLength(text);
+              break;
+            }
+
+            if (
+              i < vElements.length - 1 &&
+              node.compareDocumentPosition(vElements[i]) ===
+                Node.DOCUMENT_POSITION_PRECEDING &&
+              node.compareDocumentPosition(vElements[i + 1]) ===
+                Node.DOCUMENT_POSITION_FOLLOWING
+            ) {
+              const texts = VEditor.getTextNodesFromElement(vElements[i]);
+              if (texts.length === 0) return null;
+              text = texts[0];
+              textOffset = calculateTextLength(text);
+              break;
+            }
+          }
         }
       }
     }
@@ -83,39 +141,52 @@ export class VEditor<
       return null;
     }
 
-    const textNodes = Array.from(
-      rootElement.querySelectorAll('[data-virgo-text="true"]')
-    ).map(textElement => getTextNodeFromElement(textElement));
-    const goalIndex = textNodes.indexOf(text);
+    const texts = VEditor.getTextNodesFromElement(rootElement);
+    const goalIndex = texts.indexOf(text);
     let index = 0;
-    for (const textNode of textNodes.slice(0, goalIndex)) {
-      if (!textNode) {
-        return null;
-      }
-
-      index += calculateTextLength(textNode);
+    for (const text of texts.slice(0, goalIndex)) {
+      index += calculateTextLength(text);
     }
 
     if (text.wholeText !== ZERO_WIDTH_SPACE) {
       index += offset;
     }
 
-    const textElement = text.parentElement;
-    if (!textElement) {
-      throw new Error('text element not found');
+    const textParentElement = text.parentElement;
+    if (!textParentElement) {
+      throw new Error('text element parent not found');
     }
 
-    const lineElement = textElement.closest('virgo-line');
+    const lineElement = textParentElement.closest('v-line');
 
     if (!lineElement) {
       throw new Error('line element not found');
     }
 
     const lineIndex = Array.from(
-      rootElement.querySelectorAll('virgo-line')
+      rootElement.querySelectorAll('v-line')
     ).indexOf(lineElement);
 
     return { text, index: index + lineIndex };
+  }
+
+  static getTextNodesFromElement(element: Element): Text[] {
+    const textSpanElements = Array.from(
+      element.querySelectorAll('[data-virgo-text="true"]')
+    );
+    const textNodes = textSpanElements.map(textSpanElement => {
+      const textNode = Array.from(textSpanElement.childNodes).find(
+        (node): node is Text => node instanceof Text
+      );
+
+      if (!textNode) {
+        throw new Error('text node not found');
+      }
+
+      return textNode;
+    });
+
+    return textNodes;
   }
 
   private _rootElement: HTMLElement | null = null;
@@ -135,7 +206,27 @@ export class VEditor<
   private _handlers: {
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
+    virgoInput?: (event: InputEvent) => boolean;
   } = {};
+
+  private _defaultHandlers: VEditor['_handlers'] = {
+    paste: (event: ClipboardEvent) => {
+      const data = event.clipboardData?.getData('text/plain');
+      if (data) {
+        const vRange = this._vRange;
+        if (vRange) {
+          this.insertText(vRange, data);
+          this.slots.updateVRange.emit([
+            {
+              index: vRange.index + data.length,
+              length: 0,
+            },
+            'input',
+          ]);
+        }
+      }
+    },
+  };
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
     return this._attributesSchema.optional().parse(textAttributes);
@@ -152,7 +243,7 @@ export class VEditor<
       const virgoLine = new VirgoLine<TextAttributes>();
 
       if (chunk.length === 0) {
-        virgoLine.elements.push(new VirgoText());
+        virgoLine.elements.push(new VirgoElement());
       } else {
         chunk.forEach(delta => {
           const element = renderElement(
@@ -206,26 +297,7 @@ export class VEditor<
     this._attributesRenderer = renderer;
   };
 
-  bindHandlers(
-    handlers: VEditor['_handlers'] = {
-      paste: (event: ClipboardEvent) => {
-        const data = event.clipboardData?.getData('text/plain');
-        if (data) {
-          const vRange = this._vRange;
-          if (vRange) {
-            this.insertText(vRange, data);
-            this.slots.updateVRange.emit([
-              {
-                index: vRange.index + data.length,
-                length: 0,
-              },
-              'input',
-            ]);
-          }
-        }
-      },
-    }
-  ) {
+  bindHandlers(handlers: VEditor['_handlers'] = this._defaultHandlers) {
     this._handlers = handlers;
 
     if (this._handlerAbort) {
@@ -303,6 +375,8 @@ export class VEditor<
       this._handlerAbort = null;
     }
 
+    this._handlers = this._defaultHandlers;
+
     this._rootElement?.replaceChildren();
 
     this._rootElement = null;
@@ -334,23 +408,24 @@ export class VEditor<
 
   getTextPoint(rangeIndex: VRange['index']): TextPoint {
     assertExists(this._rootElement);
-    const textElements = Array.from(
-      this._rootElement.querySelectorAll('[data-virgo-text="true"]')
-    );
+
+    const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
 
     let index = 0;
-    for (const textElement of textElements) {
-      if (!textElement.textContent) {
-        throw new Error('text element should have textContent');
-      }
-      if (index + textElement.textContent.length >= rangeIndex) {
-        const text = getTextNodeFromElement(textElement);
-        if (!text) {
-          throw new Error('text node should have text content');
+    for (const vLine of vLines) {
+      const texts = VEditor.getTextNodesFromElement(vLine);
+
+      for (const text of texts) {
+        if (!text.textContent) {
+          throw new Error('text element should have textContent');
         }
-        return [text, rangeIndex - index];
+        if (index + text.textContent.length >= rangeIndex) {
+          return [text, rangeIndex - index];
+        }
+        index += text.textContent.length;
       }
-      index += textElement.textContent.length;
+
+      index += 1;
     }
 
     throw new Error('failed to find leaf');
@@ -360,7 +435,7 @@ export class VEditor<
   getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
     assertExists(this._rootElement);
     const lineElements = Array.from(
-      this._rootElement.querySelectorAll('virgo-line')
+      this._rootElement.querySelectorAll('v-line')
     );
 
     let index = 0;
@@ -430,6 +505,7 @@ export class VEditor<
   }
 
   setReadOnly(isReadOnly: boolean): void {
+    this.rootElement.contentEditable = isReadOnly ? 'false' : 'true';
     this._isReadOnly = isReadOnly;
   }
 
@@ -452,10 +528,14 @@ export class VEditor<
     });
   }
 
-  insertText(vRange: VRange, text: string): void {
+  insertText(
+    vRange: VRange,
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text, {});
+      this.yText.insert(vRange.index, text, attributes);
     });
   }
 
@@ -554,9 +634,8 @@ export class VEditor<
    */
   toDomRange(vRange: VRange): Range | null {
     assertExists(this._rootElement);
-
     const lineElements = Array.from(
-      this._rootElement.querySelectorAll('virgo-line')
+      this._rootElement.querySelectorAll('v-line')
     );
 
     // calculate anchorNode and focusNode
@@ -571,29 +650,21 @@ export class VEditor<
         break;
       }
 
-      const textElements = Array.from(
-        lineElements[i].querySelectorAll('[data-virgo-text="true"]')
-      );
-
-      for (let j = 0; j < textElements.length; j++) {
-        if (anchorText && focusText) {
-          break;
-        }
-
-        const textNode = getTextNodeFromElement(textElements[j]);
-        if (!textNode) {
-          return null;
-        }
-
-        const textLength = calculateTextLength(textNode);
+      const texts = VEditor.getTextNodesFromElement(lineElements[i]);
+      for (const text of texts) {
+        const textLength = calculateTextLength(text);
 
         if (!anchorText && index + textLength >= vRange.index) {
-          anchorText = textNode;
+          anchorText = text;
           anchorOffset = vRange.index - index;
         }
         if (!focusText && index + textLength >= vRange.index + vRange.length) {
-          focusText = textNode;
+          focusText = text;
           focusOffset = vRange.index + vRange.length - index;
+        }
+
+        if (anchorText && focusText) {
+          break;
         }
 
         index += textLength;
@@ -770,6 +841,15 @@ export class VEditor<
 
   private _onBeforeInput(event: InputEvent): void {
     event.preventDefault();
+
+    let ifSkip = false;
+    if (this._handlers.virgoInput) {
+      ifSkip = this._handlers.virgoInput(event);
+    }
+
+    if (ifSkip) {
+      return;
+    }
 
     if (this._isReadOnly) {
       return;
@@ -952,28 +1032,6 @@ function calculateTextLength(text: Text): number {
   }
 }
 
-function getTextNodeFromElement(element: Element): Text | null {
-  let spanElement: Element | null = element;
-  if (element instanceof HTMLElement && element.dataset.virgoText === 'true') {
-    spanElement = element;
-  } else {
-    spanElement = element.querySelector('[data-virgo-text="true"]');
-  }
-
-  if (!spanElement) {
-    return null;
-  }
-
-  const textNode = Array.from(spanElement.childNodes).find(
-    (node): node is Text => node instanceof Text
-  );
-
-  if (textNode) {
-    return textNode;
-  }
-  return null;
-}
-
 function isVText(text: unknown): text is Text {
   return (
     text instanceof Text &&
@@ -988,9 +1046,11 @@ function isVElement(element: unknown): element is HTMLElement {
 }
 
 function isVLine(element: unknown): element is HTMLElement {
-  return (
-    element instanceof HTMLElement && element.parentElement instanceof VirgoLine
-  );
+  return element instanceof HTMLElement && element instanceof VirgoLine;
+}
+
+function isVRoot(element: unknown): element is HTMLElement {
+  return element instanceof HTMLElement && element.dataset.virgoRoot === 'true';
 }
 
 function findDocumentOrShadowRoot<TextAttributes extends BaseTextAttributes>(

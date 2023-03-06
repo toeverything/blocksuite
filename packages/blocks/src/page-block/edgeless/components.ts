@@ -125,7 +125,7 @@ function Handle(
   `;
 }
 
-export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
+export function EdgelessDraggingArea(rect: DOMRect | null) {
   if (rect === null) return html``;
 
   const style = {
@@ -136,17 +136,14 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
   };
   return html`
     <style>
-      .affine-edgeless-frame-selection-rect {
+      .affine-edgeless-dragging-area {
         position: absolute;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
       }
     </style>
-    <div
-      class="affine-edgeless-frame-selection-rect"
-      style=${styleMap(style)}
-    ></div>
+    <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
   `;
 }
 

@@ -163,9 +163,9 @@ export function focusBlockByModel(
       // In the edgeless mode
       return;
     }
-    defaultPageBlock.selection.state.clear();
+    defaultPageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && defaultPageBlock.slots.updateSelectedRects.emit([rect]);
+    rect && defaultPageBlock.slots.selectedRectsUpdated.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
@@ -185,7 +185,8 @@ export function focusBlockByModel(
 
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection && defaultPageBlock.selection.state.clear();
+  defaultPageBlock.selection &&
+    defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
     defaultPageBlock.selection &&
       defaultPageBlock.selection.setFocusedBlockIndexByElement(

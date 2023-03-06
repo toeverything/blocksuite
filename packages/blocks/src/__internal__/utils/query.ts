@@ -3,6 +3,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
+import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
@@ -287,6 +288,14 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 
 export function getModelByElement(element: Element): BaseBlockModel {
   const containerBlock = element.closest(`[${ATTR}]`) as ContainerBlock;
+  // In extreme cases, the block may be loading, and the model is not yet available.
+  // For example
+  // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
+  if ('hostModel' in containerBlock) {
+    const loader = containerBlock as Loader;
+    assertExists(loader.hostModel);
+    return loader.hostModel;
+  }
   assertExists(containerBlock.model);
   return containerBlock.model;
 }

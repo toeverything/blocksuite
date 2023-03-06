@@ -9,7 +9,7 @@ import {
   SelectionEvent,
 } from '../../__internal__/index.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
-import type { PageSelectionState } from '../default/selection-manager.js';
+import type { PageSelectionState } from '../default/selection-manager/index.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const selection = window.getSelection() as Selection;
