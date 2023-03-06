@@ -317,12 +317,8 @@ export class DefaultSelectionManager {
         hoverEditingState.position.x = hoverEditingState.position.right + 10;
       }
       this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-    } else if (hoverEditingState?.model.flavour === 'affine:code') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 12;
-      this.slots.codeBlockOptionUpdated.emit(hoverEditingState);
     } else {
       this.slots.embedEditingStateUpdated.emit(null);
-      this.slots.codeBlockOptionUpdated.emit(null);
     }
   };
 
@@ -615,7 +611,6 @@ export class DefaultSelectionManager {
     this.slots.draggingAreaUpdated.dispose();
     this.slots.embedEditingStateUpdated.dispose();
     this.slots.embedRectsUpdated.dispose();
-    this.slots.codeBlockOptionUpdated.dispose();
     this.slots.nativeSelectionToggled.dispose();
     this._disposables.dispose();
   }

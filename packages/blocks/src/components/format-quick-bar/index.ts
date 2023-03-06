@@ -72,6 +72,9 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
+    if (abortController.signal.aborted) {
+      return;
+    }
     const positioningPoint =
       anchorEl instanceof Range
         ? calcPositionPointByRange(anchorEl, direction)

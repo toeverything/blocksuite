@@ -1,6 +1,5 @@
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
   DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
@@ -21,10 +20,7 @@ import {
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import type {
-  CodeBlockOption,
-  DefaultPageBlockComponent,
-} from './default-page-block.js';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -497,8 +493,8 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function copyCode(codeBlockOption: CodeBlockOption) {
-  const richText = getRichTextByModel(codeBlockOption.model);
+export function copyCode(model: BaseBlockModel) {
+  const richText = getRichTextByModel(model);
   assertExists(richText);
   const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
@@ -510,19 +506,6 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   resetNativeSelection(range);
 
   toast('Copied to clipboard');
-}
-
-export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
-  const model = codeBlockOption.model;
-  model.page.deleteBlock(model);
-}
-
-export function toggleWrap(codeBlockOption: CodeBlockOption) {
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  assertExists(syntaxElem);
-  syntaxElem.classList.toggle('wrap');
 }
 
 export function getAllowSelectedBlocks(
