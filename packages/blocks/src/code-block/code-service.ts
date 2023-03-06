@@ -1,6 +1,9 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { DeltaOperation } from 'quill';
 
 import { BaseService } from '../__internal__/service/index.js';
+import type { OpenBlockInfo } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
 export class CodeBlockService extends BaseService {
@@ -39,5 +42,20 @@ export class CodeBlockService extends BaseService {
     }
     codeElement.setAttribute('code-lang', block.language);
     return codeElement.outerHTML;
+  }
+
+  override json2Block(
+    focusedBlockModel: BaseBlockModel,
+    pastedBlocks: OpenBlockInfo[]
+  ): void {
+    const pastedDelta = pastedBlocks.reduce(
+      (deltas: DeltaOperation[], block) => {
+        block.text && deltas.push(...block.text);
+        return deltas;
+      },
+      []
+    );
+
+    focusedBlockModel.text?.insertList(pastedDelta, 0);
   }
 }
