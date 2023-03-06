@@ -1,9 +1,9 @@
-import { getCurrentBlockRange } from '@blocksuite/blocks';
+import { DefaulSelectionSlots, getCurrentBlockRange } from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';
 
 import { getModelByElement } from '../../../__internal__/index.js';
 import type { BlockComponentElement, IPoint } from '../../../std.js';
-import type { PageSelectionType } from './index.js';
+import type { PageSelectionState, PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -224,7 +224,55 @@ export function createDraggingArea(
   return new DOMRect(left, top, width, height);
 }
 
-export function computeSelectionType(
+export function updateLocalSelectionRange(page: Page) {
+  const blockRange = getCurrentBlockRange(page);
+  if (blockRange && blockRange.type === 'Native') {
+    const userRange: UserRange = {
+      startOffset: blockRange.startOffset,
+      endOffset: blockRange.endOffset,
+      blockIds: blockRange.models.map(m => m.id),
+    };
+    page.awarenessStore.setLocalRange(page, userRange);
+  }
+}
+
+export function getBlockWithIndexByElement(
+  state: PageSelectionState,
+  blockElement: Element
+) {
+  const entries = Array.from(state.blockCache.entries());
+  const len = entries.length;
+  const boundRect = blockElement.getBoundingClientRect();
+  const top = boundRect.top;
+
+  if (!boundRect) return null;
+
+  // fake a small rectangle: { top: top, bottom: top + h }
+  const h = 5;
+  let start = 0;
+  let end = len - 1;
+
+  // binary search block
+  while (start <= end) {
+    const mid = start + Math.floor((end - start) / 2);
+    const [block, rect] = entries[mid];
+    if (top <= rect.top + h) {
+      if (mid === 0 || top >= rect.top) {
+        return { block, index: mid };
+      }
+    }
+
+    if (rect.top > top) {
+      end = mid - 1;
+    } else if (rect.top + h < top) {
+      start = mid + 1;
+    }
+  }
+
+  return null;
+}
+
+function computeSelectionType(
   selectedBlocks: Element[],
   selectionType?: PageSelectionType
 ) {
@@ -256,14 +304,27 @@ export function computeSelectionType(
   return newSelectionType;
 }
 
-export function updateLocalSelectionRange(page: Page) {
-  const blockRange = getCurrentBlockRange(page);
-  if (blockRange && blockRange.type === 'Native') {
-    const userRange: UserRange = {
-      startOffset: blockRange.startOffset,
-      endOffset: blockRange.endOffset,
-      blockIds: blockRange.models.map(m => m.id),
-    };
-    page.awarenessStore.setLocalRange(page, userRange);
+export function setSelectedBlocks(
+  state: PageSelectionState,
+  slots: DefaulSelectionSlots,
+  selectedBlocks: BlockComponentElement[],
+  rects?: DOMRect[],
+  selectionType?: PageSelectionType
+) {
+  state.selectedBlocks = selectedBlocks;
+  state.type = selectionType ?? state.type;
+
+  if (rects) {
+    slots.selectedRectsUpdated.emit(rects);
+    return;
   }
+
+  const calculatedRects = [] as DOMRect[];
+  for (const block of selectedBlocks) {
+    calculatedRects.push(block.getBoundingClientRect());
+  }
+
+  const newSelectionType = computeSelectionType(selectedBlocks, selectionType);
+  state.type = newSelectionType;
+  slots.selectedRectsUpdated.emit(calculatedRects);
 }

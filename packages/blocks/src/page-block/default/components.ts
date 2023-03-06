@@ -14,8 +14,8 @@ import type {
   CodeBlockOption,
   DefaulSelectionSlots,
   EmbedEditingState,
-  ViewportState,
 } from './default-page-block.js';
+import type { PageViewport } from './selection-manager/selection-state.js';
 import {
   copyCode,
   copyImage,
@@ -49,9 +49,9 @@ export function DraggingArea(rect: DOMRect | null) {
 
 export function EmbedSelectedRectsContainer(
   rects: { left: number; top: number; width: number; height: number }[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -83,9 +83,9 @@ export function EmbedSelectedRectsContainer(
 
 export function SelectedRectsContainer(
   rects: DOMRect[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
@@ -114,11 +114,11 @@ export function SelectedRectsContainer(
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
   slots: DefaulSelectionSlots,
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
   if (!embedEditingState) return null;
 
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   const {
     position: { x, y },
     model,
@@ -146,7 +146,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click=${() => {
             focusCaption(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}
         >
           ${CaptionIcon}
@@ -183,7 +183,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click="${() => {
             model.page.deleteBlock(model);
-            slots.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}"
         >
           ${DeleteIcon}
