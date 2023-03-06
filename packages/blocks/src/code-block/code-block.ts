@@ -203,7 +203,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _disposableGroup = new DisposableGroup();
 
   @state()
-  private _showOption = true;
+  private _showOption = false;
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
@@ -265,6 +265,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
       <icon-button
+        data-testid="lang-button"
         width="101px"
         height="24px"
         ?hover=${this._showLangList}
