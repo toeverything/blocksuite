@@ -15,6 +15,7 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  switchReadonly,
   type,
   undoByKeyboard,
   waitNextFrame,
@@ -26,6 +27,13 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
+/**
+ * @example
+ * ```ts
+ * const codeBlockController = getCodeBlock(page);
+ * const codeBlock = codeBlockController.codeBlock;
+ * ```
+ */
 function getCodeBlock(page: Page) {
   const codeBlock = page.locator('affine-code');
   const languageButton = codeBlock.getByTestId('lang-button');
@@ -33,10 +41,16 @@ function getCodeBlock(page: Page) {
     await codeBlock.hover();
     await languageButton.click();
   };
+
+  const langList = codeBlock.locator('lang-list');
+  const codeOption = page.locator('.code-block-option');
+
   return {
     codeBlock,
     languageButton,
     clickLanguageButton,
+    langList,
+    codeOption,
   };
 }
 
@@ -141,7 +155,7 @@ test('change code language can work', async ({ page }) => {
 
   const codeBlockController = getCodeBlock(page);
   await codeBlockController.clickLanguageButton();
-  const locator = page.locator('.lang-list-button-container');
+  const locator = codeBlockController.langList;
   await expect(locator).toBeVisible();
   await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
@@ -179,7 +193,7 @@ test('language select list can disappear when click other place', async ({
 
   const codeBlock = getCodeBlock(page);
   await codeBlock.clickLanguageButton();
-  const locator = page.locator('.lang-list-button-container');
+  const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
   const position = await page.evaluate(() => {
@@ -350,14 +364,7 @@ test('code block copy button can work', async ({ page }) => {
 
   await type(page, 'use');
   const codeBlockController = getCodeBlock(page);
-  const codeBlockRect = await codeBlockController.codeBlock.boundingBox();
-  if (!codeBlockRect) {
-    throw new Error();
-  }
-  await page.mouse.move(
-    codeBlockRect.x + codeBlockRect.width / 2,
-    codeBlockRect.y + codeBlockRect.height / 2
-  );
+  await codeBlockController.codeBlock.hover();
 
   const position = await getCenterPosition(
     page,
@@ -579,4 +586,23 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['  const a = 10;\n']);
   await page.keyboard.press(`Shift+Tab`);
   await assertRichTexts(page, ['const a = 10;\n']);
+});
+
+test('should code block works in read only mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(300);
+  await switchReadonly(page);
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await expect(codeBlockController.langList).toBeHidden();
+  await expect(codeBlockController.codeOption).toBeVisible();
+  await expect(
+    codeBlockController.codeOption.locator('format-bar-button')
+  ).toHaveCount(2);
 });
