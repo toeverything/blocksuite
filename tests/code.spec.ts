@@ -43,14 +43,19 @@ function getCodeBlock(page: Page) {
   };
 
   const langList = codeBlock.locator('lang-list');
-  const codeOption = page.locator('.code-block-option');
-
+  const codeOption = page.locator('.affine-codeblock-option');
+  const copyButton = codeOption.getByTestId('copy-button');
+  const wrapButton = codeOption.getByTestId('wrap-button');
+  const deleteButton = codeOption.getByTestId('delete-button');
   return {
     codeBlock,
     languageButton,
     clickLanguageButton,
     langList,
     codeOption,
+    copyButton,
+    wrapButton,
+    deleteButton,
   };
 }
 
@@ -329,7 +334,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
 
   await page.mouse.move(position.x, position.y);
@@ -368,7 +373,7 @@ test('code block copy button can work', async ({ page }) => {
 
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
   await focusRichText(page);
@@ -567,9 +572,9 @@ test('code block option can appear and disappear during mousemove', async ({
   const position = await getPosition('affine-code');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.code-block-option');
+  const optionPosition = await getPosition('.affine-codeblock-option');
   await page.mouse.move(optionPosition.x, optionPosition.y);
-  const locator = page.locator('.code-block-option');
+  const locator = page.locator('.affine-codeblock-option');
   await expect(locator).toBeVisible();
   await page.mouse.move(optionPosition.right + 10, optionPosition.y);
   await expect(locator).toBeHidden();
@@ -586,6 +591,32 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['  const a = 10;\n']);
   await page.keyboard.press(`Shift+Tab`);
   await assertRichTexts(page, ['const a = 10;\n']);
+});
+
+test('should code block wrap active after click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(300);
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).toHaveAttribute('active', '');
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
 });
 
 test('should code block works in read only mode', async ({ page }) => {
