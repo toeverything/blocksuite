@@ -143,7 +143,7 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     if (this.state.type === 'block') {
       BlockDragHandlers.onMove(this, e);
@@ -164,7 +164,7 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
     }
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
@@ -277,7 +277,7 @@ export class DefaultSelectionManager {
     const direction = 'center-bottom';
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     if (!range || range.collapsed) return;
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     // Show format quick bar when double click on text
     showFormatQuickBar({
@@ -349,7 +349,7 @@ export class DefaultSelectionManager {
 
     const range = getCurrentNativeRange(selection);
     if (range.collapsed) return;
-    if (this.readonly) return;
+    if (this.page.readonly) return;
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
@@ -376,10 +376,6 @@ export class DefaultSelectionManager {
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
     updateLocalSelectionRange(this.page);
   };
-
-  get readonly() {
-    return this.page.awarenessStore.isReadonly(this.page);
-  }
 
   get viewportElement() {
     return this._container.viewportElement;
