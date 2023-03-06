@@ -35,18 +35,30 @@ export class Point {
     );
   }
 
+  /**
+   * Returns a copy of the point.
+   */
   clone() {
     return new Point(this.x, this.y);
   }
 
+  /**
+   * Compares and returns the minimum of two points.
+   */
   static min(a: Point, b: Point) {
     return new Point(Math.min(a.x, b.x), Math.min(a.y, b.y));
   }
 
+  /**
+   * Compares and returns the maximum of two points.
+   */
   static max(a: Point, b: Point) {
     return new Point(Math.max(a.x, b.x), Math.max(a.y, b.y));
   }
 
+  /**
+   * Restrict a value to a certain interval.
+   */
   static clamp(p: Point, min: Point, max: Point) {
     return new Point(clamp(p.x, min.x, max.x), clamp(p.y, min.y, max.y));
   }
