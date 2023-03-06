@@ -216,7 +216,7 @@ export class DebugMenu extends NonShadowLitElement {
     if (this.page.awarenessStore.getFlag('enable_set_remote_flag')) {
       clients.forEach(id => {
         this.page.awarenessStore.setRemoteFlag(id, 'readonly', {
-          ...(this.page.awarenessStore.getFlag('readonly') ?? {}),
+          ...(this.page.awarenessStore.isReadonly(this.page) ?? {}),
           [this.page.prefixedId]: true,
         });
       });

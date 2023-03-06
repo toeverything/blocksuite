@@ -143,9 +143,7 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (this.readonly) {
-      return;
-    }
+    if (this.readonly) return;
 
     if (this.state.type === 'block') {
       BlockDragHandlers.onMove(this, e);
@@ -380,7 +378,7 @@ export class DefaultSelectionManager {
   };
 
   get readonly() {
-    return this.page.awarenessStore.getFlag('readonly');
+    return this.page.awarenessStore.isReadonly(this.page);
   }
 
   get viewportElement() {

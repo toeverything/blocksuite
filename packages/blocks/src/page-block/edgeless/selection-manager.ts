@@ -218,7 +218,7 @@ export class EdgelessSelectionManager {
   };
 
   get readonly() {
-    return this.page.awarenessStore.getFlag('readonly');
+    return this.page.awarenessStore.isReadonly(this.page);
   }
 
   dispose() {
