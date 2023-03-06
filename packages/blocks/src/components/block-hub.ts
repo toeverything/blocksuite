@@ -100,7 +100,7 @@ export class BlockHub extends NonShadowLitElement {
   @query('.block-hub-menu-container')
   private _blockHubMenuContainer!: HTMLElement;
 
-  @query('[role="menu-entry"]')
+  @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
   private readonly _onDropCallback: (
@@ -321,7 +321,7 @@ export class BlockHub extends NonShadowLitElement {
       margin: 4px 0;
     }
 
-    [role='menu-entry'] tool-tip {
+    [role='menuitem'] tool-tip {
       font-size: var(--affine-font-sm);
     }
 
@@ -593,7 +593,7 @@ export class BlockHub extends NonShadowLitElement {
                     : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
-                  affine-type=${type}
+                  affine-type=${type ?? ''}
                 >
                   <div class="card-description-container">
                     <div>${name}</div>
@@ -807,7 +807,7 @@ export class BlockHub extends NonShadowLitElement {
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
-          role="menu-entry"
+          role="menuitem"
           style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
