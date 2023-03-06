@@ -1,6 +1,18 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+/**
+ * Renders a template into a portal. Defaults to `document.body`.
+ *
+ * @example
+ * ```ts
+ * render() {
+ *   return html`${showPortal
+ *     ? html`<affine-portal .template=${portalTemplate}></affine-portal>`
+ *     : ""}`;
+ * };
+ * ```
+ */
 @customElement('affine-portal')
 export class Portal extends LitElement {
   @property()
