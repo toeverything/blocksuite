@@ -8,7 +8,7 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   DefaultSelectionSlots,
@@ -128,7 +128,7 @@ export function EmbedEditingContainer(
         z-index: 1;
       }
 
-      ${toolTipStyle}
+      ${tooltipStyle}
     </style>
 
     <div class="affine-embed-editing-state-container">

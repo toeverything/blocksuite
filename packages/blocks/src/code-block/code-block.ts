@@ -13,7 +13,7 @@ import {
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 
@@ -187,7 +187,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     ${hljsStyles}
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
   @property()

@@ -35,7 +35,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
-import { toolTipStyle } from './tooltip/tooltip.js';
+import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
   affine-block-hub {
@@ -245,7 +245,7 @@ const styles = css`
     transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
   }
 
-  ${toolTipStyle}
+  ${tooltipStyle}
 `;
 
 type BlockHubItem = {
@@ -254,7 +254,7 @@ type BlockHubItem = {
   name: string;
   description: string;
   icon: unknown;
-  toolTip: string;
+  tooltip: string;
 };
 
 type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
@@ -295,7 +295,7 @@ function BlockHubCards(
     >
       <div class="affine-block-hub-title-container">${title}</div>
       ${blockHubItems.map(
-        ({ flavour, type, name, description, icon, toolTip }, index) => {
+        ({ flavour, type, name, description, icon, tooltip }, index) => {
           return html`
             <div class="card-container-wrapper">
               <div
@@ -320,7 +320,7 @@ function BlockHubCards(
                     ? ''
                     : 'display: none'}; z-index: ${blockHubItems.length -
                   index}"
-                  >${toolTip}</tool-tip
+                  >${tooltip}</tool-tip
                 >
               </div>
             </div>
