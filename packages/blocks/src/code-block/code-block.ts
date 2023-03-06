@@ -249,7 +249,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     );
 
     this._disposableGroup.add(
-      Slot.disposableListener(document, 'wheel', e => {
+      Slot.fromEvent(document, 'wheel', e => {
         if (!this._optionPosition) return;
         // Update option position when scrolling
         const rect = this.getBoundingClientRect();
