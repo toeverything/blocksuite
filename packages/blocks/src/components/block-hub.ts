@@ -593,7 +593,7 @@ export class BlockHub extends NonShadowLitElement {
                     : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
-                  affine-type=${type}
+                  affine-type=${type ?? ''}
                 >
                   <div class="card-description-container">
                     <div>${name}</div>
@@ -807,7 +807,7 @@ export class BlockHub extends NonShadowLitElement {
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
-          role="menu-entry"
+          role="menuitem"
           style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
