@@ -855,7 +855,6 @@ export class BlockHub extends NonShadowLitElement {
         </div>
         ${blockHubCards}
       </div>
-      <affine-drag-indicator></affine-drag-indicator>
     `;
   }
 }
