@@ -3,8 +3,8 @@ import './components/lang-list.js';
 import './components/code-option.js';
 import '../components/portal.js';
 
-import { ArrowDownIcon } from '@blocksuite/global/config';
-import { DisposableGroup, Slot } from '@blocksuite/store';
+import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -171,10 +171,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       white-space: pre-wrap;
     }
 
-    .code-block-option .filled {
-      fill: var(--affine-primary-color);
-    }
-
     .code-block-option {
       box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
         0 3px 16px -6px rgba(24, 39, 75, 0.04);
@@ -203,7 +199,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _disposableGroup = new DisposableGroup();
 
   @state()
-  private _showOption = false;
+  private _optionPosition: { x: number; y: number } | null = null;
+
+  @state()
+  private _wrap = false;
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
@@ -229,11 +228,12 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this.hoverState.on(hover => {
       clearTimeout(timer);
       if (hover) {
-        this._showOption = true;
+        const rect = this.getBoundingClientRect();
+        this._optionPosition = { x: rect.right + 12, y: rect.top };
         return;
       }
       timer = window.setTimeout(() => {
-        this._showOption = false;
+        this._optionPosition = null;
       }, HOVER_DELAY);
     });
     this._disposableGroup.add(
@@ -247,6 +247,15 @@ export class CodeBlockComponent extends NonShadowLitElement {
         this.hoverState.emit(false);
       })
     );
+
+    this._disposableGroup.add(
+      Slot.fromEvent(document, 'wheel', e => {
+        if (!this._optionPosition) return;
+        // Update option position when scrolling
+        const rect = this.getBoundingClientRect();
+        this._optionPosition = { x: rect.right + 12, y: rect.top };
+      })
+    );
   }
 
   override disconnectedCallback() {
@@ -254,7 +263,15 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this._disposableGroup.dispose();
   }
 
-  private _onClick() {
+  private _onClickWrapBtn() {
+    const syntaxElem = document.querySelector(
+      `[${BLOCK_ID_ATTR}="${this.model.id}"] .ql-syntax`
+    );
+    assertExists(syntaxElem);
+    this._wrap = syntaxElem.classList.toggle('wrap');
+  }
+
+  private _onClickLangBtn() {
     if (this.readonly) return;
     this._showLangList = !this._showLangList;
   }
@@ -270,7 +287,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
         height="24px"
         ?hover=${this._showLangList}
         ?disabled=${this.readonly}
-        @click=${this._onClick}
+        @click=${this._onClickLangBtn}
       >
         ${this.model.language} ${ArrowDownIcon}
       </icon-button>
@@ -290,19 +307,25 @@ export class CodeBlockComponent extends NonShadowLitElement {
     </div>`;
   }
 
+  private _codeOptionTemplate() {
+    if (!this._optionPosition) return '';
+    return html`<affine-portal
+      .template=${CodeOptionTemplate({
+        model: this.model,
+        position: this._optionPosition,
+        hoverState: this.hoverState,
+        wrap: this._wrap,
+        onClickWrap: () => this._onClickWrapBtn(),
+      })}
+    ></affine-portal>`;
+  }
+
   render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()
     );
-
-    const rect = this.getBoundingClientRect();
-    const codeBlockOptionPortal = CodeOptionTemplate({
-      model: this.model,
-      position: { x: rect.right + 12, y: rect.top },
-      hoverState: this.hoverState,
-    });
 
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
@@ -321,11 +344,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
         </rich-text>
         ${childrenContainer}
       </div>
-      ${this._showOption
-        ? html`<affine-portal
-            .template=${codeBlockOptionPortal}
-          ></affine-portal>`
-        : ''}`;
+      ${this._codeOptionTemplate()}`;
   }
 }
 
