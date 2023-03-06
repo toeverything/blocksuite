@@ -16,7 +16,7 @@ export const BlockDragHandlers = {
     selection.updateViewport();
 
     const { scrollLeft, scrollTop } = state.viewport;
-    state.resetStartPoint(e, {
+    state.resetDraggingArea(e, {
       scrollTop,
       scrollLeft,
     });
@@ -33,11 +33,12 @@ export const BlockDragHandlers = {
     let { scrollTop } = viewport;
     const max = scrollHeight - clientHeight;
 
-    state.updateEndPoint({ x: x + scrollLeft, y: y + scrollTop });
+    const { draggingArea } = state;
 
-    const { startPoint, endPoint } = state;
-    assertExists(startPoint);
-    assertExists(endPoint);
+    assertExists(draggingArea);
+
+    draggingArea.end.x = x + scrollLeft;
+    draggingArea.end.y = y + scrollTop;
 
     let auto = true;
     const autoScroll = () => {
@@ -54,26 +55,22 @@ export const BlockDragHandlers = {
         // ↓
         const d = (threshold - (clientHeight - y)) * 0.25;
         scrollTop += d;
-        endPoint.y += d;
+        draggingArea.end.y += d;
         auto = Math.ceil(scrollTop) < max;
         viewportElement.scrollTop = scrollTop;
-        selection.updateDraggingArea(startPoint, endPoint);
+        selection.updateDraggingArea(draggingArea);
       } else if (scrollTop > 0 && y < threshold) {
         // ↑
         const d = (y - threshold) * 0.25;
         scrollTop += d;
-        endPoint.y += d;
+        draggingArea.end.y += d;
         auto = scrollTop > 0;
         viewportElement.scrollTop = scrollTop;
-        selection.updateDraggingArea(startPoint, endPoint);
+        selection.updateDraggingArea(draggingArea);
       } else {
         auto = false;
-        const draggingArea = selection.updateDraggingArea(startPoint, endPoint);
-        selection.selectBlocksByDraggingArea(
-          state.blockCache,
-          draggingArea,
-          viewport
-        );
+        const rect = selection.updateDraggingArea(draggingArea);
+        selection.selectBlocksByDraggingArea(state.blockCache, rect, viewport);
       }
     };
 

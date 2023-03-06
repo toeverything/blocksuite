@@ -17,6 +17,8 @@ import {
   isDatabaseInput,
   isEmbed,
   isInsidePageTitle,
+  Point,
+  Rect,
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
@@ -44,7 +46,6 @@ import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, PageViewport } from './selection-state.js';
 import {
   clearSubtree,
-  createDraggingArea,
   filterSelectedBlockByIndex,
   filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
@@ -398,16 +399,16 @@ export class DefaultSelectionManager {
     }
   }
 
-  updateDraggingArea(
-    startPoint: { x: number; y: number },
-    endPoint: { x: number; y: number }
-  ): DOMRect {
+  updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
     if (this.state.focusedBlockIndex !== -1) {
       this.state.focusedBlockIndex = -1;
     }
-    const draggingArea = createDraggingArea(endPoint, startPoint);
-    this.slots.draggingAreaUpdated.emit(draggingArea);
-    return draggingArea;
+    const rect = Rect.fromPoints(
+      draggingArea.start,
+      draggingArea.end
+    ).toDOMRect();
+    this.slots.draggingAreaUpdated.emit(rect);
+    return rect;
   }
 
   updateViewport() {
@@ -434,15 +435,16 @@ export class DefaultSelectionManager {
   }
 
   refreshDraggingArea(viewport: PageViewport) {
-    const { blockCache, startPoint, endPoint } = this.state;
-
-    if (startPoint && endPoint) {
-      this.state.refreshBlockRectCache();
-      const draggingArea = createDraggingArea(endPoint, startPoint);
-      this.selectBlocksByDraggingArea(blockCache, draggingArea, viewport);
+    const { blockCache, draggingArea } = this.state;
+    if (draggingArea) {
+      this.selectBlocksByDraggingArea(
+        blockCache,
+        Rect.fromPoints(draggingArea.start, draggingArea.end).toDOMRect(),
+        viewport,
+        true
+      );
     } else {
-      this.state.updateStartPoint(null);
-      this.state.updateEndPoint(null);
+      this.state.draggingArea = null;
       this.slots.draggingAreaUpdated.emit(null);
       this.refreshSelectedBlocksRects();
     }
@@ -526,8 +528,12 @@ export class DefaultSelectionManager {
   selectBlocksByDraggingArea(
     blockCache: Map<BlockComponentElement, DOMRect>,
     draggingArea: DOMRect,
-    viewport: PageViewport
+    viewport: PageViewport,
+    scrolling = false
   ) {
+    if (scrolling) {
+      this.state.refreshBlockRectCache();
+    }
     const { scrollLeft, scrollTop, left, top } = viewport;
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
