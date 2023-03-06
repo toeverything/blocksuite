@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [],
   "author": "toeverything",

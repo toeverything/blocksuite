@@ -267,16 +267,16 @@ export class DefaultPageBlockComponent
         top = Math.max(top, -scrollTop);
       }
 
-      const { startPoint, endPoint } = state;
-      if (startPoint && endPoint) {
+      const { draggingArea } = state;
+      if (draggingArea) {
         e.preventDefault();
 
         viewport.scrollTop += top;
         // FIXME: need smooth
         viewportElement.scrollTop += top;
 
-        endPoint.y += top;
-        selection.updateDraggingArea(startPoint, endPoint);
+        draggingArea.end.y += top;
+        selection.updateDraggingArea(draggingArea);
       }
     }
 
