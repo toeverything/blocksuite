@@ -1,4 +1,7 @@
-import { DefaulSelectionSlots, getCurrentBlockRange } from '@blocksuite/blocks';
+import {
+  DefaultSelectionSlots,
+  getCurrentBlockRange,
+} from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';
 
 import { getModelByElement } from '../../../__internal__/index.js';
@@ -306,7 +309,7 @@ function computeSelectionType(
 
 export function setSelectedBlocks(
   state: PageSelectionState,
-  slots: DefaulSelectionSlots,
+  slots: DefaultSelectionSlots,
   selectedBlocks: BlockComponentElement[],
   rects?: DOMRect[],
   selectionType?: PageSelectionType

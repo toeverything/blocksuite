@@ -45,7 +45,7 @@ export interface EmbedEditingState {
 
 export type CodeBlockOption = EmbedEditingState;
 
-export interface DefaulSelectionSlots {
+export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
@@ -156,7 +156,7 @@ export class DefaultPageBlockComponent
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
-  slots: DefaulSelectionSlots = {
+  slots: DefaultSelectionSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
@@ -244,7 +244,7 @@ export class DefaultPageBlockComponent
     }
   };
 
-  // TODO: disable it on scroll's thresold
+  // TODO: disable it on scroll's threshold
   private _onWheel = (e: WheelEvent) => {
     const { selection } = this;
     const { state } = selection;

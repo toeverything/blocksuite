@@ -30,8 +30,8 @@ import {
   repairContextMenuRange,
 } from '../../utils/position.js';
 import type {
-  DefaulSelectionSlots,
   DefaultPageBlockComponent,
+  DefaultSelectionSlots,
   EmbedEditingState,
 } from '../default-page-block.js';
 import {
@@ -60,7 +60,7 @@ import {
 export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
-  readonly slots: DefaulSelectionSlots;
+  readonly slots: DefaultSelectionSlots;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
@@ -73,7 +73,7 @@ export class DefaultSelectionManager {
   }: {
     page: Page;
     mouseRoot: HTMLElement;
-    slots: DefaulSelectionSlots;
+    slots: DefaultSelectionSlots;
     container: DefaultPageBlockComponent;
   }) {
     this.page = page;
