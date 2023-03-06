@@ -12,7 +12,7 @@ import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
-  DefaulSelectionSlots,
+  DefaultSelectionSlots,
   EmbedEditingState,
 } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
@@ -113,7 +113,7 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  slots: DefaulSelectionSlots,
+  slots: DefaultSelectionSlots,
   viewport: PageViewport
 ) {
   if (!embedEditingState) return null;

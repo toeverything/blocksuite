@@ -26,7 +26,7 @@ import {
   getRichTextByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaulSelectionSlots } from '../default/default-page-block.js';
+import type { DefaultSelectionSlots } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
@@ -279,7 +279,7 @@ function handleTab(
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
-  slots: DefaulSelectionSlots
+  slots: DefaultSelectionSlots
 ) {
   const {
     BACKSPACE,
