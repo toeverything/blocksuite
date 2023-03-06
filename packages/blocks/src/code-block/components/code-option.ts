@@ -29,61 +29,58 @@ export function CodeOptionTemplate({
   const readonly = page.readonly;
 
   const style = {
+    position: 'fixed',
     left: position.x + 'px',
     top: position.y + 'px',
   };
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${model.id}"] .ql-syntax`
-  );
-  if (!syntaxElem) return html``;
 
   return html`
     <style>
-      .affine-codeblock-option-container > div {
-          position: fixed;
-          z-index: 1;
-      }
-
       ${toolTipStyle}
     </style>
 
     <div
-      class="affine-codeblock-option-container"
+      class="affine-codeblock-option"
+      style=${styleMap(style)}
       @mouseover=${() => hoverState.emit(true)}
       @mouseout=${() => hoverState.emit(false)}
     >
-      <div style=${styleMap(style)} class="code-block-option">
-        <format-bar-button class="has-tool-tip" @click=${() => copyCode(model)}>
-          ${CopyIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Copy to Clipboard</tool-tip
-          >
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip"
-          ?active=${wrap}
-          @click=${onClickWrap}
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="copy-button"
+        @click=${() => copyCode(model)}
+      >
+        ${CopyIcon}
+        <tool-tip inert tip-position="right-start" role="tooltip"
+          >Copy to Clipboard</tool-tip
         >
-          ${LineWrapIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Wrap code</tool-tip
+      </format-bar-button>
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="wrap-button"
+        ?active=${wrap}
+        @click=${onClickWrap}
+      >
+        ${LineWrapIcon}
+        <tool-tip inert tip-position="right-start" role="tooltip"
+          >Wrap code</tool-tip
+        >
+      </format-bar-button>
+      ${readonly
+        ? ''
+        : html`<format-bar-button
+            data-testid="delete-button"
+            class="has-tool-tip"
+            @click=${() => {
+              if (readonly) return;
+              model.page.deleteBlock(model);
+            }}
           >
-        </format-bar-button>
-        ${readonly
-          ? ''
-          : html`<format-bar-button
-              class="has-tool-tip"
-              @click=${() => {
-                if (readonly) return;
-                model.page.deleteBlock(model);
-              }}
+            ${DeleteIcon}
+            <tool-tip inert tip-position="right-start" role="tooltip"
+              >Delete</tool-tip
             >
-              ${DeleteIcon}
-              <tool-tip inert tip-position="right-start" role="tooltip"
-                >Delete</tool-tip
-              >
-            </format-bar-button>`}
-      </div>
+          </format-bar-button>`}
     </div>
   `;
 }
