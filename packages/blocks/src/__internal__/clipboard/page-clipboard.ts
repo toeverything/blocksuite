@@ -179,7 +179,7 @@ export class PageClipboard implements Clipboard {
       return;
     }
     if (isPureFileInClipboard(clipboardData)) {
-      return;
+      return this.contentParser.file2Blocks(clipboardData);
     }
 
     const optimalClipboardData = this._getOptimalClipboardData(clipboardData);

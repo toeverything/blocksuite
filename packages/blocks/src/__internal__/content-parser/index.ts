@@ -6,6 +6,7 @@ import type {
 import { assertExists, BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import { getFileFromClipboard } from '../clipboard/utils.js';
 import { getService, getServiceOrRegister } from '../service.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
@@ -76,6 +77,26 @@ export class ContentParser {
     htmlEl.querySelector('head')?.remove();
     this.signals.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
+  }
+  async file2Blocks(clipboardData: DataTransfer) {
+    const file = getFileFromClipboard(clipboardData);
+    if (file) {
+      if (file.type.includes('image')) {
+        // TODO: upload file to file server
+        // XXX: should use blob storage here?
+        const storage = await this._page.blobs;
+        assertExists(storage);
+        const id = await storage.set(file);
+        return [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+          },
+        ];
+      }
+    }
+    return [];
   }
 
   public async markdown2Block(text: string): Promise<OpenBlockInfo[]> {
