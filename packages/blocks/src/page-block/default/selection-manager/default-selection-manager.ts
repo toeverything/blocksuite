@@ -11,7 +11,6 @@ import {
   getDefaultPageBlock,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
-  handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
   isDatabase,
@@ -41,6 +40,7 @@ import {
 } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
+import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, PageViewport } from './selection-state.js';
 import {
   clearSubtree,
@@ -61,7 +61,6 @@ export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
   readonly slots: DefaulSelectionSlots;
-  private readonly _mouseRoot: HTMLElement;
   private readonly _container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
@@ -76,17 +75,15 @@ export class DefaultSelectionManager {
     mouseRoot: HTMLElement;
     slots: DefaulSelectionSlots;
     container: DefaultPageBlockComponent;
-    threshold: number;
   }) {
     this.page = page;
     this.slots = slots;
-    this._mouseRoot = mouseRoot;
     this._container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
     this._disposables.add(
       initMouseEventHandlers(
-        this._mouseRoot,
+        mouseRoot,
         this._onContainerDragStart,
         this._onContainerDragMove,
         this._onContainerDragEnd,
@@ -104,26 +101,10 @@ export class DefaultSelectionManager {
 
   /**
    * This array contains the blocks allowed to be selected by selection manager.
-   *  Blocks like `affine:frame`, blocks inside `affine:database` will be discharged.
-   * @private
+   * Non-content blocks like `affine:frame` and blocks inside `affine:database` will be discarded.
    */
-  private get _allowSelectedBlocks(): BaseBlockModel[] {
+  private get _selectableBlocks(): BaseBlockModel[] {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
-  }
-
-  private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this.state.resetStartRange(e);
-    this.state.type = 'native';
-    this.slots.nativeSelectionToggled.emit(false);
-  }
-
-  private _onNativeSelectionDragMove(e: SelectionEvent) {
-    this.state.updateRangePoint(e.raw.clientX, e.raw.clientY);
-    handleNativeRangeDragMove(this.state.startRange, e);
-  }
-
-  private _onNativeSelectionDragEnd(_: SelectionEvent) {
-    this.slots.nativeSelectionToggled.emit(true);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -152,18 +133,17 @@ export class DefaultSelectionManager {
     if (isBlankArea(e)) {
       BlockDragHandlers.onStart(this, e);
     } else {
-      this._onNativeSelectionDragStart(e);
+      NativeDragHandlers.onStart(this, e);
     }
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
-      return this._onNativeSelectionDragMove(e);
-    }
-
-    if (this._container.readonly) {
+      NativeDragHandlers.onMove(this, e);
       return;
     }
+
+    if (this.readonly) return;
 
     if (this.state.type === 'block') {
       BlockDragHandlers.onMove(this, e);
@@ -178,22 +158,18 @@ export class DefaultSelectionManager {
     this._container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'native') {
-      this._onNativeSelectionDragEnd(e);
+      NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
       BlockDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
     }
-    if (this._container.readonly) {
-      return;
-    }
+    if (this.readonly) return;
 
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
-      if (selectedType === 'Caret') {
-        // If nothing is selected, then we should not show the format bar
-        return;
-      }
+      // If nothing is selected, we should not show the format bar
+      if (selectedType === 'Caret') return;
       showFormatQuickBar({
         page: this.page,
         direction,
@@ -234,9 +210,7 @@ export class DefaultSelectionManager {
     // do nothing when clicking on scrollbar
     const { viewport } = this.state;
 
-    if (e.raw.pageX >= viewport.clientWidth + viewport.left) {
-      return;
-    }
+    if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
 
     // clear selection first
     this.clear();
@@ -252,7 +226,7 @@ export class DefaultSelectionManager {
     });
 
     const clickBlockInfo = getBlockEditingStateByPosition(
-      this._allowSelectedBlocks,
+      this._selectableBlocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -290,9 +264,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
-      return;
-    }
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
@@ -301,15 +273,11 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
-    if (!range || range.collapsed) {
-      return;
-    }
-    if (this._container.readonly) {
-      return;
-    }
     const direction = 'center-bottom';
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
+    if (!range || range.collapsed) return;
+    if (this.readonly) return;
 
     // Show format quick bar when double click on text
     showFormatQuickBar({
@@ -330,7 +298,7 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshBlockRectCache();
     const hoverEditingState = getBlockEditingStateByPosition(
-      this._allowSelectedBlocks,
+      this._selectableBlocks,
       e.raw.clientX,
       e.raw.clientY
     );
@@ -364,9 +332,7 @@ export class DefaultSelectionManager {
 
   private _onSelectionChangeWithDebounce = (_: Event) => {
     const selection = window.getSelection();
-    if (!selection) {
-      return;
-    }
+    if (!selection) return;
 
     // filter out selection change event from title
     if (
@@ -382,12 +348,8 @@ export class DefaultSelectionManager {
     }
 
     const range = getCurrentNativeRange(selection);
-    if (range.collapsed) {
-      return;
-    }
-    if (this._container.readonly) {
-      return;
-    }
+    if (range.collapsed) return;
+    if (this.readonly) return;
 
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
@@ -414,6 +376,10 @@ export class DefaultSelectionManager {
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
     updateLocalSelectionRange(this.page);
   };
+
+  get readonly() {
+    return this.page.awarenessStore.isReadonly(this.page);
+  }
 
   get viewportElement() {
     return this._container.viewportElement;
