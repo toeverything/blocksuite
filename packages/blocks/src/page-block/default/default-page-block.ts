@@ -191,7 +191,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this._titleVEditor.focusEnd();
-    this._titleVEditor.setReadonly(this.readonly);
+    this._titleVEditor.setReadonly(this.page.readonly);
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
