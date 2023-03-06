@@ -1,4 +1,4 @@
-import { Disposable, flattenDisposable } from './disposable.js';
+import { Disposable, flattenDisposables } from './disposable.js';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
@@ -152,8 +152,9 @@ export class Slot<T = void> implements Disposable {
   }
 
   dispose() {
-    flattenDisposable(this._disposables).dispose();
-    this._callbacks.length = 0;
+    flattenDisposables(this._disposables).dispose();
+    this._callbacks = [];
+    this._disposables = [];
   }
 
   toDispose(disposables: Disposable[]): Slot<T> {

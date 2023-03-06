@@ -33,7 +33,7 @@ export class DisposableGroup implements Disposable {
   }
 }
 
-export function flattenDisposable(disposables: Disposable[]): Disposable {
+export function flattenDisposables(disposables: Disposable[]): Disposable {
   return {
     dispose: () => disposeAll(disposables),
   };
