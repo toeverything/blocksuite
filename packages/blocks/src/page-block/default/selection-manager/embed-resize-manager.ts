@@ -5,8 +5,8 @@ import { getModelByElement, IPoint, SelectionEvent } from '../../../std.js';
 import type { PageSelectionState } from './selection-state.js';
 
 export class EmbedResizeManager {
-  state: PageSelectionState;
-  slots: DefaultSelectionSlots;
+  readonly state: PageSelectionState;
+  readonly slots: DefaultSelectionSlots;
   private _originPosition: IPoint = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
   private _dropContainerSize: { w: number; h: number; left: number } = {

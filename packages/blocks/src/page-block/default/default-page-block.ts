@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
@@ -328,7 +328,6 @@ export class DefaultPageBlockComponent
         mouseRoot: this.mouseRoot,
         slots: this.slots,
         container: this,
-        threshold: SCROLL_THRESHOLD / 2, // 50
       });
     }
 
@@ -410,20 +409,6 @@ export class DefaultPageBlockComponent
     );
   };
 
-  updateViewport() {
-    const { viewportElement } = this;
-    const { top, left } = viewportElement.getBoundingClientRect();
-    this.selection.state.viewport = {
-      top,
-      left,
-      scrollTop: viewportElement.scrollTop,
-      scrollLeft: viewportElement.scrollLeft,
-      scrollHeight: viewportElement.scrollHeight,
-      clientHeight: viewportElement.clientHeight,
-      clientWidth: viewportElement.clientWidth,
-    };
-  }
-
   private _initSlotEffects() {
     const { slots } = this;
 
@@ -469,7 +454,7 @@ export class DefaultPageBlockComponent
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
           if (target === this.viewportElement) {
-            this.updateViewport();
+            this.selection.updateViewport();
             this.selection.updateRects();
             break;
           }

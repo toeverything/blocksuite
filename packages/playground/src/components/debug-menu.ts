@@ -209,20 +209,6 @@ export class DebugMenu extends NonShadowLitElement {
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
-  private _setReadonlyOthers() {
-    const clients = [...this.page.awarenessStore.getStates().keys()].filter(
-      id => id !== this.page.workspace.doc.clientID
-    );
-    if (this.page.awarenessStore.getFlag('enable_set_remote_flag')) {
-      clients.forEach(id => {
-        this.page.awarenessStore.setRemoteFlag(id, 'readonly', {
-          ...(this.page.awarenessStore.getFlag('readonly') ?? {}),
-          [this.page.prefixedId]: true,
-        });
-      });
-    }
-  }
-
   firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
@@ -438,9 +424,6 @@ export class DebugMenu extends NonShadowLitElement {
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
-              <sl-menu-item @click=${this._setReadonlyOthers}>
-                Set Others Readonly
-              </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
