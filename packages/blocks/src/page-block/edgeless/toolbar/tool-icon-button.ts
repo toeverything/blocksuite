@@ -1,7 +1,7 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toolTipStyle } from '../../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../../components/tooltip/tooltip.js';
 
 @customElement('edgeless-tool-icon-button')
 export class EdgelessToolIconButton extends LitElement {
@@ -36,7 +36,7 @@ export class EdgelessToolIconButton extends LitElement {
       color: var(--affine-disable-color);
     }
 
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
   @property()

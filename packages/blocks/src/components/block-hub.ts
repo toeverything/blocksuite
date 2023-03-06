@@ -35,7 +35,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
-import { toolTipStyle } from './tooltip/tooltip.js';
+import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
   affine-block-hub {
@@ -245,7 +245,7 @@ const styles = css`
     transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
   }
 
-  ${toolTipStyle}
+  ${tooltipStyle}
 `;
 
 type BlockHubItem = {
@@ -254,7 +254,7 @@ type BlockHubItem = {
   name: string;
   description: string;
   icon: unknown;
-  toolTip: string;
+  tooltip: string;
 };
 
 type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
@@ -295,7 +295,7 @@ function BlockHubCards(
     >
       <div class="affine-block-hub-title-container">${title}</div>
       ${blockHubItems.map(
-        ({ flavour, type, name, description, icon, toolTip }, index) => {
+        ({ flavour, type, name, description, icon, tooltip }, index) => {
           return html`
             <div class="card-container-wrapper">
               <div
@@ -320,7 +320,7 @@ function BlockHubCards(
                     ? ''
                     : 'display: none'}; z-index: ${blockHubItems.length -
                   index}"
-                  >${toolTip}</tool-tip
+                  >${tooltip}</tool-tip
                 >
               </div>
             </div>
@@ -517,90 +517,60 @@ export class BlockHub extends NonShadowLitElement {
   connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
-    disposables.add(
-      Slot.disposableListener(this, 'dragstart', this._onDragStart)
-    );
-    disposables.add(Slot.disposableListener(this, 'drag', this._onDrag));
-    disposables.add(Slot.disposableListener(this, 'dragend', this._onDragEnd));
+    disposables.add(Slot.fromEvent(this, 'dragstart', this._onDragStart));
+    disposables.add(Slot.fromEvent(this, 'drag', this._onDrag));
+    disposables.add(Slot.fromEvent(this, 'dragend', this._onDragEnd));
 
     disposables.add(
-      Slot.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
+      Slot.fromEvent(this._mouseRoot, 'dragover', this._onDragOver)
     );
-    disposables.add(
-      Slot.disposableListener(this._mouseRoot, 'drop', this._onDrop)
-    );
+    disposables.add(Slot.fromEvent(this._mouseRoot, 'drop', this._onDrop));
     isFirefox &&
       disposables.add(
-        Slot.disposableListener(
-          this._mouseRoot,
-          'dragover',
-          this._onDragOverDocument
-        )
+        Slot.fromEvent(this._mouseRoot, 'dragover', this._onDragOverDocument)
       );
-    disposables.add(
-      Slot.disposableListener(this, 'mousedown', this._onMouseDown)
-    );
+    disposables.add(Slot.fromEvent(this, 'mousedown', this._onMouseDown));
     this._onResize();
   }
 
   firstUpdated() {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      disposables.add(
-        Slot.disposableListener(card, 'mousedown', this._onCardMouseDown)
-      );
-      disposables.add(
-        Slot.disposableListener(card, 'mouseup', this._onCardMouseUp)
-      );
+      disposables.add(Slot.fromEvent(card, 'mousedown', this._onCardMouseDown));
+      disposables.add(Slot.fromEvent(card, 'mouseup', this._onCardMouseUp));
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.add(
-        Slot.disposableListener(
-          blockHubMenu,
-          'mouseover',
-          this._onBlockHubMenuMouseOver
-        )
+        Slot.fromEvent(blockHubMenu, 'mouseover', this._onBlockHubMenuMouseOver)
       );
       if (blockHubMenu.getAttribute('type') === 'blank') {
         disposables.add(
-          Slot.disposableListener(
-            blockHubMenu,
-            'mousedown',
-            this._onBlankMenuMouseDown
-          )
+          Slot.fromEvent(blockHubMenu, 'mousedown', this._onBlankMenuMouseDown)
         );
         disposables.add(
-          Slot.disposableListener(
-            blockHubMenu,
-            'mouseup',
-            this._onBlankMenuMouseUp
-          )
+          Slot.fromEvent(blockHubMenu, 'mouseup', this._onBlankMenuMouseUp)
         );
       }
     }
     disposables.add(
-      Slot.disposableListener(
+      Slot.fromEvent(
         this._blockHubMenuEntry,
         'mouseover',
         this._onBlockHubEntryMouseOver
       )
     );
-    disposables.add(Slot.disposableListener(document, 'click', this._onClick));
+    disposables.add(Slot.fromEvent(document, 'click', this._onClick));
     disposables.add(
-      Slot.disposableListener(
-        this._blockHubButton,
-        'click',
-        this._onBlockHubButtonClick
-      )
+      Slot.fromEvent(this._blockHubButton, 'click', this._onBlockHubButtonClick)
     );
     disposables.add(
-      Slot.disposableListener(
+      Slot.fromEvent(
         this._blockHubIconsContainer,
         'transitionstart',
         this._onTransitionStart
       )
     );
-    disposables.add(Slot.disposableListener(window, 'resize', this._onResize));
+    disposables.add(Slot.fromEvent(window, 'resize', this._onResize));
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );

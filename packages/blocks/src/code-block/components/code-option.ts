@@ -4,7 +4,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { copyCode } from '../../page-block/default/utils.js';
 
 export function CodeOptionTemplate({
@@ -31,7 +31,12 @@ export function CodeOptionTemplate({
 
   return html`
     <style>
-      ${toolTipStyle}
+      .affine-codeblock-option-container > div {
+          position: fixed;
+          z-index: 1;
+      }
+
+      ${tooltipStyle}
     </style>
 
     <div

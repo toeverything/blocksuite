@@ -13,7 +13,7 @@ import {
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 
@@ -183,7 +183,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     ${hljsStyles}
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
   @property()
@@ -237,13 +237,13 @@ export class CodeBlockComponent extends NonShadowLitElement {
       }, HOVER_DELAY);
     });
     this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseover', e => {
+      Slot.fromEvent(this, 'mouseover', e => {
         this.hoverState.emit(true);
       })
     );
     const HOVER_DELAY = 300;
     this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseleave', e => {
+      Slot.fromEvent(this, 'mouseleave', e => {
         this.hoverState.emit(false);
       })
     );
