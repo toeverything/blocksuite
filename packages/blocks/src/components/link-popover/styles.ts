@@ -183,7 +183,6 @@ export const linkPopoverStyle = css`
     user-select: none;
     cursor: pointer;
     white-space: nowrap;
-    overflow: hidden;
   }
 
   .affine-link-popover-dividing-line {
