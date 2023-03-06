@@ -100,7 +100,7 @@ export class BlockHub extends NonShadowLitElement {
   @query('.block-hub-menu-container')
   private _blockHubMenuContainer!: HTMLElement;
 
-  @query('[role="menu-entry"]')
+  @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
   private readonly _onDropCallback: (
@@ -321,7 +321,7 @@ export class BlockHub extends NonShadowLitElement {
       margin: 4px 0;
     }
 
-    [role='menu-entry'] tool-tip {
+    [role='menuitem'] tool-tip {
       font-size: var(--affine-font-sm);
     }
 
