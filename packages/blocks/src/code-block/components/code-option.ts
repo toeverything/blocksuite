@@ -1,9 +1,4 @@
-import {
-  BLOCK_ID_ATTR,
-  CopyIcon,
-  DeleteIcon,
-  LineWrapIcon,
-} from '@blocksuite/global/config';
+import { CopyIcon, DeleteIcon, LineWrapIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
