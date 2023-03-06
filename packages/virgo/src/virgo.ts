@@ -194,7 +194,7 @@ export class VEditor<
   private _handlerAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
-  private _isReadOnly = false;
+  private _isReadonly = false;
   private _yText: Y.Text;
 
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
@@ -479,10 +479,6 @@ export class VEditor<
     return this._vRange;
   }
 
-  getReadOnly(): boolean {
-    return this._isReadOnly;
-  }
-
   getFormat(vRange: VRange): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange);
 
@@ -504,9 +500,9 @@ export class VEditor<
     return result as TextAttributes;
   }
 
-  setReadOnly(isReadOnly: boolean): void {
-    this.rootElement.contentEditable = isReadOnly ? 'false' : 'true';
-    this._isReadOnly = isReadOnly;
+  setReadonly(isReadonly: boolean): void {
+    this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
+    this._isReadonly = isReadonly;
   }
 
   setVRange(vRange: VRange): void {
@@ -851,7 +847,7 @@ export class VEditor<
       return;
     }
 
-    if (this._isReadOnly) {
+    if (this._isReadonly) {
       return;
     }
 

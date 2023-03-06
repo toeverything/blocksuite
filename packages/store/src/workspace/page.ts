@@ -86,6 +86,10 @@ export class Page extends Space<PageData> {
     this._idGenerator = idGenerator;
   }
 
+  get readonly() {
+    return this.awarenessStore.isReadonly(this);
+  }
+
   get history() {
     return this._history;
   }
@@ -148,14 +152,14 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       return false;
     }
     return this._history.canUndo();
   }
 
   get canRedo() {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       return false;
     }
     return this._history.canRedo();
@@ -170,7 +174,7 @@ export class Page extends Space<PageData> {
   }
 
   undo = () => {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -178,7 +182,7 @@ export class Page extends Space<PageData> {
   };
 
   redo = () => {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -383,7 +387,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       throw new Error('cannot modify data in readonly mode');
     }
     if (!flavour) {
@@ -458,7 +462,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -472,7 +476,7 @@ export class Page extends Space<PageData> {
     targetModel: BaseBlockModel,
     top = true
   ) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -514,7 +518,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -589,7 +593,7 @@ export class Page extends Space<PageData> {
   }
 
   deleteBlockById(id: string) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -606,7 +610,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: false,
     }
   ) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }

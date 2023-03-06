@@ -115,9 +115,6 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
-  @property()
-  readonly = false;
-
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -177,7 +174,7 @@ export class DefaultPageBlockComponent
     return this._titleVEditor;
   }
 
-  private initTitleVEditor() {
+  private _initTitleVEditor() {
     const { model } = this;
     const title = model.title;
 
@@ -186,6 +183,7 @@ export class DefaultPageBlockComponent
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
     });
+    this._titleVEditor.setReadonly(this.page.readonly);
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -193,7 +191,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this._titleVEditor.focusEnd();
-    this._titleVEditor.setReadOnly(this.readonly);
+    this._titleVEditor.setReadonly(this.page.readonly);
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
@@ -310,13 +308,9 @@ export class DefaultPageBlockComponent
   };
 
   updated(changedProperties: Map<string, unknown>) {
-    if (this._titleVEditor && changedProperties.has('readonly')) {
-      this._titleVEditor.setReadOnly(this.readonly);
-    }
-
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
-        this.initTitleVEditor();
+        this._initTitleVEditor();
       }
     }
   }
@@ -505,7 +499,7 @@ export class DefaultPageBlockComponent
   }
 
   render() {
-    const { readonly, selection } = this;
+    const { page, selection } = this;
     const { viewport } = selection.state;
 
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
@@ -521,12 +515,12 @@ export class DefaultPageBlockComponent
       viewport
     );
     const embedEditingContainer = EmbedEditingContainer(
-      readonly ? null : this._embedEditingState,
+      page.readonly ? null : this._embedEditingState,
       this.slots,
       viewport
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
-      readonly ? null : this.codeBlockOption
+      page.readonly ? null : this.codeBlockOption
     );
 
     return html`

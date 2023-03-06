@@ -9,7 +9,7 @@ import {
   ALLOWED_SCHEMES,
   showLinkPopover,
 } from '../../../components/link-popover/index.js';
-import { getDefaultPageBlock, getModelByElement } from '../../utils/index.js';
+import { getModelByElement } from '../../utils/index.js';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
@@ -53,10 +53,7 @@ export class LinkNodeComponent extends LitElement {
 
   onHover(e: MouseEvent) {
     const model = getModelByElement(this);
-    const page = getDefaultPageBlock(model);
-    if (page.readonly) {
-      return;
-    }
+    if (model.page.readonly) return;
 
     this._popoverTimer = window.setTimeout(async () => {
       this.onDelayHover(e);

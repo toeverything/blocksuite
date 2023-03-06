@@ -36,9 +36,6 @@ export class EmbedBlockComponent extends NonShadowLitElement {
   @property()
   model!: EmbedBlockModel;
 
-  @property()
-  readonly!: boolean;
-
   @query('input')
   _input!: HTMLInputElement;
 
@@ -89,7 +86,7 @@ export class EmbedBlockComponent extends NonShadowLitElement {
         <div class="affine-embed-wrapper">
           <slot></slot>
           <input
-            .disabled=${this.readonly}
+            .disabled=${this.model.page.readonly}
             placeholder="Write a caption"
             class="affine-embed-wrapper-caption"
             value=${this._caption}
