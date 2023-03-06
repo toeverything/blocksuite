@@ -529,9 +529,9 @@ export class DefaultSelectionManager {
     blockCache: Map<BlockComponentElement, DOMRect>,
     draggingArea: DOMRect,
     viewport: PageViewport,
-    scrolling = false
+    isScrolling = false
   ) {
-    if (scrolling) {
+    if (isScrolling) {
       this.state.refreshBlockRectCache();
     }
     const { scrollLeft, scrollTop, left, top } = viewport;
