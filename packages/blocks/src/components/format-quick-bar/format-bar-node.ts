@@ -106,9 +106,7 @@ export class FormatQuickBar extends LitElement {
         subtree: true,
       });
     });
-    this._disposableGroup.add(() => {
-      mutationObserver.disconnect();
-    });
+    this._disposableGroup.add(() => mutationObserver.disconnect());
   }
 
   override disconnectedCallback() {

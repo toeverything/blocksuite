@@ -25,7 +25,6 @@ import type { PageBlockModel } from '../index.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
-  CodeBlockOptionContainer,
   DraggingArea,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
@@ -43,14 +42,12 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
-export type CodeBlockOption = EmbedEditingState;
-
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EmbedEditingState | null>;
-  codeBlockOptionUpdated: Slot<CodeBlockOption | null>;
+  codeBlockOptionUpdated?: Slot;
   nativeSelectionToggled: Slot<boolean>;
 }
 
@@ -147,9 +144,6 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  @state()
-  private _codeBlockOption!: CodeBlockOption | null;
-
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
@@ -158,7 +152,6 @@ export class DefaultPageBlockComponent
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
-    codeBlockOptionUpdated: new Slot<CodeBlockOption | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
@@ -421,9 +414,6 @@ export class DefaultPageBlockComponent
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
     });
-    slots.codeBlockOptionUpdated.on(codeBlockOption => {
-      this._codeBlockOption = codeBlockOption;
-    });
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
@@ -514,9 +504,6 @@ export class DefaultPageBlockComponent
       this.slots,
       viewport
     );
-    const codeBlockOptionContainer = CodeBlockOptionContainer(
-      page.readonly ? null : this._codeBlockOption
-    );
 
     return html`
       <div class="affine-default-viewport">
@@ -533,7 +520,7 @@ export class DefaultPageBlockComponent
           ${childrenContainer}
         </div>
         ${selectedRectsContainer} ${draggingArea} ${selectedEmbedContainer}
-        ${embedEditingContainer} ${codeBlockOptionContainer}
+        ${embedEditingContainer}
       </div>
     `;
   }

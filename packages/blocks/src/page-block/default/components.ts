@@ -1,29 +1,21 @@
-import { BLOCK_ID_ATTR, CopyIcon, DeleteIcon } from '@blocksuite/global/config';
 import {
   CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
   DownloadIcon,
-  LineWrapIcon,
 } from '@blocksuite/global/config';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
-  CodeBlockOption,
   DefaultSelectionSlots,
   EmbedEditingState,
 } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
-import {
-  copyCode,
-  copyImage,
-  deleteCodeBlock,
-  downloadImage,
-  focusCaption,
-  toggleWrap,
-} from './utils.js';
+import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function DraggingArea(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -136,7 +128,7 @@ export function EmbedEditingContainer(
         z-index: 1;
       }
 
-      ${toolTipStyle}
+      ${tooltipStyle}
     </style>
 
     <div class="affine-embed-editing-state-container">
@@ -190,65 +182,6 @@ export function EmbedEditingContainer(
           <tool-tip inert tip-position="right-start" role="tooltip"
             >Delete</tool-tip
           >
-        </format-bar-button>
-      </div>
-    </div>
-  `;
-}
-
-export function CodeBlockOptionContainer(
-  codeBlockOption: CodeBlockOption | null
-) {
-  if (!codeBlockOption) return null;
-
-  const style = {
-    left: codeBlockOption.position.x + 'px',
-    top: codeBlockOption.position.y + 'px',
-  };
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  if (!syntaxElem) return null;
-
-  const isWrapped = syntaxElem.classList.contains('wrap');
-  return html`
-    <style>
-      .affine-codeblock-option-container > div {
-          position: fixed;
-          z-index: 1;
-      }
-
-      ${toolTipStyle}
-    </style>
-
-    <div class="affine-codeblock-option-container">
-      <div style=${styleMap(style)} class="code-block-option">
-        <format-bar-button
-          class="has-tool-tip"
-          @click=${() => copyCode(codeBlockOption)}
-        >
-          ${CopyIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Copy to Clipboard
-          </tool-tip>
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-          @click=${() => toggleWrap(codeBlockOption)}
-        >
-          ${LineWrapIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Wrap code
-          </tool-tip>
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip"
-          @click=${() => deleteCodeBlock(codeBlockOption)}
-        >
-          ${DeleteIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Delete
-          </tool-tip>
         </format-bar-button>
       </div>
     </div>

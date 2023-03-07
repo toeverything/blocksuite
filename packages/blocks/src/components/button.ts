@@ -44,6 +44,7 @@ export class IconButton extends LitElement {
     :host([disabled]),
     :host(:disabled) {
       background: transparent;
+      color: var(--affine-popover-color);
       fill: var(--affine-icon-color);
       cursor: not-allowed;
     }
