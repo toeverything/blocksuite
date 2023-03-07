@@ -4,7 +4,11 @@ import {
   MouseMode,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import {
+  ContentParser,
+  NonShadowLitElement,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
 import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
@@ -28,6 +32,7 @@ export class EditorContainer extends NonShadowLitElement {
   mouseMode: MouseMode = {
     type: 'default',
   };
+  contentParser!: ContentParser;
 
   @state()
   private showGrid = false;
@@ -68,6 +73,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   override connectedCallback() {
     super.connectedCallback();
+    this.contentParser = new ContentParser(this.page);
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.readonly[this.page.prefixedId],

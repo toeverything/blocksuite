@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import { ContentParser } from '@blocksuite/blocks';
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 
@@ -429,21 +428,16 @@ export async function pasteContent(
 
 export async function importMarkdown(
   page: Page,
-  data: string,
-  insertPositionId: string
+  focusedBlockId: string,
+  data: string
 ) {
   await page.evaluate(
-    ({ data, insertPositionId }) => {
-      const { workspace } = window;
-
-      const page = workspace.getPage(pageId) as StorePage;
-
-      const contentParser = new ContentParser(page);
+    ({ data, focusedBlockId }) => {
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard.importMarkdown(data, insertPositionId);
+        .contentParser.importMarkdown(data, focusedBlockId);
     },
-    { data, insertPositionId }
+    { data, focusedBlockId }
   );
 }
 

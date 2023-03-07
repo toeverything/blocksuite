@@ -52,14 +52,13 @@ export class CodeBlockService extends BaseService {
     range?: BlockRange
   ): void {
     assertExists(range);
-    const pastedDelta = pastedBlocks.reduce(
-      (deltas: DeltaOperation[], block) => {
+    const text = pastedBlocks
+      .reduce((deltas: DeltaOperation[], block) => {
         block.text && deltas.push(...block.text);
         return deltas;
-      },
-      []
-    );
-
-    focusedBlockModel.text?.insertList(pastedDelta, range.startOffset);
+      }, [])
+      .map(op => op.insert)
+      .join('');
+    focusedBlockModel.text?.insert(text, range.startOffset);
   }
 }
