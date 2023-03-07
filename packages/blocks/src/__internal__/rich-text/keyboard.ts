@@ -66,6 +66,12 @@ interface KeyboardEventThis {
   };
 }
 
+const IS_SAFARI = /Apple Computer/.test(navigator.vendor);
+const IS_IOS =
+  IS_SAFARI &&
+  (/Mobile\/\w+/.test(navigator.userAgent) || navigator.maxTouchPoints > 2);
+const IS_MAC = /Mac/i.test(navigator.platform);
+
 // If a block is soft enterable, the rule is:
 // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
 // 2. In the middle and start of block, press Enter will insert a \n to break the line
@@ -480,8 +486,7 @@ export function createKeyDownHandler(
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};
 
-  const safari = /Apple Computer/.test(navigator.vendor);
-  const SHORTKEY = safari ? 'metaKey' : 'ctrlKey';
+  const SHORTKEY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
   function normalize(binding: KeyboardBinding): KeyboardBinding {
     if (binding.shortKey) {
