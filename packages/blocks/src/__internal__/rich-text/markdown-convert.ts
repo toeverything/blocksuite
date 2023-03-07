@@ -518,7 +518,6 @@ const matches: Match[] = [
         length: 1,
       });
 
-      console.log(matchedText);
       vEditor.setVRange({
         index: start + hrefText.length - 1,
         length: 0,
