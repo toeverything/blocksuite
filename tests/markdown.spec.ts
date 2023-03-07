@@ -191,7 +191,6 @@ test('markdown inline-text', async ({ page }) => {
   await resetHistory(page);
 
   await type(page, '***test*** ');
-  await waitNextFrame(page);
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });
   await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
@@ -257,6 +256,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['[test](www.test.com) ']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);
