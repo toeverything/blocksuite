@@ -161,6 +161,7 @@ export function getBlockClipboardInfo(
     html,
     text,
     json,
+    model,
   };
 }
 
@@ -190,7 +191,18 @@ export function copy(range: BlockRange) {
   const customClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
     JSON.stringify(
-      clipGroups.filter(group => group.json).map(group => group.json)
+      clipGroups
+        .filter(group => {
+          if (!group.json) {
+            return false;
+          }
+          // XXX: should handle this issue here?
+          // Children json info is collected by its parent,
+          // but getCurrentBlockRange.models return parent and children at same time,
+          // children should be deleted from group
+          return !isChildBlock(range.models, group.model);
+        })
+        .map(group => group.json)
     )
   );
 
@@ -204,3 +216,22 @@ export function copy(range: BlockRange) {
 
   savedRange && resetNativeSelection(savedRange);
 }
+
+const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
+  for (let i = 0; i < blocks.length; i++) {
+    const parentBlock = blocks[i];
+    if (parentBlock.children) {
+      if (
+        parentBlock.children.findIndex(
+          childBlock => childBlock.id === block.id
+        ) > -1
+      ) {
+        return true;
+      }
+      if (isChildBlock(parentBlock.children, block)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
