@@ -201,7 +201,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
       },
     });
 
-    this.requestUpdate();
+    const richText = this.querySelector('rich-text');
+    assertExists(richText);
+    const vEditor = richText.vEditor;
+    assertExists(vEditor);
+    vEditor.requestUpdate();
   }
 
   get readonly() {
@@ -264,7 +268,9 @@ export class CodeBlockComponent extends NonShadowLitElement {
     );
     assertExists(syntaxElem);
     this._wrap = syntaxElem.classList.toggle('wrap');
+  }
 
+  protected firstUpdated() {
     this._startHighlight(codeLanguages);
   }
 

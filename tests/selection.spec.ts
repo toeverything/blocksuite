@@ -624,7 +624,7 @@ test('selection on heavy page', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   for (let i = 0; i < 5; i++) {
-    await page.keyboard.insertText(`Line ${i + 1}`);
+    await type(page, `Line ${i + 1}`);
     await pressEnter(page);
   }
   const [first, last] = await page.evaluate(() => {

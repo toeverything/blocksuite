@@ -207,7 +207,24 @@ export function createKeyboardBindings(
   function onTab(this: KeyboardEventThis, e: KeyboardEvent, vRange: VRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
-      return ALLOW_DEFAULT;
+
+      const lineStart =
+        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
+          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
+          : 0;
+      this.vEditor.insertText(
+        {
+          index: lineStart,
+          length: 0,
+        },
+        '  '
+      );
+      this.vEditor.setVRange({
+        index: vRange.index + 2,
+        length: 0,
+      });
+
+      return PREVENT_DEFAULT;
     }
 
     const index = vRange.index;
@@ -223,7 +240,26 @@ export function createKeyboardBindings(
   ) {
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
-      return ALLOW_DEFAULT;
+
+      const lineStart =
+        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
+          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
+          : 0;
+      if (
+        this.vEditor.yText.length >= 2 &&
+        this.vEditor.yText.toString().slice(lineStart, lineStart + 2) === '  '
+      ) {
+        this.vEditor.deleteText({
+          index: lineStart,
+          length: 2,
+        });
+        this.vEditor.setVRange({
+          index: vRange.index - 2,
+          length: 0,
+        });
+      }
+
+      return PREVENT_DEFAULT;
     }
 
     const index = vRange.index;
