@@ -19,7 +19,7 @@ import {
   isDatabaseInput,
   isEmbed,
   isInsidePageTitle,
-  type Point,
+  Point,
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
@@ -39,7 +39,6 @@ import type {
   EmbedEditingState,
 } from '../default-page-block.js';
 import {
-  type EditingState,
   getAllowSelectedBlocks,
   getBlockEditingStateByPosition,
 } from '../utils.js';
