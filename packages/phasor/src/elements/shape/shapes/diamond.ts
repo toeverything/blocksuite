@@ -37,7 +37,7 @@ export const DiamondMethods: ShapeMethods = {
     }
   },
 
-  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+  hitTestPoint(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     const points = [
       [bound.x + bound.w / 2, bound.y + 0],
       [bound.x + bound.w, bound.y + bound.h / 2],

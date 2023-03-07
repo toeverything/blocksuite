@@ -6,7 +6,7 @@ export class DebugElement extends BaseElement {
   type = 'debug' as const;
   color = '#000000';
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
+  hitTestPoint(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
   }
 

@@ -19,9 +19,9 @@ export class ShapeElement extends BaseElement {
     this.shapeType = shapeType;
   }
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
-    const { hitTest } = ShapeMethodsMap[this.shapeType];
-    return hitTest(x, y, this, options);
+  hitTestPoint(x: number, y: number, options?: HitTestOptions) {
+    const { hitTestPoint } = ShapeMethodsMap[this.shapeType];
+    return hitTestPoint(x, y, this, options);
   }
 
   serialize(): SerializedShapeProps {

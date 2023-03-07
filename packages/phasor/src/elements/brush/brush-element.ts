@@ -43,7 +43,7 @@ export class BrushElement extends BaseElement {
   points: number[][] = [];
   lineWidth = 4;
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
+  hitTestPoint(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
   }
 

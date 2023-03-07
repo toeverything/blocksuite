@@ -134,7 +134,7 @@ export class SurfaceManager {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
-      return element.hitTest(x, y, options);
+      return element.hitTestPoint(x, y, options);
     });
 
     return picked;
