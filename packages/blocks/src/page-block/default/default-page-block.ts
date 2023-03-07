@@ -430,26 +430,27 @@ export class DefaultPageBlockComponent
 
     slots.draggingAreaUpdated.on(rect => {
       this._draggingArea = rect;
-      this.requestUpdate();
     });
     slots.selectedRectsUpdated.on(rects => {
       this._selectedRects = rects;
-      this.requestUpdate();
     });
     slots.embedRectsUpdated.on(rects => {
       this._selectedEmbedRects = rects;
       if (rects.length === 0) {
         this._embedEditingState = null;
       }
-      this.requestUpdate();
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-      this.requestUpdate();
     });
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
+    });
+
+    this.model.page.slots.blockUpdated.on(() => {
+      // TODO: optimize
+      this.requestUpdate();
     });
   }
 
