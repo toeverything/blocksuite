@@ -168,10 +168,12 @@ test('append new paragraph block by enter', async ({ page }) => {
   await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['hello']);
   await assertSelection(page, 0, 5, 0);
 
   await redoByKeyboard(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['hello', '']);
   await assertSelection(page, 1, 0, 0);
 });
@@ -846,6 +848,7 @@ test('press arrow down in indent line should not move caret to the start of line
   await focusRichText(page, 2);
   // Insert a new long text to wrap the line
   await page.keyboard.insertText('0'.repeat(100));
+  await waitNextFrame(page);
 
   await focusRichText(page, 1);
   // Through long text
