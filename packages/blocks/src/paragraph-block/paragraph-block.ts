@@ -1,8 +1,10 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
+import { BlockHubIcon20 } from '@blocksuite/global/config';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -36,6 +38,7 @@ function getPlaceholder(model: ParagraphBlockModel) {
 export class ParagraphBlockComponent extends NonShadowLitElement {
   static styles = css`
     .affine-paragraph-block-container {
+      position: relative;
       border-radius: 5px;
     }
     .affine-paragraph-block-container.selected {
@@ -142,6 +145,19 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     em {
       font-style: italic;
     }
+
+    .tips-placeholder {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--affine-placeholder-color);
+      fill: var(--affine-placeholder-color);
+    }
   `;
 
   @property({ hasChanged: () => true })
@@ -150,12 +166,42 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  @property()
-  placeholder?: string;
+  @state()
+  private _showTipsPlaceholder = false;
+
+  private _disposables = new DisposableGroup();
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+  }
+
+  private _onFocusIn = (e: FocusEvent) => {
+    if (this.model.type !== 'text' || this.model.text.length > 0) {
+      return;
+    }
+    this._showTipsPlaceholder = true;
+
+    const observer = () =>
+      (this._showTipsPlaceholder = this.model.text.length === 0);
+    this.model.text.yText.observe(observer);
+    this._disposables = new DisposableGroup();
+    this._disposables.add(() => this.model.text.yText.unobserve(observer));
+  };
+
+  private _onFocusOut = (e: FocusEvent) => {
+    if (this.model.type !== 'text') {
+      return;
+    }
+    this._showTipsPlaceholder = false;
+    this._disposables.dispose();
+  };
+
+  private _tipsPlaceholder() {
+    if (!this._showTipsPlaceholder) return html``;
+    return html`<div class="tips-placeholder">
+      Click button ${BlockHubIcon20} to insert blocks, type '/' for commands
+    </div>`;
   }
 
   render() {
@@ -169,10 +215,13 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
+        ${this._tipsPlaceholder()}
         <rich-text
           .host=${this.host}
           .model=${this.model}
           .placeholder=${placeholder}
+          @focusin=${this._onFocusIn}
+          @focusout=${this._onFocusOut}
           style=${styleMap({
             fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
           })}
