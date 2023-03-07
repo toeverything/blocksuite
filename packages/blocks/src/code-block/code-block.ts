@@ -236,26 +236,20 @@ export class CodeBlockComponent extends NonShadowLitElement {
         this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposables.add(
-      Slot.fromEvent(this, 'mouseover', e => {
-        this.hoverState.emit(true);
-      })
-    );
+    this._disposables.addFromEvent(this, 'mouseover', e => {
+      this.hoverState.emit(true);
+    });
     const HOVER_DELAY = 300;
-    this._disposables.add(
-      Slot.fromEvent(this, 'mouseleave', e => {
-        this.hoverState.emit(false);
-      })
-    );
+    this._disposables.addFromEvent(this, 'mouseleave', e => {
+      this.hoverState.emit(false);
+    });
 
-    this._disposables.add(
-      Slot.fromEvent(document, 'wheel', e => {
-        if (!this._optionPosition) return;
-        // Update option position when scrolling
-        const rect = this.getBoundingClientRect();
-        this._optionPosition = { x: rect.right + 12, y: rect.top };
-      })
-    );
+    this._disposables.addFromEvent(document, 'wheel', e => {
+      if (!this._optionPosition) return;
+      // Update option position when scrolling
+      const rect = this.getBoundingClientRect();
+      this._optionPosition = { x: rect.right + 12, y: rect.top };
+    });
   }
 
   override disconnectedCallback() {

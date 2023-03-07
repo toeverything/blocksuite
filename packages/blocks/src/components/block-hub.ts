@@ -517,60 +517,67 @@ export class BlockHub extends NonShadowLitElement {
   connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
-    disposables.add(Slot.fromEvent(this, 'dragstart', this._onDragStart));
-    disposables.add(Slot.fromEvent(this, 'drag', this._onDrag));
-    disposables.add(Slot.fromEvent(this, 'dragend', this._onDragEnd));
+    disposables.addFromEvent(this, 'dragstart', this._onDragStart);
+    disposables.addFromEvent(this, 'drag', this._onDrag);
+    disposables.addFromEvent(this, 'dragend', this._onDragEnd);
 
-    disposables.add(
-      Slot.fromEvent(this._mouseRoot, 'dragover', this._onDragOver)
-    );
-    disposables.add(Slot.fromEvent(this._mouseRoot, 'drop', this._onDrop));
-    isFirefox &&
-      disposables.add(
-        Slot.fromEvent(this._mouseRoot, 'dragover', this._onDragOverDocument)
+    disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
+    disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
+    disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
+
+    if (isFirefox) {
+      disposables.addFromEvent(
+        this._mouseRoot,
+        'dragover',
+        this._onDragOverDocument
       );
-    disposables.add(Slot.fromEvent(this, 'mousedown', this._onMouseDown));
+    }
+
     this._onResize();
   }
 
   firstUpdated() {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      disposables.add(Slot.fromEvent(card, 'mousedown', this._onCardMouseDown));
-      disposables.add(Slot.fromEvent(card, 'mouseup', this._onCardMouseUp));
+      disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
+      disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
     });
     for (const blockHubMenu of this._blockHubMenus) {
-      disposables.add(
-        Slot.fromEvent(blockHubMenu, 'mouseover', this._onBlockHubMenuMouseOver)
+      disposables.addFromEvent(
+        blockHubMenu,
+        'mouseover',
+        this._onBlockHubMenuMouseOver
       );
       if (blockHubMenu.getAttribute('type') === 'blank') {
-        disposables.add(
-          Slot.fromEvent(blockHubMenu, 'mousedown', this._onBlankMenuMouseDown)
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mousedown',
+          this._onBlankMenuMouseDown
         );
-        disposables.add(
-          Slot.fromEvent(blockHubMenu, 'mouseup', this._onBlankMenuMouseUp)
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mouseup',
+          this._onBlankMenuMouseUp
         );
       }
     }
-    disposables.add(
-      Slot.fromEvent(
-        this._blockHubMenuEntry,
-        'mouseover',
-        this._onBlockHubEntryMouseOver
-      )
+    disposables.addFromEvent(
+      this._blockHubMenuEntry,
+      'mouseover',
+      this._onBlockHubEntryMouseOver
     );
-    disposables.add(Slot.fromEvent(document, 'click', this._onClick));
-    disposables.add(
-      Slot.fromEvent(this._blockHubButton, 'click', this._onBlockHubButtonClick)
+    disposables.addFromEvent(document, 'click', this._onClick);
+    disposables.addFromEvent(
+      this._blockHubButton,
+      'click',
+      this._onBlockHubButtonClick
     );
-    disposables.add(
-      Slot.fromEvent(
-        this._blockHubIconsContainer,
-        'transitionstart',
-        this._onTransitionStart
-      )
+    disposables.addFromEvent(
+      this._blockHubIconsContainer,
+      'transitionstart',
+      this._onTransitionStart
     );
-    disposables.add(Slot.fromEvent(window, 'resize', this._onResize));
+    disposables.addFromEvent(window, 'resize', this._onResize);
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );

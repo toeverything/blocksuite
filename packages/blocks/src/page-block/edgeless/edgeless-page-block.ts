@@ -254,11 +254,12 @@ export class EdgelessPageBlockComponent
     this.slots.surfaceUpdated.on(() => this.requestUpdate());
     this.slots.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
 
-    const historyDisposable = this.page.slots.historyUpdated.on(() => {
-      this._clearSelection();
-      this.requestUpdate();
-    });
-    this._disposables.add(historyDisposable);
+    this._disposables.add(
+      this.page.slots.historyUpdated.on(() => {
+        this._clearSelection();
+        this.requestUpdate();
+      })
+    );
     this._bindHotkeys();
 
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
