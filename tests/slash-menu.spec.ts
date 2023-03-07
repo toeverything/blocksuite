@@ -235,6 +235,22 @@ test('should clean slash string after soft enter', async ({ page }) => {
   );
 });
 
+test('slash menu supports fuzzy query', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '/');
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
+
+  const slashItems = slashMenu.locator('format-bar-button');
+  await type(page, 'c');
+  await expect(slashItems).toHaveText(['Code Block', 'Copy', 'Duplicate']);
+  await type(page, 'b');
+  await expect(slashItems).toHaveText(['Code Block']);
+});
+
 test.describe('slash menu with code block', () => {
   test('should focus on empty code blocks created by the slash menu', async ({
     page,

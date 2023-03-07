@@ -242,18 +242,15 @@ export class SlashMenu extends LitElement {
     return menuGroups
       .flatMap(group => group.items)
       .filter(({ name }) => {
-        if (
-          name
-            .trim()
-            .toLowerCase()
-            .split('')
-            .filter(char => /[A-Za-z0-9]/.test(char))
-            .join('')
-            .includes(searchStr)
-        ) {
-          return true;
-        }
-        return false;
+        const pureName = name
+          .trim()
+          .toLowerCase()
+          .split('')
+          .filter(char => /[A-Za-z0-9]/.test(char))
+          .join('');
+
+        const regex = new RegExp(searchStr.split('').join('.*'), 'i');
+        return regex.test(pureName);
       });
   }
 
