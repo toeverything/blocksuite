@@ -190,10 +190,13 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     }
     this._showTipsPlaceholder = true;
 
-    const observer = () =>
-      (this._showTipsPlaceholder = this.model.text.length === 0);
+    const observer = () => {
+      this._showTipsPlaceholder =
+        this.model.text.length === 0 && this.model.type === 'text';
+    };
     this.model.text.yText.observe(observer);
     this._disposables = new DisposableGroup();
+    this._disposables.add(this.model.propsUpdated.on(observer));
     this._disposables.add(() => this.model.text.yText.unobserve(observer));
   };
 
