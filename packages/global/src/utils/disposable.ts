@@ -26,6 +26,38 @@ export class DisposableGroup implements Disposable {
     }
   }
 
+  addFromEvent<N extends keyof WindowEventMap>(
+    element: Window,
+    eventName: N,
+    handler: (e: WindowEventMap[N]) => void,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent<N extends keyof DocumentEventMap>(
+    element: Document,
+    eventName: N,
+    handler: (e: DocumentEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent<N extends keyof HTMLElementEventMap>(
+    element: HTMLElement,
+    eventName: N,
+    handler: (e: HTMLElementEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent(
+    target: HTMLElement | Window | Document,
+    type: string,
+    handler: (e: Event) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ) {
+    this.add({
+      dispose: () => {
+        target.removeEventListener(type, handler as () => void, eventOptions);
+      },
+    });
+    target.addEventListener(type, handler as () => void, eventOptions);
+  }
+
   dispose() {
     disposeAll(this._disposables);
     this._disposables = [];
