@@ -196,7 +196,6 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-
     const frame = this.pageModel.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);

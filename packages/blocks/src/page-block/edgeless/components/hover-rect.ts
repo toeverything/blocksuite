@@ -2,7 +2,6 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessHoverState } from '../selection-manager.js';
-import { isSurfaceElement } from '../utils.js';
 import { getCommonRectStyle } from './utils.js';
 
 export function EdgelessHoverRect(
@@ -11,10 +10,9 @@ export function EdgelessHoverRect(
 ) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  const isInSurface = isSurfaceElement(hoverState.content);
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, isInSurface),
+    ...getCommonRectStyle(rect),
     border: '1px solid var(--affine-primary-color)',
   };
 

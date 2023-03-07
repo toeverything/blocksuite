@@ -31,4 +31,9 @@ export interface ShapeMethods {
     bound: IBound,
     options?: HitTestOptions
   ) => boolean;
+  hitTestBound?: (
+    shapeBound: IBound,
+    area: IBound,
+    options?: HitTestOptions
+  ) => boolean;
 }

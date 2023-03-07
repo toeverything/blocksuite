@@ -145,6 +145,15 @@ export class SurfaceManager {
     return results[results.length - 1] ?? null;
   }
 
+  pickInBound(bound: IBound, options?: HitTestOptions): PhasorElement[] {
+    const candidates = this._renderer.gridManager.search(bound);
+    const picked = candidates.filter((element: PhasorElement) => {
+      return element.hitTestBound(bound, options);
+    });
+
+    return picked;
+  }
+
   addElements(elements: PhasorElement[]) {
     elements.forEach(element => this._addElement(element));
   }

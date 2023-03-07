@@ -1,4 +1,4 @@
-import type { Color, StrokeStyle } from '../../consts.js';
+import type { Color, IBound, StrokeStyle } from '../../consts.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
@@ -22,6 +22,10 @@ export class ShapeElement extends BaseElement {
   hitTestPoint(x: number, y: number, options?: HitTestOptions) {
     const { hitTestPoint } = ShapeMethodsMap[this.shapeType];
     return hitTestPoint(x, y, this, options);
+  }
+
+  hitTestBound(bound: IBound, options?: HitTestOptions) {
+    return ShapeMethodsMap['rect'].hitTestBound?.(this, bound) ?? false;
   }
 
   serialize(): SerializedShapeProps {

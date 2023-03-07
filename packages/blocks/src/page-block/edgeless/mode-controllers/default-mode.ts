@@ -1,5 +1,6 @@
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import type {
   DefaultMouseMode,
@@ -24,7 +25,8 @@ import {
   getXYWH,
   isSurfaceElement,
   isTopLevelBlock,
-  pick,
+  pickInBound,
+  pickTop,
 } from '../utils.js';
 import { MouseModeController } from './index.js';
 
@@ -33,24 +35,29 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     type: 'default',
   };
 
+  private _draggingMode: 'translate' | 'select' | 'edit' | null = null;
   private _startRange: Range | null = null;
+  private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
+
+  get draggingArea() {
+    if (this._draggingMode === 'select') {
+      return {
+        start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
+        end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
+      };
+    }
+    return null;
+  }
 
   private _pick(x: number, y: number) {
     const { surface } = this._edgeless;
     const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
     const selectedShape = surface.pickTop(modelX, modelY);
-    return selectedShape ? selectedShape : pick(this._blocks, modelX, modelY);
-  }
-
-  private _updateDraggingArea(x: number, y: number) {
-    if (this._draggingArea) {
-      this._draggingArea.end = new DOMPoint(x, y);
-    }
-    if (this._hoverState) {
-      this._setSingleSelectionState(this._hoverState.content, false);
-    }
+    return selectedShape
+      ? selectedShape
+      : pickTop(this._blocks, modelX, modelY);
   }
 
   private _updateHoverState(content: Selectable | null) {
@@ -73,10 +80,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     resetNativeSelection(null);
   }
 
-  private _setSingleSelectionState(selected: Selectable, active: boolean) {
+  private _setSelectionState(selected: Selectable[], active: boolean) {
     this._blockSelectionState = {
+      selected,
       active,
-      selected: [selected],
     };
     this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
   }
@@ -86,19 +93,19 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     // shape
     if (isSurfaceEl) {
-      this._setSingleSelectionState(selected, true);
+      this._setSelectionState([selected], false);
     }
     // block
     else {
       switch (this.blockSelectionState.selected.length) {
         case 0:
-          this._setSingleSelectionState(selected, false);
+          this._setSelectionState([selected], false);
           break;
         case 1:
           if (this.blockSelectionState.selected[0] === selected) {
-            this._setSingleSelectionState(selected, true);
+            this._setSelectionState([selected], true);
           } else {
-            this._setSingleSelectionState(selected, false);
+            this._setSelectionState([selected], false);
           }
           handleNativeRangeClick(this._page, e);
           break;
@@ -112,8 +119,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._page.captureSync();
     }
     const { zoom } = this._edgeless.surface.viewport;
-    const deltaX = this._dragLastPos.x - e.raw.clientX;
-    const deltaY = this._dragLastPos.y - e.raw.clientY;
+    const deltaX = this._dragLastPos.x - e.x;
+    const deltaY = this._dragLastPos.y - e.y;
     const boundX = selected.x - deltaX / zoom;
     const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
@@ -124,7 +131,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       w: boundW,
       h: boundH,
     });
-    this._setSingleSelectionState(selected, true);
   }
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {
@@ -137,7 +143,40 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       modelH,
     ]);
     this._page.updateBlock(block, { xywh });
-    this._setSingleSelectionState(block, false);
+  }
+
+  private _isPointInSelectionArea(viewX: number, viewY: number) {
+    const { selected } = this._blockSelectionState;
+    if (!selected.length) {
+      return false;
+    }
+    const commonBound = getCommonBound(
+      selected.map(element => {
+        if (isTopLevelBlock(element)) {
+          const [x, y, w, h] = deserializeXYWH(getXYWH(element));
+          return {
+            x,
+            y,
+            w,
+            h,
+          };
+        }
+        return element;
+      })
+    );
+    const [modelX, modelY] = this._surface.toModelCoord(viewX, viewY);
+    if (commonBound && isPointIn(commonBound, modelX, modelY)) {
+      return true;
+    }
+    return false;
+  }
+
+  private _forceUpdateSelection() {
+    // FIXME: force triggering selection change to re-render selection rect
+    this._blockSelectionState = {
+      ...this._blockSelectionState,
+    };
+    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
   }
 
   onContainerClick(e: SelectionEvent) {
@@ -159,83 +198,71 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragStart(e: SelectionEvent) {
-    const selected = this._pick(e.x, e.y);
-
-    if (selected) {
-      // See https://github.com/toeverything/blocksuite/pull/1484
-      if (this._blockSelectionState.selected.length === 1) {
-        if (this._blockSelectionState.selected[0] !== selected) {
-          this._setNoneSelectionState();
-        }
-      } else {
-        if (isTopLevelBlock(selected)) {
-          this._setSingleSelectionState(selected, true);
-        }
-      }
+    if (this._isPointInSelectionArea(e.x, e.y)) {
+      this._draggingMode = this._blockSelectionState.active
+        ? 'edit'
+        : 'translate';
     } else {
-      this._setNoneSelectionState();
-      this._draggingArea = {
-        start: new DOMPoint(e.x, e.y),
-        end: new DOMPoint(e.x, e.y),
-      };
+      const selected = this._pick(e.x, e.y);
+      if (selected) {
+        this._setSelectionState([selected], false);
+        this._draggingMode = 'translate';
+      } else {
+        this._draggingMode = 'select';
+      }
     }
 
     const [x, y] = [e.raw.clientX, e.raw.clientY];
     this._startRange = caretRangeFromPoint(x, y);
-    this._dragLastPos = { x, y };
+    this._dragStartPos = { x: e.x, y: e.y };
+    this._dragLastPos = { x: e.x, y: e.y };
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    const { blockSelectionState } = this;
-
-    switch (blockSelectionState.selected.length) {
-      case 0:
+    switch (this._draggingMode) {
+      case 'select': {
+        const viewX = Math.min(this._dragStartPos.x, e.x);
+        const viewY = Math.min(this._dragStartPos.y, e.y);
+        const [x, y] = this._surface.toModelCoord(viewX, viewY);
+        const w = Math.abs(this._dragStartPos.x - e.x);
+        const h = Math.abs(this._dragStartPos.y - e.y);
+        const { zoom } = this._surface.viewport;
+        const bound = { x, y, w: w / zoom, h: h / zoom };
+        const elements = this._surface.pickInBound(bound);
+        const blocks = pickInBound(this._blocks, bound);
+        this._setSelectionState([...elements, ...blocks], false);
         break;
-      case 1:
-        if (isSurfaceElement(blockSelectionState.selected[0])) {
-          if (blockSelectionState.active) {
-            this._handleSurfaceDragMove(blockSelectionState.selected[0], e);
+      }
+      case 'translate': {
+        this._blockSelectionState.selected.forEach(element => {
+          if (isSurfaceElement(element)) {
+            this._handleSurfaceDragMove(element, e);
+          } else {
+            this._handleBlockDragMove(element, e);
           }
-          break;
-        }
-
-        // Is inside an active frame, handle regular rich-text editing
-        if (blockSelectionState.active) {
-          // TODO reset if drag out of frame
-          handleNativeRangeDragMove(this._startRange, e);
-          break;
-        }
-
-        // Is frame-dragging over a non-active frame
-        if (this._draggingArea) {
-          noop();
-        }
-        // Is dragging a selected (but not active) frame, move it
-        else {
-          this._handleBlockDragMove(blockSelectionState.selected[0], e);
-        }
+        });
+        this._forceUpdateSelection();
         break;
-    }
-
-    if (this._draggingArea) {
-      this._updateDraggingArea(e.x, e.y);
+      }
+      case 'edit': {
+        // TODO reset if drag out of frame
+        handleNativeRangeDragMove(this._startRange, e);
+        break;
+      }
     }
     this._dragLastPos = {
-      x: e.raw.clientX,
-      y: e.raw.clientY,
+      x: e.x,
+      y: e.y,
     };
   }
 
   onContainerDragEnd(e: SelectionEvent) {
-    const selected = this._pick(e.x, e.y);
-    const isSurfaceEl = isSurfaceElement(selected);
-
     if (this._lock) {
       this._page.captureSync();
       this._lock = false;
     }
 
-    if (this.isActive && !isSurfaceEl) {
+    if (this.isActive) {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
@@ -250,12 +277,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           },
         },
       });
-    } else if (this.blockSelectionState.selected.length === 1) {
-      if (!this._draggingArea) {
-        this._page.captureSync();
-      }
     }
-    this._draggingArea = null;
+    this._draggingMode = null;
+    this._dragStartPos = { x: 0, y: 0 };
+    this._dragLastPos = { x: 0, y: 0 };
+    this._forceUpdateSelection();
   }
 
   onContainerMouseMove(e: SelectionEvent) {
@@ -263,7 +289,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
 
     const shape = this._surface.pickTop(modelX, modelY);
-    const blocks = pick(this._blocks, modelX, modelY);
+    const blocks = pickTop(this._blocks, modelX, modelY);
 
     this._updateHoverState(shape ?? blocks);
     this._edgeless.slots.hoverUpdated.emit();

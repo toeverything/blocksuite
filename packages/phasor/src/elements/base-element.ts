@@ -46,6 +46,8 @@ export abstract class BaseElement implements SurfaceElement {
     options?: HitTestOptions
   ): boolean;
 
+  abstract hitTestBound(bound: IBound, options?: HitTestOptions): boolean;
+
   abstract render(_: CanvasRenderingContext2D): void;
 
   abstract serialize(): Record<string, unknown>;

@@ -1,22 +1,18 @@
-import { PADDING_X, PADDING_Y } from '../utils.js';
-
 export function getCommonRectStyle(
   rect: DOMRect,
-  zoom: number,
-  isSurfaceElement = false,
+  active = false,
   selected = false
 ) {
   return {
     position: 'absolute',
     left: rect.x + 'px',
     top: rect.y + 'px',
-    width: rect.width + (isSurfaceElement ? 0 : PADDING_X) * zoom + 'px',
-    height: rect.height + (isSurfaceElement ? 0 : PADDING_Y) * zoom + 'px',
-    borderRadius: isSurfaceElement ? '0' : `${10 * zoom}px`,
+    width: rect.width + 'px',
+    height: rect.height + 'px',
+    borderRadius: '0',
     pointerEvents: 'none',
     boxSizing: 'border-box',
     zIndex: '1',
-    backgroundColor:
-      isSurfaceElement && selected ? 'var(--affine-selected-color)' : '',
+    backgroundColor: !active && selected ? 'var(--affine-selected-color)' : '',
   };
 }

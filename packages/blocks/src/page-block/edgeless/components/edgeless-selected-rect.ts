@@ -1,9 +1,5 @@
 import { getCommonBound, SurfaceViewport } from '@blocksuite/phasor';
-import {
-  deserializeXYWH,
-  serializeXYWH,
-  SurfaceManager,
-} from '@blocksuite/phasor';
+import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -16,11 +12,11 @@ import {
   getSelectionBoxBound,
   getXYWH,
   isTopLevelBlock,
-  PADDING_X,
-  PADDING_Y,
 } from '../utils.js';
 import { HandleDirection, SelectedHandle } from './selected-handle.js';
 import { getCommonRectStyle } from './utils.js';
+
+type ResizeMode = 'resize' | 'row-resize';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
@@ -41,6 +37,13 @@ export class EdgelessSelectedRect extends LitElement {
 
   @property({ type: Object })
   state!: EdgelessSelectionState;
+
+  get resizeMode(): ResizeMode {
+    const hasBlockElement = this.state.selected.find(elem =>
+      isTopLevelBlock(elem)
+    );
+    return hasBlockElement ? 'row-resize' : 'resize';
+  }
 
   get rect() {
     const { viewport } = this.surface;
@@ -89,65 +92,62 @@ export class EdgelessSelectedRect extends LitElement {
     direction: HandleDirection.Left,
   };
 
-  private _getHandles(rect: DOMRect, isSurfaceElement: boolean) {
-    if (isSurfaceElement) {
-      const leftTop = [rect.x, rect.y];
-      const rightTop = [rect.x + rect.width, rect.y];
-      const leftBottom = [rect.x, rect.y + rect.height];
-      const rightBottom = [rect.x + rect.width, rect.y + rect.height];
-      return html`
-        ${SelectedHandle(
-          leftTop[0],
-          leftTop[1],
-          HandleDirection.LeftTop,
-          this._onHandleMouseDown
-        )}
-        ${SelectedHandle(
-          rightTop[0],
-          rightTop[1],
-          HandleDirection.RightTop,
-          this._onHandleMouseDown
-        )}
-        ${SelectedHandle(
-          leftBottom[0],
-          leftBottom[1],
-          HandleDirection.LeftBottom,
-          this._onHandleMouseDown
-        )}
-        ${SelectedHandle(
-          rightBottom[0],
-          rightBottom[1],
-          HandleDirection.RightBottom,
-          this._onHandleMouseDown
-        )}
-      `;
-    } else {
-      let handles: TemplateResult | null = null;
-      if (this.state.selected.length === 0) return handles;
-      if (!this.state.active) {
-        const leftCenter = [
-          rect.x,
-          rect.y + rect.height / 2 + (PADDING_Y * this.zoom) / 2,
-        ];
-        const rightCenter = [
-          rect.x + rect.width + PADDING_X * this.zoom,
-          rect.y + rect.height / 2 + (PADDING_Y * this.zoom) / 2,
-        ];
-        const handleLeft = SelectedHandle(
-          leftCenter[0],
-          leftCenter[1],
-          HandleDirection.Left,
-          this._onHandleMouseDown
-        );
-        const handleRight = SelectedHandle(
-          rightCenter[0],
-          rightCenter[1],
-          HandleDirection.Right,
-          this._onHandleMouseDown
-        );
-        handles = html` ${handleLeft}${handleRight} `;
+  private _getHandles(rect: DOMRect, resizeMode: ResizeMode) {
+    switch (resizeMode) {
+      case 'resize': {
+        const leftTop = [rect.x, rect.y];
+        const rightTop = [rect.x + rect.width, rect.y];
+        const leftBottom = [rect.x, rect.y + rect.height];
+        const rightBottom = [rect.x + rect.width, rect.y + rect.height];
+        return html`
+          ${SelectedHandle(
+            leftTop[0],
+            leftTop[1],
+            HandleDirection.LeftTop,
+            this._onHandleMouseDown
+          )}
+          ${SelectedHandle(
+            rightTop[0],
+            rightTop[1],
+            HandleDirection.RightTop,
+            this._onHandleMouseDown
+          )}
+          ${SelectedHandle(
+            leftBottom[0],
+            leftBottom[1],
+            HandleDirection.LeftBottom,
+            this._onHandleMouseDown
+          )}
+          ${SelectedHandle(
+            rightBottom[0],
+            rightBottom[1],
+            HandleDirection.RightBottom,
+            this._onHandleMouseDown
+          )}
+        `;
       }
-      return handles;
+      case 'row-resize': {
+        let handles: TemplateResult | null = null;
+        if (this.state.selected.length === 0) return handles;
+        if (!this.state.active) {
+          const leftCenter = [rect.x, rect.y + rect.height / 2];
+          const rightCenter = [rect.x + rect.width, rect.y + rect.height / 2];
+          const handleLeft = SelectedHandle(
+            leftCenter[0],
+            leftCenter[1],
+            HandleDirection.Left,
+            this._onHandleMouseDown
+          );
+          const handleRight = SelectedHandle(
+            rightCenter[0],
+            rightCenter[1],
+            HandleDirection.Right,
+            this._onHandleMouseDown
+          );
+          handles = html` ${handleLeft}${handleRight} `;
+        }
+        return handles;
+      }
     }
   }
 
@@ -291,16 +291,15 @@ export class EdgelessSelectedRect extends LitElement {
 
   render() {
     if (this.state.selected.length === 0) return null;
-
-    const isSurfaceElement = !isTopLevelBlock(this.state.selected[0]);
+    const { active } = this.state;
 
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      ...getCommonRectStyle(this.rect, this.zoom, isSurfaceElement, true),
+      ...getCommonRectStyle(this.rect, active, true),
     };
-    const handlers = this._getHandles(this.rect, isSurfaceElement);
+    const handlers = this._getHandles(this.rect, this.resizeMode);
     return html`
       ${this.page.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

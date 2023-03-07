@@ -1,6 +1,7 @@
 import { getStrokePoints } from 'perfect-freehand';
 
 import type { IBound } from '../../consts.js';
+import { boundsContain } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { Vec } from '../../utils/vec.js';
@@ -45,6 +46,11 @@ export class BrushElement extends BaseElement {
 
   hitTestPoint(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
+  }
+
+  // TODO: intersect
+  hitTestBound(area: IBound, options?: HitTestOptions) {
+    return boundsContain(area, this);
   }
 
   serialize(): Record<string, unknown> {
