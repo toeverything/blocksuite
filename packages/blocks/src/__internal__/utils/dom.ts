@@ -37,6 +37,18 @@ export function isPageOrFrame({ tagName }: Element) {
 
 /**
  * Returns the closest block element by a point in the rect.
+ *
+ * ```
+ * ########### block
+ *     ...
+ *   y - 2 * n
+ *     ...
+ * ----------- cursor
+ *     ...
+ *   y + 2 * n
+ *     ...
+ * ########### block
+ * ```
  */
 export function getClosestBlockElementByPoint(
   point: Point,
