@@ -302,7 +302,7 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshBlockRectCache();
 
-    let hoverEditingState: EditingState | null = null;
+    if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     const blockElement = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
@@ -310,30 +310,29 @@ export class DefaultSelectionManager {
     );
 
     if (blockElement) {
-      hoverEditingState = {
-        model: getModelByBlockElement(blockElement),
-        position: blockElement.getBoundingClientRect(),
+      const model = getModelByBlockElement(blockElement);
+      const position = blockElement.getBoundingClientRect();
+      const hoverEditingState = {
+        model,
+        position,
         element: blockElement as BlockComponentElement,
         index: 0,
       };
-    }
 
-    if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
+      this._container.components.dragHandle?.onContainerMouseMove(
+        e,
+        hoverEditingState
+      );
 
-    this._container.components.dragHandle?.onContainerMouseMove(
-      e,
-      hoverEditingState
-    );
-
-    if (hoverEditingState?.model.type === 'image') {
-      const { position } = hoverEditingState;
-      // when image size is too large, the option popup should show inside
-      if (position.width > 680) {
-        hoverEditingState.position.x = hoverEditingState.position.right - 50;
-      } else {
-        hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      if (model.type === 'image') {
+        // when image size is too large, the option popup should show inside
+        if (position.width > 680) {
+          position.x = position.right - 50;
+        } else {
+          position.x = position.right + 10;
+        }
+        this.slots.embedEditingStateUpdated.emit(hoverEditingState);
       }
-      this.slots.embedEditingStateUpdated.emit(hoverEditingState);
     } else {
       this.slots.embedEditingStateUpdated.emit(null);
     }

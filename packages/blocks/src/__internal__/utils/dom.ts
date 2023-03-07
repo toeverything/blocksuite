@@ -57,8 +57,8 @@ export function getClosestBlockElementByPoint(
         elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
       }
       if (elem) {
-        if (!isPageOrFrame(elem)) return elem;
-        elem = null;
+        if (isPageOrFrame(elem)) elem = null;
+        else return elem;
       }
     }
 
