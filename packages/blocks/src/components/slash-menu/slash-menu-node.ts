@@ -1,5 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -50,25 +50,19 @@ export class SlashMenu extends LitElement {
    */
   private _searchString = '';
 
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposableGroup.add(
-      Slot.fromEvent(window, 'mousedown', this._clickAwayListener)
-    );
-    this._disposableGroup.add(
-      Slot.fromEvent(window, 'keydown', this._keyDownListener, {
-        // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
-        capture: true,
-      })
-    );
-    this._disposableGroup.add(
-      Slot.fromEvent(this, 'mousedown', e => {
-        // Prevent input from losing focus
-        e.preventDefault();
-      })
-    );
+    this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
+    this._disposables.addFromEvent(window, 'keydown', this._keyDownListener, {
+      // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
+      capture: true,
+    });
+    this._disposables.addFromEvent(this, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -78,30 +72,22 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
-    this._disposableGroup.add(
-      Slot.fromEvent(richText, 'keydown', this._keyDownListener, {
-        // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-        capture: true,
-      })
-    );
-    // this._disposableGroup.add(
-    //   Slot.disposableListener(richText, 'focusout', this._clickAwayListener)
-    // );
+    this._disposables.addFromEvent(richText, 'keydown', this._keyDownListener, {
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
+      capture: true,
+    });
+    // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   // Handle click outside
-  private _clickAwayListener = (e: Event) => {
-    // if (e.target === this) {
-    //   return;
-    // }
-    if (!this._hide) {
-      return;
-    }
+  private _onClickAway = (e: Event) => {
+    // if (e.target === this) return;
+    if (!this._hide) return;
     // If the slash menu is hidden, click anywhere will close the slash menu
     this.abortController.abort();
   };

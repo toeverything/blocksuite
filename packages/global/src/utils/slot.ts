@@ -7,41 +7,6 @@ export class Slot<T = void> implements Disposable {
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
 
-  /**
-   * Returns a disposable that will remove the listener
-   */
-  static fromEvent<N extends keyof WindowEventMap>(
-    element: Window,
-    eventName: N,
-    handler: (e: WindowEventMap[N]) => void,
-    options?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static fromEvent<N extends keyof DocumentEventMap>(
-    element: Document,
-    eventName: N,
-    handler: (e: DocumentEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static fromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N,
-    handler: (e: HTMLElementEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static fromEvent(
-    element: HTMLElement | Window | Document,
-    eventName: string,
-    handler: (e: Event) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable {
-    element.addEventListener(eventName, handler, eventOptions);
-    return {
-      dispose: () => {
-        element.removeEventListener(eventName, handler, eventOptions);
-      },
-    };
-  }
-
   filter(testFun: (v: T) => boolean): Slot<T> {
     const result = new Slot<T>();
     // if result is disposed, dispose this too
