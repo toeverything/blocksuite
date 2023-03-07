@@ -418,6 +418,11 @@ export class DefaultPageBlockComponent
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
     });
+
+    this.model.page.slots.blockUpdated.on(() => {
+      // TODO: optimize
+      this.requestUpdate();
+    });
   }
 
   private _initFrameSizeEffect() {
