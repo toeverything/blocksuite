@@ -20,7 +20,7 @@ export class EdgelessToolbar extends LitElement {
   static styles = css`
     :host {
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       bottom: 28px;
       left: calc(50%);
       display: flex;
