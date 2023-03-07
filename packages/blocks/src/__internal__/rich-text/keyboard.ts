@@ -481,10 +481,7 @@ export function createKeyDownHandler(
   const bindingStore: Record<string, KeyboardBinding[]> = {};
 
   const safari = /Apple Computer/.test(navigator.vendor);
-  const ios =
-    safari &&
-    (/Mobile\/\w+/.test(navigator.userAgent) || navigator.maxTouchPoints > 2);
-  const SHORTKEY = ios ? 'metaKey' : 'ctrlKey';
+  const SHORTKEY = safari ? 'metaKey' : 'ctrlKey';
 
   function normalize(binding: KeyboardBinding): KeyboardBinding {
     if (binding.shortKey) {
