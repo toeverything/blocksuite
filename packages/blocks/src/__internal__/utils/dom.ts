@@ -41,7 +41,7 @@ export function getClosestBlockElementByPoint(
 ): Element | null {
   const { y } = point;
 
-  if (point.x > right || y < top || y > bottom) return null;
+  if (y < top || y > bottom) return null;
 
   let elem = null;
   let n = 1;
@@ -53,8 +53,9 @@ export function getClosestBlockElementByPoint(
   do {
     elem = document.elementFromPoint(point.x, point.y);
     if (elem) {
-      if (!elem.hasAttribute(BLOCK_ID_ATTR))
+      if (!elem.hasAttribute(BLOCK_ID_ATTR)) {
         elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
+      }
       if (elem) {
         if (!isPageOrFrame(elem)) return elem;
         elem = null;
