@@ -13,7 +13,7 @@ import type { Point, Rect } from './rect.js';
 const STEPS = 32 / 2 / 2 + 2;
 
 const DRAG_HANDLE_OFFSET_X =
-  DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+  24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 
 /**
  * Returns `16` if node is contained in the parent.
