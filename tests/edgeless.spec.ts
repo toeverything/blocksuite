@@ -184,6 +184,21 @@ test('add shape element', async ({ page }) => {
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
 
+test('change editor mode when brush color palette opening', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await setMouseMode(page, 'brush');
+
+  const brushMenu = page.locator('edgeless-brush-menu');
+  await expect(brushMenu).toBeVisible();
+
+  await switchEditorMode(page);
+  await expect(brushMenu).toBeHidden();
+});
+
 test('add brush element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
