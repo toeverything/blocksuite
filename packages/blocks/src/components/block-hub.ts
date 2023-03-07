@@ -14,7 +14,6 @@ import {
   assertExists,
   DisposableGroup,
   isFirefox,
-  Slot,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';

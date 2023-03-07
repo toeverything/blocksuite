@@ -82,7 +82,7 @@ export class DefaultSelectionManager {
     this._container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
-    this._disposables.addFromEvent(
+    this._disposables.add(
       initMouseEventHandlers(
         mouseRoot,
         this._onContainerDragStart,
