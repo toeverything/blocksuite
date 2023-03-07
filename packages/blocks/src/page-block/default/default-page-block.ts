@@ -176,7 +176,6 @@ export class DefaultPageBlockComponent
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
     });
-    this._titleVEditor.setReadonly(this.page.readonly);
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -445,9 +444,9 @@ export class DefaultPageBlockComponent
   }
 
   firstUpdated() {
-    const { page, selection, slots } = this;
+    const { page, selection } = this;
 
-    bindHotkeys(page, selection, slots);
+    bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
     this._initSlotEffects();
