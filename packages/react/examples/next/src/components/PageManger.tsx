@@ -1,4 +1,3 @@
-import { ContentParser } from '@blocksuite/blocks';
 import { type EditorProps, useBlockSuiteStore } from '@blocksuite/react';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import dynamic from 'next/dynamic';
@@ -97,7 +96,7 @@ export const PageManger = () => {
       <Box css={{ bg: 'white' }}>
         <Editor
           page={() => currentPage}
-          onInit={async page => {
+          onInit={async (page, editor) => {
             const pageBlockId = page.addBlockByFlavour('affine:page', {
               title: new page.Text('Welcome to BlockSuite React example'),
             });
@@ -108,8 +107,7 @@ export const PageManger = () => {
               pageBlockId
             );
             // Import preset markdown content inside frame block
-            const contentParser = new ContentParser(page);
-            await contentParser.importMarkdown(presetMarkdown, frameId);
+            await editor.contentParser.importMarkdown(presetMarkdown, frameId);
             page.resetHistory();
           }}
         />

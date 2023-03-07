@@ -1,4 +1,4 @@
-import type { BlockModelProps } from '@blocksuite/global/types.js';
+import type { BlockModelProps } from '@blocksuite/global/types';
 import type { ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
