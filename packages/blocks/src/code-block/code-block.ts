@@ -3,10 +3,11 @@ import './components/lang-list.js';
 import './components/code-option.js';
 import '../components/portal.js';
 
-import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { ArrowDownIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, PropertyValues } from 'lit';
+import { css, html, PropertyValues, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { getHighlighter, Highlighter, Lang } from 'shiki';
 
 import {
@@ -88,18 +89,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    #line-number {
+    #line-numbers {
       position: absolute;
       text-align: right;
-      top: 5.4px;
+      left: 20px;
       line-height: var(--affine-line-height);
       color: var(--affine-line-number-color);
     }
 
     .affine-code-block-container .rich-text-container {
-      left: 40px;
+      position: relative;
       border-radius: 5px;
-      padding: 2px 12px 2px 28px;
+      padding: 4px 12px 4px 60px;
     }
 
     .affine-code-block-container .virgo-editor {
@@ -108,19 +109,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
       overflow-x: auto;
     }
 
-    .affine-code-block-container v-line {
-      display: inline;
-    }
-
-    .affine-code-block-container v-line > div {
-      display: inline;
-    }
-    .affine-code-block-container affine-code-line span {
-      white-space: nowrap;
-    }
-
     .affine-code-block-container affine-code-line span v-text {
-      display: inline-block;
+      display: inline;
     }
 
     .affine-code-block-container v-line {
@@ -128,22 +118,27 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container v-line > div {
-      display: inline;
+      display: inline-block;
     }
+
     .affine-code-block-container affine-code-line span {
       white-space: nowrap;
     }
 
-    .affine-code-block-container affine-code-line span v-text {
-      display: inline-block;
+    .affine-code-block-container.wrap v-line {
+      display: block;
     }
 
-    .affine-code-block-container .ql-syntax::-webkit-scrollbar {
+    .affine-code-block-container.wrap v-line > div {
+      display: block;
+    }
+
+    .affine-code-block-container.wrap affine-code-line span {
+      white-space: break-spaces;
+    }
+
+    .affine-code-block-container .virgo-editor::-webkit-scrollbar {
       display: none;
-    }
-
-    .affine-code-block-container .wrap {
-      white-space: pre-wrap;
     }
 
     .code-block-option {
@@ -195,6 +190,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       theme: 'github-light',
       langs,
       paths: {
+        // TODO: use local path
         wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
         themes: 'https://cdn.jsdelivr.net/npm/shiki/themes',
         languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
@@ -257,11 +253,9 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _onClickWrapBtn() {
-    const syntaxElem = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${this.model.id}"] .virgo-editor`
-    );
-    assertExists(syntaxElem);
-    this._wrap = syntaxElem.classList.toggle('wrap');
+    const container = this.querySelector('.affine-code-block-container');
+    assertExists(container);
+    this._wrap = container.classList.toggle('wrap');
   }
 
   protected firstUpdated() {
@@ -337,6 +331,49 @@ export class CodeBlockComponent extends NonShadowLitElement {
     ></affine-portal>`;
   }
 
+  private _updateLineNumbers() {
+    const lineNumbersContainer = this.querySelector(
+      '#line-numbers'
+    ) as HTMLElement;
+    const richTextContainer = this.querySelector('.rich-text-container');
+    assertExists(lineNumbersContainer);
+    assertExists(richTextContainer);
+
+    const richTextRect = richTextContainer.getBoundingClientRect();
+
+    const lines = Array.from(this.querySelectorAll('v-line')).map(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      line => line.querySelector('v-text span')!
+    );
+    const lineNumbers = [];
+    for (const [index, line] of lines.entries()) {
+      const rect = line.getBoundingClientRect();
+      const top = rect.top - richTextRect.top;
+      const height = rect.height;
+
+      lineNumbers.push(html`<div
+        style="${styleMap({
+          top: `${top}px`,
+          height: `${height}px`,
+          position: 'absolute',
+          display: 'flex',
+        })}"
+      >
+        <span
+          style="${styleMap({
+            position: 'absolute',
+            top: '-2px',
+            height: '1em',
+            lineHeight: '1em',
+          })}"
+          >${index + 1}</span
+        >
+      </div>`);
+    }
+
+    render(lineNumbers, lineNumbersContainer);
+  }
+
   render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
@@ -344,9 +381,14 @@ export class CodeBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
+    setTimeout(() => {
+      this._updateLineNumbers();
+    });
+
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
+          <div id="line-numbers"></div>
           <rich-text
             .host=${this.host}
             .model=${this.model}
@@ -355,7 +397,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
               highlighter: this._highlighter,
             })}
           >
-            <div id="line-number"></div>
           </rich-text>
         </div>
         ${childrenContainer}
