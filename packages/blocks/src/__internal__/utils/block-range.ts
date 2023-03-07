@@ -39,6 +39,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
     const pageBlock = getDefaultPageBlock(page.root);
     if (pageBlock.selection) {
       const selectedBlocks = pageBlock.selection.state.selectedBlocks;
+      // Add embeds block to fix click image and delete case
       const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
       // Fix order may be wrong
       const models = [...selectedBlocks, ...selectedEmbeds]
@@ -147,7 +148,7 @@ export function restoreSelection(blockRange: BlockRange) {
       // In the edgeless mode
       return;
     }
-    defaultPageBlock.selection.state.clearBlock();
+    defaultPageBlock.selection.state.clearBlockSelection();
     defaultPageBlock.selection.state.type = 'native';
     return;
   }

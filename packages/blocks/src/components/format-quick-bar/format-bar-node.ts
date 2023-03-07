@@ -6,18 +6,13 @@ import {
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import {
-  BaseBlockModel,
-  DisposableGroup,
-  Page,
-  Signal,
-} from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
@@ -46,10 +41,10 @@ export class FormatQuickBar extends LitElement {
 
   // Sometimes the quick bar need to update position
   @property()
-  positionUpdated = new Signal();
+  positionUpdated = new Slot();
 
-  @state()
-  private _models: BaseBlockModel[] = [];
+  @property()
+  models: BaseBlockModel[] = [];
 
   @state()
   private _paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
@@ -71,16 +66,12 @@ export class FormatQuickBar extends LitElement {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't get current block range");
-    }
-    this._models = blockRange.models;
-    const startModel = this._models[0];
+
+    const startModel = this.models[0];
     this._paragraphType = `${startModel.flavour}/${startModel.type}`;
     this._format = getCurrentCombinedFormat(this.page);
 
@@ -98,7 +89,7 @@ export class FormatQuickBar extends LitElement {
       }
       this._format = getCurrentCombinedFormat(this.page);
     });
-    this._models.forEach(model => {
+    this.models.forEach(model => {
       const richText = getRichTextByModel(model);
       if (!richText) {
         console.warn(
@@ -115,14 +106,12 @@ export class FormatQuickBar extends LitElement {
         subtree: true,
       });
     });
-    this._disposableGroup.add(() => {
-      mutationObserver.disconnect();
-    });
+    this._disposables.add(() => mutationObserver.disconnect());
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   private _onHover() {
@@ -178,7 +167,26 @@ export class FormatQuickBar extends LitElement {
       const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
       const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
       const targetType = alreadyTargetType ? defaultType : type;
-      this._models = updateBlockType(this._models, targetFlavour, targetType);
+      const newModels = updateBlockType(this.models, targetFlavour, targetType);
+
+      // Reset selection if the target is code block
+      if (targetFlavour === 'affine:code') {
+        if (newModels.length !== 1) {
+          throw new Error(
+            "Failed to reset selection! New model length isn't 1"
+          );
+        }
+        const codeModel = newModels[0];
+        requestAnimationFrame(() =>
+          restoreSelection({
+            type: 'Block',
+            startOffset: 0,
+            endOffset: codeModel.text?.length ?? 0,
+            models: [codeModel],
+          })
+        );
+      }
+      this.models = newModels;
       this._paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
@@ -206,10 +214,10 @@ export class FormatQuickBar extends LitElement {
   override render() {
     const page = this.page;
 
-    if (!this._models.length || !page) {
+    if (!this.models.length || !page) {
       console.error(
-        'Failed to render format-quick-bar! page not found!',
-        this._models,
+        'Failed to render format-quick-bar! no model or page not found!',
+        this.models,
         page
       );
       return html``;
@@ -229,7 +237,7 @@ export class FormatQuickBar extends LitElement {
 
     const paragraphPanel = this._paragraphPanelTemplate();
     const formatItems = formatConfig
-      .filter(({ showWhen = () => true }) => showWhen(this._models))
+      .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"

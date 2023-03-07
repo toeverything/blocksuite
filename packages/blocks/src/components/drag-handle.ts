@@ -32,9 +32,10 @@ export class DragIndicator extends LitElement {
     .affine-drag-indicator {
       position: fixed;
       height: 3px;
+      top: 0;
+      left: 0;
       background: var(--affine-primary-color);
-      transition: top, left 300ms, 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
-        transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     }
   `;
 
@@ -51,13 +52,13 @@ export class DragIndicator extends LitElement {
     const rect = this.targetRect;
     const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
+    const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
     return html`
       <div
         class="affine-drag-indicator"
         style=${styleMap({
           width: `${rect.width + 10}px`,
-          left: `${rect.left}px`,
-          top: `${distanceToTop < distanceToBottom ? rect.top : rect.bottom}px`,
+          transform: `translate(${rect.left}px, ${offsetY}px)`,
         })}
       ></div>
     `;
@@ -66,15 +67,15 @@ export class DragIndicator extends LitElement {
 
 export type DragHandleGetModelStateCallback = (
   blocks: BaseBlockModel[],
-  pageX: number,
-  pageY: number,
+  clientX: number,
+  clientY: number,
   skipX?: boolean
 ) => EditingState | null;
 
 export type DragHandleGetModelStateWithCursorCallback = (
   blocks: BaseBlockModel[],
-  pageX: number,
-  pageY: number,
+  clientX: number,
+  clientY: number,
   cursor: number,
   size?: number,
   skipX?: boolean,
@@ -186,8 +187,8 @@ export class DragHandle extends LitElement {
     return this._draggingElements?.map(e => e.model.id) ?? null;
   }
 
-  private _currentPageX = 0;
-  private _currentPageY = 0;
+  private _currentClientX = 0;
+  private _currentClientY = 0;
 
   /**
    * Current drag handle model state
@@ -216,8 +217,8 @@ export class DragHandle extends LitElement {
     }
     const modelState = this._getBlockEditingStateByPosition(
       this.getDropAllowedBlocks(null),
-      event.raw.pageX,
-      event.raw.pageY,
+      event.raw.clientX,
+      event.raw.clientY,
       true
     );
     if (modelState) {
@@ -234,26 +235,33 @@ export class DragHandle extends LitElement {
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
+      this.style.left = '0';
+      this.style.top = '0';
       const containerRect = this._container.getBoundingClientRect();
-      this.style.left = `${
+
+      const xOffset =
         rect.left -
         containerRect.left -
         DRAG_HANDLE_WIDTH -
-        DRAG_HANDLE_OFFSET_LEFT
-      }px`;
-      this.style.top = `${rect.top - containerRect.top}px`;
+        DRAG_HANDLE_OFFSET_LEFT;
+
+      const yOffset = rect.top - containerRect.top;
+
+      this.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
       this.style.opacity = `${(
         1 -
-        (event.raw.pageX - rect.left) / rect.width
+        (event.raw.clientX - rect.left) / rect.width
       ).toFixed(2)}`;
-      const top = Math.max(
+
+      const handleYOffset = Math.max(
         0,
         Math.min(
-          event.raw.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+          event.raw.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
           rect.height - DRAG_HANDLE_HEIGHT
         )
       );
-      this._dragHandle.style.top = `${top}px`;
+
+      this._dragHandle.style.transform = `translateY(${handleYOffset}px)`;
     }
   }
 
@@ -337,9 +345,10 @@ export class DragHandle extends LitElement {
 
   private _onMouseMoveOnHost(e: MouseEvent) {
     if (isFirefox) {
-      this._currentPageX = e.pageX;
-      this._currentPageY = e.pageY;
+      this._currentClientX = e.clientX;
+      this._currentClientY = e.clientY;
     }
+
     if (!this._handleAnchorState) {
       return;
     }
@@ -347,13 +356,13 @@ export class DragHandle extends LitElement {
     const top = Math.max(
       0,
       Math.min(
-        e.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+        e.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
         rect.height - DRAG_HANDLE_HEIGHT - 6
       )
     );
 
     this._dragHandle.style.cursor = 'grab';
-    this._dragHandle.style.top = `${top}px`;
+    this._dragHandle.style.transform = `translateY(${top}px)`;
     e.stopPropagation();
   }
 
@@ -387,8 +396,8 @@ export class DragHandle extends LitElement {
   private _onClick = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
       this.getDropAllowedBlocks(null),
-      e.pageX,
-      e.pageY,
+      e.clientX,
+      e.clientY,
       true
     );
     if (clickDragState) {
@@ -409,15 +418,15 @@ export class DragHandle extends LitElement {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
-    this._currentPageX = e.pageX;
-    this._currentPageY = e.pageY;
+    this._currentClientX = e.clientX;
+    this._currentClientY = e.clientY;
   };
 
   private _onDragStart = (e: DragEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
       this.getDropAllowedBlocks(null),
-      e.pageX,
-      e.pageY,
+      e.clientX,
+      e.clientY,
       true
     );
 
@@ -449,13 +458,13 @@ export class DragHandle extends LitElement {
 
   private _onDrag = (e: DragEvent) => {
     this._dragHandle.style.cursor = 'grabbing';
-    let x = e.pageX;
-    let y = e.pageY;
+    let x = e.clientX;
+    let y = e.clientY;
     if (isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
-      x = this._currentPageX;
-      y = this._currentPageY;
+      x = this._currentClientX;
+      y = this._currentClientY;
     }
     if (this._cursor === null || !this._indicator) {
       return;
@@ -506,6 +515,10 @@ export class DragHandle extends LitElement {
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
           /* padding-top: 5px !important; FIXME */
+        }
+
+        .affine-drag-handle {
+          position: absolute;
         }
       </style>
       <div class="affine-drag-handle-line"></div>

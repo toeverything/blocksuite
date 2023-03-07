@@ -10,8 +10,10 @@ import {
 } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
+import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { initWheelEventHandlers } from './utils.js';
 
@@ -45,95 +47,20 @@ export interface SelectionArea {
   end: DOMPoint;
 }
 
-const MIN_ZOOM = 0.3;
-
-export class ViewportState {
-  private _width = 0;
-  private _height = 0;
-  private _zoom = 1.0;
-  private _centerX = 0.0;
-  private _centerY = 0.0;
-
-  get zoom() {
-    return this._zoom;
-  }
-
-  get centerX() {
-    return this._centerX;
-  }
-
-  get centerY() {
-    return this._centerY;
-  }
-
-  get viewportX() {
-    return this._centerX - this._width / 2 / this._zoom;
-  }
-
-  get viewportY() {
-    return this._centerY - this._height / 2 / this._zoom;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get height() {
-    return this._height;
-  }
-
-  toModelCoord(viewX: number, viewY: number): [number, number] {
-    return [
-      this.viewportX + viewX / this._zoom,
-      this.viewportY + viewY / this._zoom,
-    ];
-  }
-
-  toViewCoord(modelX: number, modelY: number): [number, number] {
-    return [
-      (modelX - this.viewportX) * this._zoom,
-      (modelY - this.viewportY) * this._zoom,
-    ];
-  }
-
-  setSize(width: number, height: number) {
-    this._width = width;
-    this._height = height;
-  }
-
-  setZoom(val: number) {
-    this._zoom = val;
-  }
-
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
-    this.setZoom(newZoom);
-  }
-
-  applyDeltaCenter(deltaX: number, deltaY: number) {
-    this._centerX += deltaX;
-    this._centerY += deltaY;
-  }
-
-  setCenter(centerX: number, centerY: number) {
-    this._centerX = centerX;
-    this._centerY = centerY;
-  }
-}
-
 export class EdgelessSelectionManager {
   readonly page: Page;
 
   private _mouseMode: MouseMode = {
     type: 'default',
   };
+  private _lastMouseMode: MouseMode | null = null;
+
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
-  private _mouseDisposeCallback: () => void;
+  private _mouseDisposeCallback: () => void = noop;
   private _selectionUpdateCallback: Disposable;
-  private _wheelDisposeCallback: () => void;
+  private _wheelDisposeCallback: () => void = noop;
 
   private _prevSelectedShapeId: string | null = null;
 
@@ -146,9 +73,15 @@ export class EdgelessSelectionManager {
   }
 
   set mouseMode(mode: MouseMode) {
+    const currentMouseMode = this._mouseMode;
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._lastMouseMode = currentMouseMode;
+  }
+
+  get lastMouseMode(): MouseMode | null {
+    return this._lastMouseMode;
   }
 
   get blockSelectionState() {
@@ -168,10 +101,10 @@ export class EdgelessSelectionManager {
     return false;
   }
 
-  get frameSelectionRect() {
-    if (!this.currentController.frameSelectionState) return null;
+  get draggingArea() {
+    if (!this.currentController.draggingArea) return null;
 
-    const { start, end } = this.currentController.frameSelectionState;
+    const { start, end } = this.currentController.draggingArea;
     const minX = Math.min(start.x, end.x);
     const minY = Math.min(start.y, end.y);
     const maxX = Math.max(start.x, end.x);
@@ -185,21 +118,12 @@ export class EdgelessSelectionManager {
     this._controllers = {
       default: new DefaultModeController(this._container),
       shape: new ShapeModeController(this._container),
+      brush: new BrushModeController(this._container),
+      pan: new PanModeController(this._container),
     };
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._container,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu,
-      noop,
-      this._onSelectionChangeWithoutDebounce
-    );
-    this._selectionUpdateCallback = this._container.signals.updateSelection.on(
+
+    this._initMouseAndWheelEvents();
+    this._selectionUpdateCallback = this._container.slots.updateSelection.on(
       state => {
         if (this._prevSelectedShapeId) {
           /*
@@ -223,23 +147,44 @@ export class EdgelessSelectionManager {
         }
       }
     );
-    this._wheelDisposeCallback = initWheelEventHandlers(container);
+  }
+
+  private async _initMouseAndWheelEvents() {
+    // due to surface initializing after one frame, the events handler should register after that.
+    if (!this._container.surface) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    this._mouseDisposeCallback = initMouseEventHandlers(
+      this._container,
+      this._onContainerDragStart,
+      this._onContainerDragMove,
+      this._onContainerDragEnd,
+      this._onContainerClick,
+      this._onContainerDblClick,
+      this._onContainerMouseMove,
+      this._onContainerMouseOut,
+      this._onContainerContextMenu,
+      noop,
+      this._onSelectionChangeWithoutDebounce
+    );
+
+    this._wheelDisposeCallback = initWheelEventHandlers(this._container);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.page.readonly) return;
 
     return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.page.readonly) return;
 
     return this.currentController.onContainerDragMove(e);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this._container.readonly) return;
+    if (this.page.readonly) return;
 
     return this.currentController.onContainerDragEnd(e);
   };
@@ -248,8 +193,8 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncSelectionRect() {
-    return this.currentController.syncSelectionRect();
+  syncDraggingArea() {
+    return this.currentController.syncDraggingArea();
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

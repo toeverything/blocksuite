@@ -29,7 +29,7 @@ export class SimpleAffineEditor extends NonShadowLitElement {
   // Subscribe for page update and create editor after page loaded.
   private _subscribePage() {
     const { workspace } = this;
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.slots.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
       this.page = page;
 

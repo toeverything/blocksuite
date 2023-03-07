@@ -58,11 +58,25 @@ export type DefaultMouseMode = {
 
 export type ShapeMouseMode = {
   type: 'shape';
-  shape: ShapeType;
+  shape: ShapeType | 'roundedRect';
   color: `#${string}`;
 };
 
-export type MouseMode = DefaultMouseMode | ShapeMouseMode;
+export type BrushMouseMode = {
+  type: 'brush';
+  color: `#${string}`;
+  lineWidth: number;
+};
+
+export type PanMouseMode = {
+  type: 'pan';
+};
+
+export type MouseMode =
+  | DefaultMouseMode
+  | ShapeMouseMode
+  | BrushMouseMode
+  | PanMouseMode;
 
 export type OpenBlockInfo = {
   flavour: keyof BlockModelProps;

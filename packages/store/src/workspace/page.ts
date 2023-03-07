@@ -1,7 +1,7 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
@@ -62,13 +62,13 @@ export class Page extends Space<PageData> {
     Object.keys(new BaseBlockModel(this, { id: null! }))
   );
 
-  readonly signals = {
-    historyUpdated: new Signal(),
-    rootAdded: new Signal<BaseBlockModel | BaseBlockModel[]>(),
-    rootDeleted: new Signal<string | string[]>(),
-    textUpdated: new Signal<Y.YTextEvent>(),
-    yUpdated: new Signal(),
-    blockUpdated: new Signal<{
+  readonly slots = {
+    historyUpdated: new Slot(),
+    rootAdded: new Slot<BaseBlockModel | BaseBlockModel[]>(),
+    rootDeleted: new Slot<string | string[]>(),
+    textUpdated: new Slot<Y.YTextEvent>(),
+    yUpdated: new Slot(),
+    blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
@@ -84,6 +84,10 @@ export class Page extends Space<PageData> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+  }
+
+  get readonly() {
+    return this.awarenessStore.isReadonly(this);
   }
 
   get history() {
@@ -148,14 +152,14 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       return false;
     }
     return this._history.canUndo();
   }
 
   get canRedo() {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       return false;
     }
     return this._history.canRedo();
@@ -170,7 +174,7 @@ export class Page extends Space<PageData> {
   }
 
   undo = () => {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -178,7 +182,7 @@ export class Page extends Space<PageData> {
   };
 
   redo = () => {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -383,7 +387,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       throw new Error('cannot modify data in readonly mode');
     }
     if (!flavour) {
@@ -433,7 +437,7 @@ export class Page extends Space<PageData> {
       }
     });
 
-    this.signals.blockUpdated.emit({
+    this.slots.blockUpdated.emit({
       type: 'add',
       id,
     });
@@ -458,7 +462,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -472,7 +476,7 @@ export class Page extends Space<PageData> {
     targetModel: BaseBlockModel,
     top = true
   ) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -514,7 +518,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -542,7 +546,7 @@ export class Page extends Space<PageData> {
       syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
 
-    this.signals.blockUpdated.emit({
+    this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
     });
@@ -589,7 +593,7 @@ export class Page extends Space<PageData> {
   }
 
   deleteBlockById(id: string) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -606,7 +610,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: false,
     }
   ) {
-    if (this.awarenessStore.isReadonly(this)) {
+    if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -644,7 +648,7 @@ export class Page extends Space<PageData> {
       }
     });
 
-    this.signals.blockUpdated.emit({
+    this.slots.blockUpdated.emit({
       type: 'delete',
       id: model.id,
     });
@@ -692,12 +696,12 @@ export class Page extends Space<PageData> {
   }
 
   dispose() {
-    this.signals.historyUpdated.dispose();
-    this.signals.rootAdded.dispose();
-    this.signals.rootDeleted.dispose();
-    this.signals.textUpdated.dispose();
-    this.signals.yUpdated.dispose();
-    this.signals.blockUpdated.dispose();
+    this.slots.historyUpdated.dispose();
+    this.slots.rootAdded.dispose();
+    this.slots.rootDeleted.dispose();
+    this.slots.textUpdated.dispose();
+    this.slots.yUpdated.dispose();
+    this.slots.blockUpdated.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -755,7 +759,7 @@ export class Page extends Space<PageData> {
   };
 
   private _historyObserver = () => {
-    this.signals.historyUpdated.emit();
+    this.slots.historyUpdated.emit();
   };
 
   private _createBlockModel(props: Omit<BlockProps, 'children'>) {
@@ -844,10 +848,10 @@ export class Page extends Space<PageData> {
 
     if (isRoot) {
       this._root = model;
-      this.signals.rootAdded.emit(model);
+      this.slots.rootAdded.emit(model);
     } else if (isSurface) {
       this._root = [this.root as BaseBlockModel, model];
-      this.signals.rootAdded.emit(this._root);
+      this.slots.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
       const index = parent?.childMap.get(model.id);
@@ -861,7 +865,7 @@ export class Page extends Space<PageData> {
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
     if (model === this._root) {
-      this.signals.rootDeleted.emit(id);
+      this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event
     }
@@ -943,7 +947,7 @@ export class Page extends Space<PageData> {
     // event on single block
     else if (event.target.parent === this._yBlocks) {
       if (event instanceof Y.YTextEvent) {
-        this.signals.textUpdated.emit(event);
+        this.slots.textUpdated.emit(event);
       } else if (event instanceof Y.YMapEvent) {
         this._handleYBlockUpdate(event);
       }
@@ -988,7 +992,7 @@ export class Page extends Space<PageData> {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.signals.yUpdated.emit();
+    this.slots.yUpdated.emit();
   };
 
   private _handleVersion() {

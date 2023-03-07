@@ -89,7 +89,7 @@ export class RichText extends NonShadowLitElement {
 
   quill!: QuillType;
 
-  @property({ hasChanged: () => true })
+  @property()
   host!: BlockHost;
 
   @property()
@@ -218,13 +218,18 @@ export class RichText extends NonShadowLitElement {
     }
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
-    this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
+    this.quill?.root.setAttribute(
+      'contenteditable',
+      `${!this.model.page.readonly}`
+    );
   }
 
   render() {
-    return html`<div class="affine-rich-text quill-container ql-container">
-      <slot></slot>
-    </div>`;
+    return html`
+      <div class="affine-rich-text quill-container ql-container">
+        <slot></slot>
+      </div>
+    `;
   }
 }
 

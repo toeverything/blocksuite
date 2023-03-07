@@ -16,7 +16,6 @@ import {
   createEvent,
   type FrameBlockModel,
   getCurrentBlockRange,
-  MouseMode,
   NonShadowLitElement,
   updateBlockType,
 } from '@blocksuite/blocks';
@@ -72,9 +71,6 @@ export class DebugMenu extends NonShadowLitElement {
   mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _mouseModeType: MouseMode['type'] = 'default';
-
-  @state()
   private _showGrid = false;
 
   @property()
@@ -88,20 +84,6 @@ export class DebugMenu extends NonShadowLitElement {
 
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
-
-  get mouseMode(): MouseMode {
-    if (this._mouseModeType === 'default') {
-      return {
-        type: this._mouseModeType,
-      };
-    } else {
-      return {
-        type: this._mouseModeType,
-        color: '#000000',
-        shape: 'rect',
-      };
-    }
-  }
 
   get page() {
     return this.editor.page;
@@ -131,10 +113,7 @@ export class DebugMenu extends NonShadowLitElement {
     }
   }
 
-  private _convertToList(
-    e: PointerEvent,
-    listType: 'bulleted' | 'numbered' | 'todo'
-  ) {
+  private _convertToList(e: PointerEvent, listType: ListType) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
     const blockRange = getCurrentBlockRange(this.page);
@@ -230,22 +209,8 @@ export class DebugMenu extends NonShadowLitElement {
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
-  private _setReadonlyOthers() {
-    const clients = [...this.page.awarenessStore.getStates().keys()].filter(
-      id => id !== this.page.workspace.doc.clientID
-    );
-    if (this.page.awarenessStore.getFlag('enable_set_remote_flag')) {
-      clients.forEach(id => {
-        this.page.awarenessStore.setRemoteFlag(id, 'readonly', {
-          ...(this.page.awarenessStore.getFlag('readonly') ?? {}),
-          [this.page.prefixedId]: true,
-        });
-      });
-    }
-  }
-
   firstUpdated() {
-    this.page.signals.historyUpdated.on(() => {
+    this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
@@ -273,25 +238,33 @@ export class DebugMenu extends NonShadowLitElement {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (
-      changedProperties.has('mouseModeType') ||
-      changedProperties.has('shapeModeColor') ||
-      changedProperties.has('shapeModeShape')
-    ) {
-      const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
-      window.dispatchEvent(event);
-    }
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
     }
-    if (changedProperties.has('showGrid')) {
+    if (changedProperties.has('_showGrid')) {
       window.dispatchEvent(
         createEvent('affine:switch-edgeless-display-mode', this._showGrid)
       );
     }
-    if (changedProperties.has('hasOffset')) {
-      document.body.style.margin = this._hasOffset ? '60px 0 0 40px' : '0';
+    if (changedProperties.has('_hasOffset')) {
+      const appRoot = document.getElementById('app');
+      if (!appRoot) return;
+      const style: Partial<CSSStyleDeclaration> = this._hasOffset
+        ? {
+            margin: '60px 40px 240px 40px',
+            overflow: 'auto',
+            height: '400px',
+            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
+          }
+        : {
+            margin: '0',
+            overflow: 'initial',
+            // edgeless needs the container height
+            height: '100%',
+            boxShadow: 'initial',
+          };
+      Object.assign(appRoot.style, style);
     }
     super.update(changedProperties);
   }
@@ -427,6 +400,11 @@ export class DebugMenu extends NonShadowLitElement {
               >
                 Todo List
               </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+              >
+                Toggle List
+              </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item
                 @click=${(e: PointerEvent) => this._addCodeBlock(e)}
@@ -446,9 +424,6 @@ export class DebugMenu extends NonShadowLitElement {
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
-              <sl-menu-item @click=${this._setReadonlyOthers}>
-                Set Others Readonly
-              </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>

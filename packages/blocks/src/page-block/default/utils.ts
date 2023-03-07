@@ -1,6 +1,5 @@
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
   DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
@@ -19,10 +18,7 @@ import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import type {
-  CodeBlockOption,
-  DefaultPageBlockComponent,
-} from './default-page-block.js';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -133,12 +129,22 @@ function binarySearchBlockEditingState(
     containerLeft = firstBlock.blockRect.left;
   }
 
+  let inside = false;
   while (start <= end) {
     const mid = start + Math.floor((end - start) / 2);
     const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
       blocks,
       mid
     );
+
+    // if the detectRect is not in the view port, it's definitely not the block we want
+    if (detectRect.top > window.innerHeight) {
+      end = mid - 1;
+      continue;
+    } else if (detectRect.bottom < 0) {
+      start = mid + 1;
+      continue;
+    }
 
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
@@ -182,7 +188,7 @@ function binarySearchBlockEditingState(
       }
     }
 
-    const inside = y >= detectRect.top && y <= detectRect.bottom;
+    !inside && (inside = y >= detectRect.top && y <= detectRect.bottom);
 
     if (inside) {
       assertExists(blockRect);
@@ -239,6 +245,33 @@ function binarySearchBlockEditingState(
     } else if (detectRect.bottom < y) {
       start = mid + 1;
     }
+
+    // if search failed, it may be caused by the mouse fall between two blocks
+    if (start > end) {
+      let targetIndex = -1;
+      // now start = end + 1, eg: [0, 1, ..., end start ..., blocks.length - 1]
+      if (start === blocks.length) {
+        targetIndex = end;
+      } else if (end === -1) {
+        targetIndex = start;
+      } else {
+        const { detectRect: prevDetectRect } = getBlockAndRect(blocks, end);
+        const { detectRect: nextDetectRect } = getBlockAndRect(blocks, start);
+        if (
+          y <
+          prevDetectRect.bottom +
+            (nextDetectRect.top - prevDetectRect.bottom) / 2
+        ) {
+          // nearer to prevDetectRect
+          targetIndex = end;
+        } else {
+          // nearer to nextDetectRect
+          targetIndex = start;
+        }
+      }
+      inside = true;
+      start = end = targetIndex;
+    }
   }
 
   return null;
@@ -248,9 +281,20 @@ function isPointIn(x: number, detectRect: DOMRect) {
   return x >= detectRect.left && x <= detectRect.left + detectRect.width;
 }
 
+const offscreen = document.createElement(
+  'div'
+) as unknown as BlockComponentElement;
+
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
-  const hoverDom = getBlockById(block.id);
+  let hoverDom = getBlockById(block.id);
+
+  // Give an empty position (xywh=0,0,0,0) for invisible blocks.
+  // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
+  if (!hoverDom) {
+    hoverDom = offscreen;
+  }
+
   assertExists(hoverDom);
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
@@ -287,22 +331,50 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
 
 export async function downloadImage(model: BaseBlockModel) {
   const imgSrc = await getUrlByModel(model);
-  const image = new Image();
-  imgSrc && (image.src = imgSrc);
-  image.setAttribute('crossOrigin', 'anonymous');
-  image.onload = function () {
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    context && context.drawImage(image, 0, 0, image.width, image.height);
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    const event = new MouseEvent('click');
-    a.download = 'image';
-    a.href = url;
-    a.dispatchEvent(event);
-  };
+  if (!imgSrc) {
+    return;
+  }
+  const arrayBuffer = await (await fetch(imgSrc)).arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+  let fileType: string;
+  if (
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x38
+  ) {
+    fileType = 'image/gif';
+  } else if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    fileType = 'image/png';
+  } else if (
+    buffer[0] === 0xff &&
+    buffer[1] === 0xd8 &&
+    buffer[2] === 0xff &&
+    buffer[3] === 0xe0
+  ) {
+    fileType = 'image/jpeg';
+  } else {
+    // unknown, fallback to png
+    console.error('unknown image type');
+    fileType = 'image/png';
+  }
+  const downloadUrl = URL.createObjectURL(
+    new Blob([arrayBuffer], { type: fileType })
+  );
+  const a = document.createElement('a');
+  const event = new MouseEvent('click');
+  a.download = 'image';
+  a.href = downloadUrl;
+  a.dispatchEvent(event);
+
+  // cleanup
+  a.remove();
+  URL.revokeObjectURL(downloadUrl);
 }
 
 export async function copyImage(model: EmbedBlockModel) {
@@ -412,27 +484,11 @@ export function copyCode(codeBlockModel: CodeBlockModel) {
   toast('Copied to clipboard');
 }
 
-export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
-  const model = codeBlockOption.model;
-  model.page.deleteBlock(model);
-}
-
-export function toggleWrap(codeBlockOption: CodeBlockOption) {
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  assertExists(syntaxElem);
-  syntaxElem.classList.toggle('wrap');
-}
-
 export function getAllowSelectedBlocks(
   model: BaseBlockModel
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];
   const blocks = model.children.slice();
-  if (!blocks) {
-    return [];
-  }
 
   const dfs = (blocks: BaseBlockModel[]) => {
     for (const block of blocks) {

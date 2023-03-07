@@ -26,7 +26,7 @@ initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
-  const dispose = workspace.signals.pageAdded.on(pageId => {
+  const dispose = workspace.slots.pageAdded.on(pageId => {
     if (typeof globalThis.targetPageId === 'string') {
       if (pageId !== globalThis.targetPageId) {
         // if there's `targetPageId` which not same as the `pageId`
@@ -37,7 +37,8 @@ function subscribePage(workspace: Workspace) {
 
     const editor = new EditorContainer();
     editor.page = page;
-    document.body.appendChild(editor);
+
+    document.getElementById('app')?.append(editor);
 
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;
@@ -99,7 +100,7 @@ async function main() {
 
   // Open default examples list when no `?init` param is provided
   const exampleList = document.createElement('start-panel');
-  workspace.signals.pageAdded.once(() => exampleList.remove());
+  workspace.slots.pageAdded.once(() => exampleList.remove());
   document.body.prepend(exampleList);
 }
 

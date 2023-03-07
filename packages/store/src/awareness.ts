@@ -1,4 +1,4 @@
-import { Signal } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
@@ -69,8 +69,8 @@ export class AwarenessStore<
   readonly awareness: YAwareness<RawAwarenessState<Flags>>;
   readonly store: Store;
 
-  readonly signals = {
-    update: new Signal<AwarenessEvent<Flags>>(),
+  readonly slots = {
+    update: new Slot<AwarenessEvent<Flags>>(),
   };
 
   constructor(
@@ -81,7 +81,7 @@ export class AwarenessStore<
     this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
-    this.signals.update.on(this._onAwarenessMessage);
+    this.slots.update.on(this._onAwarenessMessage);
     const upstreamFlags = awareness.getLocalState()?.flags;
     if (upstreamFlags) {
       this.awareness.setLocalStateField(
@@ -212,21 +212,21 @@ export class AwarenessStore<
 
     const states = this.awareness.getStates();
     added.forEach(id => {
-      this.signals.update.emit({
+      this.slots.update.emit({
         id,
         type: 'add',
         state: states.get(id) as RawAwarenessState<Flags>,
       });
     });
     updated.forEach(id => {
-      this.signals.update.emit({
+      this.slots.update.emit({
         id,
         type: 'update',
         state: states.get(id) as RawAwarenessState<Flags>,
       });
     });
     removed.forEach(id => {
-      this.signals.update.emit({
+      this.slots.update.emit({
         id,
         type: 'remove',
       });
@@ -308,7 +308,7 @@ export class AwarenessStore<
   destroy() {
     if (this.awareness) {
       this.awareness.off('change', this._onAwarenessChange);
-      this.signals.update.dispose();
+      this.slots.update.dispose();
     }
   }
 }

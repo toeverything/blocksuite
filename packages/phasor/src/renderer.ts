@@ -1,13 +1,34 @@
-import { IBound, MIN_ZOOM } from './consts.js';
+import { assertNotExists } from '@blocksuite/global/utils';
+
+import { MIN_ZOOM } from './consts.js';
 import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
-export class Renderer {
+export interface SurfaceViewport {
+  readonly width: number;
+  readonly height: number;
+  readonly centerX: number;
+  readonly centerY: number;
+  readonly zoom: number;
+  readonly viewportX: number;
+  readonly viewportY: number;
+
+  toModelCoord(viewX: number, viewY: number): [number, number];
+  toViewCoord(logicalX: number, logicalY: number): [number, number];
+
+  setCenter(centerX: number, centerY: number): void;
+  setZoom(zoom: number): void;
+  applyDeltaZoom(delta: number): void;
+  applyDeltaCenter(deltaX: number, deltaY: number): void;
+}
+
+export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   gridManager = new GridManager();
 
+  private _container!: HTMLElement;
   private _width = 0;
   private _height = 0;
 
@@ -16,34 +37,11 @@ export class Renderer {
   private _centerY = 0.0;
   private _shouldUpdate = false;
 
-  private _canvasResizeObserver!: ResizeObserver;
+  private _resizeObserver!: ResizeObserver;
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
-    this._initSize();
-    this.setCenter(this.width / 2, this.height / 2);
-
-    this._loop();
-
-    this._canvasResizeObserver = new ResizeObserver(() => {
-      const oldWidth = this.width;
-      const oldHeight = this.height;
-
-      this._initSize();
-
-      this.setCenter(
-        this._centerX - (oldWidth - this.width) / 2,
-        this._centerY - (oldHeight - this.height) / 2
-      );
-
-      // Re-render once canvas's size changed. Otherwise, it will flicker.
-      // Because the observer is called after the element rendered, but the canvas's content is not flush.
-      this._render();
-      this._shouldUpdate = false;
-    });
-    this._canvasResizeObserver.observe(this.canvas);
+  constructor() {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
   }
 
   get width() {
@@ -94,19 +92,20 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
-    this._zoom = newZoom;
-    this._shouldUpdate = true;
-  }
-
-  setViewport(centerX: number, centerY: number, zoom: number) {
-    this._centerX = centerX;
-    this._centerY = centerY;
+  setZoom(zoom: number) {
     this._zoom = zoom;
     this._shouldUpdate = true;
   }
+
+  applyDeltaZoom(delta: number) {
+    const val = (this.zoom * (100 + delta)) / 100;
+    const newZoom = Math.max(val, MIN_ZOOM);
+    this.setZoom(newZoom);
+  }
+
+  applyDeltaCenter = (deltaX: number, deltaY: number) => {
+    this.setCenter(this._centerX + deltaX, this._centerY + deltaY);
+  };
 
   addElement(element: PhasorElement) {
     this.gridManager.add(element);
@@ -118,19 +117,6 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  invalidateElement(element: PhasorElement, newBound: IBound) {
-    const { gridManager } = this;
-    if (gridManager.boundHasChanged(element, newBound)) {
-      gridManager.remove(element);
-      gridManager.add(element);
-    }
-    element.x = newBound.x;
-    element.y = newBound.y;
-    element.w = newBound.w;
-    element.h = newBound.h;
-    this._shouldUpdate = true;
-  }
-
   load(elements: PhasorElement[]) {
     for (let i = 0; i < elements.length; i++) {
       this.gridManager.add(elements[i]);
@@ -138,7 +124,41 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  private _initSize() {
+  attach(container: HTMLElement) {
+    assertNotExists(
+      this._container,
+      'Phasor surface is attached multiple times'
+    );
+
+    this._container = container;
+    container.appendChild(this.canvas);
+
+    this._resetSize();
+    this._resizeObserver = new ResizeObserver(() => this._onResize());
+    this._resizeObserver.observe(this.canvas);
+
+    this._loop();
+  }
+
+  private _onResize() {
+    const oldWidth = this.width;
+    const oldHeight = this.height;
+
+    this._resetSize();
+
+    this.setCenter(
+      this._centerX - (oldWidth - this.width) / 2,
+      this._centerY - (oldHeight - this.height) / 2
+    );
+
+    // Re-render once the canvas size changed. Otherwise it will flicker.
+    // Because the observer will be called after DOM element rendered,
+    // by the time the canvas content is stale.
+    this._render();
+    this._shouldUpdate = false;
+  }
+
+  private _resetSize() {
     const { canvas } = this;
     const dpr = window.devicePixelRatio;
 
@@ -202,6 +222,6 @@ export class Renderer {
   }
 
   dispose() {
-    this._canvasResizeObserver.disconnect();
+    this._resizeObserver.disconnect();
   }
 }

@@ -1,5 +1,5 @@
 import type { BlockModels } from '@blocksuite/global/types';
-import { Signal } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
@@ -105,8 +105,8 @@ export class BaseBlockModel<Props = unknown>
   id: string;
 
   page: Page;
-  propsUpdated = new Signal();
-  childrenUpdated = new Signal();
+  propsUpdated = new Slot();
+  childrenUpdated = new Slot();
   childMap = new Map<string, number>();
 
   type?: string;

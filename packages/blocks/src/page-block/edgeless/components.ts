@@ -1,10 +1,10 @@
 import '../../__internal__/index.js';
 
+import type { SurfaceViewport, XYWH } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
   serializeXYWH,
   SurfaceManager,
-  XYWH,
 } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Page } from '@blocksuite/store';
@@ -22,7 +22,6 @@ import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
 import type {
   EdgelessHoverState,
   EdgelessSelectionState,
-  ViewportState,
 } from './selection-manager.js';
 import {
   FRAME_MIN_LENGTH,
@@ -126,7 +125,7 @@ function Handle(
   `;
 }
 
-export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
+export function EdgelessDraggingArea(rect: DOMRect | null) {
   if (rect === null) return html``;
 
   const style = {
@@ -137,24 +136,21 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
   };
   return html`
     <style>
-      .affine-edgeless-frame-selection-rect {
+      .affine-edgeless-dragging-area {
         position: absolute;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
       }
     </style>
-    <div
-      class="affine-edgeless-frame-selection-rect"
-      style=${styleMap(style)}
-    ></div>
+    <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
   `;
 }
 
 function EdgelessBlockChild(
   model: TopLevelBlockModel,
   host: BlockHost,
-  viewport: ViewportState
+  viewport: SurfaceViewport
 ) {
   const { xywh } = model;
   const isSurfaceElement = false;
@@ -187,7 +183,7 @@ function EdgelessBlockChild(
 export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
-  viewport: ViewportState
+  viewport: SurfaceViewport
 ) {
   return html`
     ${repeat(
@@ -210,16 +206,13 @@ export class EdgelessSelectedRect extends LitElement {
   lock!: boolean;
 
   @property()
-  viewport!: ViewportState;
+  viewport!: SurfaceViewport;
 
   @property({ type: Number })
   zoom!: number;
 
   @property({ type: Object })
   state!: EdgelessSelectionState;
-
-  @property()
-  readonly?: boolean = false;
 
   @property({ type: Object })
   rect!: DOMRect;
@@ -463,7 +456,7 @@ export class EdgelessSelectedRect extends LitElement {
     };
     const handlers = this._getHandles(this.rect, isSurfaceElement);
     return html`
-      ${this.readonly ? null : handlers}
+      ${this.page.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }

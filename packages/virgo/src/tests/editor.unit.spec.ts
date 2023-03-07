@@ -81,7 +81,20 @@ test('getDeltasByVRange', () => {
       index: 0,
       length: 0,
     })
-  ).toEqual([]);
+  ).toEqual([
+    [
+      {
+        insert: 'aaa',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        index: 0,
+        length: 3,
+      },
+    ],
+  ]);
 
   expect(
     virgo.getDeltasByVRange({
@@ -158,16 +171,21 @@ test('getDeltasByVRange', () => {
   expect(
     virgo.getDeltasByVRange({
       index: 3,
-      length: 0,
-    })
-  ).toEqual([]);
-
-  expect(
-    virgo.getDeltasByVRange({
-      index: 3,
       length: 1,
     })
   ).toEqual([
+    [
+      {
+        insert: 'aaa',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        index: 0,
+        length: 3,
+      },
+    ],
     [
       {
         insert: 'bbb',
@@ -190,6 +208,18 @@ test('getDeltasByVRange', () => {
   ).toEqual([
     [
       {
+        insert: 'aaa',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        index: 0,
+        length: 3,
+      },
+    ],
+    [
+      {
         insert: 'bbb',
         attributes: {
           italic: true,
@@ -205,6 +235,110 @@ test('getDeltasByVRange', () => {
   expect(
     virgo.getDeltasByVRange({
       index: 3,
+      length: 4,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'aaa',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        index: 0,
+        length: 3,
+      },
+    ],
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+    [
+      {
+        insert: 'ccc',
+        attributes: {
+          underline: true,
+        },
+      },
+      {
+        index: 6,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 0,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 1,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
+      length: 2,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 4,
       length: 4,
     })
   ).toEqual([

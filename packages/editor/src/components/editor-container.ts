@@ -9,7 +9,7 @@ import {
   NonShadowLitElement,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
-import { Page, Signal } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -24,9 +24,6 @@ export class EditorContainer extends NonShadowLitElement {
 
   @property()
   mode?: 'page' | 'edgeless' = 'page';
-
-  @property()
-  readonly = false;
 
   @property()
   mouseMode: MouseMode = {
@@ -64,91 +61,61 @@ export class EditorContainer extends NonShadowLitElement {
     getServiceOrRegister('affine:code');
   }
 
-  protected update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('readonly')) {
-      this.page.awarenessStore.setReadonly(this.page, this.readonly);
-    }
-    super.update(changedProperties);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this.contentParser = new ContentParser(this.page);
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.readonly[this.page.prefixedId],
-        rd => {
-          if (typeof rd === 'boolean' && rd !== this.readonly) {
-            this.readonly = rd;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
 
     // Question: Why do we prevent this?
-    this._disposables.add(
-      Signal.disposableListener(window, 'keydown', e => {
-        if (e.altKey && e.metaKey && e.code === 'KeyC') {
-          e.preventDefault();
-        }
+    this._disposables.addFromEvent(window, 'keydown', e => {
+      if (e.altKey && e.metaKey && e.code === 'KeyC') {
+        e.preventDefault();
+      }
 
-        // `esc`  clear selection
-        if (e.code !== 'Escape') {
-          return;
-        }
-        const pageModel = this.pageBlockModel;
-        if (!pageModel) return;
-        const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.selection.clear();
+      // `esc`  clear selection
+      if (e.code !== 'Escape') {
+        return;
+      }
+      const pageModel = this.pageBlockModel;
+      if (!pageModel) return;
+      const pageBlock = getDefaultPageBlock(pageModel);
+      pageBlock.selection.clear();
 
-        const selection = getSelection();
-        if (
-          !selection ||
-          selection.isCollapsed ||
-          !checkEditorElementActive()
-        ) {
-          return;
-        }
-        selection.removeAllRanges();
-      })
-    );
+      const selection = getSelection();
+      if (!selection || selection.isCollapsed || !checkEditorElementActive()) {
+        return;
+      }
+      selection.removeAllRanges();
+    });
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
 
     // connect mouse mode event changes
-    this._disposables.add(
-      Signal.disposableListener(
-        window,
-        'affine.switch-mouse-mode',
-        ({ detail }) => {
-          this.mouseMode = detail;
-        }
-      )
+    this._disposables.addFromEvent(
+      window,
+      'affine.switch-mouse-mode',
+      ({ detail }) => {
+        this.mouseMode = detail;
+      }
     );
 
-    this._disposables.add(
-      Signal.disposableListener(
-        window,
-        'affine:switch-edgeless-display-mode',
-        ({ detail }) => {
-          this.showGrid = detail;
-        }
-      )
+    this._disposables.addFromEvent(
+      window,
+      'affine:switch-edgeless-display-mode',
+      ({ detail }) => {
+        this.showGrid = detail;
+      }
     );
 
     // subscribe store
     this._disposables.add(
-      this.page.signals.rootAdded.on(() => {
+      this.page.slots.rootAdded.on(() => {
         this.requestUpdate();
       })
     );
     this._disposables.add(
-      this.page.signals.blockUpdated.on(async ({ type, id }) => {
+      this.page.slots.blockUpdated.on(async ({ type, id }) => {
         const block = this.page.getBlockById(id);
 
         if (!block) return;
@@ -165,6 +132,9 @@ export class EditorContainer extends NonShadowLitElement {
 
   public async createBlockHub() {
     await this.updateComplete;
+    if (!this.page.root) {
+      await new Promise(res => this.page.slots.rootAdded.once(res));
+    }
     return createBlockHub(this, this.page);
   }
 
@@ -175,14 +145,13 @@ export class EditorContainer extends NonShadowLitElement {
   }
 
   render() {
-    if (!this.model) return null;
+    if (!this.model || !this.pageBlockModel) return null;
 
     const pageContainer = html`
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.pageBlockModel as PageBlockModel}
-        .readonly=${this.readonly}
+        .model=${this.pageBlockModel}
       ></affine-default-page>
     `;
 
@@ -190,10 +159,9 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .pageModel=${this.pageBlockModel as PageBlockModel}
+        .pageModel=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
-        .readonly=${this.readonly}
         .showGrid=${this.showGrid}
       ></affine-edgeless-page>
     `;

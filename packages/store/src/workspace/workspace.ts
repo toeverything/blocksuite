@@ -1,4 +1,4 @@
-import { Signal } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -25,30 +25,23 @@ export interface PageMeta {
 }
 
 type WorkspaceMetaFields = {
-  pages: Y.Array<unknown>;
-  versions: Y.Map<unknown>;
-  name: string;
-  avatar: string;
+  pages?: Y.Array<unknown>;
+  versions?: Y.Map<unknown>;
+  name?: string;
+  avatar?: string;
 };
 
 class WorkspaceMeta<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends Space<WorkspaceMetaFields, Flags> {
   private _prevPages = new Set<string>();
-  pageAdded = new Signal<string>();
-  pageRemoved = new Signal<string>();
-  pagesUpdated = new Signal();
-  commonFieldsUpdated = new Signal();
+  pageAdded = new Slot<string>();
+  pageRemoved = new Slot<string>();
+  pagesUpdated = new Slot();
+  commonFieldsUpdated = new Slot();
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
-    super(id, doc, awarenessStore, {
-      valueInitializer: {
-        pages: () => new Y.Array(),
-        versions: () => new Y.Map(),
-        avatar: () => '',
-        name: () => '',
-      },
-    });
+    super(id, doc, awarenessStore);
     this.origin.observeDeep(this._handleEvents);
   }
 
@@ -77,7 +70,7 @@ class WorkspaceMeta<
   }
 
   get pageMetas() {
-    return this.proxy.pages.toJSON() as PageMeta[];
+    return this.proxy.pages?.toJSON() ?? ([] as PageMeta[]);
   }
 
   getPageMeta(id: string) {
@@ -87,23 +80,31 @@ class WorkspaceMeta<
   addPageMeta(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
     this.doc.transact(() => {
+      const pages: Y.Array<unknown> = this.pages ?? new Y.Array();
       Object.entries(page).forEach(([key, value]) => {
         yPage.set(key, value);
       });
       if (index === undefined) {
-        this.pages.push([yPage]);
+        pages.push([yPage]);
       } else {
-        this.pages.insert(index, [yPage]);
+        pages.insert(index, [yPage]);
+      }
+      if (!this.pages) {
+        this.origin.set('pages', pages);
       }
     });
   }
 
   setPageMeta(id: string, props: Partial<PageMeta>) {
-    const pages = this.pages.toJSON() as PageMeta[];
+    const pages = (this.pages?.toJSON() as PageMeta[]) ?? [];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
+      if (!this.pages) {
+        this.origin.set('pages', new Y.Array());
+      }
       if (index === -1) return;
+      assertExists(this.pages);
 
       const yPage = this.pages.get(index) as Y.Map<unknown>;
       Object.entries(props).forEach(([key, value]) => {
@@ -113,10 +114,13 @@ class WorkspaceMeta<
   }
 
   removePage(id: string) {
+    // you cannot delete a page if there's no page
+    assertExists(this.pages);
     const pages = this.pages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
+      assertExists(this.pages);
       if (index !== -1) {
         this.pages.delete(index, 1);
       }
@@ -127,20 +131,31 @@ class WorkspaceMeta<
    * @internal Only for page initialization
    */
   writeVersion(workspace: Workspace) {
-    const versions = this.proxy.versions;
-    workspace.flavourSchemaMap.forEach((schema, flavour) => {
-      versions.set(flavour, schema.version);
-    });
+    let versions = this.proxy.versions;
+    if (!versions) {
+      versions = new Y.Map<unknown>();
+      workspace.flavourSchemaMap.forEach((schema, flavour) => {
+        (versions as Y.Map<unknown>).set(flavour, schema.version);
+      });
+      this.origin.set('versions', versions);
+      return;
+    } else {
+      console.error('Workspace versions already set.');
+    }
   }
 
   /**
    * @internal Only for page initialization
    */
   validateVersion(workspace: Workspace) {
-    const versions = this.proxy.versions.toJSON();
+    const versions = this.proxy.versions?.toJSON();
+    if (!versions) {
+      throw new Error(
+        'Invalid workspace data, versions data is missing. Please make sure the data is valid'
+      );
+    }
     const dataFlavours = Object.keys(versions);
-
-    // TODO: emit data validation error signals
+    // TODO: emit data validation error slots
     if (dataFlavours.length === 0) {
       throw new Error(
         'Invalid workspace data, missing versions field. Please make sure the data is valid.'
@@ -211,7 +226,9 @@ class WorkspaceMeta<
         hasKey('pages')
       ) {
         this._handlePageEvent();
-      } else if (hasKey('name') || hasKey('avatar')) {
+      }
+
+      if (hasKey('name') || hasKey('avatar')) {
         this._handleCommonFieldsEvent();
       }
     });
@@ -230,10 +247,10 @@ export class Workspace {
 
   meta: WorkspaceMeta;
 
-  signals: {
-    pagesUpdated: Signal;
-    pageAdded: Signal<string>;
-    pageRemoved: Signal<string>;
+  slots: {
+    pagesUpdated: Slot;
+    pageAdded: Slot<string>;
+    pageRemoved: Slot<string>;
   };
 
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
@@ -250,7 +267,7 @@ export class Workspace {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
-        blobStorage?.signals.onBlobSyncStateChange.on(state => {
+        blobStorage?.slots.onBlobSyncStateChange.on(state => {
           const blobId = state.id;
           const syncState = state.state;
           if (
@@ -278,7 +295,7 @@ export class Workspace {
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
-    this.signals = {
+    this.slots = {
       pagesUpdated: this.meta.pagesUpdated,
       pageAdded: this.meta.pageAdded,
       pageRemoved: this.meta.pageRemoved,
@@ -346,7 +363,7 @@ export class Workspace {
   }
 
   private _handlePageEvent() {
-    this.signals.pageAdded.on(pageId => {
+    this.slots.pageAdded.on(pageId => {
       const page = new Page(
         this,
         pageId,
@@ -359,7 +376,7 @@ export class Workspace {
       this._indexer.onCreatePage(pageId);
     });
 
-    this.signals.pageRemoved.on(id => {
+    this.slots.pageRemoved.on(id => {
       const page = this.getPage(id) as Page;
       page.dispose();
       this._store.removeSpace(page);

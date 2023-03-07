@@ -95,7 +95,7 @@ export function initMouseEventHandlers(
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
   onSelectionChangeWithDebounce: (e: Event) => void,
-  onSelectionChangeWithOutDebounce: (e: Event) => void
+  onSelectionChangeWithoutDebounce: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -200,10 +200,7 @@ export function initMouseEventHandlers(
     );
   };
 
-  const selectionChangeHandlerWithDebounce = debounce<
-    Event[],
-    (this: unknown, ...args: Event[]) => void
-  >(e => {
+  const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
       return;
@@ -212,8 +209,8 @@ export function initMouseEventHandlers(
     onSelectionChangeWithDebounce(e as Event);
   }, 300);
 
-  const selectionChangeHandlerWithOutDebounce = (e: Event) => {
-    onSelectionChangeWithOutDebounce(e);
+  const selectionChangeHandlerWithoutDebounce = (e: Event) => {
+    onSelectionChangeWithoutDebounce(e);
   };
 
   container.addEventListener('mousedown', mouseDownHandler);
@@ -226,7 +223,7 @@ export function initMouseEventHandlers(
   );
   document.addEventListener(
     'selectionchange',
-    selectionChangeHandlerWithOutDebounce
+    selectionChangeHandlerWithoutDebounce
   );
 
   const dispose = () => {
@@ -240,7 +237,7 @@ export function initMouseEventHandlers(
     );
     document.removeEventListener(
       'selectionchange',
-      selectionChangeHandlerWithOutDebounce
+      selectionChangeHandlerWithoutDebounce
     );
   };
   return dispose;

@@ -3,20 +3,22 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
-import type { IBound } from './consts.js';
+import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
   DebugElement,
-  getBrushBoundFromPoints,
+  ElementCtors,
   PhasorElement,
   PhasorElementType,
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
-import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
+import { getCommonBound } from './utils/bound.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -24,27 +26,33 @@ export class SurfaceManager {
   private _elements = new Map<string, PhasorElement>();
   private _lastIndex = 'a0';
 
-  constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
-    this._renderer = new Renderer(canvas);
+  constructor(yContainer: Y.Map<unknown>) {
+    this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
 
     this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  /** @deprecated escape hatch for full traversal of elements */
-  get elements() {
-    return this._elements.values();
+  get viewport(): SurfaceViewport {
+    return this._renderer;
+  }
+
+  attach(container: HTMLElement) {
+    this._renderer.attach(container);
+  }
+
+  getElementsBound(): IBound | null {
+    return getCommonBound([...this._elements.values()]);
   }
 
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = nanoid(10);
     const element = new ShapeElement(id, shapeType);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
+    setXYWH(element, bound);
     if (props) {
-      element.updateProps(props);
+      ShapeElement.updateProps(element, props);
     }
 
     return this._addElement(element);
@@ -53,45 +61,54 @@ export class SurfaceManager {
   addDebugElement(bound: IBound, color: string): string {
     const id = nanoid(10);
     const element = new DebugElement(id);
-    const { x, y, w, h } = bound;
 
-    element.setBound(x, y, w, h);
+    setXYWH(element, bound);
     element.color = color;
 
     return this._addElement(element);
   }
 
   addBrushElement(
-    x: number,
-    y: number,
-    color: string,
-    points: number[][] = []
+    bound: IBound,
+    points: number[][] = [],
+    props: {
+      color?: Color;
+      lineWidth?: number;
+    } = {}
   ): string {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
-    const lineWidth = element.lineWidth;
-    const bound = getBrushBoundFromPoints(points, lineWidth);
-
-    element.setBound(x, y, bound.w, bound.h);
-    element.color = color;
+    setXYWH(element, bound);
     element.points = points;
+    element.color = props.color ?? '#000000';
+    element.lineWidth = props.lineWidth ?? 4;
 
     return this._addElement(element);
   }
 
-  updateBrushElementPoints(id: string, points: number[][]) {
-    const yElement = this._yElements.get(id) as Y.Map<unknown>;
-    assertExists(yElement);
-    yElement.set('points', JSON.stringify(points));
+  updateBrushElement(id: string, bound: IBound, points: number[][]) {
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      yElement.set('points', JSON.stringify(points));
+      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+    });
   }
 
   setElementBound(id: string, bound: IBound) {
     this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      const ElementCtor = ElementCtors[element.type];
+      assertExists(ElementCtor);
+
+      const props = ElementCtor.getBoundProps(element, bound);
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      const xywh = serializeXYWH(bound.x, bound.y, bound.w, bound.h);
-      yElement.set('xywh', xywh);
+      for (const [key, value] of Object.entries(props)) {
+        yElement.set(key, value);
+      }
     });
   }
 
@@ -101,16 +118,16 @@ export class SurfaceManager {
     });
   }
 
+  hasElement(id: string) {
+    return this._yElements.has(id);
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     return this._renderer.toModelCoord(viewX, viewY);
   }
 
   toViewCoord(modelX: number, modelY: number): [number, number] {
     return this._renderer.toViewCoord(modelX, modelY);
-  }
-
-  setViewport(centerX: number, centerY: number, zoom: number) {
-    this._renderer.setViewport(centerX, centerY, zoom);
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
@@ -135,23 +152,9 @@ export class SurfaceManager {
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
-    let element: PhasorElement | null = null;
-    switch (type) {
-      case 'debug': {
-        element = DebugElement.deserialize(yElement.toJSON());
-        break;
-      }
-      case 'shape': {
-        element = ShapeElement.deserialize(yElement.toJSON());
-        break;
-      }
-      case 'brush': {
-        element = BrushElement.deserialize(yElement.toJSON());
-        break;
-      }
-      default:
-        throw new Error('no element type matched.');
-    }
+    const ElementCtor = ElementCtors[type];
+    assertExists(ElementCtor);
+    const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);
 
     this._renderer.addElement(element);
@@ -234,20 +237,14 @@ export class SurfaceManager {
 
           // refresh grid manager
           this._renderer.removeElement(element);
-          element.setBound(x, y, w, h);
+          setXYWH(element, { x, y, w, h });
           this._renderer.addElement(element);
         }
 
         if (key === 'points') {
           const points: number[][] = JSON.parse(yElement.get(key) as string);
-
-          const lineWidth = (element as BrushElement).lineWidth;
-
-          const bounds = getBrushBoundFromPoints(points, lineWidth);
-
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
-          element.setBound(element.x, element.y, bounds.w, bounds.h);
           this._renderer.addElement(element);
         }
       }
@@ -278,8 +275,7 @@ export class SurfaceManager {
   /** @internal Only for testing */
   initDefaultGestureHandler() {
     const { _renderer } = this;
-    const mouseRoot = _renderer.canvas;
-    mouseRoot.addEventListener('wheel', e => {
+    _renderer.canvas.addEventListener('wheel', e => {
       e.preventDefault();
       // pan
       if (!e.ctrlKey) {

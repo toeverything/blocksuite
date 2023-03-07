@@ -1,32 +1,22 @@
-import { BLOCK_ID_ATTR, CopyIcon, DeleteIcon } from '@blocksuite/global/config';
 import {
   CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
   DownloadIcon,
-  LineWrapIcon,
 } from '@blocksuite/global/config';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CodeBlockModel } from '../../code-block/index.js';
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
-  CodeBlockOption,
-  DefaultPageSignals,
+  DefaultSelectionSlots,
   EmbedEditingState,
-  ViewportState,
 } from './default-page-block.js';
-import {
-  copyCode,
-  copyImage,
-  deleteCodeBlock,
-  downloadImage,
-  focusCaption,
-  toggleWrap,
-} from './utils.js';
+import type { PageViewport } from './selection-manager/selection-state.js';
+import { copyImage, downloadImage, focusCaption } from './utils.js';
 
-export function FrameSelectionRect(rect: DOMRect | null) {
+export function DraggingArea(rect: DOMRect | null) {
   if (rect === null) return null;
 
   const style = {
@@ -37,25 +27,22 @@ export function FrameSelectionRect(rect: DOMRect | null) {
   };
   return html`
     <style>
-      .affine-page-frame-selection-rect {
+      .affine-page-dragging-area {
         position: absolute;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
       }
     </style>
-    <div
-      class="affine-page-frame-selection-rect"
-      style=${styleMap(style)}
-    ></div>
+    <div class="affine-page-dragging-area" style=${styleMap(style)}></div>
   `;
 }
 
 export function EmbedSelectedRectsContainer(
   rects: { left: number; top: number; width: number; height: number }[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -87,9 +74,9 @@ export function EmbedSelectedRectsContainer(
 
 export function SelectedRectsContainer(
   rects: DOMRect[],
-  viewportState: ViewportState
+  viewport: PageViewport
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
@@ -117,12 +104,12 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  signals: DefaultPageSignals,
-  viewportState: ViewportState
+  slots: DefaultSelectionSlots,
+  viewport: PageViewport
 ) {
   if (!embedEditingState) return null;
 
-  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const { left, top, scrollLeft, scrollTop } = viewport;
   const {
     position: { x, y },
     model,
@@ -140,7 +127,7 @@ export function EmbedEditingContainer(
         z-index: 1;
       }
 
-      ${toolTipStyle}
+      ${tooltipStyle}
     </style>
 
     <div class="affine-embed-editing-state-container">
@@ -150,7 +137,7 @@ export function EmbedEditingContainer(
           width="100%"
           @click=${() => {
             focusCaption(model);
-            signals.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}
         >
           ${CaptionIcon}
@@ -187,72 +174,13 @@ export function EmbedEditingContainer(
           width="100%"
           @click="${() => {
             model.page.deleteBlock(model);
-            signals.updateEmbedRects.emit([]);
+            slots.embedRectsUpdated.emit([]);
           }}"
         >
           ${DeleteIcon}
           <tool-tip inert tip-position="right-start" role="tooltip"
             >Delete</tool-tip
           >
-        </format-bar-button>
-      </div>
-    </div>
-  `;
-}
-
-export function CodeBlockOptionContainer(
-  codeBlockOption: CodeBlockOption | null
-) {
-  if (!codeBlockOption) return null;
-
-  const style = {
-    left: codeBlockOption.position.x + 'px',
-    top: codeBlockOption.position.y + 'px',
-  };
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  if (!syntaxElem) return null;
-
-  const isWrapped = syntaxElem.classList.contains('wrap');
-  return html`
-    <style>
-      .affine-codeblock-option-container > div {
-          position: fixed;
-          z-index: 1;
-      }
-
-      ${toolTipStyle}
-    </style>
-
-    <div class="affine-codeblock-option-container">
-      <div style=${styleMap(style)} class="code-block-option">
-        <format-bar-button
-          class="has-tool-tip"
-          @click=${() => copyCode(codeBlockOption.model as CodeBlockModel)}
-        >
-          ${CopyIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Copy to Clipboard
-          </tool-tip>
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-          @click=${() => toggleWrap(codeBlockOption)}
-        >
-          ${LineWrapIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Wrap code
-          </tool-tip>
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip"
-          @click=${() => deleteCodeBlock(codeBlockOption)}
-        >
-          ${DeleteIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Delete
-          </tool-tip>
         </format-bar-button>
       </div>
     </div>

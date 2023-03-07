@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "test:unit": "vitest --run",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
   },
@@ -13,7 +14,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "yjs": "^13.5.46"
+    "yjs": "^13.5.48"
   },
   "peerDependencies": {
     "yjs": "^13"

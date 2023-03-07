@@ -1,9 +1,7 @@
-import type {
-  BaseService,
-  OpenBlockInfo,
-  PageBlockModel,
-} from '@blocksuite/blocks';
-import { assertExists, BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
+import type { OpenBlockInfo } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import { BaseBlockModel, Page, Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import { getFileFromClipboard } from '../clipboard/utils.js';
@@ -17,8 +15,8 @@ type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
 
 export class ContentParser {
   private _page: Page;
-  readonly signals = {
-    beforeHtml2Block: new Signal<Element>(),
+  readonly slots = {
+    beforeHtml2Block: new Slot<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
   private _htmlParser: HtmlParser;
@@ -75,7 +73,7 @@ export class ContentParser {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
-    this.signals.beforeHtml2Block.emit(htmlEl);
+    this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
   }
   async file2Blocks(clipboardData: DataTransfer) {

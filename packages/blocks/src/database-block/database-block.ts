@@ -2,7 +2,6 @@
 import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { TagSchema } from '@blocksuite/global/database';
 import { assertEquals } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
@@ -303,7 +302,6 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
       this.columns
         .map(column => column.internalProperty.width)

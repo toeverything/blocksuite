@@ -101,7 +101,7 @@ pnpm i \
 
 And here is a minimal collaboration-ready editor showing how these underlying BlockSuite packages are composed together:
 
-> 🚧 Here we will work with the concepts of `Workspace`, `Page`, `Block` and `Signal`. These are the primitives for building a block-based collaborative application. We are preparing a comprehensive documentation about their usage!
+> 🚧 Here we will work with the concepts of `Workspace`, `Page`, `Block` and `Slot`. These are the primitives for building a block-based collaborative application. We are preparing a comprehensive documentation about their usage!
 
 ```ts
 import '@blocksuite/blocks';
@@ -117,8 +117,8 @@ import { EditorContainer } from '@blocksuite/editor';
  * In these cases, this function should not be called.
  */
 function createInitialPage(workspace: Workspace) {
-  // Events are being emitted using signals.
-  workspace.signals.pageAdded.once(pageId => {
+  // Events are being emitted using slots.
+  workspace.slots.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
 
     // Block types are defined and registered in BlockSchema.
@@ -127,13 +127,13 @@ function createInitialPage(workspace: Workspace) {
     page.addBlock({ flavour: 'affine:paragraph' }, frameId);
   });
 
-  // Create a new page. This will trigger the signal above.
+  // Create a new page. This will trigger the slot above.
   workspace.createPage('page0');
 }
 
 // Subscribe for page update and create editor on page added.
 function initEditorOnPageAdded(workspace: Workspace) {
-  workspace.signals.pageAdded.once(pageId => {
+  workspace.slots.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
     const editor = new EditorContainer();
     editor.page = page;

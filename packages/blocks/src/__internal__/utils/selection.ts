@@ -57,7 +57,7 @@ function setEndRange(editableContainer: Element) {
 
 async function setNewTop(y: number, editableContainer: Element) {
   const scrollContainer = editableContainer.closest('.affine-default-viewport');
-  const { top, bottom } = Rect.fromDom(editableContainer);
+  const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
     Number(
@@ -96,6 +96,7 @@ async function setNewTop(y: number, editableContainer: Element) {
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
 export function focusTitle(index = Infinity) {
+  // TODO support SelectionPosition
   const pageComponent = document.querySelector('affine-default-page');
   if (!pageComponent) {
     throw new Error("Can't find page component!");
@@ -114,7 +115,7 @@ export async function focusRichText(
   position: SelectionPosition = 'end'
 ) {
   // TODO optimize how get scroll container
-  const { left, right } = Rect.fromDom(editableContainer);
+  const { left, right } = Rect.fromDOM(editableContainer);
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -162,9 +163,9 @@ export function focusBlockByModel(
       // In the edgeless mode
       return;
     }
-    defaultPageBlock.selection.state.clear();
+    defaultPageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
+    rect && defaultPageBlock.slots.selectedRectsUpdated.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
@@ -184,7 +185,8 @@ export function focusBlockByModel(
 
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection && defaultPageBlock.selection.state.clear();
+  defaultPageBlock.selection &&
+    defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
     defaultPageBlock.selection &&
       defaultPageBlock.selection.setFocusedBlockIndexByElement(

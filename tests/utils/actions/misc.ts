@@ -53,7 +53,7 @@ async function initEmptyEditor(
   await page.evaluate(flags => {
     const { workspace } = window;
 
-    workspace.signals.pageAdded.once(async pageId => {
+    workspace.slots.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as StorePage;
       for (const [key, value] of Object.entries(flags)) {
         page.awarenessStore.setFlag(key as keyof typeof flags, value);
@@ -66,11 +66,16 @@ async function initEmptyEditor(
       debugMenu.workspace = workspace;
       debugMenu.editor = editor;
 
-      document.body.appendChild(editor);
+      // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+      const appRoot = document.querySelector('#app');
+      if (!appRoot) {
+        throw new Error('Cannot find app root element(#app).');
+      }
+      appRoot.appendChild(editor);
       document.body.appendChild(debugMenu);
-      const blockHub = await editor.createBlockHub();
-      document.body.appendChild(blockHub);
-
+      editor.createBlockHub().then(blockHub => {
+        document.body.appendChild(blockHub);
+      });
       window.debugMenu = debugMenu;
       window.editor = editor;
       window.page = page;
@@ -113,6 +118,11 @@ export async function enterPlaygroundRoom(
     }
   });
 
+  // Log all uncaught errors
+  page.on('pageerror', exception => {
+    throw new Error(`Uncaught exception: "${exception}"`);
+  });
+
   await initEmptyEditor(page, flags);
   return room;
 }
@@ -129,7 +139,7 @@ export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
-export async function waitForRemoteUpdateSignal(page: Page) {
+export async function waitForRemoteUpdateSlot(page: Page) {
   return page.evaluate(() => {
     return new Promise<void>(resolve => {
       const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
@@ -140,7 +150,7 @@ export async function waitForRemoteUpdateSignal(page: Page) {
         disposable.dispose();
         resolve();
       }, 500);
-      const disposable = debugProvider.remoteUpdateSignal.on(callback);
+      const disposable = debugProvider.remoteUpdateSlot.on(callback);
     });
   });
 }
@@ -573,4 +583,19 @@ export async function focusTitle(page: Page) {
     defaultPageComponent.titleVEditor.focusEnd();
   });
   await waitNextFrame(page);
+}
+
+/**
+ * XXX: this is a workaround for the bug in Playwright
+ */
+export async function shamefullyBlurActiveElement(page: Page) {
+  await page.evaluate(() => {
+    if (
+      !document.activeElement ||
+      !(document.activeElement instanceof HTMLElement)
+    ) {
+      throw new Error("document.activeElement doesn't exist");
+    }
+    document.activeElement.blur();
+  });
 }

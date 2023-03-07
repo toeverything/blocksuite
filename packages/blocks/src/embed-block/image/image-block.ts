@@ -1,7 +1,6 @@
 import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
@@ -151,36 +150,35 @@ export class ImageBlockComponent extends NonShadowLitElement {
       const isBlobUploadingOnInit =
         this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
 
-      const disposeSignal = this.model.page.awarenessStore.signals.update.on(
-        () => {
-          const isBlobUploading =
-            this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+      const disposeSlot = this.model.page.awarenessStore.slots.update.on(() => {
+        const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
+          this.model.sourceId
+        );
 
-          /**
-           * case:
-           * clientA send image, but network latency is high,
-           * clientB got ydoc, but doesn't get awareness,
-           * clientC has a good network, and send awareness because of cursor changed,
-           * clientB receives awareness change from clientC,
-           * this listener will be called,
-           * but clientB doesn't get uploading state from clientA.
-           */
-          if (
-            isBlobUploadingOnInit === isBlobUploading &&
-            isBlobUploading === false
-          ) {
-            return;
-          }
-
-          if (!isBlobUploading) {
-            clearTimeout(timer);
-            resolve();
-          }
+        /**
+         * case:
+         * clientA send image, but network latency is high,
+         * clientB got ydoc, but doesn't get awareness,
+         * clientC has a good network, and send awareness because of cursor changed,
+         * clientB receives awareness change from clientC,
+         * this listener will be called,
+         * but clientB doesn't get uploading state from clientA.
+         */
+        if (
+          isBlobUploadingOnInit === isBlobUploading &&
+          isBlobUploading === false
+        ) {
+          return;
         }
-      );
+
+        if (!isBlobUploading) {
+          clearTimeout(timer);
+          resolve();
+        }
+      });
 
       this._imageReady.dispose = () => {
-        disposeSignal.dispose();
+        disposeSlot.dispose();
         clearTimeout(timer);
         resolve();
       };
@@ -216,7 +214,6 @@ export class ImageBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
@@ -251,7 +248,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
+      <affine-embed .model=${this.model}>
         <div class="affine-image-wrapper">
           <div class="resizable-img">${img}</div>
           ${childrenContainer}

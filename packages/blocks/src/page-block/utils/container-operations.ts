@@ -31,7 +31,7 @@ import {
   resetNativeSelection,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
-import type { DefaultSelectionManager } from '../default/selection-manager.js';
+import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function handleBlockSelectionBatchDelete(
@@ -162,14 +162,6 @@ export function updateBlockType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
-    requestAnimationFrame(() =>
-      restoreSelection({
-        type: 'Block',
-        startOffset: 0,
-        endOffset: model.text?.length ?? 0,
-        models: [model],
-      })
-    );
     return [model];
   }
   // The lastNewId will not be null since we have checked models.length > 0
@@ -254,7 +246,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   // Skip code block or empty block
   const startModel = blockRange.models[0];
   if (
-    !matchFlavours(startModel, ['affine:code']) &&
+    !matchFlavours(startModel, ['affine:code'] as const) &&
     startModel.text &&
     startModel.text.length
   ) {
@@ -269,7 +261,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   // End block
   const endModel = blockRange.models[blockRange.models.length - 1];
   if (
-    !matchFlavours(endModel, ['affine:code']) &&
+    !matchFlavours(endModel, ['affine:code'] as const) &&
     endModel.text &&
     endModel.text.length
   ) {
@@ -281,7 +273,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
   // Between blocks
   blockRange.models
     .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code']))
+    .filter(model => !matchFlavours(model, ['affine:code'] as const))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
       const richText = getRichTextByModel(model);
@@ -298,7 +290,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
 
 export function getCurrentCombinedFormat(page: Page): TextAttributes {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) {
+  if (!blockRange || blockRange.models.every(model => !model.text)) {
     return {};
   }
   return getCombinedFormat(blockRange);
@@ -317,7 +309,7 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
 
   // edge case 2: same model
   if (blockRange.models.length === 1) {
-    if (matchFlavours(startModel, ['affine:code'])) return;
+    if (matchFlavours(startModel, ['affine:code'] as const)) return;
     startModel.text?.format(startOffset, endOffset - startOffset, {
       [key]: !format[key],
     });
@@ -325,13 +317,13 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
   }
   // common case
   // format start model
-  if (!matchFlavours(startModel, ['affine:code'])) {
+  if (!matchFlavours(startModel, ['affine:code'] as const)) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
       [key]: !format[key],
     });
   }
   // format end model
-  if (!matchFlavours(endModel, ['affine:code'])) {
+  if (!matchFlavours(endModel, ['affine:code'] as const)) {
     endModel.text?.format(0, endOffset, { [key]: !format[key] });
   }
   // format between models
@@ -383,7 +375,7 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
-      // if (matchFlavours(model, ['affine:shape'])) return;
+      // if (matchFlavours(model, ['affine:shape'] as const)) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

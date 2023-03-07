@@ -1,49 +1,14 @@
-import { Disposable, flattenDisposable } from './disposable.js';
+import { Disposable, flattenDisposables } from './disposable.js';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
-export class Signal<T = void> implements Disposable {
+export class Slot<T = void> implements Disposable {
   private _emitting = false;
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
 
-  /**
-   * This is method will return a disposable that will remove the listener
-   */
-  static disposableListener<N extends keyof WindowEventMap>(
-    element: Window,
-    eventName: N,
-    handler: (e: WindowEventMap[N]) => void,
-    options?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener<N extends keyof DocumentEventMap>(
-    element: Document,
-    eventName: N,
-    handler: (e: DocumentEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N,
-    handler: (e: HTMLElementEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener(
-    element: HTMLElement | Window | Document,
-    eventName: string,
-    handler: (e: Event) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable {
-    element.addEventListener(eventName, handler, eventOptions);
-    return {
-      dispose: () => {
-        element.removeEventListener(eventName, handler, eventOptions);
-      },
-    };
-  }
-
-  filter(testFun: (v: T) => boolean): Signal<T> {
-    const result = new Signal<T>();
+  filter(testFun: (v: T) => boolean): Slot<T> {
+    const result = new Slot<T>();
     // if result is disposed, dispose this too
     result._disposables.push({ dispose: () => this.dispose() });
 
@@ -146,17 +111,18 @@ export class Signal<T = void> implements Disposable {
     this._emitting = prevEmitting;
   }
 
-  pipe(that: Signal<T>): Signal<T> {
+  pipe(that: Slot<T>): Slot<T> {
     this._callbacks.push(v => that.emit(v));
     return this;
   }
 
   dispose() {
-    flattenDisposable(this._disposables).dispose();
-    this._callbacks.length = 0;
+    flattenDisposables(this._disposables).dispose();
+    this._callbacks = [];
+    this._disposables = [];
   }
 
-  toDispose(disposables: Disposable[]): Signal<T> {
+  toDispose(disposables: Disposable[]): Slot<T> {
     disposables.push(this);
     return this;
   }

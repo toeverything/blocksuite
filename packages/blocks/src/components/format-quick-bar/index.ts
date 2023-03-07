@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { Page, Signal } from '@blocksuite/store';
+import { matchFlavours, Page, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
@@ -41,11 +41,27 @@ export const showFormatQuickBar = async ({
 
   // Init format quick bar
 
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return;
+  }
+  blockRange.models = blockRange.models.filter(model =>
+    matchFlavours(model, [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+    ] as const)
+  );
+  if (blockRange.models.length === 0) {
+    return;
+  }
+
   const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.page = page;
+  formatQuickBar.models = blockRange.models;
   formatQuickBar.abortController = abortController;
-  const positionUpdatedSignal = new Signal();
-  formatQuickBar.positionUpdated = positionUpdatedSignal;
+  const positionUpdatedSlot = new Slot();
+  formatQuickBar.positionUpdated = positionUpdatedSlot;
 
   formatQuickBarInstance = formatQuickBar;
   abortController.signal.addEventListener('abort', () => {
@@ -56,6 +72,9 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
+    if (abortController.signal.aborted) {
+      return;
+    }
     const positioningPoint =
       anchorEl instanceof Range
         ? calcPositionPointByRange(anchorEl, direction)
@@ -85,13 +104,13 @@ export const showFormatQuickBar = async ({
     throw new Error("Failed to get page's root element");
   }
   const pageBlock = getDefaultPageBlock(page.root);
-  const scrollContainer = pageBlock.defaultViewportElement;
+  const scrollContainer = pageBlock.viewportElement;
 
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
     scrollContainer.addEventListener('scroll', updatePos, { passive: true });
   }
-  positionUpdatedSignal.on(updatePos);
+  positionUpdatedSlot.on(updatePos);
   window.addEventListener('resize', updatePos, { passive: true });
 
   // Mount
@@ -142,7 +161,7 @@ export const showFormatQuickBar = async ({
     document.removeEventListener('mouseup', mouseDownHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
-    positionUpdatedSignal.dispose();
+    positionUpdatedSlot.dispose();
   });
   return formatQuickBar;
 };

@@ -1,17 +1,20 @@
-import { BaseText, baseTextAttributes } from '../components/base-text.js';
-import type { DeltaInsert, TextElement } from '../types.js';
+import { VirgoElement } from '../components/virgo-element.js';
+import type { AttributesRenderer, DeltaInsert } from '../types.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
-/**
- * a default render function for text element
- */
-export function baseRenderElement(delta: DeltaInsert): TextElement {
-  const parseResult = baseTextAttributes.optional().parse(delta.attributes);
-
-  const baseText = new BaseText();
-  baseText.delta = {
+export function renderElement<TextAttributes extends BaseTextAttributes>(
+  delta: DeltaInsert<TextAttributes>,
+  parseAttributes: (
+    textAttributes?: TextAttributes
+  ) => TextAttributes | undefined,
+  attributesRenderer: AttributesRenderer<TextAttributes>
+): VirgoElement<TextAttributes> {
+  const vElement = new VirgoElement<TextAttributes>();
+  vElement.delta = {
     insert: delta.insert,
-    attributes: parseResult,
+    attributes: parseAttributes(delta.attributes),
   };
+  vElement.attributesRenderer = attributesRenderer;
 
-  return baseText;
+  return vElement;
 }

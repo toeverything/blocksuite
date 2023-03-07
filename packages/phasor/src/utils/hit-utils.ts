@@ -1,7 +1,7 @@
 import type { IBound } from '../consts.js';
 
 export function isPointIn(a: IBound, x: number, y: number): boolean {
-  return a.x < x && x <= a.x + a.w && a.y < y && y <= a.y + a.h;
+  return a.x <= x && x <= a.x + a.w && a.y <= y && y <= a.y + a.h;
 }
 
 export function intersects(a: IBound, b: IBound): boolean {

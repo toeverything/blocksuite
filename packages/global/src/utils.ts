@@ -3,8 +3,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockModels } from './types.js';
 
 export type { Disposable } from './utils/disposable.js';
-export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
-export { Signal } from './utils/signal.js';
+export { DisposableGroup } from './utils/disposable.js';
+export { Slot } from './utils/slot.js';
 export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -20,6 +20,15 @@ export function assertExists<T>(
   message = 'val does not exist'
 ): asserts val is T {
   if (val === null || val === undefined) {
+    throw new Error(message);
+  }
+}
+
+export function assertNotExists<T>(
+  val: T | null | undefined,
+  message = 'val exists'
+): asserts val is null | undefined {
+  if (val !== null && val !== undefined) {
     throw new Error(message);
   }
 }
@@ -74,10 +83,11 @@ type Allowed =
   | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
-  expected: U
+  expected: U,
+  message = 'val is not same as expected'
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new Error('val is not same as expected');
+    throw new Error(message);
   }
 }
 
@@ -116,4 +126,5 @@ export async function sleep(ms: number): Promise<void> {
 }
 
 export const getDefaultPlaygroundURL = (isE2E: boolean): URL =>
-  new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);
+  new URL(`http://localhost:5173/`);
+// new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);

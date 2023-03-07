@@ -38,15 +38,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _lock = false;
 
   private _pick(x: number, y: number) {
-    const { viewport, surface } = this._edgeless;
-    const [modelX, modelY] = viewport.toModelCoord(x, y);
+    const { surface } = this._edgeless;
+    const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
     const selectedShape = surface.pickTop(modelX, modelY);
     return selectedShape ? selectedShape : pick(this._blocks, modelX, modelY);
   }
 
-  private _updateFrameSelectionState(x: number, y: number) {
-    if (this._frameSelectionState) {
-      this._frameSelectionState.end = new DOMPoint(x, y);
+  private _updateDraggingArea(x: number, y: number) {
+    if (this._draggingArea) {
+      this._draggingArea.end = new DOMPoint(x, y);
     }
     if (this._hoverState) {
       this._setSingleSelectionState(this._hoverState.content, false);
@@ -59,7 +59,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       return;
     }
 
-    const { viewport } = this._edgeless;
+    const { viewport } = this._edgeless.surface;
     const xywh = getXYWH(content);
     this._hoverState = {
       rect: getSelectionBoxBound(viewport, xywh),
@@ -69,17 +69,20 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _setNoneSelectionState() {
     this._blockSelectionState = { type: 'none' };
+    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
+    resetNativeSelection(null);
   }
 
   private _setSingleSelectionState(selected: Selectable, active: boolean) {
+    const { viewport } = this._edgeless.surface;
     const xywh = getXYWH(selected);
     this._blockSelectionState = {
       type: 'single',
       active,
       selected,
-      rect: getSelectionBoxBound(this._edgeless.viewport, xywh),
+      rect: getSelectionBoxBound(viewport, xywh),
     };
-    this._edgeless.signals.updateSelection.emit(this._blockSelectionState);
+    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
@@ -112,10 +115,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._lock = true;
       this._page.captureSync();
     }
-    const deltaX = this._dragLastPos.x - e.x;
-    const deltaY = this._dragLastPos.y - e.y;
-    const boundX = selected.x - deltaX / this._edgeless.viewport.zoom;
-    const boundY = selected.y - deltaY / this._edgeless.viewport.zoom;
+    const { zoom } = this._edgeless.surface.viewport;
+    const deltaX = this._dragLastPos.x - e.raw.clientX;
+    const deltaY = this._dragLastPos.y - e.raw.clientY;
+    const boundX = selected.x - deltaX / zoom;
+    const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
     const boundH = selected.h;
     this._edgeless.surface.setElementBound(selected.id, {
@@ -129,7 +133,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {
     const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
-    const { zoom } = this._edgeless.viewport;
+    const { zoom } = this._edgeless.surface.viewport;
     const xywh = JSON.stringify([
       modelX + e.delta.x / zoom,
       modelY + e.delta.y / zoom,
@@ -147,8 +151,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._handleClickOnSelected(selected, e);
     } else {
       this._setNoneSelectionState();
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
     }
   }
 
@@ -164,21 +166,22 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const selected = this._pick(e.x, e.y);
 
     if (selected) {
-      if (isTopLevelBlock(selected)) {
-        switch (this.blockSelectionState.type) {
-          case 'none':
-            this._setSingleSelectionState(selected, true);
+      // See https://github.com/toeverything/blocksuite/pull/1484
+      if (this._blockSelectionState.type === 'single') {
+        if (this._blockSelectionState.selected !== selected) {
+          this._setNoneSelectionState();
+        }
+      } else {
+        if (isTopLevelBlock(selected)) {
+          this._setSingleSelectionState(selected, true);
         }
       }
     } else {
       this._setNoneSelectionState();
-      this._frameSelectionState = {
+      this._draggingArea = {
         start: new DOMPoint(e.x, e.y),
         end: new DOMPoint(e.x, e.y),
       };
-
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
     }
 
     const [x, y] = [e.raw.clientX, e.raw.clientY];
@@ -194,7 +197,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       case 'single':
         if (isSurfaceElement(blockSelectionState.selected)) {
-          this._handleSurfaceDragMove(blockSelectionState.selected, e);
+          if (blockSelectionState.active) {
+            this._handleSurfaceDragMove(blockSelectionState.selected, e);
+          }
           break;
         }
 
@@ -206,7 +211,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         }
 
         // Is frame-dragging over a non-active frame
-        if (this._frameSelectionState) {
+        if (this._draggingArea) {
           noop();
         }
         // Is dragging a selected (but not active) frame, move it
@@ -216,12 +221,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
     }
 
-    if (this._frameSelectionState) {
-      this._updateFrameSelectionState(e.x, e.y);
+    if (this._draggingArea) {
+      this._updateDraggingArea(e.x, e.y);
     }
     this._dragLastPos = {
-      x: e.x,
-      y: e.y,
+      x: e.raw.clientX,
+      y: e.raw.clientY,
     };
   }
 
@@ -250,22 +255,22 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     } else if (this.blockSelectionState.type === 'single') {
-      if (!this._frameSelectionState) {
+      if (!this._draggingArea) {
         this._page.captureSync();
       }
     }
-    this._frameSelectionState = null;
+    this._draggingArea = null;
   }
 
   onContainerMouseMove(e: SelectionEvent) {
-    const { viewport } = this._edgeless;
+    const { viewport } = this._edgeless.surface;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
 
     const shape = this._surface.pickTop(modelX, modelY);
     const blocks = pick(this._blocks, modelX, modelY);
 
     this._updateHoverState(shape ?? blocks);
-    this._edgeless.signals.hoverUpdated.emit();
+    this._edgeless.slots.hoverUpdated.emit();
   }
 
   onContainerMouseOut(_: SelectionEvent) {
@@ -273,16 +278,24 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   // Selection rect can be used for both top-level blocks and surface elements
-  syncSelectionRect() {
+  syncDraggingArea() {
+    const { viewport } = this._edgeless.surface;
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;
 
       const xywh = getXYWH(selected);
-      const rect = getSelectionBoxBound(this._edgeless.viewport, xywh);
+      const rect = getSelectionBoxBound(viewport, xywh);
       this.blockSelectionState.rect = rect;
-      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
     }
 
     this._updateHoverState(this._hoverState?.content || null);
+  }
+
+  clearSelection() {
+    this._blockSelectionState = {
+      type: 'none',
+    };
+    this._hoverState = null;
   }
 }

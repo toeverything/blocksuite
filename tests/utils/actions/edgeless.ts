@@ -4,6 +4,7 @@ import '../declare-test-window.js';
 import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
+import { dragBetweenCoords } from './drag.js';
 
 export async function getFrameSize(
   page: Page,
@@ -29,7 +30,18 @@ export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
 
-export async function setMouseMode(page: Page, mode: 'default' | 'shape') {
+export function locatorPanButton(page: Page, innerContainer = true) {
+  const panButton = page.locator('edgeless-tool-icon-button').filter({
+    hasText: 'Hand',
+  });
+
+  return innerContainer ? panButton.locator('.icon-container') : panButton;
+}
+
+export async function setMouseMode(
+  page: Page,
+  mode: 'default' | 'shape' | 'brush' | 'pan'
+) {
   if (mode === 'default') {
     const defaultModeButton = page.locator('edgeless-tool-icon-button').filter({
       hasText: 'Select',
@@ -43,6 +55,14 @@ export async function setMouseMode(page: Page, mode: 'default' | 'shape') {
       .locator('edgeless-tool-icon-button')
       .filter({ hasText: 'Square' });
     await squareShapeButton.click();
+  } else if (mode === 'brush') {
+    const brushButton = page.locator('edgeless-tool-icon-button').filter({
+      hasText: 'Pen',
+    });
+    await brushButton.click();
+  } else if (mode === 'pan') {
+    const panButton = locatorPanButton(page, false);
+    await panButton.click();
   }
 }
 
@@ -69,4 +89,85 @@ export async function increaseZoomLevel(page: Page) {
     .locator('edgeless-view-control-bar edgeless-tool-icon-button')
     .nth(1);
   await btn.click();
+}
+
+export async function addBasicBrushElement(
+  page: Page,
+  start: { x: number; y: number },
+  end: { x: number; y: number }
+) {
+  await setMouseMode(page, 'brush');
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+  await setMouseMode(page, 'default');
+}
+
+export async function addBasicRectShapeElement(
+  page: Page,
+  start: { x: number; y: number },
+  end: { x: number; y: number }
+) {
+  await setMouseMode(page, 'shape');
+  await dragBetweenCoords(page, start, end, { steps: 10 });
+  await setMouseMode(page, 'default');
+}
+
+export async function resizeElementByLeftTopHandle(
+  page: Page,
+  delta: { x: number; y: number },
+  steps = 1
+) {
+  const leftTopHandler = page.locator('[aria-label="handle-left-top"]');
+  const box = await leftTopHandler.boundingBox();
+  if (box === null) throw new Error();
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 5, y: box.y + 5 },
+    { x: box.x + delta.x + 5, y: box.y + delta.y + 5 },
+    {
+      steps,
+    }
+  );
+}
+
+export async function selectBrushColor(page: Page, color: `#${string}`) {
+  const colorButton = page.locator(
+    `edgeless-brush-menu .color-unit[aria-label="${color}"]`
+  );
+  await colorButton.click();
+}
+
+export async function selectBrushSize(page: Page, size: 4 | 16) {
+  const sizeMap = { 4: 'thin', 16: 'thick' };
+  const sizeButton = page.locator(
+    `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
+  );
+  await sizeButton.click();
+}
+
+export async function pickColorAtPoints(page: Page, points: number[][]) {
+  const pickedColors: `#${string}`[] = await page.evaluate(points => {
+    const node = document.querySelector(
+      '.affine-edgeless-surface-block-container canvas'
+    ) as HTMLCanvasElement;
+    const w = node.width;
+    const h = node.height;
+    const ctx = node?.getContext('2d');
+    if (!ctx) throw new Error('Cannot get canvas context');
+    const pixelData = ctx.getImageData(0, 0, w, h).data;
+
+    const colors = points.map(([x, y]) => {
+      const startPosition = (y * w + x) * 4;
+      return ('#' +
+        (
+          (1 << 24) +
+          (pixelData[startPosition] << 16) +
+          (pixelData[startPosition + 1] << 8) +
+          pixelData[startPosition + 2]
+        )
+          .toString(16)
+          .slice(1)) as `#${string}`;
+    });
+    return colors;
+  }, points);
+  return pickedColors;
 }

@@ -1,4 +1,4 @@
-import { Signal } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 
 import type {
   BlobId,
@@ -18,8 +18,8 @@ function assertProviderExist(
 export class BlobStorage {
   private _provider: BlobProvider | null = null;
 
-  signals = {
-    onBlobSyncStateChange: new Signal<BlobSyncStateChangeEvent>(),
+  slots = {
+    onBlobSyncStateChange: new Slot<BlobSyncStateChangeEvent>(),
   };
 
   get uploading(): boolean {
@@ -36,8 +36,8 @@ export class BlobStorage {
       return;
     }
     this._provider = provider;
-    this._provider.signals.onBlobSyncStateChange.on(state => {
-      this.signals.onBlobSyncStateChange.emit(state);
+    this._provider.slots.onBlobSyncStateChange.on(state => {
+      this.slots.onBlobSyncStateChange.emit(state);
     });
   }
 

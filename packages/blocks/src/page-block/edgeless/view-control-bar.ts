@@ -1,37 +1,15 @@
 import './toolbar/tool-icon-button.js';
 
 import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/global/config';
-import { Bound, deserializeXYWH } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/global/utils';
+import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 
-const FIT_TO_SCREEN_PADDING = 100;
-
-function getExpandedBound(a: Bound, b: Bound): Bound {
-  const minX = Math.min(a.x, b.x);
-  const minY = Math.min(a.y, b.y);
-  const maxX = Math.max(a.x + a.w, b.x + b.w);
-  const maxY = Math.max(a.y + a.h, b.y + b.h);
-  const width = Math.abs(maxX - minX);
-  const height = Math.abs(maxY - minY);
-
-  return new Bound(minX, minY, width, height);
-}
-
-function getCommonBound(bounds: Bound[]) {
-  if (bounds.length < 2) return bounds[0];
-
-  let result = bounds[0];
-
-  for (let i = 1; i < bounds.length; i++) {
-    result = getExpandedBound(result, bounds[i]);
-  }
-
-  return result;
-}
+const FIT_TO_SCREEN_PADDING = 200;
 
 @customElement('edgeless-view-control-bar')
 export class EdgelessViewControlBar extends LitElement {
@@ -82,36 +60,44 @@ export class EdgelessViewControlBar extends LitElement {
   zoom!: number;
 
   private _setZoom(zoom: number) {
-    this.edgeless.viewport.setZoom(zoom);
-    this.edgeless.signals.viewportUpdated.emit();
+    const { viewport } = this.edgeless.surface;
+    viewport.setZoom(zoom);
+    this.edgeless.slots.viewportUpdated.emit();
   }
 
   private _zoomToFit() {
-    const { width, height } = this.edgeless.viewport;
+    const { viewport } = this.edgeless.surface;
+    const { width, height } = viewport;
     const frame = this.edgeless.pageModel.children[0] as FrameBlockModel;
     const frameXYWH = deserializeXYWH(frame.xywh);
+    const frameBound = new Bound(...frameXYWH);
 
-    const bound = getCommonBound([
-      new Bound(...frameXYWH),
-      ...this.edgeless.surface.elements,
-    ]);
+    const surfaceElementsBound = this.edgeless.surface.getElementsBound();
+
+    const bound = surfaceElementsBound
+      ? getCommonBound([frameBound, surfaceElementsBound])
+      : frameBound;
+    assertExists(bound);
+
     const zoom = Math.min(
       (width - FIT_TO_SCREEN_PADDING) / bound.w,
       (height - FIT_TO_SCREEN_PADDING) / bound.h
     );
+
     const cx = bound.x + bound.w / 2;
     const cy = bound.y + bound.h / 2;
-    this.edgeless.viewport.setZoom(zoom);
-    this.edgeless.viewport.setCenter(cx, cy);
-    this.edgeless.signals.viewportUpdated.emit();
+    viewport.setZoom(zoom);
+    viewport.setCenter(cx, cy);
+    this.edgeless.slots.viewportUpdated.emit();
   }
 
   render() {
+    const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     return html`
       <div class="edgeless-view-control-bar-container">
         <edgeless-tool-icon-button
-          @tool.click=${() => this._setZoom(this.edgeless.viewport.zoom - 0.1)}
+          @tool.click=${() => this._setZoom(viewport.zoom - 0.1)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -119,7 +105,7 @@ export class EdgelessViewControlBar extends LitElement {
           >${formattedZoom}</span
         >
         <edgeless-tool-icon-button
-          @tool.click=${() => this._setZoom(this.edgeless.viewport.zoom + 0.1)}
+          @tool.click=${() => this._setZoom(viewport.zoom + 0.1)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

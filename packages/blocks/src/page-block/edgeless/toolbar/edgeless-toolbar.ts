@@ -1,11 +1,11 @@
 import './tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
+import './brush-tool/brush-tool-button.js';
 
 import {
   ConnectorIcon,
   HandIcon,
   ImageIcon,
-  PenIcon,
   SelectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
@@ -56,7 +56,7 @@ export class EdgelessToolbar extends LitElement {
   edgeless!: EdgelessPageBlockComponent;
 
   private _setMouseMode(mouseMode: MouseMode) {
-    this.edgeless?.signals.mouseModeUpdated.emit(mouseMode);
+    this.edgeless?.slots.mouseModeUpdated.emit(mouseMode);
   }
 
   render() {
@@ -99,19 +99,14 @@ export class EdgelessToolbar extends LitElement {
         >
           ${ConnectorIcon}
         </edgeless-tool-icon-button>
+        <edgeless-brush-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+        ></edgeless-brush-tool-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
-          .tooltip=${'Pen'}
-          .active=${false}
-          @tool.click=${() => console.log('Pen')}
-        >
-          ${PenIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .disabled=${true}
           .tooltip=${'Hand'}
-          .active=${false}
-          @tool.click=${() => console.log('Hand')}
+          .active=${type === 'pan'}
+          @tool.click=${() => this._setMouseMode({ type: 'pan' })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>

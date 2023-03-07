@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -13,7 +12,7 @@ import {
 } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-const getPlaceholder = (model: ParagraphBlockModel) => {
+function getPlaceholder(model: ParagraphBlockModel) {
   const { type } = model;
   switch (type) {
     case 'h1':
@@ -31,7 +30,7 @@ const getPlaceholder = (model: ParagraphBlockModel) => {
     default:
       return '';
   }
-};
+}
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends NonShadowLitElement {
@@ -151,14 +150,15 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
+  @property()
+  placeholder?: string;
+
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(
       this.model,

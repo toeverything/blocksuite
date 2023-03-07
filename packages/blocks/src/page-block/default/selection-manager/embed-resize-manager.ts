@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { getModelByElement, IPoint, SelectionEvent } from '../../std.js';
-import type { DefaultPageSignals } from '../index.js';
-import type { PageSelectionState } from './selection-manager.js';
+import type { DefaultSelectionSlots } from '../../../index.js';
+import { getModelByElement, IPoint, SelectionEvent } from '../../../std.js';
+import type { PageSelectionState } from './selection-state.js';
 
 export class EmbedResizeManager {
-  state: PageSelectionState;
-  signals: DefaultPageSignals;
+  readonly state: PageSelectionState;
+  readonly slots: DefaultSelectionSlots;
   private _originPosition: IPoint = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
   private _dropContainerSize: { w: number; h: number; left: number } = {
@@ -16,9 +16,9 @@ export class EmbedResizeManager {
   };
   private _dragMoveTarget = 'right';
 
-  constructor(state: PageSelectionState, signals: DefaultPageSignals) {
+  constructor(state: PageSelectionState, slots: DefaultSelectionSlots) {
     this.state = state;
-    this.signals = signals;
+    this.slots = slots;
   }
 
   onStart(e: SelectionEvent) {
@@ -60,7 +60,7 @@ export class EmbedResizeManager {
 
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
-        this.signals.updateEmbedRects.emit([
+        this.slots.embedRectsUpdated.emit([
           new DOMRect(
             left,
             this._dropContainer.getBoundingClientRect().top,

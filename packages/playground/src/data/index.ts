@@ -7,6 +7,8 @@
 import { ContentParser } from '@blocksuite/blocks';
 import { Page, Text, Workspace } from '@blocksuite/store';
 
+import { addShapeElement } from './utils';
+
 export interface InitFn {
   (workspace: Workspace): Promise<string>;
   id: string;
@@ -16,7 +18,7 @@ export interface InitFn {
 
 export const empty: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.slots.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -30,11 +32,8 @@ export const empty: InitFn = (workspace: Workspace) => {
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       // Add paragraph block inside frame block
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
-
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
-      });
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');
@@ -47,7 +46,7 @@ empty.description = 'Start from empty editor';
 
 export const heavy: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.slots.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -100,7 +99,7 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(async pageId => {
+    workspace.slots.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
@@ -115,10 +114,24 @@ export const preset: InitFn = (workspace: Workspace) => {
       const contentParser = new ContentParser(page);
       await contentParser.importMarkdown(presetMarkdown, frameId);
 
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
+      addShapeElement(page, {
+        id: '0',
+        index: 'a0',
+        type: 'shape',
+        xywh: '[0,0,100,100]',
+
+        shapeType: 'rect',
+
+        radius: 0,
+        filled: false,
+        fillColor: '#ffffff',
+        strokeWidth: 4,
+        strokeColor: '#010101',
+        strokeStyle: 'solid',
       });
+
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');
@@ -131,7 +144,7 @@ preset.description = 'Start from friendly introduction';
 
 export const database: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
-    workspace.signals.pageAdded.once(async pageId => {
+    workspace.slots.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
       page.awarenessStore.setFlag('enable_database', true);
 
@@ -224,10 +237,8 @@ export const database: InitFn = (workspace: Workspace) => {
       // Add a paragraph after database
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
-      requestAnimationFrame(() => {
-        page.resetHistory();
-        resolve(pageId);
-      });
+      page.resetHistory();
+      resolve(pageId);
     });
 
     workspace.createPage('page0');

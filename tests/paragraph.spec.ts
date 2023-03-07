@@ -6,6 +6,9 @@ import {
   focusTitle,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pressArrowDown,
+  pressArrowLeft,
+  pressBackspace,
   pressEnter,
   pressShiftEnter,
   pressShiftTab,
@@ -89,15 +92,15 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertTitle(page, 'hello');
   await resetHistory(page);
 
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await assertTitle(page, 'hell');
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await pressBackspace(page);
   await assertTitle(page, 'hll');
 
-  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown', { delay: 50 });
   await assertSelection(page, 0, 0, 0);
 
   await undoByKeyboard(page);
@@ -122,14 +125,14 @@ test('backspace on line start of the first block', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await assertSelection(page, 0, 0, 0);
 
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await assertTitle(page, 'helloabc');
 
   await pressEnter(page);
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['abc']);
 
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await pressBackspace(page);
   await assertTitle(page, 'helloabc');
   await assertRichTexts(page, []);
   await undoByClick(page);
@@ -139,6 +142,18 @@ test('backspace on line start of the first block', async ({ page }) => {
   await redoByClick(page);
   await assertTitle(page, 'helloabc');
   await assertRichTexts(page, []);
+});
+
+test('backspace on line start of the first empty block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+
+  await pressArrowDown(page);
+  await pressBackspace(page);
+
+  await pressArrowDown(page);
+  await assertSelection(page, 0, 0, 0);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {
@@ -575,13 +590,13 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'bulleted');
 
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await pressBackspace(page);
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 
   await waitNextFrame(page);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
@@ -591,11 +606,11 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockType(page, '6', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '6']);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
@@ -605,11 +620,11 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockType(page, '7', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '7']);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 });
 
@@ -623,12 +638,10 @@ test('delete at start of paragraph with content', async ({ page }) => {
   await type(page, '456');
   await assertRichTexts(page, ['123', '456']);
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
   await assertSelection(page, 1, 0, 0);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertRichTexts(page, ['123456']);
 
   await undoByClick(page);

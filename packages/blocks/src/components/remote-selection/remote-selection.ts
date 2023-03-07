@@ -82,7 +82,7 @@ export class RemoteSelection extends LitElement {
 
   protected firstUpdated() {
     assertExists(this.page);
-    this.page.awarenessStore.signals.update.subscribe(
+    this.page.awarenessStore.slots.update.subscribe(
       msg => msg,
       msg => {
         if (!msg || !msg.state?.rangeMap) {
@@ -156,18 +156,10 @@ export class RemoteSelection extends LitElement {
 
     this._resizeObserver.observe(document.body);
 
-    const defaultViewportElement = document.querySelector(
-      '.affine-default-viewport'
-    );
-    defaultViewportElement?.addEventListener(
-      'scroll',
-      () => {
-        this.requestUpdate();
-      },
-      {
-        signal: this._abortController.signal,
-      }
-    );
+    const viewportElement = document.querySelector('.affine-default-viewport');
+    viewportElement?.addEventListener('scroll', () => this.requestUpdate(), {
+      signal: this._abortController.signal,
+    });
   }
 
   disconnectedCallback() {

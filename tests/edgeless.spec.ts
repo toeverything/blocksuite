@@ -8,17 +8,25 @@ import {
   getEdgelessHoverRect,
   getFrameSize,
   increaseZoomLevel,
+  pickColorAtPoints,
+  selectBrushColor,
+  selectBrushSize,
   setMouseMode,
   switchEditorMode,
 } from './utils/actions/edgeless.js';
 import {
+  addBasicBrushElement,
+  addBasicRectShapeElement,
   clickBlockById,
+  doubleClickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
+  locatorPanButton,
   pressEnter,
   redoByClick,
+  resizeElementByLeftTopHandle,
   type,
   undoByClick,
   waitNextFrame,
@@ -28,6 +36,7 @@ import {
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
+  assertSameColor,
   assertSelection,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -166,15 +175,107 @@ test('add shape element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-  await setMouseMode(page, 'shape');
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
-  await dragBetweenCoords(page, start, end);
-  await setMouseMode(page, 'default');
+  await addBasicRectShapeElement(page, start, end);
 
   await page.mouse.move(start.x + 5, start.y + 5);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('change editor mode when brush color palette opening', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await setMouseMode(page, 'brush');
+
+  const brushMenu = page.locator('edgeless-brush-menu');
+  await expect(brushMenu).toBeVisible();
+
+  await switchEditorMode(page);
+  await expect(brushMenu).toBeHidden();
+});
+
+test('add brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+});
+
+test('resize brush element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  const delta = { x: 20, y: 40 };
+  await resizeElementByLeftTopHandle(page, delta, 10);
+
+  await page.mouse.move(start.x + 25, start.y + 45);
+  await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
+});
+
+test('add brush element with color', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'brush');
+  await selectBrushColor(page, '#B638FF');
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  const [color] = await pickColorAtPoints(page, [[110, 110]]);
+  assertSameColor(color, '#B638FF');
+});
+
+test('add brush element with different size', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'brush');
+  await selectBrushSize(page, 16);
+  await selectBrushColor(page, '#B638FF');
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 100 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  const [topEdge, bottomEdge, nearTopEdge, nearBottomEdge] =
+    await pickColorAtPoints(page, [
+      // Select two points on the top and bottom border of the line,
+      // their color should be the same as the specified color
+      [110, 100],
+      [110, 115],
+      // Select two points close to the upper and lower boundaries of the line,
+      // their color should be different from the specified color
+      [110, 99],
+      [110, 116],
+    ]);
+  assertSameColor(topEdge, '#B638FF');
+  assertSameColor(bottomEdge, '#B638FF');
+  assertSameColor(nearTopEdge, '#000000');
+  assertSameColor(nearBottomEdge, '#000000');
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {
@@ -305,4 +406,125 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   await page.mouse.move(x + 50, y + 50);
   await assertEdgelessHoverRect(page, [x, y, 100, 100]);
+});
+
+test('pan tool basic', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await setMouseMode(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: start.x + 5,
+      y: start.y + 5,
+    },
+    {
+      x: start.x + 25,
+      y: start.y + 25,
+    }
+  );
+  await setMouseMode(page, 'default');
+
+  await page.mouse.move(start.x + 25, start.y + 25);
+  await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
+});
+
+test('pan tool shortcut', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+
+  await page.keyboard.down('Space');
+  const panButton = locatorPanButton(page);
+  expect(await panButton.getAttribute('active')).toEqual('');
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: start.x + 5,
+      y: start.y + 5,
+    },
+    {
+      x: start.x + 25,
+      y: start.y + 25,
+    }
+  );
+
+  await page.keyboard.up('Space');
+
+  expect(await panButton.getAttribute('active')).toBeNull();
+
+  await page.mouse.move(start.x + 25, start.y + 25);
+  await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
+});
+
+test('pan tool shortcut when user is editing', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await setMouseMode(page, 'default');
+  await doubleClickBlockById(page, ids.frameId);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await page.keyboard.down('Space');
+  const panButton = locatorPanButton(page);
+  expect(await panButton.getAttribute('active')).toBeNull();
+});
+
+test('should cancel select when the selected point is outside the current selected element', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const firstStart = { x: 100, y: 100 };
+  const firstEnd = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, firstStart, firstEnd);
+
+  const secondStart = { x: 300, y: 300 };
+  const secondEnd = { x: 400, y: 400 };
+  await addBasicRectShapeElement(page, secondStart, secondEnd);
+
+  // select the first rect
+  await page.mouse.click(150, 150);
+
+  await dragBetweenCoords(page, { x: 350, y: 350 }, { x: 350, y: 450 });
+
+  await page.mouse.move(150, 150);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('shape element should not move when the selected state is inactive', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'shape');
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await setMouseMode(page, 'default');
+  await dragBetweenCoords(
+    page,
+    { x: 50, y: 50 },
+    { x: 150, y: 150 },
+    { steps: 2 }
+  );
+
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });

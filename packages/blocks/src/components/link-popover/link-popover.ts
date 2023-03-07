@@ -243,7 +243,7 @@ export class LinkPopover extends LitElement {
     return html`<div class="affine-link-popover">
       <div class="affine-link-preview has-tool-tip" @click=${this._onCopy}>
         <tool-tip inert role="tooltip">Click to copy link</tool-tip>
-        ${this.previewLink}
+        <span style="overflow: hidden;">${this.previewLink}</span>
       </div>
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button
@@ -336,7 +336,6 @@ export class LinkPopover extends LitElement {
   }
 }
 
-// TODO use signal to control the popover
 declare global {
   interface HTMLElementTagNameMap {
     'edit-link-panel': LinkPopover;

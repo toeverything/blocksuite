@@ -199,43 +199,57 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onTab(this: KeyboardEventThis) {
+  function onTab(e: KeyboardEvent, range: QuillRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const index = range.index;
     handleIndent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
-  function onShiftTab(this: KeyboardEventThis) {
+  function onShiftTab(e: KeyboardEvent, range: QuillRange) {
     if (matchFlavours(model, ['affine:code'] as const)) {
+      e.stopPropagation();
       return ALLOW_DEFAULT;
     }
-    const index = this.quill.getSelection()?.index;
+    const index = range.index;
     handleUnindent(page, model, index);
+    e.stopPropagation();
     return PREVENT_DEFAULT;
   }
 
   function onKeyLeft(e: KeyboardEvent, range: QuillRange) {
-    // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
-    const lineStart = range.index === 0 && range.length === 0;
-    if (lineStart) {
-      return PREVENT_DEFAULT;
+    // range.length === 0 means collapsed selection
+    if (range.length !== 0) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
     }
-    e.stopPropagation();
-    return ALLOW_DEFAULT;
+    const lineStart = range.index === 0;
+    if (!lineStart) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
+    }
+    // Need jump to previous block
+    return PREVENT_DEFAULT;
   }
 
   function onKeyRight(e: KeyboardEvent, range: QuillRange) {
+    if (range.length !== 0) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
+    }
     assertExists(model.text, 'Failed to onKeyRight! model.text not exists!');
     const textLength = model.text.length;
     const lineEnd = textLength === range.index;
-    if (lineEnd) {
-      return PREVENT_DEFAULT;
+    if (!lineEnd) {
+      e.stopPropagation();
+      return ALLOW_DEFAULT;
     }
-    e.stopPropagation();
-    return ALLOW_DEFAULT;
+    // Need jump to next block
+    return PREVENT_DEFAULT;
   }
 
   function onSpace(
@@ -310,12 +324,16 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     tab: {
       key: 'Tab',
-      handler: onTab,
+      handler(range, context) {
+        return onTab(context.event, range);
+      },
     },
     shiftTab: {
       key: 'Tab',
       shiftKey: true,
-      handler: onShiftTab,
+      handler(range, context) {
+        return onShiftTab(context.event, range);
+      },
     },
     spaceMarkdownMatch: {
       key: ' ',

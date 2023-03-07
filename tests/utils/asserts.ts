@@ -150,7 +150,7 @@ export async function assertSelection(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
-  rangeLength: number
+  rangeLength = 0
 ) {
   const actual = await page.evaluate(
     ({ richTextIndex }) => {
@@ -571,4 +571,8 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.y).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
+}
+
+export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
+  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }
