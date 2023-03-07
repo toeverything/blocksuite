@@ -34,6 +34,14 @@ function getPlaceholder(model: ParagraphBlockModel) {
   }
 }
 
+function TipsPlaceholder() {
+  return html`
+    <div class="tips-placeholder">
+      Click button ${BlockHubIcon20} to insert blocks, type '/' for commands
+    </div>
+  `;
+}
+
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends NonShadowLitElement {
   static styles = css`
@@ -197,13 +205,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this._disposables.dispose();
   };
 
-  private _tipsPlaceholder() {
-    if (!this._showTipsPlaceholder) return html``;
-    return html`<div class="tips-placeholder">
-      Click button ${BlockHubIcon20} to insert blocks, type '/' for commands
-    </div>`;
-  }
-
   render() {
     const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(
@@ -215,7 +216,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._tipsPlaceholder()}
+        ${this._showTipsPlaceholder ? TipsPlaceholder() : html``}
         <rich-text
           .host=${this.host}
           .model=${this.model}
