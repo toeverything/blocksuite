@@ -89,6 +89,12 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
+  disconnectedCallback() {
+    this._brushMenu?.dispose();
+    this._brushMenu = null;
+    super.disconnectedCallback();
+  }
+
   render() {
     const type = this.mouseMode?.type;
 
