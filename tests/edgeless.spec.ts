@@ -5,7 +5,9 @@ import { expect } from '@playwright/test';
 
 import {
   decreaseZoomLevel,
+  getEdgelessBlockChild,
   getEdgelessHoverRect,
+  getEdgelessSelectedRect,
   getFrameSize,
   increaseZoomLevel,
   pickColorAtPoints,
@@ -545,19 +547,8 @@ test('shape element should have the correct selected shape when clicking on the 
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 150, y: 150 });
   await setMouseMode(page, 'default');
 
-  const block = page.locator('.affine-edgeless-block-child');
-  const blockBox = await block.boundingBox();
-  if (blockBox === null) throw new Error('Unexpected box value: box is null');
-
-  const selectedBox = await page.evaluate(() => {
-    const selected = document
-      .querySelector('edgeless-selected-rect')
-      ?.shadowRoot?.querySelector('.affine-edgeless-selected-rect');
-    if (!selected) {
-      throw new Error('Unexpected root value: root is null');
-    }
-    return selected.getBoundingClientRect();
-  });
+  const blockBox = await getEdgelessBlockChild(page);
+  const selectedBox = await getEdgelessSelectedRect(page);
 
   expect(blockBox.x).toBeCloseTo(selectedBox.x, 0);
   expect(blockBox.y).toBeCloseTo(selectedBox.y, 0);
