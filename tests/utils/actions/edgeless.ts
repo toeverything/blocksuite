@@ -77,6 +77,26 @@ export async function getEdgelessHoverRect(page: Page) {
   return box;
 }
 
+export async function getEdgelessBlockChild(page: Page) {
+  const block = page.locator('.affine-edgeless-block-child');
+  const blockBox = await block.boundingBox();
+  if (blockBox === null) throw new Error('Missing edgeless block child rect');
+  return blockBox;
+}
+
+export async function getEdgelessSelectedRect(page: Page) {
+  const selectedBox = await page.evaluate(() => {
+    const selected = document
+      .querySelector('edgeless-selected-rect')
+      ?.shadowRoot?.querySelector('.affine-edgeless-selected-rect');
+    if (!selected) {
+      throw new Error('Missing edgeless selected rect');
+    }
+    return selected.getBoundingClientRect();
+  });
+  return selectedBox;
+}
+
 export async function decreaseZoomLevel(page: Page) {
   const btn = page
     .locator('edgeless-view-control-bar edgeless-tool-icon-button')
