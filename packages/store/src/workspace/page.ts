@@ -3,13 +3,12 @@ import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
-import type { Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
 import { Space, StackItem } from '../space.js';
-import { RichTextAdapter, Text } from '../text-adapter.js';
+import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -652,26 +651,6 @@ export class Page extends Space<PageData> {
       type: 'delete',
       id: model.id,
     });
-  }
-
-  /** Connect a rich text editor instance with a YText instance. */
-  attachRichText = (id: string, quill: Quill) => {
-    const yBlock = this._getYBlock(id);
-
-    const yText = yBlock.get('prop:text') as Y.Text | null;
-    if (!yText) {
-      throw new Error(`Block "${id}" does not have text`);
-    }
-
-    const adapter = new RichTextAdapter(this, yText, quill);
-    this.richTextAdapters.set(id, adapter);
-  };
-
-  /** Cancel the connection between the rich text editor instance and YText. */
-  detachRichText(id: string) {
-    const adapter = this.richTextAdapters.get(id);
-    adapter?.destroy();
-    this.richTextAdapters.delete(id);
   }
 
   syncFromExistingDoc() {
