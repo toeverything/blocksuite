@@ -9,13 +9,14 @@ import type { Loader } from '../../components/loader.js';
 import type { ContainerBlock } from './query.js';
 import type { Point, Rect } from './rect.js';
 
-// --affine-paragraph-space + 24px = 8px + 24px
-const STEPS = 32 / 2 / 2 + 2;
+const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
+const AFFINE_FRAME = 'AFFINE-FRAME';
+const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
 const DRAG_HANDLE_OFFSET_X =
   24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 
-const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
+const STEPS = 32 / 2 / 2 + 2; // --affine-paragraph-space + 24px = 8px + 24px
 
 /**
  * Returns `16` if node is contained in the parent.
@@ -31,7 +32,7 @@ export function contains(parent: Element, node: Element) {
  * Returns `true` if element is page or frame.
  */
 export function isPageOrFrame({ tagName }: Element) {
-  return tagName === 'AFFINE-DEFAULT-PAGE' || tagName === 'AFFINE-FRAME';
+  return tagName === AFFINE_DEFAULT_PAGE || tagName === AFFINE_FRAME;
 }
 
 /**
