@@ -34,7 +34,7 @@ import {
 } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
-import { EdgelessHoverRect } from './components/hover-Rect.js';
+import { EdgelessHoverRect } from './components/hover-rect.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,

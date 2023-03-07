@@ -2,7 +2,7 @@ import { getCommonBound, SurfaceViewport } from '@blocksuite/phasor';
 import { Bound, deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getBlockById } from '../../../__internal__/index.js';
