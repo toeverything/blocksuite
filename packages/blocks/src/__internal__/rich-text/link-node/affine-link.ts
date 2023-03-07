@@ -6,11 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import {
-  getDefaultPageBlock,
-  getModelByElement,
-  NonShadowLitElement,
-} from '../../utils/index.js';
+import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
 function affineLinkStyles(
@@ -103,10 +99,7 @@ export class AffineLink extends NonShadowLitElement {
     }
 
     const model = getModelByElement(this);
-    const page = getDefaultPageBlock(model);
-    if (page.readonly) {
-      return;
-    }
+    if (model.page.readonly) return;
 
     this._popoverTimer = window.setTimeout(() => {
       this.onDelayHover(e);

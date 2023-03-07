@@ -3,14 +3,14 @@ import { css } from 'lit';
 /**
  * @example
  * ```html
- * <icon-button class="has-tool-tip" style="${toolTipStyle}">
+ * <icon-button class="has-tool-tip" style="${tooltipStyle}">
  *    Button
  *    <tool-tip inert role="tooltip">Tooltip</tool-tip>
  * </icon-button>
  * ```
  * Reference to https://web.dev/building-a-tooltip-component/
  */
-export const toolTipStyle = css`
+export const tooltipStyle = css`
   tool-tip {
     font-family: var(--affine-font-family);
     position: absolute;

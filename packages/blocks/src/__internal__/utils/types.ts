@@ -26,7 +26,6 @@ export interface BlockHostContext {
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
-  readonly: boolean;
 }
 
 export interface CommonBlockElement extends HTMLElement {

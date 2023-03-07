@@ -214,9 +214,6 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property()
-  readonly?: boolean = false;
-
   @property({ type: Object })
   rect!: DOMRect;
 
@@ -459,7 +456,7 @@ export class EdgelessSelectedRect extends LitElement {
     };
     const handlers = this._getHandles(this.rect, isSurfaceElement);
     return html`
-      ${this.readonly ? null : handlers}
+      ${this.page.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }

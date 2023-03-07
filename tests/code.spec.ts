@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 import {
   addCodeBlock,
@@ -15,6 +15,7 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  switchReadonly,
   type,
   undoByKeyboard,
   waitNextFrame,
@@ -25,6 +26,38 @@ import {
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
+
+/**
+ * @example
+ * ```ts
+ * const codeBlockController = getCodeBlock(page);
+ * const codeBlock = codeBlockController.codeBlock;
+ * ```
+ */
+function getCodeBlock(page: Page) {
+  const codeBlock = page.locator('affine-code');
+  const languageButton = codeBlock.getByTestId('lang-button');
+  const clickLanguageButton = async () => {
+    await codeBlock.hover();
+    await languageButton.click();
+  };
+
+  const langList = codeBlock.locator('lang-list');
+  const codeOption = page.locator('.affine-codeblock-option');
+  const copyButton = codeOption.getByTestId('copy-button');
+  const wrapButton = codeOption.getByTestId('wrap-button');
+  const deleteButton = codeOption.getByTestId('delete-button');
+  return {
+    codeBlock,
+    languageButton,
+    clickLanguageButton,
+    langList,
+    codeOption,
+    copyButton,
+    wrapButton,
+    deleteButton,
+  };
+}
 
 test('use debug menu can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -71,7 +104,8 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   await type(page, '```ts');
   await type(page, ' ');
 
-  const codeLocator = page.locator('affine-code');
+  const codeBlockController = getCodeBlock(page);
+  const codeLocator = codeBlockController.codeBlock;
   await expect(codeLocator).toBeVisible();
 
   const codeRect = await codeLocator.boundingBox();
@@ -84,9 +118,9 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   };
   await page.mouse.move(position.x, position.y);
 
-  const locator = page.locator('.lang-container > icon-button');
-  await expect(locator).toBeVisible();
-  const languageText = await locator.innerText();
+  const languageButton = codeBlockController.languageButton;
+  await expect(languageButton).toBeVisible();
+  const languageText = await languageButton.innerText();
   expect(languageText).toEqual('TypeScript');
 });
 
@@ -121,23 +155,12 @@ test('use shortcut can create code block', async ({ page }) => {
 
 test('change code language can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
+  const { codeBlockId } = await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const position = await page.evaluate(() => {
-    const codeBlock = document.querySelector('affine-code');
-    const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
-    return {
-      x: bbox.left + bbox.width / 2,
-      y: bbox.top + bbox.height / 2,
-    };
-  });
-
-  await page.mouse.move(position.x, position.y);
-
-  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
-  await page.click(codeLangSelector);
-  const locator = page.locator('.lang-list-button-container');
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.clickLanguageButton();
+  const locator = codeBlockController.langList;
   await expect(locator).toBeVisible();
   await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
@@ -145,19 +168,24 @@ test('change code language can work', async ({ page }) => {
   await page.click('.lang-list-button-container > icon-button:nth-child(1)');
   await expect(locator).toBeHidden();
 
-  await page.mouse.move(position.x, position.y);
-  await expect(page.locator(codeLangSelector)).toHaveText('Rust');
+  await expect(codeBlockController.languageButton).toHaveText('Rust');
 
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
-  <affine:frame>
-    <affine:code
-      prop:language="Rust"
-    />
-  </affine:frame>
-</affine:page>`
+<affine:code
+  prop:language="Rust"
+/>`,
+    codeBlockId
+  );
+  await undoByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="JavaScript"
+/>`,
+    codeBlockId
   );
 });
 
@@ -168,9 +196,9 @@ test('language select list can disappear when click other place', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const codeLangSelector = '.lang-container > icon-button:nth-child(1)';
-  await page.click(codeLangSelector);
-  const locator = page.locator('.lang-list-button-container');
+  const codeBlock = getCodeBlock(page);
+  await codeBlock.clickLanguageButton();
+  const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
   const position = await page.evaluate(() => {
@@ -306,7 +334,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
 
   await page.mouse.move(position.x, position.y);
@@ -340,9 +368,12 @@ test('code block copy button can work', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'use');
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
   await focusRichText(page);
@@ -401,7 +432,8 @@ test('drag select code block can delete it', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const bbox = await page.locator('affine-code').boundingBox();
+  const codeBlock = page.locator('affine-code');
+  const bbox = await codeBlock.boundingBox();
   if (!bbox) {
     throw new Error("Failed to get code block's bounding box");
   }
@@ -415,8 +447,10 @@ test('drag select code block can delete it', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: position.startX, y: position.startY },
-    { x: position.endX, y: position.endY }
+    { x: position.endX, y: position.endY },
+    { steps: 10 }
   );
+  await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');
   const locator = page.locator('affine-code');
   await expect(locator).toBeHidden();
@@ -538,9 +572,9 @@ test('code block option can appear and disappear during mousemove', async ({
   const position = await getPosition('affine-code');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.code-block-option');
+  const optionPosition = await getPosition('.affine-codeblock-option');
   await page.mouse.move(optionPosition.x, optionPosition.y);
-  const locator = page.locator('.code-block-option');
+  const locator = page.locator('.affine-codeblock-option');
   await expect(locator).toBeVisible();
   await page.mouse.move(optionPosition.right + 10, optionPosition.y);
   await expect(locator).toBeHidden();
@@ -557,4 +591,46 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['  const a = 10;\n']);
   await page.keyboard.press(`Shift+Tab`);
   await assertRichTexts(page, ['const a = 10;\n']);
+});
+
+test('should code block wrap active after click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).toHaveAttribute('active', '');
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
+});
+
+test('should code block works in read only mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(300);
+  await switchReadonly(page);
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await expect(codeBlockController.langList).toBeHidden();
+  await expect(codeBlockController.codeOption).toBeVisible();
+  await expect(
+    codeBlockController.codeOption.locator('format-bar-button')
+  ).toHaveCount(2);
 });

@@ -167,7 +167,7 @@ test('readonly mode', async ({ page }) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTextA as any).vEditor.setReadOnly(true);
+    (richTextA as any).vEditor.setReadonly(true);
   });
 
   await type(page, 'aaaa');

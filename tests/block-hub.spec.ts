@@ -19,9 +19,7 @@ test('first level menu always exists, second level menu can be hidden by click f
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  const menuEntry = page.locator(
-    '.block-hub-menu-container [role="menu-entry"]'
-  );
+  const menuEntry = page.locator('.block-hub-menu-container [role="menuitem"]');
   const menuContainer = page.locator(
     '.block-hub-menu-container>div:first-child'
   );
@@ -29,24 +27,24 @@ test('first level menu always exists, second level menu can be hidden by click f
   await expect(menuEntry).toBeVisible();
   await expect(menuContainer).toBeHidden();
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
   await expect(menuEntry).toBeVisible();
   await expect(menuContainer).toBeVisible();
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
   await expect(menuContainer).toBeHidden();
 });
 
-test('blockHub card items should appear and disappear properly with corresponding menu', async ({
+test('block hub card items should appear and disappear properly with corresponding menu', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   const blankMenu = page.locator('.block-hub-icon-container:nth-child(1)');
   const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
@@ -69,14 +67,14 @@ test('blockHub card items should appear and disappear properly with correspondin
   await expect(blockHubListContainer).toBeHidden();
 });
 
-test('blockHub card items can disappear when clicking blank area', async ({
+test('block hub card items can disappear when clicking blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
 
   await textMenu.hover();
@@ -102,7 +100,7 @@ test('drag blank line into text area', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
   const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
@@ -149,7 +147,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
   const textMenu = '.block-hub-icon-container:nth-child(2)';
 
@@ -207,7 +205,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
   await listMenu.hover();

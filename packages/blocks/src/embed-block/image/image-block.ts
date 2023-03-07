@@ -248,7 +248,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
+      <affine-embed .model=${this.model}>
         <div class="affine-image-wrapper">
           <div class="resizable-img">${img}</div>
           ${childrenContainer}

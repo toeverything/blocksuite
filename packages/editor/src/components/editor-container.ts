@@ -23,9 +23,6 @@ export class EditorContainer extends NonShadowLitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  readonly = false;
-
-  @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
@@ -67,32 +64,12 @@ export class EditorContainer extends NonShadowLitElement {
     getServiceOrRegister('affine:code');
   }
 
-  protected update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('readonly')) {
-      this.page.awarenessStore.setReadonly(this.page, this.readonly);
-    }
-    super.update(changedProperties);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
-      this.page.awarenessStore.slots.update.subscribe(
-        msg => msg.state?.flags.readonly[this.page.prefixedId],
-        rd => {
-          if (typeof rd === 'boolean' && rd !== this.readonly) {
-            this.readonly = rd;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
 
     // Question: Why do we prevent this?
     this._disposables.add(
-      Slot.disposableListener(window, 'keydown', e => {
+      Slot.fromEvent(window, 'keydown', e => {
         if (e.altKey && e.metaKey && e.code === 'KeyC') {
           e.preventDefault();
         }
@@ -124,17 +101,13 @@ export class EditorContainer extends NonShadowLitElement {
 
     // connect mouse mode event changes
     this._disposables.add(
-      Slot.disposableListener(
-        window,
-        'affine.switch-mouse-mode',
-        ({ detail }) => {
-          this.mouseMode = detail;
-        }
-      )
+      Slot.fromEvent(window, 'affine.switch-mouse-mode', ({ detail }) => {
+        this.mouseMode = detail;
+      })
     );
 
     this._disposables.add(
-      Slot.disposableListener(
+      Slot.fromEvent(
         window,
         'affine:switch-edgeless-display-mode',
         ({ detail }) => {
@@ -187,7 +160,6 @@ export class EditorContainer extends NonShadowLitElement {
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
         .model=${this.pageBlockModel}
-        .readonly=${this.readonly}
       ></affine-default-page>
     `;
 
@@ -198,7 +170,6 @@ export class EditorContainer extends NonShadowLitElement {
         .pageModel=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
-        .readonly=${this.readonly}
         .showGrid=${this.showGrid}
       ></affine-edgeless-page>
     `;

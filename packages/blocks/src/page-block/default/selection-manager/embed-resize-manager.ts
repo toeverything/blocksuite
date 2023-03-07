@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { DefaulSelectionSlots } from '../../../index.js';
+import type { DefaultSelectionSlots } from '../../../index.js';
 import { getModelByElement, IPoint, SelectionEvent } from '../../../std.js';
 import type { PageSelectionState } from './selection-state.js';
 
 export class EmbedResizeManager {
-  state: PageSelectionState;
-  slots: DefaulSelectionSlots;
+  readonly state: PageSelectionState;
+  readonly slots: DefaultSelectionSlots;
   private _originPosition: IPoint = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
   private _dropContainerSize: { w: number; h: number; left: number } = {
@@ -16,7 +16,7 @@ export class EmbedResizeManager {
   };
   private _dragMoveTarget = 'right';
 
-  constructor(state: PageSelectionState, slots: DefaulSelectionSlots) {
+  constructor(state: PageSelectionState, slots: DefaultSelectionSlots) {
     this.state = state;
     this.slots = slots;
   }

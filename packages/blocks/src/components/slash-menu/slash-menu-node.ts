@@ -55,16 +55,16 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposableGroup.add(
-      Slot.disposableListener(window, 'mousedown', this._clickAwayListener)
+      Slot.fromEvent(window, 'mousedown', this._clickAwayListener)
     );
     this._disposableGroup.add(
-      Slot.disposableListener(window, 'keydown', this._keyDownListener, {
+      Slot.fromEvent(window, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
         capture: true,
       })
     );
     this._disposableGroup.add(
-      Slot.disposableListener(this, 'mousedown', e => {
+      Slot.fromEvent(this, 'mousedown', e => {
         // Prevent input from losing focus
         e.preventDefault();
       })
@@ -79,7 +79,7 @@ export class SlashMenu extends LitElement {
       return;
     }
     this._disposableGroup.add(
-      Slot.disposableListener(richText, 'keydown', this._keyDownListener, {
+      Slot.fromEvent(richText, 'keydown', this._keyDownListener, {
         // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
         capture: true,
       })

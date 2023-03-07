@@ -1,10 +1,12 @@
 import '../__internal__/rich-text/rich-text.js';
 import './components/lang-list.js';
+import './components/code-option.js';
+import '../components/portal.js';
 
-import { ArrowDownIcon } from '@blocksuite/global/config';
-import { assertExists, Slot } from '@blocksuite/store';
+import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
 import { css, html, PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { getHighlighter, Highlighter, Lang } from 'shiki';
 
 import {
@@ -12,8 +14,9 @@ import {
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
+import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
 
 @customElement('affine-code')
@@ -33,6 +36,28 @@ export class CodeBlockComponent extends NonShadowLitElement {
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+    }
+
+    /* hover area */
+    .affine-code-block-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 100%;
+      transform: translateX(100%);
+    }
+
+    /* hover area */
+    .affine-code-block-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 100%;
+      transform: translateX(100%);
     }
 
     .affine-code-block-container .virgo-editor {
@@ -81,7 +106,21 @@ export class CodeBlockComponent extends NonShadowLitElement {
       width: 90%;
       margin: 0;
       overflow-x: auto;
-      /*scrollbar-color: #fff0 #fff0;*/
+    }
+
+    .affine-code-block-container v-line {
+      display: inline;
+    }
+
+    .affine-code-block-container v-line > div {
+      display: inline;
+    }
+    .affine-code-block-container affine-code-line span {
+      white-space: nowrap;
+    }
+
+    .affine-code-block-container affine-code-line span v-text {
+      display: inline-block;
     }
 
     .affine-code-block-container v-line {
@@ -100,21 +139,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container .ql-syntax::-webkit-scrollbar {
-      /*background: none;*/
+      display: none;
     }
 
     .affine-code-block-container .wrap {
       white-space: pre-wrap;
-    }
-
-    .code-block-option .filled {
-      fill: var(--affine-primary-color);
-    }
-
-    .lang-container {
-      line-height: var(--affine-line-height);
-      text-align: justify;
-      position: relative;
     }
 
     .code-block-option {
@@ -128,23 +157,26 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin: 0;
     }
 
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: CodeBlockModel;
 
   @property()
   host!: BlockHost;
 
-  @query('.lang-container')
-  langContainerElement!: HTMLElement;
-
-  @query('lang-list')
-  langListElement!: HTMLElement;
-
   @state()
   private _showLangList = false;
+
+  @state()
+  private _disposableGroup = new DisposableGroup();
+
+  @state()
+  private _optionPosition: { x: number; y: number } | null = null;
+
+  @state()
+  private _wrap = false;
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
@@ -172,9 +204,66 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this.requestUpdate();
   }
 
-  firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+  get readonly() {
+    return this.model.page.readonly;
+  }
+
+  hoverState = new Slot<boolean>();
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposableGroup.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+    this._disposableGroup.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
+
+    let timer: number;
+    this.hoverState.on(hover => {
+      clearTimeout(timer);
+      if (hover) {
+        const rect = this.getBoundingClientRect();
+        this._optionPosition = { x: rect.right + 12, y: rect.top };
+        return;
+      }
+      timer = window.setTimeout(() => {
+        this._optionPosition = null;
+      }, HOVER_DELAY);
+    });
+    this._disposableGroup.add(
+      Slot.fromEvent(this, 'mouseover', e => {
+        this.hoverState.emit(true);
+      })
+    );
+    const HOVER_DELAY = 300;
+    this._disposableGroup.add(
+      Slot.fromEvent(this, 'mouseleave', e => {
+        this.hoverState.emit(false);
+      })
+    );
+
+    this._disposableGroup.add(
+      Slot.fromEvent(document, 'wheel', e => {
+        if (!this._optionPosition) return;
+        // Update option position when scrolling
+        const rect = this.getBoundingClientRect();
+        this._optionPosition = { x: rect.right + 12, y: rect.top };
+      })
+    );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposableGroup.dispose();
+  }
+
+  private _onClickWrapBtn() {
+    const syntaxElem = document.querySelector(
+      `[${BLOCK_ID_ATTR}="${this.model.id}"] .virgo-editor`
+    );
+    assertExists(syntaxElem);
+    this._wrap = syntaxElem.classList.toggle('wrap');
 
     this._startHighlight(codeLanguages);
   }
@@ -199,7 +288,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
   }
 
-  private _onClick() {
+  private _onClickLangBtn() {
+    if (this.readonly) return;
     this._showLangList = !this._showLangList;
   }
 
@@ -208,11 +298,16 @@ export class CodeBlockComponent extends NonShadowLitElement {
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
-      <div class="lang-container" @click=${this._onClick}>
-        <icon-button width="101px" height="24px" ?hover=${this._showLangList}>
-          ${this.model.language} ${ArrowDownIcon}
-        </icon-button>
-      </div>
+      <icon-button
+        data-testid="lang-button"
+        width="101px"
+        height="24px"
+        ?hover=${this._showLangList}
+        ?disabled=${this.readonly}
+        @click=${this._onClickLangBtn}
+      >
+        ${this.model.language} ${ArrowDownIcon}
+      </icon-button>
       ${this._showLangList
         ? html`<lang-list
             @selected-language-changed=${(e: CustomEvent) => {
@@ -229,6 +324,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
     </div>`;
   }
 
+  private _codeOptionTemplate() {
+    if (!this._optionPosition) return '';
+    return html`<affine-portal
+      .template=${CodeOptionTemplate({
+        model: this.model,
+        position: this._optionPosition,
+        hoverState: this.hoverState,
+        wrap: this._wrap,
+        onClickWrap: () => this._onClickWrapBtn(),
+      })}
+    ></affine-portal>`;
+  }
+
   render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
@@ -236,8 +344,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
-    return html`
-      <div class="affine-code-block-container">
+    return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
           <rich-text
@@ -253,7 +360,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
         </div>
         ${childrenContainer}
       </div>
-    `;
+      ${this._codeOptionTemplate()}`;
   }
 }
 

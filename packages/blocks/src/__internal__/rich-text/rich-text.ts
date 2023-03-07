@@ -117,12 +117,12 @@ export class RichText extends NonShadowLitElement {
       },
     });
 
-    this._vEditor.setReadOnly(this.host.readonly);
+    this._vEditor.setReadonly(this.model.page.readonly);
   }
 
   updated() {
     if (this._vEditor) {
-      this._vEditor.setReadOnly(this.host.readonly);
+      this._vEditor.setReadonly(this.model.page.readonly);
     }
   }
 

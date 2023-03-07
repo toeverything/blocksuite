@@ -190,11 +190,11 @@ export class VEditor<
   }
 
   private _rootElement: HTMLElement | null = null;
-  private _mountAbort: AbortController | null = null;
-  private _handlerAbort: AbortController | null = null;
+  private _mountAbortController: AbortController | null = null;
+  private _handlerAbortController: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
-  private _isReadOnly = false;
+  private _isReadonly = false;
   private _yText: Y.Text;
 
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
@@ -300,27 +300,27 @@ export class VEditor<
   bindHandlers(handlers: VEditor['_handlers'] = this._defaultHandlers) {
     this._handlers = handlers;
 
-    if (this._handlerAbort) {
-      this._handlerAbort.abort();
+    if (this._handlerAbortController) {
+      this._handlerAbortController.abort();
     }
 
-    this._handlerAbort = new AbortController();
+    this._handlerAbortController = new AbortController();
 
     assertExists(this._rootElement, 'you need to mount the editor first');
     if (this._handlers.paste) {
       this._rootElement.addEventListener('paste', this._handlers.paste, {
-        signal: this._handlerAbort.signal,
+        signal: this._handlerAbortController.signal,
       });
     }
 
     if (this._handlers.keydown) {
       this._rootElement.addEventListener('keydown', this._handlers.keydown, {
-        signal: this._handlerAbort.signal,
+        signal: this._handlerAbortController.signal,
       });
     }
   }
 
-  mount(rootElement: HTMLElement): void {
+  mount(rootElement: HTMLElement) {
     this._rootElement = rootElement;
     this._rootElement.replaceChildren();
     this._rootElement.contentEditable = 'true';
@@ -328,18 +328,16 @@ export class VEditor<
     this.yText.observe(this._onYTextChange);
     document.addEventListener('selectionchange', this._onSelectionChange);
 
-    this._mountAbort = new AbortController();
+    this._mountAbortController = new AbortController();
 
     this._renderDeltas();
 
-    this._rootElement.addEventListener(
-      'beforeinput',
-      this._onBeforeInput.bind(this),
-      {
-        signal: this._mountAbort.signal,
-      }
-    );
-    this._rootElement
+    const signal = this._mountAbortController.signal;
+
+    rootElement.addEventListener('beforeinput', this._onBeforeInput, {
+      signal,
+    });
+    rootElement
       .querySelectorAll('[data-virgo-text="true"]')
       .forEach(textNode => {
         textNode.addEventListener('dragstart', event => {
@@ -347,32 +345,24 @@ export class VEditor<
         });
       });
 
-    this._rootElement.addEventListener(
-      'compositionstart',
-      this._onCompositionStart.bind(this),
-      {
-        signal: this._mountAbort.signal,
-      }
-    );
-    this._rootElement.addEventListener(
-      'compositionend',
-      this._onCompositionEnd.bind(this),
-      {
-        signal: this._mountAbort.signal,
-      }
-    );
+    rootElement.addEventListener('compositionstart', this._onCompositionStart, {
+      signal,
+    });
+    rootElement.addEventListener('compositionend', this._onCompositionEnd, {
+      signal,
+    });
   }
 
-  unmount(): void {
+  unmount() {
     document.removeEventListener('selectionchange', this._onSelectionChange);
-    if (this._mountAbort) {
-      this._mountAbort.abort();
-      this._mountAbort = null;
+    if (this._mountAbortController) {
+      this._mountAbortController.abort();
+      this._mountAbortController = null;
     }
 
-    if (this._handlerAbort) {
-      this._handlerAbort.abort();
-      this._handlerAbort = null;
+    if (this._handlerAbortController) {
+      this._handlerAbortController.abort();
+      this._handlerAbortController = null;
     }
 
     this._handlers = this._defaultHandlers;
@@ -487,10 +477,6 @@ export class VEditor<
     return this._vRange;
   }
 
-  getReadOnly(): boolean {
-    return this._isReadOnly;
-  }
-
   getFormat(vRange: VRange): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange);
 
@@ -512,9 +498,9 @@ export class VEditor<
     return result as TextAttributes;
   }
 
-  setReadOnly(isReadOnly: boolean): void {
-    this.rootElement.contentEditable = isReadOnly ? 'false' : 'true';
-    this._isReadOnly = isReadOnly;
+  setReadonly(isReadonly: boolean): void {
+    this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
+    this._isReadonly = isReadonly;
   }
 
   setVRange(vRange: VRange): void {
@@ -847,7 +833,7 @@ export class VEditor<
     return null;
   }
 
-  private _onBeforeInput(event: InputEvent): void {
+  private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
     let ifSkip = false;
@@ -855,17 +841,9 @@ export class VEditor<
       ifSkip = this._handlers.virgoInput(event);
     }
 
-    if (ifSkip) {
-      return;
-    }
-
-    if (this._isReadOnly) {
-      return;
-    }
-
-    if (!this._vRange) {
-      return;
-    }
+    if (this._isReadonly) return;
+    if (ifSkip) return;
+    if (!this._vRange) return;
 
     const { inputType, data } = event;
     const currentVRange = this._vRange;
@@ -922,13 +900,13 @@ export class VEditor<
         });
       }
     }
-  }
+  };
 
-  private _onCompositionStart(): void {
+  private _onCompositionStart = () => {
     this._isComposing = true;
-  }
+  };
 
-  private _onCompositionEnd(event: CompositionEvent): void {
+  private _onCompositionEnd = (event: CompositionEvent) => {
     this._isComposing = false;
 
     if (!this._vRange) {
@@ -948,7 +926,7 @@ export class VEditor<
         'input',
       ]);
     }
-  }
+  };
 
   private _onYTextChange = () => {
     Promise.resolve().then(() => {

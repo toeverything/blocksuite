@@ -1,6 +1,5 @@
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
   DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
@@ -21,10 +20,7 @@ import {
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import type {
-  CodeBlockOption,
-  DefaultPageBlockComponent,
-} from './default-page-block.js';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -338,22 +334,50 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
 
 export async function downloadImage(model: BaseBlockModel) {
   const imgSrc = await getUrlByModel(model);
-  const image = new Image();
-  imgSrc && (image.src = imgSrc);
-  image.setAttribute('crossOrigin', 'anonymous');
-  image.onload = function () {
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    context && context.drawImage(image, 0, 0, image.width, image.height);
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    const event = new MouseEvent('click');
-    a.download = 'image';
-    a.href = url;
-    a.dispatchEvent(event);
-  };
+  if (!imgSrc) {
+    return;
+  }
+  const arrayBuffer = await (await fetch(imgSrc)).arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+  let fileType: string;
+  if (
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x38
+  ) {
+    fileType = 'image/gif';
+  } else if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    fileType = 'image/png';
+  } else if (
+    buffer[0] === 0xff &&
+    buffer[1] === 0xd8 &&
+    buffer[2] === 0xff &&
+    buffer[3] === 0xe0
+  ) {
+    fileType = 'image/jpeg';
+  } else {
+    // unknown, fallback to png
+    console.error('unknown image type');
+    fileType = 'image/png';
+  }
+  const downloadUrl = URL.createObjectURL(
+    new Blob([arrayBuffer], { type: fileType })
+  );
+  const a = document.createElement('a');
+  const event = new MouseEvent('click');
+  a.download = 'image';
+  a.href = downloadUrl;
+  a.dispatchEvent(event);
+
+  // cleanup
+  a.remove();
+  URL.revokeObjectURL(downloadUrl);
 }
 
 export async function copyImage(model: EmbedBlockModel) {
@@ -469,8 +493,8 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function copyCode(codeBlockOption: CodeBlockOption) {
-  const richText = getRichTextByModel(codeBlockOption.model);
+export function copyCode(model: BaseBlockModel) {
+  const richText = getRichTextByModel(model);
   assertExists(richText);
   const vEditor = richText.vEditor;
   assertExists(vEditor);
@@ -486,19 +510,6 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   resetNativeSelection(range);
 
   toast('Copied to clipboard');
-}
-
-export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
-  const model = codeBlockOption.model;
-  model.page.deleteBlock(model);
-}
-
-export function toggleWrap(codeBlockOption: CodeBlockOption) {
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  assertExists(syntaxElem);
-  syntaxElem.classList.toggle('wrap');
 }
 
 export function getAllowSelectedBlocks(
