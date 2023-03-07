@@ -8,6 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { stopPropagation } from './utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -95,15 +96,19 @@ export class EdgelessViewControlBar extends LitElement {
     const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     return html`
-      <div class="edgeless-view-control-bar-container">
+      <div
+        class="edgeless-view-control-bar-container"
+        @mousedown=${stopPropagation}
+        @mouseup=${stopPropagation}
+      >
         <edgeless-tool-icon-button
           @tool.click=${() => this._setZoom(viewport.zoom - 0.1)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
-        <span class="zoom-percent" @click=${() => this._setZoom(1)}
-          >${formattedZoom}</span
-        >
+        <span class="zoom-percent" @click=${() => this._setZoom(1)}>
+          ${formattedZoom}
+        </span>
         <edgeless-tool-icon-button
           @tool.click=${() => this._setZoom(viewport.zoom + 0.1)}
         >

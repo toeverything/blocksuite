@@ -103,3 +103,7 @@ export function getXYWH(element: Selectable) {
     ? element.xywh
     : serializeXYWH(element.x, element.y, element.w, element.h);
 }
+
+export function stopPropagation(event: Event) {
+  event.stopPropagation();
+}
