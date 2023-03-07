@@ -48,7 +48,7 @@ test.describe('slash menu should show and hide correctly', () => {
     }
     await focusRichText(page);
     // Clear input
-    await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
   });
 
   test('slash menu should hide after click away', async () => {
