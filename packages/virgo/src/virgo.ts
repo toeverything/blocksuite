@@ -899,6 +899,25 @@ export class VEditor<
           length: deletedCharacter.length,
         });
       }
+    } else if (inputType === 'deleteWordBackward') {
+      const matchs = /\S+\s*$/.exec(
+        this.yText.toString().substring(0, currentVRange.index)
+      );
+      if (!matchs) return;
+      const deleteLength = matchs[0].length;
+
+      this.slots.updateVRange.emit([
+        {
+          index: currentVRange.index - deleteLength,
+          length: 0,
+        },
+        'input',
+      ]);
+
+      this.deleteText({
+        index: currentVRange.index - deleteLength,
+        length: deleteLength,
+      });
     }
   };
 
