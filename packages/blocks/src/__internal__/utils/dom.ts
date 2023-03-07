@@ -15,6 +15,8 @@ const STEPS = 32 / 2 / 2 + 2;
 const DRAG_HANDLE_OFFSET_X =
   24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 
+const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
+
 /**
  * Returns `16` if node is contained in the parent.
  * Otherwise return `0`.
@@ -54,7 +56,7 @@ export function getClosestBlockElementByPoint(
     elem = document.elementFromPoint(point.x, point.y);
     if (elem) {
       if (!elem.hasAttribute(BLOCK_ID_ATTR)) {
-        elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
+        elem = elem.closest(BLOCK_ID_ATTR_SELECTOR);
       }
       if (elem) {
         if (isPageOrFrame(elem)) elem = null;
