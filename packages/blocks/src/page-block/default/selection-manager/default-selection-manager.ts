@@ -302,21 +302,11 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshBlockRectCache();
 
-    const { viewport } = this.state;
-    const blockContainer = this._container.viewportElement.firstElementChild;
-    assertExists(blockContainer);
-    const { left, width } = blockContainer.getBoundingClientRect();
-    const { clientHeight, top } = viewport;
     let hoverEditingState: EditingState | null = null;
 
     const blockElement = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      Rect.fromLWTH(
-        left,
-        Math.min(width, window.innerWidth),
-        top,
-        Math.min(clientHeight, window.innerHeight)
-      )
+      this._container.getInnerRect()
     );
 
     if (blockElement) {

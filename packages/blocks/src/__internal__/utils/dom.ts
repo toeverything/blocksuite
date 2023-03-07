@@ -53,22 +53,17 @@ export function getClosestBlockElementByPoint(
   do {
     elem = document.elementFromPoint(point.x, point.y);
     if (elem) {
-      if (!elem.hasAttribute(BLOCK_ID_ATTR)) {
+      if (!elem.hasAttribute(BLOCK_ID_ATTR))
         elem = elem.closest(`[${BLOCK_ID_ATTR}]`);
-      }
       if (elem) {
-        if (!isPageOrFrame(elem)) {
-          return elem;
-        }
+        if (!isPageOrFrame(elem)) return elem;
         elem = null;
       }
     }
 
     point.y = y - n * 2;
 
-    if (n < 0) {
-      n--;
-    }
+    if (n < 0) n--;
     n *= -1;
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
