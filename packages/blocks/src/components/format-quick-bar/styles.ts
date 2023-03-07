@@ -39,6 +39,7 @@ export const formatQuickBarStyle = css`
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
     z-index: var(--affine-z-index-popover);
+    pointer-events: none;
   }
 
   .divider {

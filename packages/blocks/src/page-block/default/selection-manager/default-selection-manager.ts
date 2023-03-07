@@ -181,6 +181,7 @@ export class DefaultSelectionManager {
             return calcCurrentSelectionPosition(direction, this.state);
           },
         },
+        container: this._container,
       });
     } else if (this.state.type === 'block') {
       if (
@@ -205,6 +206,7 @@ export class DefaultSelectionManager {
             return calcCurrentSelectionPosition(direction, this.state);
           },
         },
+        container: this._container,
       });
     }
   };
@@ -291,6 +293,7 @@ export class DefaultSelectionManager {
           return calcCurrentSelectionPosition(direction, this.state);
         },
       },
+      container: this._container,
     });
   };
 
@@ -382,6 +385,7 @@ export class DefaultSelectionManager {
           return calcCurrentSelectionPosition(direction, this.state);
         },
       },
+      container: this._container,
     });
   };
 

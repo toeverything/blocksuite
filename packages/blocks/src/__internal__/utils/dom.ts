@@ -58,7 +58,7 @@ export function getClosestBlockElementByPoint(
 
   if (y < top || y > bottom) return null;
 
-  let elem = null;
+  let element = null;
   let n = 1;
 
   point.x = Math.floor(
@@ -66,6 +66,7 @@ export function getClosestBlockElementByPoint(
   );
 
   do {
+    /*
     elem = document.elementFromPoint(point.x, point.y);
     if (elem) {
       if (!elem.hasAttribute(BLOCK_ID_ATTR)) {
@@ -73,8 +74,23 @@ export function getClosestBlockElementByPoint(
       }
       if (elem) {
         if (isPageOrFrame(elem)) elem = null;
-        else return elem;
+        else {
+          console.log(n, elem)
+          return elem;
+        }
       }
+    }
+    */
+
+    // In some scenarios, e.g. `format-quick-bar` will be at the top.
+    element =
+      document
+        .elementsFromPoint(point.x, point.y)
+        .find(element => element.hasAttribute(BLOCK_ID_ATTR)) || null;
+
+    if (element) {
+      if (isPageOrFrame(element)) element = null;
+      else return element;
     }
 
     point.y = y - n * 2;
@@ -83,7 +99,7 @@ export function getClosestBlockElementByPoint(
     n *= -1;
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
-  return elem;
+  return element;
 }
 
 /**

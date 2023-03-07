@@ -46,6 +46,8 @@ export class PageSelectionState {
   // -1: SELECT_ALL
   // >=0: only current focused-block
   focusedBlockIndex = -1;
+  // null: SELECT_ALL
+  focusedBlock: BlockComponentElement | null = null;
   rafID?: number;
   private _startRange: Range | null = null;
   private _rangePoint: Point | null = null;
