@@ -8,7 +8,6 @@ export type DataInitializer<Data extends Record<string, unknown>> = {
 
 export type ProxyConfig<Data extends Record<string, unknown>> = {
   readonly?: boolean;
-  initializer?: DataInitializer<Partial<Data>>;
 };
 
 function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
@@ -44,7 +43,7 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
   yMap: YMap<unknown>,
   config: ProxyConfig<Data> = {}
 ): Data {
-  const { readonly = false, initializer } = config;
+  const { readonly = false } = config;
   const object = {} as Data;
   if (!(yMap instanceof YMap)) {
     throw new TypeError();
@@ -68,15 +67,6 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
       }
     },
     get: (target, p, receiver) => {
-      if (
-        typeof p === 'string' &&
-        !yMap.has(p) &&
-        typeof initializer?.[p] === 'function'
-      ) {
-        const value = (initializer[p] as () => unknown)();
-        yMap.set(p, value);
-        return value;
-      }
       return Reflect.get(target, p, receiver);
     },
   });

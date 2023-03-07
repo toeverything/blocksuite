@@ -11,16 +11,4 @@ describe('blocksuite yjs', () => {
     map.set('x', 1);
     expect(proxy.x).toBe(1);
   });
-
-  test('proxy', () => {
-    const doc = new BlockSuiteDoc();
-    const proxy = doc.getMapProxy<string, { x: number }>('x', {
-      initializer: {
-        x: () => 1,
-      },
-    });
-    expect(proxy.x).toBe(1);
-    proxy.x = 2;
-    expect(proxy.x).toBe(2);
-  });
 });
