@@ -39,10 +39,10 @@ describe('brush element', () => {
 
   it('hit test rect', () => {
     const element = ShapeElement.deserialize(data);
-    expect(element.hitTest(0, 0)).toBeTruthy();
+    expect(element.hitTestPoint(0, 0)).toBeTruthy();
     // point is in rect, but not in path
-    expect(element.hitTest(10, 10)).toBeTruthy();
-    expect(element.hitTest(21, 21)).toBeFalsy();
+    expect(element.hitTestPoint(10, 10)).toBeTruthy();
+    expect(element.hitTestPoint(21, 21)).toBeFalsy();
   });
 
   it('hit test diamond', () => {
@@ -50,12 +50,12 @@ describe('brush element', () => {
       ...data,
       shapeType: 'diamond',
     });
-    expect(element.hitTest(0, 0)).toBeFalsy();
+    expect(element.hitTestPoint(0, 0)).toBeFalsy();
     // point is in corner
-    expect(element.hitTest(10, 1)).toBeTruthy();
+    expect(element.hitTestPoint(10, 1)).toBeTruthy();
     // point is in path
-    expect(element.hitTest(5, 5)).toBeTruthy();
-    expect(element.hitTest(21, 21)).toBeFalsy();
+    expect(element.hitTestPoint(5, 5)).toBeTruthy();
+    expect(element.hitTestPoint(21, 21)).toBeFalsy();
   });
 
   it('hit test triangle', () => {
@@ -63,12 +63,12 @@ describe('brush element', () => {
       ...data,
       shapeType: 'triangle',
     });
-    expect(element.hitTest(0, 0)).toBeFalsy();
+    expect(element.hitTestPoint(0, 0)).toBeFalsy();
     // point is in corner
-    expect(element.hitTest(10, 1)).toBeTruthy();
+    expect(element.hitTestPoint(10, 1)).toBeTruthy();
     // point is in path
-    expect(element.hitTest(1, 18)).toBeTruthy();
-    expect(element.hitTest(21, 21)).toBeFalsy();
+    expect(element.hitTestPoint(1, 18)).toBeTruthy();
+    expect(element.hitTestPoint(21, 21)).toBeFalsy();
   });
 
   it('hit test ellipse', () => {
@@ -76,14 +76,14 @@ describe('brush element', () => {
       ...data,
       shapeType: 'ellipse',
     });
-    expect(element.hitTest(0, 0)).toBeFalsy();
+    expect(element.hitTestPoint(0, 0)).toBeFalsy();
     // point is in corner
-    expect(element.hitTest(10, 1)).toBeTruthy();
+    expect(element.hitTestPoint(10, 1)).toBeTruthy();
     // point is in path
     expect(
-      element.hitTest(10 - 10 / Math.sqrt(2), 10 - 10 / Math.sqrt(2))
+      element.hitTestPoint(10 - 10 / Math.sqrt(2), 10 - 10 / Math.sqrt(2))
     ).toBeTruthy();
-    expect(element.hitTest(21, 21)).toBeFalsy();
+    expect(element.hitTestPoint(21, 21)).toBeFalsy();
   });
 
   it('transform', () => {

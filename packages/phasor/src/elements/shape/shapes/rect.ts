@@ -1,5 +1,4 @@
 import type { IBound } from '../../../consts.js';
-import { boundsContain } from '../../../utils/bound.js';
 import { isPointIn } from '../../../utils/hit-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -86,10 +85,5 @@ export const RectMethods: ShapeMethods = {
 
   hitTestPoint(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     return isPointIn(bound, x, y);
-  },
-
-  // TODO: intersect
-  hitTestBound(shapeBound, area, options?: HitTestOptions) {
-    return boundsContain(area, shapeBound);
   },
 };
