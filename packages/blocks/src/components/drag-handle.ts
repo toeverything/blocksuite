@@ -32,9 +32,10 @@ export class DragIndicator extends LitElement {
     .affine-drag-indicator {
       position: fixed;
       height: 3px;
+      top: 0;
+      left: 0;
       background: var(--affine-primary-color);
-      transition: top, left 300ms, 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
-        transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     }
   `;
 
@@ -51,13 +52,13 @@ export class DragIndicator extends LitElement {
     const rect = this.targetRect;
     const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
+    const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
     return html`
       <div
         class="affine-drag-indicator"
         style=${styleMap({
           width: `${rect.width + 10}px`,
-          left: `${rect.left}px`,
-          top: `${distanceToTop < distanceToBottom ? rect.top : rect.bottom}px`,
+          transform: `translate(${rect.left}px, ${offsetY}px)`,
         })}
       ></div>
     `;
@@ -234,26 +235,33 @@ export class DragHandle extends LitElement {
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
+      this.style.left = '0';
+      this.style.top = '0';
       const containerRect = this._container.getBoundingClientRect();
-      this.style.left = `${
+
+      const xOffset =
         rect.left -
         containerRect.left -
         DRAG_HANDLE_WIDTH -
-        DRAG_HANDLE_OFFSET_LEFT
-      }px`;
-      this.style.top = `${rect.top - containerRect.top}px`;
+        DRAG_HANDLE_OFFSET_LEFT;
+
+      const yOffset = rect.top - containerRect.top;
+
+      this.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
       this.style.opacity = `${(
         1 -
         (event.raw.clientX - rect.left) / rect.width
       ).toFixed(2)}`;
-      const top = Math.max(
+
+      const handleYOffset = Math.max(
         0,
         Math.min(
           event.raw.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
           rect.height - DRAG_HANDLE_HEIGHT
         )
       );
-      this._dragHandle.style.top = `${top}px`;
+
+      this._dragHandle.style.transform = `translateY(${handleYOffset}px)`;
     }
   }
 
@@ -354,7 +362,7 @@ export class DragHandle extends LitElement {
     );
 
     this._dragHandle.style.cursor = 'grab';
-    this._dragHandle.style.top = `${top}px`;
+    this._dragHandle.style.transform = `translateY(${top}px)`;
     e.stopPropagation();
   }
 
@@ -507,6 +515,10 @@ export class DragHandle extends LitElement {
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
           /* padding-top: 5px !important; FIXME */
+        }
+
+        .affine-drag-handle {
+          position: absolute;
         }
       </style>
       <div class="affine-drag-handle-line"></div>
