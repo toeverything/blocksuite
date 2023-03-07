@@ -11,7 +11,7 @@ import type { Point, Rect } from './rect.js';
 
 const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
 const AFFINE_FRAME = 'AFFINE-FRAME';
-const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
+// const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
 const DRAG_HANDLE_OFFSET_X =
   24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
@@ -67,17 +67,14 @@ export function getClosestBlockElementByPoint(
 
   do {
     /*
-    elem = document.elementFromPoint(point.x, point.y);
-    if (elem) {
-      if (!elem.hasAttribute(BLOCK_ID_ATTR)) {
-        elem = elem.closest(BLOCK_ID_ATTR_SELECTOR);
+    element = document.elementFromPoint(point.x, point.y);
+    if (element) {
+      if (!element.hasAttribute(BLOCK_ID_ATTR)) {
+        element = element.closest(BLOCK_ID_ATTR_SELECTOR);
       }
-      if (elem) {
-        if (isPageOrFrame(elem)) elem = null;
-        else {
-          console.log(n, elem)
-          return elem;
-        }
+      if (element) {
+        if (isPageOrFrame(element)) element = null;
+        else return element;
       }
     }
     */
