@@ -13,6 +13,7 @@ import { getHighlighter, Highlighter, Lang } from 'shiki';
 import {
   BlockChildrenContainer,
   BlockHost,
+  getViewportElement,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -212,11 +213,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
     );
 
     let timer: number;
+    const updatePosition = () => {
+      // Update option position when scrolling
+      const rect = this.getBoundingClientRect();
+      this._optionPosition = {
+        x: rect.right + 12,
+        y: Math.max(rect.top, 12),
+      };
+    };
     this.hoverState.on(hover => {
       clearTimeout(timer);
       if (hover) {
-        const rect = this.getBoundingClientRect();
-        this._optionPosition = { x: rect.right + 12, y: rect.top };
+        updatePosition();
         return;
       }
       timer = window.setTimeout(() => {
@@ -231,17 +239,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
       this.hoverState.emit(false);
     });
 
-    this._disposables.addFromEvent(document, 'wheel', e => {
-      if (!this._optionPosition) return;
-      // Update option position when scrolling
-      const rect = this.getBoundingClientRect();
-      this._optionPosition = { x: rect.right + 12, y: rect.top };
-    });
+    const viewportElement = getViewportElement(this.model.page);
+    if (viewportElement) {
+      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+        if (!this._optionPosition) return;
+        updatePosition();
+      });
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+    this.hoverState.dispose();
   }
 
   private _onClickWrapBtn() {
