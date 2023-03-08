@@ -6,6 +6,7 @@ import type { Page } from '@blocksuite/store';
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
   getCurrentNativeRange,
+  getEditorContainer,
   getRichTextByModel,
   getStartModelBySelection,
   isRangeNativeSelection,
@@ -46,7 +47,7 @@ export function createLink(page: Page) {
   const range = getCurrentNativeRange();
   const rects = Array.from(range.getClientRects());
 
-  const container = document.querySelector('.affine-editor-container');
+  const container = getEditorContainer(page);
   assertExists(container);
   const containerRect = container.getBoundingClientRect();
 

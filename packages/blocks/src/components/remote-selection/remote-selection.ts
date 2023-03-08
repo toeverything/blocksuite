@@ -12,6 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
 import { resetNativeSelection } from '../../__internal__/utils/selection.js';
+import { getEditorContainer } from '../../std.js';
 
 interface SelectionRect {
   width: number;
@@ -187,7 +188,7 @@ export class RemoteSelection extends LitElement {
       return [];
     }
 
-    const container = document.querySelector('.affine-editor-container');
+    const container = getEditorContainer(this.page);
     assertExists(container);
     const containerRect = container.getBoundingClientRect();
     const nativeRects = Array.from(nativeRange.getClientRects());
@@ -223,7 +224,7 @@ export class RemoteSelection extends LitElement {
       return null;
     }
 
-    const container = document.querySelector('.affine-editor-container');
+    const container = getEditorContainer(this.page);
     assertExists(container);
     const containerRect = container.getBoundingClientRect();
     const nativeRects = Array.from(nativeRange.getClientRects());
