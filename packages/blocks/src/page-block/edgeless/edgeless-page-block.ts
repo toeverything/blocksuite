@@ -15,6 +15,7 @@ import {
   BlockHost,
   hotkey,
   resetNativeSelection,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -154,6 +155,9 @@ export class EdgelessPageBlockComponent
         this._selection.currentController.clearSelection();
         this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
         return;
+      }
+      if (this.page.root?.childMap.has(selected.id)) {
+        this.page.deleteBlock(selected as TopLevelBlockModel);
       }
       handleMultiBlockBackspace(this.page, e);
     }
