@@ -602,6 +602,11 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessNonHoverRect(page: Page) {
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  await expect(hoverRect).toBeHidden();
+}
+
 export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
   expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }
