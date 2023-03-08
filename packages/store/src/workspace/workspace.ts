@@ -308,6 +308,19 @@ export class Workspace {
     return this._store.connected;
   }
 
+  get isEmpty() {
+    if (this.doc.store.clients.size === 0) return true;
+
+    let flag = false;
+    if (this.doc.store.clients.size === 1) {
+      const items = [...this.doc.store.clients.values()][0];
+      if (items.length <= 1) {
+        flag = true;
+      }
+    }
+    return flag;
+  }
+
   connect = () => {
     this._store.connect();
   };
