@@ -93,10 +93,10 @@ export class EdgelessPageBlockComponent
   @property()
   page!: Page;
 
-  @property({ hasChanged: () => true })
+  @property()
   pageModel!: PageBlockModel;
 
-  @property({ hasChanged: () => true })
+  @property()
   surfaceModel!: SurfaceBlockModel;
 
   @property()

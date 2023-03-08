@@ -156,7 +156,7 @@ export class DefaultPageBlockComponent
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
@@ -442,11 +442,6 @@ export class DefaultPageBlockComponent
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
-    });
-
-    this.model.page.slots.blockUpdated.on(() => {
-      // TODO: optimize
-      this.requestUpdate();
     });
   }
 
