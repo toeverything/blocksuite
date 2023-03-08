@@ -1,9 +1,14 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
-import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import {
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -113,6 +118,9 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
+  @property()
+  model!: PageBlockModel;
+
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -143,6 +151,9 @@ export class DefaultPageBlockComponent
   @state()
   private _embedEditingState!: EmbedEditingState | null;
 
+  @state()
+  private _isComposing = false;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   @query('.affine-default-viewport')
@@ -155,9 +166,6 @@ export class DefaultPageBlockComponent
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
-
-  @property()
-  model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
   private _titleContainer!: HTMLElement;
@@ -177,6 +185,18 @@ export class DefaultPageBlockComponent
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
     });
+
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionstart',
+      () => (this._isComposing = true)
+    );
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionend',
+      () => (this._isComposing = false)
+    );
 
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
@@ -538,8 +558,9 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${!this._titleContainer ||
-              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+              class="affine-default-page-block-title ${(!this.model.title ||
+                !this.model.title.length) &&
+              !this._isComposing
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
