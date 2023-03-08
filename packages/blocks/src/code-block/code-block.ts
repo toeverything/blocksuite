@@ -113,10 +113,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       display: inline;
     }
 
-    .affine-code-block-container v-line {
-      display: inline;
-    }
-
     .affine-code-block-container v-line > div {
       display: inline-block;
     }
@@ -125,16 +121,12 @@ export class CodeBlockComponent extends NonShadowLitElement {
       white-space: nowrap;
     }
 
-    .affine-code-block-container.wrap v-line {
-      display: block;
-    }
-
     .affine-code-block-container.wrap v-line > div {
       display: block;
     }
 
     .affine-code-block-container.wrap affine-code-line span {
-      white-space: break-spaces;
+      white-space: pre-wrap;
     }
 
     .affine-code-block-container .virgo-editor::-webkit-scrollbar {

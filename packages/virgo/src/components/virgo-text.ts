@@ -6,7 +6,7 @@ import { styleMap, StyleMapDirective } from 'lit/directives/style-map.js';
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 
 const unitTextStyles = styleMap({
-  whiteSpace: 'break-spaces',
+  whiteSpace: 'pre-wrap',
 });
 
 @customElement('v-text')
