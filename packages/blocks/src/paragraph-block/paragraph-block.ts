@@ -148,7 +148,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: ParagraphBlockModel;
 
   @property()
