@@ -489,12 +489,13 @@ export class VEditor<
           if (typeof value === 'boolean' && !value) {
             delete result[key];
           } else {
-            if (
-              type === 'default' &&
-              vRange.index >= position.index &&
-              vRange.index + vRange.length <= position.index + position.length
-            ) {
-              result[key] = value;
+            if (type === 'default') {
+              if (
+                vRange.index >= position.index &&
+                vRange.index + vRange.length <= position.index + position.length
+              ) {
+                result[key] = value;
+              }
             } else {
               result[key] = value;
             }
