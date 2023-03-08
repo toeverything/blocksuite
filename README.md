@@ -170,8 +170,8 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Inline text format bar
   - ✅ Inline slash menu
   - ✅ Block hub
-  - ⚛️ Block drag handle
-  - ⚛️ Block-level selection
+  - ✅ Block drag handle
+  - ✅ Block-level selection
 - Rich-content
   - ✅ Image block
   - 🚧 Database block
@@ -180,8 +180,8 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Zooming and panning
   - ✅ Frame block
   - ⚛️ Shape element
-  - 🚧 Handwriting element
-  - 📌 Grouping
+  - ⚛️ Handwriting element
+  - 🚧 Grouping
 - Playground
   - ✅ Multiplayer collaboration
   - ✅ Local data persistence
