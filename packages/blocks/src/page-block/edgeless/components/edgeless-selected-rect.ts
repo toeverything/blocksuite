@@ -9,7 +9,7 @@ import { getBlockById } from '../../../__internal__/index.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 import type { EdgelessSelectionState } from '../selection-manager.js';
 import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
-import { Drag } from './drag.js';
+import { EdgelessDragManager } from './drag-manager.js';
 import type { ResizeMode } from './utils.js';
 import { getCommonRectStyle, getHandles } from './utils.js';
 
@@ -33,11 +33,15 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: DOMRect })
   rect!: DOMRect;
 
-  private _drag: Drag;
+  private _dragManager: EdgelessDragManager;
 
   constructor() {
     super();
-    this._drag = new Drag(this, this._onDragMove, this._onDragEnd);
+    this._dragManager = new EdgelessDragManager(
+      this,
+      this._onDragMove,
+      this._onDragEnd
+    );
   }
 
   get resizeMode(): ResizeMode {
@@ -143,7 +147,7 @@ export class EdgelessSelectedRect extends LitElement {
     };
     const handlers = active
       ? null
-      : getHandles(this.rect, this.resizeMode, this._drag.onMouseDown);
+      : getHandles(this.rect, this.resizeMode, this._dragManager.onMouseDown);
     return html`
       ${this.page.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

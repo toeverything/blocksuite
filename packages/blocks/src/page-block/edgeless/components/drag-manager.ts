@@ -2,29 +2,29 @@ import type { Bound } from '@blocksuite/phasor';
 
 import { HandleDirection } from './selected-handle.js';
 
-type OnDragMoveCallback = (delta: Bound) => void;
+type DragMoveHandler = (delta: Bound) => void;
 
-type OnDragEndCallback = () => void;
+type DragEndHandler = () => void;
 
-export class Drag {
+export class EdgelessDragManager {
   private _element: HTMLElement;
-  private _onDragMoveCallback: OnDragMoveCallback;
-  private _onDragEndCallback: OnDragEndCallback;
+  private _onDragMove: DragMoveHandler;
+  private _onDragEnd: DragEndHandler;
 
   private _dragDirection: HandleDirection = HandleDirection.Left;
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
 
   constructor(
     element: HTMLElement,
-    onDragMove: OnDragMoveCallback,
-    onDragEnd: OnDragEndCallback
+    onDragMove: DragMoveHandler,
+    onDragEnd: DragEndHandler
   ) {
     this._element = element;
-    this._onDragMoveCallback = onDragMove;
-    this._onDragEndCallback = onDragEnd;
+    this._onDragMove = onDragMove;
+    this._onDragEnd = onDragEnd;
   }
 
-  private _onDragMove = (e: MouseEvent) => {
+  private _onMouseMove = (e: MouseEvent) => {
     const direction = this._dragDirection;
     const { x: lastX, y: lastY } = this._dragLastPos;
     this._dragLastPos = {
@@ -79,18 +79,18 @@ export class Drag {
       return;
     }
 
-    this._onDragMoveCallback({ x, y, w, h });
+    this._onDragMove({ x, y, w, h });
   };
 
-  private _onDragEnd = (_: MouseEvent) => {
-    this._onDragEndCallback();
+  private _onMouseUp = (_: MouseEvent) => {
+    this._onDragEnd();
     const parentElement = this._element.parentElement;
-    parentElement?.removeEventListener('mousemove', this._onDragMove);
-    parentElement?.removeEventListener('mouseup', this._onDragEnd);
+    parentElement?.removeEventListener('mousemove', this._onMouseMove);
+    parentElement?.removeEventListener('mouseup', this._onMouseUp);
   };
 
   onMouseDown = (e: MouseEvent, direction: HandleDirection) => {
-    // prevent selection action being fired
+    // Prevent selection action from being triggered
     e.stopPropagation();
 
     this._dragDirection = direction;
@@ -100,8 +100,8 @@ export class Drag {
     };
 
     const parentElement = this._element.parentElement;
-    // parent ele is the edgeless block container
-    parentElement?.addEventListener('mousemove', this._onDragMove);
-    parentElement?.addEventListener('mouseup', this._onDragEnd);
+    // The parent element is the edgeless block container
+    parentElement?.addEventListener('mousemove', this._onMouseMove);
+    parentElement?.addEventListener('mouseup', this._onMouseUp);
   };
 }
