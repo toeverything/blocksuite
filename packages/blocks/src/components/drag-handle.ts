@@ -37,12 +37,13 @@ const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
 export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
-      position: fixed;
+      position: absolute;
       height: 3px;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
       transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      pointer-events: none;
     }
   `;
 
@@ -94,6 +95,7 @@ export class DragHandle extends LitElement {
       left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
       border-right: 1px solid var(--affine-block-handle-color);
       transition: opacity ease-in-out 300ms;
+      pointer-events: none;
     }
 
     .affine-drag-handle {
@@ -104,6 +106,7 @@ export class DragHandle extends LitElement {
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
       background-color: var(--affine-page-background);
+      pointer-events: auto;
     }
 
     .affine-drag-handle-hover {
@@ -457,7 +460,13 @@ export class DragHandle extends LitElement {
       x = this._currentClientX;
       y = this._currentClientY;
     }
-    if (!this._indicator || !this._getClosestBlockElement) {
+    if (
+      !this._getClosestBlockElement ||
+      !this._indicator ||
+      (this._indicator.cursorPosition &&
+        this._indicator.cursorPosition.x === x &&
+        this._indicator.cursorPosition.y === y)
+    ) {
       return;
     }
 
@@ -471,7 +480,6 @@ export class DragHandle extends LitElement {
         model: getModelByBlockElement(element),
       };
       this._indicator.targetRect = rect;
-
       this._indicator.cursorPosition = {
         x,
         y,
@@ -508,13 +516,8 @@ export class DragHandle extends LitElement {
           /* padding-top: 5px !important; FIXME */
         }
 
-        .affine-drag-handle-line
-          pointer-events: none;
-        }
-
         .affine-drag-handle {
           position: absolute;
-          pointer-events: auto;
         }
       </style>
       <div class="affine-drag-handle-line"></div>

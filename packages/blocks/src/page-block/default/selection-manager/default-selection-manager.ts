@@ -9,6 +9,7 @@ import {
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
+  getBlockElementsIncludeSubtrees,
   getClosestBlockElementByPoint,
   getClosestBlockElementByPointInStrictMode,
   getCurrentNativeRange,
@@ -49,7 +50,6 @@ import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
   filterSelectedBlockWithoutSubtree,
-  findBlocksWithSubtree,
   setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
@@ -525,8 +525,8 @@ export class DefaultSelectionManager {
       rect = getRectByBlockElement(this.state.focusedBlock);
     }
 
-    // find subtree of focused block ement
-    const selectedBlocks = [element, ...getBlockElementsByElement(element)];
+    // find subtrees of focused block ement
+    const selectedBlocks = getBlockElementsIncludeSubtrees([element]);
 
     // only current focused block element
     setSelectedBlocks(
@@ -545,7 +545,7 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = getBlockElementsByElement(this._container);
 
-    // clear subtree
+    // clear subtrees
     const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
       getRectByBlockElement
     );
@@ -577,14 +577,21 @@ export class DefaultSelectionManager {
         x: scrollLeft - left,
       }
     );
-    const rects = selectedBlocksWithoutSubtrees.map(
-      ({ block }) => blockCache.get(block) as DOMRect
+    const [selectedBlocks, rects] = selectedBlocksWithoutSubtrees.reduce<
+      [Element[], DOMRect[]]
+    >(
+      (data, { block }) => {
+        data[0].push(...getBlockElementsIncludeSubtrees([block as Element]));
+        data[1].push(getRectByBlockElement(block as Element));
+        return data;
+      },
+      [[], []]
     );
 
     setSelectedBlocks(
       this.state,
       this.slots,
-      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+      selectedBlocks as BlockComponentElement[],
       rects
     );
   }

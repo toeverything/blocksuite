@@ -77,7 +77,10 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   point.x = Math.floor(
-    Math.min(Math.ceil(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X), right)
+    Math.min(
+      Math.ceil(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X),
+      right - 1
+    )
   );
 
   do {
@@ -111,10 +114,9 @@ export function getClosestBlockElementByPointInStrictMode(
   if (clamp) {
     // make sure `x` in [rect.left, rect.right] range.
     point.x = Math.floor(
-      Math.min(Math.ceil(Math.max(point.x, rect.left)), rect.right)
+      Math.min(Math.ceil(Math.max(point.x, rect.left)), rect.right - 1)
     );
-  }
-  if (!rect.isPointIn(point)) return null;
+  } else if (!rect.isPointIn(point)) return null;
   return getClosestBlockElementByElement(
     document.elementFromPoint(point.x, point.y)
   );
@@ -167,12 +169,9 @@ export function getBlockElementsByElement(
 /**
  * Returns rect of the block element.
  */
-export function getRectByBlockElement(element: Element) {
-  // const elem = element as BlockComponentElement;
-  // if (elem.model.type === 'image') {
-  //   const image = elem as ImageBlockComponent;
-  //   return image.resizeImg.getBoundingClientRect();
-  // }
+export function getRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
   return element.getBoundingClientRect();
 }
 
