@@ -137,13 +137,10 @@ export function convertToParagraph(
     model.text?.delete(0, prefix.length + 1);
     const vEditor = getRichTextByModel(model)?.vEditor;
     if (vEditor) {
-      vEditor.slots.updateVRange.emit([
-        {
-          index: 0,
-          length: 0,
-        },
-        'native',
-      ]);
+      vEditor.setVRange({
+        index: 0,
+        length: 0,
+      });
     }
     page.updateBlock(model, { type: type });
   }
