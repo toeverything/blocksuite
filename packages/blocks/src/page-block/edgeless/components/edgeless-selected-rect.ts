@@ -131,6 +131,8 @@ export class EdgelessSelectedRect extends LitElement {
         this.surface.setElementBound(element.id, { x, y, w, h });
       }
     });
+
+    this.requestUpdate();
   };
 
   private _onDragEnd = () => {
@@ -141,9 +143,8 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   firstUpdated() {
-    this._disposables.add(
-      this.slots.viewportUpdated.on(() => this.requestUpdate())
-    );
+    const { _disposables, slots } = this;
+    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
   }
 
   disconnectedCallback() {
