@@ -477,7 +477,7 @@ export class VEditor<
     return this._vRange;
   }
 
-  getFormat(vRange: VRange): TextAttributes {
+  getFormat(vRange: VRange, type?: 'default'): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange);
 
     const result: {
@@ -490,9 +490,12 @@ export class VEditor<
             delete result[key];
           } else {
             if (
+              type === 'default' &&
               vRange.index >= position.index &&
               vRange.index + vRange.length <= position.index + position.length
             ) {
+              result[key] = value;
+            } else {
               result[key] = value;
             }
           }
