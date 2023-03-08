@@ -30,7 +30,7 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'break-spaces',
+    'white-space': 'pre-wrap',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
