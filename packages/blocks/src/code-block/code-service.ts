@@ -1,7 +1,6 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
-import type { DeltaOperation } from 'quill';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type { OpenBlockInfo } from '../__internal__/utils/index.js';

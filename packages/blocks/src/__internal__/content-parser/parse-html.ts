@@ -1,8 +1,7 @@
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
-import type { DeltaOperation } from 'quill';
+import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import type { ContentParser } from './index.js';
 

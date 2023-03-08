@@ -38,10 +38,12 @@ export const json2block = (
         range?.startOffset || 0
       );
 
-      getRichTextByModel(focusedBlockModel)?.quill.setSelection(
-        (range?.startOffset || 0) + textLength,
-        0
-      );
+      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+      assertExists(vEditor);
+      vEditor.setVRange({
+        index: (range?.startOffset ?? 0) + textLength,
+        length: 0,
+      });
     } else {
       const shouldSplitBlock =
         focusedBlockModel.text?.length !== range.endOffset;
@@ -59,7 +61,12 @@ export const json2block = (
 
       assertExists(model);
       if (model.text) {
-        getRichTextByModel(model)?.quill.setSelection(textLength, 0);
+        const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+        assertExists(vEditor);
+        vEditor.setVRange({
+          index: textLength,
+          length: 0,
+        });
       } else {
         // TODO: set embed block selection
       }
@@ -102,14 +109,21 @@ export const json2block = (
 
     // Wait for the block's rich text mounted
     requestAnimationFrame(() => {
-      getRichTextByModel(lastModel)?.quill.setSelection(rangeOffset, 0);
+      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+      assertExists(vEditor);
+      vEditor.setVRange({
+        index: rangeOffset,
+        length: 0,
+      });
     });
   } else {
     if (lastModel?.text) {
-      getRichTextByModel(lastModel)?.quill.setSelection(
-        lastModel.text?.length,
-        0
-      );
+      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+      assertExists(vEditor);
+      vEditor.setVRange({
+        index: lastModel.text?.length,
+        length: 0,
+      });
     } else {
       // TODO: set embed block selection
     }
