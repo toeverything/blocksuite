@@ -1,6 +1,6 @@
 import type { IBound } from '../../consts.js';
 import { boundsContain } from '../../utils/bound.js';
-import { intersects,isPointIn } from '../../utils/hit-utils.js';
+import { intersects, isPointIn } from '../../utils/hit-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
