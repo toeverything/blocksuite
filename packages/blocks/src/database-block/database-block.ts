@@ -249,7 +249,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: DatabaseBlockModel;
 
   @property()

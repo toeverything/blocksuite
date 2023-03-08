@@ -93,10 +93,10 @@ export class EdgelessPageBlockComponent
   @property()
   page!: Page;
 
-  @property({ hasChanged: () => true })
+  @property()
   pageModel!: PageBlockModel;
 
-  @property({ hasChanged: () => true })
+  @property()
   surfaceModel!: SurfaceBlockModel;
 
   @property()
@@ -237,7 +237,6 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    // this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncDraggingArea());

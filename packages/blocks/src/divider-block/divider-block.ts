@@ -26,7 +26,7 @@ export class DividerBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: DividerBlockModel;
 
   @property()

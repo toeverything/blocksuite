@@ -119,7 +119,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: EmbedBlockModel;
 
   @property()

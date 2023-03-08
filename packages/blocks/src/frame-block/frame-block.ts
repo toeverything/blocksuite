@@ -18,7 +18,7 @@ export class FrameBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: FrameBlockModel;
 
   @property()
