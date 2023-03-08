@@ -137,12 +137,11 @@ export class EdgelessPageBlockComponent
     hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
     hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
     bindCommonHotkey(this.page);
-  }
 
-  private _removeHotkeys() {
-    hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
-
-    removeCommonHotKey();
+    return () => {
+      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+      removeCommonHotKey();
+    };
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {
@@ -223,6 +222,50 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initSlotEffects() {
+    // TODO: listen to new children
+    // this.pageModel.children.forEach(frame => {
+    //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
+    // });
+    const { _disposables, slots } = this;
+    _disposables.add(
+      slots.viewportUpdated.on(() => {
+        this.style.setProperty(
+          '--affine-zoom',
+          `${this.surface.viewport.zoom}`
+        );
+        this.requestUpdate();
+      })
+    );
+    _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.selectionUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.mouseModeUpdated.on(mouseMode => {
+        this.mouseMode = mouseMode;
+      })
+    );
+    _disposables.add(
+      this.page.slots.historyUpdated.on(() => {
+        this._clearSelection();
+        this.requestUpdate();
+      })
+    );
+    _disposables.add(this._selection);
+    _disposables.add(this.surface);
+    _disposables.add(this._bindHotkeys());
+    _disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
+      },
+      // FIXME: somewhere call stopPropagation on keydown event
+      true
+    );
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
@@ -235,42 +278,9 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    // TODO: listen to new children
-    // this.pageModel.children.forEach(frame => {
-    //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
-    // });
-
-    this.slots.viewportUpdated.on(() => {
-      this.style.setProperty('--affine-zoom', `${this.surface.viewport.zoom}`);
-
-      this.requestUpdate();
-    });
-    this.slots.hoverUpdated.on(() => this.requestUpdate());
-    this.slots.selectionUpdated.on(() => this.requestUpdate());
-    this.slots.surfaceUpdated.on(() => this.requestUpdate());
-    this.slots.mouseModeUpdated.on(mouseMode => {
-      this.mouseMode = mouseMode;
-    });
-
-    this._disposables.add(
-      this.page.slots.historyUpdated.on(() => {
-        this._clearSelection();
-        this.requestUpdate();
-      })
-    );
-    this._bindHotkeys();
+    this._initSlotEffects();
 
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-
-    this.addEventListener(
-      'keydown',
-      e => {
-        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-      },
-      // FIXME: somewhere call stopPropagation on keydown event
-      true
-    );
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
@@ -287,16 +297,7 @@ export class EdgelessPageBlockComponent
 
   disconnectedCallback() {
     super.disconnectedCallback();
-
-    this.slots.selectionUpdated.dispose();
-    this.slots.viewportUpdated.dispose();
-    this.slots.hoverUpdated.dispose();
-    this.slots.surfaceUpdated.dispose();
-    this.slots.mouseModeUpdated.dispose();
     this._disposables.dispose();
-    this._selection.dispose();
-    this.surface.dispose();
-    this._removeHotkeys();
   }
 
   render() {
