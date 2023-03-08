@@ -256,12 +256,9 @@ test('should format quick bar be able to format text', async ({ page }) => {
     prop:text={
       <>
         <text
-          bold={false}
-          code={false}
           insert="456"
           italic={true}
           strike={true}
-          underline={false}
         />
       </>
     }
@@ -338,36 +335,15 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="123"
-        />
-      </>
-    }
+    prop:text="123"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="456"
-        />
-      </>
-    }
+    prop:text="456"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="789"
-        />
-      </>
-    }
+    prop:text="789"
     prop:type="text"
   />
 </affine:frame>`,
@@ -771,7 +747,6 @@ test('should format quick bar work in single block selection', async ({
         <text
           bold={true}
           insert="456"
-          italic={false}
           underline={true}
         />
       </>
@@ -837,7 +812,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="123"
-          italic={false}
           underline={true}
         />
       </>
@@ -850,7 +824,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="456"
-          italic={false}
           underline={true}
         />
       </>
@@ -863,7 +836,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="789"
-          italic={false}
           underline={true}
         />
       </>

@@ -345,7 +345,7 @@ function formatBlockRange(
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
     startModel.text?.format(startOffset, endOffset - startOffset, {
-      [key]: !format[key],
+      [key]: format[key] ? null : true,
     });
     requestAnimationFrame(() => {
       restoreSelection(blockRange);
@@ -356,19 +356,21 @@ function formatBlockRange(
   // format start model
   if (!matchFlavours(startModel, ['affine:code'] as const)) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
-      [key]: !format[key],
+      [key]: format[key] ? null : true,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'] as const)) {
-    endModel.text?.format(0, endOffset, { [key]: !format[key] });
+    endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
   // format between models
   blockRange.models
     .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
-      model.text?.format(0, model.text.length, { [key]: !format[key] });
+      model.text?.format(0, model.text.length, {
+        [key]: format[key] ? null : true,
+      });
     });
 
   // Native selection maybe shifted after format
