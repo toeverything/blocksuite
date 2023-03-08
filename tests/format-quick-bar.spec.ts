@@ -973,3 +973,32 @@ test('buttons in format quick bar should have correct active styles', async ({
   await dragBetweenIndices(page, [1, 0], [1, 3]);
   await expect(codeBtn).not.toHaveAttribute('active', '');
 });
+
+test('should format bar style active correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const delta = [
+      { insert: '1', attributes: { bold: true, italic: true } },
+      { insert: '2', attributes: { bold: true, underline: true } },
+      { insert: '3', attributes: { bold: true, code: true } },
+    ];
+    const text = page.Text.fromDelta(delta);
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+  });
+
+  const { boldBtn, codeBtn, underlineBtn } = getFormatBar(page);
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await expect(underlineBtn).not.toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
+
+  await underlineBtn.click();
+  await expect(underlineBtn).toHaveAttribute('active', '');
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
+});
