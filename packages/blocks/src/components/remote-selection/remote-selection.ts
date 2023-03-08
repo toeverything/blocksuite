@@ -11,8 +11,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
+import { getEditorContainer } from '../../__internal__/utils/query.js';
 import { resetNativeSelection } from '../../__internal__/utils/selection.js';
-import { getEditorContainer } from '../../std.js';
 
 interface SelectionRect {
   width: number;
