@@ -115,7 +115,7 @@ export class ListBlockComponent extends NonShadowLitElement {
   render() {
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
-    const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);
+    const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
 
     const childrenContainer = this.showChildren
       ? BlockChildrenContainer(this.model, this.host, () =>
