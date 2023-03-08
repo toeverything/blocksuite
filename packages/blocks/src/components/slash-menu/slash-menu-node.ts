@@ -265,15 +265,6 @@ export class SlashMenu extends LitElement {
     if (!ele) {
       return;
     }
-    // `scrollIntoViewIfNeeded` is not a standard API
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
-    if (
-      'scrollIntoViewIfNeeded' in ele &&
-      ele.scrollIntoViewIfNeeded instanceof Function
-    ) {
-      ele.scrollIntoViewIfNeeded();
-      return;
-    }
     ele.scrollIntoView(true);
   }
 
