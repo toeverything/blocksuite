@@ -21,6 +21,7 @@ import {
   initWheelEventHandlers,
   pickTopBlock,
 } from './utils.js';
+import { TextModeController } from './mode-controllers/text-mode.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
 
@@ -105,6 +106,7 @@ export class EdgelessSelectionManager {
       shape: new ShapeModeController(this._container),
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
+      text: new TextModeController(this._container),
     };
 
     this._initMouseAndWheelEvents();

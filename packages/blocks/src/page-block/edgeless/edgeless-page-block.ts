@@ -266,6 +266,10 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  setBlockSelectionState(state: EdgelessSelectionState) {
+    this._selection.currentController.setBlockSelectionState(state);
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();

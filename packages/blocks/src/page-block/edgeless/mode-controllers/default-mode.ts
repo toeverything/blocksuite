@@ -10,6 +10,7 @@ import type {
 import {
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  isEmpty,
   noop,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
@@ -172,7 +173,18 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
   }
 
+  private _tryDeleteEmptyBlocks() {
+    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
+
+    if (emptyBlocks.length) {
+      this._page.captureSync();
+      emptyBlocks.forEach(b => this._page.deleteBlock(b));
+    }
+  }
+
   onContainerClick(e: SelectionEvent) {
+    this._tryDeleteEmptyBlocks();
+
     const selected = this._pick(e.x, e.y);
 
     if (selected) {

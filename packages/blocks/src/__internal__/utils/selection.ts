@@ -503,14 +503,18 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
   // if not left click
   if (e.button) return;
 
-  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+
+  handleClickRetargeting(page, e);
+}
+
+export function handleNativeRangeAtPoint(x: number, y: number) {
+  const range = caretRangeFromPoint(x, y);
   const startContainer = range?.startContainer;
   // click on rich text
   if (startContainer instanceof Node) {
     resetNativeSelection(range);
   }
-
-  handleClickRetargeting(page, e);
 }
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
