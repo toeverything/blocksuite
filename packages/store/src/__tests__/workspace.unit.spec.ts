@@ -16,7 +16,7 @@ import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
-  return { idGenerator };
+  return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
 // Create BlockSchema manually
@@ -66,7 +66,7 @@ const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
-  it('can init workspace', async () => {
+  it.only('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);

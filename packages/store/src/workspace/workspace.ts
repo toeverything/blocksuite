@@ -237,7 +237,6 @@ class WorkspaceMeta<
 
 export class Workspace {
   static Y = Y;
-  public readonly room: string | undefined;
 
   private _store: Store;
   private _indexer: Indexer;
@@ -262,8 +261,10 @@ export class Workspace {
     if (options.blobOptionsGetter) {
       this._blobOptionsGetter = options.blobOptionsGetter;
     }
+    console.log(options.isSSR);
+
     if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room, k => {
+      this._blobStorage = getBlobStorage(options.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
@@ -291,7 +292,6 @@ export class Workspace {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
-    this.room = options.room;
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
@@ -302,6 +302,10 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  get id() {
+    return this._store.id;
   }
 
   get connected(): boolean {

@@ -14,7 +14,7 @@ const Editor: React.ComponentType<EditorProps> = dynamic(
 );
 
 const localWorkspace = new Workspace({
-  room: 'suspense',
+  id: 'suspense',
   providers: [],
   isSSR: typeof window === 'undefined',
 });

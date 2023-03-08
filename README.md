@@ -143,7 +143,7 @@ function initEditorOnPageAdded(workspace: Workspace) {
 
 function main() {
   // Initialize the store.
-  const workspace = new Workspace({}).register(builtInSchemas);
+  const workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
 
   // Start waiting for the first page...
   initEditorOnPageAdded(workspace);
