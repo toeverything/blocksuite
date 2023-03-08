@@ -513,12 +513,10 @@ export class DefaultSelectionManager {
     }
   }
 
-  selectOneBlockElement(element: Element | null, rect?: DOMRect) {
+  selectOneBlock(element: Element | null, rect?: DOMRect) {
     // rich-text should be unfocused
     this.state.blur();
-
     this.state.type = 'block';
-
     this.state.focusedBlock = element as BlockComponentElement;
 
     if (!element) return;
@@ -528,22 +526,26 @@ export class DefaultSelectionManager {
     }
 
     // find subtree of focused block ement
-    const selectedBlocks = [
-      element,
-      ...getBlockElementsByElement(element),
-    ] as BlockComponentElement[];
+    const selectedBlocks = [element, ...getBlockElementsByElement(element)];
 
     // only current focused block element
-    setSelectedBlocks(this.state, this.slots, selectedBlocks, [rect]);
+    setSelectedBlocks(
+      this.state,
+      this.slots,
+      selectedBlocks as BlockComponentElement[],
+      [rect]
+    );
   }
 
-  selectAllBlockElements() {
+  selectAllBlocks() {
     // clear selection first
     this.clear();
     this.state.type = 'block';
-    this.state.focusedBlock = null; // SELECT_ALL
+    this.state.focusedBlock = null;
 
     const selectedBlocks = getBlockElementsByElement();
+
+    // clear subtree
     const rects = clearSubtree(selectedBlocks).map(getRectByBlockElement);
 
     setSelectedBlocks(
@@ -553,33 +555,6 @@ export class DefaultSelectionManager {
       rects
     );
   }
-
-  // Called on clicking on drag-handle button
-  /*
-  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
-    // rich-text should be unfocused
-    this.state.blur();
-
-    this.state.focusedBlockIndex = index;
-
-    const { blockCache, focusedBlockIndex } = this.state;
-
-    if (focusedBlockIndex === -1) {
-      return;
-    }
-
-    this.state.type = 'block';
-    this.state.refreshBlockRectCache();
-
-    const selectedBlocks = filterSelectedBlockByIndex(
-      blockCache,
-      focusedBlockIndex
-    );
-
-    // only current focused-block
-    setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
-  }
-  */
 
   selectBlocksByDraggingArea(
     blockCache: Map<BlockComponentElement, DOMRect>,
@@ -610,47 +585,6 @@ export class DefaultSelectionManager {
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
-  }
-
-  // Called on `CMD-A`
-  selectBlocksByRect(hitRect: DOMRect) {
-    this.state.refreshBlockRectCache();
-    const {
-      blockCache,
-      focusedBlockIndex,
-      selectedBlocks: prevSelectedBlocks,
-    } = this.state;
-    const selectedBlocks = filterSelectedBlockByIndexAndBound(
-      blockCache,
-      focusedBlockIndex,
-      hitRect
-    );
-
-    if (blockCache.size === prevSelectedBlocks.length) {
-      return;
-    }
-
-    if (selectedBlocks.length === 0) {
-      return;
-    }
-
-    // clear selection first
-    this.clear();
-    this.state.type = 'block';
-
-    const firstBlock = selectedBlocks[0];
-
-    if (focusedBlockIndex === -1) {
-      // SELECT_ALL
-      const rects = clearSubtree(selectedBlocks, firstBlock).map(
-        block => blockCache.get(block) as DOMRect
-      );
-      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
-    } else {
-      const rects = [blockCache.get(firstBlock) as DOMRect];
-      // only current focused-block
-      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
-    }
   }
 
   setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {

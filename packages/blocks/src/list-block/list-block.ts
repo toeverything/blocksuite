@@ -82,7 +82,7 @@ export class ListBlockComponent extends NonShadowLitElement {
 
   private _select() {
     const { selection } = getDefaultPageBlock(this.model);
-    selection.selectOneBlockElement(this);
+    selection.selectOneBlock(this);
   }
 
   private _onClickIcon = (e: MouseEvent) => {

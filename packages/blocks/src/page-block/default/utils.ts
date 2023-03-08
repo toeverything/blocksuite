@@ -558,10 +558,8 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (Array.isArray(selectedBlocks)) {
         defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
       } else if (selectedBlocks) {
-        // const { position, element } = selectedBlocks;
-        // defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
         const { element, rect } = selectedBlocks;
-        defaultPageBlock.selection.selectOneBlockElement(element, rect);
+        defaultPageBlock.selection.selectOneBlock(element, rect);
       }
     },
     getSelectedBlocks() {
