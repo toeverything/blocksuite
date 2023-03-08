@@ -5,11 +5,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { Highlighter, Lang } from 'shiki';
 import { z } from 'zod';
 
-import { getCodeLineRenderer } from '../../code-block/utils/code-line-render.js';
+import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
-import { attributesRenderer } from './virgo/attributes-render.js';
+import { attributesRenderer } from './virgo/attributes-renderer.js';
 import { affineTextAttributes, AffineVEditor } from './virgo/types.js';
 
 @customElement('rich-text')
