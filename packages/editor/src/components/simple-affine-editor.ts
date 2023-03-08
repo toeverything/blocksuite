@@ -23,7 +23,7 @@ export class SimpleAffineEditor extends NonShadowLitElement {
   constructor() {
     super();
 
-    this.workspace = new Workspace({}).register(builtInSchemas);
+    this.workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
     this._subscribePage();
 
     this.workspace.createPage('page0');

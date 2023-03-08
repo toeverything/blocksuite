@@ -13,15 +13,15 @@ import { Page, Workspace } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
 import {
+  createWorkspaceOptions,
   defaultMode,
-  getOptions,
   initDebugConfig,
   initParam,
   isE2E,
   tryInitExternalContent,
 } from './utils.js';
 
-const options = getOptions();
+const options = createWorkspaceOptions();
 initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.

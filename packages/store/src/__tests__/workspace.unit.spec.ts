@@ -16,7 +16,7 @@ import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
-  return { idGenerator };
+  return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
 // Create BlockSchema manually

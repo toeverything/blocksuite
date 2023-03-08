@@ -53,9 +53,9 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
     try {
       const data = JSON.parse(str);
       const workspaces: Workspace[] = data.map(
-        (room: string) =>
+        (id: string) =>
           new Workspace({
-            room,
+            id,
             providers: [DebugDocProvider, IndexedDBDocProvider],
           })
       );
@@ -75,8 +75,8 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
     store.subscribe(
       store => store.workspaces,
       workspaces => {
-        const rooms = workspaces.map(workspace => workspace.room);
-        localStorage.setItem('blocksuite-react', JSON.stringify(rooms));
+        const ids = workspaces.map(workspace => workspace.id);
+        localStorage.setItem('blocksuite-react', JSON.stringify(ids));
       }
     );
   }

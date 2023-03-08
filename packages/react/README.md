@@ -31,7 +31,7 @@ import { Workspace } from '@blocksuite/store';
 import { IndexedDBDocProvider } from '@blocksuite/store';
 
 const localWorkspace = new Workspace({
-  room: 'local-room',
+  id: 'local-room',
   isSSR: typeof window === 'undefined',
   providers: typeof window === 'undefined' ? [] : [IndexedDBDocProvider],
 });

@@ -58,15 +58,13 @@ export interface SSROptions {
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
-  room?: string;
+  id: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
   blobOptionsGetter?: BlobOptionsGetter;
 }
-
-const DEFAULT_ROOM = 'virgo-default';
 
 const flagsPreset = {
   enable_set_remote_flag: true,
@@ -84,6 +82,7 @@ const flagsPreset = {
 } satisfies BlockSuiteFlags;
 
 export class Store {
+  readonly id: string;
   readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
@@ -92,13 +91,16 @@ export class Store {
   connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
-  constructor({
-    room = DEFAULT_ROOM,
-    providers = [],
-    awareness,
-    idGenerator,
-    defaultFlags,
-  }: StoreOptions = {}) {
+  constructor(
+    {
+      id,
+      providers = [],
+      awareness,
+      idGenerator,
+      defaultFlags,
+    }: StoreOptions = { id: nanoid() }
+  ) {
+    this.id = id;
     this.awarenessStore = new AwarenessStore(
       this,
       awareness ?? new Awareness<RawAwarenessState>(this.doc),
@@ -129,7 +131,7 @@ export class Store {
 
     this.providers = providers.map(
       ProviderConstructor =>
-        new ProviderConstructor(room, this.doc, {
+        new ProviderConstructor(id, this.doc, {
           // @ts-expect-error
           awareness: this.awarenessStore.awareness,
         })

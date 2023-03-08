@@ -21,7 +21,7 @@ declare global {
 }
 
 const localWorkspace = new Workspace({
-  room: 'local-room',
+  id: 'local-room',
   isSSR: typeof window === 'undefined',
   providers:
     typeof window === 'undefined'
