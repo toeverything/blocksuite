@@ -149,11 +149,13 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
-  // FIXME: after quill onload
   requestAnimationFrame(() => {
     assertExists(model);
     const richText = getRichTextByModel(model);
-    richText?.quill.setSelection(offset, 0);
+    richText?.vEditor?.setVRange({
+      index: offset,
+      length: 0,
+    });
   });
 }
 
@@ -198,11 +200,13 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
       children: [...previousSibling.children, model, ...children],
     });
 
-    // FIXME: after quill onload
     requestAnimationFrame(() => {
       assertExists(model);
       const richText = getRichTextByModel(model);
-      richText?.quill.setSelection(0, 0);
+      richText?.vEditor?.setVRange({
+        index: 0,
+        length: 0,
+      });
     });
   });
 }
@@ -267,11 +271,13 @@ export function handleUnindent(
     ],
   });
 
-  // FIXME: after quill onload
   requestAnimationFrame(() => {
     assertExists(model);
     const richText = getRichTextByModel(model);
-    richText?.quill.setSelection(offset, 0);
+    richText?.vEditor?.setVRange({
+      index: offset,
+      length: 0,
+    });
   });
 }
 
@@ -353,7 +359,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           bringChildrenTo: previousSibling,
         });
         const richText = getRichTextByModel(previousSibling);
-        richText?.quill?.setSelection(preTextLength, 0);
+        richText?.vEditor?.setVRange({
+          index: preTextLength,
+          length: 0,
+        });
       } else if (
         previousSibling &&
         matchFlavours(previousSibling, [

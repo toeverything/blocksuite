@@ -357,12 +357,7 @@ test('should sync selected-blocks to session-manager when clicking drag handle',
   await handle.click();
 
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, [
-    '123',
-    `
-`,
-    '789',
-  ]);
+  await assertRichTexts(page, ['123', '', '789']);
 });
 
 test('should be able to drag & drop multiple blocks', async ({ page }) => {
@@ -470,7 +465,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   await dragBetweenIndices(
     page,
     [0, 0],
-    [1, 10],
+    [1, 1],
     { x: -80, y: 0 },
     { x: 80, y: 0 },
     {

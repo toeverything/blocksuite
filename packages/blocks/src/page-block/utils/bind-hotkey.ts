@@ -39,7 +39,7 @@ export function bindCommonHotkey(page: Page) {
 
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
     hotkey.addListener(hotkeyStr, e => {
-      // Prevent quill default behavior
+      // Prevent default behavior
       e.preventDefault();
       if (page.awarenessStore.isReadonly(page)) {
         return;

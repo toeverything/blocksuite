@@ -16,13 +16,13 @@ test('should ctrl+enter works in code block', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
-  await assertRichTexts(page, ['const a = 10;\n']);
+  await assertRichTexts(page, ['const a = 10;']);
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
   // TODO fix this
   // actual
-  await assertRichTexts(page, ['const a = 10\n;\n']);
+  await assertRichTexts(page, ['const a = 10\n;']);
   test.fail();
   // but expected
-  await assertRichTexts(page, ['const a = 10;\n\n']);
+  await assertRichTexts(page, ['const a = 10;\n']);
 });

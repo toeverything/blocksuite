@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 import {
+  pressBackspace,
   pressEnter,
   SHORT_KEY,
   type,
@@ -47,7 +48,7 @@ test.describe('slash menu should show and hide correctly', () => {
     }
     await focusRichText(page);
     // Clear input
-    await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
   });
 
   test('slash menu should hide after click away', async () => {
@@ -90,11 +91,11 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/_']);
 
     // And pressing backspace immediately should reappear the slash menu
-    await page.keyboard.press('Backspace');
+    await pressBackspace(page);
     await expect(slashMenu).toBeVisible();
 
     await type(page, '__');
-    await page.keyboard.press('Backspace');
+    await pressBackspace(page);
     await expect(slashMenu).not.toBeVisible();
   });
 
@@ -267,7 +268,7 @@ test.describe('slash menu with code block', () => {
     await codeBlock.waitFor({ state: 'hidden' });
 
     await type(page, 'const a = 10;');
-    await assertRichTexts(page, ['const a = 10;\n']);
+    await assertRichTexts(page, ['const a = 10;']);
   });
 
   test('should focus on code blocks created by the slash menu', async ({
@@ -287,6 +288,6 @@ test.describe('slash menu with code block', () => {
     await codeBlock.waitFor({ state: 'hidden' });
 
     await type(page, '111');
-    await assertRichTexts(page, ['111000\n']);
+    await assertRichTexts(page, ['111000']);
   });
 });

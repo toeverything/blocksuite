@@ -17,11 +17,12 @@ import {
   pressTab,
   resetHistory,
   selectAllByKeyboard,
-  setQuillSelection,
   setSelection,
+  setVirgoSelection,
   SHORT_KEY,
   type,
   undoByClick,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -40,7 +41,7 @@ test('clipboard copy paste', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'test');
-  await setQuillSelection(page, 0, 3);
+  await setVirgoSelection(page, 0, 3);
   await copyByKeyboard(page);
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -56,6 +57,7 @@ test('clipboard paste html', async ({ page }) => {
   const clipData = {
     'text/html': `<span>aaa</span><span>bbb</span><span>ccc</span>`,
   };
+  await waitNextFrame(page);
   await page.evaluate(
     ({ clipData }) => {
       const dT = new DataTransfer();
@@ -106,6 +108,7 @@ test('markdown format parse', async ({ page }) => {
 > quote
 `,
   };
+  await waitNextFrame(page);
   await pasteContent(page, clipData);
   await assertBlockTypes(page, [
     'h1',
@@ -138,7 +141,8 @@ test('markdown format parse', async ({ page }) => {
     'quote',
   ]);
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
+  await focusRichText(page);
 
   clipData = {
     'text/plain': `# ***bolditalic***
@@ -155,6 +159,7 @@ test('markdown format parse', async ({ page }) => {
 \`code\`
 `,
   };
+  await waitNextFrame(page);
   await pasteContent(page, clipData);
   await assertTextFormats(page, [
     { bold: true, italic: true },
@@ -166,7 +171,7 @@ test('markdown format parse', async ({ page }) => {
     { code: true },
   ]);
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('split block when paste', async ({ page }) => {
@@ -183,8 +188,7 @@ test('split block when paste', async ({ page }) => {
   await type(page, 'abc');
   await captureHistory(page);
 
-  await setQuillSelection(page, 1, 1);
-  await page.waitForTimeout(100);
+  await setVirgoSelection(page, 1, 1);
   await pasteContent(page, clipData);
 
   await assertRichTexts(page, ['atext', 'h1c']);
@@ -199,12 +203,16 @@ test('split block when paste', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'bb');
   const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left + 2, y: bbox.top + 2 };
   });
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="5"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="5"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right - 2, y: bbox.bottom - 2 };
   });
@@ -223,11 +231,11 @@ test('import markdown', async ({ page }) => {
   const clipData = `# text
 # h1
 `;
-  await setQuillSelection(page, 1, 1);
+  await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, frameId, clipData);
-  await assertRichTexts(page, ['text', 'h1', '\n']);
+  await assertRichTexts(page, ['text', 'h1', '']);
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 // FIXME
 test.skip('copy clipItems format', async ({ page }) => {
@@ -252,7 +260,7 @@ test.skip('copy clipItems format', async ({ page }) => {
     '<ul><li>b<ul><li>c</li></ul></li></ul>'
   );
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 // FIXME
 test.skip('copy partially selected text', async ({ page }) => {
@@ -263,12 +271,12 @@ test.skip('copy partially selected text', async ({ page }) => {
   await type(page, '123 456 789');
 
   // select 456
-  await setQuillSelection(page, 4, 3);
+  await setVirgoSelection(page, 4, 3);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '456');
 
   // move to line end
-  await setQuillSelection(page, 11, 0);
+  await setVirgoSelection(page, 11, 0);
   await pressEnter(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123 456 789', '456']);
@@ -284,7 +292,7 @@ test.skip('copy more than one delta op on a block', async ({ page }) => {
 
   await importMarkdown(page, clipData, '0');
   await setSelection(page, 3, 0, 3, 1);
-  await setQuillSelection(page, 0, 14);
+  await setVirgoSelection(page, 0, 14);
   await assertClipItems(page, 'text/plain', 'You talking to');
   await assertClipItems(
     page,
@@ -385,7 +393,8 @@ test('should keep first line format when pasted into a new line', async ({
 </affine:page>`
   );
 
-  await setSelection(page, 5, 1, 3, 0);
+  await setSelection(page, 3, 0, 5, 1);
+  await waitNextFrame(page);
   await copyByKeyboard(page);
 
   await focusRichText(page, 3);
@@ -453,7 +462,7 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await page.keyboard.press(`${SHORT_KEY}+x`);
-  await assertText(page, '\n');
+  await assertText(page, '');
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['a', 'b', 'c']);
 });

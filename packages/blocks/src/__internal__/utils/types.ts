@@ -1,11 +1,11 @@
 import type { BlockModelProps } from '@blocksuite/global/types';
 import type { ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
+import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { Point } from './rect.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
@@ -84,7 +84,7 @@ export type OpenBlockInfo = {
     insert?: string;
     delete?: number;
     retain?: number;
-    attributes?: TextAttributes;
+    attributes?: AffineTextAttributes;
   }[];
   rawText?: {
     insert: string;

@@ -1,7 +1,6 @@
 import type * as Y from 'yjs';
 
 import type { AwarenessStore, UserRange } from './awareness.js';
-import type { RichTextAdapter } from './text-adapter.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
 
 export interface StackItem {
@@ -24,7 +23,6 @@ export class Space<
    */
   protected readonly proxy: Data;
   protected readonly origin: Y.Map<Data[keyof Data]>;
-  readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;

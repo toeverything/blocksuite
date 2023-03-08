@@ -36,7 +36,7 @@ test('add new bulleted list', async ({ page }) => {
   await type(page, 'aa');
   await pressEnter(page);
 
-  await assertRichTexts(page, ['aa', 'aa', '\n']);
+  await assertRichTexts(page, ['aa', 'aa', '']);
   await assertBlockCount(page, 'list', 3);
 });
 
@@ -52,7 +52,7 @@ test('add new toggle list', async ({ page }) => {
   await type(page, 'kid 1');
   await pressEnter(page);
 
-  await assertRichTexts(page, ['top', 'kid 1', '\n']);
+  await assertRichTexts(page, ['top', 'kid 1', '']);
   await assertBlockCount(page, 'list', 3);
 });
 
@@ -92,10 +92,10 @@ test('indent list block', async ({ page }) => {
 
   await focusRichText(page, 1);
   await type(page, 'hello');
-  await assertRichTexts(page, ['\n', 'hello', '\n']);
+  await assertRichTexts(page, ['', 'hello', '']);
 
   await page.keyboard.press('Tab'); // 0(1(2(3)4))
-  await assertRichTexts(page, ['\n', 'hello', '\n']);
+  await assertRichTexts(page, ['', 'hello', '']);
   await assertBlockChildrenIds(page, '1', ['2', '4']);
   await assertBlockChildrenIds(page, '2', ['3']);
 
@@ -107,7 +107,7 @@ test('unindent list block', async ({ page }) => {
   await enterPlaygroundWithList(page); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
-  await page.keyboard.press('Tab'); // 0(1(2(3)4))
+  await page.keyboard.press('Tab', { delay: 50 }); // 0(1(2(3)4))
 
   await assertBlockChildrenIds(page, '1', ['2', '4']);
   await assertBlockChildrenIds(page, '2', ['3']);
@@ -121,15 +121,15 @@ test('unindent list block', async ({ page }) => {
 
 test('insert new list block by enter', async ({ page }) => {
   await enterPlaygroundWithList(page);
-  await assertRichTexts(page, ['\n', '\n', '\n']);
+  await assertRichTexts(page, ['', '', '']);
 
   await focusRichText(page, 1);
   await type(page, 'hello');
-  await assertRichTexts(page, ['\n', 'hello', '\n']);
+  await assertRichTexts(page, ['', 'hello', '']);
 
   await pressEnter(page);
   await type(page, 'world');
-  await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
+  await assertRichTexts(page, ['', 'hello', 'world', '']);
   await assertBlockChildrenFlavours(page, '1', [
     'affine:list',
     'affine:list',

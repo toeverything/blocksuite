@@ -7,11 +7,11 @@ import {
   paragraphConfig,
 } from '@blocksuite/global/config';
 import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
@@ -61,7 +61,7 @@ export class FormatQuickBar extends LitElement {
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  private _format: TextAttributes = {};
+  private _format: AffineTextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;

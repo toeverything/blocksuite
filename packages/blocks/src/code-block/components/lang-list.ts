@@ -98,7 +98,9 @@ export class LangList extends NonShadowLitElement {
   @property()
   delay = 150;
 
-  static languages = codeLanguages;
+  static languages = codeLanguages.map(
+    lang => lang.toUpperCase()[0] + lang.slice(1)
+  );
 
   override connectedCallback() {
     super.connectedCallback();

@@ -1,5 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { DeltaOperation } from 'quill';
+import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
 import { getService } from '../service.js';
 import type { BlockRange, IService, OpenBlockInfo } from '../utils/index.js';

@@ -10,7 +10,7 @@ import { getDefaultAttributeRenderer } from './utils/attributes-renderer.js';
 import { deltaInsertsToChunks } from './utils/convert.js';
 import type { BaseTextAttributes } from './utils/index.js';
 import { baseTextAttributes } from './utils/index.js';
-import { renderElement } from './utils/render.js';
+import { renderElement } from './utils/renderer.js';
 
 export interface VRange {
   index: number;

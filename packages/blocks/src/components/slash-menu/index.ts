@@ -1,6 +1,6 @@
 import './slash-menu-node.js';
 
-import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists, BaseBlockModel } from '@blocksuite/store';
 
 import {
   getRichTextByModel,
@@ -83,16 +83,17 @@ function onAbort(
     return;
   }
   const richText = getRichTextByModel(model);
-  const quill = richText?.quill;
-  if (!quill) {
+  const vEditor = richText?.vEditor;
+  if (!vEditor) {
     console.warn(
-      'Failed to clean slash search text! No quill found for model, model:',
+      'Failed to clean slash search text! No vEditor found for model, model:',
       model
     );
     return;
   }
-  const { index: curIdx } = quill.getSelection();
-  const idx = curIdx - searchStr.length;
+  const vRange = vEditor.getVRange();
+  assertExists(vRange);
+  const idx = vRange.index - searchStr.length;
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
   if (textStr !== searchStr) {
