@@ -260,10 +260,15 @@ export class EdgelessPageBlockComponent
 
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
-    this.addEventListener('keydown', e => {
-      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-    });
+    this.addEventListener(
+      'keydown',
+      e => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
+      },
+      // FIXME: somewhere call stopPropagation on keydown event
+      true
+    );
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
