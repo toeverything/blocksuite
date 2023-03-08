@@ -170,14 +170,28 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     }
     this._showTipsPlaceholder = true;
 
-    const observer = () => {
+    let isComposing = false;
+    const updatePlaceholder = () => {
       this._showTipsPlaceholder =
-        this.model.text.length === 0 && this.model.type === 'text';
+        this.model.text.length === 0 &&
+        this.model.type === 'text' &&
+        !isComposing;
     };
-    this.model.text.yText.observe(observer);
+    this.model.text.yText.observe(updatePlaceholder);
     this._disposables = new DisposableGroup();
-    this._disposables.add(this.model.propsUpdated.on(observer));
-    this._disposables.add(() => this.model.text.yText.unobserve(observer));
+    this._disposables.add(this.model.propsUpdated.on(updatePlaceholder));
+    this._disposables.add(() =>
+      this.model.text.yText.unobserve(updatePlaceholder)
+    );
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(this, 'compositionstart', () => {
+      isComposing = true;
+      updatePlaceholder();
+    });
+    this._disposables.addFromEvent(this, 'compositionend', () => {
+      isComposing = false;
+      updatePlaceholder();
+    });
   };
 
   private _onFocusOut = (e: FocusEvent) => {

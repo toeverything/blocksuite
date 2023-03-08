@@ -1,8 +1,13 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
-import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -113,6 +118,9 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
+  @property()
+  model!: PageBlockModel;
+
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -143,9 +151,10 @@ export class DefaultPageBlockComponent
   @state()
   private _embedEditingState!: EmbedEditingState | null;
 
-  private _resizeObserver: ResizeObserver | null = null;
-
+  @state()
   private _isComposing = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
 
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
@@ -157,9 +166,6 @@ export class DefaultPageBlockComponent
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
-
-  @property()
-  model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
   private _titleContainer!: HTMLElement;
@@ -180,6 +186,18 @@ export class DefaultPageBlockComponent
       keydown: this._onTitleKeyDown,
     });
 
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionstart',
+      () => (this._isComposing = true)
+    );
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionend',
+      () => (this._isComposing = false)
+    );
+
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -188,24 +206,6 @@ export class DefaultPageBlockComponent
     });
     this._titleVEditor.focusEnd();
     this._titleVEditor.setReadonly(this.page.readonly);
-  }
-
-  private _updateTitlePlaceholder() {
-    if (this.model.title.yText.length > 0 || this._isComposing) {
-      this._titleContainer.classList.remove(
-        'affine-default-page-block-title-empty'
-      );
-    } else {
-      if (
-        !this._titleContainer.classList.contains(
-          'affine-default-page-block-title-empty'
-        )
-      ) {
-        this._titleContainer.classList.add(
-          'affine-default-page-block-title-empty'
-        );
-      }
-    }
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
@@ -320,8 +320,6 @@ export class DefaultPageBlockComponent
   };
 
   updated(changedProperties: Map<string, unknown>) {
-    this._updateTitlePlaceholder();
-
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
         this._initTitleVEditor();
@@ -507,15 +505,6 @@ export class DefaultPageBlockComponent
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
-    this._titleContainer.addEventListener('compositionstart', () => {
-      this._isComposing = true;
-      this._updateTitlePlaceholder();
-    });
-    this._titleContainer.addEventListener('compositionend', e => {
-      this._isComposing = false;
-      this._updateTitlePlaceholder();
-    });
   }
 
   private _disposables = new DisposableGroup();
@@ -569,7 +558,11 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title"
+              class="affine-default-page-block-title ${(!this.model.title ||
+                !this.model.title.length) &&
+              !this._isComposing
+                ? 'affine-default-page-block-title-empty'
+                : ''}"
             ></div>
           </div>
           ${childrenContainer}
