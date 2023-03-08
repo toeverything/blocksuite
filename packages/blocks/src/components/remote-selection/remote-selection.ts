@@ -256,8 +256,7 @@ export class RemoteSelection extends LitElement {
       .map(range => ({
         id: range.id,
         userRange: range.userRange,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        rects: this._getSelectionRect(range.userRange!),
+        rects: this._getSelectionRect(range.userRange as UserRange),
         user: range.user,
       })) as Array<{
       id: number;
@@ -274,8 +273,7 @@ export class RemoteSelection extends LitElement {
         if (!this._colorMap.has(selection.id)) {
           this._colorMap.set(selection.id, randomColor());
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const color = this._colorMap.get(selection.id)!;
+        const color = this._colorMap.get(selection.id) as string;
         const cursorRect = this._getCursorRect(selection.userRange);
 
         return selection.rects
