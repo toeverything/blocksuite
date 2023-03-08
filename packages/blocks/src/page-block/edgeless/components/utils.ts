@@ -1,5 +1,9 @@
+import type { SurfaceViewport } from '@blocksuite/phasor';
+import { getCommonBound } from '@blocksuite/phasor';
 import { html } from 'lit';
 
+import type { Selectable } from '../selection-manager.js';
+import { getSelectionBoxBound, getXYWH } from '../utils.js';
 import { HandleDirection, SelectedHandle } from './selected-handle.js';
 
 export function getCommonRectStyle(
@@ -81,4 +85,34 @@ export function getHandles(
       `;
     }
   }
+}
+
+export function getSelectedRect(
+  selected: Selectable[],
+  viewport: SurfaceViewport
+): DOMRect {
+  if (selected.length === 0) {
+    return new DOMRect(0, 0, 0, 0);
+  }
+  const rects = selected.map(selectable => {
+    const { x, y, width, height } = getSelectionBoxBound(
+      viewport,
+      getXYWH(selectable)
+    );
+
+    return {
+      x,
+      y,
+      w: width,
+      h: height,
+    };
+  });
+
+  const commonBound = getCommonBound(rects);
+  return new DOMRect(
+    commonBound?.x,
+    commonBound?.y,
+    commonBound?.w,
+    commonBound?.h
+  );
 }

@@ -35,6 +35,7 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { getSelectedRect } from './components/utils.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
@@ -311,10 +312,11 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection, page } = this;
-    const selectionState = _selection.blockSelectionState;
+    const { selected } = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
     const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
+    const selectedRect = getSelectedRect(selected, viewport);
 
     const translateX = -viewportX * zoom;
     const translateY = -viewportY * zoom;
@@ -349,12 +351,12 @@ export class EdgelessPageBlockComponent
           ${childrenContainer}
         </div>
         ${hoverRect} ${draggingArea}
-        ${selectionState.selected.length
+        ${selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
-                .viewport=${viewport}
-                .state=${selectionState}
+                .state=${_selection.blockSelectionState}
+                .rect=${selectedRect}
                 .zoom=${zoom}
                 .surface=${this.surface}
               ></edgeless-selected-rect>

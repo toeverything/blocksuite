@@ -1,4 +1,4 @@
-import { getCommonBound, SurfaceViewport } from '@blocksuite/phasor';
+import { getCommonBound } from '@blocksuite/phasor';
 import { Bound, deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
@@ -8,12 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { getBlockById } from '../../../__internal__/index.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 import type { EdgelessSelectionState } from '../selection-manager.js';
-import {
-  FRAME_MIN_LENGTH,
-  getSelectionBoxBound,
-  getXYWH,
-  isTopLevelBlock,
-} from '../utils.js';
+import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
 import { Drag } from './drag.js';
 import type { ResizeMode } from './utils.js';
 import { getCommonRectStyle, getHandles } from './utils.js';
@@ -29,14 +24,14 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Boolean })
   lock!: boolean;
 
-  @property()
-  viewport!: SurfaceViewport;
-
   @property({ type: Number })
   zoom!: number;
 
   @property({ type: Object })
   state!: EdgelessSelectionState;
+
+  @property({ type: DOMRect })
+  rect!: DOMRect;
 
   private _drag: Drag;
 
@@ -50,35 +45,6 @@ export class EdgelessSelectedRect extends LitElement {
       isTopLevelBlock(elem)
     );
     return hasBlockElement ? 'row-resize' : 'resize';
-  }
-
-  get rect() {
-    const { viewport } = this.surface;
-    const { selected } = this.state;
-    if (selected.length === 0) {
-      return new DOMRect(0, 0, 0, 0);
-    }
-    const rects = selected.map(selectable => {
-      const { x, y, width, height } = getSelectionBoxBound(
-        viewport,
-        getXYWH(selectable)
-      );
-
-      return {
-        x,
-        y,
-        w: width,
-        h: height,
-      };
-    });
-
-    const commonBound = getCommonBound(rects);
-    return new DOMRect(
-      commonBound?.x,
-      commonBound?.y,
-      commonBound?.w,
-      commonBound?.h
-    );
   }
 
   get modelBound(): Bound {
