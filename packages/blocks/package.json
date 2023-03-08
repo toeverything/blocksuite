@@ -57,7 +57,6 @@
   },
   "devDependencies": {
     "@blocksuite/store": "workspace:*",
-    "@types/autosize": "^4.0.1",
-    "parchment": "^2.0.1"
+    "@types/autosize": "^4.0.1"
   }
 }

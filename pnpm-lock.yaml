@@ -92,7 +92,6 @@ importers:
       highlight.js: ^11.7.0
       hotkeys-js: ^3.10.1
       lit: ^2.6.1
-      parchment: ^2.0.1
       shiki: ^0.14.1
       zod: ^3.20.6
     dependencies:
@@ -108,7 +107,6 @@ importers:
     devDependencies:
       '@blocksuite/store': link:../store
       '@types/autosize': 4.0.1
-      parchment: 2.0.1
 
   packages/editor:
     specifiers:
@@ -5700,10 +5698,6 @@ packages:
       hasha: 5.2.2
       lodash.flattendeep: 4.4.0
       release-zalgo: 1.0.0
-    dev: true
-
-  /parchment/2.0.1:
-    resolution: {integrity: sha512-VBKrlEoZCBD+iwoeag0QTtY1Cti+Ma4nLpVYcc/uus/wHhMsPOi5InH3RL1s4aekahPZpabcS2ToKyGf7RMH/g==}
     dev: true
 
   /parent-module/1.0.1:
