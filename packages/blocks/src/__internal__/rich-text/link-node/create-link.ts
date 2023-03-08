@@ -62,9 +62,7 @@ export function createLink(page: Page) {
         )
     )
   );
-  const affineEditorContainer = document.querySelector(
-    '.affine-editor-container'
-  );
+  const affineEditorContainer = getEditorContainer(page);
   assertExists(affineEditorContainer);
   affineEditorContainer.appendChild(mockSelection);
 
