@@ -177,9 +177,10 @@ export function getRectByBlockElement(element: Element) {
 }
 
 /**
- * Clear subtree, only keep block elements of same level.
+ * Returns block elements excluding their subtrees.
+ * Only keep block elements of same level.
  */
-export function clearSubtree(elements: Element[]) {
+export function getBlockElementsExcludeSubtrees(elements: Element[]) {
   if (!elements.length) return [];
   if (elements.length === 1) return elements;
 
@@ -195,4 +196,14 @@ export function clearSubtree(elements: Element[]) {
       return true;
     }
   });
+}
+
+/**
+ * Returns block elements including their subtrees.
+ */
+export function getBlockElementsIncludeSubtrees(elements: Element[]) {
+  return elements.reduce<Element[]>((elements, element) => {
+    elements.push(element, ...getBlockElementsByElement(element));
+    return elements;
+  }, []);
 }

@@ -267,7 +267,6 @@ export class DragHandle extends LitElement {
 
   hide() {
     this.style.display = 'none';
-    // this._cursor = null;
     this._handleAnchorState = null;
     this._lastDroppingTarget = null;
 

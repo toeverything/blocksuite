@@ -6,9 +6,9 @@ import { DisposableGroup } from '@blocksuite/store';
 
 import {
   type BlockComponentElement,
-  clearSubtree,
   getBlockElementByModel,
   getBlockElementsByElement,
+  getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getClosestBlockElementByPointInStrictMode,
   getCurrentNativeRange,
@@ -474,7 +474,9 @@ export class DefaultSelectionManager {
 
     // just refresh selected blocks
     if (focusedBlock === null) {
-      const rects = clearSubtree(selectedBlocks).map(getRectByBlockElement);
+      const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
+        getRectByBlockElement
+      );
       this.slots.selectedRectsUpdated.emit(rects);
     } else {
       // only current focused block element
@@ -544,7 +546,9 @@ export class DefaultSelectionManager {
     const selectedBlocks = getBlockElementsByElement(this._container);
 
     // clear subtree
-    const rects = clearSubtree(selectedBlocks).map(getRectByBlockElement);
+    const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
+      getRectByBlockElement
+    );
 
     setSelectedBlocks(
       this.state,
