@@ -157,9 +157,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @state()
   private _showTipsPlaceholder = false;
 
-  @state()
-  private _isComposing = false;
-
   private _disposables = new DisposableGroup();
 
   firstUpdated() {
@@ -173,27 +170,28 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     }
     this._showTipsPlaceholder = true;
 
-    const observer = () => {
+    let isComposing = false;
+    const updatePlaceholder = () => {
       this._showTipsPlaceholder =
         this.model.text.length === 0 &&
         this.model.type === 'text' &&
-        !this._isComposing;
+        !isComposing;
     };
-    this.model.text.yText.observe(observer);
+    this.model.text.yText.observe(updatePlaceholder);
     this._disposables = new DisposableGroup();
-    this._disposables.add(this.model.propsUpdated.on(observer));
-    this._disposables.add(() => this.model.text.yText.unobserve(observer));
+    this._disposables.add(this.model.propsUpdated.on(updatePlaceholder));
+    this._disposables.add(() =>
+      this.model.text.yText.unobserve(updatePlaceholder)
+    );
     // Workaround for virgo skips composition event
-    this._disposables.addFromEvent(
-      this,
-      'compositionstart',
-      () => (this._isComposing = true)
-    );
-    this._disposables.addFromEvent(
-      this,
-      'compositionend',
-      () => (this._isComposing = false)
-    );
+    this._disposables.addFromEvent(this, 'compositionstart', () => {
+      isComposing = true;
+      updatePlaceholder();
+    });
+    this._disposables.addFromEvent(this, 'compositionend', () => {
+      isComposing = false;
+      updatePlaceholder();
+    });
   };
 
   private _onFocusOut = (e: FocusEvent) => {
