@@ -186,10 +186,39 @@ export function getEditorContainer(page: Page) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
-    throw new Error('Failed to check paper mode! Editor mode is not exists!');
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
   return mode === 'page';
+}
+
+/**
+ * Get editor viewport element.
+ *
+ * @example
+ * ```ts
+ * const viewportElement = getViewportElement(this.model.page);
+ * if (!viewportElement) return;
+ * this._disposables.addFromEvent(viewportElement, 'scroll', () => {
+ *   updatePosition();
+ * });
+ * ```
+ */
+export function getViewportElement(page: Page) {
+  const isPage = isPageMode(page);
+  if (!isPage) return null;
+  assertExists(page.root);
+  const defaultPageBlock = document.querySelector(
+    `[${ATTR}="${page.root.id}"]`
+  );
+
+  if (
+    !defaultPageBlock ||
+    defaultPageBlock.closest('affine-default-page') !== defaultPageBlock
+  ) {
+    throw new Error('Failed to get viewport element!');
+  }
+  return (defaultPageBlock as DefaultPageBlockComponent).viewportElement;
 }
 
 export function getBlockElementByModel(
