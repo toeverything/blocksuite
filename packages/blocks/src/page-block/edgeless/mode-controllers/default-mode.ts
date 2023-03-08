@@ -62,7 +62,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _setNoneSelectionState() {
     this._blockSelectionState = { selected: [], active: false };
-    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
+    this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
     resetNativeSelection(null);
   }
 
@@ -71,7 +71,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       selected,
       active,
     };
-    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
+    this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
@@ -162,7 +162,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._blockSelectionState = {
       ...this._blockSelectionState,
     };
-    this._edgeless.slots.updateSelection.emit(this._blockSelectionState);
+    this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
   }
 
   onContainerClick(e: SelectionEvent) {

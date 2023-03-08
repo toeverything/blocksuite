@@ -25,14 +25,14 @@ export function getCommonRectStyle(
   };
 }
 
-export type ResizeMode = 'resize' | 'row-resize';
+export type ResizeMode = 'corner' | 'edge';
 export function getHandles(
   rect: DOMRect,
   resizeMode: ResizeMode,
   onMouseDown: (e: MouseEvent, direction: HandleDirection) => void
 ) {
   switch (resizeMode) {
-    case 'resize': {
+    case 'corner': {
       const leftTop = [rect.x, rect.y];
       const rightTop = [rect.x + rect.width, rect.y];
       const leftBottom = [rect.x, rect.y + rect.height];
@@ -65,7 +65,7 @@ export function getHandles(
         )}
       `;
     }
-    case 'row-resize': {
+    case 'edge': {
       const leftCenter = [rect.x, rect.y + rect.height / 2];
       const rightCenter = [rect.x + rect.width, rect.y + rect.height / 2];
 

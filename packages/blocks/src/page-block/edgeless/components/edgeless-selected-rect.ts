@@ -1,17 +1,22 @@
 import { getCommonBound } from '@blocksuite/phasor';
 import { Bound, deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
-import { Page } from '@blocksuite/store';
+import { DisposableGroup, Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getBlockById } from '../../../__internal__/index.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
+import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../selection-manager.js';
 import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
 import { EdgelessDragManager } from './drag-manager.js';
-import type { ResizeMode } from './utils.js';
-import { getCommonRectStyle, getHandles } from './utils.js';
+import {
+  getCommonRectStyle,
+  getHandles,
+  getSelectedRect,
+  ResizeMode,
+} from './utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
@@ -21,19 +26,15 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: SurfaceManager })
   surface!: SurfaceManager;
 
-  @property({ type: Boolean })
-  lock!: boolean;
-
-  @property({ type: Number })
-  zoom!: number;
-
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property({ type: DOMRect })
-  rect!: DOMRect;
+  @property()
+  slots!: EdgelessSelectionSlots;
 
+  private _lock = false;
   private _dragManager: EdgelessDragManager;
+  private _disposables = new DisposableGroup();
 
   constructor() {
     super();
@@ -44,11 +45,15 @@ export class EdgelessSelectedRect extends LitElement {
     );
   }
 
+  get zoom() {
+    return this.surface.viewport.zoom;
+  }
+
   get resizeMode(): ResizeMode {
     const hasBlockElement = this.state.selected.find(elem =>
       isTopLevelBlock(elem)
     );
-    return hasBlockElement ? 'row-resize' : 'resize';
+    return hasBlockElement ? 'edge' : 'corner';
   }
 
   get modelBound(): Bound {
@@ -108,9 +113,9 @@ export class EdgelessSelectedRect extends LitElement {
         // reset the width of the container may trigger animation
         requestAnimationFrame(() => {
           // refresh xywh by model
-          if (!this.lock) {
+          if (!this._lock) {
             this.page.captureSync();
-            this.lock = true;
+            this._lock = true;
           }
 
           const newXywh = JSON.stringify([
@@ -129,25 +134,38 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   private _onDragEnd = () => {
-    if (this.lock) {
+    if (this._lock) {
       this.page.captureSync();
     }
-    this.lock = false;
+    this._lock = false;
   };
+
+  firstUpdated() {
+    this._disposables.add(
+      this.slots.viewportUpdated.on(() => this.requestUpdate())
+    );
+  }
+
+  disconnectedCallback() {
+    this._disposables.dispose();
+  }
 
   render() {
     if (this.state.selected.length === 0) return null;
-    const { active } = this.state;
+
+    const { state, surface, resizeMode, _dragManager } = this;
+    const { active, selected } = state;
+    const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      ...getCommonRectStyle(this.rect, active, true),
+      ...getCommonRectStyle(selectedRect, active, true),
     };
     const handlers = active
       ? null
-      : getHandles(this.rect, this.resizeMode, this._dragManager.onMouseDown);
+      : getHandles(selectedRect, resizeMode, _dragManager.onMouseDown);
     return html`
       ${this.page.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

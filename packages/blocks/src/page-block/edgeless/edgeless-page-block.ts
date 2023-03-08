@@ -35,21 +35,23 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
-import { getSelectedRect } from './components/utils.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
 
+export interface EdgelessSelectionSlots {
+  hoverUpdated: Slot;
+  viewportUpdated: Slot;
+  selectionUpdated: Slot<EdgelessSelectionState>;
+  surfaceUpdated: Slot;
+  mouseModeUpdated: Slot<MouseMode>;
+}
+
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
   readonly surface: SurfaceManager;
-  readonly slots: {
-    hoverUpdated: Slot;
-    viewportUpdated: Slot;
-    updateSelection: Slot<EdgelessSelectionState>;
-    surfaceUpdated: Slot;
-  };
+  readonly slots: EdgelessSelectionSlots;
 }
 
 @customElement('affine-edgeless-page')
@@ -110,9 +112,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
-  slots = {
+  slots: EdgelessSelectionSlots = {
     viewportUpdated: new Slot(),
-    updateSelection: new Slot<EdgelessSelectionState>(),
+    selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
@@ -151,7 +153,7 @@ export class EdgelessPageBlockComponent
       if (this.surface.hasElement(element.id)) {
         this.surface.removeElement(element.id);
         this._selection.currentController.clearSelection();
-        this.slots.updateSelection.emit(this._selection.blockSelectionState);
+        this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
         return;
       }
       handleMultiBlockBackspace(this.page, e);
@@ -244,7 +246,7 @@ export class EdgelessPageBlockComponent
       this.requestUpdate();
     });
     this.slots.hoverUpdated.on(() => this.requestUpdate());
-    this.slots.updateSelection.on(() => this.requestUpdate());
+    this.slots.selectionUpdated.on(() => this.requestUpdate());
     this.slots.surfaceUpdated.on(() => this.requestUpdate());
     this.slots.mouseModeUpdated.on(mouseMode => {
       this.mouseMode = mouseMode;
@@ -286,7 +288,7 @@ export class EdgelessPageBlockComponent
   disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.slots.updateSelection.dispose();
+    this.slots.selectionUpdated.dispose();
     this.slots.viewportUpdated.dispose();
     this.slots.hoverUpdated.dispose();
     this.slots.surfaceUpdated.dispose();
@@ -319,7 +321,6 @@ export class EdgelessPageBlockComponent
 
     const hoverState = _selection.getHoverState();
     const hoverRect = EdgelessHoverRect(hoverState, zoom);
-    const selectedRect = getSelectedRect(selected, viewport);
 
     const translateX = -viewportX * zoom;
     const translateY = -viewportY * zoom;
@@ -359,8 +360,7 @@ export class EdgelessPageBlockComponent
               <edgeless-selected-rect
                 .page=${page}
                 .state=${_selection.blockSelectionState}
-                .rect=${selectedRect}
-                .zoom=${zoom}
+                .slots=${this.slots}
                 .surface=${this.surface}
               ></edgeless-selected-rect>
             `
