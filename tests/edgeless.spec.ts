@@ -71,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 24]);
+  await assertFrameXYWH(page, [0, 0, 720, 72]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 288, 768, 72];
+  const original = [90, 264, 720, 72];
   await assertEdgelessHoverRect(page, original);
 
   await decreaseZoomLevel(page);
@@ -126,7 +126,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 24]);
+  await assertFrameXYWH(page, [0, 0, 720, 72]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -135,7 +135,7 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, 720, 24]);
+  await assertFrameXYWH(page, [0, 100, 720, 72]);
 });
 
 test('resize block in edgeless mode', async ({ page }) => {
