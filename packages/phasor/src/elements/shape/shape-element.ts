@@ -1,5 +1,6 @@
 import type { Color, IBound, StrokeStyle } from '../../consts.js';
 import { boundsContain } from '../../utils/bound.js';
+import { intersects } from '../../utils/hit-utils.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
@@ -27,7 +28,7 @@ export class ShapeElement extends BaseElement {
 
   // TODO: intersect
   hitTestBound(bound: IBound, options?: HitTestOptions) {
-    return boundsContain(bound, this);
+    return boundsContain(bound, this) || intersects(bound, this);
   }
 
   serialize(): SerializedShapeProps {

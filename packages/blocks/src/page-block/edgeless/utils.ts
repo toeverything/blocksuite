@@ -3,6 +3,7 @@ import {
   Bound,
   boundsContain,
   deserializeXYWH,
+  intersects,
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
@@ -52,7 +53,8 @@ export function pickTop(
 export function pickInBound(blocks: TopLevelBlockModel[], bound: Bound) {
   return blocks.filter(block => {
     const [x, y, w, h] = deserializeXYWH(block.xywh);
-    return boundsContain(bound, { x, y, w, h });
+    const blockBound = { x, y, w, h };
+    return boundsContain(bound, blockBound) || intersects(bound, blockBound);
   });
 }
 
