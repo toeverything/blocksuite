@@ -479,32 +479,27 @@ export class VEditor<
 
   getFormat(vRange: VRange, type?: 'default'): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange);
-
-    const result: {
-      [key: string]: unknown;
-    } = {};
-    for (const [delta, position] of deltas) {
-      if (delta.attributes) {
-        for (const [key, value] of Object.entries(delta.attributes)) {
-          if (typeof value === 'boolean' && !value) {
-            delete result[key];
-          } else {
-            if (type === 'default') {
-              if (
-                vRange.index >= position.index &&
-                vRange.index + vRange.length <= position.index + position.length
-              ) {
-                result[key] = value;
-              }
-            } else {
-              result[key] = value;
-            }
-          }
+    if (!deltas.length || !deltas[0][0].attributes) {
+      // empty range or empty text does not have any attributes
+      return {} as TextAttributes;
+    }
+    const attributesArray = deltas.map(([delta]) => delta.attributes);
+    if (attributesArray.some(attributes => !attributes)) {
+      // some text does not have any attributes
+      return {} as TextAttributes;
+    }
+    return (attributesArray as TextAttributes[]).reduce((acc, cur) => {
+      const newFormat = {} as TextAttributes;
+      for (const key in acc) {
+        const typedKey = key as keyof TextAttributes;
+        if (acc[typedKey] === cur[typedKey]) {
+          // This cast is secure because we have checked that the value of the key is the same.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          newFormat[typedKey] = acc[typedKey] as any;
         }
       }
-    }
-
-    return result as TextAttributes;
+      return newFormat;
+    });
   }
 
   setReadonly(isReadonly: boolean): void {
