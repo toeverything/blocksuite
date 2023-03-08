@@ -252,6 +252,12 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   protected firstUpdated() {
     this._startHighlight(codeLanguages);
+
+    this.model.text.yText.observe(() => {
+      setTimeout(() => {
+        this._updateLineNumbers();
+      });
+    });
   }
 
   updated(changedProperties: PropertyValues) {
