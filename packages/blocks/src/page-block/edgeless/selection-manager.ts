@@ -166,6 +166,7 @@ export class EdgelessSelectionManager {
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this._updateLastMouseViewPoint(e);
+    this._container.slots.hoverUpdated.emit();
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 

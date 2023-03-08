@@ -605,3 +605,18 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
 export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
   expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }
+
+export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+
+  const selectedRect = page
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+  const box = await selectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless selected rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
