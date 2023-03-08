@@ -156,7 +156,7 @@ export class DefaultPageBlockComponent
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
-  @property()
+  @property({ hasChanged: () => true })
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
@@ -446,7 +446,7 @@ export class DefaultPageBlockComponent
 
     this.model.page.slots.blockUpdated.on(() => {
       // TODO: optimize
-      // this.requestUpdate();
+      this.requestUpdate();
     });
   }
 
