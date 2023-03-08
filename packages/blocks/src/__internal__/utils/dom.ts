@@ -131,8 +131,7 @@ export function getClosestBlockElementByElement(element: Element | null) {
     return element;
   }
   element = element.closest(BLOCK_ID_ATTR_SELECTOR);
-  if (!element) return null;
-  if (hasBlockId(element) && isBlock(element)) {
+  if (element && hasBlockId(element) && isBlock(element)) {
     return element;
   }
   return null;

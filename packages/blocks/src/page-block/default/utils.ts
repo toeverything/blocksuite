@@ -549,6 +549,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     getFocusedBlock() {
       return defaultPageBlock.selection.state.focusedBlock;
     },
+    clearSelection() {
+      defaultPageBlock.selection.clear();
+    },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPointInStrictMode(
         point,

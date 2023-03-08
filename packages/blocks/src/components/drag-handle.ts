@@ -128,6 +128,7 @@ export class DragHandle extends LitElement {
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getFocusedBlock: () => BlockComponentElement | null;
     getClosestBlockElement: DragHandleGetClosestBlockElementCallback | null;
+    clearSelection: () => void;
   }) {
     super();
     this.getDropAllowedBlocks = () => {
@@ -139,6 +140,7 @@ export class DragHandle extends LitElement {
     this._getFocusedBlock = options.getFocusedBlock;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
+    this._clearSelection = options.clearSelection;
     options.container.appendChild(this);
     this._container = options.container;
   }
@@ -168,6 +170,7 @@ export class DragHandle extends LitElement {
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
   private _getFocusedBlock: () => BlockComponentElement | null;
+  private _clearSelection: () => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -426,12 +429,18 @@ export class DragHandle extends LitElement {
       return;
     }
 
+    this._clickedBlock = this._handleAnchorState.element;
+
     e.dataTransfer.effectAllowed = 'move';
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
     // TODO: clear block selection
     const included = selectedBlocks.includes(this._handleAnchorState.element);
+
+    if (!included) {
+      this._clearSelection();
+    }
 
     // fixme: the block may not have block id?
     const draggingBlockElements = included
