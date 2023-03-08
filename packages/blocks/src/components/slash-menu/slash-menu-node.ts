@@ -8,6 +8,10 @@ import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { menuGroups, SlashItem } from './config.js';
 import { styles } from './styles.js';
 
+function escapeRegExp(input: string) {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 @customElement('slash-menu')
 export class SlashMenu extends LitElement {
   static styles = styles;
@@ -249,7 +253,13 @@ export class SlashMenu extends LitElement {
           .filter(char => /[A-Za-z0-9]/.test(char))
           .join('');
 
-        const regex = new RegExp(searchStr.split('').join('.*'), 'i');
+        const regex = new RegExp(
+          searchStr
+            .split('')
+            .map(item => `${escapeRegExp(item)}.*`)
+            .join(''),
+          'i'
+        );
         return regex.test(pureName);
       });
   }
@@ -263,15 +273,6 @@ export class SlashMenu extends LitElement {
       `format-bar-button[text="${item.name}"]`
     );
     if (!ele) {
-      return;
-    }
-    // `scrollIntoViewIfNeeded` is not a standard API
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
-    if (
-      'scrollIntoViewIfNeeded' in ele &&
-      ele.scrollIntoViewIfNeeded instanceof Function
-    ) {
-      ele.scrollIntoViewIfNeeded();
       return;
     }
     ele.scrollIntoView(true);
