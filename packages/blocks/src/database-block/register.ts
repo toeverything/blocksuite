@@ -11,9 +11,9 @@ export abstract class DatabaseCellLitElement extends LitElement {
   static tag: ReturnType<typeof literal>;
   @property()
   rowHost!: RowHost;
-  @property({ hasChanged: () => true })
+  @property()
   databaseModel!: DatabaseBlockModel;
-  @property({ hasChanged: () => true })
+  @property()
   rowModel!: BaseBlockModel;
   @property()
   column!: TagSchema;

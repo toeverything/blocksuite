@@ -196,6 +196,8 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
+    console.log('render');
+
     return html`
       <div class="affine-paragraph-block-container ${type}">
         ${this._showTipsPlaceholder ? TipsPlaceholder() : html``}
