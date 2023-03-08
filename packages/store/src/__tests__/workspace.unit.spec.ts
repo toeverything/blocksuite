@@ -69,9 +69,13 @@ describe.concurrent('basic', () => {
   it('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
+    assert.equal(workspace.isEmpty, true);
+
     const page = await createPage(workspace);
     const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+
+    assert.equal(workspace.isEmpty, false);
     assert.equal(typeof actualPage.createDate, 'number');
     // @ts-ignore
     delete actualPage.createDate;
