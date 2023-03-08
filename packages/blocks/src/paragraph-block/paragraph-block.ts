@@ -14,26 +14,6 @@ import {
 } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-function getPlaceholder(model: ParagraphBlockModel) {
-  const { type } = model;
-  switch (type) {
-    case 'h1':
-      return 'Heading 1';
-    case 'h2':
-      return 'Heading 2';
-    case 'h3':
-      return 'Heading 3';
-    case 'h4':
-      return 'Heading 4';
-    case 'h5':
-      return 'Heading 5';
-    case 'h6':
-      return 'Heading 6';
-    default:
-      return '';
-  }
-}
-
 function TipsPlaceholder() {
   return html`
     <div class="tips-placeholder">
@@ -212,7 +192,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       this.host,
       () => this.requestUpdate()
     );
-    const placeholder = getPlaceholder(this.model);
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
@@ -220,7 +199,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
         <rich-text
           .host=${this.host}
           .model=${this.model}
-          .placeholder=${placeholder}
           @focusin=${this._onFocusIn}
           @focusout=${this._onFocusOut}
           style=${styleMap({

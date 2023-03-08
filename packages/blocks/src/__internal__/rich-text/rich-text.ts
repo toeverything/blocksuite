@@ -47,12 +47,6 @@ export class RichText extends NonShadowLitElement {
   model!: BaseBlockModel;
 
   @property()
-  placeholder?: string;
-
-  @property({ hasChanged: () => true })
-  modules: Record<string, unknown> = {};
-
-  @property()
   codeBlockGetHighlighterOptions?: () => {
     lang: Lang;
     highlighter: Highlighter | null;
