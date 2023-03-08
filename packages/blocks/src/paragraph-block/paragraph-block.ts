@@ -157,6 +157,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @state()
   private _showTipsPlaceholder = false;
 
+  @state()
+  private _isComposing = false;
+
   private _disposables = new DisposableGroup();
 
   firstUpdated() {
@@ -178,6 +181,17 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this._disposables = new DisposableGroup();
     this._disposables.add(this.model.propsUpdated.on(observer));
     this._disposables.add(() => this.model.text.yText.unobserve(observer));
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(
+      this,
+      'compositionstart',
+      () => (this._isComposing = true)
+    );
+    this._disposables.addFromEvent(
+      this,
+      'compositionend',
+      () => (this._isComposing = false)
+    );
   };
 
   private _onFocusOut = (e: FocusEvent) => {
@@ -198,7 +212,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._showTipsPlaceholder ? TipsPlaceholder() : html``}
+        ${this._showTipsPlaceholder && !this._isComposing
+          ? TipsPlaceholder()
+          : html``}
         <rich-text
           .host=${this.host}
           .model=${this.model}
