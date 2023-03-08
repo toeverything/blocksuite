@@ -135,6 +135,13 @@ export function convertToParagraph(
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
+    const vEditor = getRichTextByModel(model)?.vEditor;
+    if (vEditor) {
+      vEditor.setVRange({
+        index: 0,
+        length: 0,
+      });
+    }
     page.updateBlock(model, { type: type });
   }
   return true;
