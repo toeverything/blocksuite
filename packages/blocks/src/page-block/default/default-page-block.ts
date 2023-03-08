@@ -3,7 +3,7 @@ import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
+import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -145,8 +145,6 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  private _isComposing = false;
-
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
@@ -188,24 +186,6 @@ export class DefaultPageBlockComponent
     });
     this._titleVEditor.focusEnd();
     this._titleVEditor.setReadonly(this.page.readonly);
-  }
-
-  private _updateTitlePlaceholder() {
-    if (this.model.title.yText.length > 0 || this._isComposing) {
-      this._titleContainer.classList.remove(
-        'affine-default-page-block-title-empty'
-      );
-    } else {
-      if (
-        !this._titleContainer.classList.contains(
-          'affine-default-page-block-title-empty'
-        )
-      ) {
-        this._titleContainer.classList.add(
-          'affine-default-page-block-title-empty'
-        );
-      }
-    }
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
@@ -320,8 +300,6 @@ export class DefaultPageBlockComponent
   };
 
   updated(changedProperties: Map<string, unknown>) {
-    this._updateTitlePlaceholder();
-
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
         this._initTitleVEditor();
@@ -507,15 +485,6 @@ export class DefaultPageBlockComponent
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
-    this._titleContainer.addEventListener('compositionstart', () => {
-      this._isComposing = true;
-      this._updateTitlePlaceholder();
-    });
-    this._titleContainer.addEventListener('compositionend', e => {
-      this._isComposing = false;
-      this._updateTitlePlaceholder();
-    });
   }
 
   private _disposables = new DisposableGroup();
@@ -569,7 +538,10 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title"
+              class="affine-default-page-block-title ${!this._titleContainer ||
+              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+                ? 'affine-default-page-block-title-empty'
+                : ''}"
             ></div>
           </div>
           ${childrenContainer}
