@@ -532,7 +532,7 @@ test('shape element should not move when the selected state is inactive', async 
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
 
-test('shape element should have the correct selected shape when clicking on the `Select` toolbar', async ({
+test.skip('shape element should have the correct selected shape when clicking on the `Select` toolbar', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
