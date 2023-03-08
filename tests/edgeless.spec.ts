@@ -324,6 +324,20 @@ test('add empty Text', async ({ page }) => {
   await assertEdgelessNonHoverRect(page);
 });
 
+test('always keep at least 1 frame block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setMouseMode(page, 'default');
+
+  // clicking in default mode will try to remove empty frame block
+  await page.mouse.click(0, 0);
+
+  const frames = await page.locator('affine-frame').all();
+  expect(frames.length).toEqual(1);
+});
+
 test.skip('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
