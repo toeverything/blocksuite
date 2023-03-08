@@ -10,9 +10,11 @@ import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
+import {
   BlockComponentElement,
+  getClosestBlockElementByPoint,
   IPoint,
+  Point,
   SelectionEvent,
 } from '../__internal__/index.js';
 import type { EditingState } from '../page-block/default/utils.js';
@@ -207,7 +209,7 @@ export class DragHandle extends LitElement {
   private _lastDroppingTarget: EditingState | null = null;
   private _indicator: DragIndicator | null = null;
   // private _cursor: number | null = 0;
-  // private _lastSelectedIndex = -1;
+  private _selectedBlock: BlockComponentElement | null = null;
   private _container: HTMLElement;
   private _dragImage: HTMLElement | null = null;
 
@@ -232,16 +234,14 @@ export class DragHandle extends LitElement {
 
     if (modelState) {
       this._handleAnchorState = modelState;
-      // this._cursor = modelState.index;
+      if (this._handleAnchorState.element === this._selectedBlock) {
+        this._dragHandleOver.style.display = 'block';
+        this._dragHandleNormal.style.display = 'none';
+      } else {
+        this._dragHandleOver.style.display = 'none';
+        this._dragHandleNormal.style.display = 'block';
+      }
       const rect = modelState.rect;
-      // if (this._cursor === this._lastSelectedIndex) {
-      // if (this._cursor === this._lastSelectedIndex) {
-      //   this._dragHandleOver.style.display = 'block';
-      //   this._dragHandleNormal.style.display = 'none';
-      // } else {
-      //   this._dragHandleOver.style.display = 'none';
-      //   this._dragHandleNormal.style.display = 'block';
-      // }
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
@@ -416,17 +416,8 @@ export class DragHandle extends LitElement {
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
-    // const clickDragState = this._getBlockEditingStateByPosition?.(
-    //   this.getDropAllowedBlocks(null),
-    //   e.clientX,
-    //   e.clientY,
-    //   true
-    // );
-    // if (clickDragState) {
-    //   this.setSelectedBlocks(clickDragState);
-    // this._cursor = clickDragState.index;
-    // this._lastSelectedIndex = this._cursor;
     if (this._handleAnchorState) {
+      this._selectedBlock = this._handleAnchorState.element;
       this.setSelectedBlocks(this._handleAnchorState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
@@ -447,14 +438,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragStart = (e: DragEvent) => {
-    const clickDragState = this._getBlockEditingStateByPosition?.(
-      this.getDropAllowedBlocks(null),
-      e.clientX,
-      e.clientY,
-      true
-    );
-
-    if (!clickDragState || !e.dataTransfer) {
+    if (!this._handleAnchorState || !e.dataTransfer) {
       return;
     }
 
@@ -462,17 +446,18 @@ export class DragHandle extends LitElement {
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
+    // TODO: clear block selection
+    const included = selectedBlocks.includes(this._handleAnchorState.element);
+
     // fixme: the block may not have block id?
-    const draggingBlockElements = selectedBlocks.includes(
-      clickDragState.element
-    )
+    const draggingBlockElements = included
       ? selectedBlocks
-      : [clickDragState.element];
+      : [this._handleAnchorState.element];
 
     this._dragImage =
       (draggingBlockElements.length > 1
         ? this._container.querySelector('.affine-page-selected-rects-container')
-        : draggingBlockElements[0]) ?? clickDragState.element;
+        : draggingBlockElements[0]) ?? this._handleAnchorState.element;
 
     this._dragImage.style.opacity = '0.99';
     e.dataTransfer.setDragImage(this._dragImage, 0, 0);
@@ -480,6 +465,7 @@ export class DragHandle extends LitElement {
     this._draggingElements = draggingBlockElements;
   };
 
+  // TODO: automatic scrolling when top and bottom boundaries are reached
   private _onDrag = (e: DragEvent) => {
     this._dragHandle.style.cursor = 'grabbing';
     let x = e.clientX;
@@ -494,6 +480,8 @@ export class DragHandle extends LitElement {
     if (!this._indicator) {
       return;
     }
+
+    const blockElement = getClosestBlockElementByPoint(new Point(x, y));
     // const modelState = this._getBlockEditingStateByCursor?.(
     //   this.getDropAllowedBlocks(this._draggingBlockIds),
     //   x,
@@ -542,8 +530,8 @@ export class DragHandle extends LitElement {
           /* padding-top: 5px !important; FIXME */
         }
 
-        .affine-drag-handle-line {
-          pointer-events: auto;
+        .affine-drag-handle-line
+          pointer-events: none;
         }
 
         .affine-drag-handle {

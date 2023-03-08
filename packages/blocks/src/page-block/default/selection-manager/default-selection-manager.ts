@@ -10,6 +10,7 @@ import {
   getBlockElementByModel,
   getBlockElementsByElement,
   getClosestBlockElementByPoint,
+  getClosestBlockElementByPointInStrictMode,
   getCurrentNativeRange,
   getDefaultPageBlock,
   getModelByBlockElement,
@@ -41,19 +42,14 @@ import type {
   DefaultSelectionSlots,
   EmbedEditingState,
 } from '../default-page-block.js';
-import {
-  getAllowSelectedBlocks,
-  getBlockEditingStateByPosition,
-} from '../utils.js';
+import { getAllowSelectedBlocks } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
-  filterSelectedBlockByIndexAndBound,
   filterSelectedBlockWithoutSubtree,
   findBlocksWithSubtree,
-  getBlockWithIndexByElement,
   setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
@@ -231,17 +227,26 @@ export class DefaultSelectionManager {
       }
     });
 
-    const clickBlockInfo = getBlockEditingStateByPosition(
-      this._selectableBlocks,
-      e.raw.pageX,
-      e.raw.pageY
+    let clickBlockInfo = null;
+
+    const element = getClosestBlockElementByPointInStrictMode(
+      new Point(e.raw.clientX, e.raw.clientY),
+      this._container.getInnerRect()
     );
 
+    if (element) {
+      clickBlockInfo = {
+        model: getModelByBlockElement(element),
+        rect: element.getBoundingClientRect(),
+        element: element as BlockComponentElement,
+      };
+    }
+
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model, index } = clickBlockInfo;
+      const { model, element } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
-      this.state.focusedBlockIndex = index;
+      this.state.focusedBlock = element;
     }
 
     if (
@@ -303,8 +308,6 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    // this.state.refreshBlockRectCache();
-
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     const element = getClosestBlockElementByPoint(
@@ -411,8 +414,8 @@ export class DefaultSelectionManager {
   }
 
   updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
-    if (this.state.focusedBlockIndex !== -1) {
-      this.state.focusedBlockIndex = -1;
+    if (this.state.focusedBlock !== null) {
+      this.state.focusedBlock = null;
     }
     const rect = Rect.fromPoints(
       draggingArea.start,
@@ -464,24 +467,18 @@ export class DefaultSelectionManager {
   }
 
   refreshSelectedBlocksRects() {
-    this.state.refreshBlockRectCache();
-
-    const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
+    const { focusedBlock, selectedBlocks } = this.state;
 
     if (selectedBlocks.length === 0) return;
 
-    const firstBlock = selectedBlocks[0];
-
     // just refresh selected blocks
-    if (focusedBlockIndex === -1) {
-      const rects = clearSubtree(selectedBlocks, firstBlock).map(
-        block => blockCache.get(block) as DOMRect
-      );
+    if (focusedBlock === null) {
+      const rects = clearSubtree(selectedBlocks).map(getRectByBlockElement);
       this.slots.selectedRectsUpdated.emit(rects);
     } else {
-      // only current focused-block
+      // only current focused block element
       this.slots.selectedRectsUpdated.emit([
-        blockCache.get(firstBlock) as DOMRect,
+        getRectByBlockElement(focusedBlock),
       ]);
     }
   }
@@ -543,7 +540,7 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
     this.state.focusedBlock = null;
 
-    const selectedBlocks = getBlockElementsByElement();
+    const selectedBlocks = getBlockElementsByElement(this._container);
 
     // clear subtree
     const rects = clearSubtree(selectedBlocks).map(getRectByBlockElement);
@@ -591,13 +588,8 @@ export class DefaultSelectionManager {
     setSelectedBlocks(this.state, this.slots, selectedBlocks);
   }
 
-  setFocusedBlockIndexByElement(blockElement: Element) {
-    const result = getBlockWithIndexByElement(this.state, blockElement);
-    if (result) {
-      this.state.focusedBlockIndex = result.index;
-    } else {
-      this.state.focusedBlockIndex = -1;
-    }
+  setFocusedBlock(blockElement: Element) {
+    this.state.focusedBlock = blockElement as BlockComponentElement;
   }
 
   dispose() {

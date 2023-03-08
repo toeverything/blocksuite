@@ -43,9 +43,6 @@ export class PageSelectionState {
   draggingArea: { start: Point; end: Point } | null = null;
   selectedEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: BlockComponentElement[] = [];
-  // -1: SELECT_ALL
-  // >=0: only current focused-block
-  focusedBlockIndex = -1;
   // null: SELECT_ALL
   focusedBlock: BlockComponentElement | null = null;
   rafID?: number;
@@ -159,7 +156,7 @@ export class PageSelectionState {
   clearBlockSelection() {
     this.type = 'none';
     this._activeComponent = null;
-    this.focusedBlockIndex = -1;
+    this.focusedBlock = null;
     this.selectedBlocks = [];
     this.clearDraggingArea();
   }

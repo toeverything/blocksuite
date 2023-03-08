@@ -1,4 +1,4 @@
-import type { ImageBlockComponent } from '@blocksuite/blocks/index.js';
+// import type { ImageBlockComponent } from '@blocksuite/blocks/index.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
@@ -81,19 +81,6 @@ export function getClosestBlockElementByPoint(
   );
 
   do {
-    /*
-    element = document.elementFromPoint(point.x, point.y);
-    if (element) {
-      if (!element.hasAttribute(BLOCK_ID_ATTR)) {
-        element = element.closest(BLOCK_ID_ATTR_SELECTOR);
-      }
-      if (element) {
-        if (isPageOrFrame(element)) element = null;
-        else return element;
-      }
-    }
-    */
-
     // In some scenarios, e.g. `format-quick-bar` will be at the top.
     // Tip. Put `format-quick-bar` into `editor-container`.
     element =
@@ -111,6 +98,19 @@ export function getClosestBlockElementByPoint(
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
   return element;
+}
+
+/**
+ * Returns the closest block element by a point in the rect in strict mode.
+ */
+export function getClosestBlockElementByPointInStrictMode(
+  point: Point,
+  rect: Rect
+): Element | null {
+  if (!rect.isPointIn(point)) return null;
+  return getClosestBlockElementByElement(
+    document.elementFromPoint(point.x, point.y)
+  );
 }
 
 /**
@@ -159,12 +159,12 @@ export function getBlockElementsByElement(
  * Returns rect of the block element.
  */
 export function getRectByBlockElement(element: Element) {
-  const elem = element as BlockComponentElement;
-  if (elem.model.type === 'image') {
-    const image = elem as ImageBlockComponent;
-    return image.resizeImg.getBoundingClientRect();
-  }
-  return elem.getBoundingClientRect();
+  // const elem = element as BlockComponentElement;
+  // if (elem.model.type === 'image') {
+  //   const image = elem as ImageBlockComponent;
+  //   return image.resizeImg.getBoundingClientRect();
+  // }
+  return element.getBoundingClientRect();
 }
 
 /**

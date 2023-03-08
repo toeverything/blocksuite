@@ -121,7 +121,7 @@ function binarySearchBlockEditingState(
   }
 ): EditingState | null {
   const noSkipX = !options?.skipX;
-  const dragging = Boolean(options?.dragging);
+  const dragging = !!options?.dragging;
   let containerLeft = 0;
 
   if (noSkipX) {
