@@ -66,7 +66,7 @@ const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
-  it.only('can init workspace', async () => {
+  it('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);

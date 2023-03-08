@@ -261,7 +261,6 @@ export class Workspace {
     if (options.blobOptionsGetter) {
       this._blobOptionsGetter = options.blobOptionsGetter;
     }
-    console.log(options.isSSR);
 
     if (!options.isSSR) {
       this._blobStorage = getBlobStorage(options.id, k => {
