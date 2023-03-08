@@ -5,46 +5,51 @@ import type { Page } from '@blocksuite/store';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
+  blockRangeToNativeRange,
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../utils/block-range.js';
+import {
   getCurrentNativeRange,
   getEditorContainer,
   getRichTextByModel,
-  getStartModelBySelection,
-  isRangeNativeSelection,
 } from '../../utils/index.js';
 import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
-  // TODO may allow user creating a link with text
-  if (!isRangeNativeSelection()) return;
-
-  const startModel = getStartModelBySelection();
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+  if (blockRange.models.length > 1) {
+    throw new Error("Can't create link with multiple blocks for now");
+  }
+  const startModel = blockRange.models[0];
   if (!startModel) return;
   const richText = getRichTextByModel(startModel);
   if (!richText) return;
 
   const { vEditor } = richText;
   assertExists(vEditor);
-  const vRange = vEditor.getVRange();
-  assertExists(vRange);
-  // TODO support selection with multiple blocks
+  const vRange = {
+    index: blockRange.startOffset,
+    length: blockRange.endOffset - blockRange.startOffset,
+  };
 
   // User can cancel link by pressing shortcut again
   const format = vEditor.getFormat(vRange);
   if (format.link) {
-    delete format.link;
     page.captureSync();
-    vEditor.formatText(vRange, format, {
-      mode: 'replace',
-    });
-    vEditor.setVRange(vRange);
-    setTimeout(() => {
-      createLink(page);
-    });
+    vEditor.formatText(vRange, { link: null });
+    // vEditor.setVRange(vRange);
+    // recreate link
+    // setTimeout(() => {
+    //   createLink(page);
+    // });
     return;
   }
 
   // mock a selection style
-  const range = getCurrentNativeRange();
+  const range = blockRangeToNativeRange(blockRange);
+  assertExists(range);
   const rects = Array.from(range.getClientRects());
 
   const container = getEditorContainer(page);
