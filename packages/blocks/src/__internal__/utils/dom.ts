@@ -77,7 +77,7 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   point.x = Math.floor(
-    Math.min(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X, right)
+    Math.min(Math.ceil(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X), right)
   );
 
   do {
@@ -105,8 +105,15 @@ export function getClosestBlockElementByPoint(
  */
 export function getClosestBlockElementByPointInStrictMode(
   point: Point,
-  rect: Rect
+  rect: Rect,
+  clamp = false
 ): Element | null {
+  if (clamp) {
+    // make sure `x` in [rect.left, rect.right] range.
+    point.x = Math.floor(
+      Math.min(Math.ceil(Math.max(point.x, rect.left)), rect.right)
+    );
+  }
   if (!rect.isPointIn(point)) return null;
   return getClosestBlockElementByElement(
     document.elementFromPoint(point.x, point.y)
@@ -118,13 +125,15 @@ export function getClosestBlockElementByPointInStrictMode(
  */
 export function getClosestBlockElementByElement(element: Element | null) {
   if (!element) return null;
-  if (hasBlockId(element)) {
-    if (isBlock(element)) return element;
-    return null;
+  if (hasBlockId(element) && isBlock(element)) {
+    return element;
   }
-  return getClosestBlockElementByElement(
-    element.closest(BLOCK_ID_ATTR_SELECTOR)
-  );
+  element = element.closest(BLOCK_ID_ATTR_SELECTOR);
+  if (!element) return null;
+  if (hasBlockId(element) && isBlock(element)) {
+    return element;
+  }
+  return null;
 }
 
 /**

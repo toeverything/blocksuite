@@ -163,23 +163,6 @@ export function filterSelectedBlockByIndex(
   return results;
 }
 
-// clear subtree in block for drawing rect
-export function clearSubtree(
-  selectedBlocks: BlockComponentElement[],
-  prevBlock: BlockComponentElement
-) {
-  return selectedBlocks.filter((block, index) => {
-    if (index === 0) return true;
-    // prev block contains block
-    if (contains(prevBlock, block)) {
-      return false;
-    } else {
-      prevBlock = block;
-      return true;
-    }
-  });
-}
-
 // find blocks and its subtree
 export function findBlocksWithSubtree(
   blockCache: Map<BlockComponentElement, DOMRect>,

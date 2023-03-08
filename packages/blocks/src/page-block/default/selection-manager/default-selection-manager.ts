@@ -315,27 +315,28 @@ export class DefaultSelectionManager {
       this._container.getInnerRect()
     );
 
-    if (element) {
-      const model = getModelByBlockElement(element);
-      const rect = element.getBoundingClientRect();
-      const hoverEditingState = {
-        model,
-        rect,
-        element: element as BlockComponentElement,
-      };
-
-      this._container.components.dragHandle?.onContainerMouseMove(
-        e,
-        hoverEditingState
-      );
-
-      if (model.type === 'image') {
-        // when image size is too large, the option popup should show inside
-        rect.x = rect.right + (rect.width > 680 ? -50 : 10);
-        this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-      }
-    } else {
+    if (!element) {
       this.slots.embedEditingStateUpdated.emit(null);
+      return;
+    }
+
+    const model = getModelByBlockElement(element);
+    const rect = element.getBoundingClientRect();
+    const hoverEditingState = {
+      model,
+      rect,
+      element: element as BlockComponentElement,
+    };
+
+    this._container.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
+
+    if (model.type === 'image') {
+      // when image size is too large, the option popup should show inside
+      rect.x = rect.right + (rect.width > 680 ? -50 : 10);
+      this.slots.embedEditingStateUpdated.emit(hoverEditingState);
     }
   };
 

@@ -12,6 +12,7 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
+  getClosestBlockElementByPointInStrictMode,
   type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
@@ -505,26 +506,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    getBlockEditingStateByCursor(
-      blocks,
-      pageX,
-      pageY,
-      cursor,
-      size,
-      skipX,
-      dragging
-    ) {
-      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
-        size,
-        skipX,
-        dragging,
-      });
-    },
-    getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
-      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
-        skipX,
-      });
-    },
     onDropCallback(e, blocks, { rect, model }): void {
       const page = defaultPageBlock.page;
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
@@ -564,6 +545,16 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     },
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
+    },
+    getFocusedBlock() {
+      return defaultPageBlock.selection.state.focusedBlock;
+    },
+    getClosestBlockElement(point: Point) {
+      return getClosestBlockElementByPointInStrictMode(
+        point,
+        defaultPageBlock.getInnerRect(),
+        true
+      );
     },
   });
 }
