@@ -1,5 +1,5 @@
 import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Disposable, Page, UserRange } from '@blocksuite/store';
+import type { Page, UserRange } from '@blocksuite/store';
 
 import {
   initMouseEventHandlers,
@@ -29,24 +29,6 @@ export interface EdgelessHoverState {
   content: Selectable;
 }
 
-// /* Indicates there is no selected block */
-// interface NoneSelectionState {
-//   type: 'none';
-// }
-
-// /* Indicates there is one selected block */
-// interface SingleSelectionState {
-//   type: 'single';
-//   /* The selected block or surface element */
-//   selected: Selectable;
-//   /* Rect of the selected content */
-//   rect: DOMRect;
-//   /* True if the selected content is active (like after double click) */
-//   active: boolean;
-// }
-
-// export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
-
 export interface EdgelessSelectionState {
   /* The selected block or surface element */
   selected: Selectable[];
@@ -71,10 +53,7 @@ export class EdgelessSelectionManager {
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
   private _mouseDisposeCallback: () => void = noop;
-  private _selectionUpdateCallback: Disposable;
   private _wheelDisposeCallback: () => void = noop;
-
-  private _prevSelectedShapeId: string | null = null;
 
   private _lastMouseViewPoint: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -128,30 +107,6 @@ export class EdgelessSelectionManager {
     };
 
     this._initMouseAndWheelEvents();
-    this._selectionUpdateCallback = this._container.slots.updateSelection.on(
-      state => {
-        if (this._prevSelectedShapeId) {
-          /*
-          const element = getBlockById<'affine-shape'>(
-            this._prevSelectedShapeId
-          );
-          if (element) {
-            element.selected = false;
-          }
-          */
-          this._prevSelectedShapeId = null;
-        }
-        // if (state.type === 'single') {
-        // if (matchFlavours(state.selected, ['affine:shape'])) {
-        //   const element = getBlockById<'affine-shape'>(state.selected.id);
-        //   if (element) {
-        //     element.selected = true;
-        //   }
-        //   this._previousSelectedShape = state.selected as ShapeBlockModel;
-        // }
-        // }
-      }
-    );
   }
 
   private _updateLastMouseViewPoint(e: SelectionEvent) {
@@ -229,7 +184,6 @@ export class EdgelessSelectionManager {
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
-    this._selectionUpdateCallback.dispose();
   }
 
   updateLocalSelection() {
