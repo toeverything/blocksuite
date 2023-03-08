@@ -175,7 +175,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     const observer = () => {
       this._showTipsPlaceholder =
-        this.model.text.length === 0 && this.model.type === 'text';
+        this.model.text.length === 0 &&
+        this.model.type === 'text' &&
+        !this._isComposing;
     };
     this.model.text.yText.observe(observer);
     this._disposables = new DisposableGroup();
@@ -212,9 +214,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._showTipsPlaceholder && !this._isComposing
-          ? TipsPlaceholder()
-          : html``}
+        ${this._showTipsPlaceholder ? TipsPlaceholder() : html``}
         <rich-text
           .host=${this.host}
           .model=${this.model}
