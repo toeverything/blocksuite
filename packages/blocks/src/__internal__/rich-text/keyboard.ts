@@ -325,13 +325,13 @@ export function createKeyboardBindings(
   }
 
   const keyboardBindings: KeyboardBindings = {
-    // Note: Since Quill’s default handlers are added at initialization,
+    // Note: Since quill's default handlers are added at initialization,
     // the only way to prevent them is to add yours in the configuration.
     // See https://quilljs.com/docs/modules/keyboard/#configuration
     // The defaultOptions can found at https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L334-L607
     'code exit': {
       key: 'Enter',
-      // override default quill behavior
+      // override default behavior
       handler: () => ALLOW_DEFAULT,
     },
     bold: {

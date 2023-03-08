@@ -13,36 +13,11 @@ export type DeltaOperation = {
   retain?: number;
 } & OptionalAttributes;
 
-// Removes the pending '\n's if it has no attributes
-export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
-  if (delta.length > 0) {
-    const d = delta[delta.length - 1];
-    const insert: string = d.insert;
-    if (
-      d.attributes === undefined &&
-      insert !== undefined &&
-      insert.slice(-1) === '\n'
-    ) {
-      delta = delta.slice();
-      let ins = insert.slice(0, -1);
-      while (ins.slice(-1) === '\n') {
-        ins = ins.slice(0, -1);
-      }
-      delta[delta.length - 1] = { insert: ins };
-      if (ins.length === 0) {
-        delta.pop();
-      }
-      return delta;
-    }
-  }
-  return delta;
-}
-
 declare module 'yjs' {
   interface Text {
     /**
      * Specific addition used by @blocksuite/store
-     * When set, we know it hasn't been applied to quill.
+     * When set, we know it hasn't been applied to virgo.
      * When specified, we call this a "controlled operation".
      *
      * Consider renaming this to closer indicate this is simply a "controlled operation",
