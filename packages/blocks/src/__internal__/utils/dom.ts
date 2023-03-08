@@ -1,3 +1,4 @@
+import type { ImageBlockComponent } from '@blocksuite/blocks/index.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
@@ -6,12 +7,12 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Loader } from '../../components/loader.js';
-import type { ContainerBlock } from './query.js';
+import type { BlockComponentElement, ContainerBlock } from './query.js';
 import type { Point, Rect } from './rect.js';
 
 const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
 const AFFINE_FRAME = 'AFFINE-FRAME';
-// const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
+const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
 const DRAG_HANDLE_OFFSET_X =
   24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
@@ -33,6 +34,20 @@ export function contains(parent: Element, node: Element) {
  */
 export function isPageOrFrame({ tagName }: Element) {
   return tagName === AFFINE_DEFAULT_PAGE || tagName === AFFINE_FRAME;
+}
+
+/**
+ * Returns `true` if element is not page or frame.
+ */
+export function isBlock(element: Element) {
+  return !isPageOrFrame(element);
+}
+
+/**
+ * Returns `true` if element has `data-block-id` attribute.
+ */
+export function hasBlockId(element: Element) {
+  return element.hasAttribute(BLOCK_ID_ATTR);
 }
 
 /**
@@ -80,10 +95,9 @@ export function getClosestBlockElementByPoint(
     */
 
     // In some scenarios, e.g. `format-quick-bar` will be at the top.
+    // Tip. Put `format-quick-bar` into `editor-container`.
     element =
-      document
-        .elementsFromPoint(point.x, point.y)
-        .find(element => element.hasAttribute(BLOCK_ID_ATTR)) || null;
+      document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
 
     if (element) {
       if (isPageOrFrame(element)) element = null;
@@ -97,6 +111,20 @@ export function getClosestBlockElementByPoint(
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
   return element;
+}
+
+/**
+ * Returns the closest block element by element.
+ */
+export function getClosestBlockElementByElement(element: Element | null) {
+  if (!element) return null;
+  if (hasBlockId(element)) {
+    if (isBlock(element)) return element;
+    return null;
+  }
+  return getClosestBlockElementByElement(
+    element.closest(BLOCK_ID_ATTR_SELECTOR)
+  );
 }
 
 /**
@@ -114,4 +142,48 @@ export function getModelByBlockElement(element: Element) {
   }
   assertExists(containerBlock.model);
   return containerBlock.model;
+}
+
+/**
+ * Returns all block elements in an element.
+ */
+export function getBlockElementsByElement(
+  element: BlockComponentElement | Document | Element = document
+) {
+  return Array.from(element.querySelectorAll(BLOCK_ID_ATTR_SELECTOR)).filter(
+    isBlock
+  );
+}
+
+/**
+ * Returns rect of the block element.
+ */
+export function getRectByBlockElement(element: Element) {
+  const elem = element as BlockComponentElement;
+  if (elem.model.type === 'image') {
+    const image = elem as ImageBlockComponent;
+    return image.resizeImg.getBoundingClientRect();
+  }
+  return elem.getBoundingClientRect();
+}
+
+/**
+ * Clear subtree, only keep block elements of same level.
+ */
+export function clearSubtree(elements: Element[]) {
+  if (!elements.length) return [];
+  if (elements.length === 1) return elements;
+
+  let parent = elements[0];
+
+  return elements.filter((node, index) => {
+    if (index === 0) return true;
+    // prev block contains block
+    if (contains(parent, node)) {
+      return false;
+    } else {
+      parent = node;
+      return true;
+    }
+  });
 }

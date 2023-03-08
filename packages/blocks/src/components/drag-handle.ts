@@ -206,8 +206,8 @@ export class DragHandle extends LitElement {
    */
   private _lastDroppingTarget: EditingState | null = null;
   private _indicator: DragIndicator | null = null;
-  private _cursor: number | null = 0;
-  private _lastSelectedIndex = -1;
+  // private _cursor: number | null = 0;
+  // private _lastSelectedIndex = -1;
   private _container: HTMLElement;
   private _dragImage: HTMLElement | null = null;
 
@@ -232,15 +232,16 @@ export class DragHandle extends LitElement {
 
     if (modelState) {
       this._handleAnchorState = modelState;
-      this._cursor = modelState.index;
-      const rect = modelState.position;
-      if (this._cursor === this._lastSelectedIndex) {
-        this._dragHandleOver.style.display = 'block';
-        this._dragHandleNormal.style.display = 'none';
-      } else {
-        this._dragHandleOver.style.display = 'none';
-        this._dragHandleNormal.style.display = 'block';
-      }
+      // this._cursor = modelState.index;
+      const rect = modelState.rect;
+      // if (this._cursor === this._lastSelectedIndex) {
+      // if (this._cursor === this._lastSelectedIndex) {
+      //   this._dragHandleOver.style.display = 'block';
+      //   this._dragHandleNormal.style.display = 'none';
+      // } else {
+      //   this._dragHandleOver.style.display = 'none';
+      //   this._dragHandleNormal.style.display = 'block';
+      // }
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
@@ -284,7 +285,7 @@ export class DragHandle extends LitElement {
 
   hide() {
     this.style.display = 'none';
-    this._cursor = null;
+    // this._cursor = null;
     this._handleAnchorState = null;
     this._lastDroppingTarget = null;
 
@@ -372,7 +373,7 @@ export class DragHandle extends LitElement {
     if (!this._handleAnchorState) {
       return;
     }
-    const rect = this._handleAnchorState.position;
+    const { rect } = this._handleAnchorState;
     const top = Math.max(
       0,
       Math.min(
@@ -389,16 +390,17 @@ export class DragHandle extends LitElement {
   // fixme: handle multiple blocks case
   private _onResize = (e: UIEvent) => {
     if (this._handleAnchorState) {
+      const { rect } = this._handleAnchorState;
       const newModelState = this._getBlockEditingStateByPosition?.(
         this.getDropAllowedBlocks([this._handleAnchorState.model.id]),
-        this._handleAnchorState.position.x,
-        this._handleAnchorState.position.y,
+        rect.x,
+        rect.y,
         true
       );
       if (newModelState) {
         this._handleAnchorState = newModelState;
-        this._cursor = newModelState.index;
-        const rect = this._handleAnchorState.position;
+        // this._cursor = newModelState.index;
+        const { rect } = this._handleAnchorState;
         this.style.display = 'block';
         const containerRect = this._container.getBoundingClientRect();
         this.style.left = `${rect.left - containerRect.left - 20}px`;
@@ -414,16 +416,18 @@ export class DragHandle extends LitElement {
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
-    const clickDragState = this._getBlockEditingStateByPosition?.(
-      this.getDropAllowedBlocks(null),
-      e.clientX,
-      e.clientY,
-      true
-    );
-    if (clickDragState) {
-      this.setSelectedBlocks(clickDragState);
-      this._cursor = clickDragState.index;
-      this._lastSelectedIndex = this._cursor;
+    // const clickDragState = this._getBlockEditingStateByPosition?.(
+    //   this.getDropAllowedBlocks(null),
+    //   e.clientX,
+    //   e.clientY,
+    //   true
+    // );
+    // if (clickDragState) {
+    //   this.setSelectedBlocks(clickDragState);
+    // this._cursor = clickDragState.index;
+    // this._lastSelectedIndex = this._cursor;
+    if (this._handleAnchorState) {
+      this.setSelectedBlocks(this._handleAnchorState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
@@ -486,23 +490,24 @@ export class DragHandle extends LitElement {
       x = this._currentClientX;
       y = this._currentClientY;
     }
-    if (this._cursor === null || !this._indicator) {
+    // if (this._cursor === null || !this._indicator) {
+    if (!this._indicator) {
       return;
     }
-    const modelState = this._getBlockEditingStateByCursor?.(
-      this.getDropAllowedBlocks(this._draggingBlockIds),
-      x,
-      y,
-      this._cursor,
-      5,
-      false,
-      true
-    );
-    if (modelState) {
-      this._cursor = modelState.index;
-      this._lastDroppingTarget = modelState;
-      this._indicator.targetRect = modelState.position;
-    }
+    // const modelState = this._getBlockEditingStateByCursor?.(
+    //   this.getDropAllowedBlocks(this._draggingBlockIds),
+    //   x,
+    //   y,
+    //   this._cursor,
+    //   5,
+    //   false,
+    //   true
+    // );
+    // if (modelState) {
+    //   // this._cursor = modelState.index;
+    //   this._lastDroppingTarget = modelState;
+    //   this._indicator.targetRect = modelState.position;
+    // }
     this._indicator.cursorPosition = {
       x,
       y,
@@ -537,8 +542,13 @@ export class DragHandle extends LitElement {
           /* padding-top: 5px !important; FIXME */
         }
 
+        .affine-drag-handle-line {
+          pointer-events: auto;
+        }
+
         .affine-drag-handle {
           position: absolute;
+          pointer-events: auto;
         }
       </style>
       <div class="affine-drag-handle-line"></div>

@@ -21,10 +21,9 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 export interface EditingState {
-  model: BaseBlockModel;
-  position: DOMRect;
-  index: number;
   element: BlockComponentElement;
+  model: BaseBlockModel;
+  rect: DOMRect;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -211,7 +210,7 @@ function binarySearchBlockEditingState(
               ) {
                 if (x >= result.blockRect.left && x < blockRect.left) {
                   return {
-                    index: mid,
+                    // index: mid,
                     position: result.blockRect,
                     model: result.block,
                     element: result.hoverDom,
@@ -234,7 +233,7 @@ function binarySearchBlockEditingState(
       }
 
       return {
-        index: mid,
+        // index: mid,
         position: blockRect,
         model: block,
         element: hoverDom,
@@ -526,14 +525,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         skipX,
       });
     },
-    onDropCallback(e, blocks, end): void {
+    onDropCallback(e, blocks, { rect, model }): void {
       const page = defaultPageBlock.page;
-      const rect = end.position;
-      const targetModel = end.model;
-      if (
-        blocks.length === 1 &&
-        doesInSamePath(page, targetModel, blocks[0].model)
-      ) {
+      if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
       }
       page.captureSync();
@@ -541,7 +535,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       const distanceToBottom = Math.abs(rect.bottom - e.y);
       page.moveBlocks(
         blocks.map(b => b.model),
-        targetModel,
+        model,
         distanceToTop < distanceToBottom
       );
       const type = defaultPageBlock.selection.state.type;
@@ -564,8 +558,10 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (Array.isArray(selectedBlocks)) {
         defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
       } else if (selectedBlocks) {
-        const { position, index } = selectedBlocks;
-        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
+        // const { position, element } = selectedBlocks;
+        // defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
+        const { element, rect } = selectedBlocks;
+        defaultPageBlock.selection.selectOneBlockElement(element, rect);
       }
     },
     getSelectedBlocks() {

@@ -41,7 +41,7 @@ import {
 } from './utils.js';
 
 export interface EmbedEditingState {
-  position: { x: number; y: number };
+  rect: { x: number; y: number };
   model: BaseBlockModel;
 }
 
