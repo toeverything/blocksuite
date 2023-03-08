@@ -83,8 +83,6 @@ test('type character jump out code node', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
-  // TODO fix the `code={false}` text
-  // block suite should not be code
   await assertStoreMatchJSX(
     page,
     `
@@ -318,23 +316,7 @@ test('should single line format hotkey work', async ({ page }) => {
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="h"
-        />
-        <text
-          bold={false}
-          insert="ell"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-        <text
-          insert="o"
-        />
-      </>
-    }
+    prop:text="hello"
     prop:type="text"
   />
 </affine:frame>`,
@@ -433,51 +415,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="1"
-        />
-        <text
-          bold={false}
-          insert="23"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-      </>
-    }
+    prop:text="123"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="456"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-      </>
-    }
+    prop:text="456"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="78"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-        <text
-          insert="9"
-        />
-      </>
-    }
+    prop:text="789"
     prop:type="text"
   />
 </affine:frame>`,
