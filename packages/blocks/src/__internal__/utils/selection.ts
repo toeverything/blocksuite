@@ -388,11 +388,11 @@ export function handleNativeRangeDragMove(
     shouldUpdateCurrentRange = true;
   } else {
     const el = document.elementFromPoint(x, y);
-    if (el?.classList.contains('quill-container')) {
+    if (el?.classList.contains('virgo-editor')) {
       return;
     }
     currentFrame = el?.closest('affine-frame');
-    const currentEditor = el?.closest('.ql-editor');
+    const currentEditor = el?.closest('.virgo-editor');
     // if we are not pointing at an editor, we should update the current range
     // if we are not even pointing at a frame, we should find one and update the current range
     shouldUpdateCurrentRange = !currentFrame || !currentEditor;
@@ -885,7 +885,7 @@ export function getHorizontalClosestElement(
  * Get the closest editor element in the horizontal position
  */
 export function getClosestEditor(clientY: number, container = document.body) {
-  return getHorizontalClosestElement(clientY, '.ql-editor', container);
+  return getHorizontalClosestElement(clientY, '.virgo-editor', container);
 }
 
 /**

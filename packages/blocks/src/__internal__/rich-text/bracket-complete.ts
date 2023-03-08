@@ -1,7 +1,6 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getCurrentNativeRange, resetNativeSelection } from '../index.js';
 import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {
@@ -100,10 +99,11 @@ export function createBracketAutoCompleteBindings(
         model.text.insert(pair.left, range.index);
         model.text.insert(pair.right, range.index + range.length + 1);
 
-        const curRange = getCurrentNativeRange();
-        // move cursor to the end of the inserted text
-        curRange.setStart(curRange.startContainer, curRange.startOffset + 1);
-        resetNativeSelection(curRange);
+        this.vEditor.setVRange({
+          index: range.index + 1,
+          length: range.length,
+        });
+
         return PREVENT_DEFAULT;
       },
     };

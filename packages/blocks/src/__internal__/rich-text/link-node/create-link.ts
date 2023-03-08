@@ -1,18 +1,18 @@
-import './link-node.js';
+import './affine-link.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { ParentBlot } from 'parchment';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
+  getCurrentNativeRange,
   getRichTextByModel,
   getStartModelBySelection,
   isRangeNativeSelection,
 } from '../../utils/index.js';
-import { MockSelectNode } from './mock-select-node.js';
+import { LinkMockSelection } from './mock-selection.js';
 
-export async function createLink(page: Page) {
+export function createLink(page: Page) {
   // TODO may allow user creating a link with text
   if (!isRangeNativeSelection()) return;
 
@@ -21,48 +21,48 @@ export async function createLink(page: Page) {
   const richText = getRichTextByModel(startModel);
   if (!richText) return;
 
-  const { quill } = richText;
-  const range = quill.getSelection();
-  // TODO fix selection with multiple lines
-  assertExists(range);
+  const { vEditor } = richText;
+  assertExists(vEditor);
+  const vRange = vEditor.getVRange();
+  assertExists(vRange);
+  // TODO support selection with multiple blocks
 
   // User can cancel link by pressing shortcut again
-  const format = quill.getFormat(range);
-  if (format?.link) {
+  const format = vEditor.getFormat(vRange);
+  if (format.link) {
+    delete format.link;
     page.captureSync();
-    const { index, length } = range;
-    startModel.text?.format(index, length, { link: false });
+    vEditor.formatText(vRange, format, {
+      mode: 'replace',
+    });
+    vEditor.setVRange(vRange);
+    setTimeout(() => {
+      createLink(page);
+    });
     return;
   }
 
-  // Note: Just mock a selection style, this operation should not be recorded to store
-  quill.format('mock-select', true);
-
-  // See https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-  const [node] = (quill.scroll as unknown as ParentBlot).descendant(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/quilljs/parchment/issues/121
-    MockSelectNode as any,
-    range.index
+  // mock a selection style
+  const range = getCurrentNativeRange();
+  const rects = Array.from(range.getClientRects());
+  const mockSelection = new LinkMockSelection(rects);
+  const affineEditorContainer = document.querySelector(
+    '.affine-editor-container'
   );
-  if (!node) {
-    console.error('Error on getBlotNode', MockSelectNode, quill, range);
-    throw new Error('Failed to getBlotNode, node not found!');
-  }
+  assertExists(affineEditorContainer);
+  affineEditorContainer.appendChild(mockSelection);
 
-  const mockSelectBlot = node as MockSelectNode;
-  const mockSelectDom = mockSelectBlot?.domNode as HTMLElement | undefined;
-  if (!mockSelectDom) {
-    console.error('Error on createLink', mockSelectBlot, quill, range);
-    throw new Error('Failed to create link, mockSelectDom not found!');
-  }
+  setTimeout(async () => {
+    const linkState = await showLinkPopover({
+      anchorEl: mockSelection.shadowRoot?.querySelector('div') as HTMLElement,
+    });
 
-  const linkState = await showLinkPopover({ anchorEl: mockSelectDom });
+    mockSelection.remove();
+    if (linkState.type !== 'confirm') return;
 
-  quill.formatText(range, { 'mock-select': false });
-  if (linkState.type !== 'confirm') return;
+    const link = linkState.link;
 
-  const link = linkState.link;
-
-  page.captureSync();
-  startModel.text?.format(range.index, range.length, { link });
+    page.captureSync();
+    vEditor.formatText(vRange, { link });
+  });
 }

@@ -1,6 +1,6 @@
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { DeltaOperation } from 'quill';
+import type { DeltaOperation } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../../components/index.js';
 import type { ContentParser } from './index.js';

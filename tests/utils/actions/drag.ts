@@ -25,8 +25,8 @@ export async function dragBetweenCoords(
 
 export async function dragBetweenIndices(
   page: Page,
-  [startRichTextIndex, startQuillIndex]: [number, number],
-  [endRichTextIndex, endQuillIndex]: [number, number],
+  [startRichTextIndex, startVIndex]: [number, number],
+  [endRichTextIndex, endVIndex]: [number, number],
   startCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
   endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
   options?: {
@@ -37,12 +37,12 @@ export async function dragBetweenIndices(
 ) {
   const startCoord = await getIndexCoordinate(
     page,
-    [startRichTextIndex, startQuillIndex],
+    [startRichTextIndex, startVIndex],
     startCoordOffSet
   );
   const endCoord = await getIndexCoordinate(
     page,
-    [endRichTextIndex, endQuillIndex],
+    [endRichTextIndex, endVIndex],
     endCoordOffSet
   );
 

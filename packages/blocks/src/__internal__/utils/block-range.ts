@@ -4,8 +4,8 @@ import {
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
-  getQuillIndexByNativeSelection,
   getTextNodeBySelectedBlock,
+  getVRangeByNode,
 } from './query.js';
 import {
   getCurrentNativeRange,
@@ -102,14 +102,15 @@ export function nativeRangeToBlockRange(range: Range): BlockRange | null {
     // so we can't convert it to block range
     return null;
   }
-  const startOffset = getQuillIndexByNativeSelection(
-    range.startContainer,
-    range.startOffset
-  );
-  const endOffset = getQuillIndexByNativeSelection(
-    range.endContainer,
-    range.endOffset
-  );
+
+  const startVRange = getVRangeByNode(range.startContainer);
+  const endVRange = getVRangeByNode(range.endContainer);
+  if (!startVRange || !endVRange) {
+    return null;
+  }
+
+  const startOffset = startVRange.index;
+  const endOffset = endVRange.index + endVRange.length;
   return {
     type: 'Native',
     startOffset,

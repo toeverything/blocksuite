@@ -12,7 +12,7 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { DeltaOperation } from 'quill';
+import type { DeltaOperation } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';

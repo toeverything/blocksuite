@@ -76,7 +76,7 @@ export class SlashMenu extends LitElement {
       // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
-    this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
+    // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
   }
 
   override disconnectedCallback() {

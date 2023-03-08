@@ -1,6 +1,7 @@
 import {
   getCurrentBlockRange,
   getDefaultPageBlock,
+  getRichTextByModel,
   handleBlockSelectionBatchDelete,
   OpenBlockInfo,
 } from '@blocksuite/blocks';
@@ -10,8 +11,7 @@ import {
   handleBlockSplit,
 } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, Text } from '@blocksuite/store';
-import type { DeltaOperation } from 'quill';
+import { BaseBlockModel, DeltaOperation, Text } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
@@ -338,10 +338,17 @@ export class PasteManager {
           }
         }
         setTimeout(() => {
-          lastId &&
-            this._editor.page.richTextAdapters
-              .get(lastId)
-              ?.quill.setSelection(position, 0);
+          const block = this._editor.page.getBlockById(lastId);
+          if (block) {
+            const richText = getRichTextByModel(block);
+            const vEditor = richText?.vEditor;
+            if (vEditor) {
+              vEditor.setVRange({
+                index: position,
+                length: 0,
+              });
+            }
+          }
         });
       } else {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);

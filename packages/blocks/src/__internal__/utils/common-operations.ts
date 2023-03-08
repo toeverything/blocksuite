@@ -1,22 +1,36 @@
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { Quill } from 'quill';
+import type { VEditor, VRange } from '@blocksuite/virgo';
 
+import { getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
-// XXX: workaround quill lifecycle issue
-export function asyncFocusRichText(page: Page, id: string) {
+export function asyncFocusRichText(
+  page: Page,
+  id: string,
+  vRange: VRange = { index: 0, length: 0 }
+) {
   requestAnimationFrame(() => {
-    const adapter = page.richTextAdapters.get(id);
-    adapter?.quill.focus();
+    const model = page.getBlockById(id);
+    if (!model) {
+      throw new Error(`Cannot find block with id ${id}`);
+    }
+    const richText = getRichTextByModel(model);
+    if (!richText) {
+      throw new Error(`Cannot find rich text with id ${id}`);
+    }
+    const vEditor = richText.vEditor;
+    if (!vEditor) {
+      throw new Error(`Cannot find vEditor with id ${id}`);
+    }
+    vEditor.setVRange(vRange);
   });
 }
 
-export function isCollapsedAtBlockStart(quill: Quill) {
-  return (
-    quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
-  );
+export function isCollapsedAtBlockStart(vEditor: VEditor) {
+  const vRange = vEditor.getVRange();
+  return vRange?.index === 0 && vRange?.length === 0;
 }
 
 export function doesInSamePath(
@@ -152,8 +166,14 @@ export function convertToDivider(
     };
     // space.deleteBlock(model);
     page.addBlock(blockProps, parent, index);
-    const id = page.id;
-    asyncFocusRichText(page, id);
+
+    const nextBlock = parent.children[index + 1];
+    if (nextBlock) {
+      asyncFocusRichText(page, nextBlock.id);
+    } else {
+      const nextId = page.addBlockByFlavour('affine:paragraph', {}, parent);
+      asyncFocusRichText(page, nextId);
+    }
   }
   return true;
 }

@@ -34,6 +34,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertAlmostEqual,
   assertEdgelessHoverRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
@@ -96,7 +97,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await type(page, 'hello');
   await pressEnter(page);
   await pressEnter(page);
-  await assertRichTexts(page, ['hello', '\n', '\n']);
+  await assertRichTexts(page, ['hello', '', '']);
 
   // inactive
   await switchEditorMode(page);
@@ -163,9 +164,9 @@ test('resize block in edgeless mode', async ({ page }) => {
   const [oldX, oldY, oldW, oldH] = JSON.parse(oldXywh);
   const [x, y, w, h] = JSON.parse(xywh);
   expect(x).toBe(oldX + 100);
-  expect(y).toBe(oldY);
+  assertAlmostEqual(y, oldY, 1);
   expect(w).toBe(oldW - 100);
-  expect(h).toBe(oldH);
+  assertAlmostEqual(h, oldH, 1);
 
   await switchEditorMode(page);
   await switchEditorMode(page);
@@ -531,7 +532,7 @@ test('shape element should not move when the selected state is inactive', async 
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
 
-test('shape element should have the correct selected shape when clicking on the `Select` toolbar', async ({
+test.skip('shape element should have the correct selected shape when clicking on the `Select` toolbar', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

@@ -41,7 +41,7 @@ test('basic link', async ({ page }) => {
   await pressEnter(page);
   await expect(linkPopoverLocator).not.toBeVisible();
 
-  const linkLocator = page.locator(`text="${linkText}"`);
+  const linkLocator = page.locator('affine-link a');
   await expect(linkLocator).toHaveAttribute('href', link);
 
   // Hover link
@@ -65,7 +65,7 @@ test('basic link', async ({ page }) => {
   await type(page, link2);
   await page.keyboard.press('Tab');
   await pressEnter(page);
-  const link2Locator = page.locator(`text="${text2}"`);
+  const link2Locator = page.locator('affine-link a');
 
   await expect(link2Locator).toHaveAttribute('href', link2);
   await assertStoreMatchJSX(
@@ -137,11 +137,7 @@ test('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert=" a"
-        link={false}
-      />
-      <text
-        insert="fter link"
+        insert="after link"
       />
     </>
   }
@@ -223,7 +219,7 @@ test('should mock selection not stored', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [0, 8]);
   await pressCreateLinkShortCut(page);
 
-  const mockSelectNode = page.locator('.affine-mock-select');
+  const mockSelectNode = page.locator('link-mock-selection > div');
   await expect(mockSelectNode).toHaveCount(1);
   await expect(mockSelectNode).toBeVisible();
 
@@ -259,7 +255,7 @@ test('should keyboard work in link popover', async ({ page }) => {
 
   // ---
 
-  const linkLocator = page.locator(`text="${linkText}"`);
+  const linkLocator = page.locator(`text="${linkText.slice(3)}"`);
   const linkPopover = page.locator('.affine-link-popover');
   // Hover link
   await linkLocator.hover();

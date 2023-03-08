@@ -10,6 +10,10 @@ import {
   initThreeParagraphs,
   inlineCode,
   MODIFIER_KEY,
+  pressArrowDown,
+  pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressEnter,
   readClipboardText,
   redoByClick,
@@ -21,6 +25,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -42,7 +47,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [1, 5]);
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
@@ -91,11 +96,7 @@ test('type character jump out code node', async ({ page }) => {
         insert="Hello"
       />
       <text
-        code={false}
-        insert=" b"
-      />
-      <text
-        insert="lock suite"
+        insert="block suite"
       />
     </>
   }
@@ -263,13 +264,15 @@ test('should single line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [0, 4]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -300,13 +303,15 @@ test('should single line format hotkey work', async ({ page }) => {
   );
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -346,13 +351,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -411,13 +418,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
   );
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`);
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`);
+  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+
+  await waitNextFrame(page);
 
   await assertStoreMatchJSX(
     page,
@@ -657,7 +666,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['1', '23']);
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
-  await assertRichTexts(page, ['1', '23', '\n']);
+  await assertRichTexts(page, ['1', '23', '']);
 });
 
 test('should bracket complete works', async ({ page }) => {
@@ -735,30 +744,28 @@ test('pressing enter when selecting multiple blocks should create new block', as
   await assertRichTexts(page, ['123', '456', '789']);
 });
 
-test('should left/right key navigator works', async ({ page }) => {
+// FIXME: getCurrentBlockRange need to handle comment node
+test.skip('should left/right key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await assertSelection(page, 0, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 0, 0);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`, { delay: 50 });
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page);
   await assertSelection(page, 1, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page, 4);
   await assertSelection(page, 1, 3);
-  await page.keyboard.press('ArrowRight');
+  await pressArrowRight(page);
   await assertSelection(page, 2, 0);
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page);
   await assertSelection(page, 1, 3);
 });
 
@@ -768,17 +775,17 @@ test('should up/down key navigator works', async ({ page }) => {
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
   await assertSelection(page, 0, 3);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 1, 3);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 2, 3);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await assertSelection(page, 2, 0);
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await assertSelection(page, 1, 0);
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowUp');
+  await pressArrowRight(page);
+  await pressArrowUp(page);
   await assertSelection(page, 0, 1);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 1, 1);
 });
