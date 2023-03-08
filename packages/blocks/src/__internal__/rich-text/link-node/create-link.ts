@@ -7,13 +7,8 @@ import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
   blockRangeToNativeRange,
   getCurrentBlockRange,
-  restoreSelection,
 } from '../../utils/block-range.js';
-import {
-  getCurrentNativeRange,
-  getEditorContainer,
-  getRichTextByModel,
-} from '../../utils/index.js';
+import { getEditorContainer, getRichTextByModel } from '../../utils/index.js';
 import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
