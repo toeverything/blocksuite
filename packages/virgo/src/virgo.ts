@@ -836,6 +836,8 @@ export class VEditor<
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
+    if (this._isComposing) return;
+
     let ifSkip = false;
     if (this._handlers.virgoInput) {
       ifSkip = this._handlers.virgoInput(event);

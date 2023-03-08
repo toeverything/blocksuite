@@ -26,7 +26,6 @@ import {
   getRichTextByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultSelectionSlots } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
 import { formatConfig } from './const.js';
@@ -36,6 +35,8 @@ import {
 } from './container-operations.js';
 
 export function bindCommonHotkey(page: Page) {
+  if (page.readonly) return;
+
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent quill default behavior
@@ -276,11 +277,7 @@ function handleTab(
   }
 }
 
-export function bindHotkeys(
-  page: Page,
-  selection: DefaultSelectionManager,
-  slots: DefaultSelectionSlots
-) {
+export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   const {
     BACKSPACE,
     SELECT_ALL,
@@ -298,6 +295,14 @@ export function bindHotkeys(
   } = HOTKEYS;
 
   bindCommonHotkey(page);
+
+  hotkey.addListener(SELECT_ALL, e => {
+    e.preventDefault();
+    handleSelectAll(selection);
+    selection.state.type = 'block';
+  });
+
+  if (page.readonly) return;
 
   hotkey.addListener(ENTER, e => {
     const blockRange = getCurrentBlockRange(page);
@@ -342,12 +347,6 @@ export function bindHotkeys(
     deleteModelsByRange(page);
     e.preventDefault();
     return;
-  });
-
-  hotkey.addListener(SELECT_ALL, e => {
-    e.preventDefault();
-    handleSelectAll(selection);
-    selection.state.type = 'block';
   });
 
   hotkey.addListener(UP, e => {

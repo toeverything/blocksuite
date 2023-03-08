@@ -54,6 +54,7 @@ export class EdgelessBrushMenu extends LitElement {
   static styles = css`
     :host {
       width: 260px;
+      z-index: 1;
     }
     .container {
       display: flex;

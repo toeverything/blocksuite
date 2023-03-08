@@ -254,7 +254,12 @@ export class EdgelessPageBlockComponent
     this.slots.hoverUpdated.on(() => this.requestUpdate());
     this.slots.updateSelection.on(() => this.requestUpdate());
     this.slots.surfaceUpdated.on(() => this.requestUpdate());
-    this.slots.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
+    this.slots.mouseModeUpdated.on(mouseMode => {
+      this.mouseMode = mouseMode;
+      if (mouseMode.type === 'default') {
+        requestAnimationFrame(() => this._selection.syncDraggingArea());
+      }
+    });
 
     this._disposables.add(
       this.page.slots.historyUpdated.on(() => {

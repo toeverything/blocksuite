@@ -179,7 +179,6 @@ export class DefaultPageBlockComponent
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
     });
-    this._titleVEditor.setReadonly(this.page.readonly);
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -191,9 +190,7 @@ export class DefaultPageBlockComponent
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
-    if (e.isComposing) {
-      return;
-    }
+    if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
     const defaultFrame = model.children[0];
@@ -330,9 +327,7 @@ export class DefaultPageBlockComponent
   //  that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(e)) {
-      return;
-    }
+    if (isControlledKeyboardEvent(e) || this.page.readonly) return;
     // Only the length of character buttons is 1
     if (e.key.length === 1 && hasNativeSelection()) {
       const range = getCurrentNativeRange();
@@ -453,9 +448,9 @@ export class DefaultPageBlockComponent
   }
 
   firstUpdated() {
-    const { page, selection, slots } = this;
+    const { page, selection } = this;
 
-    bindHotkeys(page, selection, slots);
+    bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
     this._initSlotEffects();
