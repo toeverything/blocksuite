@@ -14,13 +14,14 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { stopPropagation } from '../utils.js';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends LitElement {
   static styles = css`
     :host {
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       bottom: 28px;
       left: calc(50%);
       display: flex;
@@ -63,7 +64,11 @@ export class EdgelessToolbar extends LitElement {
     const type = this.mouseMode?.type;
 
     return html`
-      <div class="edgeless-toolbar-container">
+      <div
+        class="edgeless-toolbar-container"
+        @mousedown=${stopPropagation}
+        @mouseup=${stopPropagation}
+      >
         <edgeless-tool-icon-button
           .tooltip=${'Select'}
           .active=${type === 'default'}

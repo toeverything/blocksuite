@@ -5,7 +5,9 @@ import { expect } from '@playwright/test';
 
 import {
   decreaseZoomLevel,
+  getEdgelessBlockChild,
   getEdgelessHoverRect,
+  getEdgelessSelectedRect,
   getFrameSize,
   increaseZoomLevel,
   pickColorAtPoints,
@@ -528,4 +530,29 @@ test('shape element should not move when the selected state is inactive', async 
   );
 
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('shape element should have the correct selected shape when clicking on the `Select` toolbar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await pressEnter(page);
+  for (let i = 0; i < 15; i++) {
+    await page.keyboard.insertText(`Line ${i + 1}`);
+    await pressEnter(page);
+  }
+  await switchEditorMode(page);
+
+  await setMouseMode(page, 'pan');
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 150, y: 150 });
+  await setMouseMode(page, 'default');
+
+  const blockBox = await getEdgelessBlockChild(page);
+  const selectedBox = await getEdgelessSelectedRect(page);
+
+  expect(blockBox.x).toBeCloseTo(selectedBox.x, 0);
+  expect(blockBox.y).toBeCloseTo(selectedBox.y, 0);
+  expect(blockBox.width).toBeCloseTo(selectedBox.width, 0);
+  expect(blockBox.height).toBeCloseTo(selectedBox.height, 0);
 });

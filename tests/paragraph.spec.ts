@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import {
   clickBlockTypeMenuItem,
   dragOverTitle,
@@ -857,4 +859,27 @@ test('press arrow down in indent line should not move caret to the start of line
   await page.keyboard.press('ArrowDown');
   await type(page, '2');
   await assertRichTexts(page, ['', '', '0'.repeat(100), '012']);
+});
+
+test('should placeholder works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  const placeholder = page.locator('.tips-placeholder');
+  await expect(placeholder).toBeVisible();
+  await expect(placeholder).toHaveCount(1);
+
+  await type(page, '1');
+  await expect(placeholder).not.toBeVisible();
+  await pressBackspace(page);
+
+  await expect(placeholder).toBeVisible();
+  await clickBlockTypeMenuItem(page, 'H1');
+
+  await expect(placeholder).not.toBeVisible();
+  await clickBlockTypeMenuItem(page, 'Text');
+  await expect(placeholder).toBeVisible();
+
+  await pressEnter(page);
+  await expect(placeholder).toHaveCount(1);
 });
