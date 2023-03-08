@@ -15,7 +15,7 @@
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
-[![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/AffineDev)
+[![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 
 ---
 
@@ -50,7 +50,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 - 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10/views/6)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
-- 💬 [Telegram Group](https://t.me/AffineDev)
+- 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 
