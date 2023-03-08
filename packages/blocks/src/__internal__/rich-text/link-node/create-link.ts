@@ -45,7 +45,22 @@ export function createLink(page: Page) {
   // mock a selection style
   const range = getCurrentNativeRange();
   const rects = Array.from(range.getClientRects());
-  const mockSelection = new LinkMockSelection(rects);
+
+  const container = document.querySelector('.affine-editor-container');
+  assertExists(container);
+  const containerRect = container.getBoundingClientRect();
+
+  const mockSelection = new LinkMockSelection(
+    rects.map(
+      rect =>
+        new DOMRect(
+          rect.left - containerRect.left,
+          rect.top - containerRect.top,
+          rect.width,
+          rect.height
+        )
+    )
+  );
   const affineEditorContainer = document.querySelector(
     '.affine-editor-container'
   );
