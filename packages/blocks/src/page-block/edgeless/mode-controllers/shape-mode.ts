@@ -100,10 +100,6 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     noop();
   }
 
-  syncDraggingArea() {
-    noop();
-  }
-
   clearSelection() {
     noop();
   }

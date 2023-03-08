@@ -21,7 +21,6 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
-  getSelectionBoxBound,
   getXYWH,
   isSurfaceElement,
   isTopLevelBlock,
@@ -34,6 +33,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
+  enableCalcHoverState = true;
 
   private _draggingMode: 'translate' | 'select' | 'edit' | null = null;
   private _startRange: Range | null = null;
@@ -58,20 +58,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     return selectedShape
       ? selectedShape
       : pickTop(this._blocks, modelX, modelY);
-  }
-
-  private _updateHoverState(content: Selectable | null) {
-    if (!content) {
-      this._hoverState = null;
-      return;
-    }
-
-    const { viewport } = this._edgeless.surface;
-    const xywh = getXYWH(content);
-    this._hoverState = {
-      rect: getSelectionBoxBound(viewport, xywh),
-      content,
-    };
   }
 
   private _setNoneSelectionState() {
@@ -285,27 +271,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseMove(e: SelectionEvent) {
-    const { viewport } = this._edgeless.surface;
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-
-    const shape = this._surface.pickTop(modelX, modelY);
-    const blocks = pickTop(this._blocks, modelX, modelY);
-
-    this._updateHoverState(shape ?? blocks);
-    this._edgeless.slots.hoverUpdated.emit();
+    noop();
   }
 
   onContainerMouseOut(_: SelectionEvent) {
     noop();
-  }
-
-  // Selection rect can be used for both top-level blocks and surface elements
-  syncDraggingArea() {
-    if (this.blockSelectionState.selected.length === 1) {
-      this._edgeless.slots.updateSelection.emit(this.blockSelectionState);
-    }
-
-    this._updateHoverState(this._hoverState?.content || null);
   }
 
   clearSelection() {
@@ -313,6 +283,5 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       selected: [],
       active: false,
     };
-    this._hoverState = null;
   }
 }

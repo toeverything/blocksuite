@@ -234,14 +234,13 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     // TODO: listen to new children
-    this.pageModel.children.forEach(frame => {
-      frame.propsUpdated.on(() => this._selection.syncDraggingArea());
-    });
+    // this.pageModel.children.forEach(frame => {
+    //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
+    // });
 
     this.slots.viewportUpdated.on(() => {
       this.style.setProperty('--affine-zoom', `${this.surface.viewport.zoom}`);
 
-      this._selection.syncDraggingArea();
       this.requestUpdate();
     });
     this.slots.hoverUpdated.on(() => this.requestUpdate());
@@ -249,9 +248,6 @@ export class EdgelessPageBlockComponent
     this.slots.surfaceUpdated.on(() => this.requestUpdate());
     this.slots.mouseModeUpdated.on(mouseMode => {
       this.mouseMode = mouseMode;
-      if (mouseMode.type === 'default') {
-        requestAnimationFrame(() => this._selection.syncDraggingArea());
-      }
     });
 
     this._disposables.add(
@@ -315,7 +311,9 @@ export class EdgelessPageBlockComponent
     const { selected } = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
-    const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
+
+    const hoverState = _selection.getHoverState();
+    const hoverRect = EdgelessHoverRect(hoverState, zoom);
     const selectedRect = getSelectedRect(selected, viewport);
 
     const translateX = -viewportX * zoom;

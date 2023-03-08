@@ -124,10 +124,6 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     noop();
   }
 
-  syncDraggingArea() {
-    noop();
-  }
-
   clearSelection() {
     noop();
   }

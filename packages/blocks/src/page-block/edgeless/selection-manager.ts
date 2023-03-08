@@ -15,7 +15,12 @@ import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
-import { initWheelEventHandlers } from './utils.js';
+import {
+  getSelectionBoxBound,
+  getXYWH,
+  initWheelEventHandlers,
+  pickTop,
+} from './utils.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
 
@@ -71,6 +76,8 @@ export class EdgelessSelectionManager {
 
   private _prevSelectedShapeId: string | null = null;
 
+  private _lastMouseViewPoint: { x: number; y: number } = { x: 0, y: 0 };
+
   get isActive() {
     return this.currentController.isActive;
   }
@@ -97,15 +104,6 @@ export class EdgelessSelectionManager {
 
   get currentController() {
     return this._controllers[this.mouseMode.type];
-  }
-
-  get hoverState() {
-    if (!this.currentController.hoverState) return null;
-    return this.currentController.hoverState;
-  }
-
-  get isHoveringShape(): boolean {
-    return false;
   }
 
   get draggingArea() {
@@ -156,6 +154,13 @@ export class EdgelessSelectionManager {
     );
   }
 
+  private _updateLastMouseViewPoint(e: SelectionEvent) {
+    this._lastMouseViewPoint = {
+      x: e.x,
+      y: e.y,
+    };
+  }
+
   private async _initMouseAndWheelEvents() {
     // due to surface initializing after one frame, the events handler should register after that.
     if (!this._container.surface) {
@@ -200,15 +205,12 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncDraggingArea() {
-    return this.currentController.syncDraggingArea();
-  }
-
   private _onContainerDblClick = (e: SelectionEvent) => {
     return this.currentController.onContainerDblClick(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    this._updateLastMouseViewPoint(e);
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 
@@ -248,5 +250,27 @@ export class EdgelessSelectionManager {
     if (element) {
       element.requestUpdate();
     }
+  }
+
+  getHoverState(): EdgelessHoverState | null {
+    if (!this.currentController.enableCalcHoverState) {
+      return null;
+    }
+    const { surface } = this._container;
+    const frames = (this.page.root?.children ?? []) as TopLevelBlockModel[];
+    const { x, y } = this._lastMouseViewPoint;
+    const [modelX, modelY] = surface.toModelCoord(x, y);
+
+    const hovered =
+      surface.pickTop(modelX, modelY) ?? pickTop(frames, modelX, modelY);
+    if (!hovered) {
+      return null;
+    }
+
+    const xywh = getXYWH(hovered);
+    return {
+      rect: getSelectionBoxBound(surface.viewport, xywh),
+      content: hovered,
+    };
   }
 }
