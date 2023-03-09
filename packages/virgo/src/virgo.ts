@@ -59,7 +59,7 @@ export class VEditor<
       const texts = VEditor.getTextNodesFromElement(node);
       if (texts.length > 0) {
         text = texts[0];
-        textOffset = 0;
+        textOffset = offset === 0 ? offset : text.length;
       }
     } else {
       if (node instanceof Node) {
@@ -75,7 +75,7 @@ export class VEditor<
               const texts = VEditor.getTextNodesFromElement(vElements[0]);
               if (texts.length === 0) return null;
               text = texts[0];
-              textOffset = 0;
+              textOffset = offset === 0 ? offset : text.length;
               break;
             }
 
@@ -87,7 +87,7 @@ export class VEditor<
               const texts = VEditor.getTextNodesFromElement(vElements[i]);
               if (texts.length === 0) return null;
               text = texts[0];
-              textOffset = 0;
+              textOffset = offset === 0 ? offset : text.length;
               break;
             } else if (
               i === vElements.length - 1 &&
@@ -438,7 +438,7 @@ export class VEditor<
 
     let index = 0;
     for (const lineElement of lineElements) {
-      if (rangeIndex >= index && rangeIndex < index + lineElement.textLength) {
+      if (rangeIndex >= index && rangeIndex <= index + lineElement.textLength) {
         return [lineElement, rangeIndex - index] as const;
       }
       if (
@@ -974,6 +974,13 @@ export class VEditor<
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.slots.updateVRange.emit([vRange, 'native']);
+    }
+
+    if (
+      range.startContainer.nodeType === Node.COMMENT_NODE ||
+      range.endContainer.nodeType === Node.COMMENT_NODE
+    ) {
+      this.syncVRange();
     }
   };
 
