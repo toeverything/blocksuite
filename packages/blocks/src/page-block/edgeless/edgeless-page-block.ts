@@ -12,9 +12,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  almostEqual,
   BlockHost,
   hotkey,
   resetNativeSelection,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -26,6 +28,7 @@ import type {
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
   bindCommonHotkey,
+  EDGELESS_BLOCK_CHILD_PADDING,
   handleDown,
   handleUp,
   removeCommonHotKey,
@@ -34,6 +37,7 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { FrameResizeObserver } from './frame-resize-observer.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
@@ -130,6 +134,8 @@ export class EdgelessPageBlockComponent
   // when user enters pan mode by pressing 'Space',
   // we should roll back to the last mouse mode once user releases the key;
   private _enterPanMouseModeByShortcut = false;
+
+  private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -256,22 +262,31 @@ export class EdgelessPageBlockComponent
     _disposables.add(this._selection);
     _disposables.add(this.surface);
     _disposables.add(this._bindHotkeys());
-    _disposables.addFromEvent(
-      this,
-      'keydown',
-      e => {
-        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-        // force update to re-render selection
-        requestAnimationFrame(() => {
-          this.setBlockSelectionState({
-            ...this._selection.blockSelectionState,
-          });
-          slots.selectionUpdated.emit(this._selection.blockSelectionState);
+
+    _disposables.add(this._frameResizeObserver);
+    _disposables.add(
+      this._frameResizeObserver.slots.resize.on(resizedFrames => {
+        const zoom = this.surface.viewport.zoom;
+        const page = this.page;
+        resizedFrames.forEach((domRect, id) => {
+          const model = page.getBlockById(id) as TopLevelBlockModel;
+          const [x, y, w, h] = deserializeXYWH(model.xywh);
+          const newModelHeight =
+            (domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+
+          if (!almostEqual(newModelHeight, h)) {
+            page.updateBlock(model, {
+              xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+            });
+          }
         });
-      },
-      // FIXME: somewhere call stopPropagation on keydown event
-      true
+
+        // FIXME: force updating selection for triggering re-render `selected-rect`
+        this.setBlockSelectionState({
+          ...this._selection.blockSelectionState,
+        });
+        slots.selectionUpdated.emit(this._selection.blockSelectionState);
+      })
     );
   }
 
@@ -306,6 +321,11 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    this._frameResizeObserver.resetListener(this.page);
+    super.updated(changedProperties);
   }
 
   disconnectedCallback() {
