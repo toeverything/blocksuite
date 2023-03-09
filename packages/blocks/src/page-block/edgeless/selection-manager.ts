@@ -55,7 +55,8 @@ export class EdgelessSelectionManager {
   private _mouseDisposeCallback: () => void = noop;
   private _wheelDisposeCallback: () => void = noop;
 
-  private _lastMouseViewPoint: { x: number; y: number } = { x: 0, y: 0 };
+  /** Latest mouse position in view coords */
+  private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
   get isActive() {
     return this.currentController.isActive;
@@ -109,8 +110,8 @@ export class EdgelessSelectionManager {
     this._initMouseAndWheelEvents();
   }
 
-  private _updateLastMouseViewPoint(e: SelectionEvent) {
-    this._lastMouseViewPoint = {
+  private _updateLastMousePos(e: SelectionEvent) {
+    this._lastMousePos = {
       x: e.x,
       y: e.y,
     };
@@ -165,7 +166,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    this._updateLastMouseViewPoint(e);
+    this._updateLastMousePos(e);
     this._container.slots.hoverUpdated.emit();
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
@@ -208,12 +209,12 @@ export class EdgelessSelectionManager {
   }
 
   getHoverState(): EdgelessHoverState | null {
-    if (!this.currentController.enableCalcHoverState) {
+    if (!this.currentController.enableHover) {
       return null;
     }
     const { surface } = this._container;
     const frames = (this.page.root?.children ?? []) as TopLevelBlockModel[];
-    const { x, y } = this._lastMouseViewPoint;
+    const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
     const hovered =

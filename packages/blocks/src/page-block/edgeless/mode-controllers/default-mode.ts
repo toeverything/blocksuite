@@ -33,7 +33,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
-  enableCalcHoverState = true;
+  enableHover = true;
 
   private _draggingMode: 'translate' | 'select' | 'edit' | null = null;
   private _startRange: Range | null = null;

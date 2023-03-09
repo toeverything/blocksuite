@@ -18,7 +18,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
 
   protected _draggingArea: SelectionArea | null = null;
 
-  enableCalcHoverState = false;
+  enableHover = false;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     this._edgeless = edgeless;
