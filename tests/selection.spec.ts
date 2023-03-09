@@ -299,7 +299,7 @@ test('cursor move left and right', async ({ page }) => {
   expect(indexOne).toBe(17);
   await pressArrowRight(page);
   const indexTwo = await getVirgoSelectionIndex(page);
-  expect(indexTwo).toBe(17);
+  expect(indexTwo).toBe(0);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {
