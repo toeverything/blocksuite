@@ -183,7 +183,11 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   }
 
   firstUpdated() {
-    this.model.propsUpdated.on(() => this._updatePlaceholder());
+    this.model.propsUpdated.on(() => {
+      this._updatePlaceholder();
+      this.requestUpdate();
+    });
+    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   private _updatePlaceholder = () => {
