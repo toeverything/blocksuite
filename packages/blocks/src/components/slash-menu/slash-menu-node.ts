@@ -164,33 +164,21 @@ export class SlashMenu extends LitElement {
     e.preventDefault();
     const configLen = this._filterItems.length;
 
-    const handleCursorUp = () => {
+    const handleCursorMove = (shift = 1) => {
       if (this._leftPanelActivated) {
         const nowGroupIdx = this._getGroupIndexByItem(
           this._filterItems[this._activatedItemIndex]
         );
         this._handleClickCategory(
-          menuGroups[(nowGroupIdx - 1 + menuGroups.length) % menuGroups.length]
+          menuGroups[
+            (nowGroupIdx + shift + menuGroups.length) % menuGroups.length
+          ]
         );
         return;
       }
       this._activatedItemIndex =
-        (this._activatedItemIndex - 1 + configLen) % configLen;
-      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
-    };
-
-    const handleCursorDown = () => {
-      if (this._leftPanelActivated) {
-        const nowGroupIdx = this._getGroupIndexByItem(
-          this._filterItems[this._activatedItemIndex]
-        );
-        this._handleClickCategory(
-          menuGroups[(nowGroupIdx + 1) % menuGroups.length]
-        );
-        return;
-      }
-      this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
-      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+        (this._activatedItemIndex + shift + configLen) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
     };
 
     switch (e.key) {
@@ -203,20 +191,20 @@ export class SlashMenu extends LitElement {
       }
       case 'Tab': {
         if (e.shiftKey) {
-          handleCursorUp();
+          handleCursorMove(-1);
         } else {
-          handleCursorDown();
+          handleCursorMove();
         }
         return;
       }
 
       case 'ArrowUp': {
-        handleCursorUp();
+        handleCursorMove(-1);
         return;
       }
 
       case 'ArrowDown': {
-        handleCursorDown();
+        handleCursorMove();
         return;
       }
 
@@ -264,7 +252,7 @@ export class SlashMenu extends LitElement {
       });
   }
 
-  private _scrollToItem(item: SlashItem) {
+  private _scrollToItem(item: SlashItem, force = true) {
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) {
       return;
@@ -275,7 +263,26 @@ export class SlashMenu extends LitElement {
     if (!ele) {
       return;
     }
-    ele.scrollIntoView(true);
+    if (force) {
+      // set parameter to `true` to align to top
+      ele.scrollIntoView(true);
+      return;
+    }
+
+    // `scrollIntoViewIfNeeded` is not a standard API,
+    // it is not supported by Firefox.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    } else {
+      // fallback to `scrollIntoView`
+      // TODO remove this fallback when we add polyfill
+      ele.scrollIntoView();
+    }
   }
 
   private _handleClickItem(index: number) {
