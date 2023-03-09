@@ -34,9 +34,9 @@ describe('brush element', () => {
 
   it('hit test', () => {
     const element = BrushElement.deserialize(data);
-    expect(element.hitTestPoint(8.5, 8.5)).toBeTruthy();
+    expect(element.hitTest(8.5, 8.5)).toBeTruthy();
     // point is in rect, but not in path
-    expect(element.hitTestPoint(20, 60)).toBeTruthy();
+    expect(element.hitTest(20, 60)).toBeTruthy();
   });
 
   it('transform', () => {

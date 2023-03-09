@@ -34,7 +34,7 @@ export const EllipseMethods: ShapeMethods = {
     }
   },
 
-  hitTestPoint(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     return Utils.pointInEllipse(
       [x, y],
       [bound.x + bound.w / 2, bound.y + bound.h / 2],

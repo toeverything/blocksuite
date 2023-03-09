@@ -15,9 +15,10 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
-import { getCommonBound } from './utils/bound.js';
+import { boundsContain, getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -138,7 +139,7 @@ export class SurfaceManager {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
-      return element.hitTestPoint(x, y, options);
+      return element.hitTest(x, y, options);
     });
 
     return picked;
@@ -149,10 +150,10 @@ export class SurfaceManager {
     return results[results.length - 1] ?? null;
   }
 
-  pickByBound(bound: IBound, options?: HitTestOptions): PhasorElement[] {
+  pickByBound(bound: IBound): PhasorElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
-      return element.hitTestBound(bound, options);
+      return boundsContain(bound, element) || intersects(bound, element);
     });
 
     return picked;

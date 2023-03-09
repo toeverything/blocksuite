@@ -40,13 +40,7 @@ export abstract class BaseElement implements SurfaceElement {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
-  abstract hitTestPoint(
-    x: number,
-    y: number,
-    options?: HitTestOptions
-  ): boolean;
-
-  abstract hitTestBound(bound: IBound, options?: HitTestOptions): boolean;
+  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
 
   abstract render(_: CanvasRenderingContext2D): void;
 

@@ -25,7 +25,7 @@ export type ShapeProps = Partial<Pick<SerializedShapeProps, ShapeKeys>>;
 
 export interface ShapeMethods {
   render: (ctx: CanvasRenderingContext2D, element: ShapeElement) => void;
-  hitTestPoint: (
+  hitTest: (
     x: number,
     y: number,
     bound: IBound,

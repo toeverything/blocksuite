@@ -83,7 +83,7 @@ export const RectMethods: ShapeMethods = {
     }
   },
 
-  hitTestPoint(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     return isPointIn(bound, x, y);
   },
 };

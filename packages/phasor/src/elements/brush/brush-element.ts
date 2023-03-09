@@ -1,8 +1,7 @@
 import { getStrokePoints } from 'perfect-freehand';
 
 import type { IBound } from '../../consts.js';
-import { boundsContain } from '../../utils/bound.js';
-import { intersects, isPointIn } from '../../utils/hit-utils.js';
+import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { Vec } from '../../utils/vec.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
@@ -44,12 +43,8 @@ export class BrushElement extends BaseElement {
   points: number[][] = [];
   lineWidth = 4;
 
-  hitTestPoint(x: number, y: number, options?: HitTestOptions) {
+  hitTest(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
-  }
-
-  hitTestBound(bound: IBound, options?: HitTestOptions) {
-    return boundsContain(bound, this) || intersects(bound, this);
   }
 
   serialize(): Record<string, unknown> {

@@ -1,6 +1,4 @@
-import type { IBound } from '../../consts.js';
-import { boundsContain } from '../../utils/bound.js';
-import { intersects, isPointIn } from '../../utils/hit-utils.js';
+import { isPointIn } from '../../utils/hit-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
@@ -8,12 +6,8 @@ export class DebugElement extends BaseElement {
   type = 'debug' as const;
   color = '#000000';
 
-  hitTestPoint(x: number, y: number, options?: HitTestOptions) {
+  hitTest(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
-  }
-
-  hitTestBound(bound: IBound, options?: HitTestOptions) {
-    return boundsContain(bound, this) || intersects(bound, this);
   }
 
   serialize(): Record<string, unknown> {
