@@ -1,9 +1,9 @@
-import { matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { getRichTextByModel } from './query.js';
+import { asyncSetVRangeForRichText, getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export function asyncFocusRichText(
@@ -11,22 +11,10 @@ export function asyncFocusRichText(
   id: string,
   vRange: VRange = { index: 0, length: 0 }
 ) {
-  requestAnimationFrame(() => {
-    const model = page.getBlockById(id);
-    if (!model) {
-      throw new Error(`Cannot find block with id ${id}`);
-    }
-    if (matchFlavours(model, ['affine:divider'] as const)) return;
-    const richText = getRichTextByModel(model);
-    if (!richText) {
-      throw new Error(`Cannot find rich text with id ${id}`);
-    }
-    const vEditor = richText.vEditor;
-    if (!vEditor) {
-      throw new Error(`Cannot find vEditor with id ${id}`);
-    }
-    vEditor.setVRange(vRange);
-  });
+  const model = page.getBlockById(id);
+  assertExists(model);
+  if (matchFlavours(model, ['affine:divider'] as const)) return;
+  asyncSetVRangeForRichText(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {

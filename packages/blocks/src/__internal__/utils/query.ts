@@ -237,6 +237,42 @@ export function getBlockElementByModel(
   return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
 }
 
+export function asyncGetBlockElementByModel(
+  model: BaseBlockModel
+): Promise<BlockComponentElement | null> {
+  let resolved = false;
+  return new Promise<BlockComponentElement>((resolve, reject) => {
+    const blockElement = getBlockElementByModel(model);
+    if (blockElement) {
+      resolve(blockElement);
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      const blockElement = getBlockElementByModel(model);
+      if (blockElement) {
+        resolved = true;
+        observer.disconnect();
+        resolve(blockElement);
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Reject if the element is not found after 1 second
+    setTimeout(() => {
+      if (!resolved) {
+        reject(
+          new Error(
+            `Cannot find block element by model: ${model.flavour} id: ${model.id}`
+          )
+        );
+      }
+    }, 1000);
+  });
+}
+
 export function getStartModelBySelection(range = getCurrentNativeRange()) {
   const startContainer =
     range.startContainer instanceof Text
@@ -258,9 +294,29 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
 
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
+}
+
+export async function asyncGetRichTextByModel(model: BaseBlockModel) {
+  const blockElement = await asyncGetBlockElementByModel(model);
+  const richText = blockElement?.querySelector<RichText>('rich-text');
+  if (!richText) return null;
+  return richText;
+}
+
+export function asyncSetVRangeForRichText(
+  model: BaseBlockModel,
+  vRange: VRange
+) {
+  asyncGetRichTextByModel(model)
+    .then(richText => {
+      richText?.vEditor?.setVRange(vRange);
+    })
+    .catch(e => {
+      throw e;
+    });
 }
 
 // TODO fix find embed model

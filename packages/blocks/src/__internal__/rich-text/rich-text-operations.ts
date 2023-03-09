@@ -9,6 +9,7 @@ import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
+  asyncSetVRangeForRichText,
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
@@ -150,14 +151,8 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.vEditor?.setVRange({
-      index: offset,
-      length: 0,
-    });
-  });
+  assertExists(model);
+  asyncSetVRangeForRichText(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -201,14 +196,8 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
       children: [...previousSibling.children, model, ...children],
     });
 
-    requestAnimationFrame(() => {
-      assertExists(model);
-      const richText = getRichTextByModel(model);
-      richText?.vEditor?.setVRange({
-        index: 0,
-        length: 0,
-      });
-    });
+    assertExists(model);
+    asyncSetVRangeForRichText(model, { index: 0, length: 0 });
   });
 }
 
@@ -272,14 +261,8 @@ export function handleUnindent(
     ],
   });
 
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.vEditor?.setVRange({
-      index: offset,
-      length: 0,
-    });
-  });
+  assertExists(model);
+  asyncSetVRangeForRichText(model, { index: offset, length: 0 });
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
