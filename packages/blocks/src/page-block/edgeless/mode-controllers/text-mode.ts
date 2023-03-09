@@ -8,8 +8,8 @@ import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
 import { getSelectionBoxBound, getXYWH } from '../utils.js';
 import { MouseModeController } from './index.js';
 
-const DEFAULT_FRAME_WIDTH = 400;
-const DEFAULT_FRAME_HEIGHT = 24;
+const DEFAULT_FRAME_WIDTH = 448;
+const DEFAULT_FRAME_HEIGHT = 72;
 const DEFAULT_FRAME_OFFSET_X = 30;
 const DEFAULT_FRAME_OFFSET_Y = 40;
 
@@ -42,13 +42,11 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
       const element = this._blocks.find(b => b.id === frameId);
       if (element) {
         const selectionState = {
-          type: 'single' as const,
-          selected: element,
+          selected: [element],
           active: true,
-          rect: getSelectionBoxBound(this._surface.viewport, getXYWH(element)),
         };
         this._edgeless.setBlockSelectionState(selectionState);
-        this._edgeless.slots.updateSelection.emit(selectionState);
+        this._edgeless.slots.selectionUpdated.emit(selectionState);
 
         // Cannot use `handleNativeRangeClick`, because `handleClickRetargeting` will re-target to pervious editor
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);

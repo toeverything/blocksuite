@@ -28,7 +28,6 @@ import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
   bindCommonHotkey,
   handleDown,
-  handleMultiBlockBackspace,
   handleUp,
   removeCommonHotKey,
   tryUpdateFrameSize,
@@ -40,6 +39,7 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
+import { isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -147,20 +147,19 @@ export class EdgelessPageBlockComponent
 
   private _handleBackspace = (e: KeyboardEvent) => {
     const { selected } = this._selection.blockSelectionState;
-    if (selected.length === 1) {
-      const element = selected[0];
-
-      if (this.surface.hasElement(element.id)) {
+    selected.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        const children = this.page.root?.children ?? [];
+        // FIXME: should always keep at least 1 frame
+        if (children.length > 1) {
+          this.page.deleteBlock(element);
+        }
+      } else {
         this.surface.removeElement(element.id);
-        this._selection.currentController.clearSelection();
-        this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
-        return;
       }
-      if (this.page.root?.childMap.has(selected.id)) {
-        this.page.deleteBlock(selected as TopLevelBlockModel);
-      }
-      handleMultiBlockBackspace(this.page, e);
-    }
+    });
+    this._selection.currentController.clearSelection();
+    this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
   };
 
   private _handleSpace = (event: KeyboardEvent) => {
@@ -264,6 +263,13 @@ export class EdgelessPageBlockComponent
       e => {
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
         tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
+        // force update to re-render selection
+        requestAnimationFrame(() => {
+          this.setBlockSelectionState({
+            ...this._selection.blockSelectionState,
+          });
+          slots.selectionUpdated.emit(this._selection.blockSelectionState);
+        });
       },
       // FIXME: somewhere call stopPropagation on keydown event
       true
