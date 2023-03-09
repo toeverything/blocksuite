@@ -108,11 +108,18 @@ const styles = css`
     height: 20px;
   }
 
-  .card-container:hover {
+  .card-container-inner:hover .card-container {
     background: var(--affine-card-hover-background);
     fill: var(--affine-primary-color);
     top: -2px;
     left: -2px;
+  }
+
+  .card-container-inner:hover .card-container.grabbing {
+    top: unset;
+    left: unset;
+    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+      0 0 12px rgba(66, 65, 73, 0.08);
   }
 
   .card-description-container {
@@ -130,13 +137,6 @@ const styles = css`
     line-height: var(--affine-line-height);
     color: var(--affine-secondary-text-color);
     white-space: pre;
-  }
-
-  .card-container:hover.grabbing {
-    top: unset;
-    left: unset;
-    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-      0 0 12px rgba(66, 65, 73, 0.08);
   }
 
   .grabbing {
@@ -297,30 +297,32 @@ function BlockHubCards(
         ({ flavour, type, name, description, icon, tooltip }, index) => {
           return html`
             <div class="card-container-wrapper">
-              <div
-                class="card-container has-tool-tip ${isGrabbing
-                  ? 'grabbing'
-                  : ''}"
-                draggable="true"
-                affine-flavour=${flavour}
-                affine-type=${type ?? ''}
-              >
-                <div class="card-description-container">
-                  <div>${name}</div>
-                  <div class="description">${description}</div>
-                </div>
-                <div class="card-icon-container">${icon}</div>
-                <tool-tip
-                  tip-position=${shouldScroll &&
-                  index === blockHubItems.length - 1
-                    ? 'top'
-                    : 'bottom'}
-                  style="${showTooltip
-                    ? ''
-                    : 'display: none'}; z-index: ${blockHubItems.length -
-                  index}"
-                  >${tooltip}</tool-tip
+              <div class="card-container-inner">
+                <div
+                  class="card-container has-tool-tip ${isGrabbing
+                    ? 'grabbing'
+                    : ''}"
+                  draggable="true"
+                  affine-flavour=${flavour}
+                  affine-type=${type ?? ''}
                 >
+                  <div class="card-description-container">
+                    <div>${name}</div>
+                    <div class="description">${description}</div>
+                  </div>
+                  <div class="card-icon-container">${icon}</div>
+                  <tool-tip
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="${showTooltip
+                      ? ''
+                      : 'display: none'}; z-index: ${blockHubItems.length -
+                    index}"
+                    >${tooltip}</tool-tip
+                  >
+                </div>
               </div>
             </div>
           `;
