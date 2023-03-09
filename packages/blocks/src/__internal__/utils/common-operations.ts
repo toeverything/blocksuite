@@ -96,6 +96,7 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     page.updateBlock(model, { type: listType });
+    asyncFocusRichText(page, model.id);
   }
   return true;
 }
