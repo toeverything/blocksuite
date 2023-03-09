@@ -986,8 +986,8 @@ export class VEditor<
     }
 
     if (
-      range.startContainer.nodeType === Node.COMMENT_NODE ||
-      range.endContainer.nodeType === Node.COMMENT_NODE
+      range.startContainer.nodeType !== Node.TEXT_NODE ||
+      range.endContainer.nodeType !== Node.TEXT_NODE
     ) {
       this.syncVRange();
     }
