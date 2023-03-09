@@ -4,22 +4,22 @@ import { styleMap } from 'lit/directives/style-map.js';
 export enum HandleDirection {
   Left = 'left',
   Right = 'right',
-  LeftTop = 'left-top',
-  LeftBottom = 'left-bottom',
-  RightTop = 'right-top',
-  RightBottom = 'right-bottom',
+  TopLeft = 'top-left',
+  BottomLeft = 'bottom-left',
+  TopRight = 'top-right',
+  BottomRight = 'bottom-right',
 }
 
 const directionCursors = {
   [HandleDirection.Right]: 'ew-resize',
   [HandleDirection.Left]: 'ew-resize',
-  [HandleDirection.LeftTop]: 'nw-resize',
-  [HandleDirection.RightTop]: 'ne-resize',
-  [HandleDirection.LeftBottom]: 'sw-resize',
-  [HandleDirection.RightBottom]: 'se-resize',
+  [HandleDirection.TopLeft]: 'nw-resize',
+  [HandleDirection.TopRight]: 'ne-resize',
+  [HandleDirection.BottomLeft]: 'sw-resize',
+  [HandleDirection.BottomRight]: 'se-resize',
 } as const;
 
-export function SelectedHandle(
+export function ResizeHandle(
   centerX: number,
   centerY: number,
   handleDirection: HandleDirection,

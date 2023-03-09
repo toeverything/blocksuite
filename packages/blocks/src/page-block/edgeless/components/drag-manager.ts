@@ -6,7 +6,7 @@ type DragMoveHandler = (delta: Bound) => void;
 
 type DragEndHandler = () => void;
 
-export class EdgelessDragManager {
+export class HandleDragManager {
   private _element: HTMLElement;
   private _onDragMove: DragMoveHandler;
   private _onDragEnd: DragEndHandler;
@@ -41,24 +41,24 @@ export class EdgelessDragManager {
     const deltaY = lastY - e.clientY;
 
     switch (direction) {
-      case HandleDirection.RightTop: {
+      case HandleDirection.TopRight: {
         y = y - deltaY;
         w = w - deltaX;
         h = h + deltaY;
         break;
       }
-      case HandleDirection.LeftBottom: {
+      case HandleDirection.BottomLeft: {
         x = x - deltaX;
         w = w + deltaX;
         h = h - deltaY;
         break;
       }
-      case HandleDirection.RightBottom: {
+      case HandleDirection.BottomRight: {
         w = w - deltaX;
         h = h - deltaY;
         break;
       }
-      case HandleDirection.LeftTop: {
+      case HandleDirection.TopLeft: {
         y = y - deltaY;
         x = x - deltaX;
         w = w + deltaX;

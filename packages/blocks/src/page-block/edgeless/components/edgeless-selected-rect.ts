@@ -10,11 +10,11 @@ import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.j
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../selection-manager.js';
 import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
-import { EdgelessDragManager } from './drag-manager.js';
+import { HandleDragManager } from './drag-manager.js';
 import {
   getCommonRectStyle,
-  getHandles,
   getSelectedRect,
+  ResizeHandles,
   ResizeMode,
 } from './utils.js';
 
@@ -33,12 +33,12 @@ export class EdgelessSelectedRect extends LitElement {
   slots!: EdgelessSelectionSlots;
 
   private _lock = false;
-  private _dragManager: EdgelessDragManager;
+  private _dragManager: HandleDragManager;
   private _disposables = new DisposableGroup();
 
   constructor() {
     super();
-    this._dragManager = new EdgelessDragManager(
+    this._dragManager = new HandleDragManager(
       this,
       this._onDragMove,
       this._onDragEnd
@@ -154,7 +154,7 @@ export class EdgelessSelectedRect extends LitElement {
   render() {
     if (this.state.selected.length === 0) return null;
 
-    const { state, surface, resizeMode, _dragManager } = this;
+    const { page, state, surface, resizeMode, _dragManager } = this;
     const { active, selected } = state;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
@@ -164,11 +164,16 @@ export class EdgelessSelectedRect extends LitElement {
       }px solid var(--affine-primary-color)`,
       ...getCommonRectStyle(selectedRect, active, true),
     };
-    const handlers = active
-      ? null
-      : getHandles(selectedRect, resizeMode, _dragManager.onMouseDown);
+
+    const hasResizeHandles = !active && !page.readonly;
+    const resizeHandles = ResizeHandles(
+      selectedRect,
+      resizeMode,
+      _dragManager.onMouseDown
+    );
+
     return html`
-      ${this.page.readonly ? null : handlers}
+      ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }

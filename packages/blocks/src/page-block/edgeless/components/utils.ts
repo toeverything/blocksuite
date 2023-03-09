@@ -4,7 +4,7 @@ import { html } from 'lit';
 
 import type { Selectable } from '../selection-manager.js';
 import { getSelectionBoxBound, getXYWH } from '../utils.js';
-import { HandleDirection, SelectedHandle } from './selected-handle.js';
+import { HandleDirection, ResizeHandle } from './selected-handle.js';
 
 export function getCommonRectStyle(
   rect: DOMRect,
@@ -26,7 +26,7 @@ export function getCommonRectStyle(
 }
 
 export type ResizeMode = 'corner' | 'edge';
-export function getHandles(
+export function ResizeHandles(
   rect: DOMRect,
   resizeMode: ResizeMode,
   onMouseDown: (e: MouseEvent, direction: HandleDirection) => void
@@ -38,51 +38,51 @@ export function getHandles(
       const leftBottom = [rect.x, rect.y + rect.height];
       const rightBottom = [rect.x + rect.width, rect.y + rect.height];
 
-      return html`
-        ${SelectedHandle(
-          leftTop[0],
-          leftTop[1],
-          HandleDirection.LeftTop,
-          onMouseDown
-        )}
-        ${SelectedHandle(
-          rightTop[0],
-          rightTop[1],
-          HandleDirection.RightTop,
-          onMouseDown
-        )}
-        ${SelectedHandle(
-          leftBottom[0],
-          leftBottom[1],
-          HandleDirection.LeftBottom,
-          onMouseDown
-        )}
-        ${SelectedHandle(
-          rightBottom[0],
-          rightBottom[1],
-          HandleDirection.RightBottom,
-          onMouseDown
-        )}
-      `;
+      const topLeft = ResizeHandle(
+        leftTop[0],
+        leftTop[1],
+        HandleDirection.TopLeft,
+        onMouseDown
+      );
+      const topRight = ResizeHandle(
+        rightTop[0],
+        rightTop[1],
+        HandleDirection.TopRight,
+        onMouseDown
+      );
+      const bottomLeft = ResizeHandle(
+        leftBottom[0],
+        leftBottom[1],
+        HandleDirection.BottomLeft,
+        onMouseDown
+      );
+      const bottomRight = ResizeHandle(
+        rightBottom[0],
+        rightBottom[1],
+        HandleDirection.BottomRight,
+        onMouseDown
+      );
+
+      return html` ${topLeft} ${topRight} ${bottomLeft} ${bottomRight} `;
     }
     case 'edge': {
       const leftCenter = [rect.x, rect.y + rect.height / 2];
       const rightCenter = [rect.x + rect.width, rect.y + rect.height / 2];
 
-      return html`
-        ${SelectedHandle(
-          leftCenter[0],
-          leftCenter[1],
-          HandleDirection.Left,
-          onMouseDown
-        )}
-        ${SelectedHandle(
-          rightCenter[0],
-          rightCenter[1],
-          HandleDirection.Right,
-          onMouseDown
-        )}
-      `;
+      const handleLeft = ResizeHandle(
+        leftCenter[0],
+        leftCenter[1],
+        HandleDirection.Left,
+        onMouseDown
+      );
+      const handleRight = ResizeHandle(
+        rightCenter[0],
+        rightCenter[1],
+        HandleDirection.Right,
+        onMouseDown
+      );
+
+      return html` ${handleLeft} ${handleRight} `;
     }
   }
 }
