@@ -28,7 +28,7 @@ import {
   locatorPanButton,
   pressEnter,
   redoByClick,
-  resizeElementByLeftTopHandle,
+  resizeElementByTopLeftHandle,
   type,
   undoByClick,
   waitNextFrame,
@@ -230,7 +230,7 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
-  await resizeElementByLeftTopHandle(page, delta, 10);
+  await resizeElementByTopLeftHandle(page, delta, 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
@@ -575,7 +575,7 @@ test('select multiple shapes and resize', async ({ page }) => {
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
   await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
 
-  await resizeElementByLeftTopHandle(page, { x: 50, y: 50 });
+  await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
   await assertEdgelessSelectedRect(page, [150, 150, 160, 60]);
 
   await page.mouse.move(160, 160);

@@ -60,37 +60,43 @@ export function ResizeHandles(
 ) {
   switch (resizeMode) {
     case 'corner': {
-      const leftTop = [rect.x, rect.y];
-      const rightTop = [rect.x + rect.width, rect.y];
-      const leftBottom = [rect.x, rect.y + rect.height];
-      const rightBottom = [rect.x + rect.width, rect.y + rect.height];
+      const topLeft = [rect.x, rect.y];
+      const topRight = [rect.x + rect.width, rect.y];
+      const bottomLeft = [rect.x, rect.y + rect.height];
+      const bottomRight = [rect.x + rect.width, rect.y + rect.height];
 
-      const topLeft = ResizeHandle(
-        leftTop[0],
-        leftTop[1],
+      const handleTopLeft = ResizeHandle(
+        topLeft[0],
+        topLeft[1],
         HandleDirection.TopLeft,
         onMouseDown
       );
-      const topRight = ResizeHandle(
-        rightTop[0],
-        rightTop[1],
+      const handleTopRight = ResizeHandle(
+        topRight[0],
+        topRight[1],
         HandleDirection.TopRight,
         onMouseDown
       );
-      const bottomLeft = ResizeHandle(
-        leftBottom[0],
-        leftBottom[1],
+      const handleBottomLeft = ResizeHandle(
+        bottomLeft[0],
+        bottomLeft[1],
         HandleDirection.BottomLeft,
         onMouseDown
       );
-      const bottomRight = ResizeHandle(
-        rightBottom[0],
-        rightBottom[1],
+      const handleBottomRight = ResizeHandle(
+        bottomRight[0],
+        bottomRight[1],
         HandleDirection.BottomRight,
         onMouseDown
       );
 
-      return html` ${topLeft} ${topRight} ${bottomLeft} ${bottomRight} `;
+      // prettier-ignore
+      return html`
+        ${handleTopLeft}
+        ${handleTopRight}
+        ${handleBottomLeft}
+        ${handleBottomRight}
+      `;
     }
     case 'edge': {
       const leftCenter = [rect.x, rect.y + rect.height / 2];
