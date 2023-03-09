@@ -86,20 +86,19 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
-    const oldSelected = this.blockSelectionState.selected;
-    if (oldSelected.length !== 1) {
+    const currentSelected = this.blockSelectionState.selected;
+    if (currentSelected.length !== 1) {
       this._setSelectionState([selected], false);
       return;
     }
 
-    const isSurfaceEl = isSurfaceElement(selected);
-    // shape
-    if (isSurfaceEl) {
+    // phasor element
+    if (isSurfaceElement(selected)) {
       this._setSelectionState([selected], false);
     }
-    // block
+    // frame block
     else {
-      if (oldSelected[0] === selected) {
+      if (currentSelected[0] === selected) {
         this._setSelectionState([selected], true);
       } else {
         this._setSelectionState([selected], false);
