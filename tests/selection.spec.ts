@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
   doubleClickBlockById,
@@ -886,7 +887,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await doubleClickBlockById(page, ids.frameId);
+  await activeFrameInEdgeless(page, ids.frameId);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });

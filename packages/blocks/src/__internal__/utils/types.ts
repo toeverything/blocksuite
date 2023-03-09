@@ -66,6 +66,7 @@ export type BrushMouseMode = {
 
 export type PanMouseMode = {
   type: 'pan';
+  panning: boolean;
 };
 
 export type TextMouseMode = {

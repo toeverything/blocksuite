@@ -10,6 +10,9 @@ import { ShapeComponentConfig } from './shape-menu-config.js';
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends LitElement {
   static styles = css`
+    :host {
+      z-index: 2;
+    }
     .shape-menu-container {
       display: flex;
       align-items: center;

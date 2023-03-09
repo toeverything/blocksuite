@@ -42,7 +42,7 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
-import { isTopLevelBlock } from './utils.js';
+import { getCursorMode, isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -131,9 +131,10 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
-  // when user enters pan mode by pressing 'Space',
-  // we should roll back to the last mouse mode once user releases the key;
-  private _enterPanMouseModeByShortcut = false;
+  // When user enters pan mode by pressing space,
+  // we should revert to the last mouse mode once user releases the key.
+  private _shouldRevertMode = false;
+  private _lastMode: MouseMode | null = null;
 
   private _frameResizeObserver = new FrameResizeObserver();
 
@@ -168,7 +169,7 @@ export class EdgelessPageBlockComponent
   };
 
   private _handleSpace = (event: KeyboardEvent) => {
-    const { mouseMode, lastMouseMode, blockSelectionState } = this._selection;
+    const { mouseMode, blockSelectionState } = this._selection;
     if (event.type === 'keydown') {
       if (mouseMode.type === 'pan') {
         return;
@@ -179,16 +180,17 @@ export class EdgelessPageBlockComponent
         return;
       }
 
-      this.mouseMode = { type: 'pan' };
-      this._enterPanMouseModeByShortcut = true;
+      this.mouseMode = { type: 'pan', panning: false };
+      this._shouldRevertMode = true;
+      this._lastMode = mouseMode;
     }
     if (event.type === 'keyup') {
       if (
         mouseMode.type === 'pan' &&
-        this._enterPanMouseModeByShortcut &&
-        lastMouseMode
+        this._shouldRevertMode &&
+        this._lastMode
       ) {
-        this.mouseMode = lastMouseMode;
+        this.mouseMode = this._lastMode;
       }
     }
   };
@@ -341,15 +343,16 @@ export class EdgelessPageBlockComponent
     this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
     const { viewport } = this.surface;
+    const { _selection, page } = this;
+    const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.pageModel,
       this,
-      this.surface.viewport
+      this.surface.viewport,
+      active ? selected[0].id : null
     );
 
-    const { _selection, page } = this;
-    const { selected } = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
 
@@ -366,11 +369,18 @@ export class EdgelessPageBlockComponent
     const defaultStyle = {};
     const style = this.showGrid ? gridStyle : defaultStyle;
 
+    const cursor = {
+      cursor: getCursorMode(this.mouseMode),
+    };
+
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <div class="affine-edgeless-page-block-container">
+      <div
+        class="affine-edgeless-page-block-container"
+        style=${styleMap(cursor)}
+      >
         <style>
           .affine-block-children-container.edgeless {
             padding-left: 0;

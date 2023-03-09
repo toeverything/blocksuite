@@ -47,9 +47,12 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
         this._edgeless.setBlockSelectionState(selectionState);
         this._edgeless.slots.selectionUpdated.emit(selectionState);
 
-        // Cannot reuse `handleNativeRangeClick` directly here,
-        // since `retargetClick` will re-target to pervious editor
-        handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+        // Waiting dom updated, `frame mask` is removed
+        this._edgeless.updateComplete.then(() => {
+          // Cannot reuse `handleNativeRangeClick` directly here,
+          // since `retargetClick` will re-target to pervious editor
+          handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+        });
       }
     });
   }
