@@ -264,7 +264,7 @@ export class SlashMenu extends LitElement {
       });
   }
 
-  private _scrollToItem(item: SlashItem) {
+  private _scrollToItem(item: SlashItem, force = true) {
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) {
       return;
@@ -275,7 +275,26 @@ export class SlashMenu extends LitElement {
     if (!ele) {
       return;
     }
+    if (force) {
+      // set parameter to `true` to align to top
     ele.scrollIntoView(true);
+      return;
+    }
+
+    // `scrollIntoViewIfNeeded` is not a standard API,
+    // it is not supported by Firefox.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    } else {
+      // fallback to `scrollIntoView`
+      // TODO remove this fallback when we add polyfill
+      ele.scrollIntoView();
+    }
   }
 
   private _handleClickItem(index: number) {
