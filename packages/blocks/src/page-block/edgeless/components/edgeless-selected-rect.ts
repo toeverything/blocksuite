@@ -35,7 +35,6 @@ export class EdgelessSelectedRect extends LitElement {
   constructor() {
     super();
     this._resizeManager = new HandleResizeManager(
-      this,
       this._onDragMove,
       this._onDragEnd
     );

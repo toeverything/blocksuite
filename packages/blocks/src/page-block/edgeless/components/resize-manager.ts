@@ -7,19 +7,13 @@ type ReizeMoveHandler = (delta: Bound) => void;
 type ResizeEndHandler = () => void;
 
 export class HandleResizeManager {
-  private _element: HTMLElement;
   private _onResizeMove: ReizeMoveHandler;
   private _onResizeEnd: ResizeEndHandler;
 
   private _dragDirection: HandleDirection = HandleDirection.Left;
   private _lastDragPos: { x: number; y: number } = { x: 0, y: 0 };
 
-  constructor(
-    element: HTMLElement,
-    onResizeMove: ReizeMoveHandler,
-    onResizeEnd: ResizeEndHandler
-  ) {
-    this._element = element;
+  constructor(onResizeMove: ReizeMoveHandler, onResizeEnd: ResizeEndHandler) {
     this._onResizeMove = onResizeMove;
     this._onResizeEnd = onResizeEnd;
   }
@@ -84,9 +78,8 @@ export class HandleResizeManager {
 
   private _onMouseUp = (_: MouseEvent) => {
     this._onResizeEnd();
-    const parentElement = this._element.parentElement;
-    parentElement?.removeEventListener('mousemove', this._onMouseMove);
-    parentElement?.removeEventListener('mouseup', this._onMouseUp);
+    window.removeEventListener('mousemove', this._onMouseMove);
+    window.removeEventListener('mouseup', this._onMouseUp);
   };
 
   onMouseDown = (e: MouseEvent, direction: HandleDirection) => {
@@ -99,9 +92,7 @@ export class HandleResizeManager {
       y: e.clientY,
     };
 
-    const parentElement = this._element.parentElement;
-    // The parent element is the edgeless block container
-    parentElement?.addEventListener('mousemove', this._onMouseMove);
-    parentElement?.addEventListener('mouseup', this._onMouseUp);
+    window.addEventListener('mousemove', this._onMouseMove);
+    window.addEventListener('mouseup', this._onMouseUp);
   };
 }
