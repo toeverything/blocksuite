@@ -211,10 +211,20 @@ export class DragHandle extends LitElement {
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
-  public showBySelectionEvent(event: SelectionEvent) {
-    if (!this._getBlockEditingStateByPosition) {
+  onContainerMouseMove(event: SelectionEvent) {
+    if (!this._getBlockEditingStateByPosition) return;
+
+    const frameBlock = this._container.querySelector(
+      '.affine-frame-block-container'
+    );
+    assertExists(frameBlock);
+    const frameBlockRect = frameBlock.getBoundingClientRect();
+    // See https://github.com/toeverything/blocksuite/issues/1611
+    if (event.raw.clientY < frameBlockRect.y) {
+      this.hide();
       return;
     }
+
     const modelState = this._getBlockEditingStateByPosition(
       this.getDropAllowedBlocks(null),
       event.raw.clientX,
@@ -265,7 +275,7 @@ export class DragHandle extends LitElement {
     }
   }
 
-  public hide() {
+  hide() {
     this.style.display = 'none';
     this._cursor = null;
     this._handleAnchorState = null;
@@ -288,11 +298,11 @@ export class DragHandle extends LitElement {
     }
   }
 
-  public setPointerEvents(value: 'auto' | 'none') {
+  setPointerEvents(value: 'auto' | 'none') {
     this.style.pointerEvents = value;
   }
 
-  protected firstUpdated() {
+  firstUpdated() {
     this.style.display = 'none';
     this.style.position = 'absolute';
     this._indicator = <DragIndicator>(
@@ -321,7 +331,7 @@ export class DragHandle extends LitElement {
     this._dragHandle.addEventListener('dragend', this._onDragEnd);
   }
 
-  public disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     // cleanup
@@ -501,7 +511,7 @@ export class DragHandle extends LitElement {
     this.hide();
   };
 
-  override render() {
+  render() {
     return html`
       <style>
         :host(:hover) > .affine-drag-handle-line {
