@@ -13,7 +13,7 @@ import type {
 } from '../../../index.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 
-function Mask() {
+function EdgelessMask() {
   const style = {
     position: 'absolute',
     top: '0',
@@ -21,7 +21,9 @@ function Mask() {
     bottom: '0',
     right: '0',
   };
-  return html`<div style=${styleMap(style)}></div>`;
+  return html`
+    <div class="affine-edgeless-mask" style=${styleMap(style)}></div>
+  `;
 }
 
 function EdgelessBlockChild(
@@ -49,7 +51,7 @@ function EdgelessBlockChild(
     boxSizing: 'border-box',
   };
 
-  const mask = active ? nothing : Mask();
+  const mask = active ? nothing : EdgelessMask();
 
   return html`
     <div class="affine-edgeless-block-child" style=${styleMap(style)}>
@@ -62,7 +64,7 @@ export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
-  activeModelId?: string
+  activeModelId: string | null
 ) {
   return html`
     ${repeat(

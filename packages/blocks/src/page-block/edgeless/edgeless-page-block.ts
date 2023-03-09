@@ -350,7 +350,7 @@ export class EdgelessPageBlockComponent
       this.pageModel,
       this,
       this.surface.viewport,
-      active ? selected[0].id : undefined
+      active ? selected[0].id : null
     );
 
     const { zoom, viewportX, viewportY } = viewport;
