@@ -955,3 +955,21 @@ test('should format quick bar show after convert to code block', async ({
     frameId
   );
 });
+
+test('buttons in format quick bar should have correct active styles', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  // drag only the `45`
+  await dragBetweenIndices(page, [1, 0], [1, 2]);
+  const codeBtn = page.locator(`.format-quick-bar [data-testid=code]`);
+  await codeBtn.click();
+  await expect(codeBtn).toHaveAttribute('active', '');
+
+  // drag the `456`
+  await dragBetweenIndices(page, [1, 0], [1, 3]);
+  await expect(codeBtn).not.toHaveAttribute('active', '');
+});

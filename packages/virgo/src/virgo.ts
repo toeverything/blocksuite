@@ -477,19 +477,28 @@ export class VEditor<
     return this._vRange;
   }
 
-  getFormat(vRange: VRange): TextAttributes {
+  getFormat(vRange: VRange, type?: 'default'): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange);
 
     const result: {
       [key: string]: unknown;
     } = {};
-    for (const [delta] of deltas) {
+    for (const [delta, position] of deltas) {
       if (delta.attributes) {
         for (const [key, value] of Object.entries(delta.attributes)) {
           if (typeof value === 'boolean' && !value) {
             delete result[key];
           } else {
-            result[key] = value;
+            if (type === 'default') {
+              if (
+                vRange.index >= position.index &&
+                vRange.index + vRange.length <= position.index + position.length
+              ) {
+                result[key] = value;
+              }
+            } else {
+              result[key] = value;
+            }
           }
         }
       }
