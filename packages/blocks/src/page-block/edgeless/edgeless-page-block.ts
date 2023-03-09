@@ -131,10 +131,10 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
-  // when user enters pan mode by pressing 'Space',
-  // we should roll back to the last mouse mode once user releases the key;
-  private _enterPanMouseModeByShortcut = false;
-  private _resetMouseModeAfterPanShortcut: MouseMode | null = null;
+  // When user enters pan mode by pressing space,
+  // we should revert to the last mouse mode once user releases the key.
+  private _shouldRevertMode = false;
+  private _lastMode: MouseMode | null = null;
 
   private _frameResizeObserver = new FrameResizeObserver();
 
@@ -181,16 +181,16 @@ export class EdgelessPageBlockComponent
       }
 
       this.mouseMode = { type: 'pan', panning: false };
-      this._enterPanMouseModeByShortcut = true;
-      this._resetMouseModeAfterPanShortcut = mouseMode;
+      this._shouldRevertMode = true;
+      this._lastMode = mouseMode;
     }
     if (event.type === 'keyup') {
       if (
         mouseMode.type === 'pan' &&
-        this._enterPanMouseModeByShortcut &&
-        this._resetMouseModeAfterPanShortcut
+        this._shouldRevertMode &&
+        this._lastMode
       ) {
-        this.mouseMode = this._resetMouseModeAfterPanShortcut;
+        this.mouseMode = this._lastMode;
       }
     }
   };
