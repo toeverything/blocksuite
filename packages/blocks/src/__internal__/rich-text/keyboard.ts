@@ -161,7 +161,7 @@ export function createKeyboardBindings(
     if (isEnd || shortKey) {
       const softEnterable = isSoftEnterable(model);
       const textStr = model.text.toString();
-      const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n\n');
+      const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
       const shouldSoftEnter = softEnterable && !endWithTwoBlankLines;
 
       if (shouldSoftEnter) {
