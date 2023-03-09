@@ -8,18 +8,18 @@ import { styleMap } from 'lit/directives/style-map.js';
 export class ColorEvent extends CustomEvent<Color> {}
 
 const colors: Color[] = [
-  '#00000000',
-  '#ffffff',
-  '#FFE838',
-  '#B638FF',
-  '#FC3F55',
-  '#FF38B3',
+  '#ffe838',
+  '#ffaf38',
+  '#ff631f',
+  '#fc3f55',
+  '#ff38b3',
+  '#b638ff',
+  '#10cb86',
+  '#4f90ff',
+  '#3b25cc',
   '#010101',
   '#999999',
-  '#FF631F',
-  '#3B25CC',
-  '#4F90FF',
-  '#10CB86',
+  '#ffffff',
 ];
 
 @customElement('edgeless-color-panel')
