@@ -16,6 +16,7 @@ export function asyncFocusRichText(
     if (!model) {
       throw new Error(`Cannot find block with id ${id}`);
     }
+    if (matchFlavours(model, ['affine:divider'] as const)) return;
     const richText = getRichTextByModel(model);
     if (!richText) {
       throw new Error(`Cannot find rich text with id ${id}`);
