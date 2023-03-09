@@ -17,9 +17,12 @@ export interface VRange {
   length: number;
 }
 
-export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
+export type UpdateVRangeProp = [
+  range: VRange | null,
+  type: 'native' | 'input' | 'other'
+];
 
-export type DeltaEntry = [DeltaInsert, VRange];
+export type DeltaEntry = [delta: DeltaInsert, range: VRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
 export type NativePoint = readonly [node: Node, offset: number];
@@ -263,6 +266,8 @@ export class VEditor<
   };
 
   slots: {
+    mounted: Slot;
+    unmounted: Slot;
     updateVRange: Slot<UpdateVRangeProp>;
   };
 
@@ -283,6 +288,8 @@ export class VEditor<
     this._yText = yText;
 
     this.slots = {
+      mounted: new Slot(),
+      unmounted: new Slot(),
       updateVRange: new Slot<UpdateVRangeProp>(),
     };
 
@@ -351,6 +358,8 @@ export class VEditor<
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
+
+    this.slots.mounted.emit();
   }
 
   unmount() {
@@ -370,6 +379,8 @@ export class VEditor<
     this._rootElement?.replaceChildren();
 
     this._rootElement = null;
+
+    this.slots.unmounted.emit();
   }
 
   requestUpdate(): void {

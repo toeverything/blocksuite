@@ -62,9 +62,9 @@ test('basic init with external text', async ({ page }) => {
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    page.addBlock(
+    page.addBlockByFlavour(
+      'affine:paragraph',
       {
-        flavour: 'affine:paragraph',
         text: page.Text.fromDelta(delta),
       },
       frame
