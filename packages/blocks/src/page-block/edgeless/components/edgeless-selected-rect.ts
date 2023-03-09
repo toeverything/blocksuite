@@ -10,13 +10,9 @@ import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.j
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../selection-manager.js';
 import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
-import { HandleDragManager } from './drag-manager.js';
-import {
-  getCommonRectStyle,
-  getSelectedRect,
-  ResizeHandles,
-  ResizeMode,
-} from './utils.js';
+import { ResizeHandles, type ResizeMode } from './resize-handles.js';
+import { HandleResizeManager } from './resize-manager.js';
+import { getCommonRectStyle, getSelectedRect } from './utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
@@ -33,12 +29,12 @@ export class EdgelessSelectedRect extends LitElement {
   slots!: EdgelessSelectionSlots;
 
   private _lock = false;
-  private _dragManager: HandleDragManager;
+  private _resizeManager: HandleResizeManager;
   private _disposables = new DisposableGroup();
 
   constructor() {
     super();
-    this._dragManager = new HandleDragManager(
+    this._resizeManager = new HandleResizeManager(
       this,
       this._onDragMove,
       this._onDragEnd
@@ -154,7 +150,7 @@ export class EdgelessSelectedRect extends LitElement {
   render() {
     if (this.state.selected.length === 0) return null;
 
-    const { page, state, surface, resizeMode, _dragManager } = this;
+    const { page, state, surface, resizeMode, _resizeManager } = this;
     const { active, selected } = state;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
@@ -169,7 +165,7 @@ export class EdgelessSelectedRect extends LitElement {
     const resizeHandles = ResizeHandles(
       selectedRect,
       resizeMode,
-      _dragManager.onMouseDown
+      _resizeManager.onMouseDown
     );
 
     return html`

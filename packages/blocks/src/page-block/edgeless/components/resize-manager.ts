@@ -1,33 +1,33 @@
 import type { Bound } from '@blocksuite/phasor';
 
-import { HandleDirection } from './selected-handle.js';
+import { HandleDirection } from './resize-handles.js';
 
-type DragMoveHandler = (delta: Bound) => void;
+type ReizeMoveHandler = (delta: Bound) => void;
 
-type DragEndHandler = () => void;
+type ResizeEndHandler = () => void;
 
-export class HandleDragManager {
+export class HandleResizeManager {
   private _element: HTMLElement;
-  private _onDragMove: DragMoveHandler;
-  private _onDragEnd: DragEndHandler;
+  private _onResizeMove: ReizeMoveHandler;
+  private _onResizeEnd: ResizeEndHandler;
 
   private _dragDirection: HandleDirection = HandleDirection.Left;
-  private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
+  private _lastDragPos: { x: number; y: number } = { x: 0, y: 0 };
 
   constructor(
     element: HTMLElement,
-    onDragMove: DragMoveHandler,
-    onDragEnd: DragEndHandler
+    onResizeMove: ReizeMoveHandler,
+    onResizeEnd: ResizeEndHandler
   ) {
     this._element = element;
-    this._onDragMove = onDragMove;
-    this._onDragEnd = onDragEnd;
+    this._onResizeMove = onResizeMove;
+    this._onResizeEnd = onResizeEnd;
   }
 
   private _onMouseMove = (e: MouseEvent) => {
     const direction = this._dragDirection;
-    const { x: lastX, y: lastY } = this._dragLastPos;
-    this._dragLastPos = {
+    const { x: lastX, y: lastY } = this._lastDragPos;
+    this._lastDragPos = {
       x: e.clientX,
       y: e.clientY,
     };
@@ -79,11 +79,11 @@ export class HandleDragManager {
       return;
     }
 
-    this._onDragMove({ x, y, w, h });
+    this._onResizeMove({ x, y, w, h });
   };
 
   private _onMouseUp = (_: MouseEvent) => {
-    this._onDragEnd();
+    this._onResizeEnd();
     const parentElement = this._element.parentElement;
     parentElement?.removeEventListener('mousemove', this._onMouseMove);
     parentElement?.removeEventListener('mouseup', this._onMouseUp);
@@ -94,7 +94,7 @@ export class HandleDragManager {
     e.stopPropagation();
 
     this._dragDirection = direction;
-    this._dragLastPos = {
+    this._lastDragPos = {
       x: e.clientX,
       y: e.clientY,
     };
