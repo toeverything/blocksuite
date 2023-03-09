@@ -12,10 +12,8 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getCurrentNativeRange,
   getRichTextByModel,
   OpenBlockInfo,
-  resetNativeSelection,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -504,10 +502,10 @@ export function copyCode(model: BaseBlockModel) {
   });
   document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
 
-  const range = getCurrentNativeRange();
-  range.setStart(richText, 0);
-  range.setEnd(richText, 0);
-  resetNativeSelection(range);
+  vEditor.setVRange({
+    index: vEditor.yText.length,
+    length: 0,
+  });
 
   toast('Copied to clipboard');
 }
