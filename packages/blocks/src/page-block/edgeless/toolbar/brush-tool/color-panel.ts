@@ -97,7 +97,7 @@ export class EdgelessColorPanel extends LitElement {
           >
             <div
               class="color-unit"
-              aria-label=${color}
+              aria-label=${color.toLowerCase()}
               ?bordered=${color === '#ffffff'}
               style=${styleMap(style)}
             >
