@@ -110,7 +110,8 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${'Hand'}
           .active=${type === 'pan'}
-          @tool.click=${() => this._setMouseMode({ type: 'pan' })}
+          @tool.click=${() =>
+            this._setMouseMode({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
