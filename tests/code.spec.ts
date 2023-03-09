@@ -13,6 +13,7 @@ import {
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressArrowLeft,
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
@@ -259,9 +260,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   await type(page, 'use');
   await page.keyboard.down('Shift');
-  for (let i = 0; i < 'use'.length; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 'use'.length);
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
@@ -378,9 +377,7 @@ test('split code by enter', async ({ page }) => {
   await type(page, 'hello');
 
   // he|llo
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
 
   await pressEnter(page);
   await assertRichTexts(page, ['he\nllo']);
