@@ -14,12 +14,25 @@ import {
 } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-function TipsPlaceholder() {
-  return html`
-    <div class="tips-placeholder">
-      Click ${BlockHubIcon20} to insert blocks, type '/' for commands
-    </div>
-  `;
+function TipsPlaceholder(type: ParagraphType) {
+  if (type === 'text') {
+    return html`
+      <div class="tips-placeholder">
+        Click ${BlockHubIcon20} to insert blocks, type '/' for commands
+      </div>
+    `;
+  }
+
+  const placeholders: Record<Exclude<ParagraphType, 'text'>, string> = {
+    h1: 'Heading 1',
+    h2: 'Heading 2',
+    h3: 'Heading 3',
+    h4: 'Heading 4',
+    h5: 'Heading 5',
+    h6: 'Heading 6',
+    quote: '',
+  };
+  return html`<div class="tips-placeholder">${placeholders[type]}</div> `;
 }
 
 @customElement('affine-paragraph')
@@ -107,33 +120,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       font-size: var(--affine-font-base);
     }
 
-    strong {
-      font-weight: 600;
-    }
-
-    code {
-      background: var(--affine-code-background);
-      color: var(--affine-code-color);
-      font-family: var(--affine-font-code-family);
-      font-variant-ligatures: none;
-      padding: 0 5px;
-      border-radius: 5px;
-      font-size: calc(var(--affine-font-base) - 4px);
-    }
-
-    u {
-      text-decoration: none;
-      border-bottom: 1px solid var(--affine-text-color);
-    }
-
-    del {
-      text-decoration: line-through;
-    }
-
-    em {
-      font-style: italic;
-    }
-
     .tips-placeholder {
       position: absolute;
       display: flex;
@@ -165,17 +151,14 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   }
 
   private _onFocusIn = (e: FocusEvent) => {
-    if (this.model.type !== 'text' || this.model.text.length > 0) {
+    if (this.model.text.length > 0) {
       return;
     }
     this._showTipsPlaceholder = true;
 
     let isComposing = false;
     const updatePlaceholder = () => {
-      this._showTipsPlaceholder =
-        this.model.text.length === 0 &&
-        this.model.type === 'text' &&
-        !isComposing;
+      this._showTipsPlaceholder = this.model.text.length === 0 && !isComposing;
     };
     this.model.text.yText.observe(updatePlaceholder);
     this._disposables = new DisposableGroup();
@@ -195,9 +178,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   };
 
   private _onFocusOut = (e: FocusEvent) => {
-    if (this.model.type !== 'text') {
-      return;
-    }
     this._showTipsPlaceholder = false;
     this._disposables.dispose();
   };
@@ -212,7 +192,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._showTipsPlaceholder ? TipsPlaceholder() : html``}
+        ${this._showTipsPlaceholder ? TipsPlaceholder(type) : html``}
         <rich-text
           .host=${this.host}
           .model=${this.model}
