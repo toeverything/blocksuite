@@ -13,6 +13,7 @@ import {
   pressTab,
   type,
 } from './utils/actions/index.js';
+import { getBoundingClientRect } from './utils/actions/misc.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -540,4 +541,23 @@ test('should blur rich-text first when block selection', async ({ page }) => {
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('*:focus')).toHaveCount(0);
+});
+
+test('hide drag handle when mouse is hovering over the title', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  const rect = await getBoundingClientRect(
+    page,
+    '.affine-frame-block-container'
+  );
+  const dragHandle = await page.locator('affine-drag-handle');
+  await page.mouse.move(rect.x, rect.y - 1, { steps: 2 });
+  expect(await dragHandle.isVisible()).toBe(false);
+
+  await page.mouse.move(rect.x, rect.y + 1, { steps: 2 });
+  expect(await dragHandle.isVisible()).toBe(true);
 });
