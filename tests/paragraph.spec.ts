@@ -876,7 +876,7 @@ test('should placeholder works', async ({ page }) => {
   await expect(placeholder).toBeVisible();
   await clickBlockTypeMenuItem(page, 'H1');
 
-  await expect(placeholder).not.toBeVisible();
+  await expect(placeholder).toBeVisible();
   await clickBlockTypeMenuItem(page, 'Text');
   await expect(placeholder).toBeVisible();
 
