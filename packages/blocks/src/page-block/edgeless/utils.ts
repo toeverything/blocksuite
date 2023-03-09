@@ -1,7 +1,7 @@
 import type { SurfaceElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   Bound,
-  boundsContain,
+  contains,
   deserializeXYWH,
   intersects,
   isPointIn as isPointInFromPhasor,
@@ -54,7 +54,7 @@ export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
   return blocks.filter(block => {
     const [x, y, w, h] = deserializeXYWH(block.xywh);
     const blockBound = { x, y, w, h };
-    return boundsContain(bound, blockBound) || intersects(bound, blockBound);
+    return contains(bound, blockBound) || intersects(bound, blockBound);
   });
 }
 

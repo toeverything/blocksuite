@@ -18,7 +18,7 @@ import {
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
-import { boundsContain, getCommonBound } from './utils/bound.js';
+import { contains, getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -153,7 +153,7 @@ export class SurfaceManager {
   pickByBound(bound: IBound): PhasorElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
-      return boundsContain(bound, element) || intersects(bound, element);
+      return contains(bound, element) || intersects(bound, element);
     });
 
     return picked;

@@ -43,9 +43,9 @@ export function getCommonBound(bounds: IBound[]): IBound | null {
 }
 
 /**
- * Get whether A contain B
+ * Get whether A contains B
  */
-export function boundsContain(a: IBound, b: IBound): boolean {
+export function contains(a: IBound, b: IBound): boolean {
   return (
     a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
   );
