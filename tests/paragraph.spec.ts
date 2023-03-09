@@ -868,6 +868,7 @@ test('should placeholder works', async ({ page }) => {
   const placeholder = page.locator('.tips-placeholder');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveCount(1);
+  await expect(placeholder).toContainText('type');
 
   await type(page, '1');
   await expect(placeholder).not.toBeVisible();
@@ -880,6 +881,7 @@ test('should placeholder works', async ({ page }) => {
   await expect(placeholder).toHaveText('Heading 1');
   await clickBlockTypeMenuItem(page, 'Text');
   await expect(placeholder).toBeVisible();
+  await expect(placeholder).toContainText('type');
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
