@@ -477,21 +477,28 @@ export class VEditor<
     return this._vRange;
   }
 
-  getFormat(vRange: VRange, type?: 'default'): TextAttributes {
-    const deltas = this.getDeltasByVRange(vRange);
-    if (!deltas.length || !deltas[0][0].attributes) {
-      // empty range or empty text does not have any attributes
-      return {} as TextAttributes;
-    }
-    const attributesArray = deltas.map(([delta]) => delta.attributes);
-    if (attributesArray.some(attributes => !attributes)) {
+  getFormat(vRange: VRange): TextAttributes {
+    const deltas = this.getDeltasByVRange(vRange).filter(
+      ([delta, position]) =>
+        position.index + position.length > vRange.index &&
+        position.index <= vRange.index + vRange.length
+    );
+    const maybeAttributesArray = deltas.map(([delta]) => delta.attributes);
+    if (
+      !maybeAttributesArray.length ||
       // some text does not have any attributes
+      maybeAttributesArray.some(attributes => !attributes)
+    ) {
       return {} as TextAttributes;
     }
-    return (attributesArray as TextAttributes[]).reduce((acc, cur) => {
+    const attributesArray = maybeAttributesArray as TextAttributes[];
+    return attributesArray.reduce((acc, cur) => {
       const newFormat = {} as TextAttributes;
       for (const key in acc) {
         const typedKey = key as keyof TextAttributes;
+        // If the given range contains multiple different formats
+        // such as links with different values,
+        // we will treat it as having no format
         if (acc[typedKey] === cur[typedKey]) {
           // This cast is secure because we have checked that the value of the key is the same.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
