@@ -5,7 +5,7 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
 import {
-  asyncSetVRangeForRichText,
+  asyncSetVRange,
   convertToDivider,
   convertToList,
   convertToParagraph,
@@ -420,7 +420,7 @@ const matches: Match[] = [
 
       const codeBlock = page.getBlockById(codeId);
       assertExists(codeBlock);
-      asyncSetVRangeForRichText(codeBlock, { index: 0, length: 0 });
+      asyncSetVRange(codeBlock, { index: 0, length: 0 });
 
       return true;
     },

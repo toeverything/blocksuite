@@ -6,15 +6,7 @@ import type { VEditor, VRange } from '@blocksuite/virgo';
 import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
-export function setVRangeForRichText(model: BaseBlockModel, vRange: VRange) {
-  const richText = getRichTextByModel(model);
-  richText?.vEditor?.setVRange(vRange);
-}
-
-export function asyncSetVRangeForRichText(
-  model: BaseBlockModel,
-  vRange: VRange
-) {
+export function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   asyncGetRichTextByModel(model)
     .then(richText => {
       richText?.vEditor?.setVRange(vRange);
@@ -32,7 +24,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'] as const)) return;
-  asyncSetVRangeForRichText(model, vRange);
+  asyncSetVRange(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {

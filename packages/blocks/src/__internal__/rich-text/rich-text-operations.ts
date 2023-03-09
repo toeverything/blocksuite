@@ -9,7 +9,7 @@ import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
-  asyncSetVRangeForRichText,
+  asyncSetVRange,
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
@@ -152,7 +152,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   });
 
   assertExists(model);
-  asyncSetVRangeForRichText(model, { index: offset, length: 0 });
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -197,7 +197,7 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
     });
 
     assertExists(model);
-    asyncSetVRangeForRichText(model, { index: 0, length: 0 });
+    asyncSetVRange(model, { index: 0, length: 0 });
   });
 }
 
@@ -262,7 +262,7 @@ export function handleUnindent(
   });
 
   assertExists(model);
-  asyncSetVRangeForRichText(model, { index: offset, length: 0 });
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
