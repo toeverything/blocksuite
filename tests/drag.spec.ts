@@ -32,7 +32,7 @@ test('only have one drag handle in screen', async ({ page }) => {
     return { x: box.left, y: box.top + 2 };
   }, []);
 
-  const rightBottom = await page.evaluate(() => {
+  const bottomRight = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"]');
     const box = paragraph?.getBoundingClientRect();
     if (!box) {
@@ -47,7 +47,7 @@ test('only have one drag handle in screen', async ({ page }) => {
     return handles.length;
   }, []);
   expect(length1).toBe(1);
-  await page.mouse.move(rightBottom.x, rightBottom.y);
+  await page.mouse.move(bottomRight.x, bottomRight.y);
   const length2 = await page.evaluate(() => {
     const handles = document.querySelectorAll('affine-drag-handle');
     return handles.length;

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
 import './view-control-bar.js';
+import './components/edgeless-selected-rect.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
@@ -31,25 +32,26 @@ import {
   removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
-import {
-  EdgelessBlockChildrenContainer,
-  EdgelessDraggingArea,
-  EdgelessHoverRect,
-} from './components.js';
+import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
+import { EdgelessDraggingArea } from './components/dragging-area.js';
+import { EdgelessHoverRect } from './components/hover-rect.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
 
+export interface EdgelessSelectionSlots {
+  hoverUpdated: Slot;
+  viewportUpdated: Slot;
+  selectionUpdated: Slot<EdgelessSelectionState>;
+  surfaceUpdated: Slot;
+  mouseModeUpdated: Slot<MouseMode>;
+}
+
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
   readonly surface: SurfaceManager;
-  readonly slots: {
-    hoverUpdated: Slot;
-    viewportUpdated: Slot;
-    updateSelection: Slot<EdgelessSelectionState>;
-    surfaceUpdated: Slot;
-  };
+  readonly slots: EdgelessSelectionSlots;
 }
 
 @customElement('affine-edgeless-page')
@@ -110,9 +112,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
-  slots = {
+  slots: EdgelessSelectionSlots = {
     viewportUpdated: new Slot(),
-    updateSelection: new Slot<EdgelessSelectionState>(),
+    selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
@@ -135,22 +137,22 @@ export class EdgelessPageBlockComponent
     hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
     hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
     bindCommonHotkey(this.page);
-  }
 
-  private _removeHotkeys() {
-    hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
-
-    removeCommonHotKey();
+    return () => {
+      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+      removeCommonHotKey();
+    };
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {
-    if (this._selection.blockSelectionState.type === 'single') {
-      const { selected } = this._selection.blockSelectionState;
+    const { selected } = this._selection.blockSelectionState;
+    if (selected.length === 1) {
+      const element = selected[0];
 
-      if (this.surface.hasElement(selected.id)) {
-        this.surface.removeElement(selected.id);
+      if (this.surface.hasElement(element.id)) {
+        this.surface.removeElement(element.id);
         this._selection.currentController.clearSelection();
-        this.slots.updateSelection.emit(this._selection.blockSelectionState);
+        this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
         return;
       }
       handleMultiBlockBackspace(this.page, e);
@@ -165,11 +167,7 @@ export class EdgelessPageBlockComponent
       }
 
       // when user is editing, shouldn't enter pan mode
-      if (
-        mouseMode.type === 'default' &&
-        blockSelectionState.type === 'single' &&
-        blockSelectionState.active
-      ) {
+      if (mouseMode.type === 'default' && blockSelectionState.active) {
         return;
       }
 
@@ -200,7 +198,6 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-
     const frame = this.pageModel.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
@@ -225,6 +222,50 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initSlotEffects() {
+    // TODO: listen to new children
+    // this.pageModel.children.forEach(frame => {
+    //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
+    // });
+    const { _disposables, slots } = this;
+    _disposables.add(
+      slots.viewportUpdated.on(() => {
+        this.style.setProperty(
+          '--affine-zoom',
+          `${this.surface.viewport.zoom}`
+        );
+        this.requestUpdate();
+      })
+    );
+    _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.selectionUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.mouseModeUpdated.on(mouseMode => {
+        this.mouseMode = mouseMode;
+      })
+    );
+    _disposables.add(
+      this.page.slots.historyUpdated.on(() => {
+        this._clearSelection();
+        this.requestUpdate();
+      })
+    );
+    _disposables.add(this._selection);
+    _disposables.add(this.surface);
+    _disposables.add(this._bindHotkeys());
+    _disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
+      },
+      // FIXME: somewhere call stopPropagation on keydown event
+      true
+    );
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
@@ -237,41 +278,9 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    // TODO: listen to new children
-    this.pageModel.children.forEach(frame => {
-      frame.propsUpdated.on(() => this._selection.syncDraggingArea());
-    });
-
-    this.slots.viewportUpdated.on(() => {
-      this.style.setProperty('--affine-zoom', `${this.surface.viewport.zoom}`);
-
-      this._selection.syncDraggingArea();
-      this.requestUpdate();
-    });
-    this.slots.hoverUpdated.on(() => this.requestUpdate());
-    this.slots.updateSelection.on(() => this.requestUpdate());
-    this.slots.surfaceUpdated.on(() => this.requestUpdate());
-    this.slots.mouseModeUpdated.on(mouseMode => {
-      this.mouseMode = mouseMode;
-      if (mouseMode.type === 'default') {
-        requestAnimationFrame(() => this._selection.syncDraggingArea());
-      }
-    });
-
-    this._disposables.add(
-      this.page.slots.historyUpdated.on(() => {
-        this._clearSelection();
-        this.requestUpdate();
-      })
-    );
-    this._bindHotkeys();
+    this._initSlotEffects();
 
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-
-    this.addEventListener('keydown', e => {
-      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-    });
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
@@ -288,16 +297,7 @@ export class EdgelessPageBlockComponent
 
   disconnectedCallback() {
     super.disconnectedCallback();
-
-    this.slots.updateSelection.dispose();
-    this.slots.viewportUpdated.dispose();
-    this.slots.hoverUpdated.dispose();
-    this.slots.surfaceUpdated.dispose();
-    this.slots.mouseModeUpdated.dispose();
     this._disposables.dispose();
-    this._selection.dispose();
-    this.surface.dispose();
-    this._removeHotkeys();
   }
 
   render() {
@@ -316,10 +316,12 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection, page } = this;
-    const selectionState = _selection.blockSelectionState;
+    const { selected } = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
-    const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
+
+    const hoverState = _selection.getHoverState();
+    const hoverRect = EdgelessHoverRect(hoverState, zoom);
 
     const translateX = -viewportX * zoom;
     const translateY = -viewportY * zoom;
@@ -354,14 +356,12 @@ export class EdgelessPageBlockComponent
           ${childrenContainer}
         </div>
         ${hoverRect} ${draggingArea}
-        ${selectionState.type !== 'none'
+        ${selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
-                .viewport=${viewport}
-                .state=${selectionState}
-                .rect=${selectionState.rect}
-                .zoom=${zoom}
+                .state=${_selection.blockSelectionState}
+                .slots=${this.slots}
                 .surface=${this.surface}
               ></edgeless-selected-rect>
             `

@@ -59,10 +59,6 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     noop();
   }
 
-  syncDraggingArea() {
-    noop();
-  }
-
   clearSelection() {
     noop();
   }

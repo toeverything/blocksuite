@@ -15,9 +15,10 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
-import { getCommonBound } from './utils/bound.js';
+import { contains, getCommonBound } from './utils/bound.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -130,7 +131,11 @@ export class SurfaceManager {
     return this._renderer.toViewCoord(modelX, modelY);
   }
 
-  pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
+  private _pickByPoint(
+    x: number,
+    y: number,
+    options?: HitTestOptions
+  ): PhasorElement[] {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
@@ -141,8 +146,17 @@ export class SurfaceManager {
   }
 
   pickTop(x: number, y: number): PhasorElement | null {
-    const results = this.pick(x, y);
+    const results = this._pickByPoint(x, y);
     return results[results.length - 1] ?? null;
+  }
+
+  pickByBound(bound: IBound): PhasorElement[] {
+    const candidates = this._renderer.gridManager.search(bound);
+    const picked = candidates.filter((element: PhasorElement) => {
+      return contains(bound, element) || intersects(bound, element);
+    });
+
+    return picked;
   }
 
   addElements(elements: PhasorElement[]) {

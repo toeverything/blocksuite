@@ -11,7 +11,8 @@ const { Y } = Workspace;
 
 function testClick(surface: SurfaceManager, e: MouseEvent) {
   const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
-  const elements = surface.pick(modelX, modelY);
+  // @ts-expect-error
+  const elements = surface._pickByPoint(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
     `picked elements count: ${elements.length}, top element type: ${

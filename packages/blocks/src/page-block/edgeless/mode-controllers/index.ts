@@ -5,7 +5,6 @@ import type {
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type {
-  EdgelessHoverState,
   EdgelessSelectionState,
   SelectionArea,
 } from '../selection-manager.js';
@@ -13,25 +12,20 @@ import type {
 export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
   protected _blockSelectionState: EdgelessSelectionState = {
-    type: 'none',
+    selected: [],
+    active: false,
   };
 
-  protected _hoverState: EdgelessHoverState | null = null;
   protected _draggingArea: SelectionArea | null = null;
+
+  enableHover = false;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     this._edgeless = edgeless;
   }
 
   get isActive() {
-    return (
-      this._blockSelectionState.type === 'single' &&
-      this._blockSelectionState.active
-    );
-  }
-
-  get hoverState() {
-    return this._hoverState;
+    return this._blockSelectionState.active;
   }
 
   /**
@@ -66,8 +60,6 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseMove(e: SelectionEvent): void;
   abstract onContainerMouseOut(e: SelectionEvent): void;
   abstract onContainerContextMenu(e: SelectionEvent): void;
-
-  abstract syncDraggingArea(): void;
 
   abstract clearSelection(): void;
 }

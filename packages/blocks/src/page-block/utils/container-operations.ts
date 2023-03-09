@@ -3,6 +3,7 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 
 import {
@@ -32,7 +33,9 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import { DEFAULT_SPACING } from '../edgeless/utils.js';
+
+const DEFAULT_SPACING = 64;
+export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -422,13 +425,9 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const bound = blockElement.getBoundingClientRect();
       if (!bound) return;
 
-      const [x, y, w, h] = JSON.parse(model.xywh) as [
-        number,
-        number,
-        number,
-        number
-      ];
-      const newModelHeight = bound.height / zoom;
+      const [x, y, w, h] = deserializeXYWH(model.xywh);
+      const newModelHeight =
+        (bound.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {

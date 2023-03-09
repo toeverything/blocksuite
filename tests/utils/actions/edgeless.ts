@@ -131,13 +131,13 @@ export async function addBasicRectShapeElement(
   await setMouseMode(page, 'default');
 }
 
-export async function resizeElementByLeftTopHandle(
+export async function resizeElementByTopLeftHandle(
   page: Page,
   delta: { x: number; y: number },
   steps = 1
 ) {
-  const leftTopHandler = page.locator('[aria-label="handle-left-top"]');
-  const box = await leftTopHandler.boundingBox();
+  const topLeftHandle = page.locator('[aria-label="handle-top-left"]');
+  const box = await topLeftHandle.boundingBox();
   if (box === null) throw new Error();
   await dragBetweenCoords(
     page,

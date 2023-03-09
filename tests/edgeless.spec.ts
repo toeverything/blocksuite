@@ -28,7 +28,7 @@ import {
   locatorPanButton,
   pressEnter,
   redoByClick,
-  resizeElementByLeftTopHandle,
+  resizeElementByTopLeftHandle,
   type,
   undoByClick,
   waitNextFrame,
@@ -36,6 +36,7 @@ import {
 import {
   assertAlmostEqual,
   assertEdgelessHoverRect,
+  assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
@@ -70,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 24]);
+  await assertFrameXYWH(page, [0, 0, 720, 72]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 288, 768, 72];
+  const original = [90, 264, 720, 72];
   await assertEdgelessHoverRect(page, original);
 
   await decreaseZoomLevel(page);
@@ -125,7 +126,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 24]);
+  await assertFrameXYWH(page, [0, 0, 720, 72]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -134,7 +135,7 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, 720, 24]);
+  await assertFrameXYWH(page, [0, 100, 720, 72]);
 });
 
 test('resize block in edgeless mode', async ({ page }) => {
@@ -229,7 +230,7 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
-  await resizeElementByLeftTopHandle(page, delta, 10);
+  await resizeElementByTopLeftHandle(page, delta, 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
@@ -555,4 +556,96 @@ test.skip('shape element should have the correct selected shape when clicking on
   expect(blockBox.y).toBeCloseTo(selectedBox.y, 0);
   expect(blockBox.width).toBeCloseTo(selectedBox.width, 0);
   expect(blockBox.height).toBeCloseTo(selectedBox.height, 0);
+});
+
+test('select multiple shapes and resize', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+
+  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await page.mouse.move(110, 110);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
+  await page.mouse.move(220, 120);
+  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
+
+  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
+  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+
+  await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
+  await assertEdgelessSelectedRect(page, [150, 150, 160, 60]);
+
+  await page.mouse.move(160, 160);
+  await assertEdgelessHoverRect(page, [150, 150, 79, 57]);
+
+  await page.mouse.move(260, 160);
+  await assertEdgelessHoverRect(page, [234, 155, 76, 55]);
+});
+
+test('select multiple shapes and translate', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+
+  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await page.mouse.move(110, 110);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
+  await page.mouse.move(220, 120);
+  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
+
+  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
+  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+
+  await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
+  await assertEdgelessSelectedRect(page, [130, 130, 210, 110]);
+
+  await page.mouse.move(160, 160);
+  await assertEdgelessHoverRect(page, [130, 130, 104, 104]);
+
+  await page.mouse.move(260, 160);
+  await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
+});
+
+test('dragging un-selected frame', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+
+  const frameBox = await page
+    .locator('.affine-edgeless-block-child')
+    .boundingBox();
+  if (!frameBox) {
+    throw new Error('Missing edgeless affine-frame');
+  }
+  await page.mouse.move(frameBox.x + 5, frameBox.y + 5);
+  await assertEdgelessHoverRect(page, [
+    frameBox.x,
+    frameBox.y,
+    frameBox.width,
+    frameBox.height,
+  ]);
+
+  await dragBetweenCoords(
+    page,
+    { x: frameBox.x + 5, y: frameBox.y + 5 },
+    { x: frameBox.x + 25, y: frameBox.y + 25 }
+  );
+
+  await page.mouse.move(frameBox.x + 25, frameBox.y + 25);
+  await assertEdgelessHoverRect(page, [
+    frameBox.x + 20,
+    frameBox.y + 20,
+    frameBox.width,
+    frameBox.height,
+  ]);
 });
