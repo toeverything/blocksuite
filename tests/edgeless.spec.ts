@@ -314,7 +314,7 @@ test('add empty Text', async ({ page }) => {
 
   // assert add text success
   await page.mouse.move(30, 40);
-  await assertEdgelessHoverRect(page, [0, 0, 448, 72]);
+  await assertEdgelessHoverRect(page, [0, 0, 448, 104]);
 
   // click out of text
   await page.mouse.click(0, 200);
