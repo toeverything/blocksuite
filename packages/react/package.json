@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/react",
-  "version": "0.5.0-alpha.0",
+  "version": "0.5.0-alpha.1",
   "description": "A React Component & Hooks Library for BlockSuite editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
