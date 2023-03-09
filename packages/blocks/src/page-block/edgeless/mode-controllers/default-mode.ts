@@ -42,14 +42,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   };
   enableHover = true;
 
-  private _draggingType = DragType.None;
+  private _dragType = DragType.None;
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
 
   get draggingArea() {
-    if (this._draggingType === 'select') {
+    if (this._dragType === 'select') {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
         end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
@@ -192,16 +192,16 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragStart(e: SelectionEvent) {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      this._draggingType = this._blockSelectionState.active
+      this._dragType = this._blockSelectionState.active
         ? DragType.Edit
         : DragType.Translate;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        this._draggingType = DragType.Translate;
+        this._dragType = DragType.Translate;
       } else {
-        this._draggingType = DragType.Select;
+        this._dragType = DragType.Select;
       }
     }
 
@@ -212,7 +212,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    switch (this._draggingType) {
+    switch (this._dragType) {
       case DragType.Select: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
@@ -275,7 +275,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     }
-    this._draggingType = DragType.None;
+    this._dragType = DragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._forceUpdateSelection();
