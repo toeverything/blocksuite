@@ -19,7 +19,7 @@ import {
   getSelectionBoxBound,
   getXYWH,
   initWheelEventHandlers,
-  pickTop,
+  pickTopBlock,
 } from './utils.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
@@ -217,7 +217,7 @@ export class EdgelessSelectionManager {
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
     const hovered =
-      surface.pickTop(modelX, modelY) ?? pickTop(frames, modelX, modelY);
+      surface.pickTop(modelX, modelY) ?? pickTopBlock(frames, modelX, modelY);
     if (!hovered) {
       return null;
     }

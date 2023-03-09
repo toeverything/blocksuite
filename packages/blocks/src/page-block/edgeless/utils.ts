@@ -36,7 +36,7 @@ function isPointIn(
   return isPointInFromPhasor({ x, y, w, h }, pointX, pointY);
 }
 
-export function pickTop(
+export function pickTopBlock(
   blocks: TopLevelBlockModel[],
   modelX: number,
   modelY: number
@@ -50,7 +50,7 @@ export function pickTop(
   return null;
 }
 
-export function pickInBound(blocks: TopLevelBlockModel[], bound: Bound) {
+export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
   return blocks.filter(block => {
     const [x, y, w, h] = deserializeXYWH(block.xywh);
     const blockBound = { x, y, w, h };

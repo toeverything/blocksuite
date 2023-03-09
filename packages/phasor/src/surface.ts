@@ -130,7 +130,11 @@ export class SurfaceManager {
     return this._renderer.toViewCoord(modelX, modelY);
   }
 
-  pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
+  private _pickByPoint(
+    x: number,
+    y: number,
+    options?: HitTestOptions
+  ): PhasorElement[] {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
@@ -141,11 +145,11 @@ export class SurfaceManager {
   }
 
   pickTop(x: number, y: number): PhasorElement | null {
-    const results = this.pick(x, y);
+    const results = this._pickByPoint(x, y);
     return results[results.length - 1] ?? null;
   }
 
-  pickInBound(bound: IBound, options?: HitTestOptions): PhasorElement[] {
+  pickByBound(bound: IBound, options?: HitTestOptions): PhasorElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
       return element.hitTestBound(bound, options);

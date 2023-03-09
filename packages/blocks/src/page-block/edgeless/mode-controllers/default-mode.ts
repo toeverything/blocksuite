@@ -24,8 +24,8 @@ import {
   getXYWH,
   isSurfaceElement,
   isTopLevelBlock,
-  pickInBound,
-  pickTop,
+  pickBlocksByBound,
+  pickTopBlock,
 } from '../utils.js';
 import { MouseModeController } from './index.js';
 
@@ -57,7 +57,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const selectedShape = surface.pickTop(modelX, modelY);
     return selectedShape
       ? selectedShape
-      : pickTop(this._blocks, modelX, modelY);
+      : pickTopBlock(this._blocks, modelX, modelY);
   }
 
   private _setNoneSelectionState() {
@@ -207,16 +207,20 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragMove(e: SelectionEvent) {
     switch (this._draggingMode) {
       case 'select': {
-        const viewX = Math.min(this._dragStartPos.x, e.x);
-        const viewY = Math.min(this._dragStartPos.y, e.y);
+        const startX = this._dragStartPos.x;
+        const startY = this._dragStartPos.y;
+        const viewX = Math.min(startX, e.x);
+        const viewY = Math.min(startY, e.y);
+
         const [x, y] = this._surface.toModelCoord(viewX, viewY);
-        const w = Math.abs(this._dragStartPos.x - e.x);
-        const h = Math.abs(this._dragStartPos.y - e.y);
+        const w = Math.abs(startX - e.x);
+        const h = Math.abs(startY - e.y);
         const { zoom } = this._surface.viewport;
         const bound = { x, y, w: w / zoom, h: h / zoom };
-        const elements = this._surface.pickInBound(bound);
-        const blocks = pickInBound(this._blocks, bound);
-        this._setSelectionState([...elements, ...blocks], false);
+
+        const blocks = pickBlocksByBound(this._blocks, bound);
+        const elements = this._surface.pickByBound(bound);
+        this._setSelectionState([...blocks, ...elements], false);
         break;
       }
       case 'translate': {
