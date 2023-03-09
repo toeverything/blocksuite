@@ -2,7 +2,8 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { BlockHubIcon20 } from '@blocksuite/global/config';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -10,14 +11,33 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   BlockChildrenContainer,
   type BlockHost,
+  isPageMode,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-function TipsPlaceholder(type: ParagraphType) {
-  if (type === 'text') {
+function TipsPlaceholder(model: BaseBlockModel) {
+  if (!matchFlavours(model, ['affine:paragraph'] as const)) {
+    throw new Error("TipsPlaceholder can't be used for this model");
+  }
+  if (model.type === 'text') {
+    if (!isPageMode(model.page)) {
+      return html`<div class="tips-placeholder">Type '/' for commands</div> `;
+    }
+
+    const blockHub = document.querySelector('affine-block-hub');
+    if (!blockHub) {
+      // Fall back
+      return html`<div class="tips-placeholder">Type '/' for commands</div> `;
+    }
+    const onClick = () => {
+      if (!blockHub) {
+        throw new Error('Failed to find blockHub!');
+      }
+      blockHub.toggleMenu(true);
+    };
     return html`
-      <div class="tips-placeholder">
+      <div class="tips-placeholder" @click=${onClick}>
         Click ${BlockHubIcon20} to insert blocks, type '/' for commands
       </div>
     `;
@@ -32,7 +52,7 @@ function TipsPlaceholder(type: ParagraphType) {
     h6: 'Heading 6',
     quote: '',
   };
-  return html`<div class="tips-placeholder">${placeholders[type]}</div> `;
+  return html`<div class="tips-placeholder">${placeholders[model.type]}</div> `;
 }
 
 @customElement('affine-paragraph')
@@ -125,12 +145,20 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       display: flex;
       align-items: center;
       gap: 4px;
-      left: 0;
+      left: 2px;
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
       color: var(--affine-placeholder-color);
       fill: var(--affine-placeholder-color);
+    }
+
+    .tips-placeholder > svg {
+      cursor: pointer;
+      pointer-events: all;
+    }
+    .tips-placeholder > svg:hover {
+      fill: var(--affine-primary-color);
     }
   `;
 
@@ -146,12 +174,15 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   private _disposables = new DisposableGroup();
 
   firstUpdated() {
+    this._showTipsPlaceholder =
+      this.model.type !== 'text' && this.model.text.length === 0;
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   private _onFocusIn = (e: FocusEvent) => {
     if (this.model.text.length > 0) {
+      this._showTipsPlaceholder = false;
       return;
     }
     this._showTipsPlaceholder = true;
@@ -178,7 +209,10 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   };
 
   private _onFocusOut = (e: FocusEvent) => {
-    this._showTipsPlaceholder = false;
+    // Always show placeholder for heading block
+    if (this.model.type === 'text') {
+      this._showTipsPlaceholder = false;
+    }
     this._disposables.dispose();
   };
 
@@ -192,7 +226,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._showTipsPlaceholder ? TipsPlaceholder(type) : html``}
+        ${this._showTipsPlaceholder ? TipsPlaceholder(this.model) : html``}
         <rich-text
           .host=${this.host}
           .model=${this.model}
