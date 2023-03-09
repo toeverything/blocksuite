@@ -3,8 +3,21 @@ import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { asyncSetVRangeForRichText, getRichTextByModel } from './query.js';
+import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
+
+export function asyncSetVRangeForRichText(
+  model: BaseBlockModel,
+  vRange: VRange
+) {
+  asyncGetRichTextByModel(model)
+    .then(richText => {
+      richText?.vEditor?.setVRange(vRange);
+    })
+    .catch(e => {
+      throw e;
+    });
+}
 
 export function asyncFocusRichText(
   page: Page,

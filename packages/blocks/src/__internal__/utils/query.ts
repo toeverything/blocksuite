@@ -306,19 +306,6 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
-export function asyncSetVRangeForRichText(
-  model: BaseBlockModel,
-  vRange: VRange
-) {
-  asyncGetRichTextByModel(model)
-    .then(richText => {
-      richText?.vEditor?.setVRange(vRange);
-    })
-    .catch(e => {
-      throw e;
-    });
-}
-
 // TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   // filter comment
