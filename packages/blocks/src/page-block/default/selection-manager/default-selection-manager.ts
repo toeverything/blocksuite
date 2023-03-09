@@ -305,9 +305,8 @@ export class DefaultSelectionManager {
     );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
-    if (this._container.components.dragHandle) {
-      this._container.components.dragHandle.showBySelectionEvent(e);
-    }
+    this._container.components.dragHandle?.onContainerMouseMove(e);
+
     if (hoverEditingState?.model.type === 'image') {
       const { position } = hoverEditingState;
       // when image size is too large, the option popup should show inside
