@@ -242,29 +242,43 @@ export function asyncGetBlockElementByModel(
 ): Promise<BlockComponentElement | null> {
   let resolved = false;
   return new Promise<BlockComponentElement>((resolve, reject) => {
+    const onSuccess = (element: BlockComponentElement) => {
+      resolved = true;
+      observer.disconnect();
+      resolve(element);
+    };
+
+    const onFail = () => {
+      observer.disconnect();
+      reject(
+        new Error(
+          `Cannot find block element by model: ${model.flavour} id: ${model.id}`
+        )
+      );
+    };
+
     const observer = new MutationObserver(() => {
       const blockElement = getBlockElementByModel(model);
       if (blockElement) {
-        resolved = true;
-        observer.disconnect();
-        resolve(blockElement);
+        onSuccess(blockElement);
       }
     });
+
     observer.observe(document.body, {
       childList: true,
       subtree: true,
     });
 
-    // Reject if the element is not found after 1 second
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (!resolved) {
-        reject(
-          new Error(
-            `Cannot find block element by model: ${model.flavour} id: ${model.id}`
-          )
-        );
+        const blockElement = getBlockElementByModel(model);
+        if (blockElement) {
+          onSuccess(blockElement);
+        } else {
+          onFail();
+        }
       }
-    }, 1000);
+    });
   });
 }
 
