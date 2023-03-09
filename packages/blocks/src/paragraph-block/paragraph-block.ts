@@ -17,7 +17,7 @@ import type { ParagraphBlockModel } from './paragraph-model.js';
 function TipsPlaceholder() {
   return html`
     <div class="tips-placeholder">
-      Click button ${BlockHubIcon20} to insert blocks, type '/' for commands
+      Click ${BlockHubIcon20} to insert blocks, type '/' for commands
     </div>
   `;
 }
