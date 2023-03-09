@@ -78,8 +78,22 @@ test('type character jump out code node', async ({ page }) => {
   await type(page, 'Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await assertTextFormat(page, 0, 5, { code: true });
-
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        code={true}
+        insert="Hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
@@ -333,13 +347,13 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+b`);
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+i`);
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+u`);
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
 
   await waitNextFrame(page);
 
@@ -464,6 +478,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+8`);
   await assertStoreMatchJSX(
     page,
@@ -477,6 +492,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+9`);
   await assertStoreMatchJSX(
     page,

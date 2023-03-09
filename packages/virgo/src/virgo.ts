@@ -477,34 +477,36 @@ export class VEditor<
     return this._vRange;
   }
 
-  getFormat(vRange: VRange, type?: 'default'): TextAttributes {
-    const deltas = this.getDeltasByVRange(vRange);
-
-    const result: {
-      [key: string]: unknown;
-    } = {};
-    for (const [delta, position] of deltas) {
-      if (delta.attributes) {
-        for (const [key, value] of Object.entries(delta.attributes)) {
-          if (typeof value === 'boolean' && !value) {
-            delete result[key];
-          } else {
-            if (type === 'default') {
-              if (
-                vRange.index >= position.index &&
-                vRange.index + vRange.length <= position.index + position.length
-              ) {
-                result[key] = value;
-              }
-            } else {
-              result[key] = value;
-            }
-          }
+  getFormat(vRange: VRange): TextAttributes {
+    const deltas = this.getDeltasByVRange(vRange).filter(
+      ([delta, position]) =>
+        position.index + position.length > vRange.index &&
+        position.index <= vRange.index + vRange.length
+    );
+    const maybeAttributesArray = deltas.map(([delta]) => delta.attributes);
+    if (
+      !maybeAttributesArray.length ||
+      // some text does not have any attributes
+      maybeAttributesArray.some(attributes => !attributes)
+    ) {
+      return {} as TextAttributes;
+    }
+    const attributesArray = maybeAttributesArray as TextAttributes[];
+    return attributesArray.reduce((acc, cur) => {
+      const newFormat = {} as TextAttributes;
+      for (const key in acc) {
+        const typedKey = key as keyof TextAttributes;
+        // If the given range contains multiple different formats
+        // such as links with different values,
+        // we will treat it as having no format
+        if (acc[typedKey] === cur[typedKey]) {
+          // This cast is secure because we have checked that the value of the key is the same.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          newFormat[typedKey] = acc[typedKey] as any;
         }
       }
-    }
-
-    return result as TextAttributes;
+      return newFormat;
+    });
   }
 
   setReadonly(isReadonly: boolean): void {

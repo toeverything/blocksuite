@@ -2,11 +2,11 @@ import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
 import { z } from 'zod';
 
 export const affineTextAttributes = z.object({
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  strike: z.boolean().optional(),
-  code: z.boolean().optional(),
+  bold: z.literal(true).optional(),
+  italic: z.literal(true).optional(),
+  underline: z.literal(true).optional(),
+  strike: z.literal(true).optional(),
+  code: z.literal(true).optional(),
   link: z.string().optional(),
 });
 

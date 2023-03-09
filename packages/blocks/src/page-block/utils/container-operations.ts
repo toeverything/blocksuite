@@ -263,13 +263,10 @@ export function getCombinedFormat(
     assertExists(richText);
     const { vEditor } = richText;
     assertExists(vEditor);
-    const format = vEditor.getFormat(
-      {
-        index: blockRange.startOffset,
-        length: blockRange.endOffset - blockRange.startOffset,
-      },
-      'default'
-    );
+    const format = vEditor.getFormat({
+      index: blockRange.startOffset,
+      length: blockRange.endOffset - blockRange.startOffset,
+    });
     return format;
   }
   const formatArr = [];
@@ -284,13 +281,10 @@ export function getCombinedFormat(
     const startRichText = getRichTextByModel(startModel);
     assertExists(startRichText);
     assertExists(startRichText.vEditor);
-    const startFormat = startRichText.vEditor.getFormat(
-      {
-        index: blockRange.startOffset,
-        length: startRichText.vEditor.yText.length - blockRange.startOffset,
-      },
-      'default'
-    );
+    const startFormat = startRichText.vEditor.getFormat({
+      index: blockRange.startOffset,
+      length: startRichText.vEditor.yText.length - blockRange.startOffset,
+    });
     formatArr.push(startFormat);
   }
   // End block
@@ -303,13 +297,10 @@ export function getCombinedFormat(
     const endRichText = getRichTextByModel(endModel);
     assertExists(endRichText);
     assertExists(endRichText.vEditor);
-    const endFormat = endRichText.vEditor.getFormat(
-      {
-        index: 0,
-        length: blockRange.endOffset,
-      },
-      'default'
-    );
+    const endFormat = endRichText.vEditor.getFormat({
+      index: 0,
+      length: blockRange.endOffset,
+    });
     formatArr.push(endFormat);
   }
   // Between blocks
@@ -321,13 +312,10 @@ export function getCombinedFormat(
       const richText = getRichTextByModel(model);
       assertExists(richText);
       assertExists(richText.vEditor);
-      const format = richText.vEditor.getFormat(
-        {
-          index: 0,
-          length: richText.vEditor.yText.length - 1,
-        },
-        'default'
-      );
+      const format = richText.vEditor.getFormat({
+        index: 0,
+        length: richText.vEditor.yText.length - 1,
+      });
       formatArr.push(format);
     });
 

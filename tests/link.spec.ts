@@ -242,7 +242,7 @@ test('should mock selection not stored', async ({ page }) => {
   await expect(mockSelectNode).toHaveCount(0);
 });
 
-test.skip('should keyboard work in link popover', async ({ page }) => {
+test('should keyboard work in link popover', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const linkText = 'linkText';
   await createLinkBlock(page, linkText, 'http://example.com');
@@ -252,11 +252,11 @@ test.skip('should keyboard work in link popover', async ({ page }) => {
   await pressCreateLinkShortCut(page);
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await assertKeyboardWorkInInput(page, linkPopoverInput);
-  await page.mouse.click(1, 100);
+  await page.mouse.click(1, 1);
 
   // ---
 
-  const linkLocator = page.locator(`text="${linkText.slice(3)}"`);
+  const linkLocator = page.locator(`text="${linkText}"`);
   const linkPopover = page.locator('.affine-link-popover');
   await expect(linkLocator).toBeVisible();
   // Hover link
