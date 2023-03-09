@@ -48,7 +48,6 @@ export class EdgelessSelectionManager {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
-  private _lastMouseMode: MouseMode | null = null;
 
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
@@ -68,15 +67,9 @@ export class EdgelessSelectionManager {
   }
 
   set mouseMode(mode: MouseMode) {
-    const currentMouseMode = this._mouseMode;
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
-    this._lastMouseMode = currentMouseMode;
-  }
-
-  get lastMouseMode(): MouseMode | null {
-    return this._lastMouseMode;
   }
 
   get blockSelectionState() {

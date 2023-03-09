@@ -28,6 +28,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._lastPoint = [e.x, e.y];
+    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: true });
   }
 
   onContainerDragMove(e: SelectionEvent) {
@@ -49,6 +50,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
 
   onContainerDragEnd() {
     this._lastPoint = null;
+    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: false });
   }
 
   onContainerMouseMove(e: SelectionEvent) {

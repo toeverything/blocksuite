@@ -42,7 +42,7 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
-import { getCursorMode,isTopLevelBlock } from './utils.js';
+import { getCursorMode, isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -134,6 +134,7 @@ export class EdgelessPageBlockComponent
   // when user enters pan mode by pressing 'Space',
   // we should roll back to the last mouse mode once user releases the key;
   private _enterPanMouseModeByShortcut = false;
+  private _resetMouseModeAfterPanShortcut: MouseMode | null = null;
 
   private _frameResizeObserver = new FrameResizeObserver();
 
@@ -168,7 +169,7 @@ export class EdgelessPageBlockComponent
   };
 
   private _handleSpace = (event: KeyboardEvent) => {
-    const { mouseMode, lastMouseMode, blockSelectionState } = this._selection;
+    const { mouseMode, blockSelectionState } = this._selection;
     if (event.type === 'keydown') {
       if (mouseMode.type === 'pan') {
         return;
@@ -179,16 +180,17 @@ export class EdgelessPageBlockComponent
         return;
       }
 
-      this.mouseMode = { type: 'pan' };
+      this.mouseMode = { type: 'pan', panning: false };
       this._enterPanMouseModeByShortcut = true;
+      this._resetMouseModeAfterPanShortcut = mouseMode;
     }
     if (event.type === 'keyup') {
       if (
         mouseMode.type === 'pan' &&
         this._enterPanMouseModeByShortcut &&
-        lastMouseMode
+        this._resetMouseModeAfterPanShortcut
       ) {
-        this.mouseMode = lastMouseMode;
+        this.mouseMode = this._resetMouseModeAfterPanShortcut;
       }
     }
   };
