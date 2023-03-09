@@ -15,7 +15,6 @@ import {
   BlockHost,
   hotkey,
   resetNativeSelection,
-  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';

@@ -5,7 +5,6 @@ import type {
   TextMouseMode,
 } from '../../../__internal__/index.js';
 import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
-import { getSelectionBoxBound, getXYWH } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 const DEFAULT_FRAME_WIDTH = 448;
