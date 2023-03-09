@@ -77,8 +77,10 @@ export class VEditor<
             ) {
               const texts = VEditor.getTextNodesFromElement(vElements[0]);
               if (texts.length === 0) return null;
-              text = texts[0];
-              textOffset = offset === 0 ? offset : text.length;
+              for (let i = 0; i < texts.length; i++) {
+                text = texts[i];
+                textOffset = offset === 0 ? offset : text.length;
+              }
               break;
             }
 
