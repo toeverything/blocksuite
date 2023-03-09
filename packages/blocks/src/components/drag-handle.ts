@@ -35,7 +35,7 @@ export class DragIndicator extends LitElement {
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
-      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     }
   `;
 
