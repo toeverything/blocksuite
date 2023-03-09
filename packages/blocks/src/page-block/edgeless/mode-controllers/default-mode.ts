@@ -30,9 +30,13 @@ import {
 import { MouseModeController } from './index.js';
 
 enum DragType {
-  Translate = 'translate',
-  Select = 'select',
-  Edit = 'edit',
+  /** Moving selected contents */
+  ContentMoving = 'content-moving',
+  /** Expanding the dragging area, select the content covered inside */
+  Selecting = 'selecting',
+  /** Native range dragging inside active frame block */
+  NativeEditing = 'native-editing',
+  /** Default void state */
   None = 'none',
 }
 
@@ -49,7 +53,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _lock = false;
 
   get draggingArea() {
-    if (this._dragType === 'select') {
+    if (this._dragType === DragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
         end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
@@ -193,15 +197,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
       this._dragType = this._blockSelectionState.active
-        ? DragType.Edit
-        : DragType.Translate;
+        ? DragType.NativeEditing
+        : DragType.ContentMoving;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        this._dragType = DragType.Translate;
+        this._dragType = DragType.ContentMoving;
       } else {
-        this._dragType = DragType.Select;
+        this._dragType = DragType.Selecting;
       }
     }
 
@@ -213,7 +217,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   onContainerDragMove(e: SelectionEvent) {
     switch (this._dragType) {
-      case DragType.Select: {
+      case DragType.Selecting: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
         const viewX = Math.min(startX, e.x);
@@ -230,7 +234,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._setSelectionState([...blocks, ...elements], false);
         break;
       }
-      case DragType.Translate: {
+      case DragType.ContentMoving: {
         this._blockSelectionState.selected.forEach(element => {
           if (isSurfaceElement(element)) {
             this._handleSurfaceDragMove(element, e);
@@ -241,7 +245,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._forceUpdateSelection();
         break;
       }
-      case DragType.Edit: {
+      case DragType.NativeEditing: {
         // TODO reset if drag out of frame
         handleNativeRangeDragMove(this._startRange, e);
         break;
