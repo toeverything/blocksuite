@@ -444,22 +444,6 @@ export class Page extends Space<PageData> {
     return id;
   }
 
-  /**
-   * @deprecated use `addBlockByFlavour`
-   */
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string | null,
-    parentIndex?: number
-  ): string {
-    return this.addBlockByFlavour(
-      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
-      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
-      parent,
-      parentIndex
-    );
-  }
-
   updateBlockById(id: string, props: Partial<BlockProps>) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');

@@ -93,18 +93,18 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
       const { page } = window;
-      const pageId = page.addBlock({
-        flavour: 'affine:page',
+      const pageId = page.addBlockByFlavour('affine:page', {
         title: new page.Text('title'),
       });
-      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
 
       const text = page.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
-      const id = page.addBlock(
-        { flavour: 'affine:paragraph', type: 'text', text: text },
+      const id = page.addBlockByFlavour(
+        'affine:paragraph',
+        { type: 'text', text: text },
         frameId
       );
       return id;

@@ -1,6 +1,7 @@
 // operations used in rich-text level
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
 
@@ -34,21 +35,21 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
-  const blockProps = shouldInheritFlavour
-    ? {
-        flavour: model.flavour,
-        type: model.type,
-      }
-    : {
-        flavour: 'affine:paragraph',
-        type: 'text',
-      };
+  const getProps = ():
+    | ['affine:list', Partial<BlockModelProps['affine:list']>]
+    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
+    if (shouldInheritFlavour) {
+      return [model.flavour, { type: model.type }];
+    }
+    return ['affine:paragraph', { type: 'text' }];
+  };
+  const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
-    ? page.addBlock(blockProps, parent, index + 1)
+    ? page.addBlockByFlavour(flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
-      page.addBlock(blockProps, model, 0);
+      page.addBlockByFlavour(flavour, blockProps, model, 0);
 
   asyncFocusRichText(page, id);
 }

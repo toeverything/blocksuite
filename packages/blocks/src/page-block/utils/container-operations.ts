@@ -1,3 +1,4 @@
+import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
   assertFlavours,
@@ -216,20 +217,26 @@ export function updateBlockType(
   return newModels;
 }
 
-function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
+function transformBlock(
+  model: BaseBlockModel,
+  flavour: keyof BlockModels,
+  type?: string
+) {
   const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
-  const blockProps = {
-    flavour,
+  const blockProps: {
+    type?: string;
+    text?: Text;
+    children?: BlockSuiteInternal.IBaseBlockProps[];
+  } = {
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
   };
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
-  const id = page.addBlock(blockProps, parent, index);
-  return id;
+  return page.addBlockByFlavour(flavour, blockProps, parent, index);
 }
 
 /**

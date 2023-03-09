@@ -77,7 +77,6 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:list',
       type: listType,
       text: model.text?.clone(),
       children: model.children,
@@ -85,7 +84,7 @@ export function convertToList(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlock(blockProps, parent, index);
+    const id = page.addBlockByFlavour('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:list'] as const) &&
@@ -119,14 +118,18 @@ export function convertToParagraph(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:paragraph',
       type: type,
       text: model.text?.clone(),
       children: model.children,
     };
     page.deleteBlock(model);
 
-    const id = page.addBlock(blockProps, parent, index);
+    const id = page.addBlockByFlavour(
+      'affine:paragraph',
+      blockProps,
+      parent,
+      index
+    );
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:paragraph'] as const) &&
@@ -169,11 +172,10 @@ export function convertToDivider(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:divider',
       children: model.children,
     };
     // space.deleteBlock(model);
-    page.addBlock(blockProps, parent, index);
+    page.addBlockByFlavour('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {

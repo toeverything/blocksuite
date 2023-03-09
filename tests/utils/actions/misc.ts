@@ -262,9 +262,9 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const codeBlockId = page.addBlockByFlavour('affine:code', {}, frameId);
     page.captureSync();
     return { pageId, frameId, codeBlockId };
   });

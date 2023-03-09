@@ -225,17 +225,16 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector(
+  const page = document.querySelector<DefaultPageBlockComponent>(
     `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  );
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
     return page;
   }
 
-  const element = page.querySelector(`[${ATTR}="${model.id}"]`);
-  return element as BlockComponentElement | null;
+  return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
 }
 
 export function getStartModelBySelection(range = getCurrentNativeRange()) {
