@@ -164,7 +164,7 @@ export async function resizeElementByTopLeftHandle(
 
 export async function selectBrushColor(page: Page, color: `#${string}`) {
   const colorButton = page.locator(
-    `edgeless-brush-menu .color-unit[aria-label="${color}"]`
+    `edgeless-brush-menu .color-unit[aria-label="${color.toLowerCase()}"]`
   );
   await colorButton.click();
 }
