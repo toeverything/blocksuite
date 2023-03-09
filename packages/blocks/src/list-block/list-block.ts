@@ -49,6 +49,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      align-self: flex-start;
       color: var(--affine-code-color);
       font-size: 14px;
       line-height: var(--affine-line-height);
