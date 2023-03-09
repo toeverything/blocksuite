@@ -86,27 +86,25 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
-    const isSurfaceEl = isSurfaceElement(selected);
+    const oldSelected = this.blockSelectionState.selected;
+    if (oldSelected.length !== 1) {
+      this._setSelectionState([selected], false);
+      return;
+    }
 
+    const isSurfaceEl = isSurfaceElement(selected);
     // shape
     if (isSurfaceEl) {
       this._setSelectionState([selected], false);
     }
     // block
     else {
-      switch (this.blockSelectionState.selected.length) {
-        case 0:
-          this._setSelectionState([selected], false);
-          break;
-        case 1:
-          if (this.blockSelectionState.selected[0] === selected) {
-            this._setSelectionState([selected], true);
-          } else {
-            this._setSelectionState([selected], false);
-          }
-          handleNativeRangeClick(this._page, e);
-          break;
+      if (oldSelected[0] === selected) {
+        this._setSelectionState([selected], true);
+      } else {
+        this._setSelectionState([selected], false);
       }
+      handleNativeRangeClick(this._page, e);
     }
   }
 
