@@ -36,7 +36,7 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     this._page.addBlockByFlavour('affine:paragraph', {}, frameId);
     this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
-    // waiting mouseMode updated
+    // Wait for mouseMode updated
     requestAnimationFrame(() => {
       const element = this._blocks.find(b => b.id === frameId);
       if (element) {
@@ -47,7 +47,8 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
         this._edgeless.setBlockSelectionState(selectionState);
         this._edgeless.slots.selectionUpdated.emit(selectionState);
 
-        // Cannot use `handleNativeRangeClick`, because `handleClickRetargeting` will re-target to pervious editor
+        // Cannot reuse `handleNativeRangeClick` directly here,
+        // since `retargetClick` will re-target to pervious editor
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       }
     });
