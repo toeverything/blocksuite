@@ -10,14 +10,19 @@ import type { Loader } from '../../components/loader.js';
 import type { BlockComponentElement, ContainerBlock } from './query.js';
 import type { Point, Rect } from './rect.js';
 
+const AFFINE_CODE = 'AFFINE-CODE';
+const AFFINE_DATABASE = 'AFFINE-DATABASE';
 const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
 const AFFINE_FRAME = 'AFFINE-FRAME';
+const AFFINE_IMAGE = 'AFFINE-IMAGE';
 const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
-const DRAG_HANDLE_OFFSET_X =
-  24 + DRAG_HANDLE_OFFSET_LEFT + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+const DRAG_HANDLE_OFFSET_X = 24 + DRAG_HANDLE_OFFSET_LEFT;
 
-const STEPS = 32 / 2 / 2 + 2; // --affine-paragraph-space + 24px = 8px + 24px
+// margin-top: calc(var(--affine-paragraph-space) + 24px);
+// h1.margin-top = 8px + 24px = 32px;
+const MAX_SPACE = 32;
+const STEPS = MAX_SPACE / 2 / 2;
 
 /**
  * Returns `16` if node is contained in the parent.
@@ -41,6 +46,27 @@ export function isPageOrFrame({ tagName }: Element) {
  */
 export function isBlock(element: Element) {
   return !isPageOrFrame(element);
+}
+
+/**
+ * Returns `true` if element is image.
+ */
+export function isImage({ tagName }: Element) {
+  return tagName === AFFINE_IMAGE;
+}
+
+/**
+ * Returns `true` if element is codeblock.
+ */
+export function isCodeblock({ tagName }: Element) {
+  return tagName === AFFINE_CODE;
+}
+
+/**
+ * Returns `true` if element is codeblock.
+ */
+function isDatabase({ tagName }: Element) {
+  return tagName === AFFINE_DATABASE;
 }
 
 /**
@@ -74,30 +100,59 @@ export function getClosestBlockElementByPoint(
   if (y < top || y > bottom) return null;
 
   let element = null;
+  let bounds = null;
   let n = 1;
 
-  point.x = Math.floor(
-    Math.min(
-      Math.ceil(Math.max(point.x, left) + DRAG_HANDLE_OFFSET_X),
-      right - 1
-    )
+  point.x = Math.min(
+    Math.max(point.x, left) + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
+    right - 1
   );
 
-  do {
-    // In some scenarios, e.g. `format-quick-bar` will be at the top.
-    // Tip. Put `format-quick-bar` into `editor-container`.
-    element =
-      document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
+  element =
+    document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
 
-    if (element) {
-      if (isPageOrFrame(element)) element = null;
-      else return element;
+  if (element) {
+    if (isBlock(element)) {
+      bounds = element.getBoundingClientRect();
+      if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
+        if (isDatabase(element)) {
+          bounds = element
+            .querySelector('.affine-database-block-title')
+            ?.getBoundingClientRect();
+          if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+            return element;
+          }
+          return null;
+        } else {
+          return element;
+        }
+      }
     }
+    element = null;
+  }
 
+  do {
     point.y = y - n * 2;
 
     if (n < 0) n--;
     n *= -1;
+
+    element =
+      document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
+
+    if (element) {
+      if (isBlock(element)) {
+        if (isImage(element) || isCodeblock(element)) return element;
+        bounds = element.getBoundingClientRect();
+        if (
+          point.y - bounds.top <= Math.abs(n) * 2 ||
+          bounds.bottom - point.y <= Math.abs(n) * 2
+        ) {
+          return element;
+        }
+      }
+      element = null;
+    }
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
   return element;
@@ -113,13 +168,41 @@ export function getClosestBlockElementByPointInStrictMode(
 ): Element | null {
   if (clamp) {
     // make sure `x` in [rect.left, rect.right] range.
-    point.x = Math.floor(
-      Math.min(Math.ceil(Math.max(point.x, rect.left)), rect.right - 1)
+    point.x = Math.min(
+      Math.max(point.x, rect.left) + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
+      rect.right - 1
     );
   } else if (!rect.isPointIn(point)) return null;
-  return getClosestBlockElementByElement(
-    document.elementFromPoint(point.x, point.y)
-  );
+
+  const { y } = point;
+  const { top, bottom } = rect;
+  let element = null;
+  let n = 1;
+
+  do {
+    element = document.elementFromPoint(point.x, point.y);
+
+    if (element) {
+      element = getClosestBlockElementByElement(element);
+      if (element) {
+        const bounds = element.getBoundingClientRect();
+        if (n < 0) {
+          if (bounds.top - point.y >= n * 2) return element;
+        } else {
+          if (bounds.bottom - point.y <= n * 2) return element;
+        }
+        // if (point.x - bounds.left >= 0 && point.x - bounds.left <= DRAG_HANDLE_OFFSET_LEFT / 2) return element;
+      }
+      element = null;
+    }
+
+    point.y = y - n * 2;
+
+    if (n < 0) n--;
+    n *= -1;
+  } while (n <= STEPS && point.y >= top && point.y <= bottom);
+
+  return element;
 }
 
 /**

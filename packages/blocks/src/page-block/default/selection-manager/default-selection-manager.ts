@@ -41,9 +41,8 @@ import {
 import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
-  EmbedEditingState,
 } from '../default-page-block.js';
-import { getAllowSelectedBlocks } from '../utils.js';
+import { EditingState, getAllowSelectedBlocks } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
@@ -316,7 +315,6 @@ export class DefaultSelectionManager {
     );
 
     if (!element) {
-      this.slots.embedEditingStateUpdated.emit(null);
       return;
     }
 
@@ -337,6 +335,8 @@ export class DefaultSelectionManager {
       // when image size is too large, the option popup should show inside
       rect.x = rect.right + (rect.width > 680 ? -50 : 10);
       this.slots.embedEditingStateUpdated.emit(hoverEditingState);
+    } else {
+      this.slots.embedEditingStateUpdated.emit(null);
     }
   };
 
@@ -493,7 +493,7 @@ export class DefaultSelectionManager {
     this.refreshSelectedBlocksRects();
   }
 
-  refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
+  refreshEmbedRects(hoverEditingState: EditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;

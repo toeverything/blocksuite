@@ -37,12 +37,15 @@ const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
 export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
-      position: absolute;
+      position: fixed;
       height: 3px;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
-      transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      transition-property: width, transform;
+      transition-duration: 100ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-delay: 0s;
       pointer-events: none;
     }
   `;
@@ -371,7 +374,8 @@ export class DragHandle extends LitElement {
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
-    e.stopPropagation();
+
+    // e.stopPropagation();
   }
 
   // fixme: handle multiple blocks case
@@ -431,16 +435,15 @@ export class DragHandle extends LitElement {
 
     this._clickedBlock = this._handleAnchorState.element;
 
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = 'copy';
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
-    // TODO: clear block selection
     const included = selectedBlocks.includes(this._handleAnchorState.element);
 
-    if (!included) {
-      this._clearSelection();
-    }
+    // if (!included) {
+    //   this._clearSelection();
+    // }
 
     // fixme: the block may not have block id?
     const draggingBlockElements = included

@@ -36,20 +36,16 @@ import {
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
+  EditingState,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
 } from './utils.js';
-
-export interface EmbedEditingState {
-  rect: { x: number; y: number };
-  model: BaseBlockModel;
-}
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
-  embedEditingStateUpdated: Slot<EmbedEditingState | null>;
+  embedEditingStateUpdated: Slot<EditingState | null>;
   codeBlockOptionUpdated?: Slot;
   nativeSelectionToggled: Slot<boolean>;
 }
@@ -152,7 +148,7 @@ export class DefaultPageBlockComponent
   private _selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  private _embedEditingState!: EmbedEditingState | null;
+  private _embedEditingState!: EditingState | null;
 
   @state()
   private _isComposing = false;
@@ -169,7 +165,7 @@ export class DefaultPageBlockComponent
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
-    embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
+    embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
