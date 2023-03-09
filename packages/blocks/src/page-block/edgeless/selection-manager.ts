@@ -15,13 +15,13 @@ import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
+import { TextModeController } from './mode-controllers/text-mode.js';
 import {
   getSelectionBoxBound,
   getXYWH,
   initWheelEventHandlers,
   pickTopBlock,
 } from './utils.js';
-import { TextModeController } from './mode-controllers/text-mode.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
 

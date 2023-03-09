@@ -36,8 +36,8 @@ import {
 import {
   assertAlmostEqual,
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
   assertEdgelessNonHoverRect,
+  assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
   assertRichTexts,
