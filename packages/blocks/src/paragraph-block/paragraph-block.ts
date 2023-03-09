@@ -169,51 +169,61 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   host!: BlockHost;
 
   @state()
-  private _showTipsPlaceholder = false;
+  private _tipsPlaceholderTemplate = html``;
+  @state()
+  private _isComposing = false;
+  @state()
+  private _isFocus = false;
+  private _placeholderDisposables = new DisposableGroup();
 
-  private _disposables = new DisposableGroup();
-
-  firstUpdated() {
-    this._showTipsPlaceholder =
-      this.model.type !== 'text' && this.model.text.length === 0;
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+  override connectedCallback() {
+    super.connectedCallback();
+    // Initial placeholder state
+    this._updatePlaceholder();
   }
 
-  private _onFocusIn = (e: FocusEvent) => {
-    if (this.model.text.length > 0) {
-      this._showTipsPlaceholder = false;
+  firstUpdated() {
+    this.model.propsUpdated.on(() => this._updatePlaceholder());
+  }
+
+  private _updatePlaceholder = () => {
+    if (this.model.text.length !== 0 || this._isComposing) {
+      this._tipsPlaceholderTemplate = html``;
       return;
     }
-    this._showTipsPlaceholder = true;
+    if (this.model.type === 'text' && !this._isFocus) {
+      // Text block placeholder only show when focus and empty
+      this._tipsPlaceholderTemplate = html``;
+      return;
+    }
+    this._tipsPlaceholderTemplate = TipsPlaceholder(this.model);
+  };
 
-    let isComposing = false;
-    const updatePlaceholder = () => {
-      this._showTipsPlaceholder = this.model.text.length === 0 && !isComposing;
-    };
-    this.model.text.yText.observe(updatePlaceholder);
-    this._disposables = new DisposableGroup();
-    this._disposables.add(this.model.propsUpdated.on(updatePlaceholder));
-    this._disposables.add(() =>
-      this.model.text.yText.unobserve(updatePlaceholder)
+  private _onFocusIn = (e: FocusEvent) => {
+    this._isFocus = true;
+    this._updatePlaceholder();
+
+    this.model.text.yText.observe(this._updatePlaceholder);
+    this._placeholderDisposables.add(() =>
+      this.model.text.yText.unobserve(this._updatePlaceholder)
     );
     // Workaround for virgo skips composition event
-    this._disposables.addFromEvent(this, 'compositionstart', () => {
-      isComposing = true;
-      updatePlaceholder();
+    this._placeholderDisposables.addFromEvent(this, 'compositionstart', () => {
+      this._isComposing = true;
+      this._updatePlaceholder();
     });
-    this._disposables.addFromEvent(this, 'compositionend', () => {
-      isComposing = false;
-      updatePlaceholder();
+    this._placeholderDisposables.addFromEvent(this, 'compositionend', () => {
+      this._isComposing = false;
+      this._updatePlaceholder();
     });
   };
 
   private _onFocusOut = (e: FocusEvent) => {
-    // Always show placeholder for heading block
-    if (this.model.type === 'text') {
-      this._showTipsPlaceholder = false;
-    }
-    this._disposables.dispose();
+    this._isFocus = false;
+    this._updatePlaceholder();
+    // We should not observe text change when focus out
+    this._placeholderDisposables.dispose();
+    this._placeholderDisposables = new DisposableGroup();
   };
 
   render() {
@@ -226,7 +236,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._showTipsPlaceholder ? TipsPlaceholder(this.model) : html``}
+        ${this._tipsPlaceholderTemplate}
         <rich-text
           .host=${this.host}
           .model=${this.model}
