@@ -29,20 +29,27 @@ import {
 } from '../utils.js';
 import { MouseModeController } from './index.js';
 
+enum DragType {
+  Translate = 'translate',
+  Select = 'select',
+  Edit = 'edit',
+  None = 'none',
+}
+
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
   enableHover = true;
 
-  private _draggingMode: 'translate' | 'select' | 'edit' | null = null;
+  private _draggingType = DragType.None;
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
 
   get draggingArea() {
-    if (this._draggingMode === 'select') {
+    if (this._draggingType === 'select') {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
         end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
@@ -131,11 +138,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._page.updateBlock(block, { xywh });
   }
 
-  private _isPointInSelectionArea(viewX: number, viewY: number) {
+  private _isInSelectedRect(viewX: number, viewY: number) {
     const { selected } = this._blockSelectionState;
-    if (!selected.length) {
-      return false;
-    }
+    if (!selected.length) return false;
+
     const commonBound = getCommonBound(
       selected.map(element => {
         if (isTopLevelBlock(element)) {
@@ -184,17 +190,18 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragStart(e: SelectionEvent) {
-    if (this._isPointInSelectionArea(e.x, e.y)) {
-      this._draggingMode = this._blockSelectionState.active
-        ? 'edit'
-        : 'translate';
+    // Is dragging started from current selected rect
+    if (this._isInSelectedRect(e.x, e.y)) {
+      this._draggingType = this._blockSelectionState.active
+        ? DragType.Edit
+        : DragType.Translate;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        this._draggingMode = 'translate';
+        this._draggingType = DragType.Translate;
       } else {
-        this._draggingMode = 'select';
+        this._draggingType = DragType.Select;
       }
     }
 
@@ -205,8 +212,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    switch (this._draggingMode) {
-      case 'select': {
+    switch (this._draggingType) {
+      case DragType.Select: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
         const viewX = Math.min(startX, e.x);
@@ -223,7 +230,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._setSelectionState([...blocks, ...elements], false);
         break;
       }
-      case 'translate': {
+      case DragType.Translate: {
         this._blockSelectionState.selected.forEach(element => {
           if (isSurfaceElement(element)) {
             this._handleSurfaceDragMove(element, e);
@@ -234,7 +241,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._forceUpdateSelection();
         break;
       }
-      case 'edit': {
+      case DragType.Edit: {
         // TODO reset if drag out of frame
         handleNativeRangeDragMove(this._startRange, e);
         break;
@@ -268,7 +275,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     }
-    this._draggingMode = null;
+    this._draggingType = DragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._forceUpdateSelection();
