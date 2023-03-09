@@ -36,6 +36,7 @@ import {
 import {
   assertAlmostEqual,
   assertEdgelessHoverRect,
+  assertEdgelessNonHoverRect,
   assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
@@ -280,6 +281,61 @@ test('add brush element with different size', async ({ page }) => {
   assertSameColor(bottomEdge, '#B638FF');
   assertSameColor(nearTopEdge, '#000000');
   assertSameColor(nearBottomEdge, '#000000');
+});
+
+test('add Text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setMouseMode(page, 'text');
+
+  await page.mouse.click(30, 40);
+
+  await page.waitForTimeout(100);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['', 'hello']);
+
+  await page.mouse.move(30, 40);
+  await assertEdgelessHoverRect(page, [0, 0, 448, 72]);
+});
+
+test('add empty Text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setMouseMode(page, 'text');
+
+  // add text at 30,40
+  await page.mouse.click(30, 40);
+  await page.waitForTimeout(100);
+  await pressEnter(page);
+
+  // assert add text success
+  await page.mouse.move(30, 40);
+  await assertEdgelessHoverRect(page, [0, 0, 448, 104]);
+
+  // click out of text
+  await page.mouse.click(0, 200);
+
+  // assert empty text is removed
+  await page.mouse.move(30, 40);
+  await assertEdgelessNonHoverRect(page);
+});
+
+test('always keep at least 1 frame block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setMouseMode(page, 'default');
+
+  // clicking in default mode will try to remove empty frame block
+  await page.mouse.click(0, 0);
+
+  const frames = await page.locator('affine-frame').all();
+  expect(frames.length).toEqual(1);
 });
 
 test.skip('delete shape block by keyboard', async ({ page }) => {

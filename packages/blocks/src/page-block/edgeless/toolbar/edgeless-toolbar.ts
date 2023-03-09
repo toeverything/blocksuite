@@ -77,10 +77,9 @@ export class EdgelessToolbar extends LitElement {
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
           .tooltip=${'Text'}
-          .active=${false}
-          @tool.click=${() => console.log('Text')}
+          .active=${type === 'text'}
+          @tool.click=${() => this._setMouseMode({ type: 'text' })}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>

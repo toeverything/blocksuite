@@ -15,6 +15,7 @@ import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
+import { TextModeController } from './mode-controllers/text-mode.js';
 import {
   getSelectionBoxBound,
   getXYWH,
@@ -105,6 +106,7 @@ export class EdgelessSelectionManager {
       shape: new ShapeModeController(this._container),
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
+      text: new TextModeController(this._container),
     };
 
     this._initMouseAndWheelEvents();

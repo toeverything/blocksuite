@@ -19,6 +19,16 @@ export function supportsChildren(model: BaseBlockModel): boolean {
   return true;
 }
 
+export function isEmpty(model: BaseBlockModel): boolean {
+  if (model.children.length !== 0) {
+    const found = model.children.find(c => !isEmpty(c));
+    return !found;
+  }
+  return (
+    !model.text?.length && !model.sourceId && model.flavour !== 'affine:code'
+  );
+}
+
 export function almostEqual(a: number, b: number) {
   return Math.abs(a - b) < 0.0001;
 }

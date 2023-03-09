@@ -12,9 +12,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  almostEqual,
   BlockHost,
   hotkey,
   resetNativeSelection,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -26,8 +28,8 @@ import type {
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
   bindCommonHotkey,
+  EDGELESS_BLOCK_CHILD_PADDING,
   handleDown,
-  handleMultiBlockBackspace,
   handleUp,
   removeCommonHotKey,
   tryUpdateFrameSize,
@@ -35,10 +37,12 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { FrameResizeObserver } from './frame-resize-observer.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
+import { isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -131,6 +135,8 @@ export class EdgelessPageBlockComponent
   // we should roll back to the last mouse mode once user releases the key;
   private _enterPanMouseModeByShortcut = false;
 
+  private _frameResizeObserver = new FrameResizeObserver();
+
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
@@ -146,17 +152,19 @@ export class EdgelessPageBlockComponent
 
   private _handleBackspace = (e: KeyboardEvent) => {
     const { selected } = this._selection.blockSelectionState;
-    if (selected.length === 1) {
-      const element = selected[0];
-
-      if (this.surface.hasElement(element.id)) {
+    selected.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        const children = this.page.root?.children ?? [];
+        // FIXME: should always keep at least 1 frame
+        if (children.length > 1) {
+          this.page.deleteBlock(element);
+        }
+      } else {
         this.surface.removeElement(element.id);
-        this._selection.currentController.clearSelection();
-        this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
-        return;
       }
-      handleMultiBlockBackspace(this.page, e);
-    }
+    });
+    this._selection.currentController.clearSelection();
+    this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
   };
 
   private _handleSpace = (event: KeyboardEvent) => {
@@ -254,16 +262,36 @@ export class EdgelessPageBlockComponent
     _disposables.add(this._selection);
     _disposables.add(this.surface);
     _disposables.add(this._bindHotkeys());
-    _disposables.addFromEvent(
-      this,
-      'keydown',
-      e => {
-        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
-      },
-      // FIXME: somewhere call stopPropagation on keydown event
-      true
+
+    _disposables.add(this._frameResizeObserver);
+    _disposables.add(
+      this._frameResizeObserver.slots.resize.on(resizedFrames => {
+        const zoom = this.surface.viewport.zoom;
+        const page = this.page;
+        resizedFrames.forEach((domRect, id) => {
+          const model = page.getBlockById(id) as TopLevelBlockModel;
+          const [x, y, w, h] = deserializeXYWH(model.xywh);
+          const newModelHeight =
+            (domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+
+          if (!almostEqual(newModelHeight, h)) {
+            page.updateBlock(model, {
+              xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+            });
+          }
+        });
+
+        // FIXME: force updating selection for triggering re-render `selected-rect`
+        this.setBlockSelectionState({
+          ...this._selection.blockSelectionState,
+        });
+        slots.selectionUpdated.emit(this._selection.blockSelectionState);
+      })
     );
+  }
+
+  setBlockSelectionState(state: EdgelessSelectionState) {
+    this._selection.currentController.setBlockSelectionState(state);
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -293,6 +321,11 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    this._frameResizeObserver.resetListener(this.page);
+    super.updated(changedProperties);
   }
 
   disconnectedCallback() {

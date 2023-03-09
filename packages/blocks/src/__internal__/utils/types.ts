@@ -68,11 +68,16 @@ export type PanMouseMode = {
   type: 'pan';
 };
 
+export type TextMouseMode = {
+  type: 'text';
+};
+
 export type MouseMode =
   | DefaultMouseMode
   | ShapeMouseMode
   | BrushMouseMode
-  | PanMouseMode;
+  | PanMouseMode
+  | TextMouseMode;
 
 export type OpenBlockInfo = {
   flavour: string;

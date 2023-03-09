@@ -51,6 +51,10 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return (this._page.root?.children as TopLevelBlockModel[]) ?? [];
   }
 
+  setBlockSelectionState(state: EdgelessSelectionState) {
+    this._blockSelectionState = state;
+  }
+
   public abstract mouseMode: Mode;
   abstract onContainerDragStart(e: SelectionEvent): void;
   abstract onContainerDragMove(e: SelectionEvent): void;
