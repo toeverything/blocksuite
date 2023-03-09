@@ -242,11 +242,6 @@ export function asyncGetBlockElementByModel(
 ): Promise<BlockComponentElement | null> {
   let resolved = false;
   return new Promise<BlockComponentElement>((resolve, reject) => {
-    const blockElement = getBlockElementByModel(model);
-    if (blockElement) {
-      resolve(blockElement);
-      return;
-    }
     const observer = new MutationObserver(() => {
       const blockElement = getBlockElementByModel(model);
       if (blockElement) {
