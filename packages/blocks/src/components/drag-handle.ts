@@ -215,6 +215,15 @@ export class DragHandle extends LitElement {
     if (!this._getBlockEditingStateByPosition) {
       return;
     }
+    const frameBlock = this._container.querySelector(
+      '.affine-frame-block-container'
+    );
+    assertExists(frameBlock);
+    const frameBlockRect = frameBlock.getBoundingClientRect();
+    if (event.raw.clientY < frameBlockRect.y) {
+      this.hide();
+      return;
+    }
     const modelState = this._getBlockEditingStateByPosition(
       this.getDropAllowedBlocks(null),
       event.raw.clientX,
