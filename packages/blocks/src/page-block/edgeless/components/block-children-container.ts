@@ -1,7 +1,7 @@
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -13,10 +13,22 @@ import type {
 } from '../../../index.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 
+function Mask() {
+  const style = {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    bottom: '0',
+    right: '0',
+  };
+  return html`<div style=${styleMap(style)}></div>`;
+}
+
 function EdgelessBlockChild(
   model: TopLevelBlockModel,
   host: BlockHost,
-  viewport: SurfaceViewport
+  viewport: SurfaceViewport,
+  active: boolean
 ) {
   const { xywh } = model;
   const { zoom, viewportX, viewportY } = viewport;
@@ -37,9 +49,11 @@ function EdgelessBlockChild(
     boxSizing: 'border-box',
   };
 
+  const mask = active ? nothing : Mask();
+
   return html`
     <div class="affine-edgeless-block-child" style=${styleMap(style)}>
-      ${BlockElement(model, host, true)}
+      ${BlockElement(model, host, true)} ${mask}
     </div>
   `;
 }
@@ -47,13 +61,20 @@ function EdgelessBlockChild(
 export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
-  viewport: SurfaceViewport
+  viewport: SurfaceViewport,
+  activeModelId?: string
 ) {
   return html`
     ${repeat(
       model.children,
       child => child.id,
-      child => EdgelessBlockChild(child as FrameBlockModel, host, viewport)
+      child =>
+        EdgelessBlockChild(
+          child as FrameBlockModel,
+          host,
+          viewport,
+          activeModelId === child.id
+        )
     )}
   `;
 }

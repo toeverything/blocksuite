@@ -8,7 +8,10 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 
-import type { TopLevelBlockModel } from '../../__internal__/index.js';
+import type {
+  MouseMode,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
@@ -116,4 +119,21 @@ export function getXYWH(element: Selectable) {
 
 export function stopPropagation(event: Event) {
   event.stopPropagation();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
+export function getCursorMode(mouseMode: MouseMode) {
+  switch (mouseMode.type) {
+    case 'default':
+      return 'default';
+    case 'pan':
+      return 'grab';
+    case 'brush':
+    case 'shape':
+      return 'crosshair';
+    case 'text':
+      return 'text';
+    default:
+      return 'default';
+  }
 }

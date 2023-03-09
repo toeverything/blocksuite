@@ -4,6 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
+  activeFrameInEdgeless,
   decreaseZoomLevel,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
@@ -13,6 +14,7 @@ import {
   pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
+  selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
 } from './utils/actions/edgeless.js';
@@ -20,7 +22,6 @@ import {
   addBasicBrushElement,
   addBasicRectShapeElement,
   clickBlockById,
-  doubleClickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
@@ -31,6 +32,7 @@ import {
   resizeElementByTopLeftHandle,
   type,
   undoByClick,
+  waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
@@ -142,7 +144,8 @@ test('can drag selected non-active frame', async ({ page }) => {
 test('resize block in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
-  await focusRichText(page);
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
@@ -150,7 +153,7 @@ test('resize block in edgeless mode', async ({ page }) => {
   await page.mouse.move(100, 100); // FIXME: no update until mousemove
 
   expect(ids.frameId).toBe('2'); // 0 for page, 1 for surface
-  await clickBlockById(page, ids.frameId);
+  await selectFrameInEdgeless(page, ids.frameId);
 
   const oldXywh = await getFrameSize(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
@@ -291,8 +294,8 @@ test('add Text', async ({ page }) => {
   await setMouseMode(page, 'text');
 
   await page.mouse.click(30, 40);
+  await waitForVirgoStateUpdated(page);
 
-  await page.waitForTimeout(100);
   await type(page, 'hello');
   await assertRichTexts(page, ['', 'hello']);
 
@@ -309,7 +312,7 @@ test('add empty Text', async ({ page }) => {
 
   // add text at 30,40
   await page.mouse.click(30, 40);
-  await page.waitForTimeout(100);
+  await waitForVirgoStateUpdated(page);
   await pressEnter(page);
 
   // assert add text success
@@ -397,7 +400,8 @@ test('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
 
-  await focusRichText(page);
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await pressEnter(page);
@@ -407,7 +411,8 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await page.click('.affine-edgeless-block-child');
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
   // 0 for page, 1 for surface, 2 for frame, 3 for paragraph
   expect(ids.paragraphId).toBe('3');
   await clickBlockById(page, ids.paragraphId);
@@ -536,7 +541,10 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await setMouseMode(page, 'default');
-  await doubleClickBlockById(page, ids.frameId);
+
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
+
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 

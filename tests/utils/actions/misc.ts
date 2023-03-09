@@ -577,3 +577,29 @@ export async function shamefullyBlurActiveElement(page: Page) {
     document.activeElement.blur();
   });
 }
+
+/**
+ * FIXME:
+ * Sometimes virgo state is not updated in time. Bad case like below:
+ *
+ * ```
+ * await focusRichText(page);
+ * await type(page, 'hello');
+ * await assertRichTexts(page, ['hello']);
+ * ```
+ *
+ * output(failed or flaky):
+ *
+ * ```
+ * - Expected  - 1
+ * + Received  + 1
+ *   Array [
+ * -   "hello",
+ * +   "ello",
+ *   ]
+ * ```
+ *
+ */
+export async function waitForVirgoStateUpdated(page: Page) {
+  await page.waitForTimeout(50);
+}

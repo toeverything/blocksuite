@@ -204,3 +204,22 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
   }, points);
   return pickedColors;
 }
+
+export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
+  const frame = page.locator(`affine-frame[data-block-id="${frameId}"]`);
+  const bound = await frame.boundingBox();
+  if (!bound) {
+    throw new Error(`Missing frame: ${frameId}`);
+  }
+  return bound;
+}
+
+export async function activeFrameInEdgeless(page: Page, frameId: string) {
+  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+  await page.mouse.dblclick(bound.x, bound.y);
+}
+
+export async function selectFrameInEdgeless(page: Page, frameId: string) {
+  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+  await page.mouse.click(bound.x, bound.y);
+}

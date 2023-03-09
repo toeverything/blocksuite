@@ -42,7 +42,7 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager.js';
-import { isTopLevelBlock } from './utils.js';
+import { getCursorMode,isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -341,15 +341,16 @@ export class EdgelessPageBlockComponent
     this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
     const { viewport } = this.surface;
+    const { _selection, page } = this;
+    const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.pageModel,
       this,
-      this.surface.viewport
+      this.surface.viewport,
+      active ? selected[0].id : undefined
     );
 
-    const { _selection, page } = this;
-    const { selected } = _selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
 
@@ -366,11 +367,18 @@ export class EdgelessPageBlockComponent
     const defaultStyle = {};
     const style = this.showGrid ? gridStyle : defaultStyle;
 
+    const cursor = {
+      cursor: getCursorMode(this.mouseMode),
+    };
+
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <div class="affine-edgeless-page-block-container">
+      <div
+        class="affine-edgeless-page-block-container"
+        style=${styleMap(cursor)}
+      >
         <style>
           .affine-block-children-container.edgeless {
             padding-left: 0;
