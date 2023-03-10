@@ -257,9 +257,7 @@ export function getBlockElementsExcludeSubtrees(
 /**
  * Returns block elements including their subtrees.
  */
-export function getBlockElementsIncludeSubtrees(
-  elements: Element[] | BlockComponentElement[]
-) {
+export function getBlockElementsIncludeSubtrees(elements: Element[]) {
   return elements.reduce<Element[]>((elements, element) => {
     elements.push(element, ...getBlockElementsByElement(element));
     return elements;
