@@ -529,6 +529,8 @@ export class Page extends Space<PageData> {
       syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
 
+    model.propsUpdated.emit();
+
     this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
@@ -608,6 +610,8 @@ export class Page extends Space<PageData> {
       options.bringChildrenTo.children.unshift(...model.children);
     }
     this._blockMap.delete(model.id);
+
+    model.propsUpdated.emit();
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
