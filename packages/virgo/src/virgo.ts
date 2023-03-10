@@ -202,6 +202,9 @@ export class VEditor<
   private _isReadonly = false;
   private _yText: Y.Text;
 
+  private _previousAnchor: NativePoint | null = null;
+  private _previousFocus: NativePoint | null = null;
+
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
     getDefaultAttributeRenderer<TextAttributes>();
 
@@ -537,8 +540,6 @@ export class VEditor<
       index: this.yText.length,
       length: 0,
     });
-
-    this.syncVRange();
   }
 
   deleteText(vRange: VRange): void {
@@ -631,26 +632,18 @@ export class VEditor<
   /**
    * sync the dom selection from vRange for **this Editor**
    */
-  syncVRange(type: 'async' | 'sync' = 'async'): void {
-    const fn = () => {
-      if (this._vRange) {
-        const newRange = this.toDomRange(this._vRange);
+  syncVRange(): void {
+    if (this._vRange) {
+      const newRange = this.toDomRange(this._vRange);
 
-        if (newRange) {
-          const selectionRoot = findDocumentOrShadowRoot(this);
-          const selection = selectionRoot.getSelection();
-          if (selection) {
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          }
+      if (newRange) {
+        const selectionRoot = findDocumentOrShadowRoot(this);
+        const selection = selectionRoot.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
         }
       }
-    };
-
-    if (type === 'async') {
-      requestAnimationFrame(fn);
-    } else {
-      fn();
     }
   }
 
@@ -1019,16 +1012,23 @@ export class VEditor<
     const range = selection.getRangeAt(0);
     if (!range || !range.intersectsNode(this._rootElement)) return;
 
+    this._previousAnchor = [range.startContainer, range.startOffset];
+    this._previousFocus = [range.endContainer, range.endOffset];
+
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.slots.updateVRange.emit([vRange, 'native']);
     }
 
     if (
-      range.startContainer.nodeType !== Node.TEXT_NODE ||
-      range.endContainer.nodeType !== Node.TEXT_NODE
+      (range.startContainer.nodeType !== Node.TEXT_NODE ||
+        range.endContainer.nodeType !== Node.TEXT_NODE) &&
+      range.startContainer !== this._previousAnchor[0] &&
+      range.endContainer !== this._previousFocus[0] &&
+      range.startOffset !== this._previousAnchor[1] &&
+      range.endOffset !== this._previousFocus[1]
     ) {
-      this.syncVRange('sync');
+      this.syncVRange();
     }
   };
 
