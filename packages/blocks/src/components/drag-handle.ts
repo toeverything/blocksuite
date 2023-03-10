@@ -435,7 +435,7 @@ export class DragHandle extends LitElement {
 
     this._clickedBlock = this._handleAnchorState.element;
 
-    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.effectAllowed = 'move';
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
@@ -493,11 +493,11 @@ export class DragHandle extends LitElement {
         model: getModelByBlockElement(element),
       };
       this._indicator.targetRect = rect;
-      this._indicator.cursorPosition = {
-        x,
-        y,
-      };
     }
+    this._indicator.cursorPosition = {
+      x,
+      y,
+    };
   };
 
   private _onDragEnd = (e: DragEvent) => {
