@@ -990,9 +990,9 @@ export class VEditor<
 
   private _onSelectionChange = () => {
     assertExists(this._rootElement);
-    // if (this._isComposing) {
-    //   return;
-    // }
+    if (this._isComposing) {
+      return;
+    }
 
     const selectionRoot = findDocumentOrShadowRoot(this);
     const selection = selectionRoot.getSelection();
