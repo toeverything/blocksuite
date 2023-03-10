@@ -70,6 +70,7 @@ export class AffineLink extends NonShadowLitElement {
   static styles = css`
     a {
       color: var(--affine-link-color);
+      fill: var(--affine-link-color);
       text-decoration: none;
       cursor: pointer;
     }
