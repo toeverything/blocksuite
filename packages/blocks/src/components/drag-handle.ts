@@ -117,7 +117,7 @@ export class DragHandle extends LitElement {
   constructor(options: {
     container: HTMLElement;
     onDropCallback: (
-      e: DragEvent,
+      point: IPoint,
       dragged: BlockComponentElement[],
       lastModelState: EditingState
     ) => void;
@@ -157,7 +157,7 @@ export class DragHandle extends LitElement {
 
   @property()
   public onDropCallback: (
-    e: DragEvent,
+    point: IPoint,
     draggingBlockElements: BlockComponentElement[],
     lastModelState: EditingState
   ) => void;
@@ -503,7 +503,15 @@ export class DragHandle extends LitElement {
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;
-    this.onDropCallback?.(e, this._draggingElements, this._lastDroppingTarget);
+    // `darg.y` !== `dragend.y` in chrome.
+    this.onDropCallback?.(
+      this._indicator?.cursorPosition ?? {
+        x: e.clientX,
+        y: e.clientY,
+      },
+      this._draggingElements,
+      this._lastDroppingTarget
+    );
 
     this.hide();
   };

@@ -507,14 +507,15 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(e, blocks, { rect, model }): void {
+    onDropCallback(p, blocks, { rect, model }): void {
       const page = defaultPageBlock.page;
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
       }
       page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
+
+      const distanceToTop = Math.abs(rect.top - p.y);
+      const distanceToBottom = Math.abs(rect.bottom - p.y);
       page.moveBlocks(
         blocks.map(b => b.model),
         model,

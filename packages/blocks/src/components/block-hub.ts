@@ -31,6 +31,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
+  IPoint,
   NonShadowLitElement,
   Point,
 } from '../__internal__/index.js';
@@ -485,7 +486,8 @@ export class BlockHub extends NonShadowLitElement {
 
   private readonly _onDropCallback: (
     e: DragEvent,
-    lastModelState: EditingState
+    lastModelState: EditingState,
+    point: IPoint
   ) => Promise<void>;
 
   private _currentClientX = 0;
@@ -505,7 +507,8 @@ export class BlockHub extends NonShadowLitElement {
     enableDatabase: boolean;
     onDropCallback: (
       e: DragEvent,
-      lastModelState: EditingState
+      lastModelState: EditingState,
+      point: IPoint
     ) => Promise<void>;
   }) {
     super();
@@ -732,7 +735,15 @@ export class BlockHub extends NonShadowLitElement {
     if (!e.dataTransfer.getData('affine/block-hub')) return;
     if (!this._lastModelState) return;
 
-    this._onDropCallback(e, this._lastModelState);
+    this._onDropCallback(
+      e,
+      this._lastModelState,
+      // `darg.y` !== `dragend.y` in chrome.
+      this._indicator?.cursorPosition ?? {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    );
   };
 
   private _onCardMouseDown = (e: Event) => {
