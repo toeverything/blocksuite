@@ -3,6 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
+import { throttle } from '../../__internal__/utils/std.js';
 
 export class FrameResizeObserver {
   private _observer: ResizeObserver;
@@ -19,7 +20,12 @@ export class FrameResizeObserver {
   };
 
   constructor() {
-    this._observer = new ResizeObserver(this._onResize);
+    this._observer = new ResizeObserver(
+      throttle<ResizeObserverEntry[][], typeof this._onResize>(
+        this._onResize,
+        100
+      )
+    );
   }
 
   private _onResize = (entries: ResizeObserverEntry[]) => {

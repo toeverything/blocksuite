@@ -1,18 +1,23 @@
-import { getCommonBound } from '@blocksuite/phasor';
 import { Bound, deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getBlockById } from '../../../__internal__/index.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../selection-manager.js';
-import { FRAME_MIN_LENGTH, getXYWH, isTopLevelBlock } from '../utils.js';
+import type {
+  EdgelessSelectionState,
+  Selectable,
+} from '../selection-manager.js';
+import { FRAME_MIN_LENGTH, isTopLevelBlock } from '../utils.js';
+import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
-import { getCommonRectStyle, getSelectedRect } from './utils.js';
+import {
+  getCommonRectStyle,
+  getSelectableBounds,
+  getSelectedRect,
+} from './utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
@@ -51,79 +56,36 @@ export class EdgelessSelectedRect extends LitElement {
     return hasBlockElement ? 'edge' : 'corner';
   }
 
-  get modelBound(): Bound {
-    const { selected } = this.state;
-    if (!selected.length) {
-      return { x: 0, y: 0, w: 0, h: 0 };
-    }
-    const bounds = selected.map(s => {
-      if (isTopLevelBlock(s)) {
-        const [x, y, w, h] = deserializeXYWH(getXYWH(s));
-        return { x, y, w, h };
+  private _onDragMove = (newShapesBounds: Record<string, Bound>) => {
+    const selectedMap = this.state.selected.reduce((acc, element) => {
+      acc[element.id] = element;
+      return acc;
+    }, {} as Record<string, Selectable>);
+
+    Object.entries(newShapesBounds).forEach(([id, bound]) => {
+      const element = selectedMap[id];
+      if (!element) {
+        return;
       }
-      return s;
-    });
-
-    return getCommonBound(bounds) as Bound;
-  }
-
-  private _onDragMove = (deltaBound: Bound) => {
-    const oldBound = this.modelBound;
-    const newBound = {
-      x: oldBound.x + deltaBound.x,
-      y: oldBound.y + deltaBound.y,
-      w: oldBound.w + deltaBound.w,
-      h: oldBound.h + deltaBound.h,
-    };
-
-    this.state.selected.forEach(element => {
-      const [ex, ey, ew, eh] = deserializeXYWH(getXYWH(element));
-      const x = (newBound.w * (ex - oldBound.x)) / oldBound.w + newBound.x;
-      const y = (newBound.h * (ey - oldBound.y)) / oldBound.h + newBound.y;
-      const w = (newBound.w * ew) / oldBound.w;
-      const h = (newBound.h * eh) / oldBound.h;
-
       if (isTopLevelBlock(element)) {
-        let frameX = x;
-        let frameY = y;
-        let frameW = w;
-        let frameH = h;
+        let frameX = bound.x;
+        let frameY = bound.y;
+        let frameW = bound.w;
+        let frameH = deserializeXYWH(element.xywh)[3];
         // limit the width of the selected frame
         if (frameW < FRAME_MIN_LENGTH) {
           frameW = FRAME_MIN_LENGTH;
-          frameX = x;
+          frameX = bound.x;
         }
         // limit the height of the selected frame
         if (frameH < FRAME_MIN_LENGTH) {
           frameH = FRAME_MIN_LENGTH;
-          frameY = y;
+          frameY = bound.y;
         }
-        const frameBlock = getBlockById<'div'>(element.id);
-        const frameContainer = frameBlock?.parentElement;
-        // first change container`s x/w directly for get frames real height
-        if (frameContainer) {
-          frameContainer.style.width = frameW + 'px';
-          frameContainer.style.translate = `translate(${frameX}px, ${frameY}px) scale(${this.zoom})`;
-        }
-        // reset the width of the container may trigger animation
-        requestAnimationFrame(() => {
-          // refresh xywh by model
-          if (!this._lock) {
-            this.page.captureSync();
-            this._lock = true;
-          }
-
-          const newXywh = JSON.stringify([
-            frameX,
-            frameY,
-            frameW,
-            (frameBlock?.getBoundingClientRect().height || 0) / this.zoom +
-              EDGELESS_BLOCK_CHILD_PADDING * 2,
-          ]);
-          this.page.updateBlock(element, { xywh: newXywh });
-        });
+        const newXywh = JSON.stringify([frameX, frameY, frameW, frameH]);
+        this.page.updateBlock(element, { xywh: newXywh });
       } else {
-        this.surface.setElementBound(element.id, { x, y, w, h });
+        this.surface.setElementBound(element.id, bound);
       }
     });
 
@@ -164,7 +126,10 @@ export class EdgelessSelectedRect extends LitElement {
     const resizeHandles = ResizeHandles(
       selectedRect,
       resizeMode,
-      _resizeManager.onMouseDown
+      (e: MouseEvent, direction: HandleDirection) => {
+        const bounds = getSelectableBounds(this.state.selected);
+        _resizeManager.onMouseDown(e, direction, bounds);
+      }
     );
 
     return html`
