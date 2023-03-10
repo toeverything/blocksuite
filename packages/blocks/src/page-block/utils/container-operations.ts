@@ -14,12 +14,14 @@ import {
   asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
+  getBlockElementByModel,
   getClosestBlockElementByElement,
   getDefaultPageBlock,
   getVirgoByModel,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
+  resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -31,10 +33,6 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import { getBlockElementByModel } from '../../__internal__/utils/query.js';
-import {
-  resetNativeSelection,
-} from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
