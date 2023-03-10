@@ -112,13 +112,10 @@ export class RichText extends NonShadowLitElement {
           const delta = vEditor.getDeltaByRangeIndex(index);
           const attributes = delta?.attributes ?? {};
           vEditor.insertText(vRange, data, attributes);
-          vEditor.slots.updateVRange.emit([
-            {
-              index: index + data.length,
-              length: 0,
-            },
-            'input',
-          ]);
+          vEditor.setVRange({
+            index: index + data.length,
+            length: 0,
+          });
           return true;
         }
         return false;
