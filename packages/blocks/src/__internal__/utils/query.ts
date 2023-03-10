@@ -237,6 +237,51 @@ export function getBlockElementByModel(
   return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
 }
 
+export function asyncGetBlockElementByModel(
+  model: BaseBlockModel
+): Promise<BlockComponentElement | null> {
+  let resolved = false;
+  return new Promise<BlockComponentElement>((resolve, reject) => {
+    const onSuccess = (element: BlockComponentElement) => {
+      resolved = true;
+      observer.disconnect();
+      resolve(element);
+    };
+
+    const onFail = () => {
+      observer.disconnect();
+      reject(
+        new Error(
+          `Cannot find block element by model: ${model.flavour} id: ${model.id}`
+        )
+      );
+    };
+
+    const observer = new MutationObserver(() => {
+      const blockElement = getBlockElementByModel(model);
+      if (blockElement) {
+        onSuccess(blockElement);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    requestAnimationFrame(() => {
+      if (!resolved) {
+        const blockElement = getBlockElementByModel(model);
+        if (blockElement) {
+          onSuccess(blockElement);
+        } else {
+          onFail();
+        }
+      }
+    });
+  });
+}
+
 export function getStartModelBySelection(range = getCurrentNativeRange()) {
   const startContainer =
     range.startContainer instanceof Text
@@ -258,7 +303,14 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
 
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector<RichText>('rich-text');
+  if (!richText) return null;
+  return richText;
+}
+
+export async function asyncGetRichTextByModel(model: BaseBlockModel) {
+  const blockElement = await asyncGetBlockElementByModel(model);
+  const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
