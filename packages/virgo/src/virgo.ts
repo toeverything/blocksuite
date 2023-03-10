@@ -212,6 +212,7 @@ export class VEditor<
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
     virgoInput?: (event: InputEvent) => boolean;
+    virgoCompositionEnd?: (event: CompositionEvent) => boolean;
   } = {};
 
   private _defaultHandlers: VEditor['_handlers'] = {
@@ -969,15 +970,17 @@ export class VEditor<
   private _onCompositionEnd = (event: CompositionEvent) => {
     this._isComposing = false;
 
-    if (!this._vRange) {
-      return;
+    let ifSkip = false;
+    if (this._handlers.virgoCompositionEnd) {
+      ifSkip = this._handlers.virgoCompositionEnd(event);
     }
 
-    const { data } = event;
+    if (ifSkip) return;
+    if (!this._vRange) return;
 
+    const { data } = event;
     if (this._vRange.index >= 0 && data) {
       this.insertText(this._vRange, data);
-
       this.slots.updateVRange.emit([
         {
           index: this._vRange.index + data.length,
