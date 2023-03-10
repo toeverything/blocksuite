@@ -205,6 +205,10 @@ export class AffineLink extends NonShadowLitElement {
     clearTimeout(this._popoverTimer);
   }
 
+  private _onClick(e: MouseEvent) {
+    window.open(this.link, '_blank');
+  }
+
   render() {
     const style = affineLinkStyles(this.textAttributes);
 
@@ -213,6 +217,7 @@ export class AffineLink extends NonShadowLitElement {
       rel="noopener noreferrer"
       target="_blank"
       style=${style}
+      @click=${this._onClick}
       >${FontLinkIcon}${this.vText}</a
     >`;
   }
