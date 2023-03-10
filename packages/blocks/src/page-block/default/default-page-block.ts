@@ -184,6 +184,7 @@ export class DefaultPageBlockComponent
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
+      paste: this._onTitlePaste,
     });
 
     // Workaround for virgo skips composition event
@@ -251,6 +252,23 @@ export class DefaultPageBlockComponent
         asyncFocusRichText(page, newFirstParagraphId);
       }
       return;
+    }
+  };
+
+  private _onTitlePaste = (event: ClipboardEvent) => {
+    const vEditor = this._titleVEditor;
+    if (!vEditor) return;
+    const vRange = vEditor.getVRange();
+    if (!vRange) return;
+
+    const data = event.clipboardData?.getData('text/plain');
+    if (data) {
+      const text = data.replace(/(\r\n|\r|\n)/g, '\n');
+      vEditor.insertText(vRange, text);
+      vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
     }
   };
 
