@@ -4,7 +4,11 @@ import {
 } from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';
 
-import type { BlockComponentElement, IPoint } from '../../../std.js';
+import {
+  BlockComponentElement,
+  getRectByBlockElement,
+  IPoint,
+} from '../../../std.js';
 import { contains, getModelByElement } from '../../../std.js';
 import type { PageSelectionState, PageSelectionType } from './index.js';
 
@@ -146,7 +150,7 @@ export function setSelectedBlocks(
 
   const calculatedRects = [] as DOMRect[];
   for (const block of selectedBlocks) {
-    calculatedRects.push(block.getBoundingClientRect());
+    calculatedRects.push(getRectByBlockElement(block));
   }
 
   const newSelectionType = computeSelectionType(selectedBlocks, selectionType);

@@ -738,7 +738,7 @@ export class BlockHub extends NonShadowLitElement {
     this._onDropCallback(
       e,
       this._lastModelState,
-      // `darg.y` !== `dragend.y` in chrome.
+      // `darg.clientY` !== `dragend.clientY` in chrome.
       this._indicator?.cursorPosition ?? {
         x: e.clientX,
         y: e.clientY,

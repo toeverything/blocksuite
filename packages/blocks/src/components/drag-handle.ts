@@ -12,6 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   BlockComponentElement,
+  getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
   IPoint,
   Point,
@@ -503,13 +504,16 @@ export class DragHandle extends LitElement {
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;
-    // `darg.y` !== `dragend.y` in chrome.
+    // `darg.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
       this._indicator?.cursorPosition ?? {
         x: e.clientX,
         y: e.clientY,
       },
-      this._draggingElements,
+      // Must clear subtrees!
+      getBlockElementsExcludeSubtrees(
+        this._draggingElements
+      ) as BlockComponentElement[],
       this._lastDroppingTarget
     );
 

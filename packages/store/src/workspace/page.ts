@@ -1,3 +1,4 @@
+import { getBlockElementByModel } from '@blocksuite/blocks';
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';

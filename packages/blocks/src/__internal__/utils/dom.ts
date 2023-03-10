@@ -236,7 +236,9 @@ export function getRectByBlockElement(
  * Returns block elements excluding their subtrees.
  * Only keep block elements of same level.
  */
-export function getBlockElementsExcludeSubtrees(elements: Element[]) {
+export function getBlockElementsExcludeSubtrees(
+  elements: Element[] | BlockComponentElement[]
+) {
   if (elements.length <= 1) return elements;
 
   let parent = elements[0];
@@ -255,7 +257,9 @@ export function getBlockElementsExcludeSubtrees(elements: Element[]) {
 /**
  * Returns block elements including their subtrees.
  */
-export function getBlockElementsIncludeSubtrees(elements: Element[]) {
+export function getBlockElementsIncludeSubtrees(
+  elements: Element[] | BlockComponentElement[]
+) {
   return elements.reduce<Element[]>((elements, element) => {
     elements.push(element, ...getBlockElementsByElement(element));
     return elements;
