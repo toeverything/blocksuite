@@ -631,8 +631,8 @@ export class VEditor<
   /**
    * sync the dom selection from vRange for **this Editor**
    */
-  syncVRange(): void {
-    requestAnimationFrame(() => {
+  syncVRange(type: 'async' | 'sync' = 'async'): void {
+    const fn = () => {
       if (this._vRange) {
         const newRange = this.toDomRange(this._vRange);
 
@@ -645,7 +645,13 @@ export class VEditor<
           }
         }
       }
-    });
+    };
+
+    if (type === 'async') {
+      requestAnimationFrame(fn);
+    } else {
+      fn();
+    }
   }
 
   /**
@@ -1022,7 +1028,7 @@ export class VEditor<
       range.startContainer.nodeType !== Node.TEXT_NODE ||
       range.endContainer.nodeType !== Node.TEXT_NODE
     ) {
-      this.syncVRange();
+      this.syncVRange('sync');
     }
   };
 
