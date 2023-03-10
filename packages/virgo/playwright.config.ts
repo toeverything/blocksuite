@@ -6,7 +6,7 @@ import type {
 const config: PlaywrightTestConfig = {
   testDir: 'src/',
   testIgnore: ['**.unit.spec.ts'],
-  workers: 1,
+  workers: 4,
   use: {
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
