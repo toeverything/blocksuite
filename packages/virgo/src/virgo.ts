@@ -1020,6 +1020,7 @@ export class VEditor<
       this.slots.updateVRange.emit([vRange, 'native']);
     }
 
+    // avoid infinite syncVRange
     if (
       (range.startContainer.nodeType !== Node.TEXT_NODE ||
         range.endContainer.nodeType !== Node.TEXT_NODE) &&
