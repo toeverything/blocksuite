@@ -944,6 +944,21 @@ export class VEditor<
         index: currentVRange.index - deleteLength,
         length: deleteLength,
       });
+    } else if (inputType === 'deleteContentForward') {
+      if (currentVRange.index < this.yText.length) {
+        this.slots.updateVRange.emit([
+          {
+            index: currentVRange.index,
+            length: 0,
+          },
+          'input',
+        ]);
+
+        this.deleteText({
+          index: currentVRange.index,
+          length: 1,
+        });
+      }
     }
   };
 
