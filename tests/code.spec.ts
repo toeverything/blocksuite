@@ -456,6 +456,21 @@ test('press enter twice at end of code block can jump out', async ({
   await expect(locator).toBeVisible();
 });
 
+test('press enter twice at end of code block with content can jump out', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = 10;');
+  await pressEnter(page);
+  await pressEnter(page);
+
+  const locator = page.locator('affine-paragraph');
+  await expect(locator).toBeVisible();
+});
+
 test('press ArrowDown before code block can select code block', async ({
   page,
 }) => {
