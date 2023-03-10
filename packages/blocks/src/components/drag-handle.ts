@@ -1,5 +1,10 @@
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  Disposable,
+  DisposableGroup,
+  isFirefox,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -194,6 +199,7 @@ export class DragHandle extends LitElement {
    * Current drag handle model state
    */
   private _handleAnchorState: EditingState | null = null;
+  private _handleAnchorDisposable: Disposable | null = null;
 
   /**
    * Last drag handle dropping target state
@@ -204,6 +210,8 @@ export class DragHandle extends LitElement {
   private _lastSelectedIndex = -1;
   private _container: HTMLElement;
   private _dragImage: HTMLElement | null = null;
+
+  private _disposables: DisposableGroup = new DisposableGroup();
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -272,6 +280,15 @@ export class DragHandle extends LitElement {
       );
 
       this._dragHandle.style.transform = `translateY(${handleYOffset}px)`;
+
+      if (this._handleAnchorDisposable) {
+        this._handleAnchorDisposable.dispose();
+      }
+
+      this._handleAnchorDisposable = modelState.model.propsUpdated.on(() => {
+        console.log(123);
+        this.hide();
+      });
     }
   }
 
@@ -314,21 +331,36 @@ export class DragHandle extends LitElement {
       );
       document.body.appendChild(this._indicator);
     }
-    document.body.addEventListener(
+
+    const disposables = this._disposables;
+
+    // event bindings
+    // window
+    disposables.addFromEvent(window, 'resize', this._onResize);
+
+    // document
+    if (isFirefox) {
+      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
+    }
+
+    // document.body
+    disposables.addFromEvent(document.body, 'wheel', this._onWheel);
+    disposables.addFromEvent(
+      document.body,
       'dragover',
       handlePreventDocumentDragOverDelay,
       false
     );
-    document.body.addEventListener('wheel', this._onWheel);
-    window.addEventListener('resize', this._onResize);
-    this._dragHandle.addEventListener('click', this._onClick);
-    this._dragHandle.addEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mousemove', this._onMouseMoveOnHost);
-    this._dragHandle.addEventListener('dragstart', this._onDragStart);
-    this._dragHandle.addEventListener('drag', this._onDrag);
-    this._dragHandle.addEventListener('dragend', this._onDragEnd);
+
+    // host
+    disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
+
+    // drag handle
+    disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
+    disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
+    disposables.addFromEvent(this._dragHandle, 'dragstart', this._onDragStart);
+    disposables.addFromEvent(this._dragHandle, 'drag', this._onDrag);
+    disposables.addFromEvent(this._dragHandle, 'dragend', this._onDragEnd);
   }
 
   disconnectedCallback() {
@@ -337,20 +369,8 @@ export class DragHandle extends LitElement {
     // cleanup
     this.hide();
 
-    window.removeEventListener('resize', this._onResize);
-    document.body.removeEventListener('wheel', this._onWheel);
-    document.body.removeEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay
-    );
-    this._dragHandle.removeEventListener('click', this._onClick);
-    this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mousemove', this._onMouseMoveOnHost);
-    this._dragHandle.removeEventListener('dragstart', this._onDragStart);
-    this._dragHandle.removeEventListener('drag', this._onDrag);
-    this._dragHandle.removeEventListener('dragend', this._onDragEnd);
+    this._disposables.dispose();
+    this._handleAnchorDisposable?.dispose();
   }
 
   private _onMouseMoveOnHost(e: MouseEvent) {
