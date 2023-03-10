@@ -213,7 +213,7 @@ function binarySearchBlockEditingState(
                 if (x >= result.blockRect.left && x < blockRect.left) {
                   return {
                     // index: mid,
-                    position: result.blockRect,
+                    rect: result.blockRect,
                     model: result.block,
                     element: result.hoverDom,
                   };
@@ -236,7 +236,7 @@ function binarySearchBlockEditingState(
 
       return {
         // index: mid,
-        position: blockRect,
+        rect: blockRect,
         model: block,
         element: hoverDom,
       };
@@ -550,9 +550,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     getFocusedBlock() {
       return defaultPageBlock.selection.state.focusedBlock;
     },
-    clearSelection() {
-      defaultPageBlock.selection.clear();
-    },
+    // clearSelection() {
+    //   defaultPageBlock.selection.clear();
+    // },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPoint(
         point,

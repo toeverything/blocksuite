@@ -110,24 +110,20 @@ export function isList({ tagName }: Element) {
  */
 export function getClosestBlockElementByPoint(
   point: Point,
-  rect: Rect,
-  strict = false
+  rect?: Rect
 ): Element | null {
-  if (strict && !rect.isPointIn(point)) return null;
-
   const { y } = point;
-  const { left, top, right, bottom } = rect;
-
-  if (y < top || y > bottom) return null;
 
   let element = null;
   let bounds = null;
   let n = 1;
 
-  point.x = Math.min(
-    Math.max(point.x, left) + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
-    right - 1
-  );
+  if (rect) {
+    point.x = Math.min(
+      Math.max(point.x, rect.left) + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
+      rect.right - 1
+    );
+  }
 
   element =
     document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
@@ -175,7 +171,7 @@ export function getClosestBlockElementByPoint(
       }
       element = null;
     }
-  } while (n <= STEPS && point.y >= top && point.y <= bottom);
+  } while (n <= STEPS);
 
   return element;
 }

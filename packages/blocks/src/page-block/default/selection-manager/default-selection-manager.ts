@@ -229,8 +229,7 @@ export class DefaultSelectionManager {
 
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      this._container.getInnerRect(),
-      true
+      this._container.getInnerRect()
     );
 
     if (element) {

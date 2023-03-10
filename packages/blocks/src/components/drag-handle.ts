@@ -76,10 +76,6 @@ export class DragIndicator extends LitElement {
   }
 }
 
-export type DragHandleGetClosestBlockElementCallback = (
-  point: Point
-) => Element | null;
-
 const DRAG_HANDLE_HEIGHT = 16; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
@@ -130,8 +126,8 @@ export class DragHandle extends LitElement {
     ) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getFocusedBlock: () => BlockComponentElement | null;
-    getClosestBlockElement: DragHandleGetClosestBlockElementCallback | null;
-    clearSelection: () => void;
+    getClosestBlockElement: (point: Point) => Element | null;
+    // clearSelection: () => void;
   }) {
     super();
     this.getDropAllowedBlocks = () => {
@@ -143,7 +139,7 @@ export class DragHandle extends LitElement {
     this._getFocusedBlock = options.getFocusedBlock;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
-    this._clearSelection = options.clearSelection;
+    // this._clearSelection = options.clearSelection;
     options.container.appendChild(this);
     this._container = options.container;
   }
@@ -173,7 +169,7 @@ export class DragHandle extends LitElement {
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
   private _getFocusedBlock: () => BlockComponentElement | null;
-  private _clearSelection: () => void;
+  // private _clearSelection: () => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -206,8 +202,7 @@ export class DragHandle extends LitElement {
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  private _getClosestBlockElement: DragHandleGetClosestBlockElementCallback | null =
-    null;
+  private readonly _getClosestBlockElement: (point: Point) => Element | null;
 
   onContainerMouseMove(event: SelectionEvent, modelState: EditingState | null) {
     const frameBlock = this._container.querySelector(

@@ -34,13 +34,12 @@ export const createBlockHub: (
         props = [props];
       }
 
-      const targetModel = end.model;
-      const rect = end.position;
+      const { model, rect } = end;
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
       const ids = page.addSiblingBlocks(
-        targetModel,
+        model,
         props,
         distanceToTop < distanceToBottom ? 'before' : 'after'
       );
