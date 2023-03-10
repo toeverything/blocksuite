@@ -536,6 +536,7 @@ export function createKeyDownHandler(
     const vRange = vEditor.getVRange();
     if (!vRange) return;
 
+    // edgeless mode
     if (!hasNativeSelection()) return;
     // if it is multi block selection, we should not handle the keydown event
     const range = getCurrentNativeRange();
