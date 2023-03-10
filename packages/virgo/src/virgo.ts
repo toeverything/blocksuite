@@ -223,15 +223,13 @@ export class VEditor<
       const data = event.clipboardData?.getData('text/plain');
       if (data) {
         const vRange = this._vRange;
+        const text = data.replace(/(\r\n|\r|\n)/g, '\n');
         if (vRange) {
-          this.insertText(vRange, data);
-          this.slots.updateVRange.emit([
-            {
-              index: vRange.index + data.length,
-              length: 0,
-            },
-            'input',
-          ]);
+          this.insertText(vRange, text);
+          this.setVRange({
+            index: vRange.index + text.length,
+            length: 0,
+          });
         }
       }
     },
@@ -364,6 +362,8 @@ export class VEditor<
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
+
+    this.bindHandlers();
 
     this.slots.mounted.emit();
   }
