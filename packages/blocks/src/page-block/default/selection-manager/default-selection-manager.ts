@@ -41,7 +41,7 @@ import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
 } from '../default-page-block.js';
-import { EditingState, getAllowSelectedBlocks } from '../utils.js';
+import type { EditingState } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
@@ -95,15 +95,6 @@ export class DefaultSelectionManager {
         this._onSelectionChangeWithoutDebounce
       )
     );
-  }
-
-  /**
-   * This array contains the blocks allowed to be selected by selection manager.
-   * Non-content blocks like `affine:frame` and blocks inside `affine:database` will be discarded.
-   * @deprecated
-   */
-  private get _selectableBlocks(): BaseBlockModel[] {
-    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
