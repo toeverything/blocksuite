@@ -107,7 +107,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     .affine-code-block-container .virgo-editor {
       width: 90%;
       margin: 0;
-      padding-left: 2px;
+      padding-left: 5px;
       overflow-x: auto;
     }
 
