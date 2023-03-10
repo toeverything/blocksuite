@@ -6,6 +6,7 @@ import type { VRange } from '@blocksuite/virgo';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
   getCurrentNativeRange,
+  hasNativeSelection,
   isCollapsedAtBlockStart,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
@@ -535,18 +536,14 @@ export function createKeyDownHandler(
     const vRange = vEditor.getVRange();
     if (!vRange) return;
 
+    if (!hasNativeSelection()) return;
     // if it is multi block selection, we should not handle the keydown event
-    try {
-      const range = getCurrentNativeRange();
-      if (!range) return;
-      if (
-        !vEditor.rootElement.contains(range.startContainer) ||
-        !vEditor.rootElement.contains(range.endContainer)
-      ) {
-        return;
-      }
-    } catch (error) {
-      // try...catch is used to avoid error when in edgeless mode
+    const range = getCurrentNativeRange();
+    if (!range) return;
+    if (
+      !vEditor.rootElement.contains(range.startContainer) ||
+      !vEditor.rootElement.contains(range.endContainer)
+    ) {
       return;
     }
 
