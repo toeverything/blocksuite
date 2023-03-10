@@ -6,14 +6,9 @@ import type { VEditor, VRange } from '@blocksuite/virgo';
 import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
-export function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
-  asyncGetRichTextByModel(model)
-    .then(richText => {
-      richText?.vEditor?.setVRange(vRange);
-    })
-    .catch(e => {
-      throw e;
-    });
+export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.setVRange(vRange);
 }
 
 export function asyncFocusRichText(
