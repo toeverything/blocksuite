@@ -103,6 +103,10 @@ function onAbort(
     return;
   }
   text.delete(idx, searchStr.length);
+  vEditor.setVRange({
+    index: idx,
+    length: 0,
+  });
 }
 
 export function showSlashMenu({
