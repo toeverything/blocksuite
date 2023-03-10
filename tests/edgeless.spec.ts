@@ -9,7 +9,7 @@ import {
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
-  getFrameSize,
+  getFrameRect,
   increaseZoomLevel,
   pickColorAtPoints,
   selectBrushColor,
@@ -36,12 +36,12 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
-  assertAlmostEqual,
   assertEdgelessHoverRect,
   assertEdgelessNonHoverRect,
   assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
+  assertRectEqual,
   assertRichTexts,
   assertSameColor,
   assertSelection,
@@ -141,7 +141,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertFrameXYWH(page, [0, 100, 720, 72]);
 });
 
-test('resize block in edgeless mode', async ({ page }) => {
+test('resize frame in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await activeFrameInEdgeless(page, ids.frameId);
@@ -155,7 +155,7 @@ test('resize block in edgeless mode', async ({ page }) => {
   expect(ids.frameId).toBe('2'); // 0 for page, 1 for surface
   await selectFrameInEdgeless(page, ids.frameId);
 
-  const oldXywh = await getFrameSize(page, ids);
+  const initRect = await getFrameRect(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
   const box = await leftHandle.boundingBox();
   if (box === null) throw new Error();
@@ -165,18 +165,18 @@ test('resize block in edgeless mode', async ({ page }) => {
     { x: box.x + 5, y: box.y + 5 },
     { x: box.x + 105, y: box.y + 5 }
   );
-  const xywh = await getFrameSize(page, ids);
-  const [oldX, oldY, oldW, oldH] = JSON.parse(oldXywh);
-  const [x, y, w, h] = JSON.parse(xywh);
-  expect(x).toBe(oldX + 100);
-  assertAlmostEqual(y, oldY, 1);
-  expect(w).toBe(oldW - 100);
-  assertAlmostEqual(h, oldH, 1);
+  const draggedRect = await getFrameRect(page, ids);
+  assertRectEqual(draggedRect, {
+    x: initRect.x + 100,
+    y: initRect.y,
+    w: initRect.w - 100,
+    h: initRect.h,
+  });
 
   await switchEditorMode(page);
   await switchEditorMode(page);
-  const newXywh = await getFrameSize(page, ids);
-  expect(newXywh).toBe(xywh);
+  const newRect = await getFrameRect(page, ids);
+  assertRectEqual(newRect, draggedRect);
 });
 
 test('add shape element', async ({ page }) => {

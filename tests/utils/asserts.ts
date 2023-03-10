@@ -611,6 +611,15 @@ export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
   expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
 }
 
+type Rect = { x: number; y: number; w: number; h: number };
+
+export function assertRectEqual(a: Rect, b: Rect) {
+  expect(a.x).toBeCloseTo(b.x, 0);
+  expect(a.y).toBeCloseTo(b.y, 0);
+  expect(a.w).toBeCloseTo(b.w, 0);
+  expect(a.h).toBeCloseTo(b.h, 0);
+}
+
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
 
