@@ -649,6 +649,33 @@ test('select multiple shapes and resize', async ({ page }) => {
   await assertEdgelessHoverRect(page, [234, 155, 76, 55]);
 });
 
+test('select multiple shapes and resize to negative', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+
+  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await page.mouse.move(110, 110);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+
+  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
+  await page.mouse.move(220, 120);
+  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
+
+  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
+  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+
+  await resizeElementByTopLeftHandle(page, { x: 400, y: 300 }, 30);
+  await assertEdgelessSelectedRect(page, [310, 210, 190, 190]);
+
+  await page.mouse.move(450, 300);
+  await assertEdgelessHoverRect(page, [406, 220, 94, 180]);
+
+  await page.mouse.move(320, 220);
+  await assertEdgelessHoverRect(page, [310, 210, 90, 173]);
+});
+
 test('select multiple shapes and translate', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
