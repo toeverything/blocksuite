@@ -101,9 +101,9 @@ export class DefaultSelectionManager {
    * This array contains the blocks allowed to be selected by selection manager.
    * Non-content blocks like `affine:frame` and blocks inside `affine:database` will be discarded.
    */
-  private get _selectableBlocks(): BaseBlockModel[] {
-    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
-  }
+  // private get _selectableBlocks(): BaseBlockModel[] {
+  //   return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
+  // }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
