@@ -5,17 +5,13 @@ import { styleMap, StyleMapDirective } from 'lit/directives/style-map.js';
 
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 
-const unitTextStyles = styleMap({
-  whiteSpace: 'pre-wrap',
-});
-
 @customElement('v-text')
 export class VText extends LitElement {
   @property()
   str: string = ZERO_WIDTH_SPACE;
 
   @property()
-  styles: DirectiveResult<typeof StyleMapDirective> = unitTextStyles;
+  styles: DirectiveResult<typeof StyleMapDirective> = styleMap({});
 
   render() {
     // we need to avoid \n appearing before and after the span element, which will

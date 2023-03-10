@@ -27,21 +27,16 @@ export class AffineCodeLine extends NonShadowLitElement {
     if (!highlighter) {
       const vText = new VText();
       vText.str = this.vText.str;
-      vText.styles = styleMap({
-        whiteSpace: 'pre',
-      });
       return html`<span>${vText}</span>`;
     }
 
     const tokens = highlighter.codeToThemedTokens(this.vText.str, lang)[0];
     const vTexts = tokens.map(token => {
-      const styles = styleMap({
-        color: token.color,
-        whiteSpace: 'pre',
-      });
       const vText = new VText();
       vText.str = token.content;
-      vText.styles = styles;
+      vText.styles = styleMap({
+        color: token.color,
+      });
 
       return vText;
     });
