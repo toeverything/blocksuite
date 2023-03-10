@@ -98,6 +98,31 @@ export class RichText extends NonShadowLitElement {
 
         return false;
       },
+      virgoCompositionEnd: e => {
+        const { data } = e;
+        const vEditor = this._vEditor;
+        assertExists(vEditor);
+        const vRange = vEditor.getVRange();
+        if (!vRange || vRange.length !== 0) {
+          return false;
+        }
+
+        const index = vRange.index;
+        if (index >= 0 && data) {
+          const delta = vEditor.getDeltaByRangeIndex(index);
+          const attributes = delta?.attributes ?? {};
+          vEditor.insertText(vRange, data, attributes);
+          vEditor.slots.updateVRange.emit([
+            {
+              index: index + data.length,
+              length: 0,
+            },
+            'input',
+          ]);
+          return true;
+        }
+        return false;
+      },
     });
 
     this._vEditor.setReadonly(this.model.page.readonly);
