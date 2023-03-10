@@ -291,3 +291,64 @@ test.describe('slash menu with code block', () => {
     await assertRichTexts(page, ['111000']);
   });
 });
+
+test.describe('slash menu with date & time', () => {
+  test("should insert Today's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Today');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
+  });
+
+  test("should create Tomorrow's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Tomorrow');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
+  });
+
+  test("should insert Yesterday's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Yesterday');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
+  });
+});

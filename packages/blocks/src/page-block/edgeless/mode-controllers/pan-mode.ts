@@ -36,6 +36,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     if (!this._lastPoint) return;
 
     const { viewport } = this._edgeless.surface;
+    const { zoom } = viewport;
 
     const [lastX, lastY] = this._lastPoint;
     const deltaX = lastX - e.x;
@@ -43,7 +44,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
 
     this._lastPoint = [e.x, e.y];
 
-    viewport.applyDeltaCenter(deltaX, deltaY);
+    viewport.applyDeltaCenter(deltaX / zoom, deltaY / zoom);
 
     this._edgeless.slots.viewportUpdated.emit();
   }

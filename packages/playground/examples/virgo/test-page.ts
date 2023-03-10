@@ -107,7 +107,7 @@ function toggleStyle(
   });
   root.blur();
 
-  vEditor.syncVRange();
+  vEditor.setVRange(vRange);
 }
 
 @customElement('rich-text')

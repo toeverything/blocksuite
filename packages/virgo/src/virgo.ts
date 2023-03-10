@@ -202,6 +202,9 @@ export class VEditor<
   private _isReadonly = false;
   private _yText: Y.Text;
 
+  private _previousAnchor: NativePoint | null = null;
+  private _previousFocus: NativePoint | null = null;
+
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
     getDefaultAttributeRenderer<TextAttributes>();
 
@@ -212,6 +215,7 @@ export class VEditor<
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
     virgoInput?: (event: InputEvent) => boolean;
+    virgoCompositionEnd?: (event: CompositionEvent) => boolean;
   } = {};
 
   private _defaultHandlers: VEditor['_handlers'] = {
@@ -536,8 +540,6 @@ export class VEditor<
       index: this.yText.length,
       length: 0,
     });
-
-    this.syncVRange();
   }
 
   deleteText(vRange: VRange): void {
@@ -631,20 +633,18 @@ export class VEditor<
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange(): void {
-    requestAnimationFrame(() => {
-      if (this._vRange) {
-        const newRange = this.toDomRange(this._vRange);
+    if (this._vRange) {
+      const newRange = this.toDomRange(this._vRange);
 
-        if (newRange) {
-          const selectionRoot = findDocumentOrShadowRoot(this);
-          const selection = selectionRoot.getSelection();
-          if (selection) {
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          }
+      if (newRange) {
+        const selectionRoot = findDocumentOrShadowRoot(this);
+        const selection = selectionRoot.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
         }
       }
-    });
+    }
   }
 
   /**
@@ -944,6 +944,21 @@ export class VEditor<
         index: currentVRange.index - deleteLength,
         length: deleteLength,
       });
+    } else if (inputType === 'deleteContentForward') {
+      if (currentVRange.index < this.yText.length) {
+        this.slots.updateVRange.emit([
+          {
+            index: currentVRange.index,
+            length: 0,
+          },
+          'input',
+        ]);
+
+        this.deleteText({
+          index: currentVRange.index,
+          length: 1,
+        });
+      }
     }
   };
 
@@ -954,15 +969,17 @@ export class VEditor<
   private _onCompositionEnd = (event: CompositionEvent) => {
     this._isComposing = false;
 
-    if (!this._vRange) {
-      return;
+    let ifSkip = false;
+    if (this._handlers.virgoCompositionEnd) {
+      ifSkip = this._handlers.virgoCompositionEnd(event);
     }
 
-    const { data } = event;
+    if (ifSkip) return;
+    if (!this._vRange) return;
 
+    const { data } = event;
     if (this._vRange.index >= 0 && data) {
       this.insertText(this._vRange, data);
-
       this.slots.updateVRange.emit([
         {
           index: this._vRange.index + data.length,
@@ -995,14 +1012,24 @@ export class VEditor<
     const range = selection.getRangeAt(0);
     if (!range || !range.intersectsNode(this._rootElement)) return;
 
+    this._previousAnchor = [range.startContainer, range.startOffset];
+    this._previousFocus = [range.endContainer, range.endOffset];
+
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.slots.updateVRange.emit([vRange, 'native']);
     }
 
+    // avoid infinite syncVRange
     if (
-      range.startContainer.nodeType !== Node.TEXT_NODE ||
-      range.endContainer.nodeType !== Node.TEXT_NODE
+      ((range.startContainer.nodeType !== Node.TEXT_NODE ||
+        range.endContainer.nodeType !== Node.TEXT_NODE) &&
+        range.startContainer !== this._previousAnchor[0] &&
+        range.endContainer !== this._previousFocus[0] &&
+        range.startOffset !== this._previousAnchor[1] &&
+        range.endOffset !== this._previousFocus[1]) ||
+      range.startContainer.nodeType === Node.COMMENT_NODE ||
+      range.endContainer.nodeType === Node.COMMENT_NODE
     ) {
       this.syncVRange();
     }
