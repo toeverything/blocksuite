@@ -204,6 +204,7 @@ export class VEditor<
 
   private _previousAnchor: NativePoint | null = null;
   private _previousFocus: NativePoint | null = null;
+  private _previousVRange: VRange | null = null;
 
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
     getDefaultAttributeRenderer<TextAttributes>();
@@ -1014,6 +1015,7 @@ export class VEditor<
 
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
+    this._previousVRange = this._vRange;
 
     const vRange = this.toVRange(selection);
     if (vRange) {
@@ -1027,7 +1029,8 @@ export class VEditor<
       range.startContainer !== this._previousAnchor[0] &&
       range.endContainer !== this._previousFocus[0] &&
       range.startOffset !== this._previousAnchor[1] &&
-      range.endOffset !== this._previousFocus[1]
+      range.endOffset !== this._previousFocus[1] &&
+      this._previousVRange !== this._vRange
     ) {
       this.syncVRange();
     }
