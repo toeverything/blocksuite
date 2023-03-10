@@ -12,8 +12,9 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getClosestBlockElementByPointInStrictMode,
+  getClosestBlockElementByPoint,
   type OpenBlockInfo,
+  type Point,
 } from '../../__internal__/utils/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -553,10 +554,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.selection.clear();
     },
     getClosestBlockElement(point: Point) {
-      return getClosestBlockElementByPointInStrictMode(
+      return getClosestBlockElementByPoint(
         point,
-        defaultPageBlock.getInnerRect(),
-        true
+        defaultPageBlock.getInnerRect()
       );
     },
   });

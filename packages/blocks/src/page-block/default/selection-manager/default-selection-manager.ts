@@ -11,7 +11,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getBlockElementsIncludeSubtrees,
   getClosestBlockElementByPoint,
-  getClosestBlockElementByPointInStrictMode,
   getCurrentNativeRange,
   getDefaultPageBlock,
   getModelByBlockElement,
@@ -228,9 +227,10 @@ export class DefaultSelectionManager {
 
     let clickBlockInfo = null;
 
-    const element = getClosestBlockElementByPointInStrictMode(
+    const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      this._container.getInnerRect()
+      this._container.getInnerRect(),
+      true
     );
 
     if (element) {

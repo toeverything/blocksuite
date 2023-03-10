@@ -375,7 +375,7 @@ export class DragHandle extends LitElement {
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
 
-    // e.stopPropagation();
+    e.stopPropagation();
   }
 
   // fixme: handle multiple blocks case
@@ -441,6 +441,7 @@ export class DragHandle extends LitElement {
 
     const included = selectedBlocks.includes(this._handleAnchorState.element);
 
+    // TODO: clear selection
     // if (!included) {
     //   this._clearSelection();
     // }

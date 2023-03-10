@@ -2,7 +2,7 @@
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
-  DRAG_HANDLE_OFFSET_LEFT,
+  // DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 
@@ -13,11 +13,13 @@ import type { Point, Rect } from './rect.js';
 const AFFINE_CODE = 'AFFINE-CODE';
 const AFFINE_DATABASE = 'AFFINE-DATABASE';
 const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
+const AFFINE_DIVIDER = 'AFFINE-DIVIDER';
 const AFFINE_FRAME = 'AFFINE-FRAME';
 const AFFINE_IMAGE = 'AFFINE-IMAGE';
+const AFFINE_LIST = 'AFFINE-LIST';
 const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 
-const DRAG_HANDLE_OFFSET_X = 24 + DRAG_HANDLE_OFFSET_LEFT;
+// const DRAG_HANDLE_OFFSET_X = 24 + DRAG_HANDLE_OFFSET_LEFT;
 
 // margin-top: calc(var(--affine-paragraph-space) + 24px);
 // h1.margin-top = 8px + 24px = 32px;
@@ -32,6 +34,13 @@ export function contains(parent: Element, node: Element) {
   return (
     parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
   );
+}
+
+/**
+ * Returns `true` if element has `data-block-id` attribute.
+ */
+export function hasBlockId(element: Element) {
+  return element.hasAttribute(BLOCK_ID_ATTR);
 }
 
 /**
@@ -70,10 +79,17 @@ function isDatabase({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element has `data-block-id` attribute.
+ * Returns `true` if element is codeblock.
  */
-export function hasBlockId(element: Element) {
-  return element.hasAttribute(BLOCK_ID_ATTR);
+export function isDivider({ tagName }: Element) {
+  return tagName === AFFINE_DIVIDER;
+}
+
+/**
+ * Returns `true` if element is list.
+ */
+export function isList({ tagName }: Element) {
+  return tagName === AFFINE_LIST;
 }
 
 /**
@@ -93,9 +109,13 @@ export function hasBlockId(element: Element) {
  */
 export function getClosestBlockElementByPoint(
   point: Point,
-  { left, top, right, bottom }: Rect
+  rect: Rect,
+  strict = false
 ): Element | null {
+  if (strict && !rect.isPointIn(point)) return null;
+
   const { y } = point;
+  const { left, top, right, bottom } = rect;
 
   if (y < top || y > bottom) return null;
 
@@ -111,9 +131,10 @@ export function getClosestBlockElementByPoint(
   element =
     document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
 
+  // Horizontal direction: for nested structures
   if (element) {
     if (isBlock(element)) {
-      bounds = element.getBoundingClientRect();
+      bounds = getRectByBlockElement(element);
       if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
         if (isDatabase(element)) {
           bounds = element
@@ -131,6 +152,7 @@ export function getClosestBlockElementByPoint(
     element = null;
   }
 
+  // Vertical direction
   do {
     point.y = y - n * 2;
 
@@ -142,64 +164,16 @@ export function getClosestBlockElementByPoint(
 
     if (element) {
       if (isBlock(element)) {
-        if (isImage(element) || isCodeblock(element)) return element;
-        bounds = element.getBoundingClientRect();
+        bounds = getRectByBlockElement(element);
         if (
-          point.y - bounds.top <= Math.abs(n) * 2 ||
-          bounds.bottom - point.y <= Math.abs(n) * 2
+          bounds.bottom - point.y <= STEPS * 2 ||
+          point.y - bounds.top <= STEPS * 2
         ) {
           return element;
         }
       }
       element = null;
     }
-  } while (n <= STEPS && point.y >= top && point.y <= bottom);
-
-  return element;
-}
-
-/**
- * Returns the closest block element by a point in the rect in strict mode.
- */
-export function getClosestBlockElementByPointInStrictMode(
-  point: Point,
-  rect: Rect,
-  clamp = false
-): Element | null {
-  if (clamp) {
-    // make sure `x` in [rect.left, rect.right] range.
-    point.x = Math.min(
-      Math.max(point.x, rect.left) + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
-      rect.right - 1
-    );
-  } else if (!rect.isPointIn(point)) return null;
-
-  const { y } = point;
-  const { top, bottom } = rect;
-  let element = null;
-  let n = 1;
-
-  do {
-    element = document.elementFromPoint(point.x, point.y);
-
-    if (element) {
-      element = getClosestBlockElementByElement(element);
-      if (element) {
-        const bounds = element.getBoundingClientRect();
-        if (n < 0) {
-          if (bounds.top - point.y >= n * 2) return element;
-        } else {
-          if (bounds.bottom - point.y <= n * 2) return element;
-        }
-        // if (point.x - bounds.left >= 0 && point.x - bounds.left <= DRAG_HANDLE_OFFSET_LEFT / 2) return element;
-      }
-      element = null;
-    }
-
-    point.y = y - n * 2;
-
-    if (n < 0) n--;
-    n *= -1;
   } while (n <= STEPS && point.y >= top && point.y <= bottom);
 
   return element;
@@ -254,7 +228,8 @@ export function getBlockElementsByElement(
 export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
-  return element.getBoundingClientRect();
+  // Compatible with Safari!
+  return element.firstElementChild!.getBoundingClientRect();
 }
 
 /**
