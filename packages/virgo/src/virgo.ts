@@ -198,6 +198,7 @@ export class VEditor<
   private _mountAbortController: AbortController | null = null;
   private _handlerAbortController: AbortController | null = null;
   private _vRange: VRange | null = null;
+  private _composingVRange: VRange | null = null;
   private _isComposing = false;
   private _isReadonly = false;
   private _yText: Y.Text;
@@ -949,23 +950,29 @@ export class VEditor<
 
   private _onCompositionStart = () => {
     this._isComposing = true;
+    this._composingVRange = this._vRange;
   };
 
   private _onCompositionEnd = (event: CompositionEvent) => {
     this._isComposing = false;
-
-    if (!this._vRange) {
+    if (!this._composingVRange) {
       return;
     }
 
     const { data } = event;
-
-    if (this._vRange.index >= 0 && data) {
-      this.insertText(this._vRange, data);
+    const index = this._composingVRange.index;
+    if (index >= 0 && data) {
+      const delta = this.getDeltaByRangeIndex(index);
+      const attributes = delta?.attributes ?? {};
+      this.insertText(
+        this._composingVRange,
+        data,
+        attributes as TextAttributes
+      );
 
       this.slots.updateVRange.emit([
         {
-          index: this._vRange.index + data.length,
+          index: index + data.length,
           length: 0,
         },
         'input',
@@ -983,9 +990,9 @@ export class VEditor<
 
   private _onSelectionChange = () => {
     assertExists(this._rootElement);
-    if (this._isComposing) {
-      return;
-    }
+    // if (this._isComposing) {
+    //   return;
+    // }
 
     const selectionRoot = findDocumentOrShadowRoot(this);
     const selection = selectionRoot.getSelection();
