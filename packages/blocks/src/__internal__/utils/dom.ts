@@ -96,15 +96,19 @@ export function isList({ tagName }: Element) {
  * Returns the closest block element by a point in the rect.
  *
  * ```
- * ########### block
- *     ...
- *   y - 2 * n
- *     ...
- * ----------- cursor
- *     ...
- *   y + 2 * n
- *     ...
- * ########### block
+ * ############### block
+ * ||############# block
+ * ||||########### block
+ * ||||    ...
+ * ||||  y - 2 * n
+ * ||||    ...
+ * ||||----------- cursor
+ * ||||    ...
+ * ||||  y + 2 * n
+ * ||||    ...
+ * ||||########### block
+ * ||############# block
+ * ############### block
  * ```
  */
 export function getClosestBlockElementByPoint(
