@@ -536,12 +536,17 @@ export function createKeyDownHandler(
     if (!vRange) return;
 
     // if it is multi block selection, we should not handle the keydown event
-    const range = getCurrentNativeRange();
-    if (!range) return;
-    if (
-      !vEditor.rootElement.contains(range.startContainer) ||
-      !vEditor.rootElement.contains(range.endContainer)
-    ) {
+    try {
+      const range = getCurrentNativeRange();
+      if (!range) return;
+      if (
+        !vEditor.rootElement.contains(range.startContainer) ||
+        !vEditor.rootElement.contains(range.endContainer)
+      ) {
+        return;
+      }
+    } catch (error) {
+      // try...catch is used to avoid error when in edgeless mode
       return;
     }
 
