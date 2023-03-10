@@ -2,7 +2,6 @@
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
-  // DRAG_HANDLE_OFFSET_LEFT,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 
@@ -18,8 +17,6 @@ const AFFINE_FRAME = 'AFFINE-FRAME';
 const AFFINE_IMAGE = 'AFFINE-IMAGE';
 const AFFINE_LIST = 'AFFINE-LIST';
 const BLOCK_ID_ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
-
-// const DRAG_HANDLE_OFFSET_X = 24 + DRAG_HANDLE_OFFSET_LEFT;
 
 // margin-top: calc(var(--affine-paragraph-space) + 24px);
 // h1.margin-top = 8px + 24px = 32px;
@@ -228,12 +225,15 @@ export function getBlockElementsByElement(
 
 /**
  * Returns rect of the block element.
+ *
+ * Compatible with Safari!
+ * https://github.com/toeverything/blocksuite/issues/902
+ * https://github.com/toeverything/blocksuite/pull/1121
  */
 export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
-  // Compatible with Safari!
-  return element.firstElementChild!.getBoundingClientRect();
+  return (element.firstElementChild ?? element).getBoundingClientRect();
 }
 
 /**
@@ -241,14 +241,12 @@ export function getRectByBlockElement(
  * Only keep block elements of same level.
  */
 export function getBlockElementsExcludeSubtrees(elements: Element[]) {
-  if (!elements.length) return [];
-  if (elements.length === 1) return elements;
+  if (elements.length <= 1) return elements;
 
   let parent = elements[0];
 
   return elements.filter((node, index) => {
     if (index === 0) return true;
-    // prev block contains block
     if (contains(parent, node)) {
       return false;
     } else {
