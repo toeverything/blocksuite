@@ -880,6 +880,7 @@ test('should placeholder works', async ({ page }) => {
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveText('Heading 1');
   await clickBlockTypeMenuItem(page, 'Text');
+  await focusRichText(page, 0);
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toContainText('type');
 
