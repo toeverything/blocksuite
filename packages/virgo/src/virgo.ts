@@ -78,10 +78,8 @@ export class VEditor<
             ) {
               const texts = VEditor.getTextNodesFromElement(vElements[0]);
               if (texts.length === 0) return null;
-              for (let i = 0; i < texts.length; i++) {
-                text = texts[i];
-                textOffset = offset === 0 ? offset : text.length;
-              }
+              text = texts[texts.length - 1];
+              textOffset = offset === 0 ? offset : text.length;
               break;
             }
 
@@ -102,7 +100,7 @@ export class VEditor<
             ) {
               const texts = VEditor.getTextNodesFromElement(vElements[i]);
               if (texts.length === 0) return null;
-              text = texts[0];
+              text = texts[texts.length - 1];
               textOffset = calculateTextLength(text);
               break;
             }
@@ -116,7 +114,7 @@ export class VEditor<
             ) {
               const texts = VEditor.getTextNodesFromElement(vElements[i]);
               if (texts.length === 0) return null;
-              text = texts[0];
+              text = texts[texts.length - 1];
               textOffset = calculateTextLength(text);
               break;
             }

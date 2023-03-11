@@ -25,13 +25,12 @@ export class VirgoLine<
     return result;
   }
 
+  protected firstUpdated(): void {
+    this.style.display = 'block';
+  }
+
   render() {
-    return html`<style>
-        v-line {
-          display: block;
-        }
-      </style>
-      <div>${this.elements}</div>`;
+    return html`<div>${this.elements}</div>`;
   }
 
   createRenderRoot() {
