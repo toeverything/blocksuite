@@ -17,6 +17,7 @@ import type { TemplateResult } from 'lit';
 
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
+  asyncGetRichTextByModel,
   getCurrentNativeRange,
   getRichTextByModel,
   resetNativeSelection,
@@ -85,14 +86,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
                 );
               }
               const codeModel = newModels[0];
-              requestAnimationFrame(() =>
-                restoreSelection({
-                  type: 'Native',
-                  startOffset: 0,
-                  endOffset: 0,
-                  models: [codeModel],
-                })
-              );
+              asyncGetRichTextByModel(codeModel).then(richText => {
+                richText?.vEditor?.slots.updated.once(() => {
+                  restoreSelection({
+                    type: 'Native',
+                    startOffset: 0,
+                    endOffset: 0,
+                    models: [codeModel],
+                  });
+                });
+              });
             }
           },
         })),

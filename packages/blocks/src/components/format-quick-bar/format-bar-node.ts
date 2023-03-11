@@ -13,7 +13,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import {
+  asyncGetBlockElementByModel,
+  getRichTextByModel,
+} from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   getCurrentCombinedFormat,
@@ -177,14 +180,14 @@ export class FormatQuickBar extends LitElement {
           );
         }
         const codeModel = newModels[0];
-        requestAnimationFrame(() =>
+        asyncGetBlockElementByModel(codeModel).then(() => {
           restoreSelection({
             type: 'Block',
             startOffset: 0,
             endOffset: codeModel.text?.length ?? 0,
             models: [codeModel],
-          })
-        );
+          });
+        });
       }
       this.models = newModels;
       this._paragraphType = `${targetFlavour}/${targetType}`;

@@ -321,14 +321,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         previousSiblingParent &&
         matchFlavours(previousSiblingParent, ['affine:database'] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSiblingParent, 'end');
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSiblingParent, 'end');
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else if (
         previousSibling &&
         matchFlavours(previousSibling, [
@@ -355,14 +353,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           'affine:code',
         ] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSibling);
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSibling);
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else {
         // No previous sibling, it's the first block
         // Try to merge with the title

@@ -102,13 +102,11 @@ export class LangList extends NonShadowLitElement {
     lang => lang.toUpperCase()[0] + lang.slice(1)
   );
 
-  override connectedCallback() {
-    super.connectedCallback();
+  override async connectedCallback() {
+    await super.connectedCallback();
     // Avoid triggering click away listener on initial render
-    requestAnimationFrame(() => {
-      document.addEventListener('click', this._clickAwayListener);
-      this.filterInput.focus();
-    });
+    document.addEventListener('click', this._clickAwayListener);
+    this.filterInput.focus();
   }
 
   override disconnectedCallback() {
@@ -117,7 +115,7 @@ export class LangList extends NonShadowLitElement {
   }
 
   private _clickAwayListener = (e: Event) => {
-    if (this.contains(e.target as Node)) {
+    if (this.renderRoot.parentElement?.contains(e.target as Node)) {
       return;
     }
     this.dispatchEvent(createEvent('dispose', null));
@@ -146,31 +144,33 @@ export class LangList extends NonShadowLitElement {
       'padding-left': '4px',
     });
 
-    return html`<div class="lang-list-container">
-      <div style="${styles}">
-        <div class="search-icon">${SearchIcon}</div>
-        <input
-          id="filter-input"
-          type="text"
-          placeholder="Search"
-          @input=${() => (this._filterText = this.filterInput?.value)}
-        />
+    return html`
+      <div class="lang-list-container">
+        <div style="${styles}">
+          <div class="search-icon">${SearchIcon}</div>
+          <input
+            id="filter-input"
+            type="text"
+            placeholder="Search"
+            @input="${() => (this._filterText = this.filterInput?.value)}"
+          />
+        </div>
+        <div class="lang-list-button-container">
+          ${filteredLanguages.map(
+            language => html`
+              <icon-button
+                width="100%"
+                height="32px"
+                @click="${() => this._onLanguageClicked(language)}"
+                class="lang-item"
+              >
+                ${language}
+              </icon-button>
+            `
+          )}
+        </div>
       </div>
-      <div class="lang-list-button-container">
-        ${filteredLanguages.map(
-          language => html`
-            <icon-button
-              width="100%"
-              height="32px"
-              @click="${() => this._onLanguageClicked(language)}"
-              class="lang-item"
-            >
-              ${language}
-            </icon-button>
-          `
-        )}
-      </div>
-    </div> `;
+    `;
   }
 }
 

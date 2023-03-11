@@ -4,7 +4,10 @@ import './format-bar-node.js';
 import { matchFlavours, Page, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
-import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
+import {
+  asyncGetBlockElementByModel,
+  getDefaultPageBlock,
+} from '../../__internal__/utils/query.js';
 import { throttle } from '../../__internal__/utils/std.js';
 import {
   calcPositionPointByRange,
@@ -151,7 +154,7 @@ export const showFormatQuickBar = async ({
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
 
-  requestAnimationFrame(() => {
+  asyncGetBlockElementByModel(blockRange.models[0]).then(() => {
     updatePos();
   });
 
