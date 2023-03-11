@@ -84,7 +84,7 @@ export class HandleResizeManager {
 
     const newBounds = new Map<string, Bound>();
 
-    for (const [id, oldShapeBound] of this._bounds.entries()) {
+    this._bounds.forEach((oldShapeBound, id) => {
       const {
         x: oldShapeX,
         y: oldShapeY,
@@ -107,8 +107,7 @@ export class HandleResizeManager {
       const shapeH = newCommonBound.h * (oldShapeH / oldCommonHeight);
 
       newBounds.set(id, { x: shapeX, y: shapeY, w: shapeW, h: shapeH });
-    }
-
+    });
     this._onResizeMove(newBounds);
   };
 

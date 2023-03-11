@@ -61,9 +61,9 @@ export class EdgelessSelectedRect extends LitElement {
       this.state.selected.map(element => [element.id, element])
     );
 
-    for (const [id, bound] of newBounds.entries()) {
+    newBounds.forEach((bound, id) => {
       const element = selectedMap.get(id);
-      if (!element) continue;
+      if (!element) return;
 
       if (isTopLevelBlock(element)) {
         let frameX = bound.x;
@@ -85,7 +85,7 @@ export class EdgelessSelectedRect extends LitElement {
       } else {
         this.surface.setElementBound(element.id, bound);
       }
-    }
+    });
 
     this.requestUpdate();
   };
