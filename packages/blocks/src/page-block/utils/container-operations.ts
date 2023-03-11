@@ -354,11 +354,12 @@ function formatBlockRange(
   // edge case 2: same model
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
+    const richText = getRichTextByModel(startModel);
+    richText?.vEditor?.slots.updated.once(() => {
+      restoreSelection(blockRange);
+    });
     startModel.text?.format(startOffset, endOffset - startOffset, {
       [key]: format[key] ? null : true,
-    });
-    requestAnimationFrame(() => {
-      restoreSelection(blockRange);
     });
     return;
   }
@@ -373,20 +374,27 @@ function formatBlockRange(
   if (!matchFlavours(endModel, ['affine:code'] as const)) {
     endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
-  // format between models
-  blockRange.models
+
+  const models = blockRange.models
     .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code']))
-    .forEach(model => {
-      model.text?.format(0, model.text.length, {
-        [key]: format[key] ? null : true,
-      });
+    .filter(model => !matchFlavours(model, ['affine:code']));
+
+  // format between models
+  models.forEach(model => {
+    model.text?.format(0, model.text.length, {
+      [key]: format[key] ? null : true,
     });
+  });
 
   // Native selection maybe shifted after format
   // We need to restore it manually
   if (blockRange.type === 'Native') {
-    requestAnimationFrame(() => {
+    const lastTextBlock = blockRange.models
+      .reverse()
+      .find(model => !matchFlavours(model, ['affine:code'] as const));
+    assertExists(lastTextBlock);
+    const richText = getRichTextByModel(lastTextBlock);
+    richText?.vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
     });
   }

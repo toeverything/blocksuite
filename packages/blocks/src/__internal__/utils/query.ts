@@ -240,6 +240,16 @@ export function getBlockElementByModel(
 export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
+  assertExists(model.page.root);
+  const page = document.querySelector<DefaultPageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
+  if (!page) return Promise.resolve(null);
+
+  if (model.id === model.page.root.id) {
+    return Promise.resolve(page);
+  }
+
   let resolved = false;
   return new Promise<BlockComponentElement>((resolve, reject) => {
     const onSuccess = (element: BlockComponentElement) => {
@@ -258,13 +268,15 @@ export function asyncGetBlockElementByModel(
     };
 
     const observer = new MutationObserver(() => {
-      const blockElement = getBlockElementByModel(model);
+      const blockElement = page.querySelector<BlockComponentElement>(
+        `[${ATTR}="${model.id}"]`
+      );
       if (blockElement) {
         onSuccess(blockElement);
       }
     });
 
-    observer.observe(document.body, {
+    observer.observe(page, {
       childList: true,
       subtree: true,
     });
