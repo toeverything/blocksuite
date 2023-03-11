@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // ALL_PACKAGES
 const allPackages = [
   'blocks',

@@ -44,7 +44,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build playground
-        run: pnpm run build:playground
+        run: pnpm build:playground
 
       - name: Install playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browsers }}
