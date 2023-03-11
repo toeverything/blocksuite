@@ -5,11 +5,11 @@ import {
 import type { Page, UserRange } from '@blocksuite/store';
 
 import {
-  BlockComponentElement,
+  contains,
+  getModelByElement,
   getRectByBlockElement,
-  IPoint,
-} from '../../../std.js';
-import { contains, getModelByElement } from '../../../std.js';
+} from '../../../__internal__/index.js';
+import type { BlockComponentElement, IPoint } from '../../../std.js';
 import type { PageSelectionState, PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
