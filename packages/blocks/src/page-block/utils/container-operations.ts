@@ -374,17 +374,15 @@ function formatBlockRange(
   if (!matchFlavours(endModel, ['affine:code'] as const)) {
     endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
-
-  const models = blockRange.models
-    .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code']));
-
   // format between models
-  models.forEach(model => {
-    model.text?.format(0, model.text.length, {
-      [key]: format[key] ? null : true,
+  blockRange.models
+    .slice(1, -1)
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .forEach(model => {
+      model.text?.format(0, model.text.length, {
+        [key]: format[key] ? null : true,
+      });
     });
-  });
 
   // Native selection maybe shifted after format
   // We need to restore it manually
