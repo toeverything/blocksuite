@@ -115,7 +115,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container affine-code-line span {
-      white-space: nowrap;
+      white-space: pre;
     }
 
     .affine-code-block-container.wrap v-line > div {
