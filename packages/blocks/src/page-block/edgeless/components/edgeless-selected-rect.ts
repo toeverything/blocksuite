@@ -1,4 +1,5 @@
-import { Bound, deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
+import type { Bound } from '@blocksuite/phasor';
+import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

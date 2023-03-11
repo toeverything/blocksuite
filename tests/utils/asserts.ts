@@ -6,7 +6,8 @@ import './declare-test-window.js';
 
 import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
 import type { VEditor } from '@blocksuite/virgo';
-import { expect, Locator, type Page } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,

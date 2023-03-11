@@ -1,4 +1,5 @@
-import { Bound, getCommonBound } from '@blocksuite/phasor';
+import type { Bound } from '@blocksuite/phasor';
+import { getCommonBound } from '@blocksuite/phasor';
 
 import { HandleDirection } from './resize-handles.js';
 

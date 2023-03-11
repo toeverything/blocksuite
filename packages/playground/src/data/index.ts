@@ -4,7 +4,8 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
-import { Page, Text, Workspace } from '@blocksuite/store';
+import type { Page, Workspace } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import { addShapeElement } from './utils';
 

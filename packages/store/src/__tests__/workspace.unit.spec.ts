@@ -10,7 +10,8 @@ import { ListBlockModelSchema } from '../../../blocks/src/list-block/list-model.
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModelSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockModelSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { BaseBlockModel, Generator, Page, Workspace } from '../index.js';
+import type { BaseBlockModel, Page } from '../index.js';
+import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import { assertExists } from './test-utils-dom.js';
 
