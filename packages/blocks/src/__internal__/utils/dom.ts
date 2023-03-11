@@ -1,4 +1,3 @@
-// import type { ImageBlockComponent } from '@blocksuite/blocks/index.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_ID_ATTR,
@@ -238,6 +237,20 @@ export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
   return (element.firstElementChild ?? element).getBoundingClientRect();
+}
+
+/**
+ * Returns selected state rect of the block element.
+ */
+export function getSelectedStateRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
+  if (isImage(element)) {
+    return (
+      element.querySelector('.resizable-img') ?? element
+    ).getBoundingClientRect();
+  }
+  return getRectByBlockElement(element);
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   getDefaultPageBlock,
   getModelByBlockElement,
   getRectByBlockElement,
+  getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   initMouseEventHandlers,
@@ -28,10 +29,7 @@ import {
   type SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import type {
-  EmbedBlockComponent,
-  ImageBlockComponent,
-} from '../../../embed-block/index.js';
+import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -227,7 +225,7 @@ export class DefaultSelectionManager {
     if (element) {
       clickBlockInfo = {
         model: getModelByBlockElement(element),
-        rect: element.getBoundingClientRect(),
+        rect: getSelectedStateRectByBlockElement(element),
         element: element as BlockComponentElement,
       };
     }
@@ -312,7 +310,7 @@ export class DefaultSelectionManager {
     }
 
     const model = getModelByBlockElement(element);
-    const rect = element.getBoundingClientRect();
+    const rect = getSelectedStateRectByBlockElement(element);
     const hoverEditingState = {
       model,
       rect,
@@ -489,19 +487,11 @@ export class DefaultSelectionManager {
   refreshEmbedRects(hoverEditingState: EditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
-      const image = activeComponent as ImageBlockComponent;
-      if (image.model.type === 'image') {
-        const imgRect = image.resizeImg.getBoundingClientRect();
-
-        // updates editing
-        if (hoverEditingState) {
-          const { model, rect } = hoverEditingState;
-          if (model === image.model) {
-            rect.y = imgRect.y;
-          }
-        }
-
-        this.slots.embedRectsUpdated.emit([imgRect]);
+      // updates editing
+      if (hoverEditingState) {
+        hoverEditingState.rect.y =
+          getSelectedStateRectByBlockElement(activeComponent).y;
+        this.slots.embedRectsUpdated.emit([hoverEditingState.rect]);
       }
     }
   }
