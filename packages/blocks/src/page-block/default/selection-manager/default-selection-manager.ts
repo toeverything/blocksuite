@@ -232,6 +232,8 @@ export class DefaultSelectionManager {
       };
     }
 
+    // console.log(clickBlockInfo)
+
     if (clickBlockInfo && clickBlockInfo.model) {
       const { model, element } = clickBlockInfo;
       const page = getDefaultPageBlock(model);

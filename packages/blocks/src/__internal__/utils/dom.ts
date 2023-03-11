@@ -138,19 +138,21 @@ export function getClosestBlockElementByPoint(
   // Horizontal direction: for nested structures
   if (element) {
     if (isBlock(element)) {
-      bounds = getRectByBlockElement(element);
-      if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
-        if (isDatabase(element)) {
-          bounds = element
-            .querySelector('.affine-database-block-title')
-            ?.getBoundingClientRect();
-          if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
-            return element;
-          }
-          return null;
-        } else {
+      if (isList(element)) {
+        bounds = getRectByBlockElement(element);
+        if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
           return element;
         }
+      } else if (isDatabase(element)) {
+        bounds = getRectByBlockElement(element);
+        bounds = element
+          .querySelector('.affine-database-block-title')
+          ?.getBoundingClientRect();
+        if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+          return element;
+        }
+      } else {
+        return element;
       }
     }
     element = null;
