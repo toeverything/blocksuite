@@ -26,7 +26,7 @@ export class VirgoLine<
   }
 
   render() {
-    return html` <style>
+    return html`<style>
         v-line {
           display: block;
         }
