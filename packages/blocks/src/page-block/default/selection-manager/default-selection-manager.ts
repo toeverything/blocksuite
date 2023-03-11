@@ -1,11 +1,12 @@
 import '../../../components/drag-handle.js';
 
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
-import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 
+import type { Point } from '../../../__internal__/index.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   getBlockElementByModel,
   getCurrentNativeRange,
   getDefaultPageBlock,
@@ -17,9 +18,8 @@ import {
   isDatabaseInput,
   isEmbed,
   isInsidePageTitle,
-  Point,
   Rect,
-  SelectionEvent,
+  type SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -43,7 +43,7 @@ import {
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
-import { PageSelectionState, PageViewport } from './selection-state.js';
+import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
   clearSubtree,
   filterSelectedBlockByIndex,

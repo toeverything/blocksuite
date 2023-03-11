@@ -1,5 +1,5 @@
 import {
-  DefaultSelectionSlots,
+  type DefaultSelectionSlots,
   getCurrentBlockRange,
 } from '@blocksuite/blocks';
 import type { Page, UserRange } from '@blocksuite/store';

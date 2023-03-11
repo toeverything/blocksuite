@@ -1,7 +1,7 @@
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
-  Disposable,
+  type Disposable,
   DisposableGroup,
   isFirefox,
 } from '@blocksuite/global/utils';

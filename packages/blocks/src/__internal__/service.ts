@@ -1,8 +1,8 @@
 import {
-  BlockService,
+  type BlockService,
   blockService,
-  BlockServiceInstance,
-  Flavour,
+  type BlockServiceInstance,
+  type Flavour,
 } from '../models.js';
 import { BaseService } from './service/index.js';
 

@@ -8,7 +8,8 @@ import '@blocksuite/editor/themes/affine.css';
 import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import { EditorContainer } from '@blocksuite/editor';
-import { Page, Workspace } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';

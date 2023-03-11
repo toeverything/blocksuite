@@ -3,7 +3,7 @@ import {
   getDefaultPageBlock,
   getRichTextByModel,
   handleBlockSelectionBatchDelete,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
@@ -12,7 +12,8 @@ import {
 } from '@blocksuite/blocks';
 import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, DeltaOperation, Text } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { type DeltaOperation, Text } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';

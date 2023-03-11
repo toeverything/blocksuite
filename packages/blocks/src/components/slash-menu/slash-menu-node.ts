@@ -5,7 +5,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
-import { menuGroups, SlashItem } from './config.js';
+import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
 
 function escapeRegExp(input: string) {

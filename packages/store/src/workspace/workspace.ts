@@ -2,19 +2,20 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import { AwarenessStore, BlobUploadState } from '../awareness.js';
+import type { AwarenessStore } from '../awareness.js';
+import { BlobUploadState } from '../awareness.js';
 import { BlockSchema, internalPrimitives } from '../base.js';
+import type { BlobStorage } from '../persistence/blob/index.js';
 import {
-  BlobOptionsGetter,
-  BlobStorage,
+  type BlobOptionsGetter,
   BlobSyncState,
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
-import { Store, StoreOptions } from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
-import { Indexer, QueryContent } from './search.js';
+import { Indexer, type QueryContent } from './search.js';
 
 export interface PageMeta {
   id: string;

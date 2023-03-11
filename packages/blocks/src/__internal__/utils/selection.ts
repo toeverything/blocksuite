@@ -12,7 +12,7 @@ import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   getBlockElementByModel,
   getDefaultPageBlock,
   getElementFromEventTarget,

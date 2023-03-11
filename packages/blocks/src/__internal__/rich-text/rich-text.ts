@@ -1,4 +1,5 @@
-import { assertExists, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -10,7 +11,7 @@ import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
-import { affineTextAttributes, AffineVEditor } from './virgo/types.js';
+import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {

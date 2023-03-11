@@ -4,7 +4,7 @@ import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
-import { BaseElement, HitTestOptions } from '../base-element.js';
+import { BaseElement, type HitTestOptions } from '../base-element.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStrokePoints(points, {

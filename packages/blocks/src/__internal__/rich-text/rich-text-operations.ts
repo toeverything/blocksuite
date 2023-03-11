@@ -3,14 +3,15 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
-  ExtendedModel,
+  type ExtendedModel,
   focusBlockByModel,
   focusTitle,
   getCurrentNativeRange,
