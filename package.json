@@ -24,7 +24,7 @@
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
-    "lint": "eslint ./ --max-warnings=0 --cache",
+    "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "test:unit": "pnpm -r test:unit",

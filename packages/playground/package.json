@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "dev:hmr": "WC_HMR=1 vite",
-    "build": "tsc --project ./tsconfig.json && vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
