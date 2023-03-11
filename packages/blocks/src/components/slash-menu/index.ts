@@ -3,10 +3,10 @@ import './slash-menu-node.js';
 import { assertExists, BaseBlockModel } from '@blocksuite/store';
 
 import {
-  asyncGetBlockElementByModel,
   getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
+import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
@@ -141,9 +141,7 @@ export function showSlashMenu({
   // Mount
   container.appendChild(slashMenu);
   // Wait for the format quick bar to be mounted
-  asyncGetBlockElementByModel(model).then(() => {
-    updatePosition();
-  });
+  onModelElementUpdated(model, updatePosition);
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {

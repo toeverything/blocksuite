@@ -10,7 +10,9 @@ import type { VEditor } from '@blocksuite/virgo';
 
 import {
   almostEqual,
+  asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
+  BlockComponentElement,
   ExtendedModel,
   getDefaultPageBlock,
   hasNativeSelection,
@@ -18,6 +20,7 @@ import {
   isMultiBlockRange,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   BlockRange,
@@ -213,10 +216,8 @@ export function updateBlockType(
   const firstModel = newModels[0];
   const lastModel = newModels.at(-1);
   if (savedBlockRange) {
-    asyncGetRichTextByModel(firstModel).then(richText => {
-      richText?.vEditor?.slots.updated.once(() => {
-        restoreSelection(savedBlockRange);
-      });
+    onModelTextUpdated(firstModel, () => {
+      restoreSelection(savedBlockRange);
     });
   } else {
     if (lastModel) asyncFocusRichText(page, lastModel.id);
@@ -433,6 +434,31 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   }
 
   resetNativeSelection(null);
+}
+
+export async function onModelTextUpdated(
+  model: BaseBlockModel,
+  callback: (text: RichText) => void
+) {
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.slots.updated.once(() => {
+    callback(richText);
+  });
+}
+
+// Run the callback until a model's element updated.
+// Please notice that the callback will be called **once the element itself is ready**.
+// The children may be not updated.
+// If you want to wait for the text elements,
+// please use `onModelTextUpdated`.
+export async function onModelElementUpdated(
+  model: BaseBlockModel,
+  callback: (blockElement: BlockComponentElement) => void
+) {
+  const element = await asyncGetBlockElementByModel(model);
+  if (element) {
+    callback(element);
+  }
 }
 
 export function tryUpdateFrameSize(page: Page, zoom: number) {
