@@ -1,52 +1,82 @@
-export interface Disposable {
-  dispose(): void;
-}
+type DisposeCallback = () => void;
 
-type DisposeLogic = Disposable | (() => void);
+export interface Disposable {
+  dispose: DisposeCallback;
+}
 
 export class DisposableGroup implements Disposable {
   private _disposed = false;
+  private _disposables: Disposable[] = [];
+
   get disposed() {
     return this._disposed;
   }
-  constructor(private _disposables: DisposeLogic[] = []) {}
+
   /**
    * Add to group to be disposed with others.
-   *
    * This will be immediately disposed if this group has already been disposed.
    */
-  add(disposable: DisposeLogic | undefined | null | false): void {
-    if (disposable) {
-      if (this._disposed) execDisposeLogic(disposable);
-      else this._disposables.push(disposable);
+  add(d: Disposable | DisposeCallback) {
+    if (typeof d === 'function') {
+      if (this._disposed) d();
+      else this._disposables.push({ dispose: d });
+    } else {
+      if (this._disposed) d.dispose();
+      else this._disposables.push(d);
     }
   }
-  dispose(): void {
-    disposeAllAndClearArray(this._disposables);
+
+  addFromEvent<N extends keyof WindowEventMap>(
+    element: Window,
+    eventName: N,
+    handler: (e: WindowEventMap[N]) => void,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent<N extends keyof DocumentEventMap>(
+    element: Document,
+    eventName: N,
+    handler: (e: DocumentEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent<N extends keyof HTMLElementEventMap>(
+    element: HTMLElement,
+    eventName: N,
+    handler: (e: HTMLElementEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent(
+    target: HTMLElement | Window | Document,
+    type: string,
+    handler: (e: Event) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ) {
+    this.add({
+      dispose: () => {
+        target.removeEventListener(type, handler as () => void, eventOptions);
+      },
+    });
+    target.addEventListener(type, handler as () => void, eventOptions);
+  }
+
+  dispose() {
+    disposeAll(this._disposables);
+    this._disposables = [];
     this._disposed = true;
   }
 }
 
-export function flattenDisposable(disposables: Disposable[]): Disposable {
+export function flattenDisposables(disposables: Disposable[]): Disposable {
   return {
-    dispose: disposeAllAndClearArray.bind(null, disposables),
+    dispose: () => disposeAll(disposables),
   };
 }
 
-/** @internal */
-function disposeAllAndClearArray(disposables: DisposeLogic[]) {
+function disposeAll(disposables: Disposable[]) {
   for (const disposable of disposables) {
     try {
-      execDisposeLogic(disposable);
+      disposable.dispose();
     } catch (err) {
       console.error(err);
     }
   }
-  disposables.length = 0;
-}
-
-/** @internal */
-function execDisposeLogic(disposable: DisposeLogic) {
-  if (typeof disposable === 'function') disposable();
-  else disposable.dispose();
 }

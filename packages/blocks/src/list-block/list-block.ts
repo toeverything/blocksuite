@@ -7,7 +7,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
   NonShadowLitElement,
@@ -49,6 +49,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      align-self: flex-start;
       color: var(--affine-code-color);
       font-size: 14px;
       line-height: var(--affine-line-height);
@@ -72,7 +73,7 @@ export class ListBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: ListBlockModel;
 
   @property()
@@ -115,7 +116,7 @@ export class ListBlockComponent extends NonShadowLitElement {
   render() {
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
-    const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);
+    const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
 
     const childrenContainer = this.showChildren
       ? BlockChildrenContainer(this.model, this.host, () =>

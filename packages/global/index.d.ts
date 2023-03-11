@@ -1,13 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
-declare module 'quill' {
-  import quill = require('quill/index');
-  export type * from 'quill/index' assert { 'resolution-mode': 'require' };
-  declare const quillDefault: typeof quill.default;
-  export default quillDefault;
-}
-
 declare module 'y-protocols/awareness.js' {
   export class Awareness<
     State extends Record<string, unknown> = Record<string, unknown>

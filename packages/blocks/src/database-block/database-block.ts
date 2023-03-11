@@ -11,7 +11,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
-import { BlockElementWithService, BlockHost } from '../__internal__/index.js';
+import {
+  BlockElementWithService,
+  type BlockHost,
+} from '../__internal__/index.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
 import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
@@ -249,7 +252,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: DatabaseBlockModel;
 
   @property()

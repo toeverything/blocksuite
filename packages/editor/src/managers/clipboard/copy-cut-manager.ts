@@ -2,21 +2,21 @@ import {
   getCurrentBlockRange,
   getDefaultPageBlock,
   handleBlockSelectionBatchDelete,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
-  EmbedBlockModel,
+  type EmbedBlockModel,
   getServiceOrRegister,
-  ListBlockModel,
+  type ListBlockModel,
   SelectionUtils,
 } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { DeltaOperation } from 'quill';
+import type { DeltaOperation } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
-import { CLIPBOARD_MIMETYPE, SelectedBlock } from './types.js';
+import { CLIPBOARD_MIMETYPE, type SelectedBlock } from './types.js';
 import { getSelectInfo } from './utils.js';
 
 export class CopyCutManager {

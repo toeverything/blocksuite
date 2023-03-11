@@ -126,7 +126,7 @@ export class PageSelectionState {
 
   blur() {
     resetNativeSelection(null);
-    // deactivate quill keyboard event handler
+    // deactivate keyboard event handler
     if (
       document.activeElement &&
       document.activeElement instanceof HTMLElement

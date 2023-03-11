@@ -6,7 +6,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
-import { toolTipStyle } from '../../../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { ColorEvent } from './color-panel.js';
 
@@ -54,6 +54,7 @@ export class EdgelessBrushMenu extends LitElement {
   static styles = css`
     :host {
       width: 260px;
+      z-index: 1;
     }
     .container {
       display: flex;
@@ -108,7 +109,7 @@ export class EdgelessBrushMenu extends LitElement {
       background-color: #e3e2e4;
     }
 
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
   @property()

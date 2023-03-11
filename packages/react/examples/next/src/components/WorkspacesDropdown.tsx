@@ -28,18 +28,18 @@ export const WorkspacesDropdown = (): React.ReactElement => {
   return (
     <Dropdown>
       <Dropdown.Button flat id={React.useId()}>
-        <DisplayRoomName room={currentWorkspace.room} />
+        <DisplayRoomName room={currentWorkspace.id} />
       </Dropdown.Button>
       <Dropdown.Menu
         color="primary"
         disallowEmptySelection
         selectionMode="single"
-        selectedKeys={new Set([currentWorkspace.room ?? 'local-room'])}
+        selectedKeys={new Set([currentWorkspace.id ?? 'local-room'])}
         onSelectionChange={changes => {
           const array = [...changes];
           if (array[0] === 'add-new-one') {
             const workspace = new Workspace({
-              room: 'random:' + uuidv4(),
+              id: 'random:' + uuidv4(),
               providers: [IndexedDBDocProvider],
             });
             workspace.register(builtInSchemas);
@@ -49,7 +49,7 @@ export const WorkspacesDropdown = (): React.ReactElement => {
             if (workspaces.length === 1) {
               return;
             }
-            if (currentWorkspace.room === 'local-room') {
+            if (currentWorkspace.id === 'local-room') {
               return;
             }
             deleteWorkspace(currentWorkspace);
@@ -59,7 +59,7 @@ export const WorkspacesDropdown = (): React.ReactElement => {
           } else {
             array.forEach(change => {
               const target = workspaces.find(
-                workspace => workspace.room === change
+                workspace => workspace.id === change
               );
               target && setCurrentWorkspace(target);
             });
@@ -80,10 +80,10 @@ export const WorkspacesDropdown = (): React.ReactElement => {
         <Dropdown.Section title="workspaces">
           {workspaces.map(workspace => (
             <Dropdown.Item
-              key={workspace.room ?? 'local-room'}
-              textValue={workspace.room}
+              key={workspace.id ?? 'local-room'}
+              textValue={workspace.id}
             >
-              <DisplayRoomName room={workspace.room} />
+              <DisplayRoomName room={workspace.id} />
             </Dropdown.Item>
           ))}
         </Dropdown.Section>

@@ -1,16 +1,16 @@
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import {
   assertExists,
-  BaseBlockModel,
-  Page,
-  StackItem,
-  UserInfo,
-  UserRange,
+  type StackItem,
+  type UserInfo,
+  type UserRange,
 } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
+import { getEditorContainer } from '../../__internal__/utils/query.js';
 import { resetNativeSelection } from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
@@ -68,7 +68,7 @@ export class RemoteSelection extends LitElement {
 
   private _ranges: Array<{
     id: number;
-    userRange: UserRange;
+    userRange?: UserRange;
     user?: UserInfo;
   }> = [];
 
@@ -187,13 +187,16 @@ export class RemoteSelection extends LitElement {
       return [];
     }
 
+    const container = getEditorContainer(this.page);
+    assertExists(container);
+    const containerRect = container.getBoundingClientRect();
     const nativeRects = Array.from(nativeRange.getClientRects());
     return nativeRects
       .map(rect => ({
         width: rect.width,
         height: rect.height,
-        top: rect.top,
-        left: rect.left,
+        top: rect.top - containerRect.top,
+        left: rect.left - containerRect.left,
       }))
       .filter(
         rect =>
@@ -220,14 +223,17 @@ export class RemoteSelection extends LitElement {
       return null;
     }
 
+    const container = getEditorContainer(this.page);
+    assertExists(container);
+    const containerRect = container.getBoundingClientRect();
     const nativeRects = Array.from(nativeRange.getClientRects());
     if (nativeRects.length === 1) {
       const rect = nativeRects[0];
       return {
         width: 2,
         height: rect.height + 4,
-        top: rect.top - 2,
-        left: rect.left,
+        top: rect.top - 2 - containerRect.top,
+        left: rect.left - containerRect.left,
       };
     }
 
@@ -245,12 +251,19 @@ export class RemoteSelection extends LitElement {
       userRange: UserRange;
       rects: SelectionRect[];
       user?: UserInfo;
-    }> = this._ranges.map(range => ({
-      id: range.id,
-      userRange: range.userRange,
-      rects: this._getSelectionRect(range.userRange),
-      user: range.user,
-    }));
+    }> = this._ranges
+      .filter(range => range.userRange)
+      .map(range => ({
+        id: range.id,
+        userRange: range.userRange,
+        rects: this._getSelectionRect(range.userRange as UserRange),
+        user: range.user,
+      })) as Array<{
+      id: number;
+      userRange: UserRange;
+      rects: SelectionRect[];
+      user?: UserInfo;
+    }>;
 
     return html`<div>
       ${selections.flatMap(selection => {
@@ -260,8 +273,7 @@ export class RemoteSelection extends LitElement {
         if (!this._colorMap.has(selection.id)) {
           this._colorMap.set(selection.id, randomColor());
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const color = this._colorMap.get(selection.id)!;
+        const color = this._colorMap.get(selection.id) as string;
         const cursorRect = this._getCursorRect(selection.userRange);
 
         return selection.rects

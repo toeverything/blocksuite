@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
   doubleClickBlockById,
@@ -14,15 +15,18 @@ import {
   focusTitle,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
-  getQuillSelectionIndex,
-  getQuillSelectionText,
-  getSelectedTextByQuill,
+  getSelectedTextByVirgo,
+  getVirgoSelectionIndex,
+  getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressShiftTab,
@@ -55,7 +59,9 @@ test('click on blank area', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.top + 5 }; // deepscan-disable-line NULL_POINTER
   });
@@ -63,7 +69,9 @@ test('click on blank area', async ({ page }) => {
   await assertSelection(page, 0, 0, 0);
 
   const above456 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="3"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.top + 5 };
   });
@@ -71,7 +79,9 @@ test('click on blank area', async ({ page }) => {
   await assertSelection(page, 1, 0, 0);
 
   const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.bottom - 5 };
   });
@@ -86,13 +96,17 @@ test('native range delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left + 1, y: bbox.top + 1 };
   });
 
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right - 1, y: bbox.bottom - 1 };
   });
@@ -101,7 +115,7 @@ test('native range delete', async ({ page }) => {
   await dragBetweenCoords(page, topLeft123, bottomRight789);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
@@ -109,7 +123,7 @@ test('native range delete', async ({ page }) => {
   // await assertRichTexts(page, ['123', '456', '789']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('native range input', async ({ page }) => {
@@ -119,13 +133,17 @@ test('native range input', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left + 1, y: bbox.top + 1 };
   });
 
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right - 1, y: bbox.bottom - 1 };
   });
@@ -144,22 +162,26 @@ test('native range selection backwards', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.top - 2 };
   });
 
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right, y: bbox.bottom };
   });
 
   // from bottom to top
   await dragBetweenCoords(page, bottomRight789, topLeft123);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
@@ -167,7 +189,7 @@ test('native range selection backwards', async ({ page }) => {
   // await assertRichTexts(page, ['123', '456', '789']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('block level range delete', async ({ page }) => {
@@ -178,21 +200,25 @@ test('block level range delete', async ({ page }) => {
   await resetHistory(page);
 
   const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.top - 10 };
   });
 
   const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right - 10, y: bbox.bottom + 10 };
   });
 
   await dragBetweenCoords(page, below789, above123);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
@@ -200,7 +226,7 @@ test('block level range delete', async ({ page }) => {
   // await assertRichTexts(page, ['123', '456', '789']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('cursor move up and down', async ({ page }) => {
@@ -213,17 +239,17 @@ test('cursor move up and down', async ({ page }) => {
   await pressArrowLeft(page, 3);
 
   await page.keyboard.press('ArrowUp');
-  const indexOne = await getQuillSelectionIndex(page);
-  const textOne = await getQuillSelectionText(page);
+  const indexOne = await getVirgoSelectionIndex(page);
+  const textOne = await getVirgoSelectionText(page);
   expect(indexOne).toBe(14);
-  expect(textOne).toBe('arrow down test 1\n');
+  expect(textOne).toBe('arrow down test 1');
 
   await pressArrowLeft(page, 3);
   await page.keyboard.press('ArrowDown');
-  const indexTwo = await getQuillSelectionIndex(page);
-  const textTwo = await getQuillSelectionText(page);
+  const indexTwo = await getVirgoSelectionIndex(page);
+  const textTwo = await getVirgoSelectionText(page);
   expect(indexTwo).toBe(11);
-  expect(textTwo).toBe('arrow down test 2\n');
+  expect(textTwo).toBe('arrow down test 2');
 });
 
 test('cursor move to up and down with children block', async ({ page }) => {
@@ -244,22 +270,22 @@ test('cursor move to up and down with children block', async ({ page }) => {
     await page.keyboard.press('ArrowRight');
   }
   await page.keyboard.press('ArrowUp');
-  const indexOne = await getQuillSelectionIndex(page);
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('arrow down test 2\n');
+  const indexOne = await getVirgoSelectionIndex(page);
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('arrow down test 2');
   expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
-  const indexTwo = await getQuillSelectionIndex(page);
-  const textTwo = await getQuillSelectionText(page);
-  expect(textTwo).toBe('arrow down test 1\n');
+  const indexTwo = await getVirgoSelectionIndex(page);
+  const textTwo = await getVirgoSelectionText(page);
+  expect(textTwo).toBe('arrow down test 1');
   expect(indexTwo).toBeGreaterThanOrEqual(12);
   expect(indexTwo).toBeLessThanOrEqual(17);
   await page.keyboard.press('ArrowDown');
-  const textThree = await getQuillSelectionText(page);
-  expect(textThree).toBe('arrow down test 2\n');
+  const textThree = await getVirgoSelectionText(page);
+  expect(textThree).toBe('arrow down test 2');
 });
 
 test('cursor move left and right', async ({ page }) => {
@@ -269,13 +295,11 @@ test('cursor move left and right', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  for (let i = 0; i < 18; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
-  const indexOne = await getQuillSelectionIndex(page);
+  await pressArrowLeft(page, 18);
+  const indexOne = await getVirgoSelectionIndex(page);
   expect(indexOne).toBe(17);
-  await page.keyboard.press('ArrowRight');
-  const indexTwo = await getQuillSelectionIndex(page);
+  await pressArrowRight(page);
+  const indexTwo = await getVirgoSelectionIndex(page);
   expect(indexTwo).toBe(0);
 });
 
@@ -287,8 +311,8 @@ test('cursor move up at edge of the second line', async ({ page }) => {
   const [id, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
     await fillLine(page, true);
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowUp');
+    await pressArrowLeft(page);
+    await pressArrowUp(page);
     const [currentId] = await getCursorBlockIdAndHeight(page);
     expect(currentId).toBe(id);
   }
@@ -304,8 +328,8 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   const [, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
     await fillLine(page, true);
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowDown');
+    await pressArrowLeft(page);
+    await pressArrowDown(page);
     const [currentId] = await getCursorBlockIdAndHeight(page);
     expect(currentId).toBe(id);
   }
@@ -333,7 +357,9 @@ test('double click choose words', async ({ page }) => {
   await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
   const helloPosition = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const rect = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: rect.left + 2, y: rect.top + 8 };
   });
@@ -373,8 +399,8 @@ test('select all text with dragging and delete', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('abc');
 });
 
 test('select text leaving a few words in the last line and delete', async ({
@@ -388,8 +414,8 @@ test('select text leaving a few words in the last line and delete', async ({
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
   await type(page, 'abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc89\n');
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('abc89');
 });
 
 test('select text in the same line with dragging leftward and move outside the affine-frame', async ({
@@ -479,8 +505,8 @@ test('select text in the same line with dragging rightward and move outside the 
   );
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('abc');
 });
 
 test('select text in the same line with dragging rightward and press enter create block', async ({
@@ -493,12 +519,16 @@ test('select text in the same line with dragging rightward and press enter creat
   // blur the editor
   await page.mouse.click(0, 0);
   const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="2"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left - 20, y: bbox.top - 20 };
   });
   const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right + 30, y: bbox.bottom + 50 };
   });
@@ -548,11 +578,11 @@ test('click the list icon can select and delete', async ({ page }) => {
   await pressBackspace(page);
   await shamefullyBlurActiveElement(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['\n', '456', '789']);
+  await assertRichTexts(page, ['', '456', '789']);
   await clickListIcon(page, 0);
   await shamefullyBlurActiveElement(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['\n', '\n']);
+  await assertRichTexts(page, ['', '']);
 });
 
 test('drag to select tagged text, and copy', async ({ page }) => {
@@ -567,7 +597,7 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   page.keyboard.press(`${SHORT_KEY}+C`);
-  const textOne = await getSelectedTextByQuill(page);
+  const textOne = await getSelectedTextByVirgo(page);
   expect(textOne).toBe('12345');
 });
 
@@ -583,8 +613,8 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await type(page, '1');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('16789\n');
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('16789');
 });
 
 test('selection on heavy page', async ({ page }) => {
@@ -595,7 +625,7 @@ test('selection on heavy page', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   for (let i = 0; i < 5; i++) {
-    await page.keyboard.insertText(`Line ${i + 1}`);
+    await type(page, `Line ${i + 1}`);
     await pressEnter(page);
   }
   const [first, last] = await page.evaluate(() => {
@@ -654,9 +684,9 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await focusRichText(page);
   await type(page, '--- ');
   await assertDivider(page, 1);
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await copyByKeyboard(page);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await pasteByKeyboard(page);
   await assertDivider(page, 2);
 });
@@ -670,11 +700,10 @@ test('Delete the blank line between two dividers', async ({ page }) => {
 
   await pressEnter(page);
   await type(page, '--- ');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('Backspace');
+  await pressArrowUp(page, 2);
+  await pressBackspace(page);
   await assertDivider(page, 2);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 });
 
 test('should delete line with content after divider should not lost content', async ({
@@ -687,12 +716,13 @@ test('should delete line with content after divider should not lost content', as
   await type(page, '123');
   await assertDivider(page, 1);
   // Jump to line start
-  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
-  await page.waitForTimeout(10);
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
   await assertDivider(page, 0);
-  await assertRichTexts(page, ['\n', '123']);
+  await assertRichTexts(page, ['', '123']);
 });
 
 test('the cursor should move to closest editor block when clicking outside container', async ({
@@ -705,7 +735,7 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   const rect = await page.evaluate(() => {
     const secondRichText = document.querySelector(
-      '[data-block-id="3"] .ql-editor'
+      '[data-block-id="3"] .virgo-editor'
     );
     if (!secondRichText) {
       throw new Error();
@@ -857,7 +887,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await doubleClickBlockById(page, ids.frameId);
+  await activeFrameInEdgeless(page, ids.frameId);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });
@@ -913,13 +943,13 @@ test('should add a new line when clicking the bottom of the last non-text block'
     return secondRichText.getBoundingClientRect();
   });
   await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+  await waitNextFrame(page);
   await type(page, 'ABC');
   await assertRichTexts(page, [
     '123',
     '456',
     '789',
-    `
-`, // code block
+    '', // code block
     'ABC',
   ]);
 });
@@ -939,7 +969,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   // ←
   await page.mouse.move(coord.x - 20, coord.y);
   await page.mouse.up();
-  expect(await getSelectedTextByQuill(page)).toBe('45');
+  expect(await getSelectedTextByVirgo(page)).toBe('45');
 
   // blur
   await page.mouse.click(0, 0);
@@ -975,13 +1005,17 @@ test('should indent native multi-selection block', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   const topLeft456 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="3"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left + 1, y: bbox.top + 1 };
   });
 
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] .virgo-editor'
+    );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right - 1, y: bbox.bottom - 1 };
   });
@@ -1072,8 +1106,7 @@ test('should keep selection state when scrolling backward', async ({
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1150,8 +1183,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1229,8 +1261,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1324,7 +1355,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
 
   expect(count0).toBe(count1);
   expect(scrollTop0).toBe(0);
-  expect(scrollTop1).toBeCloseTo(distance, -0.01);
+  expect(scrollTop1).toBeCloseTo(distance, -0.5);
 });
 
 // ↓
@@ -1346,8 +1377,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(5).fill(`
-`);
+  const data = new Array(5).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1437,7 +1467,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   });
 
   expect(count0).toBe(count1);
-  expect(scrollTop0).toBeCloseTo(distance, -0.01);
+  expect(scrollTop0).toBeCloseTo(distance, -0.8);
   expect(scrollTop1).toBe(0);
 });
 
@@ -1785,7 +1815,7 @@ test('should clear native selection before block selection', async ({
     { x: 0, y: 0 }
   );
 
-  const text0 = await getQuillSelectionText(page);
+  const text0 = await getVirgoSelectionText(page);
 
   // `123`
   const first = await page.evaluate(() => {
@@ -1812,7 +1842,7 @@ test('should clear native selection before block selection', async ({
     return window.getSelection()?.rangeCount || 0;
   });
 
-  expect(text0).toBe('456\n');
+  expect(text0).toBe('456');
   expect(textCount).toBe(0);
   const rects = page.locator('.affine-page-selected-rects-container > *');
   await expect(rects).toHaveCount(1);
@@ -1888,8 +1918,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill(`
-`);
+  const data = new Array(9).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -1961,8 +1990,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill(`
-`);
+  const data = new Array(9).fill('');
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
@@ -2024,7 +2052,7 @@ test('undo should clear block selection', async ({ page }) => {
   await pressEnter(page);
 
   const rect = await page
-    .locator('[data-block-id="2"] .ql-editor')
+    .locator('[data-block-id="2"] .virgo-editor')
     .boundingBox();
   if (!rect) {
     throw new Error();

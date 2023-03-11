@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   dragBetweenIndices,
@@ -41,7 +42,7 @@ test('basic link', async ({ page }) => {
   await pressEnter(page);
   await expect(linkPopoverLocator).not.toBeVisible();
 
-  const linkLocator = page.locator(`text="${linkText}"`);
+  const linkLocator = page.locator('affine-link a');
   await expect(linkLocator).toHaveAttribute('href', link);
 
   // Hover link
@@ -65,7 +66,7 @@ test('basic link', async ({ page }) => {
   await type(page, link2);
   await page.keyboard.press('Tab');
   await pressEnter(page);
-  const link2Locator = page.locator(`text="${text2}"`);
+  const link2Locator = page.locator('affine-link a');
 
   await expect(link2Locator).toHaveAttribute('href', link2);
   await assertStoreMatchJSX(
@@ -93,18 +94,18 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
       const { page } = window;
-      const pageId = page.addBlock({
-        flavour: 'affine:page',
+      const pageId = page.addBlockByFlavour('affine:page', {
         title: new page.Text('title'),
       });
-      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
 
       const text = page.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
-      const id = page.addBlock(
-        { flavour: 'affine:paragraph', type: 'text', text: text },
+      const id = page.addBlockByFlavour(
+        'affine:paragraph',
+        { type: 'text', text: text },
         frameId
       );
       return id;
@@ -137,11 +138,7 @@ test('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert=" a"
-        link={false}
-      />
-      <text
-        insert="fter link"
+        insert="after link"
       />
     </>
   }
@@ -223,7 +220,7 @@ test('should mock selection not stored', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [0, 8]);
   await pressCreateLinkShortCut(page);
 
-  const mockSelectNode = page.locator('.affine-mock-select');
+  const mockSelectNode = page.locator('link-mock-selection > div');
   await expect(mockSelectNode).toHaveCount(1);
   await expect(mockSelectNode).toBeVisible();
 
@@ -252,15 +249,17 @@ test('should keyboard work in link popover', async ({ page }) => {
   await createLinkBlock(page, linkText, 'http://example.com');
 
   await dragBetweenIndices(page, [0, 0], [0, 8]);
+  await page.mouse.move(0, 0);
   await pressCreateLinkShortCut(page);
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await assertKeyboardWorkInInput(page, linkPopoverInput);
-  await page.mouse.click(1, 100);
+  await page.mouse.click(1, 1);
 
   // ---
 
   const linkLocator = page.locator(`text="${linkText}"`);
   const linkPopover = page.locator('.affine-link-popover');
+  await expect(linkLocator).toBeVisible();
   // Hover link
   await linkLocator.hover();
   // wait for popover delay open

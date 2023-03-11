@@ -4,86 +4,22 @@ import './components/code-option.js';
 import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
+import { css, html, type PropertyValues, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
+  getViewportElement,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
-
-const hljsStyles = css`
-  //<editor-fold desc="highlight.js/styles/color-brewer.css">
-  pre code.hljs {
-    display: block;
-    overflow-x: auto;
-    padding: 1em;
-  }
-
-  code.hljs {
-    padding: 3px 5px;
-  }
-
-  .hljs {
-    color: #000;
-    background: #fff;
-  }
-
-  .hljs-addition,
-  .hljs-meta,
-  .hljs-string,
-  .hljs-symbol,
-  .hljs-template-tag,
-  .hljs-template-variable {
-    color: #756bb1;
-  }
-
-  .hljs-comment,
-  .hljs-quote {
-    color: #636363;
-  }
-
-  .hljs-bullet,
-  .hljs-link,
-  .hljs-literal,
-  .hljs-number,
-  .hljs-regexp {
-    color: #31a354;
-  }
-
-  .hljs-deletion,
-  .hljs-variable {
-    color: #88f;
-  }
-
-  .hljs-built_in,
-  .hljs-doctag,
-  .hljs-keyword,
-  .hljs-name,
-  .hljs-section,
-  .hljs-selector-class,
-  .hljs-selector-id,
-  .hljs-selector-tag,
-  .hljs-strong,
-  .hljs-tag,
-  .hljs-title,
-  .hljs-type {
-    color: #3182bd;
-  }
-
-  .hljs-emphasis {
-    font-style: italic;
-  }
-
-  .hljs-attribute {
-    color: #e6550d;
-  }
-`;
+import { codeLanguages } from './utils/code-languages.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -115,7 +51,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
       transform: translateX(100%);
     }
 
-    .affine-code-block-container pre {
+    /* hover area */
+    .affine-code-block-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 100%;
+      transform: translateX(100%);
+    }
+
+    .affine-code-block-container .virgo-editor {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
     }
@@ -143,36 +90,44 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
-    #line-number {
+    #line-numbers {
       position: absolute;
       text-align: right;
-      top: 5.4px;
+      left: 20px;
       line-height: var(--affine-line-height);
       color: var(--affine-line-number-color);
     }
 
-    .affine-code-block-container .ql-container {
-      left: 40px;
+    .affine-code-block-container .rich-text-container {
+      position: relative;
       border-radius: 5px;
-      padding: 2px 12px;
+      padding: 4px 12px 4px 60px;
     }
 
-    .affine-code-block-container .ql-syntax {
-      width: 89%;
+    .affine-code-block-container .virgo-editor {
+      width: 90%;
       margin: 0;
       overflow-x: auto;
     }
 
-    .affine-code-block-container .ql-syntax::-webkit-scrollbar {
-      display: none;
+    .affine-code-block-container affine-code-line span v-text {
+      display: inline;
     }
 
-    .affine-code-block-container .wrap {
+    .affine-code-block-container affine-code-line span {
+      white-space: pre;
+    }
+
+    .affine-code-block-container.wrap v-line > div {
+      display: block;
+    }
+
+    .affine-code-block-container.wrap affine-code-line span {
       white-space: pre-wrap;
     }
 
-    .code-block-option .filled {
-      fill: var(--affine-primary-color);
+    .affine-code-block-container .virgo-editor::-webkit-scrollbar {
+      display: none;
     }
 
     .code-block-option {
@@ -186,8 +141,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       margin: 0;
     }
 
-    ${hljsStyles}
-    ${toolTipStyle}
+    ${tooltipStyle}
   `;
 
   @property()
@@ -200,14 +154,43 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _showLangList = false;
 
   @state()
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   @state()
-  private _showOption = false;
+  private _optionPosition: { x: number; y: number } | null = null;
+
+  @state()
+  private _wrap = false;
 
   get highlight() {
     const service = this.host.getService(this.model.flavour);
     return service.hljs.default.highlight;
+  }
+
+  private langUpdated = new Slot<{
+    lang: Lang;
+    highlighter: Highlighter;
+  }>();
+
+  private _preLang: Lang | null = null;
+  private _highlighter: Highlighter | null = null;
+  private async _startHighlight(langs: Lang[]) {
+    this._highlighter = await getHighlighter({
+      theme: 'github-light',
+      langs,
+      paths: {
+        // TODO: use local path
+        wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
+        themes: 'https://cdn.jsdelivr.net/npm/shiki/themes',
+        languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
+      },
+    });
+
+    const richText = this.querySelector('rich-text');
+    assertExists(richText);
+    const vEditor = richText.vEditor;
+    assertExists(vEditor);
+    vEditor.requestUpdate();
   }
 
   get readonly() {
@@ -218,43 +201,92 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposableGroup.add(
+    this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
-    this._disposableGroup.add(
+    this._disposables.add(
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
 
     let timer: number;
+    const updatePosition = () => {
+      // Update option position when scrolling
+      const rect = this.getBoundingClientRect();
+      this._optionPosition = {
+        x: rect.right + 12,
+        y: Math.max(rect.top, 12),
+      };
+    };
     this.hoverState.on(hover => {
       clearTimeout(timer);
       if (hover) {
-        this._showOption = true;
+        updatePosition();
         return;
       }
       timer = window.setTimeout(() => {
-        this._showOption = false;
+        this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseover', e => {
-        this.hoverState.emit(true);
-      })
-    );
+    this._disposables.addFromEvent(this, 'mouseover', e => {
+      this.hoverState.emit(true);
+    });
     const HOVER_DELAY = 300;
-    this._disposableGroup.add(
-      Slot.disposableListener(this, 'mouseleave', e => {
-        this.hoverState.emit(false);
-      })
-    );
+    this._disposables.addFromEvent(this, 'mouseleave', e => {
+      this.hoverState.emit(false);
+    });
+
+    const viewportElement = getViewportElement(this.model.page);
+    if (viewportElement) {
+      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+        if (!this._optionPosition) return;
+        updatePosition();
+      });
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
+    this.hoverState.dispose();
   }
 
-  private _onClick() {
+  private _onClickWrapBtn() {
+    const container = this.querySelector('.affine-code-block-container');
+    assertExists(container);
+    this._wrap = container.classList.toggle('wrap');
+  }
+
+  protected firstUpdated() {
+    this._startHighlight(codeLanguages);
+
+    this.model.text.yText.observe(() => {
+      setTimeout(() => {
+        this._updateLineNumbers();
+      });
+    });
+  }
+
+  updated(changedProperties: PropertyValues) {
+    if (
+      changedProperties.has('model') &&
+      this._highlighter &&
+      this.model.language !== this._preLang
+    ) {
+      this._preLang = this.model.language as Lang;
+      this.langUpdated.emit({
+        lang: this.model.language.toLowerCase() as Lang,
+        highlighter: this._highlighter,
+      });
+
+      const richText = this.querySelector('rich-text');
+      assertExists(richText);
+      const vEditor = richText.vEditor;
+      assertExists(vEditor);
+      vEditor.requestUpdate();
+    }
+  }
+
+  private _onClickLangBtn() {
     if (this.readonly) return;
     this._showLangList = !this._showLangList;
   }
@@ -270,7 +302,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
         height="24px"
         ?hover=${this._showLangList}
         ?disabled=${this.readonly}
-        @click=${this._onClick}
+        @click=${this._onClickLangBtn}
       >
         ${this.model.language} ${ArrowDownIcon}
       </icon-button>
@@ -290,6 +322,62 @@ export class CodeBlockComponent extends NonShadowLitElement {
     </div>`;
   }
 
+  private _codeOptionTemplate() {
+    if (!this._optionPosition) return '';
+    return html`<affine-portal
+      .template=${CodeOptionTemplate({
+        model: this.model,
+        position: this._optionPosition,
+        hoverState: this.hoverState,
+        wrap: this._wrap,
+        onClickWrap: () => this._onClickWrapBtn(),
+      })}
+    ></affine-portal>`;
+  }
+
+  private _updateLineNumbers() {
+    const lineNumbersContainer = this.querySelector(
+      '#line-numbers'
+    ) as HTMLElement;
+    const richTextContainer = this.querySelector('.rich-text-container');
+    assertExists(lineNumbersContainer);
+    assertExists(richTextContainer);
+
+    const richTextRect = richTextContainer.getBoundingClientRect();
+
+    const lines = Array.from(this.querySelectorAll('v-line')).map(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      line => line.querySelector('v-text span')!
+    );
+    const lineNumbers = [];
+    for (const [index, line] of lines.entries()) {
+      const rect = line.getBoundingClientRect();
+      const top = rect.top - richTextRect.top;
+      const height = rect.height;
+
+      lineNumbers.push(html`<div
+        style="${styleMap({
+          top: `${top}px`,
+          height: `${height}px`,
+          position: 'absolute',
+          display: 'flex',
+        })}"
+      >
+        <span
+          style="${styleMap({
+            position: 'absolute',
+            top: '-2px',
+            height: '1em',
+            lineHeight: '1em',
+          })}"
+          >${index + 1}</span
+        >
+      </div>`);
+    }
+
+    render(lineNumbers, lineNumbersContainer);
+  }
+
   render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
@@ -297,35 +385,27 @@ export class CodeBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
-    const rect = this.getBoundingClientRect();
-    const codeBlockOptionPortal = CodeOptionTemplate({
-      model: this.model,
-      position: { x: rect.right + 12, y: rect.top },
-      hoverState: this.hoverState,
+    setTimeout(() => {
+      this._updateLineNumbers();
     });
 
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
-        <rich-text
-          .host=${this.host}
-          .model=${this.model}
-          .modules=${{
-            syntax: {
-              highlight: this.highlight,
-              codeBlockElement: this,
-              language: this.model.language,
-            },
-          }}
-        >
-          <div id="line-number"></div>
-        </rich-text>
+        <div class="rich-text-container">
+          <div id="line-numbers"></div>
+          <rich-text
+            .host=${this.host}
+            .model=${this.model}
+            .codeBlockGetHighlighterOptions=${() => ({
+              lang: this.model.language.toLowerCase() as Lang,
+              highlighter: this._highlighter,
+            })}
+          >
+          </rich-text>
+        </div>
         ${childrenContainer}
       </div>
-      ${this._showOption
-        ? html`<affine-portal
-            .template=${codeBlockOptionPortal}
-          ></affine-portal>`
-        : ''}`;
+      ${this._codeOptionTemplate()}`;
   }
 }
 

@@ -9,6 +9,7 @@ import {
   focusRichText,
   focusTitle,
   initEmptyParagraphState,
+  pressBackspace,
   pressEnter,
   redoByClick,
   redoByKeyboard,
@@ -61,9 +62,9 @@ test('basic init with external text', async ({ page }) => {
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    page.addBlock(
+    page.addBlockByFlavour(
+      'affine:paragraph',
       {
-        flavour: 'affine:paragraph',
         text: page.Text.fromDelta(delta),
       },
       frame
@@ -125,7 +126,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
-  await pageB.keyboard.type('hello');
+  await type(pageB, 'hello');
   await slot;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
@@ -258,7 +259,7 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await redoByClick(page);
   await assertRichTexts(page, ['hello']);
@@ -279,7 +280,7 @@ test('should undo/redo work on title', async ({ page }) => {
   await captureHistory(page);
   let i = 5;
   while (i--) {
-    await page.keyboard.press('Backspace');
+    await pressBackspace(page);
   }
 
   await focusTitle(page);
@@ -310,11 +311,11 @@ test.skip('undo multi frames', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await addFrameByClick(page);
-  await assertRichTexts(page, ['\n', '\n']);
+  await assertRichTexts(page, ['', '']);
 
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await redoByClick(page);
-  await assertRichTexts(page, ['\n', '\n']);
+  await assertRichTexts(page, ['', '']);
 });

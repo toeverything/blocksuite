@@ -1,4 +1,4 @@
-import { Disposable, flattenDisposable } from './disposable.js';
+import { type Disposable, flattenDisposables } from './disposable.js';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
@@ -6,41 +6,6 @@ export class Slot<T = void> implements Disposable {
   private _emitting = false;
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
-
-  /**
-   * This is method will return a disposable that will remove the listener
-   */
-  static disposableListener<N extends keyof WindowEventMap>(
-    element: Window,
-    eventName: N,
-    handler: (e: WindowEventMap[N]) => void,
-    options?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener<N extends keyof DocumentEventMap>(
-    element: Document,
-    eventName: N,
-    handler: (e: DocumentEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N,
-    handler: (e: HTMLElementEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable;
-  static disposableListener(
-    element: HTMLElement | Window | Document,
-    eventName: string,
-    handler: (e: Event) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Disposable {
-    element.addEventListener(eventName, handler, eventOptions);
-    return {
-      dispose: () => {
-        element.removeEventListener(eventName, handler, eventOptions);
-      },
-    };
-  }
 
   filter(testFun: (v: T) => boolean): Slot<T> {
     const result = new Slot<T>();
@@ -152,8 +117,9 @@ export class Slot<T = void> implements Disposable {
   }
 
   dispose() {
-    flattenDisposable(this._disposables).dispose();
-    this._callbacks.length = 0;
+    flattenDisposables(this._disposables).dispose();
+    this._callbacks = [];
+    this._disposables = [];
   }
 
   toDispose(disposables: Disposable[]): Slot<T> {

@@ -1,20 +1,21 @@
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import { AwarenessStore, BlobUploadState } from '../awareness.js';
+import type { AwarenessStore } from '../awareness.js';
+import { BlobUploadState } from '../awareness.js';
 import { BlockSchema, internalPrimitives } from '../base.js';
+import type { BlobStorage } from '../persistence/blob/index.js';
 import {
-  BlobOptionsGetter,
-  BlobStorage,
+  type BlobOptionsGetter,
   BlobSyncState,
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
-import { Store, StoreOptions } from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
-import { Indexer, QueryContent } from './search.js';
+import { Indexer, type QueryContent } from './search.js';
 
 export interface PageMeta {
   id: string;
@@ -25,8 +26,8 @@ export interface PageMeta {
 }
 
 type WorkspaceMetaFields = {
-  pages: Y.Array<unknown>;
-  versions: Y.Map<unknown>;
+  pages?: Y.Array<unknown>;
+  versions?: Y.Map<unknown>;
   name?: string;
   avatar?: string;
 };
@@ -41,12 +42,7 @@ class WorkspaceMeta<
   commonFieldsUpdated = new Slot();
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
-    super(id, doc, awarenessStore, {
-      valueInitializer: {
-        pages: () => new Y.Array(),
-        versions: () => new Y.Map(),
-      },
-    });
+    super(id, doc, awarenessStore);
     this.origin.observeDeep(this._handleEvents);
   }
 
@@ -75,7 +71,7 @@ class WorkspaceMeta<
   }
 
   get pageMetas() {
-    return this.proxy.pages.toJSON() as PageMeta[];
+    return this.proxy.pages?.toJSON() ?? ([] as PageMeta[]);
   }
 
   getPageMeta(id: string) {
@@ -85,23 +81,31 @@ class WorkspaceMeta<
   addPageMeta(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
     this.doc.transact(() => {
+      const pages: Y.Array<unknown> = this.pages ?? new Y.Array();
       Object.entries(page).forEach(([key, value]) => {
         yPage.set(key, value);
       });
       if (index === undefined) {
-        this.pages.push([yPage]);
+        pages.push([yPage]);
       } else {
-        this.pages.insert(index, [yPage]);
+        pages.insert(index, [yPage]);
+      }
+      if (!this.pages) {
+        this.origin.set('pages', pages);
       }
     });
   }
 
   setPageMeta(id: string, props: Partial<PageMeta>) {
-    const pages = this.pages.toJSON() as PageMeta[];
+    const pages = (this.pages?.toJSON() as PageMeta[]) ?? [];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
+      if (!this.pages) {
+        this.origin.set('pages', new Y.Array());
+      }
       if (index === -1) return;
+      assertExists(this.pages);
 
       const yPage = this.pages.get(index) as Y.Map<unknown>;
       Object.entries(props).forEach(([key, value]) => {
@@ -111,10 +115,13 @@ class WorkspaceMeta<
   }
 
   removePage(id: string) {
+    // you cannot delete a page if there's no page
+    assertExists(this.pages);
     const pages = this.pages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
+      assertExists(this.pages);
       if (index !== -1) {
         this.pages.delete(index, 1);
       }
@@ -125,19 +132,30 @@ class WorkspaceMeta<
    * @internal Only for page initialization
    */
   writeVersion(workspace: Workspace) {
-    const versions = this.proxy.versions;
-    workspace.flavourSchemaMap.forEach((schema, flavour) => {
-      versions.set(flavour, schema.version);
-    });
+    let versions = this.proxy.versions;
+    if (!versions) {
+      versions = new Y.Map<unknown>();
+      workspace.flavourSchemaMap.forEach((schema, flavour) => {
+        (versions as Y.Map<unknown>).set(flavour, schema.version);
+      });
+      this.origin.set('versions', versions);
+      return;
+    } else {
+      console.error('Workspace versions already set.');
+    }
   }
 
   /**
    * @internal Only for page initialization
    */
   validateVersion(workspace: Workspace) {
-    const versions = this.proxy.versions.toJSON();
+    const versions = this.proxy.versions?.toJSON();
+    if (!versions) {
+      throw new Error(
+        'Invalid workspace data, versions data is missing. Please make sure the data is valid'
+      );
+    }
     const dataFlavours = Object.keys(versions);
-
     // TODO: emit data validation error slots
     if (dataFlavours.length === 0) {
       throw new Error(
@@ -220,7 +238,6 @@ class WorkspaceMeta<
 
 export class Workspace {
   static Y = Y;
-  public readonly room: string | undefined;
 
   private _store: Store;
   private _indexer: Indexer;
@@ -245,8 +262,9 @@ export class Workspace {
     if (options.blobOptionsGetter) {
       this._blobOptionsGetter = options.blobOptionsGetter;
     }
+
     if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room, k => {
+      this._blobStorage = getBlobStorage(options.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
@@ -274,7 +292,6 @@ export class Workspace {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
-    this.room = options.room;
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
@@ -287,8 +304,25 @@ export class Workspace {
     this._handlePageEvent();
   }
 
+  get id() {
+    return this._store.id;
+  }
+
   get connected(): boolean {
     return this._store.connected;
+  }
+
+  get isEmpty() {
+    if (this.doc.store.clients.size === 0) return true;
+
+    let flag = false;
+    if (this.doc.store.clients.size === 1) {
+      const items = [...this.doc.store.clients.values()][0];
+      if (items.length <= 1) {
+        flag = true;
+      }
+    }
+    return flag;
   }
 
   connect = () => {

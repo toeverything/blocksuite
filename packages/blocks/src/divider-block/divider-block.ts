@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import type { DividerBlockModel } from './divider-model.js';
@@ -26,7 +26,7 @@ export class DividerBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({ hasChanged: () => true })
+  @property()
   model!: DividerBlockModel;
 
   @property()

@@ -10,13 +10,14 @@ import { ListBlockModelSchema } from '../../../blocks/src/list-block/list-model.
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModelSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockModelSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { BaseBlockModel, Generator, Page, Workspace } from '../index.js';
+import type { BaseBlockModel, Page } from '../index.js';
+import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
-  return { idGenerator };
+  return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
 // Create BlockSchema manually
@@ -69,9 +70,13 @@ describe.concurrent('basic', () => {
   it('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
+    assert.equal(workspace.isEmpty, true);
+
     const page = await createPage(workspace);
     const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+
+    assert.equal(workspace.isEmpty, false);
     assert.equal(typeof actualPage.createDate, 'number');
     // @ts-ignore
     delete actualPage.createDate;

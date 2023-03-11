@@ -1,14 +1,21 @@
-import { TextAttributes, VEditor } from '@blocksuite/virgo';
+import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
+import type {
+  AffineTextAttributes,
+  AffineVEditor,
+} from '../../../__internal__/rich-text/virgo/types.js';
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
 } from '../../register.js';
 
-function toggleStyle(vEditor: VEditor, attrs: TextAttributes): void {
+function toggleStyle(
+  vEditor: AffineVEditor,
+  attrs: AffineTextAttributes
+): void {
   const vRange = vEditor.getVRange();
   if (!vRange) {
     return;
@@ -20,7 +27,7 @@ function toggleStyle(vEditor: VEditor, attrs: TextAttributes): void {
   }
 
   const deltas = vEditor.getDeltasByVRange(vRange);
-  let oldAttributes: TextAttributes = {};
+  let oldAttributes: AffineTextAttributes = {};
 
   for (const [delta] of deltas) {
     const attributes = delta.attributes;
@@ -62,7 +69,7 @@ class TextCell extends DatabaseCellLitElement {
     }
   `;
 
-  vEditor: VEditor | null = null;
+  vEditor: AffineVEditor | null = null;
   static tag = literal`affine-database-rich-text-cell`;
 
   @query('.rich-text-container')

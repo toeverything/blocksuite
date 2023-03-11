@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.5.0-alpha.0",
+  "version": "0.5.0-alpha.1",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
@@ -25,7 +25,6 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@types/marked": "^4.0.8",
-    "@types/quill": "=1.3.7",
     "@types/turndown": "^5.0.1"
   },
   "exports": {

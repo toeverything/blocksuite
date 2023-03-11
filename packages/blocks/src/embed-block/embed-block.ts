@@ -1,4 +1,4 @@
-import { css, html } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { NonShadowLitElement } from '../__internal__/index.js';
@@ -42,8 +42,10 @@ export class EmbedBlockComponent extends NonShadowLitElement {
   @state()
   private _caption!: string;
 
-  firstUpdated() {
-    requestAnimationFrame(() => {
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+
+    this.updateComplete.then(() => {
       this._caption = this.model?.caption ?? '';
 
       if (this._caption.length > 0) {

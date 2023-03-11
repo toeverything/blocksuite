@@ -1,11 +1,14 @@
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  MouseMode,
-  PageBlockModel,
+  type MouseMode,
+  type PageBlockModel,
 } from '@blocksuite/blocks';
-import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
-import { Page, Slot } from '@blocksuite/store';
+import {
+  NonShadowLitElement,
+  type SurfaceBlockModel,
+} from '@blocksuite/blocks';
+import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -68,56 +71,46 @@ export class EditorContainer extends NonShadowLitElement {
     super.connectedCallback();
 
     // Question: Why do we prevent this?
-    this._disposables.add(
-      Slot.disposableListener(window, 'keydown', e => {
-        if (e.altKey && e.metaKey && e.code === 'KeyC') {
-          e.preventDefault();
-        }
+    this._disposables.addFromEvent(window, 'keydown', e => {
+      if (e.altKey && e.metaKey && e.code === 'KeyC') {
+        e.preventDefault();
+      }
 
-        // `esc`  clear selection
-        if (e.code !== 'Escape') {
-          return;
-        }
-        const pageModel = this.pageBlockModel;
-        if (!pageModel) return;
-        const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.selection.clear();
+      // `esc`  clear selection
+      if (e.code !== 'Escape') {
+        return;
+      }
+      const pageModel = this.pageBlockModel;
+      if (!pageModel) return;
+      const pageBlock = getDefaultPageBlock(pageModel);
+      pageBlock.selection.clear();
 
-        const selection = getSelection();
-        if (
-          !selection ||
-          selection.isCollapsed ||
-          !checkEditorElementActive()
-        ) {
-          return;
-        }
-        selection.removeAllRanges();
-      })
-    );
+      const selection = getSelection();
+      if (!selection || selection.isCollapsed || !checkEditorElementActive()) {
+        return;
+      }
+      selection.removeAllRanges();
+    });
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
 
     // connect mouse mode event changes
-    this._disposables.add(
-      Slot.disposableListener(
-        window,
-        'affine.switch-mouse-mode',
-        ({ detail }) => {
-          this.mouseMode = detail;
-        }
-      )
+    this._disposables.addFromEvent(
+      window,
+      'affine.switch-mouse-mode',
+      ({ detail }) => {
+        this.mouseMode = detail;
+      }
     );
 
-    this._disposables.add(
-      Slot.disposableListener(
-        window,
-        'affine:switch-edgeless-display-mode',
-        ({ detail }) => {
-          this.showGrid = detail;
-        }
-      )
+    this._disposables.addFromEvent(
+      window,
+      'affine:switch-edgeless-display-mode',
+      ({ detail }) => {
+        this.showGrid = detail;
+      }
     );
 
     // subscribe store

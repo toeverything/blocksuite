@@ -28,6 +28,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._lastPoint = [e.x, e.y];
+    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: true });
   }
 
   onContainerDragMove(e: SelectionEvent) {
@@ -35,6 +36,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     if (!this._lastPoint) return;
 
     const { viewport } = this._edgeless.surface;
+    const { zoom } = viewport;
 
     const [lastX, lastY] = this._lastPoint;
     const deltaX = lastX - e.x;
@@ -42,13 +44,14 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
 
     this._lastPoint = [e.x, e.y];
 
-    viewport.applyDeltaCenter(deltaX, deltaY);
+    viewport.applyDeltaCenter(deltaX / zoom, deltaY / zoom);
 
     this._edgeless.slots.viewportUpdated.emit();
   }
 
   onContainerDragEnd() {
     this._lastPoint = null;
+    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: false });
   }
 
   onContainerMouseMove(e: SelectionEvent) {
@@ -56,10 +59,6 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
   }
 
   onContainerMouseOut(e: SelectionEvent) {
-    noop();
-  }
-
-  syncDraggingArea() {
     noop();
   }
 

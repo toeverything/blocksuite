@@ -1,7 +1,8 @@
 import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { getServiceOrRegister } from '@blocksuite/blocks';
-import { BaseBlockModel, Slot } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { EditorContainer, SelectedBlock } from '../../../index.js';

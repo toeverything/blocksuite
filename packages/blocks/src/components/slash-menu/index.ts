@@ -1,15 +1,17 @@
 import './slash-menu-node.js';
 
 import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import {
   getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
+import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
-  DragDirection,
+  type DragDirection,
 } from '../../page-block/utils/position.js';
 import type { SlashMenu } from './slash-menu-node.js';
 
@@ -83,16 +85,17 @@ function onAbort(
     return;
   }
   const richText = getRichTextByModel(model);
-  const quill = richText?.quill;
-  if (!quill) {
+  const vEditor = richText?.vEditor;
+  if (!vEditor) {
     console.warn(
-      'Failed to clean slash search text! No quill found for model, model:',
+      'Failed to clean slash search text! No vEditor found for model, model:',
       model
     );
     return;
   }
-  const { index: curIdx } = quill.getSelection();
-  const idx = curIdx - searchStr.length;
+  const vRange = vEditor.getVRange();
+  assertExists(vRange);
+  const idx = vRange.index - searchStr.length;
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
   if (textStr !== searchStr) {
@@ -102,6 +105,10 @@ function onAbort(
     return;
   }
   text.delete(idx, searchStr.length);
+  vEditor.setVRange({
+    index: idx,
+    length: 0,
+  });
 }
 
 export function showSlashMenu({
@@ -135,7 +142,7 @@ export function showSlashMenu({
   // Mount
   container.appendChild(slashMenu);
   // Wait for the format quick bar to be mounted
-  requestAnimationFrame(() => updatePosition());
+  onModelElementUpdated(model, updatePosition);
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {

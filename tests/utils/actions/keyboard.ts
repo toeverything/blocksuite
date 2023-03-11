@@ -48,10 +48,21 @@ export async function pressArrowLeft(page: Page, count = 1) {
     await page.keyboard.press('ArrowLeft', { delay: 50 });
   }
 }
+export async function pressArrowRight(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('ArrowRight', { delay: 50 });
+  }
+}
 
 export async function pressArrowDown(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
     await page.keyboard.press('ArrowDown', { delay: 50 });
+  }
+}
+
+export async function pressArrowUp(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('ArrowUp', { delay: 50 });
   }
 }
 
@@ -144,7 +155,7 @@ export async function fillLine(page: Page, toNext = false) {
     let nextHeight;
     // type until current block height is changed, means has new line
     do {
-      await page.keyboard.type('a');
+      await page.keyboard.type('a', { delay: 50 });
       [, nextHeight] = await getCursorBlockIdAndHeight(page);
     } while (nextHeight === height);
     if (!toNext) {

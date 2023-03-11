@@ -21,7 +21,7 @@ export interface DocProvider {
 /** See {@link DocProvider} */
 export interface DocProviderConstructor {
   new (
-    room: string,
+    id: string,
     doc: Y.Doc,
     options?: { awareness?: Awareness }
   ): DocProvider;

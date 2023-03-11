@@ -26,8 +26,8 @@ const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 export class DebugDocProvider extends WebrtcProvider implements DocProvider {
   private readonly _doc: Y.Doc;
   public remoteUpdateSlot = new Slot<unknown>();
-  constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
-    super(room, doc, {
+  constructor(id: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
+    super(id, doc, {
       awareness: options?.awareness,
       signaling,
     });

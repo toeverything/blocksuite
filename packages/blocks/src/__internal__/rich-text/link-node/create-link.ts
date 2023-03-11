@@ -1,68 +1,82 @@
-import './link-node.js';
+import './affine-link.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { ParentBlot } from 'parchment';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
-  getRichTextByModel,
-  getStartModelBySelection,
-  isRangeNativeSelection,
-} from '../../utils/index.js';
-import { MockSelectNode } from './mock-select-node.js';
+  blockRangeToNativeRange,
+  getCurrentBlockRange,
+} from '../../utils/block-range.js';
+import { getEditorContainer, getRichTextByModel } from '../../utils/index.js';
+import { LinkMockSelection } from './mock-selection.js';
 
-export async function createLink(page: Page) {
-  // TODO may allow user creating a link with text
-  if (!isRangeNativeSelection()) return;
-
-  const startModel = getStartModelBySelection();
+export function createLink(page: Page) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+  if (blockRange.models.length > 1) {
+    throw new Error("Can't create link with multiple blocks for now");
+  }
+  const startModel = blockRange.models[0];
   if (!startModel) return;
   const richText = getRichTextByModel(startModel);
   if (!richText) return;
 
-  const { quill } = richText;
-  const range = quill.getSelection();
-  // TODO fix selection with multiple lines
-  assertExists(range);
+  const { vEditor } = richText;
+  assertExists(vEditor);
+  const vRange = {
+    index: blockRange.startOffset,
+    length: blockRange.endOffset - blockRange.startOffset,
+  };
 
   // User can cancel link by pressing shortcut again
-  const format = quill.getFormat(range);
-  if (format?.link) {
+  const format = vEditor.getFormat(vRange);
+  if (format.link) {
     page.captureSync();
-    const { index, length } = range;
-    startModel.text?.format(index, length, { link: false });
+    vEditor.formatText(vRange, { link: null });
+    // vEditor.setVRange(vRange);
+    // recreate link
+    // setTimeout(() => {
+    //   createLink(page);
+    // });
     return;
   }
 
-  // Note: Just mock a selection style, this operation should not be recorded to store
-  quill.format('mock-select', true);
+  // mock a selection style
+  const range = blockRangeToNativeRange(blockRange);
+  assertExists(range);
+  const rects = Array.from(range.getClientRects());
 
-  // See https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-  const [node] = (quill.scroll as unknown as ParentBlot).descendant(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/quilljs/parchment/issues/121
-    MockSelectNode as any,
-    range.index
+  const container = getEditorContainer(page);
+  assertExists(container);
+  const containerRect = container.getBoundingClientRect();
+
+  const mockSelection = new LinkMockSelection(
+    rects.map(
+      rect =>
+        new DOMRect(
+          rect.left - containerRect.left,
+          rect.top - containerRect.top,
+          rect.width,
+          rect.height
+        )
+    )
   );
-  if (!node) {
-    console.error('Error on getBlotNode', MockSelectNode, quill, range);
-    throw new Error('Failed to getBlotNode, node not found!');
-  }
+  const affineEditorContainer = getEditorContainer(page);
+  assertExists(affineEditorContainer);
+  affineEditorContainer.appendChild(mockSelection);
 
-  const mockSelectBlot = node as MockSelectNode;
-  const mockSelectDom = mockSelectBlot?.domNode as HTMLElement | undefined;
-  if (!mockSelectDom) {
-    console.error('Error on createLink', mockSelectBlot, quill, range);
-    throw new Error('Failed to create link, mockSelectDom not found!');
-  }
+  setTimeout(async () => {
+    const linkState = await showLinkPopover({
+      anchorEl: mockSelection.shadowRoot?.querySelector('div') as HTMLElement,
+    });
 
-  const linkState = await showLinkPopover({ anchorEl: mockSelectDom });
+    mockSelection.remove();
+    if (linkState.type !== 'confirm') return;
 
-  quill.formatText(range, { 'mock-select': false });
-  if (linkState.type !== 'confirm') return;
+    const link = linkState.link;
 
-  const link = linkState.link;
-
-  page.captureSync();
-  startModel.text?.format(range.index, range.length, { link });
+    page.captureSync();
+    vEditor.formatText(vRange, { link });
+  });
 }

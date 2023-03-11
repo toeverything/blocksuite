@@ -5,7 +5,9 @@
 import './declare-test-window.js';
 
 import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
-import { expect, Locator, type Page } from '@playwright/test';
+import type { VEditor } from '@blocksuite/virgo';
+import type { Locator } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
@@ -18,6 +20,9 @@ import type {
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 import {
+  pressArrowLeft,
+  pressArrowRight,
+  pressBackspace,
   redoByKeyboard,
   SHORT_KEY,
   type,
@@ -27,6 +32,7 @@ import {
   captureHistory,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
+import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -61,7 +67,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,24]',
+      'prop:xywh': '[0,0,720,72]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -74,7 +80,7 @@ export const defaultStore: SerializedStore = {
 };
 
 export async function assertEmpty(page: Page) {
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 }
 
 export async function assertTitle(page: Page, text: string) {
@@ -83,20 +89,28 @@ export async function assertTitle(page: Page, text: string) {
   expect(vText).toBe(text);
 }
 
-export async function assertText(page: Page, text: string) {
-  const actual = await page.innerText('.ql-editor');
+export async function assertText(page: Page, text: string, i = 0) {
+  const actual = await getStringFromRichText(page, i);
   expect(actual).toBe(text);
 }
 
-export async function assertTextContain(page: Page, text: string) {
-  const actual = await page.innerText('.ql-editor');
+export async function assertTextContain(page: Page, text: string, i = 0) {
+  const actual = await getStringFromRichText(page, i);
   expect(actual).toContain(text);
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  await page.mouse.move(100, 100); // move mouse for focus
-  const actual = await page.locator('.ql-editor').allInnerTexts();
-  expect(actual).toEqual(texts);
+  const actualTexts = await page.evaluate(async () => {
+    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+    const result = [];
+    for (const richText of richTexts) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = (richText as any).vEditor as VEditor;
+      result.push(editor.yText.toString());
+    }
+    return result;
+  });
+  expect(actualTexts).toEqual(texts);
 }
 
 export async function assertRichImage(page: Page, count: number) {
@@ -154,10 +168,9 @@ export async function assertSelection(
 ) {
   const actual = await page.evaluate(
     ({ richTextIndex }) => {
-      const quill =
-        // @ts-ignore
-        document.querySelectorAll('rich-text')[richTextIndex]?.quill!;
-      return quill.getSelection();
+      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const vEditor = richText.vEditor;
+      return vEditor?.getVRange();
     },
     { richTextIndex }
   );
@@ -193,15 +206,24 @@ export async function assertFrameXYWH(
 export async function assertTextFormat(
   page: Page,
   richTextIndex: number,
-  quillIndex: number,
+  index: number,
   resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex, quillIndex }) => {
-      const quill = document.querySelectorAll('rich-text')[richTextIndex].quill;
-      return quill.getFormat(quillIndex);
+    ({ richTextIndex, index }) => {
+      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const vEditor = richText.vEditor;
+      if (!vEditor) {
+        throw new Error('vEditor is undefined');
+      }
+
+      const result = vEditor.getFormat({
+        index,
+        length: 0,
+      });
+      return result;
     },
-    { richTextIndex, quillIndex }
+    { richTextIndex, index }
   );
   expect(actual).toEqual(resultObj);
 }
@@ -217,7 +239,18 @@ export async function assertTypeFormat(page: Page, type: string) {
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(() => {
     const elements = document.querySelectorAll('rich-text');
-    return Array.from(elements).map(el => el.quill.getFormat());
+    return Array.from(elements).map(el => {
+      const vEditor = el.vEditor;
+      if (!vEditor) {
+        throw new Error('vEditor is undefined');
+      }
+
+      const result = vEditor.getFormat({
+        index: 0,
+        length: vEditor.yText.length,
+      });
+      return result;
+    });
   });
   expect(actual).toEqual(resultObj);
 }
@@ -531,7 +564,7 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await type(page, '1234');
   await expect(locator).toHaveValue('1234');
   await captureHistory(page);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await expect(locator).toHaveValue('123');
 
   // undo/redo
@@ -541,21 +574,20 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await expect(locator).toHaveValue('123');
 
   // keyboard
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Backspace');
+  await pressArrowLeft(page, 2);
+  await pressArrowRight(page, 1);
+  await pressBackspace(page);
   await expect(locator).toHaveValue('13');
 
   // copy/cut/paste
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+c`);
-  await page.keyboard.press('Backspace');
+  await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
+  await pressBackspace(page);
   await expect(locator).toHaveValue('');
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
   await expect(locator).toHaveValue('13');
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
   await expect(locator).toHaveValue('');
 }
 
@@ -571,6 +603,35 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessNonHoverRect(page: Page) {
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  await expect(hoverRect).toBeHidden();
+}
+
 export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
   expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
+}
+
+type Rect = { x: number; y: number; w: number; h: number };
+
+export function assertRectEqual(a: Rect, b: Rect) {
+  expect(a.x).toBeCloseTo(b.x, 0);
+  expect(a.y).toBeCloseTo(b.y, 0);
+  expect(a.w).toBeCloseTo(b.w, 0);
+  expect(a.h).toBeCloseTo(b.h, 0);
+}
+
+export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+
+  const selectedRect = page
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+  const box = await selectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless selected rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
 }

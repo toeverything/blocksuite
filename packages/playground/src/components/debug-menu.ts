@@ -14,7 +14,6 @@ import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 
 import {
   createEvent,
-  type FrameBlockModel,
   getCurrentBlockRange,
   NonShadowLitElement,
   updateBlockType,
@@ -135,13 +134,12 @@ export class DebugMenu extends NonShadowLitElement {
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
     const blockProps = {
-      flavour: 'affine:code',
       text: startModel.text?.clone(),
     };
     assertExists(parent);
     this.page.captureSync();
     this.page.deleteBlock(startModel);
-    this.page.addBlock(blockProps, parent, index);
+    this.page.addBlockByFlavour('affine:code', blockProps, parent, index);
   }
 
   private _convertToParagraph(e: PointerEvent, type: string) {
@@ -174,11 +172,12 @@ export class DebugMenu extends NonShadowLitElement {
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const frameId = this.page.addBlock<FrameBlockModel>(
-      { flavour: 'affine:frame', xywh },
+    const frameId = this.page.addBlockByFlavour(
+      'affine:frame',
+      { xywh },
       pageId
     );
-    this.page.addBlock({ flavour: 'affine:paragraph' }, frameId);
+    this.page.addBlockByFlavour('affine:paragraph', {}, frameId);
   }
 
   private _switchShowGrid() {

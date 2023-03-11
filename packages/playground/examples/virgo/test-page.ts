@@ -1,6 +1,6 @@
 import '@shoelace-style/shoelace';
 
-import { BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
+import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -32,7 +32,7 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'break-spaces',
+    'white-space': 'pre-wrap',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -107,7 +107,7 @@ function toggleStyle(
   });
   root.blur();
 
-  vEditor.syncVRange();
+  vEditor.setVRange(vRange);
 }
 
 @customElement('rich-text')

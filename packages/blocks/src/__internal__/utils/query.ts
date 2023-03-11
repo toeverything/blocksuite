@@ -1,7 +1,7 @@
 import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { LeafBlot } from 'parchment';
+import type { VRange } from '@blocksuite/virgo';
 
 import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../index.js';
@@ -186,27 +186,112 @@ export function getEditorContainer(page: Page) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
-    throw new Error('Failed to check paper mode! Editor mode is not exists!');
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
   return mode === 'page';
+}
+
+/**
+ * Get editor viewport element.
+ *
+ * @example
+ * ```ts
+ * const viewportElement = getViewportElement(this.model.page);
+ * if (!viewportElement) return;
+ * this._disposables.addFromEvent(viewportElement, 'scroll', () => {
+ *   updatePosition();
+ * });
+ * ```
+ */
+export function getViewportElement(page: Page) {
+  const isPage = isPageMode(page);
+  if (!isPage) return null;
+  assertExists(page.root);
+  const defaultPageBlock = document.querySelector(
+    `[${ATTR}="${page.root.id}"]`
+  );
+
+  if (
+    !defaultPageBlock ||
+    defaultPageBlock.closest('affine-default-page') !== defaultPageBlock
+  ) {
+    throw new Error('Failed to get viewport element!');
+  }
+  return (defaultPageBlock as DefaultPageBlockComponent).viewportElement;
 }
 
 export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector(
+  const page = document.querySelector<DefaultPageBlockComponent>(
     `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  );
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
     return page;
   }
 
-  const element = page.querySelector(`[${ATTR}="${model.id}"]`);
-  return element as BlockComponentElement | null;
+  return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
+}
+
+export function asyncGetBlockElementByModel(
+  model: BaseBlockModel
+): Promise<BlockComponentElement | null> {
+  assertExists(model.page.root);
+  const page = document.querySelector<DefaultPageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
+  if (!page) return Promise.resolve(null);
+
+  if (model.id === model.page.root.id) {
+    return Promise.resolve(page);
+  }
+
+  let resolved = false;
+  return new Promise<BlockComponentElement>((resolve, reject) => {
+    const onSuccess = (element: BlockComponentElement) => {
+      resolved = true;
+      observer.disconnect();
+      resolve(element);
+    };
+
+    const onFail = () => {
+      observer.disconnect();
+      reject(
+        new Error(
+          `Cannot find block element by model: ${model.flavour} id: ${model.id}`
+        )
+      );
+    };
+
+    const observer = new MutationObserver(() => {
+      const blockElement = page.querySelector<BlockComponentElement>(
+        `[${ATTR}="${model.id}"]`
+      );
+      if (blockElement) {
+        onSuccess(blockElement);
+      }
+    });
+
+    observer.observe(page, {
+      childList: true,
+      subtree: true,
+    });
+
+    requestAnimationFrame(() => {
+      if (!resolved) {
+        const blockElement = getBlockElementByModel(model);
+        if (blockElement) {
+          onSuccess(blockElement);
+        } else {
+          onFail();
+        }
+      }
+    });
+  });
 }
 
 export function getStartModelBySelection(range = getCurrentNativeRange()) {
@@ -230,13 +315,29 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
 
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector<RichText>('rich-text');
+  if (!richText) return null;
+  return richText;
+}
+
+export async function asyncGetRichTextByModel(model: BaseBlockModel) {
+  const blockElement = await asyncGetBlockElementByModel(model);
+  const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
 
 // TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
+  // filter comment
+  if (
+    range.startContainer.nodeType === Node.COMMENT_NODE ||
+    range.endContainer.nodeType === Node.COMMENT_NODE ||
+    range.commonAncestorContainer.nodeType === Node.COMMENT_NODE
+  ) {
+    return [];
+  }
+
   let commonAncestor = range.commonAncestorContainer as HTMLElement;
   if (commonAncestor.nodeType === Node.TEXT_NODE) {
     const model = getStartModelBySelection(range);
@@ -334,70 +435,20 @@ export function getDOMRectByLine(
   }
 }
 
-function textWithoutNode(parentNode: Node, currentNode: Node) {
-  let text = '';
-  for (let i = 0; i < parentNode.childNodes.length; i++) {
-    const node = parentNode.childNodes[i];
+export function getVRangeByNode(node: Node): VRange | null {
+  if (!node.parentElement) return null;
 
-    if (node !== currentNode || !currentNode.contains(node)) {
-      // @ts-ignore
-      text += node.textContent || node.innerText || '';
-    } else {
-      return text;
-    }
-  }
-  return text;
-}
+  const richText = node.parentElement.closest('rich-text') as RichText;
+  const vEditor = richText?.vEditor;
+  if (!vEditor) return null;
 
-/**
- * FIXME: Use it carefully, it will skip soft enter!
- */
-export function getQuillIndexByNativeSelection(
-  ele: Node | null | undefined,
-  nodeOffset: number,
-  isStart = true
-) {
-  if (
-    ele instanceof Element &&
-    ele.classList.contains('affine-default-page-block-title-container')
-  ) {
-    return (
-      (isStart
-        ? ele.querySelector('input')?.selectionStart
-        : ele.querySelector('input')?.selectionEnd) || 0
-    );
-  }
-
-  let offset = 0;
-  let lastNode = ele;
-  let selfAdded = false;
-  while (
-    ele &&
-    // @ts-ignore
-    (!lastNode?.getAttributeNode ||
-      // @ts-ignore
-      !lastNode.getAttributeNode('contenteditable'))
-  ) {
-    if (ele instanceof Element && ele.hasAttribute(ATTR)) {
-      offset = 0;
-      break;
-    }
-    if (!selfAdded) {
-      selfAdded = true;
-      offset += nodeOffset;
-    } else {
-      offset += textWithoutNode(ele, lastNode as Node).length;
-    }
-    lastNode = ele;
-    ele = ele?.parentNode;
-  }
-  return offset;
+  return vEditor.getVRange();
 }
 
 /**
  * Get the specific text node and offset by the selected block.
- * The reverse implementation of {@link getQuillIndexByNativeSelection}
- * See also {@link getQuillIndexByNativeSelection}
+ * The reverse implementation of {@link getVRangeByNode}
+ * See also {@link getVRangeByNode}
  *
  * ```ts
  * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
@@ -439,9 +490,10 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   if (!richText) {
     throw new Error('Failed to get rich text element');
   }
-  const quill = richText.quill;
-  const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
-  return [leaf.domNode, leafOffset] as const;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
+  return [leaf, leafOffset] as const;
 }
 
 export function getAllBlocks() {

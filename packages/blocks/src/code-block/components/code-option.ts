@@ -1,43 +1,34 @@
-import {
-  BLOCK_ID_ATTR,
-  CopyIcon,
-  DeleteIcon,
-  LineWrapIcon,
-} from '@blocksuite/global/config';
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { CopyIcon, DeleteIcon, LineWrapIcon } from '@blocksuite/global/config';
+import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { copyCode } from '../../page-block/default/utils.js';
 
-export function toggleWrap(model: BaseBlockModel) {
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${model.id}"] .ql-syntax`
-  );
-  assertExists(syntaxElem);
-  syntaxElem.classList.toggle('wrap');
-}
-
-export function CodeOptionTemplate(codeBlockOption: {
+export function CodeOptionTemplate({
+  model,
+  position,
+  hoverState,
+  wrap,
+  onClickWrap,
+}: {
   position: { x: number; y: number };
   model: BaseBlockModel;
   hoverState: Slot<boolean>;
+  wrap: boolean;
+  onClickWrap: () => void;
 }) {
-  const page = codeBlockOption.model.page;
+  const page = model.page;
   const readonly = page.readonly;
 
   const style = {
-    left: codeBlockOption.position.x + 'px',
-    top: codeBlockOption.position.y + 'px',
+    position: 'fixed',
+    left: position.x + 'px',
+    top: position.y + 'px',
   };
-  const syntaxElem = document.querySelector(
-    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-  );
-  if (!syntaxElem) return html``;
 
-  const isWrapped = syntaxElem.classList.contains('wrap');
   return html`
     <style>
       .affine-codeblock-option-container > div {
@@ -45,49 +36,51 @@ export function CodeOptionTemplate(codeBlockOption: {
           z-index: 1;
       }
 
-      ${toolTipStyle}
+      ${tooltipStyle}
     </style>
 
     <div
-      class="affine-codeblock-option-container"
-      @mouseover=${() => codeBlockOption.hoverState.emit(true)}
-      @mouseout=${() => codeBlockOption.hoverState.emit(false)}
+      class="affine-codeblock-option"
+      style=${styleMap(style)}
+      @mouseover=${() => hoverState.emit(true)}
+      @mouseout=${() => hoverState.emit(false)}
     >
-      <div style=${styleMap(style)} class="code-block-option">
-        <format-bar-button
-          class="has-tool-tip"
-          @click=${() => copyCode(codeBlockOption.model)}
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="copy-button"
+        @click=${() => copyCode(model)}
+      >
+        ${CopyIcon}
+        <tool-tip inert tip-position="right-start" role="tooltip"
+          >Copy to Clipboard</tool-tip
         >
-          ${CopyIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Copy to Clipboard</tool-tip
-          >
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-          @click=${() => toggleWrap(codeBlockOption.model)}
+      </format-bar-button>
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="wrap-button"
+        ?active=${wrap}
+        @click=${onClickWrap}
+      >
+        ${LineWrapIcon}
+        <tool-tip inert tip-position="right-start" role="tooltip"
+          >Wrap code</tool-tip
         >
-          ${LineWrapIcon}
-          <tool-tip inert tip-position="right-start" role="tooltip"
-            >Wrap code</tool-tip
+      </format-bar-button>
+      ${readonly
+        ? ''
+        : html`<format-bar-button
+            data-testid="delete-button"
+            class="has-tool-tip"
+            @click=${() => {
+              if (readonly) return;
+              model.page.deleteBlock(model);
+            }}
           >
-        </format-bar-button>
-        ${readonly
-          ? ''
-          : html`<format-bar-button
-              class="has-tool-tip"
-              @click=${() => {
-                if (readonly) return;
-                const model = codeBlockOption.model;
-                model.page.deleteBlock(model);
-              }}
+            ${DeleteIcon}
+            <tool-tip inert tip-position="right-start" role="tooltip"
+              >Delete</tool-tip
             >
-              ${DeleteIcon}
-              <tool-tip inert tip-position="right-start" role="tooltip"
-                >Delete</tool-tip
-              >
-            </format-bar-button>`}
-      </div>
+          </format-bar-button>`}
     </div>
   `;
 }

@@ -22,7 +22,7 @@ export function ListIcon(
       case 'bulleted':
         return points[depth % points.length];
       case 'numbered':
-        return getNumberPrefix(depth, index);
+        return getNumberPrefix(index, depth);
       case 'todo':
         return model.checked ? checkboxChecked() : checkboxUnchecked();
       case 'toggle':

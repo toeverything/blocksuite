@@ -1,14 +1,17 @@
 // operations used in rich-text level
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
-  ExtendedModel,
+  asyncSetVRange,
+  type ExtendedModel,
   focusBlockByModel,
   focusTitle,
   getCurrentNativeRange,
@@ -34,21 +37,21 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
-  const blockProps = shouldInheritFlavour
-    ? {
-        flavour: model.flavour,
-        type: model.type,
-      }
-    : {
-        flavour: 'affine:paragraph',
-        type: 'text',
-      };
+  const getProps = ():
+    | ['affine:list', Partial<BlockModelProps['affine:list']>]
+    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
+    if (shouldInheritFlavour) {
+      return [model.flavour, { type: model.type }];
+    }
+    return ['affine:paragraph', { type: 'text' }];
+  };
+  const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
-    ? page.addBlock(blockProps, parent, index + 1)
+    ? page.addBlockByFlavour(flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
-      page.addBlock(blockProps, model, 0);
+      page.addBlockByFlavour(flavour, blockProps, model, 0);
 
   asyncFocusRichText(page, id);
 }
@@ -149,12 +152,8 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
-  // FIXME: after quill onload
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.quill.setSelection(offset, 0);
-  });
+  assertExists(model);
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -198,12 +197,8 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
       children: [...previousSibling.children, model, ...children],
     });
 
-    // FIXME: after quill onload
-    requestAnimationFrame(() => {
-      assertExists(model);
-      const richText = getRichTextByModel(model);
-      richText?.quill.setSelection(0, 0);
-    });
+    assertExists(model);
+    asyncSetVRange(model, { index: 0, length: 0 });
   });
 }
 
@@ -267,12 +262,8 @@ export function handleUnindent(
     ],
   });
 
-  // FIXME: after quill onload
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.quill.setSelection(offset, 0);
-  });
+  assertExists(model);
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
@@ -331,14 +322,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         previousSiblingParent &&
         matchFlavours(previousSiblingParent, ['affine:database'] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSiblingParent, 'end');
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSiblingParent, 'end');
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else if (
         previousSibling &&
         matchFlavours(previousSibling, [
@@ -353,7 +342,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           bringChildrenTo: previousSibling,
         });
         const richText = getRichTextByModel(previousSibling);
-        richText?.quill?.setSelection(preTextLength, 0);
+        richText?.vEditor?.setVRange({
+          index: preTextLength,
+          length: 0,
+        });
       } else if (
         previousSibling &&
         matchFlavours(previousSibling, [
@@ -362,14 +354,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           'affine:code',
         ] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSibling);
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSibling);
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else {
         // No previous sibling, it's the first block
         // Try to merge with the title

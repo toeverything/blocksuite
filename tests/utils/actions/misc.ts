@@ -2,7 +2,8 @@
 import '../declare-test-window.js';
 
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
+import type { ConsoleMessage, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import type {
   BaseBlockModel,
@@ -12,7 +13,7 @@ import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
-const RICH_TEXT_SELECTOR = '.ql-editor';
+const RICH_TEXT_SELECTOR = '.virgo-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   if (!process.env.CI) {
@@ -262,9 +263,9 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const codeBlockId = page.addBlockByFlavour('affine:code', {}, frameId);
     page.captureSync();
     return { pageId, frameId, codeBlockId };
   });
@@ -326,38 +327,39 @@ export async function initThreeDividers(page: Page) {
   await type(page, '123');
 }
 
-export async function getQuillSelectionIndex(page: Page) {
+export async function getVirgoSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    const index = component?.quill?.getSelection()?.index;
+    const index = component?.vEditor?.getVRange()?.index;
     return index !== undefined ? index : -1;
   });
 }
 
-export async function getQuillSelectionText(page: Page) {
+export async function getVirgoSelectionText(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    return component?.quill?.getText() || '';
+    return component?.vEditor?.yText.toString() ?? '';
   });
 }
 
-export async function getSelectedTextByQuill(page: Page) {
+export async function getSelectedTextByVirgo(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    // @ts-expect-error
-    const { index, length } = component.quill.getSelection();
-    return component?.quill?.getText(index, length) || '';
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { index, length } = component!.vEditor!.getVRange()!;
+    return component?.vEditor?.yText.toString().slice(index, length) || '';
   });
 }
 
-export async function setQuillSelection(
+export async function setVirgoSelection(
   page: Page,
   index: number,
   length: number
@@ -369,7 +371,10 @@ export async function setQuillSelection(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      component?.quill?.setSelection(index, length);
+      component?.vEditor?.setVRange({
+        index,
+        length,
+      });
     },
     { index, length }
   );
@@ -426,20 +431,29 @@ export async function setSelection(
 ) {
   await page.evaluate(
     ({ anchorBlockId, anchorOffset, focusBlockId, focusOffset }) => {
-      const begin = document.querySelector(
-        `[data-block-id="${anchorBlockId}"] p`
+      const anchorRichText = document.querySelector(
+        `[data-block-id="${anchorBlockId}"] rich-text`
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ) as any;
+      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
+        index: anchorOffset,
+        length: 0,
+      });
+      const focusRichText = document.querySelector(
+        `[data-block-id="${focusBlockId}"] rich-text`
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ) as any;
+      const focusRichTextRange = focusRichText.vEditor.toDomRange({
+        index: focusOffset,
+        length: 0,
+      });
+
+      getSelection()?.setBaseAndExtent(
+        anchorRichTextRange.startContainer,
+        anchorOffset,
+        focusRichTextRange.startContainer,
+        focusOffset
       );
-      const paragraph = document.querySelector(
-        `[data-block-id="${focusBlockId}"] p`
-      );
-      begin &&
-        paragraph &&
-        getSelection()?.setBaseAndExtent(
-          begin,
-          anchorOffset,
-          paragraph,
-          focusOffset
-        );
     },
     { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
   );
@@ -506,29 +520,28 @@ export async function getBlockModel<Model extends BaseBlockModel>(
 
 export async function getIndexCoordinate(
   page: Page,
-  [richTextIndex, quillIndex]: [number, number],
+  [richTextIndex, vIndex]: [number, number],
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const coord = await page.evaluate(
-    ({ richTextIndex, quillIndex, coordOffSet }) => {
+    ({ richTextIndex, vIndex, coordOffSet }) => {
       const richText = document.querySelectorAll('rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const quillBound = richText.quill.getBounds(quillIndex);
-      const richTextBound = richText.getBoundingClientRect();
+      const domRange = richText.vEditor.toDomRange({
+        index: vIndex,
+        length: 0,
+      });
+      const pointBound = domRange.getBoundingClientRect();
       return {
-        x: richTextBound.left + quillBound.left + coordOffSet.x,
-        y:
-          richTextBound.top +
-          quillBound.top +
-          quillBound.height / 2 +
-          coordOffSet.y,
+        x: pointBound.left + coordOffSet.x,
+        y: pointBound.top + pointBound.height / 2 + coordOffSet.y,
       };
     },
     {
       richTextIndex,
-      quillIndex,
+      vIndex,
       coordOffSet,
     }
   );
@@ -564,4 +577,30 @@ export async function shamefullyBlurActiveElement(page: Page) {
     }
     document.activeElement.blur();
   });
+}
+
+/**
+ * FIXME:
+ * Sometimes virgo state is not updated in time. Bad case like below:
+ *
+ * ```
+ * await focusRichText(page);
+ * await type(page, 'hello');
+ * await assertRichTexts(page, ['hello']);
+ * ```
+ *
+ * output(failed or flaky):
+ *
+ * ```
+ * - Expected  - 1
+ * + Received  + 1
+ *   Array [
+ * -   "hello",
+ * +   "ello",
+ *   ]
+ * ```
+ *
+ */
+export async function waitForVirgoStateUpdated(page: Page) {
+  await page.waitForTimeout(50);
 }

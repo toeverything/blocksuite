@@ -3,13 +3,12 @@ import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
-import type { Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space, StackItem } from '../space.js';
-import { RichTextAdapter, Text } from '../text-adapter.js';
+import { Space, type StackItem } from '../space.js';
+import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -445,22 +444,6 @@ export class Page extends Space<PageData> {
     return id;
   }
 
-  /**
-   * @deprecated use `addBlockByFlavour`
-   */
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string | null,
-    parentIndex?: number
-  ): string {
-    return this.addBlockByFlavour(
-      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
-      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
-      parent,
-      parentIndex
-    );
-  }
-
   updateBlockById(id: string, props: Partial<BlockProps>) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -546,6 +529,8 @@ export class Page extends Space<PageData> {
       syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
 
+    model.propsUpdated.emit();
+
     this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
@@ -626,6 +611,8 @@ export class Page extends Space<PageData> {
     }
     this._blockMap.delete(model.id);
 
+    model.propsUpdated.emit();
+
     this.transact(() => {
       this._yBlocks.delete(model.id);
       const children = model.children.map(model => model.id);
@@ -652,26 +639,6 @@ export class Page extends Space<PageData> {
       type: 'delete',
       id: model.id,
     });
-  }
-
-  /** Connect a rich text editor instance with a YText instance. */
-  attachRichText = (id: string, quill: Quill) => {
-    const yBlock = this._getYBlock(id);
-
-    const yText = yBlock.get('prop:text') as Y.Text | null;
-    if (!yText) {
-      throw new Error(`Block "${id}" does not have text`);
-    }
-
-    const adapter = new RichTextAdapter(this, yText, quill);
-    this.richTextAdapters.set(id, adapter);
-  };
-
-  /** Cancel the connection between the rich text editor instance and YText. */
-  detachRichText(id: string) {
-    const adapter = this.richTextAdapters.get(id);
-    adapter?.destroy();
-    this.richTextAdapters.delete(id);
   }
 
   syncFromExistingDoc() {

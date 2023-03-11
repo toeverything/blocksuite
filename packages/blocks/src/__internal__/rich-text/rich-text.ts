@@ -1,93 +1,34 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import type { LeafBlot } from 'parchment';
-import type { DeltaStatic, Quill as QuillType } from 'quill';
-import Quill from 'quill';
+import type { Highlighter, Lang } from 'shiki';
+import { z } from 'zod';
 
-import Syntax from '../../code-block/components/syntax-code-block.js';
+import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { createKeyboardBindings } from './keyboard.js';
-import { KeyboardWithEvent } from './quill-keyboard.js';
-
-Quill.register('modules/keyboard', KeyboardWithEvent, true);
-const Clipboard = Quill.import('modules/clipboard');
-
-class EmptyClipboard extends Clipboard {
-  onPaste() {
-    // No need to execute
-  }
-}
-
-Quill.register('modules/clipboard', EmptyClipboard, true);
-
-const Strike = Quill.import('formats/strike');
-// Quill uses <s> by default，but <s> is not supported by HTML5
-Strike.tagName = 'del';
-Quill.register(Strike, true);
-
-const CodeToken = Quill.import('modules/syntax');
-CodeToken.register();
-Syntax.register();
-Quill.register('modules/syntax', Syntax, true);
+import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
+import { attributesRenderer } from './virgo/attributes-renderer.js';
+import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
   static styles = css`
-    /*
- * This style is most simple to reset the default styles of the quill editor
- * User should custom the styles of the block in the block itself
- */
-    .ql-cursor-flag {
-      display: none;
-    }
-    .ql-container {
-      box-sizing: border-box;
+    .affine-rich-text {
       height: 100%;
-      margin: 0;
-      position: relative;
-    }
-    .ql-container.ql-disabled .ql-tooltip {
-      visibility: hidden;
-    }
-    .ql-clipboard {
-      left: -100000px;
-      height: 1px;
-      overflow-y: hidden;
-      position: absolute;
-      top: 50%;
-    }
-    .ql-container p {
-      margin: 0;
-      padding: 0;
-    }
-    .ql-editor {
-      box-sizing: border-box;
-      height: 100%;
+      width: 100%;
       outline: none;
-      tab-size: 4;
-      -moz-tab-size: 4;
-      text-align: left;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      margin: 3px 0;
-    }
-    .ql-editor > * {
       cursor: text;
-    }
-    .ql-editor.ql-blank::before {
-      color: var(--affine-disable-color);
-      content: attr(data-placeholder);
-      pointer-events: none;
-      position: absolute;
     }
   `;
 
-  @query('.affine-rich-text.quill-container')
-  private _textContainer!: HTMLDivElement;
-
-  quill!: QuillType;
+  @query('.affine-rich-text')
+  private _virgoContainer!: HTMLDivElement;
+  get virgoContainer() {
+    return this._virgoContainer;
+  }
 
   @property()
   host!: BlockHost;
@@ -96,140 +37,110 @@ export class RichText extends NonShadowLitElement {
   model!: BaseBlockModel;
 
   @property()
-  placeholder?: string;
+  codeBlockGetHighlighterOptions?: () => {
+    lang: Lang;
+    highlighter: Highlighter | null;
+  };
 
-  @property({ hasChanged: () => true })
-  modules: Record<string, unknown> = {};
-
-  // If one types a character after the code or link node,
-  // the character should not be inserted into the code or link node.
-  // So we check and remove the corresponding format manually.
-  private _handleInlineBoundaryInput() {
-    this.quill.on('text-change', (delta: DeltaStatic, oldDelta, source) => {
-      if (source !== 'user') return;
-
-      const selectorMap = {
-        code: 'code',
-        link: 'link-node',
-      } as const;
-      let attr: keyof typeof selectorMap | null = null;
-
-      if (!delta.ops) {
-        return;
-      }
-
-      if (delta.ops[1]?.attributes?.code) {
-        attr = 'code';
-      }
-      if (delta.ops[1]?.attributes?.link) {
-        attr = 'link';
-      }
-      // only length is 2 need to be handled
-      if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
-        const retain = delta.ops[0].retain;
-        const selector = selectorMap[attr];
-        if (retain !== undefined) {
-          const currentLeaf: [LeafBlot, number] = this.quill.getLeaf(
-            retain + Number(delta.ops[1]?.insert.toString().length)
-          );
-          const nextLeaf: [LeafBlot, number] = this.quill.getLeaf(
-            retain + Number(delta.ops[1]?.insert.toString().length) + 1
-          );
-          const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
-          const currentEmbedElement = currentParentElement?.closest(selector);
-          const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
-          const nextEmbedElement = nextParentElement?.closest(selector);
-          const insertedString: string = delta.ops[1]?.insert.toString();
-
-          // if insert to the same node, no need to handle
-          // For example,
-          // `inline |code`
-          //         ⬆️ should not remove format when insert to inside the format
-          if (
-            // At the end of the node, need to remove format
-            !nextEmbedElement ||
-            // At the edge of the node, need to remove format
-            nextEmbedElement !== currentEmbedElement
-          ) {
-            this.model.text?.replace(
-              retain,
-              insertedString.length,
-              ' ' + insertedString,
-              {
-                [attr]: false,
-              }
-            );
-          }
-        }
-      }
-    });
+  private _vEditor: AffineVEditor | null = null;
+  get vEditor() {
+    return this._vEditor;
   }
 
   firstUpdated() {
-    const { host, model, placeholder, _textContainer } = this;
-    const { page } = host;
-    const keyboardBindings = createKeyboardBindings(page, model);
+    assertExists(this.model.text, 'rich-text need text to init.');
+    this._vEditor = new VEditor(this.model.text.yText);
+    if (this.codeBlockGetHighlighterOptions) {
+      this._vEditor.setAttributesSchema(z.object({}));
+      this._vEditor.setAttributesRenderer(
+        getCodeLineRenderer(this.codeBlockGetHighlighterOptions)
+      );
+    } else {
+      this._vEditor.setAttributesRenderer(attributesRenderer);
+      this._vEditor.setAttributesSchema(affineTextAttributes);
+    }
 
-    this.quill = new Quill(_textContainer, {
-      modules: Object.assign(
-        {
-          toolbar: false,
-          history: {
-            maxStack: 0,
-            userOnly: true,
-          },
-          keyboard: {
-            bindings: keyboardBindings,
-          },
-        },
-        this.modules
-      ),
-      placeholder,
+    const keyboardBindings = createKeyboardBindings(
+      this.model.page,
+      this.model
+    );
+    const keyDownHandler = createKeyDownHandler(
+      this._vEditor,
+      keyboardBindings
+    );
+
+    this._vEditor.mount(this._virgoContainer);
+    this._vEditor.bindHandlers({
+      keydown: keyDownHandler,
+      virgoInput: e => {
+        const vEditor = this._vEditor;
+        assertExists(vEditor);
+        const vRange = vEditor.getVRange();
+        if (!vRange || vRange.length !== 0) {
+          return false;
+        }
+
+        const deltas = vEditor.getDeltasByVRange(vRange);
+        if (
+          deltas.length === 1 &&
+          vRange.index !== 0 &&
+          vRange.index !== vEditor.yText.length &&
+          e.data &&
+          e.data !== '\n'
+        ) {
+          const attributes = deltas[0][0].attributes;
+          vEditor.insertText(vRange, e.data, attributes);
+          vEditor.setVRange({
+            index: vRange.index + 1,
+            length: 0,
+          });
+          return true;
+        }
+
+        return false;
+      },
+      virgoCompositionEnd: e => {
+        const { data } = e;
+        const vEditor = this._vEditor;
+        assertExists(vEditor);
+        const vRange = vEditor.getVRange();
+        if (!vRange || vRange.length !== 0) {
+          return false;
+        }
+
+        const index = vRange.index;
+        const deltas = vEditor.getDeltasByVRange(vRange);
+        if (
+          index >= 0 &&
+          data &&
+          data !== '\n' &&
+          deltas.length === 1 &&
+          vRange.index !== 0 &&
+          vRange.index !== vEditor.yText.length
+        ) {
+          const attributes = deltas[0][0].attributes;
+          vEditor.insertText(vRange, data, attributes);
+          vEditor.setVRange({
+            index: index + data.length,
+            length: 0,
+          });
+          return true;
+        }
+        return false;
+      },
     });
 
-    page.attachRichText(model.id, this.quill);
-    this.model.propsUpdated.on(() => this.requestUpdate());
-
-    if (this.modules.syntax && this.quill.getText() === '\n') {
-      this.quill.focus();
-    }
-
-    this._handleInlineBoundaryInput();
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    const { model, host } = this;
-    if (this.quill) {
-      host.page.attachRichText(model.id, this.quill);
-    }
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this.host.page.detachRichText(this.model.id);
+    this._vEditor.setReadonly(this.model.page.readonly);
   }
 
   updated() {
-    if (this.modules.syntax) {
-      //@ts-ignore
-      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
+    if (this._vEditor) {
+      this._vEditor.setReadonly(this.model.page.readonly);
     }
-    // Update placeholder if block`s type changed
-    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
-    this.quill?.root.setAttribute(
-      'contenteditable',
-      `${!this.model.page.readonly}`
-    );
   }
 
   render() {
-    return html`
-      <div class="affine-rich-text quill-container ql-container">
-        <slot></slot>
-      </div>
-    `;
+    return html`<div class="affine-rich-text virgo-editor"></div>`;
   }
 }
 

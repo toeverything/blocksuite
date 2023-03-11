@@ -1,17 +1,19 @@
 import {
   getCurrentBlockRange,
   getDefaultPageBlock,
+  getRichTextByModel,
   handleBlockSelectionBatchDelete,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   getStartModelBySelection,
   handleBlockSplit,
 } from '@blocksuite/blocks';
+import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, Text } from '@blocksuite/store';
-import type { DeltaOperation } from 'quill';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { type DeltaOperation, Text } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
@@ -77,13 +79,13 @@ export class PasteManager {
   };
 
   /* FIXME
-      private get _selection() {
-        const page =
-          document.querySelector<DefaultPageBlockComponent>('default-page-block');
-        if (!page) throw new Error('No page block');
-        return page.selection;
-      }
-      */
+              private get _selection() {
+                const page =
+                  document.querySelector<DefaultPageBlockComponent>('default-page-block');
+                if (!page) throw new Error('No page block');
+                return page.selection;
+              }
+              */
 
   private _clipboardEvent2Blocks(
     e: ClipboardEvent
@@ -215,8 +217,9 @@ export class PasteManager {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.page.addBlock(
-              { flavour: 'affine:frame' },
+            const id = this._editor.page.addBlockByFlavour(
+              'affine:frame',
+              {},
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
@@ -338,10 +341,17 @@ export class PasteManager {
           }
         }
         setTimeout(() => {
-          lastId &&
-            this._editor.page.richTextAdapters
-              .get(lastId)
-              ?.quill.setSelection(position, 0);
+          const block = this._editor.page.getBlockById(lastId);
+          if (block) {
+            const richText = getRichTextByModel(block);
+            const vEditor = richText?.vEditor;
+            if (vEditor) {
+              vEditor.setVRange({
+                index: position,
+                length: 0,
+              });
+            }
+          }
         });
       } else {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);
@@ -358,8 +368,9 @@ export class PasteManager {
           if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.page.addBlock(
-              { flavour: 'affine:frame' },
+            const id = this._editor.page.addBlockByFlavour(
+              'affine:frame',
+              {},
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
@@ -382,10 +393,9 @@ export class PasteManager {
     index: number,
     addBlockIds: string[]
   ) {
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
+    blocks.forEach((block, i) => {
+      const flavour = block.flavour as keyof BlockModels;
       const blockProps = {
-        flavour: block.flavour as string,
         type: block.type as string,
         checked: block.checked,
         sourceId: block.sourceId,
@@ -394,10 +404,14 @@ export class PasteManager {
         height: block.height,
         language: block.language,
       };
-      const id = this._editor.page.addBlock(blockProps, parent, index + i);
+      const id = this._editor.page.addBlockByFlavour(
+        flavour,
+        blockProps,
+        parent,
+        index + i
+      );
       const model = this._editor.page.getBlockById(id);
 
-      const flavour = model?.flavour;
       const initialProps =
         flavour && this._editor.page.getInitialPropsMapByFlavour(flavour);
       if (initialProps && initialProps.text instanceof Text) {
@@ -406,6 +420,6 @@ export class PasteManager {
 
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);
-    }
+    });
   }
 }

@@ -11,10 +11,10 @@ import * as store from '@blocksuite/store';
 import {
   assertExists,
   DebugDocProvider,
-  DocProviderConstructor,
+  type DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  StoreOptions,
+  type StoreOptions,
   Utils,
   Workspace,
 } from '@blocksuite/store';
@@ -66,7 +66,7 @@ if (isE2E) {
       });
       const buffer = await file.arrayBuffer();
       const workspace = new Workspace({
-        room: 'temporary',
+        id: 'temporary',
       })
         .register(builtInSchemas)
         .register(__unstableSchemas);
@@ -120,9 +120,9 @@ export async function tryInitExternalContent(
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
  * We use webrtcDocProvider by default if the `providers` param is missing.
  */
-export function getOptions(): Pick<
+export function createWorkspaceOptions(): Pick<
   StoreOptions,
-  'providers' | 'idGenerator' | 'room' | 'defaultFlags'
+  'providers' | 'idGenerator' | 'id' | 'defaultFlags'
 > {
   const providers: DocProviderConstructor[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
@@ -145,7 +145,7 @@ export function getOptions(): Pick<
   }
 
   return {
-    room,
+    id: room,
     providers,
     idGenerator,
     defaultFlags: {

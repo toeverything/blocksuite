@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
-import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -16,9 +16,10 @@ import {
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
-  SelectionPosition,
+  type SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';
@@ -112,6 +113,9 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
+  @property()
+  model!: PageBlockModel;
+
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -142,6 +146,9 @@ export class DefaultPageBlockComponent
   @state()
   private _embedEditingState!: EmbedEditingState | null;
 
+  @state()
+  private _isComposing = false;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   @query('.affine-default-viewport')
@@ -154,9 +161,6 @@ export class DefaultPageBlockComponent
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
-
-  @property({ hasChanged: () => true })
-  model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
   private _titleContainer!: HTMLElement;
@@ -175,8 +179,21 @@ export class DefaultPageBlockComponent
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
+      paste: this._onTitlePaste,
     });
-    this._titleVEditor.setReadonly(this.page.readonly);
+
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionstart',
+      () => (this._isComposing = true)
+    );
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionend',
+      () => (this._isComposing = false)
+    );
+
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
         title: this.model.title.toString(),
@@ -188,9 +205,7 @@ export class DefaultPageBlockComponent
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
-    if (e.isComposing) {
-      return;
-    }
+    if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
     const defaultFrame = model.children[0];
@@ -232,6 +247,23 @@ export class DefaultPageBlockComponent
         asyncFocusRichText(page, newFirstParagraphId);
       }
       return;
+    }
+  };
+
+  private _onTitlePaste = (event: ClipboardEvent) => {
+    const vEditor = this._titleVEditor;
+    if (!vEditor) return;
+    const vRange = vEditor.getVRange();
+    if (!vRange) return;
+
+    const data = event.clipboardData?.getData('text/plain');
+    if (data) {
+      const text = data.replace(/(\r\n|\r|\n)/g, '\n');
+      vEditor.insertText(vRange, text);
+      vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
     }
   };
 
@@ -327,14 +359,40 @@ export class DefaultPageBlockComponent
   //  that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(e)) {
-      return;
-    }
+    if (isControlledKeyboardEvent(e) || this.page.readonly) return;
     // Only the length of character buttons is 1
     if (e.key.length === 1 && hasNativeSelection()) {
       const range = getCurrentNativeRange();
       if (isMultiBlockRange(range)) {
         deleteModelsByRange(this.page);
+
+        // handle user input
+        const blockRange = getCurrentBlockRange(this.page);
+        if (
+          !blockRange ||
+          blockRange.models.length === 0 ||
+          blockRange.type !== 'Native'
+        ) {
+          return;
+        }
+        const startBlock = blockRange.models[0];
+        const richText = getRichTextByModel(startBlock);
+        if (richText) {
+          const vEditor = richText.vEditor;
+          if (vEditor) {
+            vEditor.insertText(
+              {
+                index: blockRange.startOffset,
+                length: 0,
+              },
+              e.key
+            );
+            vEditor.setVRange({
+              index: blockRange.startOffset + 1,
+              length: 0,
+            });
+          }
+        }
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {
@@ -401,27 +459,25 @@ export class DefaultPageBlockComponent
 
     slots.draggingAreaUpdated.on(rect => {
       this._draggingArea = rect;
-      this.requestUpdate();
     });
     slots.selectedRectsUpdated.on(rects => {
       this._selectedRects = rects;
-      this.requestUpdate();
     });
     slots.embedRectsUpdated.on(rects => {
       this._selectedEmbedRects = rects;
       if (rects.length === 0) {
         this._embedEditingState = null;
       }
-      this.requestUpdate();
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-      this.requestUpdate();
     });
     slots.nativeSelectionToggled.on(flag => {
       if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
       else window.removeEventListener('keydown', this._handleNativeKeydown);
     });
+
+    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   private _initFrameSizeEffect() {
@@ -449,9 +505,9 @@ export class DefaultPageBlockComponent
   }
 
   firstUpdated() {
-    const { page, selection, slots } = this;
+    const { page, selection } = this;
 
-    bindHotkeys(page, selection, slots);
+    bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
     this._initSlotEffects();
@@ -515,8 +571,9 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${!this._titleContainer ||
-              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+              class="affine-default-page-block-title ${(!this.model.title ||
+                !this.model.title.length) &&
+              !this._isComposing
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>

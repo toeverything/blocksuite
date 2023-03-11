@@ -1,6 +1,6 @@
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import type { EditorProps } from '@blocksuite/react/editor';
-import { Page, Workspace } from '@blocksuite/store';
+import { type Page, Workspace } from '@blocksuite/store';
 import dynamic from 'next/dynamic';
 
 import { Layout } from '../layouts/Layout';
@@ -14,7 +14,7 @@ const Editor: React.ComponentType<EditorProps> = dynamic(
 );
 
 const localWorkspace = new Workspace({
-  room: 'suspense',
+  id: 'suspense',
   providers: [],
   isSSR: typeof window === 'undefined',
 });

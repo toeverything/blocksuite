@@ -14,7 +14,6 @@ import {
   assertExists,
   DisposableGroup,
   isFirefox,
-  Slot,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -35,7 +34,7 @@ import {
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
-import { toolTipStyle } from './tooltip/tooltip.js';
+import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
   affine-block-hub {
@@ -109,11 +108,18 @@ const styles = css`
     height: 20px;
   }
 
-  .card-container:hover {
+  .card-container-inner:hover .card-container {
     background: var(--affine-card-hover-background);
     fill: var(--affine-primary-color);
     top: -2px;
     left: -2px;
+  }
+
+  .card-container-inner:hover .card-container.grabbing {
+    top: unset;
+    left: unset;
+    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+      0 0 12px rgba(66, 65, 73, 0.08);
   }
 
   .card-description-container {
@@ -131,13 +137,6 @@ const styles = css`
     line-height: var(--affine-line-height);
     color: var(--affine-secondary-text-color);
     white-space: pre;
-  }
-
-  .card-container:hover.grabbing {
-    top: unset;
-    left: unset;
-    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-      0 0 12px rgba(66, 65, 73, 0.08);
   }
 
   .grabbing {
@@ -245,7 +244,7 @@ const styles = css`
     transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
   }
 
-  ${toolTipStyle}
+  ${tooltipStyle}
 `;
 
 type BlockHubItem = {
@@ -254,7 +253,7 @@ type BlockHubItem = {
   name: string;
   description: string;
   icon: unknown;
-  toolTip: string;
+  tooltip: string;
 };
 
 type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
@@ -295,33 +294,35 @@ function BlockHubCards(
     >
       <div class="affine-block-hub-title-container">${title}</div>
       ${blockHubItems.map(
-        ({ flavour, type, name, description, icon, toolTip }, index) => {
+        ({ flavour, type, name, description, icon, tooltip }, index) => {
           return html`
             <div class="card-container-wrapper">
-              <div
-                class="card-container has-tool-tip ${isGrabbing
-                  ? 'grabbing'
-                  : ''}"
-                draggable="true"
-                affine-flavour=${flavour}
-                affine-type=${type ?? ''}
-              >
-                <div class="card-description-container">
-                  <div>${name}</div>
-                  <div class="description">${description}</div>
-                </div>
-                <div class="card-icon-container">${icon}</div>
-                <tool-tip
-                  tip-position=${shouldScroll &&
-                  index === blockHubItems.length - 1
-                    ? 'top'
-                    : 'bottom'}
-                  style="${showTooltip
-                    ? ''
-                    : 'display: none'}; z-index: ${blockHubItems.length -
-                  index}"
-                  >${toolTip}</tool-tip
+              <div class="card-container-inner">
+                <div
+                  class="card-container has-tool-tip ${isGrabbing
+                    ? 'grabbing'
+                    : ''}"
+                  draggable="true"
+                  affine-flavour=${flavour}
+                  affine-type=${type ?? ''}
                 >
+                  <div class="card-description-container">
+                    <div>${name}</div>
+                    <div class="description">${description}</div>
+                  </div>
+                  <div class="card-icon-container">${icon}</div>
+                  <tool-tip
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="${showTooltip
+                      ? ''
+                      : 'display: none'}; z-index: ${blockHubItems.length -
+                    index}"
+                    >${tooltip}</tool-tip
+                  >
+                </div>
               </div>
             </div>
           `;
@@ -517,90 +518,67 @@ export class BlockHub extends NonShadowLitElement {
   connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
-    disposables.add(
-      Slot.disposableListener(this, 'dragstart', this._onDragStart)
-    );
-    disposables.add(Slot.disposableListener(this, 'drag', this._onDrag));
-    disposables.add(Slot.disposableListener(this, 'dragend', this._onDragEnd));
+    disposables.addFromEvent(this, 'dragstart', this._onDragStart);
+    disposables.addFromEvent(this, 'drag', this._onDrag);
+    disposables.addFromEvent(this, 'dragend', this._onDragEnd);
 
-    disposables.add(
-      Slot.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
-    );
-    disposables.add(
-      Slot.disposableListener(this._mouseRoot, 'drop', this._onDrop)
-    );
-    isFirefox &&
-      disposables.add(
-        Slot.disposableListener(
-          this._mouseRoot,
-          'dragover',
-          this._onDragOverDocument
-        )
+    disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
+    disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
+    disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
+
+    if (isFirefox) {
+      disposables.addFromEvent(
+        this._mouseRoot,
+        'dragover',
+        this._onDragOverDocument
       );
-    disposables.add(
-      Slot.disposableListener(this, 'mousedown', this._onMouseDown)
-    );
+    }
+
     this._onResize();
   }
 
   firstUpdated() {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      disposables.add(
-        Slot.disposableListener(card, 'mousedown', this._onCardMouseDown)
-      );
-      disposables.add(
-        Slot.disposableListener(card, 'mouseup', this._onCardMouseUp)
-      );
+      disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
+      disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
     });
     for (const blockHubMenu of this._blockHubMenus) {
-      disposables.add(
-        Slot.disposableListener(
-          blockHubMenu,
-          'mouseover',
-          this._onBlockHubMenuMouseOver
-        )
+      disposables.addFromEvent(
+        blockHubMenu,
+        'mouseover',
+        this._onBlockHubMenuMouseOver
       );
       if (blockHubMenu.getAttribute('type') === 'blank') {
-        disposables.add(
-          Slot.disposableListener(
-            blockHubMenu,
-            'mousedown',
-            this._onBlankMenuMouseDown
-          )
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mousedown',
+          this._onBlankMenuMouseDown
         );
-        disposables.add(
-          Slot.disposableListener(
-            blockHubMenu,
-            'mouseup',
-            this._onBlankMenuMouseUp
-          )
+        disposables.addFromEvent(
+          blockHubMenu,
+          'mouseup',
+          this._onBlankMenuMouseUp
         );
       }
     }
-    disposables.add(
-      Slot.disposableListener(
-        this._blockHubMenuEntry,
-        'mouseover',
-        this._onBlockHubEntryMouseOver
-      )
+    disposables.addFromEvent(
+      this._blockHubMenuEntry,
+      'mouseover',
+      this._onBlockHubEntryMouseOver
     );
-    disposables.add(Slot.disposableListener(document, 'click', this._onClick));
-    disposables.add(
-      Slot.disposableListener(
-        this._blockHubButton,
-        'click',
-        this._onBlockHubButtonClick
-      )
+    disposables.addFromEvent(document, 'click', this._onClick);
+    disposables.addFromEvent(
+      this._blockHubButton,
+      'click',
+      this._onBlockHubButtonClick
     );
-    disposables.add(
-      Slot.disposableListener(
-        this._blockHubIconsContainer,
-        'transitionstart',
-        this._onTransitionStart
-      )
+    disposables.addFromEvent(
+      this._blockHubIconsContainer,
+      'transitionstart',
+      this._onTransitionStart
     );
-    disposables.add(Slot.disposableListener(window, 'resize', this._onResize));
+    disposables.addFromEvent(window, 'resize', this._onResize);
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );

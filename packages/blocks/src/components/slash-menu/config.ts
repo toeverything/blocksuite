@@ -11,8 +11,8 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
-import { Page, Text } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
@@ -24,7 +24,10 @@ import {
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 // import { formatConfig } from '../../page-block/utils/const.js';
-import { updateBlockType } from '../../page-block/utils/index.js';
+import {
+  onModelTextUpdated,
+  updateBlockType,
+} from '../../page-block/utils/index.js';
 import { toast } from '../toast.js';
 
 export type SlashItem = {
@@ -39,14 +42,18 @@ function insertContent(model: BaseBlockModel, text: string) {
     throw new Error("Can't insert text! Text not found");
   }
   const richText = getRichTextByModel(model);
-  const quill = richText?.quill;
-  if (!quill) {
-    throw new Error("Can't insert text! Quill not found");
+  const vEditor = richText?.vEditor;
+  if (!vEditor) {
+    throw new Error("Can't insert text! vEditor not found");
   }
-  const index = quill.getSelection()?.index || model.text.length;
+  const vRange = vEditor.getVRange();
+  const index = vRange ? vRange.index : model.text.length;
   model.text.insert(text, index);
   // Update the caret to the end of the inserted text
-  quill.setSelection(index + text.length, 0);
+  vEditor.setVRange({
+    index: index + text.length,
+    length: 0,
+  });
 }
 
 const dividerItem: SlashItem = {
@@ -81,14 +88,14 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
                 );
               }
               const codeModel = newModels[0];
-              requestAnimationFrame(() =>
+              onModelTextUpdated(codeModel, () => {
                 restoreSelection({
                   type: 'Native',
                   startOffset: 0,
                   endOffset: 0,
                   models: [codeModel],
-                })
-              );
+                });
+              });
             }
           },
         })),

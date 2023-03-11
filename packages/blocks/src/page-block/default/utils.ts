@@ -8,14 +8,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getCurrentNativeRange,
   getRichTextByModel,
-  OpenBlockInfo,
-  resetNativeSelection,
+  type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -496,14 +494,18 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function copyCode(model: BaseBlockModel) {
   const richText = getRichTextByModel(model);
   assertExists(richText);
-  const quill = richText.quill;
-  quill.setSelection(0, quill.getLength());
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange({
+    index: 0,
+    length: vEditor.yText.length,
+  });
   document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
 
-  const range = getCurrentNativeRange();
-  range.setStart(richText, 0);
-  range.setEnd(richText, 0);
-  resetNativeSelection(range);
+  vEditor.setVRange({
+    index: vEditor.yText.length,
+    length: 0,
+  });
 
   toast('Copied to clipboard');
 }
@@ -573,7 +575,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = type;
 
-      requestAnimationFrame(() => {
+      defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
         defaultPageBlock.selection.setSelectedBlocks(

@@ -1,20 +1,24 @@
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   addCodeBlock,
   copyByKeyboard,
   createCodeBlock,
   dragBetweenCoords,
+  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getQuillSelectionText,
+  getVirgoSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressArrowLeft,
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  SHORT_KEY,
   switchReadonly,
   type,
   undoByKeyboard,
@@ -43,14 +47,19 @@ function getCodeBlock(page: Page) {
   };
 
   const langList = codeBlock.locator('lang-list');
-  const codeOption = page.locator('.code-block-option');
-
+  const codeOption = page.locator('.affine-codeblock-option');
+  const copyButton = codeOption.getByTestId('copy-button');
+  const wrapButton = codeOption.getByTestId('wrap-button');
+  const deleteButton = codeOption.getByTestId('delete-button');
   return {
     codeBlock,
     languageButton,
     clickLanguageButton,
     langList,
     codeOption,
+    copyButton,
+    wrapButton,
+    deleteButton,
   };
 }
 
@@ -131,10 +140,9 @@ test('use more than three backticks can not create code block', async ({
 
   const codeBlockLocator = page.locator('affine-code');
   await expect(codeBlockLocator).toBeHidden();
-  const inlineCodelocator = page.locator('code');
+  const inlineCodelocator = page.getByText('```');
   await expect(inlineCodelocator).toBeVisible();
-  const codes = await inlineCodelocator.innerText();
-  expect(codes).toEqual('```');
+  expect(await inlineCodelocator.count()).toEqual(1);
 });
 
 test('use shortcut can create code block', async ({ page }) => {
@@ -229,33 +237,21 @@ use fern::{
   await expect(locator).toBeHidden();
 });
 
-test('drag copy paste', async ({ page }) => {
+// FIXEME: wait for paste refactor in code block
+test.skip('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
   await type(page, 'use');
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('pre');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return {
-      startX: bbox.left,
-      startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.left + 100,
-      endY: bbox.bottom - bbox.height / 2,
-    };
-  });
 
-  await dragBetweenCoords(
-    page,
-    { x: position.startX, y: position.startY },
-    { x: position.endX, y: position.endY }
-  );
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
   await copyByKeyboard(page);
-  await pasteByKeyboard(page);
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
 
-  const content = await getQuillSelectionText(page);
-  expect(content).toBe('useuse\n');
+  const content = await getVirgoSelectionText(page);
+  expect(content).toBe('useuse');
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -265,15 +261,13 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   await type(page, 'use');
   await page.keyboard.down('Shift');
-  for (let i = 0; i < 'use'.length; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 'use'.length);
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
 
-  const content = await getQuillSelectionText(page);
-  expect(content).toBe('useuse\n');
+  const content = await getVirgoSelectionText(page);
+  expect(content).toBe('useuse');
 });
 
 test.skip('use keyboard copy inside code block copy plain text', async ({
@@ -329,7 +323,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
 
   await page.mouse.move(position.x, position.y);
@@ -368,12 +362,12 @@ test('code block copy button can work', async ({ page }) => {
 
   const position = await getCenterPosition(
     page,
-    '.code-block-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > format-bar-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
   await focusRichText(page);
   await pasteByKeyboard(page);
-  await assertRichTexts(page, ['useuse\n']);
+  await assertRichTexts(page, ['useuse']);
 });
 
 test('split code by enter', async ({ page }) => {
@@ -384,18 +378,16 @@ test('split code by enter', async ({ page }) => {
   await type(page, 'hello');
 
   // he|llo
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
 
   await pressEnter(page);
-  await assertRichTexts(page, ['he\nllo\n']);
+  await assertRichTexts(page, ['he\nllo']);
 
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['hello\n']);
+  await assertRichTexts(page, ['hello']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['he\nllo\n']);
+  await assertRichTexts(page, ['he\nllo']);
 });
 
 test('split code with selection by enter', async ({ page }) => {
@@ -413,13 +405,13 @@ test('split code with selection by enter', async ({ page }) => {
   await page.keyboard.up('Shift');
 
   await pressEnter(page);
-  await assertRichTexts(page, ['he\no\n']);
+  await assertRichTexts(page, ['he\no']);
 
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['hello\n']);
+  await assertRichTexts(page, ['hello']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['he\no\n']);
+  await assertRichTexts(page, ['he\no']);
 });
 
 test('drag select code block can delete it', async ({ page }) => {
@@ -465,6 +457,21 @@ test('press enter twice at end of code block can jump out', async ({
   await expect(locator).toBeVisible();
 });
 
+test('press enter twice at end of code block with content can jump out', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = 10;');
+  await pressEnter(page);
+  await pressEnter(page);
+
+  const locator = page.locator('affine-paragraph');
+  await expect(locator).toBeVisible();
+});
+
 test('press ArrowDown before code block can select code block', async ({
   page,
 }) => {
@@ -474,7 +481,7 @@ test('press ArrowDown before code block can select code block', async ({
 
   await pressEnter(page);
   await addCodeBlock(page);
-  await page.keyboard.press('ArrowUp');
+  await focusRichText(page);
   await page.keyboard.press('ArrowDown');
 
   const locator = page.locator('.affine-page-selected-rects-container > *');
@@ -533,12 +540,12 @@ test('undo and redo works in code block', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
-  await assertRichTexts(page, ['const a = 10;\n']);
+  await assertRichTexts(page, ['const a = 10;']);
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, ['']);
 
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['const a = 10;\n']);
+  await assertRichTexts(page, ['const a = 10;']);
 });
 
 test('code block option can appear and disappear during mousemove', async ({
@@ -567,9 +574,9 @@ test('code block option can appear and disappear during mousemove', async ({
   const position = await getPosition('affine-code');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.code-block-option');
+  const optionPosition = await getPosition('.affine-codeblock-option');
   await page.mouse.move(optionPosition.x, optionPosition.y);
-  const locator = page.locator('.code-block-option');
+  const locator = page.locator('.affine-codeblock-option');
   await expect(locator).toBeVisible();
   await page.mouse.move(optionPosition.right + 10, optionPosition.y);
   await expect(locator).toBeHidden();
@@ -581,11 +588,34 @@ test('should tab works in code block', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
-  await assertRichTexts(page, ['const a = 10;\n']);
+  await assertRichTexts(page, ['const a = 10;']);
   await page.keyboard.press('Tab');
-  await assertRichTexts(page, ['  const a = 10;\n']);
+  await assertRichTexts(page, ['  const a = 10;']);
   await page.keyboard.press(`Shift+Tab`);
-  await assertRichTexts(page, ['const a = 10;\n']);
+  await assertRichTexts(page, ['const a = 10;']);
+});
+
+test('should code block wrap active after click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).toHaveAttribute('active', '');
+  await codeBlockController.wrapButton.click();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).not.toHaveAttribute(
+    'active',
+    ''
+  );
 });
 
 test('should code block works in read only mode', async ({ page }) => {

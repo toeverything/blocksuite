@@ -1,40 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DeltaInsert, TextAttributes } from '@blocksuite/virgo';
-import type { DeltaOperation, Quill } from 'quill';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
-import type { Space } from './space.js';
-
-// Removes the pending '\n's if it has no attributes
-export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
-  if (delta.length > 0) {
-    const d = delta[delta.length - 1];
-    const insert: string = d.insert;
-    if (
-      d.attributes === undefined &&
-      insert !== undefined &&
-      insert.slice(-1) === '\n'
-    ) {
-      delta = delta.slice();
-      let ins = insert.slice(0, -1);
-      while (ins.slice(-1) === '\n') {
-        ins = ins.slice(0, -1);
-      }
-      delta[delta.length - 1] = { insert: ins };
-      if (ins.length === 0) {
-        delta.pop();
-      }
-      return delta;
-    }
-  }
-  return delta;
+export interface OptionalAttributes {
+  attributes?: {
+    [key: string]: any;
+  };
 }
+export type DeltaOperation = {
+  insert?: any;
+  delete?: number;
+  retain?: number;
+} & OptionalAttributes;
 
 declare module 'yjs' {
   interface Text {
     /**
      * Specific addition used by @blocksuite/store
-     * When set, we know it hasn't been applied to quill.
+     * When set, we know it hasn't been applied to virgo.
      * When specified, we call this a "controlled operation".
      *
      * Consider renaming this to closer indicate this is simply a "controlled operation",
@@ -259,7 +242,7 @@ export class Text {
     index: number,
     length: number,
     content: string,
-    attributes?: TextAttributes
+    attributes?: BaseTextAttributes
   ) {
     if (index < 0 || length < 0 || index + length > this._yText.length) {
       throw new Error(
@@ -352,131 +335,4 @@ export class Text {
   toString() {
     return this._yText?.toString() || '';
   }
-}
-
-export class RichTextAdapter {
-  readonly space: Space;
-  readonly doc: Y.Doc;
-  readonly yText: Y.Text;
-  readonly quill: Quill;
-  readonly quillCursors: any;
-  private _negatedUsedFormats: Record<string, any>;
-
-  constructor(space: Space, yText: Y.Text, quill: Quill) {
-    this.space = space;
-    this.yText = yText;
-    this.doc = space.doc;
-    this.quill = quill;
-    const quillCursors = quill.getModule('cursors') || null;
-    this.quillCursors = quillCursors;
-    // This object contains all attributes used in the quill instance
-    this._negatedUsedFormats = {};
-
-    this.yText.observe(this._yObserver);
-
-    // This indirectly initializes _negatedUsedFormats.
-    // Make sure this calls after the _quillObserver is set.
-    quill.setContents(yText.toDelta(), this as any);
-    quill.on('editor-change', this._quillObserver as any);
-  }
-
-  private _yObserver = (event: Y.YTextEvent) => {
-    const isFromLocal = event.transaction.origin === this.doc.clientID;
-    const isFromRemote = !isFromLocal;
-    const isControlledOperation = !!event.target?.meta;
-
-    // update quill if the change is from remote or using controlled operation
-    const quillMustApplyUpdate = isFromRemote || isControlledOperation;
-
-    if (quillMustApplyUpdate) {
-      const eventDelta = event.delta;
-      // We always explicitly set attributes, otherwise concurrent edits may
-      // result in quill assuming that a text insertion shall inherit existing
-      // attributes.
-      const delta: any = [];
-      for (let i = 0; i < eventDelta.length; i++) {
-        const d = eventDelta[i];
-        if (d.insert !== undefined) {
-          delta.push(
-            Object.assign({}, d, {
-              attributes: Object.assign(
-                {},
-                this._negatedUsedFormats,
-                d.attributes || {}
-              ),
-            })
-          );
-        } else {
-          delta.push(d);
-        }
-      }
-      // tell quill this is a remote update
-      this.quill.updateContents(delta, this.doc.clientID as any);
-
-      // @ts-ignore
-      if (event.target?.meta) {
-        // @ts-ignore
-        delete event.target.meta;
-      }
-    }
-  };
-
-  private _quillObserver = (
-    eventType: string,
-    delta: any,
-    state: any,
-    origin: any
-  ) => {
-    // eventType === 'text-change' &&
-    //   console.trace('quill event', eventType, delta, state, origin);
-    const { yText } = this;
-
-    if (delta && delta.ops) {
-      // update content
-      const ops = transformDelta(delta, yText).ops;
-      ops.forEach((op: any) => {
-        if (op.attributes !== undefined) {
-          for (const key in op.attributes) {
-            if (this._negatedUsedFormats[key] === undefined) {
-              this._negatedUsedFormats[key] = false;
-            }
-          }
-        }
-      });
-      if (origin === 'user') {
-        this.space.transact(() => {
-          yText.applyDelta(ops);
-        });
-      }
-    }
-  };
-
-  getCursor() {
-    const selection = this.quill.getSelection();
-    if (!selection) {
-      return null;
-    }
-    const anchor = Y.createRelativePositionFromTypeIndex(
-      this.yText,
-      selection.index
-    );
-    const focus = Y.createRelativePositionFromTypeIndex(
-      this.yText,
-      selection.index + selection.length
-    );
-    return {
-      anchor,
-      focus,
-    };
-  }
-
-  destroy() {
-    this.yText.unobserve(this._yObserver);
-    this.quill.off('editor-change', this._quillObserver as any);
-  }
-}
-
-function transformDelta(delta: any, yText: Y.Text) {
-  // delta.ops.forEach((op: any) => (op.attributes = undefined));
-  return delta;
 }

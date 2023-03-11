@@ -8,7 +8,8 @@ on:
     types: [opened]
 
 jobs:
-  check_for_first_interaction:
+  check-for-first-interaction:
+    name: Check for first interaction
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,4 +22,4 @@ jobs:
           pr-message: |
             Hello! Thank you for your contribution.
 
-            In order for us to review and merge your suggested changes, please sign at https://github.com/toeverything/blocksuite/blob/master/.github/CLA.md
+            In order for us to review and merge your suggested changes, please sign our CLA at https://github.com/toeverything/blocksuite/edit/master/.github/CLA.md

@@ -64,12 +64,11 @@ export const RectMethods: ShapeMethods = {
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
-    const rx = renderWidth * radius;
-    const ry = renderHeight * radius;
+    const r = Math.min(renderWidth * radius, renderHeight * radius);
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path = createRectPath(0, 0, renderWidth, renderHeight, rx, ry);
+    const path = createRectPath(0, 0, renderWidth, renderHeight, r, r);
 
     if (filled) {
       ctx.fillStyle = fillColor;
