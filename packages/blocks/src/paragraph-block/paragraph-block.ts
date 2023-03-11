@@ -9,7 +9,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  addImageFromOutside,
   BlockChildrenContainer,
   type BlockHost,
   isPageMode,

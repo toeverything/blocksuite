@@ -16,6 +16,7 @@ import { choose } from 'lit/directives/choose.js';
 
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
+import { OutsideDragManager } from '../utils/outside-drag-manager.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -61,6 +62,8 @@ export class EditorContainer extends NonShadowLitElement {
   private _placeholderInput!: HTMLInputElement;
 
   private _disposables = new DisposableGroup();
+
+  public outsideDragManager = new OutsideDragManager(this);
 
   override firstUpdated() {
     // todo: refactor to a better solution
@@ -133,6 +136,14 @@ export class EditorContainer extends NonShadowLitElement {
     );
 
     this._placeholderInput?.focus();
+
+    this.outsideDragManager.registerHandler(
+      files => Array.from(files).every(file => /^image\//.test(file.type)),
+      () => {
+        // TODO: add image block to the page
+        console.log('add image');
+      }
+    );
   }
 
   public async createBlockHub() {
