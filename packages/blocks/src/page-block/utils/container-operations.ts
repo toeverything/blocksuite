@@ -9,6 +9,7 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 
 import {
   almostEqual,
+  asyncGetRichTextByModel,
   ExtendedModel,
   getDefaultPageBlock,
   hasNativeSelection,
@@ -208,9 +209,14 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
+  const firstModel = newModels[0];
   const lastModel = newModels.at(-1);
   if (savedBlockRange) {
-    requestAnimationFrame(() => restoreSelection(savedBlockRange));
+    asyncGetRichTextByModel(firstModel).then(richText => {
+      richText?.vEditor?.slots.updated.once(() => {
+        restoreSelection(savedBlockRange);
+      });
+    });
   } else {
     if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
