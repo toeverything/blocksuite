@@ -9,6 +9,7 @@ on:
 
 jobs:
   check-for-first-interaction:
+    name: Check for first interaction
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
