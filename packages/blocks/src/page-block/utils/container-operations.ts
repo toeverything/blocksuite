@@ -6,6 +6,7 @@ import {
 } from '@blocksuite/global/utils';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { VEditor } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -393,12 +394,16 @@ function formatBlockRange(
   // Native selection maybe shifted after format
   // We need to restore it manually
   if (blockRange.type === 'Native') {
-    const lastTextBlock = blockRange.models
-      .reverse()
-      .find(model => !matchFlavours(model, ['affine:code'] as const));
-    assertExists(lastTextBlock);
-    const richText = getRichTextByModel(lastTextBlock);
-    richText?.vEditor?.slots.updated.once(() => {
+    const textUpdated = blockRange.models
+      .filter(model => !matchFlavours(model, ['affine:code']))
+      .map(getRichTextByModel)
+      .map(richText => richText?.vEditor)
+      .filter((vEditor): vEditor is VEditor => !!vEditor)
+      .map(
+        vEditor => new Promise(resolve => vEditor.slots.updated.once(resolve))
+      );
+
+    Promise.all(textUpdated).then(() => {
       restoreSelection(blockRange);
     });
   }
