@@ -1,5 +1,4 @@
-import type {
-  DragIndicator} from '@blocksuite/blocks';
+import type { DragIndicator } from '@blocksuite/blocks';
 import {
   getAllowSelectedBlocks,
   getBlockEditingStateByCursor,
