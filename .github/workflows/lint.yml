@@ -1,4 +1,4 @@
-name: Linter
+name: Lint
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: lint
+    name: Run linters
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Prettier
+      - name: Run prettier
         run: npx prettier --cache --check packages tests
 
       - name: Run ESLint
@@ -46,6 +46,6 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
-      - name: Type Check
+      - name: Run type check
         # run: pnpm exec tsc -b
         run: pnpm build

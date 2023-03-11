@@ -1,4 +1,4 @@
-name: Browser compatibility (Firefox and Safari)
+name: Browser Compatibility Test (Firefox and WebKit)
 
 on:
   schedule:
@@ -43,13 +43,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Playground
+      - name: Build playground
         run: pnpm run build:playground
 
       - name: Install playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browsers }}
 
-      - name: Run playwright tests
+      - name: Run playwright test
         env:
           BROWSER: ${{ matrix.browsers }}
         run: pnpm test -- --forbid-only
