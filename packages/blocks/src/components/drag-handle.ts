@@ -267,7 +267,11 @@ export class DragHandle extends LitElement {
       this._handleAnchorDisposable = modelState.model.propsUpdated.on(() => {
         this.hide();
       });
+
+      return;
     }
+
+    this.hide();
   }
 
   hide() {
