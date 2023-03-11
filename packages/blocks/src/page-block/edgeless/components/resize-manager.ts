@@ -2,7 +2,7 @@ import { Bound, getCommonBound } from '@blocksuite/phasor';
 
 import { HandleDirection } from './resize-handles.js';
 
-type ResizeMoveHandler = (newShapeBounds: Record<string, Bound>) => void;
+type ResizeMoveHandler = (newShapeBounds: Map<string, Bound>) => void;
 
 type ResizeEndHandler = () => void;
 
@@ -13,7 +13,7 @@ export class HandleResizeManager {
   private _dragDirection: HandleDirection = HandleDirection.Left;
   private _startDragPos: { x: number; y: number } = { x: 0, y: 0 };
 
-  private _bounds: Record<string, Bound> = {};
+  private _bounds = new Map<string, Bound>();
   private _commonBoundPosition = [
     /* minX */ 0, /* minY */ 0, /* maxX */ 0, /* maxY */ 0,
   ];
@@ -82,34 +82,32 @@ export class HandleResizeManager {
       h: maxY - minY,
     };
 
-    const newBounds = Object.entries(this._bounds).reduce(
-      (acc, [id, oldShapeBound]) => {
-        const {
-          x: oldShapeX,
-          y: oldShapeY,
-          w: oldShapeW,
-          h: oldShapeH,
-        } = oldShapeBound;
-        const nx =
-          (flipX
-            ? oldCommonMaxX - oldShapeX - oldShapeW
-            : oldShapeX - oldCommonMinX) / oldCommonWidth;
-        const ny =
-          (flipY
-            ? oldCommonMaxY - oldShapeY - oldShapeH
-            : oldShapeY - oldCommonMinY) / oldCommonHeight;
+    const newBounds = new Map<string, Bound>();
 
-        const shapeX = newCommonBound.w * nx + newCommonBound.x;
-        const shapeY = newCommonBound.h * ny + newCommonBound.y;
-        const shapeW = newCommonBound.w * (oldShapeW / oldCommonWidth);
-        const shapeH = newCommonBound.h * (oldShapeH / oldCommonHeight);
+    for (const [id, oldShapeBound] of this._bounds.entries()) {
+      const {
+        x: oldShapeX,
+        y: oldShapeY,
+        w: oldShapeW,
+        h: oldShapeH,
+      } = oldShapeBound;
 
-        acc[id] = { x: shapeX, y: shapeY, w: shapeW, h: shapeH };
+      const nx =
+        (flipX
+          ? oldCommonMaxX - oldShapeX - oldShapeW
+          : oldShapeX - oldCommonMinX) / oldCommonWidth;
+      const ny =
+        (flipY
+          ? oldCommonMaxY - oldShapeY - oldShapeH
+          : oldShapeY - oldCommonMinY) / oldCommonHeight;
 
-        return acc;
-      },
-      {} as Record<string, Bound>
-    );
+      const shapeX = newCommonBound.w * nx + newCommonBound.x;
+      const shapeY = newCommonBound.h * ny + newCommonBound.y;
+      const shapeW = newCommonBound.w * (oldShapeW / oldCommonWidth);
+      const shapeH = newCommonBound.h * (oldShapeH / oldCommonHeight);
+
+      newBounds.set(id, { x: shapeX, y: shapeY, w: shapeW, h: shapeH });
+    }
 
     this._onResizeMove(newBounds);
   };
@@ -118,7 +116,7 @@ export class HandleResizeManager {
     this._onResizeEnd();
 
     this._startDragPos = { x: 0, y: 0 };
-    this._bounds = {};
+    this._bounds.clear();
     this._commonBoundPosition = [0, 0, 0, 0];
 
     window.removeEventListener('mousemove', this._onMouseMove);
@@ -128,13 +126,14 @@ export class HandleResizeManager {
   onMouseDown = (
     e: MouseEvent,
     direction: HandleDirection,
-    bounds: Record<string, Bound>
+    bounds: Map<string, Bound>
   ) => {
     // Prevent selection action from being triggered
     e.stopPropagation();
 
     this._bounds = bounds;
-    const { x, y, w, h } = getCommonBound(Object.values(bounds)) as Bound;
+
+    const { x, y, w, h } = getCommonBound([...bounds.values()]) as Bound;
     this._commonBoundPosition = [x, y, x + w, y + h];
 
     this._dragDirection = direction;

@@ -55,8 +55,9 @@ export function getSelectedRect(
 
 export function getSelectableBounds(
   selected: Selectable[]
-): Record<string, Bound> {
-  const bounds = selected.reduce((acc, s) => {
+): Map<string, Bound> {
+  const bounds = new Map<string, Bound>();
+  for (const s of selected) {
     let bound: Bound;
     if (isTopLevelBlock(s)) {
       const [x, y, w, h] = deserializeXYWH(getXYWH(s));
@@ -64,8 +65,7 @@ export function getSelectableBounds(
     } else {
       bound = { x: s.x, y: s.y, w: s.w, h: s.h };
     }
-    acc[s.id] = bound;
-    return acc;
-  }, {} as Record<string, Bound>);
+    bounds.set(s.id, bound);
+  }
   return bounds;
 }

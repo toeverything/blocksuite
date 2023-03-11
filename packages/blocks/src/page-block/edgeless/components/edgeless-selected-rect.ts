@@ -56,17 +56,15 @@ export class EdgelessSelectedRect extends LitElement {
     return hasBlockElement ? 'edge' : 'corner';
   }
 
-  private _onDragMove = (newShapesBounds: Record<string, Bound>) => {
-    const selectedMap = this.state.selected.reduce((acc, element) => {
-      acc[element.id] = element;
-      return acc;
-    }, {} as Record<string, Selectable>);
+  private _onDragMove = (newBounds: Map<string, Bound>) => {
+    const selectedMap = new Map<string, Selectable>(
+      this.state.selected.map(element => [element.id, element])
+    );
 
-    Object.entries(newShapesBounds).forEach(([id, bound]) => {
-      const element = selectedMap[id];
-      if (!element) {
-        return;
-      }
+    for (const [id, bound] of newBounds.entries()) {
+      const element = selectedMap.get(id);
+      if (!element) continue;
+
       if (isTopLevelBlock(element)) {
         let frameX = bound.x;
         let frameY = bound.y;
@@ -87,7 +85,7 @@ export class EdgelessSelectedRect extends LitElement {
       } else {
         this.surface.setElementBound(element.id, bound);
       }
-    });
+    }
 
     this.requestUpdate();
   };
