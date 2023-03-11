@@ -212,7 +212,6 @@ function binarySearchBlockEditingState(
               ) {
                 if (x >= result.blockRect.left && x < blockRect.left) {
                   return {
-                    // index: mid,
                     rect: result.blockRect,
                     model: result.block,
                     element: result.hoverDom,
@@ -235,7 +234,6 @@ function binarySearchBlockEditingState(
       }
 
       return {
-        // index: mid,
         rect: blockRect,
         model: block,
         element: hoverDom,

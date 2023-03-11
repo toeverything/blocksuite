@@ -558,6 +558,7 @@ export class DefaultSelectionManager {
     if (isScrolling) {
       this.state.refreshBlockRectCache();
     }
+
     const { scrollLeft, scrollTop, left, top } = viewport;
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,

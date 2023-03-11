@@ -504,7 +504,7 @@ export class DragHandle extends LitElement {
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;
-    // `darg.clientY` !== `dragend.clientY` in chrome.
+    // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
       this._indicator?.cursorPosition ?? {
         x: e.clientX,

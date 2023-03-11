@@ -2,6 +2,7 @@ import type { EmbedBlockComponent } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
   getAllBlocks,
+  getRectByBlockElement,
   Point,
   resetNativeSelection,
   type SelectionEvent,
@@ -118,8 +119,7 @@ export class PageSelectionState {
     this._blockCache.clear();
     const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
-      const rect = block.getBoundingClientRect();
-      this._blockCache.set(block, rect);
+      this._blockCache.set(block, getRectByBlockElement(block));
     }
   }
 
