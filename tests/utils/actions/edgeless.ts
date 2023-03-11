@@ -6,11 +6,11 @@ import { expect, Page } from '@playwright/test';
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 
-export async function getFrameSize(
+export async function getFrameRect(
   page: Page,
   ids: { pageId: string; frameId: string; paragraphId: string }
 ) {
-  const result: string | null = await page.evaluate(
+  const xywh: string | null = await page.evaluate(
     ([id]) => {
       const page = window.workspace.getPage('page0');
       const block = page?.getBlockById(id.frameId);
@@ -22,8 +22,9 @@ export async function getFrameSize(
     },
     [ids] as const
   );
-  expect(result).not.toBeNull();
-  return result as string;
+  expect(xywh).not.toBeNull();
+  const [x, y, w, h] = JSON.parse(xywh as string);
+  return { x, y, w, h };
 }
 
 export async function switchEditorMode(page: Page) {

@@ -1,8 +1,8 @@
-import type { SurfaceViewport } from '@blocksuite/phasor';
+import { Bound, deserializeXYWH, SurfaceViewport } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 
 import type { Selectable } from '../selection-manager.js';
-import { getSelectionBoxBound, getXYWH } from '../utils.js';
+import { getSelectionBoxBound, getXYWH, isTopLevelBlock } from '../utils.js';
 
 export function getCommonRectStyle(
   rect: DOMRect,
@@ -51,4 +51,21 @@ export function getSelectedRect(
     commonBound?.w,
     commonBound?.h
   );
+}
+
+export function getSelectableBounds(
+  selected: Selectable[]
+): Map<string, Bound> {
+  const bounds = new Map<string, Bound>();
+  for (const s of selected) {
+    let bound: Bound;
+    if (isTopLevelBlock(s)) {
+      const [x, y, w, h] = deserializeXYWH(getXYWH(s));
+      bound = { x, y, w, h };
+    } else {
+      bound = { x: s.x, y: s.y, w: s.w, h: s.h };
+    }
+    bounds.set(s.id, bound);
+  }
+  return bounds;
 }

@@ -3,7 +3,6 @@ import { getStrokePoints } from 'perfect-freehand';
 import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
-import { Vec } from '../../utils/vec.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 
@@ -76,11 +75,12 @@ export class BrushElement extends BaseElement {
     element: BaseElement,
     bound: IBound
   ): Record<string, string> {
+    const elementH = element.h || 1;
+    const elementW = element.w || 1;
+    const boundH = bound.h || 1;
+    const boundW = bound.w || 1;
     const points = (element as BrushElement).points.map(([x, y]) => {
-      return Vec.toFixed([
-        bound.w * (x / element.w),
-        bound.h * (y / element.h),
-      ]);
+      return [boundW * (x / elementW), boundH * (y / elementH)];
     });
 
     return {

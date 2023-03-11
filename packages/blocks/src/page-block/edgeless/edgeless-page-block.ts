@@ -268,13 +268,14 @@ export class EdgelessPageBlockComponent
     _disposables.add(this._frameResizeObserver);
     _disposables.add(
       this._frameResizeObserver.slots.resize.on(resizedFrames => {
-        const zoom = this.surface.viewport.zoom;
         const page = this.page;
         resizedFrames.forEach((domRect, id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const [x, y, w, h] = deserializeXYWH(model.xywh);
+
+          // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
-            (domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+            domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
           if (!almostEqual(newModelHeight, h)) {
             page.updateBlock(model, {
