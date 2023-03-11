@@ -1,4 +1,4 @@
-name: Add to GitHub projects
+name: Add to AFFiNE Kanban
 
 on:
   issues:
