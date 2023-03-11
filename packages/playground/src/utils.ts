@@ -11,10 +11,10 @@ import * as store from '@blocksuite/store';
 import {
   assertExists,
   DebugDocProvider,
-  DocProviderConstructor,
+  type DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  StoreOptions,
+  type StoreOptions,
   Utils,
   Workspace,
 } from '@blocksuite/store';

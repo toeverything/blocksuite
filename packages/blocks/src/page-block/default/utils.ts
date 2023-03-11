@@ -8,12 +8,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
   getRichTextByModel,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';

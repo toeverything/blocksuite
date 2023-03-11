@@ -5,14 +5,14 @@ import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, PropertyValues, render } from 'lit';
+import { css, html, type PropertyValues, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getHighlighter, Highlighter, Lang } from 'shiki';
+import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   getViewportElement,
   NonShadowLitElement,
 } from '../__internal__/index.js';

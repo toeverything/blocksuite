@@ -5,24 +5,25 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { deserializeXYWH } from '@blocksuite/phasor';
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { BaseBlockModel, Page} from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import {
   almostEqual,
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
-  BlockComponentElement,
-  ExtendedModel,
+  type BlockComponentElement,
+  type ExtendedModel,
   getDefaultPageBlock,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  TopLevelBlockModel,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
-  BlockRange,
+  type BlockRange,
   getCurrentBlockRange,
   restoreSelection,
   updateBlockRange,

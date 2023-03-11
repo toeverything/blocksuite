@@ -1,6 +1,6 @@
 import type { Color, StrokeStyle } from '../../consts.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
-import { BaseElement, HitTestOptions } from '../base-element.js';
+import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
 

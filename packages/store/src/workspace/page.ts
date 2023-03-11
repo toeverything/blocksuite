@@ -7,7 +7,7 @@ import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space, StackItem } from '../space.js';
+import { Space, type StackItem } from '../space.js';
 import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {

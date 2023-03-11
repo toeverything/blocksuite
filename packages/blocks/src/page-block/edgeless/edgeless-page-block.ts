@@ -6,17 +6,18 @@ import './components/edgeless-selected-rect.js';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
-import { DisposableGroup, Page, Slot } from '@blocksuite/store';
+import type { Page} from '@blocksuite/store';
+import { DisposableGroup, Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   almostEqual,
-  BlockHost,
+  type BlockHost,
   hotkey,
   resetNativeSelection,
-  TopLevelBlockModel,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -40,7 +41,7 @@ import { EdgelessHoverRect } from './components/hover-rect.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import {
   EdgelessSelectionManager,
-  EdgelessSelectionState,
+  type EdgelessSelectionState,
 } from './selection-manager.js';
 import { getCursorMode, isTopLevelBlock } from './utils.js';
 

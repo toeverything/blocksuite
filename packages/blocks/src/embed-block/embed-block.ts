@@ -1,4 +1,4 @@
-import { css, html, PropertyValues } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { NonShadowLitElement } from '../__internal__/index.js';

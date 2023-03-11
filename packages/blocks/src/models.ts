@@ -5,7 +5,7 @@ import type { z } from 'zod';
 
 import type { BaseService } from './__internal__/service/index.js';
 import {
-  CodeBlockModel,
+  type CodeBlockModel,
   CodeBlockModelSchema,
 } from './code-block/code-model.js';
 import { CodeBlockService } from './code-block/code-service.js';

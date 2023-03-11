@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import {
+import type {
   BaseBlockModel,
+  Page} from '@blocksuite/store';
+import {
   DisposableGroup,
-  Page,
   Slot,
   Utils,
 } from '@blocksuite/store';
@@ -21,7 +22,7 @@ import {
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
-  SelectionPosition,
+  type SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
