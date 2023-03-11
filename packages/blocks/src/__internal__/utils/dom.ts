@@ -13,6 +13,7 @@ const AFFINE_CODE = 'AFFINE-CODE';
 const AFFINE_DATABASE = 'AFFINE-DATABASE';
 const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
 const AFFINE_DIVIDER = 'AFFINE-DIVIDER';
+const AFFINE_EMBED = 'AFFINE-EMBED';
 const AFFINE_FRAME = 'AFFINE-FRAME';
 const AFFINE_IMAGE = 'AFFINE-IMAGE';
 const AFFINE_LIST = 'AFFINE-LIST';
@@ -52,6 +53,13 @@ export function isPageOrFrame({ tagName }: Element) {
  */
 export function isBlock(element: Element) {
   return !isPageOrFrame(element);
+}
+
+/**
+ * Returns `true` if element is embed.
+ */
+function isEmbed({ tagName }: Element) {
+  return tagName === AFFINE_EMBED;
 }
 
 /**
@@ -125,8 +133,7 @@ export function getClosestBlockElementByPoint(
     );
   }
 
-  element =
-    document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
+  element = find(document.elementsFromPoint(point.x, point.y)) || null;
 
   // Horizontal direction: for nested structures
   if (element) {
@@ -156,8 +163,7 @@ export function getClosestBlockElementByPoint(
     if (n < 0) n--;
     n *= -1;
 
-    element =
-      document.elementsFromPoint(point.x, point.y).find(hasBlockId) || null;
+    element = find(document.elementsFromPoint(point.x, point.y)) || null;
 
     if (element) {
       if (isBlock(element)) {
@@ -185,7 +191,7 @@ export function getClosestBlockElementByElement(element: Element | null) {
     return element;
   }
   element = element.closest(BLOCK_ID_ATTR_SELECTOR);
-  if (element && hasBlockId(element) && isBlock(element)) {
+  if (element && isBlock(element)) {
     return element;
   }
   return null;
@@ -262,4 +268,24 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
     elements.push(element, ...getBlockElementsByElement(element));
     return elements;
   }, []);
+}
+
+/**
+ * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
+ */
+function find(elements: Element[]) {
+  const len = elements.length;
+  let element = null;
+  let i = 0;
+  while (i < len) {
+    element = elements[i];
+    if (hasBlockId(element)) return element;
+    if (isEmbed(element)) {
+      i++;
+      if (i < len && hasBlockId(elements[i])) return elements[i];
+      return element.closest(BLOCK_ID_ATTR_SELECTOR);
+    }
+    i++;
+  }
+  return null;
 }
