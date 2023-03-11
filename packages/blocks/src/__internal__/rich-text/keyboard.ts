@@ -461,17 +461,18 @@ export function createKeyboardBindings(
         // }
 
         // we need to insert text before show menu, because the Text node will be
-        // expired if we insert text after show menu because of the re-render
+        // expired if we insert text after show menu because of the rerender
         this.vEditor.insertText(range, context.event.key);
         this.vEditor.setVRange({
           index: range.index + 1,
           length: 0,
         });
 
-        requestAnimationFrame(() => {
+        this.vEditor.slots.rangeUpdated.once(() => {
           const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
+
         return PREVENT_DEFAULT;
       },
     },

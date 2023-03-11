@@ -70,7 +70,7 @@ async function setNewTop(y: number, editableContainer: Element) {
       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
-        // set scroll may has a animation, wait for over
+        // set scroll may have an animation, wait for over
         requestAnimationFrame(() => {
           finalBottom = editableContainer.getBoundingClientRect().bottom;
         });

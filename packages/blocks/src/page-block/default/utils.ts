@@ -575,7 +575,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = type;
 
-      requestAnimationFrame(() => {
+      defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
         defaultPageBlock.selection.setSelectedBlocks(

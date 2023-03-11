@@ -6,6 +6,7 @@ import { matchFlavours, Page, Slot } from '@blocksuite/store';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
 import { throttle } from '../../__internal__/utils/std.js';
+import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcPositionPointByRange,
   calcSafeCoordinate,
@@ -151,9 +152,7 @@ export const showFormatQuickBar = async ({
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
 
-  requestAnimationFrame(() => {
-    updatePos();
-  });
+  onModelElementUpdated(blockRange.models[0], updatePos);
 
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);

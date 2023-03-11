@@ -19,6 +19,12 @@ export class VirgoLine<
     return this.elements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.elements.map(el => el.updateComplete));
+    return result;
+  }
+
   render() {
     return html`<style>
         v-line {

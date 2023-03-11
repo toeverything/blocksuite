@@ -6,6 +6,7 @@ import {
   getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
+import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
@@ -140,7 +141,7 @@ export function showSlashMenu({
   // Mount
   container.appendChild(slashMenu);
   // Wait for the format quick bar to be mounted
-  requestAnimationFrame(() => updatePosition());
+  onModelElementUpdated(model, updatePosition);
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {

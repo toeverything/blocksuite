@@ -28,6 +28,7 @@ export type DeltaEntry = [delta: DeltaInsert, range: VRange];
 export type NativePoint = readonly [node: Node, offset: number];
 // the number here is relative to the text node
 export type TextPoint = readonly [text: Text, offset: number];
+
 export interface DomPoint {
   // which text node this point is in
   text: Text;
@@ -239,7 +240,7 @@ export class VEditor<
     return this._attributesSchema.optional().parse(textAttributes);
   };
 
-  private _renderDeltas = () => {
+  private _renderDeltas = async () => {
     assertExists(this._rootElement);
 
     const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
@@ -267,12 +268,21 @@ export class VEditor<
     });
 
     this._rootElement.replaceChildren(...lines);
+    await Promise.all(
+      lines.map(async line => {
+        await line.updateComplete;
+      })
+    );
+
+    this.slots.updated.emit();
   };
 
   slots: {
     mounted: Slot;
     unmounted: Slot;
+    updated: Slot;
     updateVRange: Slot<UpdateVRangeProp>;
+    rangeUpdated: Slot<Range>;
   };
 
   get yText() {
@@ -294,7 +304,9 @@ export class VEditor<
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
+      updated: new Slot(),
       updateVRange: new Slot<UpdateVRangeProp>(),
+      rangeUpdated: new Slot<Range>(),
     };
 
     this.slots.updateVRange.on(this._onUpdateVRange);
@@ -634,18 +646,23 @@ export class VEditor<
    */
   syncVRange(): void {
     if (this._vRange) {
-      const newRange = this.toDomRange(this._vRange);
-
-      if (newRange) {
-        const selectionRoot = findDocumentOrShadowRoot(this);
-        const selection = selectionRoot.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
-      }
+      this._applyVRange(this._vRange);
     }
   }
+
+  private _applyVRange = (vRange: VRange): void => {
+    const newRange = this.toDomRange(vRange);
+
+    if (newRange) {
+      const selectionRoot = findDocumentOrShadowRoot(this);
+      const selection = selectionRoot.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        this.slots.rangeUpdated.emit(newRange);
+      }
+    }
+  };
 
   /**
    * calculate the dom selection from vRange for **this Editor**
@@ -1046,20 +1063,10 @@ export class VEditor<
     this._rootElement?.blur();
 
     const fn = () => {
-      if (!newVRange) {
-        return;
-      }
-
-      // when using input method _vRange will return to the starting point,
-      // so we need to resync
-      const newRange = this.toDomRange(newVRange);
-      if (newRange) {
-        const selectionRoot = findDocumentOrShadowRoot(this);
-        const selection = selectionRoot.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
+      if (newVRange) {
+        // when using input method _vRange will return to the starting point,
+        // so we need to re-sync
+        this._applyVRange(newVRange);
       }
     };
 

@@ -17,6 +17,7 @@ import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   getCurrentCombinedFormat,
+  onModelElementUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
@@ -177,25 +178,25 @@ export class FormatQuickBar extends LitElement {
           );
         }
         const codeModel = newModels[0];
-        requestAnimationFrame(() =>
+        onModelElementUpdated(codeModel, () => {
           restoreSelection({
             type: 'Block',
             startOffset: 0,
             endOffset: codeModel.text?.length ?? 0,
             models: [codeModel],
-          })
-        );
+          });
+        });
       }
       this.models = newModels;
       this._paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
 
-    return html`<div
+    return html` <div
       class="paragraph-panel"
       style="${styles}"
-      @mouseover=${this._onHover}
-      @mouseout=${this._onHoverEnd}
+      @mouseover="${this._onHover}"
+      @mouseout="${this._onHoverEnd}"
     >
       ${paragraphConfig.map(
         ({ flavour, type, name, icon }) => html` <format-bar-button
@@ -203,7 +204,7 @@ export class FormatQuickBar extends LitElement {
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
           data-testid="${flavour}/${type}"
-          @click=${() => updateParagraphType(flavour, type)}
+          @click="${() => updateParagraphType(flavour, type)}"
         >
           ${icon}
         </format-bar-button>`
@@ -229,8 +230,8 @@ export class FormatQuickBar extends LitElement {
     const paragraphItems = html` <format-bar-button
       class="paragraph-button"
       width="52px"
-      @mouseover=${this._onHover}
-      @mouseout=${this._onHoverEnd}
+      @mouseover="${this._onHover}"
+      @mouseout="${this._onHoverEnd}"
     >
       ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;

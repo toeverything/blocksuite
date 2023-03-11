@@ -24,7 +24,10 @@ import {
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 // import { formatConfig } from '../../page-block/utils/const.js';
-import { updateBlockType } from '../../page-block/utils/index.js';
+import {
+  onModelTextUpdated,
+  updateBlockType,
+} from '../../page-block/utils/index.js';
 import { toast } from '../toast.js';
 
 export type SlashItem = {
@@ -85,14 +88,14 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
                 );
               }
               const codeModel = newModels[0];
-              requestAnimationFrame(() =>
+              onModelTextUpdated(codeModel, () => {
                 restoreSelection({
                   type: 'Native',
                   startOffset: 0,
                   endOffset: 0,
                   models: [codeModel],
-                })
-              );
+                });
+              });
             }
           },
         })),

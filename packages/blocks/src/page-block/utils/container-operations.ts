@@ -9,6 +9,9 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 
 import {
   almostEqual,
+  asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
+  BlockComponentElement,
   ExtendedModel,
   getDefaultPageBlock,
   hasNativeSelection,
@@ -16,6 +19,7 @@ import {
   isMultiBlockRange,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   BlockRange,
@@ -208,9 +212,12 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
+  const firstModel = newModels[0];
   const lastModel = newModels.at(-1);
   if (savedBlockRange) {
-    requestAnimationFrame(() => restoreSelection(savedBlockRange));
+    onModelTextUpdated(firstModel, () => {
+      restoreSelection(savedBlockRange);
+    });
   } else {
     if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
@@ -354,11 +361,12 @@ function formatBlockRange(
   // edge case 2: same model
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
+    const richText = getRichTextByModel(startModel);
+    richText?.vEditor?.slots.updated.once(() => {
+      restoreSelection(blockRange);
+    });
     startModel.text?.format(startOffset, endOffset - startOffset, {
       [key]: format[key] ? null : true,
-    });
-    requestAnimationFrame(() => {
-      restoreSelection(blockRange);
     });
     return;
   }
@@ -386,7 +394,11 @@ function formatBlockRange(
   // Native selection maybe shifted after format
   // We need to restore it manually
   if (blockRange.type === 'Native') {
-    requestAnimationFrame(() => {
+    const allTextUpdated = blockRange.models
+      .filter(model => !matchFlavours(model, ['affine:code']))
+      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+
+    Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
     });
   }
@@ -416,6 +428,31 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   }
 
   resetNativeSelection(null);
+}
+
+export async function onModelTextUpdated(
+  model: BaseBlockModel,
+  callback: (text: RichText) => void
+) {
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.slots.updated.once(() => {
+    callback(richText);
+  });
+}
+
+// Run the callback until a model's element updated.
+// Please notice that the callback will be called **once the element itself is ready**.
+// The children may be not updated.
+// If you want to wait for the text elements,
+// please use `onModelTextUpdated`.
+export async function onModelElementUpdated(
+  model: BaseBlockModel,
+  callback: (blockElement: BlockComponentElement) => void
+) {
+  const element = await asyncGetBlockElementByModel(model);
+  if (element) {
+    callback(element);
+  }
 }
 
 export function tryUpdateFrameSize(page: Page, zoom: number) {
