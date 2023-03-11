@@ -1,6 +1,6 @@
 import {
   handleNativeRangeDragMove,
-  SelectionEvent,
+  type SelectionEvent,
 } from '@blocksuite/blocks/std';
 
 import type { DefaultSelectionManager } from './default-selection-manager.js';

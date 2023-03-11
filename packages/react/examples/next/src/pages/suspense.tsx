@@ -1,6 +1,6 @@
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import type { EditorProps } from '@blocksuite/react/editor';
-import { Page, Workspace } from '@blocksuite/store';
+import { type Page, Workspace } from '@blocksuite/store';
 import dynamic from 'next/dynamic';
 
 import { Layout } from '../layouts/Layout';

@@ -1,6 +1,6 @@
+import type { DebugElement } from '@blocksuite/phasor';
 import {
   Bound,
-  DebugElement,
   SurfaceManager,
   // Uncomment to batch load mock data
   // initMockData,

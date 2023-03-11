@@ -1,6 +1,6 @@
 import { CssBaseline } from '@nextui-org/react';
 import Document, {
-  DocumentContext,
+  type DocumentContext,
   Head,
   Html,
   Main,

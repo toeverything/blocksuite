@@ -3,10 +3,10 @@ import type { Page, UserRange } from '@blocksuite/store';
 
 import {
   initMouseEventHandlers,
-  MouseMode,
+  type MouseMode,
   noop,
-  SelectionEvent,
-  TopLevelBlockModel,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';

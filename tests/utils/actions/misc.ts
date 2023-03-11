@@ -2,7 +2,8 @@
 import '../declare-test-window.js';
 
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
+import type { ConsoleMessage, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import type {
   BaseBlockModel,

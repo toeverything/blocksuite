@@ -1,6 +1,9 @@
-import type { SurfaceElement, SurfaceViewport } from '@blocksuite/phasor';
-import {
+import type {
   Bound,
+  SurfaceElement,
+  SurfaceViewport,
+} from '@blocksuite/phasor';
+import {
   contains,
   deserializeXYWH,
   intersects,

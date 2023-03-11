@@ -7,7 +7,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
   NonShadowLitElement,

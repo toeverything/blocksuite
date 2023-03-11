@@ -1,6 +1,7 @@
 import './slash-menu-node.js';
 
-import { assertExists, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import {
   getRichTextByModel,
@@ -10,7 +11,7 @@ import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
-  DragDirection,
+  type DragDirection,
 } from '../../page-block/utils/position.js';
 import type { SlashMenu } from './slash-menu-node.js';
 

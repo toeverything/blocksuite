@@ -1,10 +1,9 @@
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import {
   assertExists,
-  BaseBlockModel,
-  Page,
-  StackItem,
-  UserInfo,
-  UserRange,
+  type StackItem,
+  type UserInfo,
+  type UserRange,
 } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

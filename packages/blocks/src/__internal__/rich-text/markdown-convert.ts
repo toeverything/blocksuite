@@ -9,7 +9,7 @@ import {
   convertToDivider,
   convertToList,
   convertToParagraph,
-  ExtendedModel,
+  type ExtendedModel,
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 

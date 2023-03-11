@@ -11,8 +11,8 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
-import { Page, Text } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { restoreSelection } from '../../__internal__/utils/block-range.js';

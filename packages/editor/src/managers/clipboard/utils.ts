@@ -1,13 +1,13 @@
 import {
-  DomSelectionType,
+  type DomSelectionType,
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
   getVRangeByNode,
   SelectionUtils,
 } from '@blocksuite/blocks';
-import type { Page } from '@blocksuite/store';
-import { assertExists, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import type { SelectedBlock, SelectionInfo } from './types.js';
 

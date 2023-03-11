@@ -10,10 +10,10 @@ import {
   BrushElement,
   DebugElement,
   ElementCtors,
-  PhasorElement,
-  PhasorElementType,
+  type PhasorElement,
+  type PhasorElementType,
   ShapeElement,
-  ShapeType,
+  type ShapeType,
 } from './elements/index.js';
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';

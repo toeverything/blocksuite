@@ -1,13 +1,8 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  BaseBlockModel,
-  DisposableGroup,
-  Page,
-  Slot,
-  Utils,
-} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -21,7 +16,7 @@ import {
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
-  SelectionPosition,
+  type SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';

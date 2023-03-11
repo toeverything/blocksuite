@@ -1,7 +1,7 @@
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
-import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobOptionsGetter } from './persistence/blob/index.js';
 import type {
   DocProvider,
