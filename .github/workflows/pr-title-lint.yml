@@ -1,4 +1,4 @@
-name: Pull Request Title Lint
+name: PR Title Lint
 
 on:
   pull_request:
@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   check-pull-request-title:
+    name: Check pull request title
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
