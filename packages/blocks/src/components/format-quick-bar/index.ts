@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import type { Page} from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';

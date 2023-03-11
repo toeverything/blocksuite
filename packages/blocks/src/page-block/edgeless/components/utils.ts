@@ -1,9 +1,5 @@
-import type {
-  Bound} from '@blocksuite/phasor';
-import {
-  deserializeXYWH,
-  type SurfaceViewport,
-} from '@blocksuite/phasor';
+import type { Bound } from '@blocksuite/phasor';
+import { deserializeXYWH, type SurfaceViewport } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 
 import type { Selectable } from '../selection-manager.js';

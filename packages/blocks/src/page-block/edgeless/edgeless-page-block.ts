@@ -6,7 +6,7 @@ import './components/edgeless-selected-rect.js';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
-import type { Page} from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

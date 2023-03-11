@@ -1,11 +1,10 @@
 import '../../../components/drag-handle.js';
 
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel,Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
-import type {
-  Point} from '../../../__internal__/index.js';
+import type { Point } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,

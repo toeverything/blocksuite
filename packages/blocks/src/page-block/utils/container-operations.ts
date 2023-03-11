@@ -5,7 +5,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { deserializeXYWH } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import {

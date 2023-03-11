@@ -6,7 +6,7 @@ import {
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

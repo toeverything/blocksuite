@@ -1,6 +1,4 @@
-import type {
-  BaseBlockModel,
-  Page} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import {
   assertExists,
   type StackItem,

@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/blocks';
 import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel} from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type DeltaOperation, Text } from '@blocksuite/store';
 
 import type { EditorContainer } from '../../components/index.js';
