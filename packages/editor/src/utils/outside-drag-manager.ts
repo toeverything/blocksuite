@@ -4,9 +4,10 @@ import {
   getBlockEditingStateByCursor,
   getBlockEditingStateByPosition,
 } from '@blocksuite/blocks';
-import type { EditorContainer } from '@blocksuite/editor';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+
+import type { EditorContainer } from '../components/editor-container.js';
 
 interface OutsideDragHandler {
   filter: (files: FileList) => boolean;
@@ -53,6 +54,10 @@ export class OutsideDragManager {
     });
 
     this._disposables.addFromEvent(editor, 'dragover', event => {
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) {
+        return;
+      }
       event.preventDefault();
       const x = event.clientX;
       const y = event.clientY;
@@ -80,17 +85,18 @@ export class OutsideDragManager {
 
     this._disposables.addFromEvent(editor, 'drop', event => {
       const files = event.dataTransfer?.files;
-      if (files?.length) {
-        for (const h of this._handlers) {
-          const { filter, handler } = h;
-          if (filter(files)) {
-            event.preventDefault();
-            handler();
-          }
+      if (!files || files.length === 0) {
+        return;
+      }
+      for (const h of this._handlers) {
+        const { filter, handler } = h;
+        if (filter(files)) {
+          event.preventDefault();
+          handler();
+          this._indicator.cursorPosition = null;
+          this._indicator.targetRect = null;
         }
       }
-      this._indicator.cursorPosition = null;
-      this._indicator.targetRect = null;
     });
   }
 
