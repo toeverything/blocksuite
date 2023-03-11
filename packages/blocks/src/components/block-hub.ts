@@ -26,12 +26,11 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { BlockComponentElement, IPoint } from '../__internal__/index.js';
 import {
-  BlockComponentElement,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  IPoint,
   NonShadowLitElement,
   Point,
 } from '../__internal__/index.js';
