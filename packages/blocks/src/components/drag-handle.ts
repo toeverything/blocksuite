@@ -10,13 +10,15 @@ import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
+import type {
   BlockComponentElement,
+  IPoint,
+  SelectionEvent,
+} from '../__internal__/index.js';
+import {
   getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
-  IPoint,
   Point,
-  SelectionEvent,
 } from '../__internal__/index.js';
 import type { EditingState } from '../page-block/default/utils.js';
 
