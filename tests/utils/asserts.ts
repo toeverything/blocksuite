@@ -5,7 +5,6 @@
 import './declare-test-window.js';
 
 import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
-import type { VEditor } from '@blocksuite/virgo';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -13,6 +12,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
+import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
   SerializedStore,
@@ -100,14 +100,14 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(async () => {
-    const richTexts = Array.from(document.querySelectorAll('rich-text'));
-    const result = [];
-    for (const richText of richTexts) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richText as any).vEditor as VEditor;
-      result.push(editor.yText.toString());
-    }
+  const actualTexts = await page.evaluate(() => {
+    const richTexts = Array.from(
+      document.querySelectorAll<RichText>('rich-text')
+    );
+    const result = richTexts.map(richText => {
+      const editor = richText.vEditor;
+      return editor.yText.toString();
+    });
     return result;
   });
   expect(actualTexts).toEqual(texts);

@@ -3,7 +3,6 @@ import { expect } from '@playwright/test';
 import {
   pressBackspace,
   pressEnter,
-  SHORT_KEY,
   type,
   withPressKey,
 } from 'utils/actions/keyboard.js';
@@ -21,35 +20,20 @@ import {
 import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
-  // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
-  test.describe.configure({ mode: 'serial' });
   let page: Page;
   let paragraphId: string;
   let slashMenu: Locator;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     await enterPlaygroundRoom(page);
     const id = await initEmptyParagraphState(page);
     paragraphId = id.paragraphId;
     slashMenu = page.locator(`.slash-menu`);
-  });
 
-  test.beforeEach(async () => {
     await focusRichText(page);
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
-  });
-
-  test.afterEach(async () => {
-    // Close the slash menu
-    if (await slashMenu.isVisible()) {
-      // Click outside
-      await page.mouse.click(0, 50);
-    }
-    await focusRichText(page);
-    // Clear input
-    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
   });
 
   test('slash menu should hide after click away', async () => {
