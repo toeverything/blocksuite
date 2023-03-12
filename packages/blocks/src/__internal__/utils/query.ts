@@ -314,7 +314,7 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
 }
 
 /**
- * @deprecated In most cases, you not need RichText, you can use {@link getVirgoEditorByModel} instead.
+ * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
  */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
