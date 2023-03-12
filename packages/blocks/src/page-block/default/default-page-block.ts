@@ -1,13 +1,5 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
-import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-
-import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
+import { getCurrentBlockRange } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
   BlockChildrenContainer,
@@ -18,10 +10,23 @@ import {
   hotkey,
   isMultiBlockRange,
   Rect,
-  type SelectionPosition
-} from '../../__internal__/index.js';
+  type SelectionPosition,
+} from '@blocksuite/blocks/std';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
+import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';
@@ -36,7 +41,7 @@ import {
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
-  EditingState,
+  type EditingState,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
 } from './utils.js';

@@ -1,4 +1,13 @@
 import {
+  type BlockComponentElement,
+  doesInSamePath,
+  getBlockById,
+  getBlockElementByModel,
+  getClosestBlockElementByPoint,
+  type OpenBlockInfo,
+  type Point,
+} from '@blocksuite/blocks/std';
+import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_SERVICE_LOADING_ATTR,
   DRAG_HANDLE_OFFSET_LEFT,
@@ -7,15 +16,6 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copy } from '../../__internal__/clipboard/index.js';
-import {
-  type BlockComponentElement,
-  doesInSamePath,
-  getBlockById,
-  getBlockElementByModel,
-  getClosestBlockElementByPoint,
-  type OpenBlockInfo,
-  type Point,
-} from '../../__internal__/utils/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';

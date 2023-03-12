@@ -2,14 +2,15 @@ import {
   type DefaultSelectionSlots,
   getCurrentBlockRange,
 } from '@blocksuite/blocks';
-import type { Page, UserRange } from '@blocksuite/store';
-
 import {
+  type BlockComponentElement,
   contains,
   getModelByElement,
   getRectByBlockElement,
-} from '../../../__internal__/index.js';
-import type { BlockComponentElement, IPoint } from '../../../std.js';
+  type IPoint,
+} from '@blocksuite/blocks/std';
+import type { Page, UserRange } from '@blocksuite/store';
+
 import type { PageSelectionState, PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {

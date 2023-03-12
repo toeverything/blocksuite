@@ -1,10 +1,5 @@
 import '../../../components/drag-handle.js';
 
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
-
-import { isImage } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
@@ -24,11 +19,19 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
+  isImage,
   isInsidePageTitle,
   Point,
   Rect,
   type SelectionEvent,
-} from '../../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+} from '@blocksuite/store';
+
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 import {
