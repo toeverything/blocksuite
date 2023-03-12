@@ -3,8 +3,10 @@ import { expect } from '@playwright/test';
 import {
   clickBlockTypeMenuItem,
   dragBetweenIndices,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   formatType,
   initEmptyParagraphState,
   initThreeParagraphs,
@@ -32,6 +34,7 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
+  assertTitle,
   assertTypeFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -750,4 +753,21 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 0, 1);
   await pressArrowDown(page);
   await assertSelection(page, 1, 1);
+});
+
+test('should cut in title works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusTitle(page);
+  await type(page, 'hello');
+  await assertTitle(page, 'hello');
+
+  await dragOverTitle(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertTitle(page, '');
+
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, ['hello']);
 });
