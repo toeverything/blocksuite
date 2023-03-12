@@ -215,10 +215,12 @@ export class AffineLink extends NonShadowLitElement {
   // this workaround is not necessary and links work normally.
   // see https://github.com/toeverything/AFFiNE/issues/1540
   private _onMouseUp(e: MouseEvent) {
-    if (!this.isContentEditable) return;
-    this.contentEditable = 'false';
+    const anchorElement = this.querySelector('a');
+    assertExists(anchorElement);
+    if (!anchorElement.isContentEditable) return;
+    anchorElement.contentEditable = 'false';
     setTimeout(() => {
-      this.removeAttribute('contenteditable');
+      anchorElement.removeAttribute('contenteditable');
     }, 0);
   }
 
