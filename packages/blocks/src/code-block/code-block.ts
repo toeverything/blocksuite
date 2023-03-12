@@ -190,7 +190,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
     assertExists(richText);
     const vEditor = richText.vEditor;
     assertExists(vEditor);
+    const range = vEditor.getVRange();
     vEditor.requestUpdate();
+    if (range) {
+      vEditor.setVRange(range);
+    }
   }
 
   get readonly() {
@@ -258,7 +262,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   protected firstUpdated() {
     this._startHighlight(codeLanguages);
-
     this.model.text.yText.observe(() => {
       setTimeout(() => {
         this._updateLineNumbers();
