@@ -14,7 +14,18 @@
         "react",
         "next-example",
         "store",
-        "virgo"
+        "virgo",
+        "paragraph",
+        "list",
+        "link",
+        "code",
+        "divider",
+        "embed",
+        "selection",
+        "block-hub",
+        "slash-menu",
+        "drag-handle",
+        "format-bar"
       ]
     ]
   }
