@@ -178,7 +178,7 @@ export class DefaultPageBlockComponent
     return this._titleVEditor;
   }
 
-  getInnerRect() {
+  get innerRect() {
     const { left, width } = this.pageBlockContainer.getBoundingClientRect();
     const { clientHeight, top } = this.selection.state.viewport;
     return Rect.fromLWTH(

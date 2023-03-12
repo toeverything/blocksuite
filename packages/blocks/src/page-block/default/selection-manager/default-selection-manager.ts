@@ -219,7 +219,7 @@ export class DefaultSelectionManager {
 
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      this._container.getInnerRect()
+      this._container.innerRect
     );
 
     if (element) {
@@ -298,28 +298,30 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
+    let hoverEditingState = null;
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      this._container.getInnerRect()
+      this._container.innerRect
     );
 
-    if (!element) {
-      this._container.components.dragHandle?.onContainerMouseMove(e, null);
-      return;
+    if (element) {
+      const model = getModelByBlockElement(element);
+      const rect = getSelectedStateRectByBlockElement(element);
+      hoverEditingState = {
+        model,
+        rect,
+        element: element as BlockComponentElement,
+      };
     }
-
-    const model = getModelByBlockElement(element);
-    const rect = getSelectedStateRectByBlockElement(element);
-    const hoverEditingState = {
-      model,
-      rect,
-      element: element as BlockComponentElement,
-    };
 
     this._container.components.dragHandle?.onContainerMouseMove(
       e,
       hoverEditingState
     );
+
+    if (!hoverEditingState) return;
+
+    const { model, rect } = hoverEditingState;
 
     if (model.type === 'image') {
       // when image size is too large, the option popup should show inside
