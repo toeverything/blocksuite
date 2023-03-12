@@ -132,27 +132,26 @@ export function getClosestBlockElementByPoint(
     );
   }
 
-  element = find(document.elementsFromPoint(point.x, point.y)) || null;
+  // find block element
+  element = find(document.elementsFromPoint(point.x, point.y));
 
   // Horizontal direction: for nested structures
   if (element) {
-    if (isBlock(element)) {
-      if (isList(element)) {
-        bounds = getRectByBlockElement(element);
-        if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
-          return element;
-        }
-      } else if (isDatabase(element)) {
-        bounds = getRectByBlockElement(element);
-        bounds = element
-          .querySelector('.affine-database-block-title')
-          ?.getBoundingClientRect();
-        if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
-          return element;
-        }
-      } else {
+    if (isList(element)) {
+      bounds = getRectByBlockElement(element);
+      if (point.x - bounds.x <= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT) {
         return element;
       }
+    } else if (isDatabase(element)) {
+      bounds = getRectByBlockElement(element);
+      bounds = element
+        .querySelector('.affine-database-block-title')
+        ?.getBoundingClientRect();
+      if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+        return element;
+      }
+    } else {
+      return element;
     }
     element = null;
   }
@@ -164,17 +163,16 @@ export function getClosestBlockElementByPoint(
     if (n < 0) n--;
     n *= -1;
 
-    element = find(document.elementsFromPoint(point.x, point.y)) || null;
+    // find block element
+    element = find(document.elementsFromPoint(point.x, point.y));
 
     if (element) {
-      if (isBlock(element)) {
-        bounds = getRectByBlockElement(element);
-        if (
-          bounds.bottom - point.y <= STEPS * 2 ||
-          point.y - bounds.top <= STEPS * 2
-        ) {
-          return element;
-        }
+      bounds = getRectByBlockElement(element);
+      if (
+        bounds.bottom - point.y <= STEPS * 2 ||
+        point.y - bounds.top <= STEPS * 2
+      ) {
+        return element;
       }
       element = null;
     }
@@ -294,11 +292,13 @@ function find(elements: Element[]) {
   let i = 0;
   while (i < len) {
     element = elements[i];
-    if (hasBlockId(element)) return element;
+    if (hasBlockId(element) && isBlock(element)) return element;
     if (isEmbed(element)) {
       i++;
-      if (i < len && hasBlockId(elements[i])) return elements[i];
-      return element.closest(BLOCK_ID_ATTR_SELECTOR);
+      if (i < len && hasBlockId(elements[i]) && isBlock(elements[i])) {
+        return elements[i];
+      }
+      return getClosestBlockElementByElement(element);
     }
     i++;
   }
