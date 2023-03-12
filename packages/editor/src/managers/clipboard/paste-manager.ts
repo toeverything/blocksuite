@@ -239,6 +239,7 @@ export class PasteManager {
           },
           0
         );
+        let position = endIndex + insertLen;
         // when the cursor is inside code block, insert raw texts into code block
         if (selectedBlock.flavour === 'affine:code') {
           const texts: DeltaOperation[] = [];
@@ -252,6 +253,20 @@ export class PasteManager {
           };
           dfs(blocks);
           texts.splice(texts.length - 1, 1);
+
+          const startPos = lastBlock.startPos;
+          const endPos = lastBlock.endPos;
+          if (
+            selectionInfo.type === 'Range' &&
+            startPos !== undefined &&
+            startPos >= 0 &&
+            endPos !== undefined &&
+            endPos >= 0
+          ) {
+            const length = endPos - startPos;
+            selectedBlock.text?.delete(startPos, length);
+            position -= length;
+          }
           selectedBlock?.text?.insertList(texts, endIndex);
         } else if (
           ['affine:divider', 'affine:embed', 'affine:code'].includes(
@@ -321,7 +336,6 @@ export class PasteManager {
             this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
         }
         let lastId = selectedBlock?.id;
-        let position = endIndex + insertLen;
         if (addBlockIds.length > 0) {
           const endtexts =
             selectedBlock?.text?.sliceToDelta(endIndex + insertLen) || [];
