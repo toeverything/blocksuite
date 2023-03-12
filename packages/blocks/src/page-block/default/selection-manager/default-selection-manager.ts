@@ -299,18 +299,17 @@ export class DefaultSelectionManager {
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     let hoverEditingState = null;
+
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
       this._container.innerRect
     );
 
     if (element) {
-      const model = getModelByBlockElement(element);
-      const rect = getSelectedStateRectByBlockElement(element);
       hoverEditingState = {
-        model,
-        rect,
         element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
       };
     }
 
