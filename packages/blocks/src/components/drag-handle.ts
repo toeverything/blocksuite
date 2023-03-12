@@ -18,6 +18,7 @@ import type {
 import {
   getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
+  getRectByBlockElement,
   Point,
 } from '../__internal__/index.js';
 import type { EditingState } from '../page-block/default/utils.js';
@@ -475,6 +476,7 @@ export class DragHandle extends LitElement {
       x = this._currentClientX;
       y = this._currentClientY;
     }
+
     if (
       !this._getClosestBlockElement ||
       !this._indicator ||
@@ -488,7 +490,7 @@ export class DragHandle extends LitElement {
     const element = this._getClosestBlockElement(new Point(x, y));
 
     if (element) {
-      const rect = element.getBoundingClientRect();
+      const rect = getRectByBlockElement(element);
       this._lastDroppingTarget = {
         rect,
         element: element as BlockComponentElement,
@@ -496,6 +498,7 @@ export class DragHandle extends LitElement {
       };
       this._indicator.targetRect = rect;
     }
+
     this._indicator.cursorPosition = {
       x,
       y,

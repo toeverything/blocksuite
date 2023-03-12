@@ -699,11 +699,12 @@ export class BlockHub extends NonShadowLitElement {
         model: getModelByBlockElement(element),
       };
       this._indicator.targetRect = rect;
-      this._indicator.cursorPosition = {
-        x,
-        y,
-      };
     }
+
+    this._indicator.cursorPosition = {
+      x,
+      y,
+    };
   };
 
   private _onDragOver = (e: DragEvent) => {
