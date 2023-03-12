@@ -574,6 +574,8 @@ export class DefaultPageBlockComponent
       this.slots,
       viewport
     );
+    const isEmpty =
+      (!this.model.title || !this.model.title.length) && !this._isComposing;
 
     return html`
       <div class="affine-default-viewport">
@@ -581,9 +583,7 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${(!this.model.title ||
-                !this.model.title.length) &&
-              !this._isComposing
+              class="affine-default-page-block-title ${isEmpty
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>

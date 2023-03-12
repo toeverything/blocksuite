@@ -259,9 +259,7 @@ export function getBlockElementsExcludeSubtrees(
   elements: Element[] | BlockComponentElement[]
 ) {
   if (elements.length <= 1) return elements;
-
   let parent = elements[0];
-
   return elements.filter((node, index) => {
     if (index === 0) return true;
     if (contains(parent, node)) {

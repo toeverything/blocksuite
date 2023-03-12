@@ -4,6 +4,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
+import { isImage } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
@@ -318,16 +319,16 @@ export class DefaultSelectionManager {
       hoverEditingState
     );
 
-    if (!hoverEditingState) return;
+    if (!hoverEditingState) {
+      this.slots.embedEditingStateUpdated.emit(null);
+      return;
+    }
 
     const { model, rect } = hoverEditingState;
-
     if (model.type === 'image') {
       // when image size is too large, the option popup should show inside
       rect.x = rect.right + (rect.width > 680 ? -50 : 10);
       this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-    } else {
-      this.slots.embedEditingStateUpdated.emit(null);
     }
   };
 
@@ -487,12 +488,19 @@ export class DefaultSelectionManager {
   refreshEmbedRects(hoverEditingState: EditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
+      const rect = getSelectedStateRectByBlockElement(activeComponent);
+      const embedRects = [
+        new DOMRect(rect.left, rect.right, rect.width, rect.height),
+      ];
+
       // updates editing
-      if (hoverEditingState) {
-        hoverEditingState.rect =
-          getSelectedStateRectByBlockElement(activeComponent);
-        this.slots.embedRectsUpdated.emit([hoverEditingState.rect]);
+      if (hoverEditingState && isImage(activeComponent)) {
+        // when image size is too large, the option popup should show inside
+        rect.x = rect.right + (rect.width > 680 ? -50 : 10);
+        hoverEditingState.rect = rect;
       }
+
+      this.slots.embedRectsUpdated.emit(embedRects);
     }
   }
 
