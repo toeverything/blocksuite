@@ -910,7 +910,7 @@ export class VEditor<
 
       this.insertLineBreak(currentVRange);
     } else if (
-      inputType === 'deleteContentBackward' &&
+      (inputType === 'deleteContentBackward' || inputType === 'deleteByCut') &&
       currentVRange.index >= 0
     ) {
       if (currentVRange.length > 0) {
