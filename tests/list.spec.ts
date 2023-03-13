@@ -1,6 +1,3 @@
-import { sleep } from '@blocksuite/global/utils';
-import { expect } from '@playwright/test';
-
 import {
   clickBlockTypeMenuItem,
   enterPlaygroundRoom,
@@ -232,7 +229,7 @@ test('nested list blocks', async ({ page }) => {
   );
 });
 
-test.only('update numbered list block prefix', async ({ page }) => {
+test('update numbered list block prefix', async ({ page }) => {
   await enterPlaygroundWithList(page, ['', '', ''], 'numbered'); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
