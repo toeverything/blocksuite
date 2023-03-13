@@ -172,6 +172,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
     highlighter: Highlighter;
   }>();
 
+  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
+    this._updateLineNumbers();
+  });
+
   private _preLang: Lang | null = null;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(langs: Lang[]) {
@@ -262,11 +266,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   protected firstUpdated() {
     this._startHighlight(codeLanguages);
-    this.model.text.yText.observe(() => {
-      setTimeout(() => {
-        this._updateLineNumbers();
-      });
-    });
   }
 
   updated(changedProperties: PropertyValues) {
@@ -287,6 +286,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
       assertExists(vEditor);
       vEditor.requestUpdate();
     }
+
+    const richText = this.querySelector('rich-text');
+    assertExists(richText);
+    this._richTextResizeObserver.disconnect();
+    this._richTextResizeObserver.observe(richText);
   }
 
   private _onClickLangBtn() {
@@ -387,10 +391,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       this.host,
       () => this.requestUpdate()
     );
-
-    setTimeout(() => {
-      this._updateLineNumbers();
-    });
 
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
