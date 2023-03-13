@@ -1,7 +1,7 @@
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Text, Workspace, Workspace } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';

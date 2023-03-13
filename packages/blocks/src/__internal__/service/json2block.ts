@@ -1,3 +1,4 @@
+import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -142,8 +143,9 @@ export const addBlocks = (
   const addedBlockIds = [];
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
+    const flavour = block.flavour as keyof BlockModels;
     const blockProps = {
-      flavour: block.flavour as string,
+      flavour,
       type: block.type as string,
       checked: block.checked,
       sourceId: block.sourceId,
@@ -152,12 +154,13 @@ export const addBlocks = (
       height: block.height,
       language: block.language,
     };
-    const id = page.addBlock(blockProps, parent, index + i);
+    const id = page.addBlockByFlavour(flavour, blockProps, parent, index + i);
+
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
 
-    const flavour = model?.flavour;
-    const initialProps = flavour && page.getInitialPropsMapByFlavour(flavour);
+    const initialProps =
+      model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
     if (initialProps && initialProps.text instanceof Text) {
       block.text && model?.text?.applyDelta(block.text);
     }
