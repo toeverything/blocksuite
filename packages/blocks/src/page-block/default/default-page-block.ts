@@ -7,6 +7,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import {
   asyncFocusRichText,
   BlockChildrenContainer,
@@ -117,6 +118,8 @@ export class DefaultPageBlockComponent
   model!: PageBlockModel;
 
   flavour = 'affine:page' as const;
+
+  clipboard = new pageBlockClipboard();
 
   selection!: DefaultSelectionManager;
 
@@ -513,11 +516,14 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboard.initEvent(this.page);
+
     this._initDragHandle();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.clipboard.disposeEvent();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
 

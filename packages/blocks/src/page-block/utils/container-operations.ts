@@ -76,8 +76,7 @@ export function deleteModelsByRange(
     return;
   }
   if (blockRange.type === 'Block') {
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    return;
+    return handleBlockSelectionBatchDelete(page, blockRange.models);
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -95,11 +94,11 @@ export function deleteModelsByRange(
       blockRange.startOffset === blockRange.endOffset &&
       blockRange.startOffset > 0
     ) {
-      startModel.text.delete(blockRange.startOffset - 1, 1);
-      vEditor.setVRange({
-        index: blockRange.startOffset - 1,
-        length: 0,
-      });
+      // startModel.text.delete(blockRange.startOffset - 1, 1);
+      // vEditor.setVRange({
+      //   index: blockRange.startOffset - 1,
+      //   length: 0,
+      // });
       return;
     }
     startModel.text.delete(
@@ -123,7 +122,7 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  vEditor.setVRange({
+  return vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });

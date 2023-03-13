@@ -6,6 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { copyCode } from '../../page-block/default/utils.js';
+import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({
   model,
@@ -48,7 +49,7 @@ export function CodeOptionTemplate({
       <format-bar-button
         class="has-tool-tip"
         data-testid="copy-button"
-        @click=${() => copyCode(model)}
+        @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
         <tool-tip inert tip-position="right-start" role="tooltip"

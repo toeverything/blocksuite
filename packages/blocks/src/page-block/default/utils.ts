@@ -6,15 +6,15 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getService } from '../../__internal__/service.js';
+import { copy } from '../../__internal__/clipboard/index.js';
 import {
   type BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getVirgoByModel,
   type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
@@ -379,32 +379,14 @@ export async function downloadImage(model: BaseBlockModel) {
 }
 
 export async function copyImage(model: EmbedBlockModel) {
-  const copyType = 'blocksuite/x-c+w';
-  const service = getService(model.flavour);
-  const text = service.block2Text(model, '', 0, 0);
-  const delta = [
-    {
-      insert: text,
-    },
-  ];
-  const copyData = JSON.stringify({
-    data: [
-      {
-        type: model.type,
-        sourceId: model.sourceId,
-        width: model.width,
-        height: model.height,
-        caption: model.caption,
-        flavour: model.flavour,
-        text: delta,
-        children: model.children,
-      },
-    ],
+  copy({
+    type: 'Block',
+    models: [model],
+    startOffset: 0,
+    endOffset: 0,
   });
-  const copySuccess = performNativeCopy([
-    { mimeType: copyType, data: copyData },
-  ]);
-  copySuccess && toast('Copied image to clipboard');
+
+  toast('Copied image to clipboard');
 }
 
 function getTextDelta(model: BaseBlockModel) {
@@ -491,23 +473,16 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-export function copyCode(model: BaseBlockModel) {
-  const vEditor = getVirgoByModel(model);
-  assertExists(vEditor);
-  vEditor.setVRange({
-    index: 0,
-    length: vEditor.yText.length,
-  });
-  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
-
-  vEditor.setVRange({
-    index: vEditor.yText.length,
-    length: 0,
+export function copyCode(codeBlockModel: CodeBlockModel) {
+  copy({
+    type: 'Block',
+    models: [codeBlockModel],
+    startOffset: 0,
+    endOffset: 0,
   });
 
   toast('Copied to clipboard');
 }
-
 export function getAllowSelectedBlocks(
   model: BaseBlockModel
 ): BaseBlockModel[] {

@@ -12,6 +12,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
@@ -116,6 +117,8 @@ export class EdgelessPageBlockComponent
 
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
+
+  clipboard = new EdgelessClipboard(this.page);
 
   slots: EdgelessSelectionSlots = {
     viewportUpdated: new Slot(),
@@ -311,7 +314,7 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     this._initSlotEffects();
-
+    this.clipboard.initEvent(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
@@ -333,6 +336,7 @@ export class EdgelessPageBlockComponent
   }
 
   disconnectedCallback() {
+    this.clipboard.disposeEvent();
     super.disconnectedCallback();
     this._disposables.dispose();
   }

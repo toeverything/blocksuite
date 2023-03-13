@@ -19,7 +19,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'] as const)) return;
-  asyncSetVRange(model, vRange);
+  return asyncSetVRange(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {
