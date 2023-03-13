@@ -505,12 +505,6 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   return [leaf, leafOffset] as const;
 }
 
-export function getAllBlocks() {
-  return getBlockElementsByElement(document).filter(
-    isBlock
-  ) as BlockComponentElement[];
-}
-
 export function isInsideRichText(element: unknown): element is RichText {
   // Fool-proofing
   if (element instanceof Event) {
