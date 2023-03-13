@@ -17,7 +17,7 @@ import {
   getCurrentNativeRange,
   getModelByElement,
   getPreviousBlock,
-  getRichTextByModel,
+  getVirgoByModel,
   supportsChildren,
 } from '../utils/index.js';
 
@@ -410,8 +410,8 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         page.deleteBlock(model, {
           bringChildrenTo: previousSibling,
         });
-        const richText = getRichTextByModel(previousSibling);
-        richText?.vEditor?.setVRange({
+        const vEditor = getVirgoByModel(previousSibling);
+        vEditor?.setVRange({
           index: preTextLength,
           length: 0,
         });

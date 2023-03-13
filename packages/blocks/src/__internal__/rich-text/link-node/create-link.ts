@@ -8,7 +8,7 @@ import {
   blockRangeToNativeRange,
   getCurrentBlockRange,
 } from '../../utils/block-range.js';
-import { getEditorContainer, getRichTextByModel } from '../../utils/index.js';
+import { getEditorContainer, getVirgoByModel } from '../../utils/index.js';
 import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
@@ -19,10 +19,7 @@ export function createLink(page: Page) {
   }
   const startModel = blockRange.models[0];
   if (!startModel) return;
-  const richText = getRichTextByModel(startModel);
-  if (!richText) return;
-
-  const { vEditor } = richText;
+  const vEditor = getVirgoByModel(startModel);
   assertExists(vEditor);
   const vRange = {
     index: blockRange.startOffset,
