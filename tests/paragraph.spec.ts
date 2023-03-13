@@ -868,6 +868,7 @@ test('should placeholder works', async ({ page }) => {
   const placeholder = page.locator('.tips-placeholder');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveCount(1);
+  await expect(placeholder).toContainText('type');
 
   await type(page, '1');
   await expect(placeholder).not.toBeVisible();
@@ -876,10 +877,22 @@ test('should placeholder works', async ({ page }) => {
   await expect(placeholder).toBeVisible();
   await clickBlockTypeMenuItem(page, 'H1');
 
-  await expect(placeholder).not.toBeVisible();
-  await clickBlockTypeMenuItem(page, 'Text');
   await expect(placeholder).toBeVisible();
+  await expect(placeholder).toHaveText('Heading 1');
+  await clickBlockTypeMenuItem(page, 'Text');
+  await focusRichText(page, 0);
+  await expect(placeholder).toBeVisible();
+  await expect(placeholder).toContainText('type');
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
+
+  // should block hub icon works
+  const blockHubPlaceholder = placeholder.locator('svg');
+  const blockHubMenu = page.locator('.block-hub-icons-container');
+  await expect(blockHubPlaceholder).toBeVisible();
+  await expect(blockHubMenu).not.toBeVisible();
+  await blockHubPlaceholder.click();
+  await expect(placeholder).toHaveCount(1);
+  await expect(blockHubMenu).toBeVisible();
 });

@@ -4,7 +4,8 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import { BaseBlockModel, BlockSchema, internalPrimitives } from '../base.js';
+import type { BaseBlockModel, BlockSchema } from '../base.js';
+import { internalPrimitives } from '../base.js';
 import { Text } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import type {

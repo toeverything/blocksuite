@@ -1,12 +1,12 @@
 import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Disposable, Page, UserRange } from '@blocksuite/store';
+import type { Page, UserRange } from '@blocksuite/store';
 
 import {
   initMouseEventHandlers,
-  MouseMode,
+  type MouseMode,
   noop,
-  SelectionEvent,
-  TopLevelBlockModel,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -15,7 +15,13 @@ import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
-import { initWheelEventHandlers } from './utils.js';
+import { TextModeController } from './mode-controllers/text-mode.js';
+import {
+  getSelectionBoxBound,
+  getXYWH,
+  initWheelEventHandlers,
+  pickTopBlock,
+} from './utils.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
 
@@ -24,23 +30,12 @@ export interface EdgelessHoverState {
   content: Selectable;
 }
 
-/* Indicates there is no selected block */
-interface NoneSelectionState {
-  type: 'none';
-}
-
-/* Indicates there is one selected block */
-interface SingleSelectionState {
-  type: 'single';
+export interface EdgelessSelectionState {
   /* The selected block or surface element */
-  selected: Selectable;
-  /* Rect of the selected content */
-  rect: DOMRect;
+  selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
 }
-
-export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
 
 export interface SelectionArea {
   start: DOMPoint;
@@ -53,16 +48,15 @@ export class EdgelessSelectionManager {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
-  private _lastMouseMode: MouseMode | null = null;
 
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
   private _mouseDisposeCallback: () => void = noop;
-  private _selectionUpdateCallback: Disposable;
   private _wheelDisposeCallback: () => void = noop;
 
-  private _prevSelectedShapeId: string | null = null;
+  /** Latest mouse position in view coords */
+  private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
   get isActive() {
     return this.currentController.isActive;
@@ -73,15 +67,9 @@ export class EdgelessSelectionManager {
   }
 
   set mouseMode(mode: MouseMode) {
-    const currentMouseMode = this._mouseMode;
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
-    this._lastMouseMode = currentMouseMode;
-  }
-
-  get lastMouseMode(): MouseMode | null {
-    return this._lastMouseMode;
   }
 
   get blockSelectionState() {
@@ -90,15 +78,6 @@ export class EdgelessSelectionManager {
 
   get currentController() {
     return this._controllers[this.mouseMode.type];
-  }
-
-  get hoverState() {
-    if (!this.currentController.hoverState) return null;
-    return this.currentController.hoverState;
-  }
-
-  get isHoveringShape(): boolean {
-    return false;
   }
 
   get draggingArea() {
@@ -120,33 +99,17 @@ export class EdgelessSelectionManager {
       shape: new ShapeModeController(this._container),
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
+      text: new TextModeController(this._container),
     };
 
     this._initMouseAndWheelEvents();
-    this._selectionUpdateCallback = this._container.slots.updateSelection.on(
-      state => {
-        if (this._prevSelectedShapeId) {
-          /*
-          const element = getBlockById<'affine-shape'>(
-            this._prevSelectedShapeId
-          );
-          if (element) {
-            element.selected = false;
-          }
-          */
-          this._prevSelectedShapeId = null;
-        }
-        if (state.type === 'single') {
-          // if (matchFlavours(state.selected, ['affine:shape'])) {
-          //   const element = getBlockById<'affine-shape'>(state.selected.id);
-          //   if (element) {
-          //     element.selected = true;
-          //   }
-          //   this._previousSelectedShape = state.selected as ShapeBlockModel;
-          // }
-        }
-      }
-    );
+  }
+
+  private _updateLastMousePos(e: SelectionEvent) {
+    this._lastMousePos = {
+      x: e.x,
+      y: e.y,
+    };
   }
 
   private async _initMouseAndWheelEvents() {
@@ -193,15 +156,13 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncDraggingArea() {
-    return this.currentController.syncDraggingArea();
-  }
-
   private _onContainerDblClick = (e: SelectionEvent) => {
     return this.currentController.onContainerDblClick(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    this._updateLastMousePos(e);
+    this._container.slots.hoverUpdated.emit();
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 
@@ -220,7 +181,6 @@ export class EdgelessSelectionManager {
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
-    this._selectionUpdateCallback.dispose();
   }
 
   updateLocalSelection() {
@@ -241,5 +201,27 @@ export class EdgelessSelectionManager {
     if (element) {
       element.requestUpdate();
     }
+  }
+
+  getHoverState(): EdgelessHoverState | null {
+    if (!this.currentController.enableHover) {
+      return null;
+    }
+    const { surface } = this._container;
+    const frames = (this.page.root?.children ?? []) as TopLevelBlockModel[];
+    const { x, y } = this._lastMousePos;
+    const [modelX, modelY] = surface.toModelCoord(x, y);
+
+    const hovered =
+      surface.pickTop(modelX, modelY) ?? pickTopBlock(frames, modelX, modelY);
+    if (!hovered) {
+      return null;
+    }
+
+    const xywh = getXYWH(hovered);
+    return {
+      rect: getSelectionBoxBound(surface.viewport, xywh),
+      content: hovered,
+    };
   }
 }

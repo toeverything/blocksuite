@@ -1,4 +1,4 @@
-name: Linter
+name: Lint
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: lint
+    name: Run linters
     runs-on: ubuntu-latest
 
     steps:
@@ -26,13 +26,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Prettier
-        run: npx prettier --cache --check packages tests
+      - name: Run type check
+        run: pnpm build
 
       - name: Run ESLint
-        # by default: eslint will save the cache files on cwd
-        #   Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
-        run: npx eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0
+        # ESLint will save the cache files on cwd by default,
+        # so the lint command uses node_modules for caching.
+        # Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
+        run: pnpm lint
+
+      - name: Run prettier
+        run: npx prettier --cache --check packages tests
 
       - uses: actions/cache@v3
         id: restore-build
@@ -46,6 +50,21 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
-      - name: Type Check
-        # run: pnpm exec tsc -b
+
+  build-next:
+    name: Verify Next.js example build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Next.js example
         run: pnpm build
+        working-directory: packages/react/examples/next

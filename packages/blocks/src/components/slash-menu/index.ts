@@ -1,15 +1,17 @@
 import './slash-menu-node.js';
 
-import { assertExists, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import {
   getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
+import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
-  DragDirection,
+  type DragDirection,
 } from '../../page-block/utils/position.js';
 import type { SlashMenu } from './slash-menu-node.js';
 
@@ -103,6 +105,10 @@ function onAbort(
     return;
   }
   text.delete(idx, searchStr.length);
+  vEditor.setVRange({
+    index: idx,
+    length: 0,
+  });
 }
 
 export function showSlashMenu({
@@ -136,7 +142,7 @@ export function showSlashMenu({
   // Mount
   container.appendChild(slashMenu);
   // Wait for the format quick bar to be mounted
-  requestAnimationFrame(() => updatePosition());
+  onModelElementUpdated(model, updatePosition);
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {

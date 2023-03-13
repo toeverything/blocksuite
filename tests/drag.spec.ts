@@ -13,6 +13,7 @@ import {
   pressTab,
   type,
 } from './utils/actions/index.js';
+import { getBoundingClientRect } from './utils/actions/misc.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -32,7 +33,7 @@ test('only have one drag handle in screen', async ({ page }) => {
     return { x: box.left, y: box.top + 2 };
   }, []);
 
-  const rightBottom = await page.evaluate(() => {
+  const bottomRight = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"]');
     const box = paragraph?.getBoundingClientRect();
     if (!box) {
@@ -47,7 +48,7 @@ test('only have one drag handle in screen', async ({ page }) => {
     return handles.length;
   }, []);
   expect(length1).toBe(1);
-  await page.mouse.move(rightBottom.x, rightBottom.y);
+  await page.mouse.move(bottomRight.x, bottomRight.y);
   const length2 = await page.evaluate(() => {
     const handles = document.querySelectorAll('affine-drag-handle');
     return handles.length;
@@ -540,4 +541,23 @@ test('should blur rich-text first when block selection', async ({ page }) => {
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('*:focus')).toHaveCount(0);
+});
+
+test('hide drag handle when mouse is hovering over the title', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  const rect = await getBoundingClientRect(
+    page,
+    '.affine-frame-block-container'
+  );
+  const dragHandle = await page.locator('affine-drag-handle');
+  await page.mouse.move(rect.x, rect.y - 1, { steps: 2 });
+  expect(await dragHandle.isVisible()).toBe(false);
+
+  await page.mouse.move(rect.x, rect.y + 1, { steps: 2 });
+  expect(await dragHandle.isVisible()).toBe(true);
 });

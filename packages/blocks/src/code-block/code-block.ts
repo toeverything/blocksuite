@@ -5,14 +5,15 @@ import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, PropertyValues, render } from 'lit';
+import { css, html, type PropertyValues, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getHighlighter, Highlighter, Lang } from 'shiki';
+import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
+  getViewportElement,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -113,20 +114,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
       display: inline;
     }
 
-    .affine-code-block-container v-line {
-      display: inline;
-    }
-
-    .affine-code-block-container v-line > div {
-      display: inline-block;
-    }
-
     .affine-code-block-container affine-code-line span {
-      white-space: nowrap;
-    }
-
-    .affine-code-block-container.wrap v-line {
-      display: block;
+      white-space: pre;
     }
 
     .affine-code-block-container.wrap v-line > div {
@@ -134,7 +123,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container.wrap affine-code-line span {
-      white-space: break-spaces;
+      white-space: pre-wrap;
     }
 
     .affine-code-block-container .virgo-editor::-webkit-scrollbar {
@@ -201,7 +190,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
     assertExists(richText);
     const vEditor = richText.vEditor;
     assertExists(vEditor);
+    const range = vEditor.getVRange();
     vEditor.requestUpdate();
+    if (range) {
+      vEditor.setVRange(range);
+    }
   }
 
   get readonly() {
@@ -220,11 +213,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
     );
 
     let timer: number;
+    const updatePosition = () => {
+      // Update option position when scrolling
+      const rect = this.getBoundingClientRect();
+      this._optionPosition = {
+        x: rect.right + 12,
+        y: Math.max(rect.top, 12),
+      };
+    };
     this.hoverState.on(hover => {
       clearTimeout(timer);
       if (hover) {
-        const rect = this.getBoundingClientRect();
-        this._optionPosition = { x: rect.right + 12, y: rect.top };
+        updatePosition();
         return;
       }
       timer = window.setTimeout(() => {
@@ -239,17 +239,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
       this.hoverState.emit(false);
     });
 
-    this._disposables.addFromEvent(document, 'wheel', e => {
-      if (!this._optionPosition) return;
-      // Update option position when scrolling
-      const rect = this.getBoundingClientRect();
-      this._optionPosition = { x: rect.right + 12, y: rect.top };
-    });
+    const viewportElement = getViewportElement(this.model.page);
+    if (viewportElement) {
+      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+        if (!this._optionPosition) return;
+        updatePosition();
+      });
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+    this.hoverState.dispose();
   }
 
   private _onClickWrapBtn() {
@@ -260,6 +262,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   protected firstUpdated() {
     this._startHighlight(codeLanguages);
+    this.model.text.yText.observe(() => {
+      setTimeout(() => {
+        this._updateLineNumbers();
+      });
+    });
   }
 
   updated(changedProperties: PropertyValues) {

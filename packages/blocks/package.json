@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.5.0-alpha.0",
+  "version": "0.5.0-alpha.1",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
@@ -61,7 +61,6 @@
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1",
     "@blocksuite/store": "workspace:*",
-    "@types/autosize": "^4.0.1",
-    "parchment": "^2.0.1"
+    "@types/autosize": "^4.0.1"
   }
 }

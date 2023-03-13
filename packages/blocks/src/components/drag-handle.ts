@@ -1,5 +1,10 @@
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  type Disposable,
+  DisposableGroup,
+  isFirefox,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -35,7 +40,7 @@ export class DragIndicator extends LitElement {
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
-      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     }
   `;
 
@@ -194,6 +199,7 @@ export class DragHandle extends LitElement {
    * Current drag handle model state
    */
   private _handleAnchorState: EditingState | null = null;
+  private _handleAnchorDisposable: Disposable | null = null;
 
   /**
    * Last drag handle dropping target state
@@ -205,16 +211,28 @@ export class DragHandle extends LitElement {
   private _container: HTMLElement;
   private _dragImage: HTMLElement | null = null;
 
+  private _disposables: DisposableGroup = new DisposableGroup();
+
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
 
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
-  public showBySelectionEvent(event: SelectionEvent) {
-    if (!this._getBlockEditingStateByPosition) {
+  onContainerMouseMove(event: SelectionEvent) {
+    if (!this._getBlockEditingStateByPosition) return;
+
+    const frameBlock = this._container.querySelector(
+      '.affine-frame-block-container'
+    );
+    assertExists(frameBlock);
+    const frameBlockRect = frameBlock.getBoundingClientRect();
+    // See https://github.com/toeverything/blocksuite/issues/1611
+    if (event.raw.clientY < frameBlockRect.y) {
+      this.hide();
       return;
     }
+
     const modelState = this._getBlockEditingStateByPosition(
       this.getDropAllowedBlocks(null),
       event.raw.clientX,
@@ -262,10 +280,18 @@ export class DragHandle extends LitElement {
       );
 
       this._dragHandle.style.transform = `translateY(${handleYOffset}px)`;
+
+      if (this._handleAnchorDisposable) {
+        this._handleAnchorDisposable.dispose();
+      }
+
+      this._handleAnchorDisposable = modelState.model.propsUpdated.on(() => {
+        this.hide();
+      });
     }
   }
 
-  public hide() {
+  hide() {
     this.style.display = 'none';
     this._cursor = null;
     this._handleAnchorState = null;
@@ -288,11 +314,11 @@ export class DragHandle extends LitElement {
     }
   }
 
-  public setPointerEvents(value: 'auto' | 'none') {
+  setPointerEvents(value: 'auto' | 'none') {
     this.style.pointerEvents = value;
   }
 
-  protected firstUpdated() {
+  firstUpdated() {
     this.style.display = 'none';
     this.style.position = 'absolute';
     this._indicator = <DragIndicator>(
@@ -304,43 +330,46 @@ export class DragHandle extends LitElement {
       );
       document.body.appendChild(this._indicator);
     }
-    document.body.addEventListener(
+
+    const disposables = this._disposables;
+
+    // event bindings
+    // window
+    disposables.addFromEvent(window, 'resize', this._onResize);
+
+    // document
+    if (isFirefox) {
+      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
+    }
+
+    // document.body
+    disposables.addFromEvent(document.body, 'wheel', this._onWheel);
+    disposables.addFromEvent(
+      document.body,
       'dragover',
       handlePreventDocumentDragOverDelay,
       false
     );
-    document.body.addEventListener('wheel', this._onWheel);
-    window.addEventListener('resize', this._onResize);
-    this._dragHandle.addEventListener('click', this._onClick);
-    this._dragHandle.addEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mousemove', this._onMouseMoveOnHost);
-    this._dragHandle.addEventListener('dragstart', this._onDragStart);
-    this._dragHandle.addEventListener('drag', this._onDrag);
-    this._dragHandle.addEventListener('dragend', this._onDragEnd);
+
+    // host
+    disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
+
+    // drag handle
+    disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
+    disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
+    disposables.addFromEvent(this._dragHandle, 'dragstart', this._onDragStart);
+    disposables.addFromEvent(this._dragHandle, 'drag', this._onDrag);
+    disposables.addFromEvent(this._dragHandle, 'dragend', this._onDragEnd);
   }
 
-  public disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     // cleanup
     this.hide();
 
-    window.removeEventListener('resize', this._onResize);
-    document.body.removeEventListener('wheel', this._onWheel);
-    document.body.removeEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay
-    );
-    this._dragHandle.removeEventListener('click', this._onClick);
-    this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mousemove', this._onMouseMoveOnHost);
-    this._dragHandle.removeEventListener('dragstart', this._onDragStart);
-    this._dragHandle.removeEventListener('drag', this._onDrag);
-    this._dragHandle.removeEventListener('dragend', this._onDragEnd);
+    this._disposables.dispose();
+    this._handleAnchorDisposable?.dispose();
   }
 
   private _onMouseMoveOnHost(e: MouseEvent) {
@@ -501,7 +530,7 @@ export class DragHandle extends LitElement {
     this.hide();
   };
 
-  override render() {
+  render() {
     return html`
       <style>
         :host(:hover) > .affine-drag-handle-line {

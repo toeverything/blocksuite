@@ -1,31 +1,25 @@
-import { matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { getRichTextByModel } from './query.js';
+import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
+
+export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.setVRange(vRange);
+}
 
 export function asyncFocusRichText(
   page: Page,
   id: string,
   vRange: VRange = { index: 0, length: 0 }
 ) {
-  requestAnimationFrame(() => {
-    const model = page.getBlockById(id);
-    if (!model) {
-      throw new Error(`Cannot find block with id ${id}`);
-    }
-    const richText = getRichTextByModel(model);
-    if (!richText) {
-      throw new Error(`Cannot find rich text with id ${id}`);
-    }
-    const vEditor = richText.vEditor;
-    if (!vEditor) {
-      throw new Error(`Cannot find vEditor with id ${id}`);
-    }
-    vEditor.setVRange(vRange);
-  });
+  const model = page.getBlockById(id);
+  assertExists(model);
+  if (matchFlavours(model, ['affine:divider'] as const)) return;
+  asyncSetVRange(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {
@@ -76,7 +70,6 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:list',
       type: listType,
       text: model.text?.clone(),
       children: model.children,
@@ -84,7 +77,7 @@ export function convertToList(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlock(blockProps, parent, index);
+    const id = page.addBlockByFlavour('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:list'] as const) &&
@@ -95,6 +88,7 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     page.updateBlock(model, { type: listType });
+    asyncFocusRichText(page, model.id);
   }
   return true;
 }
@@ -118,14 +112,18 @@ export function convertToParagraph(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:paragraph',
       type: type,
       text: model.text?.clone(),
       children: model.children,
     };
     page.deleteBlock(model);
 
-    const id = page.addBlock(blockProps, parent, index);
+    const id = page.addBlockByFlavour(
+      'affine:paragraph',
+      blockProps,
+      parent,
+      index
+    );
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:paragraph'] as const) &&
@@ -135,6 +133,13 @@ export function convertToParagraph(
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
+    const vEditor = getRichTextByModel(model)?.vEditor;
+    if (vEditor) {
+      vEditor.setVRange({
+        index: 0,
+        length: 0,
+      });
+    }
     page.updateBlock(model, { type: type });
   }
   return true;
@@ -161,11 +166,10 @@ export function convertToDivider(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'affine:divider',
       children: model.children,
     };
     // space.deleteBlock(model);
-    page.addBlock(blockProps, parent, index);
+    page.addBlockByFlavour('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {

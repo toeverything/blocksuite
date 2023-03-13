@@ -2,7 +2,8 @@
 import '../declare-test-window.js';
 
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
+import type { ConsoleMessage, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import type {
   BaseBlockModel,
@@ -175,26 +176,32 @@ export async function resetHistory(page: Page) {
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function enterPlaygroundWithList(
   page: Page,
-  contents: string[] = ['', '', '']
+  contents: string[] = ['', '', ''],
+  type: ListType = 'bulleted'
 ) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   await initEmptyEditor(page);
 
-  await page.evaluate(contents => {
-    const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
-      title: new page.Text(),
-    });
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    for (let i = 0; i < contents.length; i++) {
-      page.addBlockByFlavour(
-        'affine:list',
-        contents.length > 0 ? { text: new page.Text(contents[i]) } : {},
-        frameId
-      );
-    }
-  }, contents);
+  await page.evaluate(
+    ({ contents, type }: { contents: string[]; type: ListType }) => {
+      const { page } = window;
+      const pageId = page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      });
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+      for (let i = 0; i < contents.length; i++) {
+        page.addBlockByFlavour(
+          'affine:list',
+          contents.length > 0
+            ? { text: new page.Text(contents[i]), type }
+            : { type },
+          frameId
+        );
+      }
+    },
+    { contents, type }
+  );
   await waitNextFrame(page);
 }
 
@@ -280,9 +287,9 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const codeBlockId = page.addBlockByFlavour('affine:code', {}, frameId);
     page.captureSync();
     return { pageId, frameId, codeBlockId };
   });
@@ -610,4 +617,30 @@ export async function shamefullyBlurActiveElement(page: Page) {
     }
     document.activeElement.blur();
   });
+}
+
+/**
+ * FIXME:
+ * Sometimes virgo state is not updated in time. Bad case like below:
+ *
+ * ```
+ * await focusRichText(page);
+ * await type(page, 'hello');
+ * await assertRichTexts(page, ['hello']);
+ * ```
+ *
+ * output(failed or flaky):
+ *
+ * ```
+ * - Expected  - 1
+ * + Received  + 1
+ *   Array [
+ * -   "hello",
+ * +   "ello",
+ *   ]
+ * ```
+ *
+ */
+export async function waitForVirgoStateUpdated(page: Page) {
+  await page.waitForTimeout(50);
 }

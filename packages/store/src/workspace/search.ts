@@ -1,6 +1,7 @@
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
-import { Doc, Map as YMap, Text as YText } from 'yjs';
+import type { Doc, Map as YMap } from 'yjs';
+import { Text as YText } from 'yjs';
 
 import type { YBlock } from './page.js';
 

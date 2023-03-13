@@ -1,14 +1,11 @@
+import type { SurfaceBlockModel } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  MouseMode,
-  PageBlockModel,
+  type MouseMode,
+  type PageBlockModel,
 } from '@blocksuite/blocks';
-import {
-  ContentParser,
-  NonShadowLitElement,
-  SurfaceBlockModel,
-} from '@blocksuite/blocks';
+import { ContentParser, NonShadowLitElement } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';

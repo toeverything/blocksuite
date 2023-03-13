@@ -5,13 +5,14 @@
 import './declare-test-window.js';
 
 import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
-import type { VEditor } from '@blocksuite/virgo';
-import { expect, Locator, type Page } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
+import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
   SerializedStore,
@@ -66,7 +67,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,24]',
+      'prop:xywh': '[0,0,720,72]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -99,14 +100,14 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(async () => {
-    const richTexts = Array.from(document.querySelectorAll('rich-text'));
-    const result = [];
-    for (const richText of richTexts) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richText as any).vEditor as VEditor;
-      result.push(editor.yText.toString());
-    }
+  const actualTexts = await page.evaluate(() => {
+    const richTexts = Array.from(
+      document.querySelectorAll<RichText>('rich-text')
+    );
+    const result = richTexts.map(richText => {
+      const editor = richText.vEditor;
+      return editor.yText.toString();
+    });
     return result;
   });
   expect(actualTexts).toEqual(texts);
@@ -148,6 +149,25 @@ export async function assertImageOption(page: Page) {
 export async function assertPageTitleFocus(page: Page) {
   const locator = page.locator('.affine-default-page-block-title').nth(0);
   await expect(locator).toBeFocused();
+}
+
+export async function assertListPrefix(
+  page: Page,
+  predict: (string | RegExp)[],
+  range?: [number, number]
+) {
+  const prefixs = await page.locator('.affine-list-block__prefix');
+
+  let start = 0;
+  let end = await prefixs.count();
+  if (range) {
+    [start, end] = range;
+  }
+
+  for (let i = start; i < end; i++) {
+    const prefix = await prefixs.nth(i).innerText();
+    expect(prefix).toContain(predict[i]);
+  }
 }
 
 export async function assertBlockCount(
@@ -604,6 +624,35 @@ export async function assertEdgelessHoverRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessNonHoverRect(page: Page) {
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  await expect(hoverRect).toBeHidden();
+}
+
 export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
   expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
+}
+
+type Rect = { x: number; y: number; w: number; h: number };
+
+export function assertRectEqual(a: Rect, b: Rect) {
+  expect(a.x).toBeCloseTo(b.x, 0);
+  expect(a.y).toBeCloseTo(b.y, 0);
+  expect(a.w).toBeCloseTo(b.w, 0);
+  expect(a.h).toBeCloseTo(b.h, 0);
+}
+
+export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+
+  const selectedRect = page
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+  const box = await selectedRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless selected rect');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
 }

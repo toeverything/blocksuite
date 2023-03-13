@@ -1,22 +1,29 @@
+import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import { deserializeXYWH } from '@blocksuite/phasor';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import {
   almostEqual,
-  ExtendedModel,
+  asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
+  type BlockComponentElement,
+  type ExtendedModel,
   getDefaultPageBlock,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  TopLevelBlockModel,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
-  BlockRange,
+  type BlockRange,
   getCurrentBlockRange,
   restoreSelection,
   updateBlockRange,
@@ -32,7 +39,9 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import { DEFAULT_SPACING } from '../edgeless/utils.js';
+
+const DEFAULT_SPACING = 64;
+export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -204,29 +213,38 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
+  const firstModel = newModels[0];
   const lastModel = newModels.at(-1);
   if (savedBlockRange) {
-    requestAnimationFrame(() => restoreSelection(savedBlockRange));
+    onModelTextUpdated(firstModel, () => {
+      restoreSelection(savedBlockRange);
+    });
   } else {
     if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
   return newModels;
 }
 
-function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
+function transformBlock(
+  model: BaseBlockModel,
+  flavour: keyof BlockModels,
+  type?: string
+) {
   const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
-  const blockProps = {
-    flavour,
+  const blockProps: {
+    type?: string;
+    text?: Text;
+    children?: BlockSuiteInternal.IBaseBlockProps[];
+  } = {
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
   };
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
-  const id = page.addBlock(blockProps, parent, index);
-  return id;
+  return page.addBlockByFlavour(flavour, blockProps, parent, index);
 }
 
 /**
@@ -344,11 +362,12 @@ function formatBlockRange(
   // edge case 2: same model
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
-    startModel.text?.format(startOffset, endOffset - startOffset, {
-      [key]: !format[key],
-    });
-    requestAnimationFrame(() => {
+    const richText = getRichTextByModel(startModel);
+    richText?.vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
+    });
+    startModel.text?.format(startOffset, endOffset - startOffset, {
+      [key]: format[key] ? null : true,
     });
     return;
   }
@@ -356,25 +375,31 @@ function formatBlockRange(
   // format start model
   if (!matchFlavours(startModel, ['affine:code'] as const)) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
-      [key]: !format[key],
+      [key]: format[key] ? null : true,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'] as const)) {
-    endModel.text?.format(0, endOffset, { [key]: !format[key] });
+    endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
   // format between models
   blockRange.models
     .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
-      model.text?.format(0, model.text.length, { [key]: !format[key] });
+      model.text?.format(0, model.text.length, {
+        [key]: format[key] ? null : true,
+      });
     });
 
   // Native selection maybe shifted after format
   // We need to restore it manually
   if (blockRange.type === 'Native') {
-    requestAnimationFrame(() => {
+    const allTextUpdated = blockRange.models
+      .filter(model => !matchFlavours(model, ['affine:code']))
+      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+
+    Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
     });
   }
@@ -406,6 +431,31 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
+export async function onModelTextUpdated(
+  model: BaseBlockModel,
+  callback: (text: RichText) => void
+) {
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.slots.updated.once(() => {
+    callback(richText);
+  });
+}
+
+// Run the callback until a model's element updated.
+// Please notice that the callback will be called **once the element itself is ready**.
+// The children may be not updated.
+// If you want to wait for the text elements,
+// please use `onModelTextUpdated`.
+export async function onModelElementUpdated(
+  model: BaseBlockModel,
+  callback: (blockElement: BlockComponentElement) => void
+) {
+  const element = await asyncGetBlockElementByModel(model);
+  if (element) {
+    callback(element);
+  }
+}
+
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
@@ -420,13 +470,9 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const bound = blockElement.getBoundingClientRect();
       if (!bound) return;
 
-      const [x, y, w, h] = JSON.parse(model.xywh) as [
-        number,
-        number,
-        number,
-        number
-      ];
-      const newModelHeight = bound.height / zoom;
+      const [x, y, w, h] = deserializeXYWH(model.xywh);
+      const newModelHeight =
+        (bound.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {

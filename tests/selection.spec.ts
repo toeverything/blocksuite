@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
   doubleClickBlockById,
@@ -299,7 +300,7 @@ test('cursor move left and right', async ({ page }) => {
   expect(indexOne).toBe(17);
   await pressArrowRight(page);
   const indexTwo = await getVirgoSelectionIndex(page);
-  expect(indexTwo).toBe(17);
+  expect(indexTwo).toBe(0);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {
@@ -886,7 +887,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await doubleClickBlockById(page, ids.frameId);
+  await activeFrameInEdgeless(page, ids.frameId);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });

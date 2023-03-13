@@ -29,7 +29,7 @@ async function testBasic() {
   await runOnce();
 }
 
-const workspace = new Workspace({});
+const workspace = new Workspace({ id: 'test' });
 window.workspace = workspace;
 
 const app = document.createElement('test-app') as TestApp;

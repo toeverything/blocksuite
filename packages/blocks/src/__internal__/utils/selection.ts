@@ -12,7 +12,7 @@ import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   getBlockElementByModel,
   getDefaultPageBlock,
   getElementFromEventTarget,
@@ -70,7 +70,7 @@ async function setNewTop(y: number, editableContainer: Element) {
       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
-        // set scroll may has a animation, wait for over
+        // set scroll may have an animation, wait for over
         requestAnimationFrame(() => {
           finalBottom = editableContainer.getBoundingClientRect().bottom;
         });
@@ -460,9 +460,9 @@ export function isBlankArea(e: SelectionEvent) {
 // Retarget selection back to the nearest block
 // when user clicks on the edge of page (page mode) or frame (edgeless mode).
 // See https://github.com/toeverything/blocksuite/pull/878
-function handleClickRetargeting(page: Page, e: SelectionEvent) {
-  const targetEl = getElementFromEventTarget(e.raw.target);
-  const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
+function retargetClick(page: Page, e: SelectionEvent) {
+  const targetElement = getElementFromEventTarget(e.raw.target);
+  const block = targetElement?.closest(`[${BLOCK_ID_ATTR}]`) as {
     model?: BaseBlockModel;
     pageModel?: BaseBlockModel;
   } | null;
@@ -503,14 +503,18 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
   // if not left click
   if (e.button) return;
 
-  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+
+  retargetClick(page, e);
+}
+
+export function handleNativeRangeAtPoint(x: number, y: number) {
+  const range = caretRangeFromPoint(x, y);
   const startContainer = range?.startContainer;
   // click on rich text
   if (startContainer instanceof Node) {
     resetNativeSelection(range);
   }
-
-  handleClickRetargeting(page, e);
 }
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {

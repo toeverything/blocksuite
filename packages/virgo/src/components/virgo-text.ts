@@ -1,13 +1,9 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { DirectiveResult } from 'lit/directive.js';
-import { styleMap, StyleMapDirective } from 'lit/directives/style-map.js';
+import { styleMap, type StyleMapDirective } from 'lit/directives/style-map.js';
 
 import { ZERO_WIDTH_SPACE } from '../constant.js';
-
-const unitTextStyles = styleMap({
-  whiteSpace: 'break-spaces',
-});
 
 @customElement('v-text')
 export class VText extends LitElement {
@@ -15,7 +11,7 @@ export class VText extends LitElement {
   str: string = ZERO_WIDTH_SPACE;
 
   @property()
-  styles: DirectiveResult<typeof StyleMapDirective> = unitTextStyles;
+  styles: DirectiveResult<typeof StyleMapDirective> = styleMap({});
 
   render() {
     // we need to avoid \n appearing before and after the span element, which will

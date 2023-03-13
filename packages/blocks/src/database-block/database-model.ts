@@ -1,5 +1,5 @@
 import type { TagSchema } from '@blocksuite/global/database';
-import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
+import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export enum DatabaseBlockDisplayMode {

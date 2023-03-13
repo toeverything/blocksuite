@@ -7,7 +7,7 @@ import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space, StackItem } from '../space.js';
+import { Space, type StackItem } from '../space.js';
 import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
@@ -444,22 +444,6 @@ export class Page extends Space<PageData> {
     return id;
   }
 
-  /**
-   * @deprecated use `addBlockByFlavour`
-   */
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string | null,
-    parentIndex?: number
-  ): string {
-    return this.addBlockByFlavour(
-      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
-      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
-      parent,
-      parentIndex
-    );
-  }
-
   updateBlockById(id: string, props: Partial<BlockProps>) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -545,6 +529,8 @@ export class Page extends Space<PageData> {
       syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
 
+    model.propsUpdated.emit();
+
     this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
@@ -624,6 +610,8 @@ export class Page extends Space<PageData> {
       options.bringChildrenTo.children.unshift(...model.children);
     }
     this._blockMap.delete(model.id);
+
+    model.propsUpdated.emit();
 
     this.transact(() => {
       this._yBlocks.delete(model.id);

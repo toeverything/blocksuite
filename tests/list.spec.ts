@@ -18,6 +18,7 @@ import {
   assertBlockChildrenIds,
   assertBlockCount,
   assertBlockType,
+  assertListPrefix,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -226,6 +227,30 @@ test('nested list blocks', async ({ page }) => {
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('update numbered list block prefix', async ({ page }) => {
+  await enterPlaygroundWithList(page, ['', '', ''], 'numbered'); // 0(1(2,3,4))
+
+  await focusRichText(page, 1);
+  await type(page, 'lunatic');
+  await assertRichTexts(page, ['', 'lunatic', '']);
+  await assertListPrefix(page, ['1', '2', '3']);
+
+  await page.keyboard.press('Tab');
+  await assertListPrefix(page, ['1', 'a', '2']);
+
+  await page.keyboard.press('Shift+Tab');
+  await assertListPrefix(page, ['1', '2', '3']);
+
+  await page.keyboard.press('Enter');
+  await assertListPrefix(page, ['1', '2', '3', '4']);
+
+  await type(page, 'concorde');
+  await assertRichTexts(page, ['', 'lunatic', 'concorde', '']);
+
+  await page.keyboard.press('Tab');
+  await assertListPrefix(page, ['1', '2', 'a', '3']);
 });
 
 test('basic indent and unindent', async ({ page }) => {

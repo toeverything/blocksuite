@@ -1,18 +1,24 @@
-import type { SurfaceElement, SurfaceViewport } from '@blocksuite/phasor';
-import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
+import type {
+  Bound,
+  SurfaceElement,
+  SurfaceViewport,
+} from '@blocksuite/phasor';
+import {
+  contains,
+  deserializeXYWH,
+  intersects,
+  isPointIn as isPointInFromPhasor,
+  serializeXYWH,
+} from '@blocksuite/phasor';
 
-import type { TopLevelBlockModel } from '../../__internal__/index.js';
+import type {
+  MouseMode,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
-export const DEFAULT_SPACING = 64;
-
-// XXX: edgeless frame container padding
-export const PADDING_X = 48;
-export const PADDING_Y = 48;
-
-// XXX: edgeless frame min length
-export const FRAME_MIN_LENGTH = 20;
+export const FRAME_MIN_SIZE = 20;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -26,15 +32,16 @@ export function isSurfaceElement(
   return !isTopLevelBlock(selectable);
 }
 
-function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
-  const a = deserializeXYWH(block.xywh);
-  const [ax, ay, aw, ah] = a;
-  const paddedW = aw + PADDING_X;
-  const paddedH = ah + PADDING_Y;
-  return ax < x && x <= ax + paddedW && ay < y && y <= ay + paddedH;
+function isPointIn(
+  block: { xywh: string },
+  pointX: number,
+  pointY: number
+): boolean {
+  const [x, y, w, h] = deserializeXYWH(block.xywh);
+  return isPointInFromPhasor({ x, y, w, h }, pointX, pointY);
 }
 
-export function pick(
+export function pickTopBlock(
   blocks: TopLevelBlockModel[],
   modelX: number,
   modelY: number
@@ -46,6 +53,14 @@ export function pick(
     }
   }
   return null;
+}
+
+export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
+  return blocks.filter(block => {
+    const [x, y, w, h] = deserializeXYWH(block.xywh);
+    const blockBound = { x, y, w, h };
+    return contains(bound, blockBound) || intersects(bound, blockBound);
+  });
 }
 
 export function getSelectionBoxBound(viewport: SurfaceViewport, xywh: string) {
@@ -106,4 +121,21 @@ export function getXYWH(element: Selectable) {
 
 export function stopPropagation(event: Event) {
   event.stopPropagation();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
+export function getCursorMode(mouseMode: MouseMode) {
+  switch (mouseMode.type) {
+    case 'default':
+      return 'default';
+    case 'pan':
+      return mouseMode.panning ? 'grabbing' : 'grab';
+    case 'brush':
+    case 'shape':
+      return 'crosshair';
+    case 'text':
+      return 'text';
+    default:
+      return 'default';
+  }
 }

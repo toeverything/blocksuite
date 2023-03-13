@@ -5,7 +5,8 @@
  * In these cases, these functions should not be called.
  */
 import { ContentParser } from '@blocksuite/blocks';
-import { Page, Text, Workspace } from '@blocksuite/store';
+import type { Page, Workspace } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import { addShapeElement } from './utils';
 

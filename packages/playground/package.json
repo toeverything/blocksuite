@@ -1,12 +1,12 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.5.0-alpha.0",
+  "version": "0.5.0-alpha.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
     "dev:hmr": "WC_HMR=1 vite",
-    "build": "tsc --project ./tsconfig.json && vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 import './utils/declare-test-window.js';
 
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
@@ -142,15 +143,16 @@ test('enter shortcut on focusing embed block and its caption', async ({
 });
 
 const mockImageId = '_e2e_test_image_id_';
+
 async function initMockImage(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    page.addBlock(
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    page.addBlockByFlavour(
+      'affine:embed',
       {
-        flavour: 'affine:embed',
         type: 'image',
         sourceId: '_e2e_test_image_id_',
         width: 200,

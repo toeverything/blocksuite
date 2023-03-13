@@ -88,15 +88,15 @@ export class IndexedDBDocProvider
   _storeTimeoutId: ReturnType<typeof setTimeout> | null;
   _storeUpdate: (update: Uint8Array, origin: this) => void;
 
-  constructor(room: string, doc: Y.Doc) {
+  constructor(id: string, doc: Y.Doc) {
     super();
     this.doc = doc;
-    this.name = room;
+    this.name = id;
     /**
      * @type {IDBDatabase|null}
      */
     this.db = null;
-    this._db = idb.openDB(room, db =>
+    this._db = idb.openDB(id, db =>
       idb.createStores(db, [['updates', { autoIncrement: true }], ['custom']])
     );
     /**

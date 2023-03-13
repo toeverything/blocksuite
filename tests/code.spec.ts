@@ -1,4 +1,5 @@
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   addCodeBlock,
@@ -13,6 +14,7 @@ import {
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressArrowLeft,
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
@@ -259,9 +261,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   await type(page, 'use');
   await page.keyboard.down('Shift');
-  for (let i = 0; i < 'use'.length; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
+  await pressArrowLeft(page, 'use'.length);
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
@@ -378,9 +378,7 @@ test('split code by enter', async ({ page }) => {
   await type(page, 'hello');
 
   // he|llo
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
 
   await pressEnter(page);
   await assertRichTexts(page, ['he\nllo']);
@@ -452,6 +450,21 @@ test('press enter twice at end of code block can jump out', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
+  await pressEnter(page);
+  await pressEnter(page);
+
+  const locator = page.locator('affine-paragraph');
+  await expect(locator).toBeVisible();
+});
+
+test('press enter twice at end of code block with content can jump out', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = 10;');
   await pressEnter(page);
   await pressEnter(page);
 
@@ -576,10 +589,17 @@ test('should tab works in code block', async ({ page }) => {
 
   await type(page, 'const a = 10;');
   await assertRichTexts(page, ['const a = 10;']);
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab', { delay: 50 });
   await assertRichTexts(page, ['  const a = 10;']);
-  await page.keyboard.press(`Shift+Tab`);
+  await page.keyboard.press(`Shift+Tab`, { delay: 50 });
   await assertRichTexts(page, ['const a = 10;']);
+
+  await page.keyboard.press('Enter', { delay: 50 });
+  await type(page, 'const b = "NothingToSay";');
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.press('Tab', { delay: 50 });
+  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay";']);
 });
 
 test('should code block wrap active after click', async ({ page }) => {

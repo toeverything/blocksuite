@@ -1,4 +1,5 @@
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   clickBlockTypeMenuItem,
@@ -256,12 +257,9 @@ test('should format quick bar be able to format text', async ({ page }) => {
     prop:text={
       <>
         <text
-          bold={false}
-          code={false}
           insert="456"
           italic={true}
           strike={true}
-          underline={false}
         />
       </>
     }
@@ -338,36 +336,15 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="123"
-        />
-      </>
-    }
+    prop:text="123"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="456"
-        />
-      </>
-    }
+    prop:text="456"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="789"
-        />
-      </>
-    }
+    prop:text="789"
     prop:type="text"
   />
 </affine:frame>`,
@@ -771,7 +748,6 @@ test('should format quick bar work in single block selection', async ({
         <text
           bold={true}
           insert="456"
-          italic={false}
           underline={true}
         />
       </>
@@ -837,7 +813,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="123"
-          italic={false}
           underline={true}
         />
       </>
@@ -850,7 +825,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="456"
-          italic={false}
           underline={true}
         />
       </>
@@ -863,7 +837,6 @@ test('should format quick bar work in multiple block selection', async ({
         <text
           bold={true}
           insert="789"
-          italic={false}
           underline={true}
         />
       </>
@@ -982,4 +955,51 @@ test('should format quick bar show after convert to code block', async ({
 </affine:frame>`,
     frameId
   );
+});
+
+test('buttons in format quick bar should have correct active styles', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  // drag only the `45`
+  await dragBetweenIndices(page, [1, 0], [1, 2]);
+  const codeBtn = page.locator(`.format-quick-bar [data-testid=code]`);
+  await codeBtn.click();
+  await expect(codeBtn).toHaveAttribute('active', '');
+
+  // drag the `456`
+  await dragBetweenIndices(page, [1, 0], [1, 3]);
+  await expect(codeBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format bar style active correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const delta = [
+      { insert: '1', attributes: { bold: true, italic: true } },
+      { insert: '2', attributes: { bold: true, underline: true } },
+      { insert: '3', attributes: { bold: true, code: true } },
+    ];
+    const text = page.Text.fromDelta(delta);
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+  });
+
+  const { boldBtn, codeBtn, underlineBtn } = getFormatBar(page);
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await expect(underlineBtn).not.toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
+
+  await underlineBtn.click();
+  await expect(underlineBtn).toHaveAttribute('active', '');
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
 });

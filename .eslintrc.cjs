@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // ALL_PACKAGES
 const allPackages = [
   'blocks',
@@ -92,6 +93,10 @@ module.exports = {
   },
   plugins: ['react', '@typescript-eslint', 'simple-import-sort'],
   rules: {
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'type-imports', disallowTypeAnnotations: false },
+    ],
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     '@typescript-eslint/no-restricted-imports': [

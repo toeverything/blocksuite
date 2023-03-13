@@ -1,14 +1,17 @@
 // operations used in rich-text level
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
-  ExtendedModel,
+  asyncSetVRange,
+  type ExtendedModel,
   focusBlockByModel,
   focusTitle,
   getCurrentNativeRange,
@@ -20,6 +23,7 @@ import {
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
+  const nextSibling = page.getNextSibling(model);
   if (!parent) {
     return;
   }
@@ -34,21 +38,37 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
-  const blockProps = shouldInheritFlavour
-    ? {
-        flavour: model.flavour,
-        type: model.type,
-      }
-    : {
-        flavour: 'affine:paragraph',
-        type: 'text',
-      };
+  const getProps = ():
+    | ['affine:list', Partial<BlockModelProps['affine:list']>]
+    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
+    if (shouldInheritFlavour) {
+      return [model.flavour, { type: model.type }];
+    }
+    return ['affine:paragraph', { type: 'text' }];
+  };
+  const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
-    ? page.addBlock(blockProps, parent, index + 1)
+    ? page.addBlockByFlavour(flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
-      page.addBlock(blockProps, model, 0);
+      page.addBlockByFlavour(flavour, blockProps, model, 0);
+
+  // 4. If the target block is a numbered list, update the prefix of next siblings
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
 
   asyncFocusRichText(page, id);
 }
@@ -124,6 +144,7 @@ export function handleBlockSplit(
  */
 export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
+  const nextSibling = page.getNextSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
@@ -149,19 +170,30 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.vEditor?.setVRange({
-      index: offset,
-      length: 0,
-    });
-  });
+  // 4. If the target block is a numbered list, update the prefix of next siblings
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
+
+  assertExists(model);
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
   const previousSibling = page.getPreviousSibling(models[0]);
+  const nextSibling = page.getNextSibling(models.at(-1) as BaseBlockModel);
 
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
@@ -200,14 +232,24 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
       children: [...previousSibling.children, model, ...children],
     });
 
-    requestAnimationFrame(() => {
-      assertExists(model);
-      const richText = getRichTextByModel(model);
-      richText?.vEditor?.setVRange({
-        index: 0,
-        length: 0,
-      });
-    });
+    // 4. If the target block is a numbered list, update the prefix of next siblings
+    if (
+      matchFlavours(model, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      let next = nextSibling;
+      while (
+        next &&
+        matchFlavours(next, ['affine:list'] as const) &&
+        model.type === 'numbered'
+      ) {
+        page.updateBlock(next, {});
+        next = page.getNextSibling(next);
+      }
+    }
+
+    assertExists(model);
+    asyncSetVRange(model, { index: 0, length: 0 });
   });
 }
 
@@ -251,6 +293,7 @@ export function handleUnindent(
   // 1. save child blocks of the parent block
   const previousSiblings = page.getPreviousSiblings(model);
   const nextSiblings = page.getNextSiblings(model);
+
   // 2. remove all child blocks after the target block from the parent block
   page.updateBlock(parent, {
     children: previousSiblings,
@@ -271,14 +314,25 @@ export function handleUnindent(
     ],
   });
 
-  requestAnimationFrame(() => {
-    assertExists(model);
-    const richText = getRichTextByModel(model);
-    richText?.vEditor?.setVRange({
-      index: offset,
-      length: 0,
-    });
-  });
+  // 5. If the target block is a numbered list, update the prefix of next siblings
+  const nextSibling = page.getNextSibling(model);
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
+
+  assertExists(model);
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
@@ -337,14 +391,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         previousSiblingParent &&
         matchFlavours(previousSiblingParent, ['affine:database'] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSiblingParent, 'end');
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSiblingParent, 'end');
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else if (
         previousSibling &&
         matchFlavours(previousSibling, [
@@ -371,14 +423,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           'affine:code',
         ] as const)
       ) {
-        window.requestAnimationFrame(() => {
-          focusBlockByModel(previousSibling);
-          // We can not delete block if the block has content
-          if (!model.text?.length) {
-            page.captureSync();
-            page.deleteBlock(model);
-          }
-        });
+        focusBlockByModel(previousSibling);
+        // We can not delete block if the block has content
+        if (!model.text?.length) {
+          page.captureSync();
+          page.deleteBlock(model);
+        }
       } else {
         // No previous sibling, it's the first block
         // Try to merge with the title

@@ -35,7 +35,7 @@ function affineLinkStyles(
   }
 
   return styleMap({
-    'white-space': 'break-spaces',
+    'white-space': 'pre-wrap',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -70,6 +70,7 @@ export class AffineLink extends NonShadowLitElement {
   static styles = css`
     a {
       color: var(--affine-link-color);
+      fill: var(--affine-link-color);
       text-decoration: none;
       cursor: pointer;
     }
@@ -205,6 +206,24 @@ export class AffineLink extends NonShadowLitElement {
     clearTimeout(this._popoverTimer);
   }
 
+  // Workaround for links not working in contenteditable div
+  // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
+  //
+  // Note: We cannot use JS to directly open a new page as this may be blocked by the browser.
+  //
+  // Please also note that when readonly mode active,
+  // this workaround is not necessary and links work normally.
+  // see https://github.com/toeverything/AFFiNE/issues/1540
+  private _onMouseUp(e: MouseEvent) {
+    const anchorElement = this.querySelector('a');
+    assertExists(anchorElement);
+    if (!anchorElement.isContentEditable) return;
+    anchorElement.contentEditable = 'false';
+    setTimeout(() => {
+      anchorElement.removeAttribute('contenteditable');
+    }, 0);
+  }
+
   render() {
     const style = affineLinkStyles(this.textAttributes);
 
@@ -213,6 +232,7 @@ export class AffineLink extends NonShadowLitElement {
       rel="noopener noreferrer"
       target="_blank"
       style=${style}
+      @mouseup=${this._onMouseUp}
       >${FontLinkIcon}${this.vText}</a
     >`;
   }

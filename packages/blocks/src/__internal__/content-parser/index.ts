@@ -1,7 +1,8 @@
 import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Slot } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import { getFileFromClipboard } from '../clipboard/utils.js';

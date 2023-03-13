@@ -5,10 +5,11 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
 import {
+  asyncSetVRange,
   convertToDivider,
   convertToList,
   convertToParagraph,
-  ExtendedModel,
+  type ExtendedModel,
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 
@@ -409,12 +410,18 @@ const matches: Match[] = [
       assertExists(parent);
       const index = parent.children.indexOf(model);
       page.deleteBlock(model);
-      page.addBlockByFlavour(
+
+      const codeId = page.addBlockByFlavour(
         'affine:code',
         { language: getCodeLanguage(match?.[1] || '') || 'JavaScript' },
         parent,
         index
       );
+
+      const codeBlock = page.getBlockById(codeId);
+      assertExists(codeBlock);
+      asyncSetVRange(codeBlock, { index: 0, length: 0 });
+
       return true;
     },
   },

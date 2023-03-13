@@ -17,7 +17,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
   private _draggingElementId: string | null = null;
 
-  protected _draggingLeftTopPoint: [number, number] | null = null;
+  protected _draggingTopLeftPoint: [number, number] | null = null;
   protected _draggingPathPoints: number[][] | null = null;
 
   onContainerClick(e: SelectionEvent): void {
@@ -59,7 +59,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     this._draggingElementId = id;
     this._draggingPathPoints = points;
-    this._draggingLeftTopPoint = [modelX, modelY];
+    this._draggingTopLeftPoint = [modelX, modelY];
 
     this._edgeless.slots.surfaceUpdated.emit();
   }
@@ -70,35 +70,35 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
-    assertExists(this._draggingLeftTopPoint);
+    assertExists(this._draggingTopLeftPoint);
 
     const { lineWidth } = this.mouseMode;
 
-    const [leftTopX, leftTopY] = this._draggingLeftTopPoint;
+    const [topLeftX, topLeftY] = this._draggingTopLeftPoint;
     const [modelX, modelY] = this._edgeless.surface.toModelCoord(e.x, e.y);
 
     const points = [
       ...this._draggingPathPoints,
-      [modelX - leftTopX, modelY - leftTopY],
+      [modelX - topLeftX, modelY - topLeftY],
     ];
 
     const newBound = getBrushBoundFromPoints(points, lineWidth);
 
-    const newLeftTopPoint = [
-      Math.min(leftTopX, modelX),
-      Math.min(leftTopY, modelY),
+    const newTopLeft = [
+      Math.min(topLeftX, modelX),
+      Math.min(topLeftY, modelY),
     ] as [number, number];
 
-    const deltaX = newLeftTopPoint[0] - leftTopX;
-    const deltaY = newLeftTopPoint[1] - leftTopY;
-    this._draggingLeftTopPoint = newLeftTopPoint;
+    const deltaX = newTopLeft[0] - topLeftX;
+    const deltaY = newTopLeft[1] - topLeftY;
+    this._draggingTopLeftPoint = newTopLeft;
     this._draggingPathPoints = points.map(([x, y]) => [x - deltaX, y - deltaY]);
 
     this._surface.updateBrushElement(
       this._draggingElementId,
       {
-        x: this._draggingLeftTopPoint[0],
-        y: this._draggingLeftTopPoint[1],
+        x: this._draggingTopLeftPoint[0],
+        y: this._draggingTopLeftPoint[1],
         w: newBound.w,
         h: newBound.h,
       },
@@ -111,7 +111,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
   onContainerDragEnd(e: SelectionEvent) {
     this._draggingElementId = null;
     this._draggingPathPoints = null;
-    this._draggingLeftTopPoint = null;
+    this._draggingTopLeftPoint = null;
     this._page.captureSync();
     this._edgeless.slots.surfaceUpdated.emit();
   }
@@ -121,10 +121,6 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
   }
 
   onContainerMouseOut(e: SelectionEvent) {
-    noop();
-  }
-
-  syncDraggingArea() {
     noop();
   }
 

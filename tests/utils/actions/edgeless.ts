@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 
-export async function getFrameSize(
+export async function getFrameRect(
   page: Page,
   ids: { pageId: string; frameId: string; paragraphId: string }
 ) {
-  const result: string | null = await page.evaluate(
+  const xywh: string | null = await page.evaluate(
     ([id]) => {
       const page = window.workspace.getPage('page0');
       const block = page?.getBlockById(id.frameId);
@@ -22,8 +23,9 @@ export async function getFrameSize(
     },
     [ids] as const
   );
-  expect(result).not.toBeNull();
-  return result as string;
+  expect(xywh).not.toBeNull();
+  const [x, y, w, h] = JSON.parse(xywh as string);
+  return { x, y, w, h };
 }
 
 export async function switchEditorMode(page: Page) {
@@ -31,38 +33,50 @@ export async function switchEditorMode(page: Page) {
 }
 
 export function locatorPanButton(page: Page, innerContainer = true) {
-  const panButton = page.locator('edgeless-tool-icon-button').filter({
-    hasText: 'Hand',
-  });
-
-  return innerContainer ? panButton.locator('.icon-container') : panButton;
+  return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-export async function setMouseMode(
-  page: Page,
-  mode: 'default' | 'shape' | 'brush' | 'pan'
-) {
-  if (mode === 'default') {
-    const defaultModeButton = page.locator('edgeless-tool-icon-button').filter({
-      hasText: 'Select',
-    });
-    await defaultModeButton.click();
-  } else if (mode === 'shape') {
-    const shapeToolButton = page.locator('edgeless-shape-tool-button');
-    await shapeToolButton.click();
+export type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
 
-    const squareShapeButton = page
-      .locator('edgeless-tool-icon-button')
-      .filter({ hasText: 'Square' });
-    await squareShapeButton.click();
-  } else if (mode === 'brush') {
-    const brushButton = page.locator('edgeless-tool-icon-button').filter({
-      hasText: 'Pen',
-    });
-    await brushButton.click();
-  } else if (mode === 'pan') {
-    const panButton = locatorPanButton(page, false);
-    await panButton.click();
+export function locatorEdgelessToolButton(
+  page: Page,
+  mode: MouseMode,
+  innerContainer = true
+) {
+  const text = {
+    default: 'Select',
+    shape: 'Shape',
+    brush: 'Pen',
+    pan: 'Hand',
+    text: 'Text',
+  }[mode];
+  const button = page.locator('edgeless-tool-icon-button').filter({
+    hasText: text,
+  });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export async function setMouseMode(page: Page, mode: MouseMode) {
+  switch (mode) {
+    case 'default':
+    case 'brush':
+    case 'pan':
+    case 'text': {
+      const button = locatorEdgelessToolButton(page, mode, false);
+      await button.click();
+      break;
+    }
+    case 'shape': {
+      const shapeToolButton = locatorEdgelessToolButton(page, 'shape', false);
+      await shapeToolButton.click();
+
+      const squareShapeButton = page
+        .locator('edgeless-tool-icon-button')
+        .filter({ hasText: 'Square' });
+      await squareShapeButton.click();
+      break;
+    }
   }
 }
 
@@ -131,18 +145,19 @@ export async function addBasicRectShapeElement(
   await setMouseMode(page, 'default');
 }
 
-export async function resizeElementByLeftTopHandle(
+export async function resizeElementByTopLeftHandle(
   page: Page,
   delta: { x: number; y: number },
   steps = 1
 ) {
-  const leftTopHandler = page.locator('[aria-label="handle-left-top"]');
-  const box = await leftTopHandler.boundingBox();
+  const topLeftHandle = page.locator('[aria-label="handle-top-left"]');
+  const box = await topLeftHandle.boundingBox();
   if (box === null) throw new Error();
+  const offset = 5;
   await dragBetweenCoords(
     page,
-    { x: box.x + 5, y: box.y + 5 },
-    { x: box.x + delta.x + 5, y: box.y + delta.y + 5 },
+    { x: box.x + offset, y: box.y + offset },
+    { x: box.x + delta.x + offset, y: box.y + delta.y + offset },
     {
       steps,
     }
@@ -151,7 +166,7 @@ export async function resizeElementByLeftTopHandle(
 
 export async function selectBrushColor(page: Page, color: `#${string}`) {
   const colorButton = page.locator(
-    `edgeless-brush-menu .color-unit[aria-label="${color}"]`
+    `edgeless-brush-menu .color-unit[aria-label="${color.toLowerCase()}"]`
   );
   await colorButton.click();
 }
@@ -190,4 +205,23 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
     return colors;
   }, points);
   return pickedColors;
+}
+
+export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
+  const frame = page.locator(`affine-frame[data-block-id="${frameId}"]`);
+  const bound = await frame.boundingBox();
+  if (!bound) {
+    throw new Error(`Missing frame: ${frameId}`);
+  }
+  return bound;
+}
+
+export async function activeFrameInEdgeless(page: Page, frameId: string) {
+  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+  await page.mouse.dblclick(bound.x, bound.y);
+}
+
+export async function selectFrameInEdgeless(page: Page, frameId: string) {
+  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+  await page.mouse.click(bound.x, bound.y);
 }

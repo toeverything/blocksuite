@@ -2,19 +2,20 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import { AwarenessStore, BlobUploadState } from '../awareness.js';
+import type { AwarenessStore } from '../awareness.js';
+import { BlobUploadState } from '../awareness.js';
 import { BlockSchema, internalPrimitives } from '../base.js';
+import type { BlobStorage } from '../persistence/blob/index.js';
 import {
-  BlobOptionsGetter,
-  BlobStorage,
+  type BlobOptionsGetter,
   BlobSyncState,
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
-import { Store, StoreOptions } from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
-import { Indexer, QueryContent } from './search.js';
+import { Indexer, type QueryContent } from './search.js';
 
 export interface PageMeta {
   id: string;
@@ -237,7 +238,6 @@ class WorkspaceMeta<
 
 export class Workspace {
   static Y = Y;
-  public readonly room: string | undefined;
 
   private _store: Store;
   private _indexer: Indexer;
@@ -262,8 +262,9 @@ export class Workspace {
     if (options.blobOptionsGetter) {
       this._blobOptionsGetter = options.blobOptionsGetter;
     }
+
     if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room, k => {
+      this._blobStorage = getBlobStorage(options.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
@@ -291,7 +292,6 @@ export class Workspace {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
-    this.room = options.room;
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
@@ -304,8 +304,25 @@ export class Workspace {
     this._handlePageEvent();
   }
 
+  get id() {
+    return this._store.id;
+  }
+
   get connected(): boolean {
     return this._store.connected;
+  }
+
+  get isEmpty() {
+    if (this.doc.store.clients.size === 0) return true;
+
+    let flag = false;
+    if (this.doc.store.clients.size === 1) {
+      const items = [...this.doc.store.clients.values()][0];
+      if (items.length <= 1) {
+        flag = true;
+      }
+    }
+    return flag;
   }
 
   connect = () => {

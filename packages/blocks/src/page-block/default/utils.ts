@@ -8,11 +8,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copy } from '../../__internal__/clipboard/index.js';
 import {
-  BlockComponentElement,
+  type BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -549,7 +549,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = type;
 
-      requestAnimationFrame(() => {
+      defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
         defaultPageBlock.selection.setSelectedBlocks(

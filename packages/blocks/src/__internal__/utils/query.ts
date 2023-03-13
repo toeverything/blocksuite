@@ -186,27 +186,112 @@ export function getEditorContainer(page: Page) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
-    throw new Error('Failed to check paper mode! Editor mode is not exists!');
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
   return mode === 'page';
+}
+
+/**
+ * Get editor viewport element.
+ *
+ * @example
+ * ```ts
+ * const viewportElement = getViewportElement(this.model.page);
+ * if (!viewportElement) return;
+ * this._disposables.addFromEvent(viewportElement, 'scroll', () => {
+ *   updatePosition();
+ * });
+ * ```
+ */
+export function getViewportElement(page: Page) {
+  const isPage = isPageMode(page);
+  if (!isPage) return null;
+  assertExists(page.root);
+  const defaultPageBlock = document.querySelector(
+    `[${ATTR}="${page.root.id}"]`
+  );
+
+  if (
+    !defaultPageBlock ||
+    defaultPageBlock.closest('affine-default-page') !== defaultPageBlock
+  ) {
+    throw new Error('Failed to get viewport element!');
+  }
+  return (defaultPageBlock as DefaultPageBlockComponent).viewportElement;
 }
 
 export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector(
+  const page = document.querySelector<DefaultPageBlockComponent>(
     `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  );
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
     return page;
   }
 
-  const element = page.querySelector(`[${ATTR}="${model.id}"]`);
-  return element as BlockComponentElement | null;
+  return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
+}
+
+export function asyncGetBlockElementByModel(
+  model: BaseBlockModel
+): Promise<BlockComponentElement | null> {
+  assertExists(model.page.root);
+  const page = document.querySelector<DefaultPageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
+  if (!page) return Promise.resolve(null);
+
+  if (model.id === model.page.root.id) {
+    return Promise.resolve(page);
+  }
+
+  let resolved = false;
+  return new Promise<BlockComponentElement>((resolve, reject) => {
+    const onSuccess = (element: BlockComponentElement) => {
+      resolved = true;
+      observer.disconnect();
+      resolve(element);
+    };
+
+    const onFail = () => {
+      observer.disconnect();
+      reject(
+        new Error(
+          `Cannot find block element by model: ${model.flavour} id: ${model.id}`
+        )
+      );
+    };
+
+    const observer = new MutationObserver(() => {
+      const blockElement = page.querySelector<BlockComponentElement>(
+        `[${ATTR}="${model.id}"]`
+      );
+      if (blockElement) {
+        onSuccess(blockElement);
+      }
+    });
+
+    observer.observe(page, {
+      childList: true,
+      subtree: true,
+    });
+
+    requestAnimationFrame(() => {
+      if (!resolved) {
+        const blockElement = getBlockElementByModel(model);
+        if (blockElement) {
+          onSuccess(blockElement);
+        } else {
+          onFail();
+        }
+      }
+    });
+  });
 }
 
 export function getStartModelBySelection(range = getCurrentNativeRange()) {
@@ -230,7 +315,14 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
 
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector<RichText>('rich-text');
+  if (!richText) return null;
+  return richText;
+}
+
+export async function asyncGetRichTextByModel(model: BaseBlockModel) {
+  const blockElement = await asyncGetBlockElementByModel(model);
+  const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }

@@ -40,6 +40,21 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abcdefg');
 
   await focusVirgoRichText(page);
+  await press(page, 'Delete');
+  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorB.innerText()).toBe('abcdefg');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'Delete');
+  await press(page, 'Delete');
+  expect(await editorA.innerText()).toBe('abcde');
+  expect(await editorB.innerText()).toBe('abcde');
+
+  await editorAUndo.click();
+  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorB.innerText()).toBe('abcdefg');
+
+  await focusVirgoRichText(page);
   await page.waitForTimeout(50);
   await press(page, 'Backspace');
   await press(page, 'Backspace');

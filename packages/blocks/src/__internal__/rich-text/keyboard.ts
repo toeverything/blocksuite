@@ -6,6 +6,7 @@ import type { VRange } from '@blocksuite/virgo';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
   getCurrentNativeRange,
+  hasNativeSelection,
   isCollapsedAtBlockStart,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
@@ -161,7 +162,7 @@ export function createKeyboardBindings(
     if (isEnd || shortKey) {
       const softEnterable = isSoftEnterable(model);
       const textStr = model.text.toString();
-      const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n\n');
+      const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
       const shouldSoftEnter = softEnterable && !endWithTwoBlankLines;
 
       if (shouldSoftEnter) {
@@ -214,10 +215,12 @@ export function createKeyboardBindings(
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
 
+      const lastLineBreakBeforeCursor = this.vEditor.yText
+        .toString()
+        .lastIndexOf('\n', vRange.index - 1);
+
       const lineStart =
-        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
-          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
-          : 0;
+        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
       this.vEditor.insertText(
         {
           index: lineStart,
@@ -247,10 +250,12 @@ export function createKeyboardBindings(
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
 
+      const lastLineBreakBeforeCursor = this.vEditor.yText
+        .toString()
+        .lastIndexOf('\n', vRange.index - 1);
+
       const lineStart =
-        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
-          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
-          : 0;
+        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
       if (
         this.vEditor.yText.length >= 2 &&
         this.vEditor.yText.toString().slice(lineStart, lineStart + 2) === '  '
@@ -460,17 +465,18 @@ export function createKeyboardBindings(
         // }
 
         // we need to insert text before show menu, because the Text node will be
-        // expired if we insert text after show menu because of the re-render
+        // expired if we insert text after show menu because of the rerender
         this.vEditor.insertText(range, context.event.key);
         this.vEditor.setVRange({
           index: range.index + 1,
           length: 0,
         });
 
-        requestAnimationFrame(() => {
+        this.vEditor.slots.rangeUpdated.once(() => {
           const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
+
         return PREVENT_DEFAULT;
       },
     },
@@ -535,6 +541,8 @@ export function createKeyDownHandler(
     const vRange = vEditor.getVRange();
     if (!vRange) return;
 
+    // edgeless mode
+    if (!hasNativeSelection()) return;
     // if it is multi block selection, we should not handle the keydown event
     const range = getCurrentNativeRange();
     if (!range) return;

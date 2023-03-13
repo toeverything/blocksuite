@@ -115,6 +115,12 @@ export function createBracketAutoCompleteBindings(
     handler(range, context) {
       if (!model.text) return ALLOW_DEFAULT;
       model.text.format(range.index, range.length, { code: true });
+
+      this.vEditor.setVRange({
+        index: range.index,
+        length: range.length,
+      });
+
       return PREVENT_DEFAULT;
     },
   };

@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
-import { BaseBlockModel, DisposableGroup, Page, Slot } from '@blocksuite/store';
-import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -17,7 +17,7 @@ import {
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
-  SelectionPosition,
+  type SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
@@ -114,6 +114,9 @@ export class DefaultPageBlockComponent
   @property()
   page!: Page;
 
+  @property()
+  model!: PageBlockModel;
+
   flavour = 'affine:page' as const;
 
   clipboard = new pageBlockClipboard();
@@ -146,6 +149,9 @@ export class DefaultPageBlockComponent
   @state()
   private _embedEditingState!: EmbedEditingState | null;
 
+  @state()
+  private _isComposing = false;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   @query('.affine-default-viewport')
@@ -158,9 +164,6 @@ export class DefaultPageBlockComponent
     embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
-
-  @property()
-  model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
   private _titleContainer!: HTMLElement;
@@ -179,7 +182,20 @@ export class DefaultPageBlockComponent
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
+      paste: this._onTitlePaste,
     });
+
+    // Workaround for virgo skips composition event
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionstart',
+      () => (this._isComposing = true)
+    );
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'compositionend',
+      () => (this._isComposing = false)
+    );
 
     this.model.title.yText.observe(() => {
       this.page.workspace.setPageMeta(this.page.id, {
@@ -234,6 +250,23 @@ export class DefaultPageBlockComponent
         asyncFocusRichText(page, newFirstParagraphId);
       }
       return;
+    }
+  };
+
+  private _onTitlePaste = (event: ClipboardEvent) => {
+    const vEditor = this._titleVEditor;
+    if (!vEditor) return;
+    const vRange = vEditor.getVRange();
+    if (!vRange) return;
+
+    const data = event.clipboardData?.getData('text/plain');
+    if (data) {
+      const text = data.replace(/(\r\n|\r|\n)/g, '\n');
+      vEditor.insertText(vRange, text);
+      vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
     }
   };
 
@@ -543,8 +576,9 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${!this._titleContainer ||
-              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+              class="affine-default-page-block-title ${(!this.model.title ||
+                !this.model.title.length) &&
+              !this._isComposing
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>

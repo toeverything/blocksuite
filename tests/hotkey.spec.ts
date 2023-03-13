@@ -3,8 +3,10 @@ import { expect } from '@playwright/test';
 import {
   clickBlockTypeMenuItem,
   dragBetweenIndices,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   formatType,
   initEmptyParagraphState,
   initThreeParagraphs,
@@ -32,6 +34,7 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
+  assertTitle,
   assertTypeFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -78,13 +81,25 @@ test('type character jump out code node', async ({ page }) => {
   await type(page, 'Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await assertTextFormat(page, 0, 5, { code: true });
-
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        code={true}
+        insert="Hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
-  // TODO fix the `code={false}` text
-  // block suite should not be code
   await assertStoreMatchJSX(
     page,
     `
@@ -318,23 +333,7 @@ test('should single line format hotkey work', async ({ page }) => {
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="h"
-        />
-        <text
-          bold={false}
-          insert="ell"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-        <text
-          insert="o"
-        />
-      </>
-    }
+    prop:text="hello"
     prop:type="text"
   />
 </affine:frame>`,
@@ -351,13 +350,13 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [2, 2]);
 
   // bold
-  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+b`);
   // italic
-  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+i`);
   // underline
-  await page.keyboard.press(`${SHORT_KEY}+u`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+u`);
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
 
   await waitNextFrame(page);
 
@@ -433,51 +432,15 @@ test('should multiple line format hotkey work', async ({ page }) => {
     `
 <affine:frame>
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          insert="1"
-        />
-        <text
-          bold={false}
-          insert="23"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-      </>
-    }
+    prop:text="123"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="456"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-      </>
-    }
+    prop:text="456"
     prop:type="text"
   />
   <affine:paragraph
-    prop:text={
-      <>
-        <text
-          bold={false}
-          insert="78"
-          italic={false}
-          strike={false}
-          underline={false}
-        />
-        <text
-          insert="9"
-        />
-      </>
-    }
+    prop:text="789"
     prop:type="text"
   />
 </affine:frame>`,
@@ -518,6 +481,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+8`);
   await assertStoreMatchJSX(
     page,
@@ -531,6 +495,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+9`);
   await assertStoreMatchJSX(
     page,
@@ -788,4 +753,21 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 0, 1);
   await pressArrowDown(page);
   await assertSelection(page, 1, 1);
+});
+
+test('should cut in title works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusTitle(page);
+  await type(page, 'hello');
+  await assertTitle(page, 'hello');
+
+  await dragOverTitle(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertTitle(page, '');
+
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, ['hello']);
 });

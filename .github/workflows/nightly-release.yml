@@ -9,10 +9,10 @@ on:
 
 jobs:
   nightly-release:
-    name: Nightly Release
+    name: Publish npm@nightly release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup pnpm
@@ -26,15 +26,15 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install
 
       - uses: toeverything/set-build-version@latest
 
-      - name: Replace Nightly Version
+      - name: Replace nightly version fields
         run: ./scripts/replace-nightly-version.sh
 
-      - name: Try Publishing to NPM
+      - name: Try publishing to NPM
         run: ./scripts/publish.sh
         env:
           NIGHTLY: true

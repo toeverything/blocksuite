@@ -1,4 +1,5 @@
-import { assertExists, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -10,7 +11,7 @@ import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
-import { affineTextAttributes, AffineVEditor } from './virgo/types.js';
+import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
@@ -20,17 +21,6 @@ export class RichText extends NonShadowLitElement {
       width: 100%;
       outline: none;
       cursor: text;
-    }
-
-    .affine-rich-text code {
-      font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono',
-        'Liberation Mono', Courier, monospace;
-      line-height: normal;
-      background: rgba(135, 131, 120, 0.15);
-      color: #eb5757;
-      border-radius: 3px;
-      font-size: 85%;
-      padding: 0.2em 0.4em;
     }
   `;
 
@@ -107,6 +97,35 @@ export class RichText extends NonShadowLitElement {
           return true;
         }
 
+        return false;
+      },
+      virgoCompositionEnd: e => {
+        const { data } = e;
+        const vEditor = this._vEditor;
+        assertExists(vEditor);
+        const vRange = vEditor.getVRange();
+        if (!vRange || vRange.length !== 0) {
+          return false;
+        }
+
+        const index = vRange.index;
+        const deltas = vEditor.getDeltasByVRange(vRange);
+        if (
+          index >= 0 &&
+          data &&
+          data !== '\n' &&
+          deltas.length === 1 &&
+          vRange.index !== 0 &&
+          vRange.index !== vEditor.yText.length
+        ) {
+          const attributes = deltas[0][0].attributes;
+          vEditor.insertText(vRange, data, attributes);
+          vEditor.setVRange({
+            index: index + data.length,
+            length: 0,
+          });
+          return true;
+        }
         return false;
       },
     });

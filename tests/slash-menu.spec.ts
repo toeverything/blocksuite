@@ -1,8 +1,8 @@
-import { expect, Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import {
   pressBackspace,
   pressEnter,
-  SHORT_KEY,
   type,
   withPressKey,
 } from 'utils/actions/keyboard.js';
@@ -20,35 +20,20 @@ import {
 import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
-  // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
-  test.describe.configure({ mode: 'serial' });
   let page: Page;
   let paragraphId: string;
   let slashMenu: Locator;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     await enterPlaygroundRoom(page);
     const id = await initEmptyParagraphState(page);
     paragraphId = id.paragraphId;
     slashMenu = page.locator(`.slash-menu`);
-  });
 
-  test.beforeEach(async () => {
     await focusRichText(page);
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
-  });
-
-  test.afterEach(async () => {
-    // Close the slash menu
-    if (await slashMenu.isVisible()) {
-      // Click outside
-      await page.mouse.click(0, 50);
-    }
-    await focusRichText(page);
-    // Clear input
-    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
   });
 
   test('slash menu should hide after click away', async () => {
@@ -289,5 +274,66 @@ test.describe('slash menu with code block', () => {
 
     await type(page, '111');
     await assertRichTexts(page, ['111000']);
+  });
+});
+
+test.describe('slash menu with date & time', () => {
+  test("should insert Today's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Today');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
+  });
+
+  test("should create Tomorrow's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Tomorrow');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
+  });
+
+  test("should insert Yesterday's time string", async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const todayBlock = page.getByTestId('Yesterday');
+    await todayBlock.click();
+    await todayBlock.waitFor({ state: 'hidden' });
+
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    const strTime = date.toISOString().split('T')[0];
+
+    await assertRichTexts(page, [strTime]);
   });
 });
