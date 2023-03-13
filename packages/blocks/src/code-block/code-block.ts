@@ -251,6 +251,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     super.disconnectedCallback();
     this._disposables.dispose();
     this.hoverState.dispose();
+    this._richTextResizeObserver.disconnect();
   }
 
   private _onClickWrapBtn() {
