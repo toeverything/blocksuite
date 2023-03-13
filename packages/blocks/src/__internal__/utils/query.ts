@@ -332,7 +332,7 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 
 export function getVirgoByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText.vEditor;
 }
