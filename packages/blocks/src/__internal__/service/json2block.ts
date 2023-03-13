@@ -1,11 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
+// @ts-ignore
 import {
-  BlockRange,
+  type BlockRange,
   getRichTextByModel,
-  OpenBlockInfo,
+  type OpenBlockInfo,
 } from '../utils/index.js';
 
 export const json2block = (

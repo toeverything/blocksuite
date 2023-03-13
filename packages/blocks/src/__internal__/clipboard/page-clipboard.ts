@@ -1,4 +1,5 @@
-import { assertExists, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import { deleteModelsByRange } from '../../page-block/index.js';

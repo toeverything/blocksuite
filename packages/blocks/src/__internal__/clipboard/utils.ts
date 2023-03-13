@@ -2,8 +2,8 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service.js';
+import type { BlockRange } from '../utils/index.js';
 import {
-  BlockRange,
   getCurrentBlockRange,
   getCurrentNativeRange,
   hasNativeSelection,
