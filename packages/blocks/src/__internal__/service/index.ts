@@ -1,18 +1,24 @@
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
-import type { IService } from '../utils/index.js';
+import { getService } from '../service.js';
+import type { BlockRange, IService, OpenBlockInfo } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
+import { json2block } from './json2block.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
   block2html(
     block: BaseBlockModel,
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
+  ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
       return html + BaseService.deltaLeaf2Html(item);
@@ -22,12 +28,50 @@ export class BaseService implements IService {
 
   block2Text(
     block: BaseBlockModel,
-    childText: string,
-    begin?: number,
-    end?: number
-  ) {
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
+  ): string {
     const text = (block.text?.toString() || '').slice(begin || 0, end);
     return `${text}${childText}`;
+  }
+
+  block2Json(
+    block: BaseBlockModel,
+    begin?: number,
+    end?: number
+  ): OpenBlockInfo {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    return {
+      flavour: block.flavour,
+      type: block.type as string,
+      text: delta,
+      children: block.children?.map((child, index) => {
+        if (index === block.children.length - 1) {
+          // @ts-ignore
+          return getService(child.flavour).block2Json(child, 0, end);
+        }
+        // @ts-ignore
+        return getService(child.flavour).block2Json(child);
+      }),
+    };
+  }
+
+  // json2block is triggered when paste behavior occurs(now),
+  // at this time cursor is focus on one block, and is must a caret in this block(since selection has been handled in paste callback)
+  // this is the common handler for most block, but like code block, it should be overridden this
+  async json2Block(
+    focusedBlockModel: BaseBlockModel,
+    pastedBlocks: OpenBlockInfo[],
+    range?: BlockRange
+  ) {
+    return json2block(focusedBlockModel, pastedBlocks, range);
   }
 
   private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
@@ -65,7 +109,7 @@ export class BaseService implements IService {
       await import('../rich-text/rich-text-operations.js')
     ).handleUnindent;
     // we need to unindent the first child of the block if it not
-    // support children
+    // supports children
     if (supportsChildren(block)) {
       return;
     }
