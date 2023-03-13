@@ -6,7 +6,6 @@ import {
   activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
-  doubleClickBlockById,
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -2020,6 +2019,9 @@ test('should keep native range selection when scrolling forward with the scroll 
   });
   await page.waitForTimeout(250);
 
+  await page.evaluate(() => {
+    document.querySelector('.affine-default-viewport')?.scrollTo(0, 0);
+  });
   await page.mouse.move(0, 0);
 
   await dragBetweenIndices(
