@@ -33,6 +33,7 @@ export function BlockElement(
         <${model.tag}
           .model=${model}
           .host=${host}
+          class="affine-block-element"
           ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
         ></${model.tag}>
       `;

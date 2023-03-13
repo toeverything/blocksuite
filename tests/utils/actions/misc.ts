@@ -565,7 +565,7 @@ export async function getIndexCoordinate(
 }
 
 export function virgoEditorInnerTextToString(innerText: string): string {
-  return innerText.replace('\u200B', '');
+  return innerText.replace('\u200B', '').trim();
 }
 
 export async function focusTitle(page: Page) {

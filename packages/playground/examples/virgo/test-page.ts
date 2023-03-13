@@ -1,5 +1,6 @@
 import '@shoelace-style/shoelace';
 
+import { NonShadowLitElement } from '@blocksuite/blocks';
 import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -110,8 +111,8 @@ function toggleStyle(
   vEditor.setVRange(vRange);
 }
 
-@customElement('rich-text')
-export class RichText extends LitElement {
+@customElement('virgo-test-rich-text')
+export class RichText extends NonShadowLitElement {
   vEditor: VEditor;
 
   @query('.rich-text-container')
@@ -167,18 +168,14 @@ export class ToolBar extends LitElement {
   }
 
   protected firstUpdated(): void {
-    if (!this.shadowRoot) {
-      throw new Error('Cannot find shadow root');
-    }
-
-    const boldButton = this.shadowRoot.querySelector('.bold');
-    const italicButton = this.shadowRoot.querySelector('.italic');
-    const underlineButton = this.shadowRoot.querySelector('.underline');
-    const strikeButton = this.shadowRoot.querySelector('.strike');
-    const code = this.shadowRoot.querySelector('.code');
-    const resetButton = this.shadowRoot.querySelector('.reset');
-    const undoButton = this.shadowRoot.querySelector('.undo');
-    const redoButton = this.shadowRoot.querySelector('.redo');
+    const boldButton = this.querySelector('.bold');
+    const italicButton = this.querySelector('.italic');
+    const underlineButton = this.querySelector('.underline');
+    const strikeButton = this.querySelector('.strike');
+    const code = this.querySelector('.code');
+    const resetButton = this.querySelector('.reset');
+    const undoButton = this.querySelector('.undo');
+    const redoButton = this.querySelector('.redo');
 
     if (
       !boldButton ||
@@ -266,7 +263,7 @@ export class ToolBar extends LitElement {
 }
 
 @customElement('test-page')
-export class TestPage extends LitElement {
+export class TestPage extends NonShadowLitElement {
   static styles = css`
     .container {
       display: grid;
@@ -318,12 +315,12 @@ export class TestPage extends LitElement {
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
 
-    if (!this.shadowRoot) {
+    if (!this) {
       throw new Error('Cannot find shadow root');
     }
 
-    const docA = this.shadowRoot.querySelector('.doc-a');
-    const docB = this.shadowRoot.querySelector('.doc-b');
+    const docA = this.querySelector('.doc-a');
+    const docB = this.querySelector('.doc-b');
 
     if (!docA || !docB) {
       throw new Error('Cannot find doc');
