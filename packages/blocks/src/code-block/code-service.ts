@@ -45,11 +45,11 @@ export class CodeBlockService extends BaseService {
     return codeElement.outerHTML;
   }
 
-  override json2Block(
+  override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: OpenBlockInfo[],
     range?: BlockRange
-  ): void {
+  ) {
     assertExists(range);
     const text = pastedBlocks
       .reduce((deltas: DeltaOperation[], block) => {

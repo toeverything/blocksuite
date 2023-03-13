@@ -263,6 +263,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await page.keyboard.down('Shift');
   await pressArrowLeft(page, 'use'.length);
   await page.keyboard.up('Shift');
+  await pressArrowLeft(page, 1);
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
 
