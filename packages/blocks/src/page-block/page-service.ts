@@ -38,10 +38,10 @@ export class PageBlockService extends BaseService {
     return `${text}${childText}`;
   }
 
-  json2Block(
+  async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: OpenBlockInfo[]
-  ): void {
+  ) {
     // this is page block empty case
     const frameId = focusedBlockModel.page.addBlockByFlavour(
       'affine:frame',
@@ -51,7 +51,7 @@ export class PageBlockService extends BaseService {
     const frameModel = focusedBlockModel.page.getBlockById(frameId);
     assertExists(frameModel);
     const service = getService('affine:frame');
-    service.json2Block(frameModel, pastedBlocks);
+    return service.json2Block(frameModel, pastedBlocks);
     // TODO: if page is not empty
   }
 }
