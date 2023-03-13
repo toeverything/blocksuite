@@ -95,7 +95,6 @@ importers:
       hotkeys-js: ^3.10.1
       lit: ^2.6.1
       marked: ^4.2.12
-      parchment: ^2.0.1
       shiki: ^0.14.1
       turndown: ^7.1.1
       zod: ^3.20.6
@@ -116,7 +115,6 @@ importers:
       '@types/autosize': 4.0.1
       '@types/marked': 4.0.8
       '@types/turndown': 5.0.1
-      parchment: 2.0.1
 
   packages/editor:
     specifiers:
