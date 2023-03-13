@@ -66,7 +66,7 @@ export class BaseService implements IService {
   // json2block is triggered when paste behavior occurs(now),
   // at this time cursor is focus on one block, and is must a caret in this block(since selection has been handled in paste callback)
   // this is the common handler for most block, but like code block, it should be overridden this
-  json2Block(
+  async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: OpenBlockInfo[],
     range?: BlockRange

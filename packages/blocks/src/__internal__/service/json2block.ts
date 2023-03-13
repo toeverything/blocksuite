@@ -11,7 +11,7 @@ import {
   type OpenBlockInfo,
 } from '../utils/index.js';
 
-export const json2block = (
+export const json2block = async (
   focusedBlockModel: BaseBlockModel,
   pastedBlocks: OpenBlockInfo[],
   range?: BlockRange
@@ -27,7 +27,6 @@ export const json2block = (
   const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;
   const parent = page.getParent(focusedBlockModel);
   assertExists(parent);
-
   if (pastedBlocks.length === 1) {
     // TODO: optimize textLength
     const textLength =
@@ -79,7 +78,7 @@ export const json2block = (
     return;
   }
 
-  handleBlockSplit(page, focusedBlockModel, range.startOffset, 0);
+  await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0);
 
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
@@ -109,10 +108,9 @@ export const json2block = (
     lastModel.text?.join(nextSiblingModel?.text as Text);
     assertExists(nextSiblingModel);
     page.deleteBlock(nextSiblingModel);
-
     // Wait for the block's rich text mounted
     requestAnimationFrame(() => {
-      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+      const vEditor = getRichTextByModel(lastModel)?.vEditor;
       assertExists(vEditor);
       vEditor.setVRange({
         index: rangeOffset,
@@ -121,10 +119,10 @@ export const json2block = (
     });
   } else {
     if (lastModel?.text) {
-      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
+      const vEditor = getRichTextByModel(lastModel)?.vEditor;
       assertExists(vEditor);
       vEditor.setVRange({
-        index: lastModel.text?.length,
+        index: lastModel.text.length,
         length: 0,
       });
     } else {

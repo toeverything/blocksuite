@@ -110,6 +110,7 @@ test('markdown format parse', async ({ page }) => {
   };
   await waitNextFrame(page);
   await pasteContent(page, clipData);
+  await waitNextFrame(page);
   await assertBlockTypes(page, [
     'h1',
     'h2',

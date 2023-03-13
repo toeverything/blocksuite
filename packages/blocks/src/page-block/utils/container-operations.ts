@@ -66,8 +66,7 @@ export function handleBlockSelectionBatchDelete(
     return;
   }
   defaultPageBlock.selection.clear();
-  id && asyncFocusRichText(page, id);
-  return;
+  return id && asyncFocusRichText(page, id);
 }
 
 export function deleteModelsByRange(
@@ -78,8 +77,7 @@ export function deleteModelsByRange(
     return;
   }
   if (blockRange.type === 'Block') {
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    return;
+    return handleBlockSelectionBatchDelete(page, blockRange.models);
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -99,11 +97,11 @@ export function deleteModelsByRange(
       blockRange.startOffset === blockRange.endOffset &&
       blockRange.startOffset > 0
     ) {
-      startModel.text.delete(blockRange.startOffset - 1, 1);
-      vEditor.setVRange({
-        index: blockRange.startOffset - 1,
-        length: 0,
-      });
+      // startModel.text.delete(blockRange.startOffset - 1, 1);
+      // vEditor.setVRange({
+      //   index: blockRange.startOffset - 1,
+      //   length: 0,
+      // });
       return;
     }
     startModel.text.delete(
@@ -127,7 +125,7 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  vEditor.setVRange({
+  return vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });
@@ -159,13 +157,12 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
     .join('\n');
   models.map(model => page.deleteBlock(model));
 
-  const id = page.addBlockByFlavour(
+  return page.addBlockByFlavour(
     'affine:code',
     { text: new Text(text) },
     parent,
     index
   );
-  return id;
 }
 
 export function updateBlockType(
@@ -278,11 +275,10 @@ export function getCombinedFormat(
     assertExists(richText);
     const { vEditor } = richText;
     assertExists(vEditor);
-    const format = vEditor.getFormat({
+    return vEditor.getFormat({
       index: blockRange.startOffset,
       length: blockRange.endOffset - blockRange.startOffset,
     });
-    return format;
   }
   const formatArr = [];
   // Start block

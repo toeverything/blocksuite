@@ -122,7 +122,7 @@ export function handleBlockSplit(
     newParent,
     newBlockIndex
   );
-  asyncFocusRichText(page, id);
+  return asyncFocusRichText(page, id);
 }
 
 /**
