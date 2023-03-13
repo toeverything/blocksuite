@@ -6,8 +6,10 @@ import {
   getModelsByRange,
   getTextNodeBySelectedBlock,
   getVRangeByNode,
+  isInsidePageTitle,
 } from './query.js';
 import {
+  focusTitle,
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
@@ -165,6 +167,54 @@ export function restoreSelection(blockRange: BlockRange) {
   // Try clean native selection
   resetNativeSelection(null);
   (document.activeElement as HTMLElement).blur();
+}
+
+type ExtendBlockRange =
+  | BlockRange
+  | {
+      type: 'Title';
+      startOffset: number;
+      endOffset: number;
+    };
+
+/**
+ * Get the block range that includes the title range.
+ *
+ * In most cases, we should use {@link getCurrentBlockRange} to get current block range.
+ *
+ */
+export function getExtendBlockRange(page: Page): ExtendBlockRange | null {
+  const basicBlockRange = getCurrentBlockRange(page);
+  if (basicBlockRange) return basicBlockRange;
+  // Check title
+  if (hasNativeSelection()) {
+    const range = getCurrentNativeRange();
+    if (
+      isInsidePageTitle(range.startContainer) &&
+      isInsidePageTitle(range.endContainer)
+    ) {
+      return {
+        type: 'Title' as const,
+        startOffset: range.startOffset,
+        endOffset: range.endOffset,
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * In most cases, we should use {@link restoreSelection}.
+ */
+export function restoreExtendSelection(extendBlockRange: ExtendBlockRange) {
+  if (extendBlockRange.type !== 'Title') {
+    restoreSelection(extendBlockRange);
+    return;
+  }
+  focusTitle(
+    extendBlockRange.startOffset,
+    extendBlockRange.endOffset - extendBlockRange.startOffset
+  );
 }
 
 // The following section is experimental code.

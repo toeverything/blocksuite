@@ -1,4 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import scrollIntoView from 'scroll-into-view-if-needed';
 import type * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -665,7 +666,7 @@ export class VEditor<
   /**
    * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(vRange: VRange): Range | null {
+  toDomRange(vRange: VRange, shouldScrollIntoView = true): Range | null {
     assertExists(this._rootElement);
     const lineElements = Array.from(
       this._rootElement.querySelectorAll('v-line')
@@ -714,6 +715,11 @@ export class VEditor<
     const range = document.createRange();
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
+
+    if (shouldScrollIntoView && focusText.parentElement) {
+      scrollIntoView(focusText.parentElement, { scrollMode: 'if-needed' });
+    }
+
     return range;
   }
 

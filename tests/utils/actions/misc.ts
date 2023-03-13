@@ -5,6 +5,7 @@ import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
   Page as StorePage,
@@ -471,23 +472,29 @@ export async function setSelection(
 ) {
   await page.evaluate(
     ({ anchorBlockId, anchorOffset, focusBlockId, focusOffset }) => {
-      const anchorRichText = document.querySelector(
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ) as any;
-      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
-        index: anchorOffset,
-        length: 0,
-      });
-      const focusRichText = document.querySelector(
+      )!;
+      const anchorRichTextRange = anchorRichText.vEditor.toDomRange(
+        {
+          index: anchorOffset,
+          length: 0,
+        },
+        false
+      )!;
+      const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ) as any;
-      const focusRichTextRange = focusRichText.vEditor.toDomRange({
-        index: focusOffset,
-        length: 0,
-      });
+      )!;
+      const focusRichTextRange = focusRichText.vEditor.toDomRange(
+        {
+          index: focusOffset,
+          length: 0,
+        },
+        false
+      )!;
 
+      /* eslint-enable @typescript-eslint/no-non-null-assertion */
       getSelection()?.setBaseAndExtent(
         anchorRichTextRange.startContainer,
         anchorOffset,
@@ -569,10 +576,13 @@ export async function getIndexCoordinate(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
-        index: vIndex,
-        length: 0,
-      });
+      const domRange = richText.vEditor.toDomRange(
+        {
+          index: vIndex,
+          length: 0,
+        },
+        false
+      );
       const pointBound = domRange.getBoundingClientRect();
       return {
         x: pointBound.left + coordOffSet.x,

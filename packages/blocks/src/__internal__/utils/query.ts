@@ -313,6 +313,9 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
   return startModel;
 }
 
+/**
+ * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
+ */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
   const richText = blockElement?.querySelector<RichText>('rich-text');
@@ -325,6 +328,12 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
+}
+
+export function getVirgoByModel(model: BaseBlockModel) {
+  const richText = getRichTextByModel(model);
+  if (!richText) return null;
+  return richText.vEditor;
 }
 
 // TODO fix find embed model

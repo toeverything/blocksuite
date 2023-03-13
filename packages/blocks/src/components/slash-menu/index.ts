@@ -3,10 +3,7 @@ import './slash-menu-node.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import {
-  getRichTextByModel,
-  throttle,
-} from '../../__internal__/utils/index.js';
+import { getVirgoByModel, throttle } from '../../__internal__/utils/index.js';
 import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcSafeCoordinate,
@@ -84,8 +81,7 @@ function onAbort(
     );
     return;
   }
-  const richText = getRichTextByModel(model);
-  const vEditor = richText?.vEditor;
+  const vEditor = getVirgoByModel(model);
   if (!vEditor) {
     console.warn(
       'Failed to clean slash search text! No vEditor found for model, model:',

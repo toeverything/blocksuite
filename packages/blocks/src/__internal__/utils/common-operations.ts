@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
+import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
@@ -133,7 +133,7 @@ export function convertToParagraph(
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    const vEditor = getRichTextByModel(model)?.vEditor;
+    const vEditor = getVirgoByModel(model);
     if (vEditor) {
       vEditor.setVRange({
         index: 0,

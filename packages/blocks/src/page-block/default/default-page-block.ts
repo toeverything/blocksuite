@@ -13,7 +13,7 @@ import {
   BlockChildrenContainer,
   type BlockHost,
   getCurrentNativeRange,
-  getRichTextByModel,
+  getVirgoByModel,
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
@@ -219,14 +219,6 @@ export class DefaultPageBlockComponent
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
       const right = model.title.split(vRange.index);
-
-      const block = defaultFrame.children.find(block =>
-        getRichTextByModel(block)
-      );
-      if (block) {
-        asyncFocusRichText(page, block.id);
-      }
-
       const newFirstParagraphId = page.addBlockByFlavour(
         'affine:paragraph',
         { text: right },
@@ -379,22 +371,19 @@ export class DefaultPageBlockComponent
           return;
         }
         const startBlock = blockRange.models[0];
-        const richText = getRichTextByModel(startBlock);
-        if (richText) {
-          const vEditor = richText.vEditor;
-          if (vEditor) {
-            vEditor.insertText(
-              {
-                index: blockRange.startOffset,
-                length: 0,
-              },
-              e.key
-            );
-            vEditor.setVRange({
-              index: blockRange.startOffset + 1,
+        const vEditor = getVirgoByModel(startBlock);
+        if (vEditor) {
+          vEditor.insertText(
+            {
+              index: blockRange.startOffset,
               length: 0,
-            });
-          }
+            },
+            e.key
+          );
+          vEditor.setVRange({
+            index: blockRange.startOffset + 1,
+            length: 0,
+          });
         }
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
