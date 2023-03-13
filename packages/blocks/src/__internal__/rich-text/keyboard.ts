@@ -196,13 +196,7 @@ export function createKeyboardBindings(
     return PREVENT_DEFAULT;
   }
 
-  function onSoftEnter(
-    range: VRange,
-    /**
-     * @deprecated
-     */
-    vEditor: AffineVEditor
-  ) {
+  function onSoftEnter(range: VRange, vEditor: AffineVEditor) {
     handleSoftEnter(page, model, range.index, range.length);
     vEditor.setVRange({
       index: range.index + 1,
