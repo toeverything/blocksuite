@@ -85,7 +85,7 @@ export type MouseMode =
 export type OpenBlockInfo = {
   flavour: string;
   type?: string;
-  text: {
+  text?: {
     insert?: string;
     delete?: number;
     retain?: number;

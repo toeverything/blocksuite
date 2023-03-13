@@ -9,6 +9,8 @@ import {
   focusRichText,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pasteByKeyboard,
+  pressArrowRight,
   pressEnter,
   setSelection,
   switchReadonly,
@@ -19,8 +21,8 @@ import {
 } from './utils/actions/index.js';
 import {
   assertAlmostEqual,
-  assertClipItems,
   assertLocatorVisible,
+  assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -525,10 +527,12 @@ test('should format quick bar be able to copy', async ({ page }) => {
   await expect(copyBtn).toBeVisible();
   await assertSelection(page, 1, 0, 3);
   await copyBtn.click();
-
-  await assertClipItems(page, 'text/plain', '456');
-
   await assertSelection(page, 1, 0, 3);
+
+  await pressArrowRight(page, 1);
+  await pasteByKeyboard(page);
+
+  await assertRichTexts(page, ['123', '456456', '789']);
 });
 
 test('should format quick bar show when double click text', async ({

@@ -393,22 +393,17 @@ export async function pasteContent(
 ) {
   await page.evaluate(
     ({ clipData }) => {
-      const e = {
-        target: document.body,
-        preventDefault: () => null,
-        stopPropagation: () => null,
-        clipboardData: {
-          types: Object.keys(clipData),
-          getData: (mime: string) => {
-            return clipData[mime];
-          },
-        },
-      };
-      document
-        .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_onPaste'](
-          e as unknown as ClipboardEvent
-        );
+      const e = new ClipboardEvent('paste', {
+        clipboardData: new DataTransfer(),
+      });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
+      Object.keys(clipData).forEach(key => {
+        e.clipboardData?.setData(key, clipData[key] as string);
+      });
+      document.body.dispatchEvent(e);
     },
     { clipData }
   );
@@ -416,16 +411,16 @@ export async function pasteContent(
 
 export async function importMarkdown(
   page: Page,
-  data: string,
-  insertPositionId: string
+  focusedBlockId: string,
+  data: string
 ) {
   await page.evaluate(
-    ({ data, insertPositionId }) => {
+    ({ data, focusedBlockId }) => {
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard.importMarkdown(data, insertPositionId);
+        .contentParser.importMarkdown(data, focusedBlockId);
     },
-    { data, insertPositionId }
+    { data, focusedBlockId }
   );
 }
 
