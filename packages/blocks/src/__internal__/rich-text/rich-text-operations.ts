@@ -23,6 +23,7 @@ import {
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
+  const nextSibling = page.getNextSibling(model);
   if (!parent) {
     return;
   }
@@ -52,6 +53,22 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     ? page.addBlockByFlavour(flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
       page.addBlockByFlavour(flavour, blockProps, model, 0);
+
+  // 4. If the target block is a numbered list, update the prefix of next siblings
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
 
   asyncFocusRichText(page, id);
 }
@@ -127,6 +144,7 @@ export function handleBlockSplit(
  */
 export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
+  const nextSibling = page.getNextSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
@@ -152,6 +170,22 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     children: [...previousSibling.children, model, ...children],
   });
 
+  // 4. If the target block is a numbered list, update the prefix of next siblings
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
+
   assertExists(model);
   asyncSetVRange(model, { index: offset, length: 0 });
 }
@@ -159,6 +193,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
   const previousSibling = page.getPreviousSibling(models[0]);
+  const nextSibling = page.getNextSibling(models.at(-1) as BaseBlockModel);
 
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
@@ -196,6 +231,22 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
     page.updateBlock(previousSibling, {
       children: [...previousSibling.children, model, ...children],
     });
+
+    // 4. If the target block is a numbered list, update the prefix of next siblings
+    if (
+      matchFlavours(model, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      let next = nextSibling;
+      while (
+        next &&
+        matchFlavours(next, ['affine:list'] as const) &&
+        model.type === 'numbered'
+      ) {
+        page.updateBlock(next, {});
+        next = page.getNextSibling(next);
+      }
+    }
 
     assertExists(model);
     asyncSetVRange(model, { index: 0, length: 0 });
@@ -242,6 +293,7 @@ export function handleUnindent(
   // 1. save child blocks of the parent block
   const previousSiblings = page.getPreviousSiblings(model);
   const nextSiblings = page.getNextSiblings(model);
+
   // 2. remove all child blocks after the target block from the parent block
   page.updateBlock(parent, {
     children: previousSiblings,
@@ -261,6 +313,23 @@ export function handleUnindent(
       ...grandParent.children.slice(index + 1),
     ],
   });
+
+  // 5. If the target block is a numbered list, update the prefix of next siblings
+  const nextSibling = page.getNextSibling(model);
+  if (
+    matchFlavours(model, ['affine:list'] as const) &&
+    model.type === 'numbered'
+  ) {
+    let next = nextSibling;
+    while (
+      next &&
+      matchFlavours(next, ['affine:list'] as const) &&
+      model.type === 'numbered'
+    ) {
+      page.updateBlock(next, {});
+      next = page.getNextSibling(next);
+    }
+  }
 
   assertExists(model);
   asyncSetVRange(model, { index: offset, length: 0 });

@@ -151,6 +151,25 @@ export async function assertPageTitleFocus(page: Page) {
   await expect(locator).toBeFocused();
 }
 
+export async function assertListPrefix(
+  page: Page,
+  predict: (string | RegExp)[],
+  range?: [number, number]
+) {
+  const prefixs = await page.locator('.affine-list-block__prefix');
+
+  let start = 0;
+  let end = await prefixs.count();
+  if (range) {
+    [start, end] = range;
+  }
+
+  for (let i = start; i < end; i++) {
+    const prefix = await prefixs.nth(i).innerText();
+    expect(prefix).toContain(predict[i]);
+  }
+}
+
 export async function assertBlockCount(
   page: Page,
   flavour: string,
