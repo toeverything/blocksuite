@@ -240,6 +240,9 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const richText = richTextParent.querySelector('rich-text');
   assertExists(richText);
@@ -251,6 +254,9 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   }
 }
 
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();

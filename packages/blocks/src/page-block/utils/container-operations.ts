@@ -15,6 +15,7 @@ import {
   type BlockComponentElement,
   type ExtendedModel,
   getDefaultPageBlock,
+  getVirgoByModel,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
@@ -29,10 +30,7 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import {
-  getBlockElementByModel,
-  getRichTextByModel,
-} from '../../__internal__/utils/query.js';
+import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import {
   getCurrentNativeRange,
   resetNativeSelection,
@@ -87,9 +85,7 @@ export function deleteModelsByRange(
     throw new Error('startModel or endModel does not have text');
   }
 
-  const firstRichText = getRichTextByModel(startModel);
-  assertExists(firstRichText);
-  const vEditor = firstRichText.vEditor;
+  const vEditor = getVirgoByModel(startModel);
   assertExists(vEditor);
 
   // Only select one block
@@ -274,9 +270,7 @@ export function getCombinedFormat(
   blockRange: BlockRange
 ): AffineTextAttributes {
   if (blockRange.models.length === 1) {
-    const richText = getRichTextByModel(blockRange.models[0]);
-    assertExists(richText);
-    const { vEditor } = richText;
+    const vEditor = getVirgoByModel(blockRange.models[0]);
     assertExists(vEditor);
     const format = vEditor.getFormat({
       index: blockRange.startOffset,
@@ -293,12 +287,11 @@ export function getCombinedFormat(
     startModel.text &&
     startModel.text.length
   ) {
-    const startRichText = getRichTextByModel(startModel);
-    assertExists(startRichText);
-    assertExists(startRichText.vEditor);
-    const startFormat = startRichText.vEditor.getFormat({
+    const vEditor = getVirgoByModel(startModel);
+    assertExists(vEditor);
+    const startFormat = vEditor.getFormat({
       index: blockRange.startOffset,
-      length: startRichText.vEditor.yText.length - blockRange.startOffset,
+      length: vEditor.yText.length - blockRange.startOffset,
     });
     formatArr.push(startFormat);
   }
@@ -309,10 +302,9 @@ export function getCombinedFormat(
     endModel.text &&
     endModel.text.length
   ) {
-    const endRichText = getRichTextByModel(endModel);
-    assertExists(endRichText);
-    assertExists(endRichText.vEditor);
-    const endFormat = endRichText.vEditor.getFormat({
+    const vEditor = getVirgoByModel(endModel);
+    assertExists(vEditor);
+    const endFormat = vEditor.getFormat({
       index: 0,
       length: blockRange.endOffset,
     });
@@ -324,12 +316,11 @@ export function getCombinedFormat(
     .filter(model => !matchFlavours(model, ['affine:code'] as const))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
-      const richText = getRichTextByModel(model);
-      assertExists(richText);
-      assertExists(richText.vEditor);
-      const format = richText.vEditor.getFormat({
+      const vEditor = getVirgoByModel(model);
+      assertExists(vEditor);
+      const format = vEditor.getFormat({
         index: 0,
-        length: richText.vEditor.yText.length - 1,
+        length: vEditor.yText.length - 1,
       });
       formatArr.push(format);
     });
@@ -362,8 +353,8 @@ function formatBlockRange(
   // edge case 2: same model
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
-    const richText = getRichTextByModel(startModel);
-    richText?.vEditor?.slots.updated.once(() => {
+    const vEditor = getVirgoByModel(startModel);
+    vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
     });
     startModel.text?.format(startOffset, endOffset - startOffset, {

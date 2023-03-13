@@ -12,7 +12,7 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
-  getRichTextByModel,
+  getVirgoByModel,
   type OpenBlockInfo,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -492,9 +492,7 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 }
 
 export function copyCode(model: BaseBlockModel) {
-  const richText = getRichTextByModel(model);
-  assertExists(richText);
-  const vEditor = richText.vEditor;
+  const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
   vEditor.setVRange({
     index: 0,

@@ -18,7 +18,7 @@ import type { TemplateResult } from 'lit';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   getCurrentNativeRange,
-  getRichTextByModel,
+  getVirgoByModel,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
@@ -41,8 +41,7 @@ function insertContent(model: BaseBlockModel, text: string) {
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
-  const richText = getRichTextByModel(model);
-  const vEditor = richText?.vEditor;
+  const vEditor = getVirgoByModel(model);
   if (!vEditor) {
     throw new Error("Can't insert text! vEditor not found");
   }
