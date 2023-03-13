@@ -714,6 +714,9 @@ export class VEditor<
     const range = document.createRange();
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
+
+    focusText.parentElement?.scrollIntoView();
+
     return range;
   }
 
