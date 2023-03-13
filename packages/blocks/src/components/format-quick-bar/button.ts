@@ -29,6 +29,8 @@ export class FormatBarButton extends IconButton {
   private readonly _mousedown = (e: MouseEvent) => {
     // prevents catching or bubbling in editor-container
     e.stopPropagation();
+    // disable default behavior (e.g., change selection focus)
+    e.preventDefault();
   };
 
   override connectedCallback() {
