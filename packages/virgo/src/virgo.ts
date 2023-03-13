@@ -665,7 +665,7 @@ export class VEditor<
   /**
    * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(vRange: VRange): Range | null {
+  toDomRange(vRange: VRange, scrollIntoView = true): Range | null {
     assertExists(this._rootElement);
     const lineElements = Array.from(
       this._rootElement.querySelectorAll('v-line')
@@ -715,7 +715,9 @@ export class VEditor<
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
 
-    focusText.parentElement?.scrollIntoView();
+    if (scrollIntoView) {
+      focusText.parentElement?.scrollIntoView();
+    }
 
     return range;
   }
