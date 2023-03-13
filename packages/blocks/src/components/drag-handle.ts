@@ -1,3 +1,12 @@
+import {
+  type BlockComponentElement,
+  getBlockElementsExcludeSubtrees,
+  getModelByBlockElement,
+  getRectByBlockElement,
+  type IPoint,
+  Point,
+  type SelectionEvent,
+} from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -10,17 +19,6 @@ import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  BlockComponentElement,
-  IPoint,
-  SelectionEvent,
-} from '../__internal__/index.js';
-import {
-  getBlockElementsExcludeSubtrees,
-  getModelByBlockElement,
-  getRectByBlockElement,
-  Point,
-} from '../__internal__/index.js';
 import type { EditingState } from '../page-block/default/utils.js';
 
 const handleIcon = svg`

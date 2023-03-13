@@ -407,7 +407,8 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
-  return getModelByBlockElement(element.closest(ATTR_SELECTOR)!);
+  // maybe should check element.closest(ATTR_SELECTOR) is not null
+  return getModelByBlockElement(element.closest(ATTR_SELECTOR) as Element);
 }
 
 function mergeRect(a: DOMRect, b: DOMRect) {
@@ -587,10 +588,10 @@ export function isBlock(element: Element) {
 }
 
 /**
- * Returns `true` if element is embed.
+ * Returns `true` if element is list.
  */
-function isEmbed({ tagName }: Element) {
-  return tagName === AFFINE_EMBED;
+export function isList({ tagName }: Element) {
+  return tagName === AFFINE_LIST;
 }
 
 /**
@@ -601,17 +602,17 @@ export function isImage({ tagName }: Element) {
 }
 
 /**
+ * Returns `true` if element is embed.
+ */
+function isEmbed({ tagName }: Element) {
+  return tagName === AFFINE_EMBED;
+}
+
+/**
  * Returns `true` if element is codeblock.
  */
 function isDatabase({ tagName }: Element) {
   return tagName === AFFINE_DATABASE;
-}
-
-/**
- * Returns `true` if element is list.
- */
-export function isList({ tagName }: Element) {
-  return tagName === AFFINE_LIST;
 }
 
 /**
