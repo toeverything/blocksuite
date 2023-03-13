@@ -302,10 +302,11 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
+    const point = new Point(e.raw.clientX, e.raw.clientY);
     let hoverEditingState = null;
 
     const element = getClosestBlockElementByPoint(
-      new Point(e.raw.clientX, e.raw.clientY),
+      point.clone(),
       this._container.innerRect
     );
 
@@ -322,17 +323,26 @@ export class DefaultSelectionManager {
       hoverEditingState
     );
 
-    if (!hoverEditingState) {
-      this.slots.embedEditingStateUpdated.emit(null);
-      return;
+    if (hoverEditingState) {
+      const { model, rect } = hoverEditingState;
+
+      if (model.type === 'image') {
+        const tempRect = Rect.fromDOMRect(rect);
+        const isLarge = rect.width > 680;
+        tempRect.right += isLarge ? 0 : 60;
+
+        if (tempRect.isPointIn(point)) {
+          // when image size is too large, the option popup should show inside
+          rect.x = rect.right + (isLarge ? -50 : 10);
+        } else {
+          hoverEditingState = null;
+        }
+      } else {
+        hoverEditingState = null;
+      }
     }
 
-    const { model, rect } = hoverEditingState;
-    if (model.type === 'image') {
-      // when image size is too large, the option popup should show inside
-      rect.x = rect.right + (rect.width > 680 ? -50 : 10);
-      this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-    }
+    this.slots.embedEditingStateUpdated.emit(hoverEditingState);
   };
 
   // TODO: Keep selecting blocks?
