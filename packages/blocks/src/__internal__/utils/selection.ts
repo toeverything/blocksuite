@@ -95,7 +95,7 @@ async function setNewTop(y: number, editableContainer: Element) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(index = Infinity) {
+export function focusTitle(index = Infinity, len = 0) {
   // TODO support SelectionPosition
   const pageComponent = document.querySelector('affine-default-page');
   if (!pageComponent) {
@@ -107,7 +107,7 @@ export function focusTitle(index = Infinity) {
   if (index > pageComponent.titleVEditor.yText.length) {
     index = pageComponent.titleVEditor.yText.length;
   }
-  pageComponent.titleVEditor.setVRange({ index, length: 0 });
+  pageComponent.titleVEditor.setVRange({ index, length: len });
 }
 
 export async function focusRichText(
