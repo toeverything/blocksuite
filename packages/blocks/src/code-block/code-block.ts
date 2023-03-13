@@ -5,7 +5,7 @@ import '../components/portal.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, type PropertyValues, render } from 'lit';
+import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { getHighlighter, type Highlighter, type Lang } from 'shiki';
@@ -167,16 +167,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return service.hljs.default.highlight;
   }
 
-  private langUpdated = new Slot<{
-    lang: Lang;
-    highlighter: Highlighter;
-  }>();
-
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
 
-  private _preLang: Lang | null = null;
+  private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(langs: Lang[]) {
     this._highlighter = await getHighlighter({
@@ -265,26 +260,47 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   protected firstUpdated() {
-    this._startHighlight(codeLanguages);
+    const lang = codeLanguages.find(
+      lang => lang === this.model.language.toLowerCase()
+    );
+    if (lang) {
+      this._startHighlight([lang]);
+    } else {
+      this._highlighter = null;
+    }
   }
 
-  updated(changedProperties: PropertyValues) {
-    if (
-      changedProperties.has('model') &&
-      this._highlighter &&
-      this.model.language !== this._preLang
-    ) {
-      this._preLang = this.model.language as Lang;
-      this.langUpdated.emit({
-        lang: this.model.language.toLowerCase() as Lang,
-        highlighter: this._highlighter,
-      });
+  updated() {
+    if (this.model.language !== this._preLang) {
+      this._preLang = this.model.language;
+
+      const lang = codeLanguages.find(
+        lang => lang === this.model.language.toLowerCase()
+      );
+      if (lang) {
+        if (this._highlighter) {
+          const currentLangs = this._highlighter.getLoadedLanguages();
+          if (!currentLangs.includes(lang)) {
+            this._highlighter.loadLanguage(lang).then(() => {
+              const richText = this.querySelector('rich-text');
+              const vEditor = richText?.vEditor;
+              if (vEditor) {
+                vEditor.requestUpdate();
+              }
+            });
+          }
+        } else {
+          this._startHighlight([lang]);
+        }
+      } else {
+        this._highlighter = null;
+      }
 
       const richText = this.querySelector('rich-text');
-      assertExists(richText);
-      const vEditor = richText.vEditor;
-      assertExists(vEditor);
-      vEditor.requestUpdate();
+      const vEditor = richText?.vEditor;
+      if (vEditor) {
+        vEditor.requestUpdate();
+      }
     }
 
     const richText = this.querySelector('rich-text');

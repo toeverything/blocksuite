@@ -24,7 +24,7 @@ export class AffineCodeLine extends NonShadowLitElement {
     assertExists(this.getHighlightOptions, 'getHighlightOptions is not set');
     const { lang, highlighter } = this.getHighlightOptions();
 
-    if (!highlighter) {
+    if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
       const vText = new VText();
       vText.str = this.vText.str;
       return html`<span>${vText}</span>`;
