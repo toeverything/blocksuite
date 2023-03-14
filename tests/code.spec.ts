@@ -267,7 +267,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await pasteByKeyboard(page);
 
   const content = await getVirgoSelectionText(page);
-  expect(content).toBe('useuse');
+  expect(content).toBe('use');
 });
 
 test.skip('use keyboard copy inside code block copy plain text', async ({
