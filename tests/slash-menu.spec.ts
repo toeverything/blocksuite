@@ -253,6 +253,7 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await codeBlock.waitFor({ state: 'hidden' });
 
+    await waitNextFrame(page);
     await type(page, 'const a = 10;');
     await assertRichTexts(page, ['const a = 10;']);
   });
