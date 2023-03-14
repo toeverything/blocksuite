@@ -670,6 +670,8 @@ export function getClosestBlockElementByPoint(
           return element;
         }
         childBounds = null;
+      } else {
+        return element;
       }
     }
 
