@@ -500,15 +500,7 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
     //   text.length
     // );
   }
-  const blockElement = getBlockById(model.id);
-  if (!blockElement) {
-    throw new Error('Failed to get block element, block id: ' + model.id);
-  }
-  const richText = blockElement.querySelector('rich-text');
-  if (!richText) {
-    throw new Error('Failed to get rich text element');
-  }
-  const vEditor = richText.vEditor;
+  const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
   const [leaf, leafOffset] = vEditor.getTextPoint(offset);
   return [leaf, leafOffset] as const;
