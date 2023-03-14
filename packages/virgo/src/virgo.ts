@@ -1035,8 +1035,10 @@ export class VEditor<
     if (!range) return;
     if (!range.intersectsNode(this._rootElement)) {
       if (
-        this._rootElement?.contains(range.endContainer) ||
-        range.endContainer.contains(this._rootElement)
+        range.endContainer.contains(this._rootElement) &&
+        Array.from(range.endContainer.childNodes).filter(
+          node => node instanceof HTMLElement
+        ).length === 1
       ) {
         this.focusEnd();
       } else {
