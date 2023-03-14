@@ -9,12 +9,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { Selectable } from '../../selection-manager.js';
-import type { EdgelessShapeMenu } from '../../toolbar/shape-tool/shape-menu.js';
-import { ShapeComponentConfigMap } from '../../toolbar/shape-tool/shape-menu-config.js';
 import { isTopLevelBlock } from '../../utils.js';
-import { countBy, createButtonPopper, maxBy } from './utils.js';
+import { createButtonPopper } from './utils.js';
 
 type Action = { name: string; value: string; disabled: boolean };
 const ACTIONS: Action[] = [

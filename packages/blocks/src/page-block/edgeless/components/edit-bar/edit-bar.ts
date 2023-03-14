@@ -3,7 +3,6 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './more-button.js';
 
-import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type {
   BrushElement,
   ShapeElement,
@@ -15,7 +14,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { Selectable } from '../../selection-manager.js';
-import { isPhasorElement, isTopLevelBlock } from '../../utils.js';
+import { isTopLevelBlock } from '../../utils.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
