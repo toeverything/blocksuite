@@ -129,7 +129,7 @@ export function handleUp(
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock && isPageMode(page)) {
-      focusTitle();
+      focusTitle(page);
       return;
     }
 

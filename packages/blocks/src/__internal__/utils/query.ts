@@ -159,7 +159,7 @@ export function getPreviousBlock(
 /**
  * Note: this method will return `DefaultPageBlockComponent` | `EdgelessPageBlockComponent`!
  *
- * @deprecated This method only works in the paper mode!
+ * @deprecated Use {@link getDefaultPage} instead. This method only works in the paper mode!
  */
 export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.page.root);
@@ -180,10 +180,19 @@ export function getContainerByModel(model: BaseBlockModel) {
   return container;
 }
 
+export function getDefaultPage(page: Page) {
+  if (!isPageMode(page)) {
+    return null;
+  }
+  const editor = getEditorContainer(page);
+  const pageComponent = editor.querySelector('affine-default-page');
+  return pageComponent;
+}
+
 export function getEditorContainer(page: Page) {
   assertExists(
     page.root,
-    'Failed to check paper mode! Page root is not exists!'
+    'Failed to check page mode! Page root is not exists!'
   );
   const pageBlock = document.querySelector(`[${ATTR}="${page.root.id}"]`);
   // EditorContainer
