@@ -9,9 +9,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
+import {
+  blockRangeToNativeRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import { getEditorContainer } from '../../__internal__/utils/query.js';
-import { resetNativeSelection } from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
   width: number;
@@ -143,13 +145,23 @@ export class RemoteSelection extends LitElement {
           })
           .filter(Boolean) as BaseBlockModel[];
         requestAnimationFrame(() => {
-          const nativeRange = blockRangeToNativeRange({
+          assertExists(this.page);
+          // special case for title
+          if (models.length === 1 && models[0] === this.page.root) {
+            restoreSelection({
+              type: 'Title',
+              startOffset: userRange.startOffset,
+              endOffset: userRange.endOffset,
+              models: [this.page.root],
+            });
+            return;
+          }
+          restoreSelection({
             type: 'Native',
             startOffset: userRange.startOffset,
             endOffset: userRange.endOffset,
             models,
           });
-          resetNativeSelection(nativeRange);
         });
       }
     );
@@ -177,12 +189,23 @@ export class RemoteSelection extends LitElement {
       })
       .filter(Boolean) as BaseBlockModel[];
 
-    const nativeRange = blockRangeToNativeRange({
-      type: 'Native',
-      startOffset: userRange.startOffset,
-      endOffset: userRange.endOffset,
-      models,
-    });
+    let nativeRange: Range | null = null;
+    // special case for title
+    if (models.length === 1 && models[0] === this.page.root) {
+      nativeRange = blockRangeToNativeRange({
+        type: 'Title',
+        startOffset: userRange.startOffset,
+        endOffset: userRange.endOffset,
+        models: [this.page.root],
+      });
+    } else {
+      nativeRange = blockRangeToNativeRange({
+        type: 'Native',
+        startOffset: userRange.startOffset,
+        endOffset: userRange.endOffset,
+        models,
+      });
+    }
     if (!nativeRange) {
       return [];
     }
