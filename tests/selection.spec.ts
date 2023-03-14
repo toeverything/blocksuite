@@ -964,7 +964,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   await page.mouse.up();
   expect(await getSelectedTextByVirgo(page)).toBe('45');
 
@@ -973,9 +973,9 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   // ↓
-  await page.mouse.move(coord.x - 20, coord.y + 90);
+  await page.mouse.move(coord.x - 26 - 24, coord.y + 90);
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
