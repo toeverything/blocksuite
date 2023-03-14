@@ -573,7 +573,7 @@ export class DefaultSelectionManager {
     }
 
     const { scrollLeft, scrollTop, left, top } = viewport;
-    const selectedBlocksWithoutSubtrees = filterBlocksExcludeSubtrees(
+    const blocks = filterBlocksExcludeSubtrees(
       blockCache,
       draggingArea,
       // subtracting the left/top of the container is required.
@@ -582,9 +582,7 @@ export class DefaultSelectionManager {
         x: scrollLeft - left,
       }
     );
-    const [selectedBlocks, rects] = selectedBlocksWithoutSubtrees.reduce<
-      [Element[], DOMRect[]]
-    >(
+    const [selectedBlocks, rects] = blocks.reduce<[Element[], DOMRect[]]>(
       (data, { block }) => {
         data[0].push(...getBlockElementsIncludeSubtrees([block as Element]));
         data[1].push(getRectByBlockElement(block as Element));
