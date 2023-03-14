@@ -1,5 +1,5 @@
 import './color-panel.js';
-import '../tool-icon-button.js';
+import '../../components/tool-icon-button.js';
 
 import type { Color } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';

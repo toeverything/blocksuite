@@ -1,4 +1,4 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
+import type { PhasorElement } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
 import {
@@ -23,7 +23,7 @@ import {
   pickTopBlock,
 } from './utils.js';
 
-export type Selectable = TopLevelBlockModel | SurfaceElement;
+export type Selectable = TopLevelBlockModel | PhasorElement;
 
 export interface EdgelessHoverState {
   rect: DOMRect;

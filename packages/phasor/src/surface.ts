@@ -97,6 +97,17 @@ export class SurfaceManager {
     });
   }
 
+  // FIXME: props type check
+  updateShapeElement(id: string, props: ShapeProps) {
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      for (const [key, value] of Object.entries(props)) {
+        yElement.set(key, value);
+      }
+    });
+  }
+
   setElementBound(id: string, bound: IBound) {
     this._transact(() => {
       const element = this._elements.get(id);
@@ -245,22 +256,27 @@ export class SurfaceManager {
         const element = this._elements.get(id);
         assertExists(element);
 
-        if (key === 'xywh') {
-          const xywh = yElement.get(key) as string;
-          const [x, y, w, h] = deserializeXYWH(xywh);
-
-          // refresh grid manager
-          this._renderer.removeElement(element);
-          setXYWH(element, { x, y, w, h });
-          this._renderer.addElement(element);
+        this._renderer.removeElement(element);
+        switch (key) {
+          case 'xywh': {
+            const xywh = yElement.get(key) as string;
+            const [x, y, w, h] = deserializeXYWH(xywh);
+            setXYWH(element, { x, y, w, h });
+            break;
+          }
+          case 'points': {
+            const points: number[][] = JSON.parse(yElement.get(key) as string);
+            (element as BrushElement).points = points;
+            break;
+          }
+          default: {
+            const v = yElement.get(key);
+            // FIXME: update element prop
+            // @ts-expect-error should be fixed
+            element[key] = v;
+          }
         }
-
-        if (key === 'points') {
-          const points: number[][] = JSON.parse(yElement.get(key) as string);
-          this._renderer.removeElement(element);
-          (element as BrushElement).points = points;
-          this._renderer.addElement(element);
-        }
+        this._renderer.addElement(element);
       }
     });
   }

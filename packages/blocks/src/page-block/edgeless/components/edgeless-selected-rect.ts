@@ -1,8 +1,12 @@
+import './edit-bar/edit-bar.js';
+
 import type { Bound } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page } from '@blocksuite/store';
-import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import type { Instance as PopperInstance } from '@popperjs/core';
+import { createPopper } from '@popperjs/core';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
@@ -10,7 +14,8 @@ import type {
   EdgelessSelectionState,
   Selectable,
 } from '../selection-manager.js';
-import { FRAME_MIN_SIZE, isTopLevelBlock } from '../utils.js';
+import { FRAME_MIN_SIZE, isTopLevelBlock, stopPropagation } from '../utils.js';
+import type { EdgelessEditBar } from './edit-bar/edit-bar.js';
 import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
@@ -22,6 +27,17 @@ import {
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+    }
+
+    edgeless-edit-bar {
+      /* greater than handle */
+      z-index: 11;
+    }
+  `;
+
   @property({ type: Page })
   page!: Page;
 
@@ -34,6 +50,14 @@ export class EdgelessSelectedRect extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @query('.affine-edgeless-selected-rect')
+  private _selectedRect!: HTMLDivElement;
+
+  @query('edgeless-edit-bar')
+  private _editBar!: EdgelessEditBar;
+
+  private _editBarPopper: PopperInstance | null = null;
+
   private _lock = false;
   private _resizeManager: HandleResizeManager;
   private _disposables = new DisposableGroup();
@@ -44,6 +68,7 @@ export class EdgelessSelectedRect extends LitElement {
       this._onDragMove,
       this._onDragEnd
     );
+    this.addEventListener('mousedown', stopPropagation);
   }
 
   get zoom() {
@@ -98,9 +123,34 @@ export class EdgelessSelectedRect extends LitElement {
     this._lock = false;
   };
 
-  firstUpdated() {
+  async firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+
+    this._editBarPopper = createPopper(this._selectedRect, this._editBar, {
+      placement: 'top',
+      modifiers: [
+        {
+          name: 'offset',
+          options: {
+            offset: [0, 12],
+          },
+        },
+        {
+          name: 'flip',
+          options: {
+            fallbackPlacements: ['bottom'],
+            boundary: document.querySelector('#app'),
+          },
+        },
+      ],
+    });
+    _disposables.add(() => this._editBarPopper?.destroy());
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    this._editBarPopper?.update();
+    super.updated(changedProperties);
   }
 
   disconnectedCallback() {
@@ -134,6 +184,12 @@ export class EdgelessSelectedRect extends LitElement {
     return html`
       ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+      <edgeless-edit-bar
+        .selected=${selected}
+        .page=${this.page}
+        .surface=${this.surface}
+      >
+      </edgeless-edit-bar>
     `;
   }
 }
