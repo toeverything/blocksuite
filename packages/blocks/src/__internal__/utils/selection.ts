@@ -95,7 +95,7 @@ async function setNewTop(y: number, editableContainer: Element) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(index = Infinity) {
+export function focusTitle(index = Infinity, len = 0) {
   // TODO support SelectionPosition
   const pageComponent = document.querySelector('affine-default-page');
   if (!pageComponent) {
@@ -107,7 +107,7 @@ export function focusTitle(index = Infinity) {
   if (index > pageComponent.titleVEditor.yText.length) {
     index = pageComponent.titleVEditor.yText.length;
   }
-  pageComponent.titleVEditor.setVRange({ index, length: 0 });
+  pageComponent.titleVEditor.setVRange({ index, length: len });
 }
 
 export async function focusRichText(
@@ -240,6 +240,9 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const richText = richTextParent.querySelector('rich-text');
   assertExists(richText);
@@ -251,6 +254,9 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   }
 }
 
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();

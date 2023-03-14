@@ -1,7 +1,7 @@
 import {
   getCurrentBlockRange,
   getDefaultPageBlock,
-  getRichTextByModel,
+  getVirgoByModel,
   handleBlockSelectionBatchDelete,
   type OpenBlockInfo,
 } from '@blocksuite/blocks';
@@ -343,8 +343,7 @@ export class PasteManager {
         setTimeout(() => {
           const block = this._editor.page.getBlockById(lastId);
           if (block) {
-            const richText = getRichTextByModel(block);
-            const vEditor = richText?.vEditor;
+            const vEditor = getVirgoByModel(block);
             if (vEditor) {
               vEditor.setVRange({
                 index: position,

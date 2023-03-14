@@ -196,13 +196,7 @@ export function createKeyboardBindings(
     return PREVENT_DEFAULT;
   }
 
-  function onSoftEnter(
-    range: VRange,
-    /**
-     * @deprecated
-     */
-    vEditor: AffineVEditor
-  ) {
+  function onSoftEnter(range: VRange, vEditor: AffineVEditor) {
     handleSoftEnter(page, model, range.index, range.length);
     vEditor.setVRange({
       index: range.index + 1,
@@ -215,10 +209,12 @@ export function createKeyboardBindings(
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
 
+      const lastLineBreakBeforeCursor = this.vEditor.yText
+        .toString()
+        .lastIndexOf('\n', vRange.index - 1);
+
       const lineStart =
-        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
-          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
-          : 0;
+        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
       this.vEditor.insertText(
         {
           index: lineStart,
@@ -248,10 +244,12 @@ export function createKeyboardBindings(
     if (matchFlavours(model, ['affine:code'] as const)) {
       e.stopPropagation();
 
+      const lastLineBreakBeforeCursor = this.vEditor.yText
+        .toString()
+        .lastIndexOf('\n', vRange.index - 1);
+
       const lineStart =
-        this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) !== -1
-          ? this.vEditor.yText.toString().lastIndexOf('\n', vRange.index) + 1
-          : 0;
+        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
       if (
         this.vEditor.yText.length >= 2 &&
         this.vEditor.yText.toString().slice(lineStart, lineStart + 2) === '  '
