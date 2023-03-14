@@ -669,8 +669,8 @@ export function getClosestBlockElementByPoint(
         if (bounds.x < point.x && point.x <= childBounds.x) {
           return element;
         }
+        childBounds = null;
       }
-      childBounds = null;
     }
 
     bounds = null;
