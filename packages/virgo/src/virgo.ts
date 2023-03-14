@@ -1,5 +1,4 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import scrollIntoView from 'scroll-into-view-if-needed';
 import type * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -716,8 +715,10 @@ export class VEditor<
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
 
-    if (shouldScrollIntoView && focusText.parentElement) {
-      scrollIntoView(focusText.parentElement, { scrollMode: 'if-needed' });
+    if (shouldScrollIntoView) {
+      this._rootElement?.scrollIntoView({
+        block: 'nearest',
+      });
     }
 
     return range;
