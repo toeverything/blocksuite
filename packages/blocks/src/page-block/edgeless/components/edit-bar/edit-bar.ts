@@ -1,6 +1,7 @@
 import '../tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
+import './more-button.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type {
@@ -110,14 +111,12 @@ export class EdgelessEditBar extends LitElement {
 
     return html`<div class="container">
       ${shapeButton} ${brushButton} ${divider}
-      <edgeless-tool-icon-button
-        .disabled=${true}
-        .tooltip=${'More'}
-        .active=${false}
-        @tool.click=${() => console.log('More')}
+      <edgeless-more-button
+        .elements=${this.selected}
+        .page=${this.page}
+        .surface=${this.surface}
       >
-        ${MoreHorizontalIcon}
-      </edgeless-tool-icon-button>
+      </edgeless-more-button>
     </div>`;
   }
 }
