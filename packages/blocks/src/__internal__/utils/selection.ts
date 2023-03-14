@@ -7,6 +7,7 @@ import {
   nonTextBlock,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { VirgoLine } from '@blocksuite/virgo';
 
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
@@ -116,6 +117,9 @@ export async function focusRichText(
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
+  editableContainer
+    .querySelector<VirgoLine>('v-line')
+    ?.scrollIntoView({ block: 'nearest' });
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -188,8 +192,7 @@ export function focusBlockByModel(
   defaultPageBlock.selection &&
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection &&
-      defaultPageBlock.selection.setFocusedBlock(element as Element);
+    defaultPageBlock.selection?.setFocusedBlock(element as Element);
     focusRichText(editableContainer, position);
   }
 }

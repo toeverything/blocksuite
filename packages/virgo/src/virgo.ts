@@ -716,7 +716,11 @@ export class VEditor<
     range.setEnd(focusText, focusOffset);
 
     if (shouldScrollIntoView) {
-      this._rootElement?.scrollIntoView({
+      let lineElement: HTMLElement | null = focusText.parentElement;
+      while (!(lineElement instanceof VirgoLine)) {
+        lineElement = lineElement?.parentElement ?? null;
+      }
+      lineElement?.scrollIntoView({
         block: 'nearest',
       });
     }
@@ -1032,7 +1036,19 @@ export class VEditor<
     if (selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
-    if (!range || !range.intersectsNode(this._rootElement)) return;
+    if (!range) return;
+    if (!range.intersectsNode(this._rootElement)) {
+      if (
+        range.endContainer.contains(this._rootElement) &&
+        Array.from(range.endContainer.childNodes).filter(
+          node => node instanceof HTMLElement
+        ).length === 1
+      ) {
+        this.focusEnd();
+      } else {
+        return;
+      }
+    }
 
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
