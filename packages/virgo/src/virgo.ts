@@ -716,7 +716,11 @@ export class VEditor<
     range.setEnd(focusText, focusOffset);
 
     if (shouldScrollIntoView) {
-      this._rootElement?.scrollIntoView({
+      let lineElement: HTMLElement | null = focusText.parentElement;
+      while (!(lineElement instanceof VirgoLine)) {
+        lineElement = lineElement?.parentElement ?? null;
+      }
+      lineElement?.scrollIntoView({
         block: 'nearest',
       });
     }

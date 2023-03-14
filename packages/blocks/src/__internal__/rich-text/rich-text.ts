@@ -17,11 +17,15 @@ import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 export class RichText extends NonShadowLitElement {
   static styles = css`
     .affine-rich-text {
-      scroll-margin: 30px;
       height: 100%;
       width: 100%;
       outline: none;
       cursor: text;
+    }
+
+    v-line {
+      scroll-margin-top: 50px;
+      scroll-margin-bottom: 30px;
     }
   `;
 
