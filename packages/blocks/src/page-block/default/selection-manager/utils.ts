@@ -1,12 +1,12 @@
-import {
-  type BlockComponentElement,
-  contains,
-  getRectByBlockElement,
-} from '@blocksuite/blocks/__internal__/utils/query.js';
 import type { Page, UserRange } from '@blocksuite/store';
 
 import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
 import type { IPoint } from '../../../__internal__/utils/gesture.js';
+import {
+  type BlockComponentElement,
+  contains,
+  getRectByBlockElement,
+} from '../../../__internal__/utils/query.js';
 import type { DefaultSelectionSlots } from '../default-page-block.js';
 import type { PageSelectionState } from './index.js';
 

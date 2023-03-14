@@ -3,14 +3,15 @@ import {
   type BaseBlockModel,
   type Page,
 } from '@blocksuite/store';
+import type { VRange } from '@blocksuite/virgo';
 
+import type { RichText } from '../rich-text/rich-text.js';
 import {
   getDefaultPage,
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
-  getTextNodeBySelectedBlock,
-  getVRangeByNode,
+  getVirgoByModel,
   isInsidePageTitle,
 } from './query.js';
 import {
@@ -38,6 +39,16 @@ export type BlockRange = {
   endOffset: number;
   // collapsed is true when models.length === 1 && startOffset === endOffset
   // collapsed: true;
+};
+
+type ExtendBlockRange = {
+  type: 'Title';
+  startOffset: number;
+  endOffset: number;
+  /**
+   * Only one model, the page model
+   */
+  models: [BaseBlockModel];
 };
 
 export function getCurrentBlockRange(page: Page): BlockRange | null {
@@ -71,6 +82,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
 export function blockRangeToNativeRange(
   blockRange: BlockRange | ExtendBlockRange
 ) {
+  // special case for title
   if (blockRange.type === 'Title') {
     const page = blockRange.models[0].page;
     const pageElement = getDefaultPage(page);
@@ -97,24 +109,14 @@ export function blockRangeToNativeRange(
     // so we can't convert it to native range
     return null;
   }
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(
+  const [startNode, startOffset] = getTextNodeByModel(
     models[0],
     blockRange.startOffset
   );
-  if (!startNode) {
-    throw new Error(
-      'Failed to convert block range to native range. Start node is null.'
-    );
-  }
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(
+  const [endNode, endOffset] = getTextNodeByModel(
     models[models.length - 1],
     blockRange.endOffset
   );
-  if (!endNode) {
-    throw new Error(
-      'Failed to convert block range to native range. End node is null.'
-    );
-  }
   const range = new Range();
   range.setStart(startNode, startOffset);
   range.setEnd(endNode, endOffset);
@@ -210,25 +212,15 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
   throw new Error('Invalid block range type: ' + blockRange.type);
 }
 
-type ExtendBlockRange =
-  | BlockRange
-  | {
-      type: 'Title';
-      startOffset: number;
-      endOffset: number;
-      /**
-       * Only one model, the page model
-       */
-      models: [BaseBlockModel];
-    };
-
 /**
  * Get the block range that includes the title range.
  *
  * In most cases, we should use {@link getCurrentBlockRange} to get current block range.
  *
  */
-export function getExtendBlockRange(page: Page): ExtendBlockRange | null {
+export function getExtendBlockRange(
+  page: Page
+): BlockRange | ExtendBlockRange | null {
   const basicBlockRange = getCurrentBlockRange(page);
   if (basicBlockRange) return basicBlockRange;
   // Check title
@@ -251,6 +243,60 @@ export function getExtendBlockRange(page: Page): ExtendBlockRange | null {
   }
 
   return null;
+}
+
+export function getVRangeByNode(node: Node): VRange | null {
+  if (!node.parentElement) return null;
+
+  const richText = node.parentElement.closest('rich-text') as RichText;
+  const vEditor = richText?.vEditor;
+  if (!vEditor) return null;
+
+  return vEditor.getVRange();
+}
+
+/**
+ * Get the specific text node and offset by the selected block.
+ * The reverse implementation of {@link getVRangeByNode}
+ * See also {@link getVRangeByNode}
+ *
+ * ```ts
+ * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
+ * const [endNode, endOffset] = getTextNodeBySelectedBlock(endModel, endOffset);
+ *
+ * const range = new Range();
+ * range.setStart(startNode, startOffset);
+ * range.setEnd(endNode, endOffset);
+ *
+ * const selection = window.getSelection();
+ * selection.removeAllRanges();
+ * selection.addRange(range);
+ * ```
+ */
+export function getTextNodeByModel(model: BaseBlockModel, offset = 0) {
+  const text = model.text;
+  if (!text) {
+    throw new Error("Failed to get block's text!");
+  }
+  if (offset > text.length) {
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
+  }
+
+  const vEditor = getVirgoByModel(model);
+  assertExists(vEditor);
+  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
+  return [leaf, leafOffset] as const;
 }
 
 // The following section is experimental code.

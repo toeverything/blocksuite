@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
 
 import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../index.js';
@@ -180,6 +179,9 @@ export function getContainerByModel(model: BaseBlockModel) {
   return container;
 }
 
+/**
+ * If it's not in the page mode, it will return `null` directly.
+ */
 export function getDefaultPage(page: Page) {
   if (!isPageMode(page)) {
     return null;
@@ -451,59 +453,6 @@ export function getDOMRectByLine(
     const subList = list.slice(flag);
     return subList.reduce(mergeRect);
   }
-}
-
-export function getVRangeByNode(node: Node): VRange | null {
-  if (!node.parentElement) return null;
-
-  const richText = node.parentElement.closest('rich-text') as RichText;
-  const vEditor = richText?.vEditor;
-  if (!vEditor) return null;
-
-  return vEditor.getVRange();
-}
-
-/**
- * Get the specific text node and offset by the selected block.
- * The reverse implementation of {@link getVRangeByNode}
- * See also {@link getVRangeByNode}
- *
- * ```ts
- * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
- * const [endNode, endOffset] = getTextNodeBySelectedBlock(endModel, endOffset);
- *
- * const range = new Range();
- * range.setStart(startNode, startOffset);
- * range.setEnd(endNode, endOffset);
- *
- * const selection = window.getSelection();
- * selection.removeAllRanges();
- * selection.addRange(range);
- * ```
- */
-export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
-  const text = model.text;
-  if (!text) {
-    throw new Error("Failed to get block's text!");
-  }
-  if (offset > text.length) {
-    offset = text.length;
-    // FIXME enable strict check
-    // console.error(
-    //   'Offset is out of range! model: ',
-    //   model,
-    //   'offset: ',
-    //   offset,
-    //   'text: ',
-    //   text.toString(),
-    //   'text.length: ',
-    //   text.length
-    // );
-  }
-  const vEditor = getVirgoByModel(model);
-  assertExists(vEditor);
-  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
-  return [leaf, leafOffset] as const;
 }
 
 export function isInsideRichText(element: unknown): element is RichText {
