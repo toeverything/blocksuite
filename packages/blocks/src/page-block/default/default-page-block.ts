@@ -108,6 +108,10 @@ export class DefaultPageBlockComponent
     .affine-default-page-block-title-container {
     }
     */
+
+    .affine-block-element {
+      display: block;
+    }
   `;
 
   @property()
