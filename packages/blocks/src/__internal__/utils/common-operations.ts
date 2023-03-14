@@ -9,6 +9,12 @@ import type { ExtendedModel } from './types.js';
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
   richText?.vEditor?.setVRange(vRange);
+
+  return new Promise<void>(resolve => {
+    richText?.vEditor?.slots.rangeUpdated.once(() => {
+      resolve();
+    });
+  });
 }
 
 export function asyncFocusRichText(
@@ -19,7 +25,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'] as const)) return;
-  asyncSetVRange(model, vRange);
+  return asyncSetVRange(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {

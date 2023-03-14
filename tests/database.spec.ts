@@ -4,6 +4,7 @@ import {
   enterPlaygroundRoom,
   initEmptyDatabaseState,
   undoByClick,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import { assertBlockCount, assertBlockProps } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -60,6 +61,7 @@ test('database rich text column', async ({ page }) => {
   await addRowButton.click();
   const richTextCell = page.locator('affine-database-rich-text-cell');
   await richTextCell.click();
+  await waitNextFrame(page);
   await richTextCell.type('hello', { delay: 50 });
   const text1 = await page.evaluate(() => {
     return window.page.tags.toJSON()[4][3].value;

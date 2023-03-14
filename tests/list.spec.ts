@@ -12,6 +12,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenFlavours,
@@ -156,6 +157,7 @@ test('delete at start of list block', async ({ page }) => {
     'affine:list',
     'affine:list',
   ]);
+  await waitNextFrame(page);
   await assertSelection(page, 1, 0, 0);
 });
 

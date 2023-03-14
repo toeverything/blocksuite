@@ -3,6 +3,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { Clipboard } from '../clipboard/index.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { Point } from './rect.js';
 
@@ -26,6 +27,7 @@ export interface BlockHostContext {
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
+  clipboard: Clipboard;
 }
 
 export interface CommonBlockElement extends HTMLElement {
@@ -83,7 +85,7 @@ export type MouseMode =
 export type OpenBlockInfo = {
   flavour: string;
   type?: string;
-  text: {
+  text?: {
     insert?: string;
     delete?: number;
     retain?: number;

@@ -21,7 +21,7 @@ export class MarkdownUtils {
   ];
 
   /** Extract some grammar rules to check whether a piece of text contains markdown grammar */
-  public static checkIfTextContainsMd(text: string) {
+  checkIfTextContainsMd(text: string) {
     text = text.replace(/¨/g, '¨T');
     text = text.replace(/\$/g, '¨D'); // replace $ with ¨D
     // Standardize the line position (unify mac, dos)
@@ -63,3 +63,5 @@ export class MarkdownUtils {
     return text;
   }
 }
+
+export default new MarkdownUtils();

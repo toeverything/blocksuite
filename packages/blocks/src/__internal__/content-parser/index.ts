@@ -1,33 +1,35 @@
 import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
 import type { OpenBlockInfo } from '@blocksuite/blocks';
-import { getServiceOrRegister } from '@blocksuite/blocks';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
-import type { EditorContainer, SelectedBlock } from '../../../index.js';
-import { FileExporter } from '../../file-exporter/file-exporter.js';
+import { getFileFromClipboard } from '../clipboard/utils.js';
+import { getService, getServiceOrRegister } from '../service.js';
+import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
+import type { SelectedBlock } from './types.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
 
 export class ContentParser {
-  private _editor: EditorContainer;
+  private _page: Page;
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
   private _htmlParser: HtmlParser;
 
-  constructor(editor: EditorContainer) {
-    this._editor = editor;
-    this._htmlParser = new HtmlParser(this, this._editor);
+  constructor(page: Page) {
+    this._page = page;
+    this._htmlParser = new HtmlParser(this, page);
     this._htmlParser.registerParsers();
   }
 
   public async onExportHtml() {
-    const root = this._editor.page.root;
+    const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
       this._getSelectedBlock(root).children[0].children
@@ -39,7 +41,7 @@ export class ContentParser {
   }
 
   public async onExportMarkdown() {
-    const root = this._editor.page.root;
+    const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
       this._getSelectedBlock(root).children[0].children
@@ -55,11 +57,7 @@ export class ContentParser {
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
       htmlText =
         htmlText +
-        (await this._getHtmlInfoBySelectionInfo(
-          blocks[currentIndex],
-          currentIndex > 0 ? blocks[currentIndex - 1] : null,
-          currentIndex < blocks.length - 1 ? blocks[currentIndex + 1] : null
-        ));
+        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex]));
     }
     return htmlText;
   }
@@ -78,6 +76,26 @@ export class ContentParser {
     htmlEl.querySelector('head')?.remove();
     this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
+  }
+  async file2Blocks(clipboardData: DataTransfer) {
+    const file = getFileFromClipboard(clipboardData);
+    if (file) {
+      if (file.type.includes('image')) {
+        // TODO: upload file to file server
+        // XXX: should use blob storage here?
+        const storage = await this._page.blobs;
+        assertExists(storage);
+        const id = await storage.set(file);
+        return [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+          },
+        ];
+      }
+    }
+    return [];
   }
 
   public async markdown2Block(text: string): Promise<OpenBlockInfo[]> {
@@ -132,6 +150,15 @@ export class ContentParser {
     return this.htmlText2Block(md2html);
   }
 
+  public async importMarkdown(text: string, insertPositionId: string) {
+    const blocks = await this.markdown2Block(text);
+    const insertBlockModel = this._page.getBlockById(insertPositionId);
+
+    assertExists(insertBlockModel);
+    const service = getService(insertBlockModel.flavour);
+
+    service.json2Block(insertBlockModel, blocks);
+  }
   public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
     this._parsers[name] = func;
   }
@@ -152,19 +179,16 @@ export class ContentParser {
   }
 
   private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
-    const block = {
+    return {
       id: model.id,
       children: model.children.map(child => this._getSelectedBlock(child)),
     };
-    return block;
   }
 
   private async _getHtmlInfoBySelectionInfo(
-    block: SelectedBlock,
-    previousSibling: SelectedBlock | null,
-    nextSibling: SelectedBlock | null
+    block: SelectedBlock
   ): Promise<string> {
-    const model = this._editor.page.getBlockById(block.id);
+    const model = this._page.getBlockById(block.id);
     if (!model) {
       return '';
     }
@@ -176,31 +200,24 @@ export class ContentParser {
       currentIndex++
     ) {
       const childText = await this._getHtmlInfoBySelectionInfo(
-        block.children[currentIndex],
-        currentIndex > 0 ? block.children[currentIndex - 1] : null,
-        currentIndex < block.children.length - 1
-          ? block.children[currentIndex + 1]
-          : null
+        block.children[currentIndex]
       );
       childText && children.push(childText);
     }
 
     const service = (await getServiceOrRegister(model.flavour)) as BaseService;
 
-    return service.block2html(
-      model,
-      children.join(''),
-      previousSibling?.id || '',
-      nextSibling?.id || '',
-      block.startPos,
-      block.endPos
-    );
+    return service.block2html(model, {
+      childText: children.join(''),
+      begin: block.startPos,
+      end: block.endPos,
+    });
   }
 
   private async _getTextInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): Promise<string> {
-    const model = this._editor.page.getBlockById(selectedBlock.id);
+    const model = this._page.getBlockById(selectedBlock.id);
     if (!model) {
       return '';
     }
@@ -213,12 +230,12 @@ export class ContentParser {
 
     const service = await getServiceOrRegister(model.flavour);
 
-    return service.block2Text(
-      model,
-      children.join(''),
-      selectedBlock.startPos,
-      selectedBlock.endPos
-    );
+    // @ts-ignore
+    return service.block2Text(model, {
+      childText: children.join(''),
+      begin: selectedBlock.startPos,
+      end: selectedBlock.endPos,
+    });
   }
 
   private async _convertHtml2Blocks(

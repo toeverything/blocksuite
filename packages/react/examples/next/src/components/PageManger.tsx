@@ -107,7 +107,7 @@ export const PageManger = () => {
               pageBlockId
             );
             // Import preset markdown content inside frame block
-            await editor.clipboard.importMarkdown(presetMarkdown, frameId);
+            await editor.contentParser.importMarkdown(presetMarkdown, frameId);
             page.resetHistory();
           }}
         />

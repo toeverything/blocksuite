@@ -4,11 +4,15 @@ import type { DividerBlockModel } from './divider-model.js';
 export class DividerBlockService extends BaseService {
   override block2html(
     block: DividerBlockModel,
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
+    {
+      childText = '',
+      begin,
+      end,
+    }: {
+      childText?: string;
+      begin?: number;
+      end?: number;
+    } = {}
   ): string {
     return `<hr/>`;
   }

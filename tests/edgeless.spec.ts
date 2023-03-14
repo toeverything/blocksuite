@@ -27,6 +27,8 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   locatorPanButton,
+  pressArrowDown,
+  pressArrowUp,
   pressEnter,
   redoByClick,
   resizeElementByTopLeftHandle,
@@ -417,13 +419,13 @@ test('edgeless arrow up/down', async ({ page }) => {
   expect(ids.paragraphId).toBe('3');
   await clickBlockById(page, ids.paragraphId);
 
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
   await assertSelection(page, 1, 4, 0);
 
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await assertSelection(page, 0, 4, 0);
 
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await assertSelection(page, 0, 4, 0);
 });
 

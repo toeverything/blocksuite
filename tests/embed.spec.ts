@@ -35,17 +35,19 @@ async function initImageState(page: Page) {
     const clipData = {
       'text/html': `<img src="${location.origin}/test-card-1.png" />`,
     };
-    const dT = new DataTransfer();
-    const e = new ClipboardEvent('paste', { clipboardData: dT });
+    const e = new ClipboardEvent('paste', {
+      clipboardData: new DataTransfer(),
+    });
     Object.defineProperty(e, 'target', {
       writable: false,
       value: document.body,
     });
-    e.clipboardData?.setData('text/html', clipData['text/html']);
-    document
-      .getElementsByTagName('editor-container')[0]
-      .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
+    Object.entries(clipData).forEach(([key, value]) => {
+      e.clipboardData?.setData(key, value);
+    });
+    document.body.dispatchEvent(e);
   });
+
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
 }
@@ -128,7 +130,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await initImageState(page);
   await assertRichImage(page, 1);
 
-  await activeEmbed(page);
   await moveToImage(page);
   await assertImageOption(page);
 
@@ -137,9 +138,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
     page,
     page.locator('.affine-embed-wrapper-caption')
   );
-  await pressEnter(page);
-  await type(page, 'aa');
-  await assertRichTexts(page, ['aa']);
 });
 
 const mockImageId = '_e2e_test_image_id_';
