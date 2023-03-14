@@ -503,7 +503,7 @@ export class DefaultSelectionManager {
     if (activeComponent && selectedEmbeds.length) {
       const rect = getSelectedStateRectByBlockElement(activeComponent);
       const embedRects = [
-        new DOMRect(rect.left, rect.right, rect.width, rect.height),
+        new DOMRect(rect.left, rect.top, rect.width, rect.height),
       ];
 
       // updates editing

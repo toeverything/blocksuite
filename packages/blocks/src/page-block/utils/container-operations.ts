@@ -1,13 +1,3 @@
-import type { BlockModels } from '@blocksuite/global/types';
-import {
-  assertExists,
-  assertFlavours,
-  matchFlavours,
-} from '@blocksuite/global/utils';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
-
 import {
   almostEqual,
   asyncGetBlockElementByModel,
@@ -23,7 +13,17 @@ import {
   isMultiBlockRange,
   resetNativeSelection,
   type TopLevelBlockModel,
-} from '../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import type { BlockModels } from '@blocksuite/global/types';
+import {
+  assertExists,
+  assertFlavours,
+  matchFlavours,
+} from '@blocksuite/global/utils';
+import { deserializeXYWH } from '@blocksuite/phasor';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
+
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {

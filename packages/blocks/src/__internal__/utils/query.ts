@@ -662,7 +662,6 @@ export function getClosestBlockElementByPoint(
         return element;
       }
     } else if (isDatabase(element)) {
-      bounds = getRectByBlockElement(element);
       bounds = element
         .querySelector('.affine-database-block-title')
         ?.getBoundingClientRect();
