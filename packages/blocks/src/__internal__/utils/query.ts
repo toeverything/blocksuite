@@ -17,7 +17,6 @@ const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
 const AFFINE_EMBED = 'AFFINE-EMBED';
 const AFFINE_FRAME = 'AFFINE-FRAME';
 const AFFINE_IMAGE = 'AFFINE-IMAGE';
-const AFFINE_LIST = 'AFFINE-LIST';
 const ATTR_SELECTOR = `[${ATTR}]`;
 
 // margin-top: calc(var(--affine-paragraph-space) + 24px);
@@ -588,13 +587,6 @@ export function isBlock(element: Element) {
 }
 
 /**
- * Returns `true` if element is list.
- */
-export function isList({ tagName }: Element) {
-  return tagName === AFFINE_LIST;
-}
-
-/**
  * Returns `true` if element is image.
  */
 export function isImage({ tagName }: Element) {
@@ -642,6 +634,8 @@ export function getClosestBlockElementByPoint(
 
   let element = null;
   let bounds = null;
+  let childBounds = null;
+  let diff = 0;
   let n = 1;
 
   if (rect) {
@@ -656,12 +650,8 @@ export function getClosestBlockElementByPoint(
 
   // Horizontal direction: for nested structures
   if (element) {
-    if (isList(element)) {
-      bounds = getRectByBlockElement(element);
-      if (point.x - bounds.x <= PADDING_LEFT) {
-        return element;
-      }
-    } else if (isDatabase(element)) {
+    // Database
+    if (isDatabase(element)) {
       bounds = element
         .querySelector('.affine-database-block-title')
         ?.getBoundingClientRect();
@@ -669,8 +659,21 @@ export function getClosestBlockElementByPoint(
         return element;
       }
     } else {
-      return element;
+      // Indented paragraphs or list
+      bounds = getRectByBlockElement(element);
+      childBounds = element
+        .querySelector('.affine-block-children-container')
+        ?.firstElementChild?.getBoundingClientRect();
+
+      if (childBounds && childBounds.height) {
+        if (bounds.x < point.x && point.x <= childBounds.x) {
+          return element;
+        }
+      }
+      childBounds = null;
     }
+
+    bounds = null;
     element = null;
   }
 
@@ -686,12 +689,15 @@ export function getClosestBlockElementByPoint(
 
     if (element) {
       bounds = getRectByBlockElement(element);
-      if (
-        bounds.bottom - point.y <= STEPS * 2 ||
-        point.y - bounds.top <= STEPS * 2
-      ) {
+      diff = bounds.bottom - point.y;
+      if (diff >= 0 && diff <= STEPS * 2) {
         return element;
       }
+      diff = point.y - bounds.top;
+      if (diff >= 0 && diff <= STEPS * 2) {
+        return element;
+      }
+      bounds = null;
       element = null;
     }
   } while (n <= STEPS);
