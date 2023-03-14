@@ -5,6 +5,7 @@ import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
+import type { BrushProps, SerializedBrushProps } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStrokePoints(points, {
@@ -32,7 +33,7 @@ export function getBrushBoundFromPoints(
 
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
-  color = '#000000';
+  color = '#000000' as const;
   x = 0;
   y = 0;
   w = 0;
@@ -46,7 +47,7 @@ export class BrushElement extends BaseElement {
     return isPointIn(this, x, y);
   }
 
-  serialize(): Record<string, unknown> {
+  serialize(): SerializedBrushProps {
     return {
       id: this.id,
       index: this.index,
@@ -61,14 +62,19 @@ export class BrushElement extends BaseElement {
 
   static deserialize(data: Record<string, unknown>): BrushElement {
     const element = new BrushElement(data.id as string);
-    element.index = data.index as string;
-    element.color = data.color as string;
-    element.lineWidth = data.lineWidth as number;
 
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     setXYWH(element, { x, y, w, h });
     element.points = JSON.parse(data.points as string);
+
+    const { id, type, xywh, ...props } = data as SerializedBrushProps;
+    BrushElement.updateProps(element, props);
+
     return element;
+  }
+
+  static updateProps(element: BrushElement, props: BrushProps) {
+    Object.assign(element, props);
   }
 
   static getBoundProps(

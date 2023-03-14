@@ -1,14 +1,26 @@
 import '../tool-icon-button.js';
 import './change-shape-button.js';
+import './change-brush-button.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
-import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
+import type {
+  BrushElement,
+  ShapeElement,
+  SurfaceManager,
+} from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { Selectable } from '../../selection-manager.js';
-import { isSurfaceElement } from '../../utils.js';
+import { isPhasorElement, isTopLevelBlock } from '../../utils.js';
+
+type CategorizedElements = {
+  shape: ShapeElement[];
+  brush: BrushElement[];
+  frame: TopLevelBlockModel[];
+};
 
 @customElement('edgeless-edit-bar')
 export class EdgelessEditBar extends LitElement {
@@ -25,6 +37,10 @@ export class EdgelessEditBar extends LitElement {
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
+
+    common-divider {
+      height: 24px;
+    }
   `;
 
   @property()
@@ -36,13 +52,31 @@ export class EdgelessEditBar extends LitElement {
   @property()
   surface!: SurfaceManager;
 
-  private _getShapeButton() {
-    const shapeElements = this.selected.filter(s => {
-      if (isSurfaceElement(s) && s.type === 'shape') {
-        return true;
+  private _category(): CategorizedElements {
+    const cate = {
+      shape: [],
+      brush: [],
+      frame: [],
+    } as CategorizedElements;
+
+    this.selected.forEach(s => {
+      if (isTopLevelBlock(s)) {
+        cate.frame.push(s);
+        return;
       }
-      return false;
-    }) as ShapeElement[];
+      if (s.type === 'shape') {
+        cate.shape.push(s);
+        return;
+      }
+      if (s.type === 'brush') {
+        cate.brush.push(s);
+      }
+    });
+
+    return cate;
+  }
+
+  private _getShapeButton(shapeElements: ShapeElement[]) {
     const shapeButton = shapeElements.length
       ? html`<edgeless-change-shape-button
           .elements=${shapeElements}
@@ -54,11 +88,28 @@ export class EdgelessEditBar extends LitElement {
     return shapeButton;
   }
 
+  private _getBrushButton(brushElements: BrushElement[]) {
+    return brushElements.length
+      ? html`<edgeless-change-brush-button
+          .elements=${brushElements}
+          .page=${this.page}
+          .surface=${this.surface}
+        >
+        </edgeless-change-brush-button>`
+      : null;
+  }
+
   render() {
-    const shapeButton = this._getShapeButton();
+    const { shape, brush } = this._category();
+    const shapeButton = this._getShapeButton(shape);
+    const brushButton = this._getBrushButton(brush);
+    const divider =
+      shapeButton || brushButton
+        ? html`<common-divider .vertical=${true}></common-divider>`
+        : nothing;
 
     return html`<div class="container">
-      ${shapeButton}
+      ${shapeButton} ${brushButton} ${divider}
       <edgeless-tool-icon-button
         .disabled=${true}
         .tooltip=${'More'}

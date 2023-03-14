@@ -6,13 +6,14 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { BrushSize } from '../../../../__internal__/index.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { ColorEvent } from './color-panel.js';
 
 function BrushSizeButtonGroup(
   mouseMode: MouseMode,
-  setBrushWidth: (width: number) => void
+  setBrushWidth: (size: BrushSize) => void
 ) {
   if (mouseMode.type !== 'brush') return nothing;
 
@@ -29,8 +30,8 @@ function BrushSizeButtonGroup(
 
       <div
         class="brush-size-button has-tool-tip"
-        ?active=${lineWidth === 4}
-        @click=${() => setBrushWidth(4)}
+        ?active=${lineWidth === BrushSize.Thin}
+        @click=${() => setBrushWidth(BrushSize.Thin)}
       >
         <div class="thin"></div>
         <tool-tip inert role="tooltip" tip-position="top" arrow>
@@ -40,8 +41,8 @@ function BrushSizeButtonGroup(
 
       <div
         class="brush-size-button"
-        ?active=${lineWidth === 16}
-        @click=${() => setBrushWidth(16)}
+        ?active=${lineWidth === BrushSize.Thick}
+        @click=${() => setBrushWidth(BrushSize.Thick)}
       >
         <div class="thick"></div>
       </div>
@@ -102,11 +103,8 @@ export class EdgelessBrushMenu extends LitElement {
       height: 15px;
     }
 
-    .divider {
-      width: 1px;
+    common-divider {
       height: 62px;
-      margin: 0 7px;
-      background-color: #e3e2e4;
     }
 
     ${tooltipStyle}
@@ -129,7 +127,7 @@ export class EdgelessBrushMenu extends LitElement {
     });
   };
 
-  private _setBrushWidth = (lineWidth: number) => {
+  private _setBrushWidth = (lineWidth: BrushSize) => {
     if (this.mouseMode.type !== 'brush') return;
 
     const { color } = this.mouseMode;
@@ -152,7 +150,7 @@ export class EdgelessBrushMenu extends LitElement {
     return html`
       <div class="container">
         ${brushSizeButtonGroup}
-        <div class="divider"></div>
+        <common-divider .vertical=${true}></common-divider>
         <edgeless-color-panel
           .value=${color}
           @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}

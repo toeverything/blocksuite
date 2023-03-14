@@ -3,76 +3,14 @@ import '../../toolbar/shape-tool/shape-menu.js';
 
 import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { assertExists, DisposableGroup } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { EdgelessShapeMenu } from '../../toolbar/shape-tool/shape-menu.js';
 import { ShapeComponentConfigMap } from '../../toolbar/shape-tool/shape-menu-config.js';
-import { countBy, maxBy } from './utils.js';
-
-const ATTR_SHOW = 'data-show';
-
-function createShapeMenuPopper(
-  reference: HTMLElement,
-  popperElement: HTMLElement
-) {
-  const popper = createPopper(reference, popperElement, {
-    placement: 'top',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 12],
-        },
-      },
-    ],
-  });
-
-  const show = () => {
-    popperElement.setAttribute(ATTR_SHOW, '');
-    popper.setOptions(options => ({
-      ...options,
-      modifiers: [
-        ...(options.modifiers ?? []),
-        { name: 'eventListeners', enabled: false },
-      ],
-    }));
-    popper.update();
-  };
-
-  const hide = () => {
-    popperElement.removeAttribute(ATTR_SHOW);
-
-    popper.setOptions(options => ({
-      ...options,
-      modifiers: [
-        ...(options.modifiers ?? []),
-        { name: 'eventListeners', enabled: false },
-      ],
-    }));
-  };
-
-  const toggle = () => {
-    if (popperElement.hasAttribute(ATTR_SHOW)) {
-      hide();
-    } else {
-      show();
-    }
-  };
-
-  return {
-    popper,
-    show,
-    hide,
-    toggle,
-    dispose: () => {
-      popper.destroy();
-    },
-  };
-}
+import { countBy, createButtonPopper, maxBy } from './utils.js';
 
 function getMostCommonShape(
   elements: ShapeElement[]
@@ -116,15 +54,14 @@ export class EdgelessChangeShapeButton extends LitElement {
   @query('edgeless-shape-menu')
   private _shapeMenu!: EdgelessShapeMenu;
 
-  private _shapeMenuPopper: ReturnType<typeof createShapeMenuPopper> | null =
-    null;
+  private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
   firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._shapeMenuPopper = createShapeMenuPopper(this, this._shapeMenu);
+    this._shapeMenuPopper = createButtonPopper(this, this._shapeMenu);
     _disposables.add(this._shapeMenuPopper);
     _disposables.add(
       this._shapeMenu.slots.select.on(shapeType => {
@@ -135,9 +72,7 @@ export class EdgelessChangeShapeButton extends LitElement {
 
         this.page.captureSync();
         this.elements.forEach(element => {
-          if (element.shapeType !== shapeType) {
-            this.surface.updateShapeElement(element.id, updatedProps);
-          }
+          this.surface.updateElementProps(element.id, updatedProps);
         });
         this.page.captureSync();
       })
@@ -161,5 +96,11 @@ export class EdgelessChangeShapeButton extends LitElement {
       <edgeless-shape-menu .selectedShape=${selectedShape}>
       </edgeless-shape-menu>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-change-shape-button': EdgelessChangeShapeButton;
   }
 }

@@ -5,6 +5,7 @@ import * as Y from 'yjs';
 
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
+import type { BrushProps } from './elements/brush/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -72,23 +73,25 @@ export class SurfaceManager {
   addBrushElement(
     bound: IBound,
     points: number[][] = [],
-    props: {
+    props?: {
       color?: Color;
       lineWidth?: number;
-    } = {}
+    }
   ): string {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
     setXYWH(element, bound);
     element.points = points;
-    element.color = props.color ?? '#000000';
-    element.lineWidth = props.lineWidth ?? 4;
+
+    if (props) {
+      BrushElement.updateProps(element, props);
+    }
 
     return this._addElement(element);
   }
 
-  updateBrushElement(id: string, bound: IBound, points: number[][]) {
+  updateBrushElementPoints(id: string, bound: IBound, points: number[][]) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
@@ -98,7 +101,7 @@ export class SurfaceManager {
   }
 
   // FIXME: props type check
-  updateShapeElement(id: string, props: ShapeProps) {
+  updateElementProps(id: string, props: ShapeProps | BrushProps) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);

@@ -23,7 +23,7 @@ import {
 import type { Selectable } from '../selection-manager.js';
 import {
   getXYWH,
-  isSurfaceElement,
+  isPhasorElement,
   isTopLevelBlock,
   pickBlocksByBound,
   pickTopBlock,
@@ -94,7 +94,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
 
     // phasor element
-    if (isSurfaceElement(selected)) {
+    if (isPhasorElement(selected)) {
       this._setSelectionState([selected], false);
     }
     // frame block
@@ -249,7 +249,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       case DragType.ContentMoving: {
         this._blockSelectionState.selected.forEach(element => {
-          if (isSurfaceElement(element)) {
+          if (isPhasorElement(element)) {
             this._handleSurfaceDragMove(element, e);
           } else {
             this._handleBlockDragMove(element, e);
