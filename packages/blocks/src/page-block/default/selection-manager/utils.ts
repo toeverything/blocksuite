@@ -102,11 +102,13 @@ export function updateLocalSelectionRange(page: Page) {
   }
 }
 
+/*
 function computeSelectionType(
   selectedBlocks: Element[],
   selectionType?: PageSelectionType
 ) {
   let newSelectionType: PageSelectionType = selectionType ?? 'native';
+
   const isOnlyBlock = selectedBlocks.length === 1;
   for (const block of selectedBlocks) {
     if (selectionType) continue;
@@ -133,16 +135,15 @@ function computeSelectionType(
   }
   return newSelectionType;
 }
+*/
 
 export function setSelectedBlocks(
   state: PageSelectionState,
   slots: DefaultSelectionSlots,
   selectedBlocks: BlockComponentElement[],
-  rects?: DOMRect[],
-  selectionType?: PageSelectionType
+  rects?: DOMRect[]
 ) {
   state.selectedBlocks = selectedBlocks;
-  state.type = selectionType ?? state.type;
 
   if (rects) {
     slots.selectedRectsUpdated.emit(rects);
@@ -154,7 +155,5 @@ export function setSelectedBlocks(
     calculatedRects.push(getRectByBlockElement(block));
   }
 
-  const newSelectionType = computeSelectionType(selectedBlocks, selectionType);
-  state.type = newSelectionType;
   slots.selectedRectsUpdated.emit(calculatedRects);
 }
