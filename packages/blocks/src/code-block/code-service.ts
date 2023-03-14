@@ -4,6 +4,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type { BlockRange, OpenBlockInfo } from '../__internal__/utils/index.js';
+import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
 export class CodeBlockService extends BaseService {
@@ -58,5 +59,12 @@ export class CodeBlockService extends BaseService {
       .map(op => op.insert)
       .join('');
     focusedBlockModel.text?.insert(text, range.startOffset);
+
+    const vEditor = getVirgoByModel(focusedBlockModel);
+    assertExists(vEditor);
+    vEditor.setVRange({
+      index: range.startOffset + text.length,
+      length: 0,
+    });
   }
 }
