@@ -35,7 +35,7 @@ export type BlockComponentElement =
       : never
     : never;
 
-export interface ContainerBlock {
+interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
