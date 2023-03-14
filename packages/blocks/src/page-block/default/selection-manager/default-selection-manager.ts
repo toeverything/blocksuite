@@ -49,7 +49,7 @@ import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
-  filterSelectedBlockWithoutSubtree,
+  filterBlocksExcludeSubtrees,
   setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
@@ -573,7 +573,7 @@ export class DefaultSelectionManager {
     }
 
     const { scrollLeft, scrollTop, left, top } = viewport;
-    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+    const selectedBlocksWithoutSubtrees = filterBlocksExcludeSubtrees(
       blockCache,
       draggingArea,
       // subtracting the left/top of the container is required.

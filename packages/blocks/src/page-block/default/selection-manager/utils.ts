@@ -27,7 +27,7 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
 // for more context.
 //
 // The `bound` is a rect of drag-and-drop selection.
-export function filterSelectedBlockWithoutSubtree(
+export function filterBlocksExcludeSubtrees(
   blockCache: Map<BlockComponentElement, DOMRect>,
   bound: DOMRect,
   offset: IPoint
