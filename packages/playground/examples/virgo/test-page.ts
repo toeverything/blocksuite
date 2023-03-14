@@ -2,7 +2,7 @@ import '@shoelace-style/shoelace';
 
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
-import { css, html, LitElement } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
@@ -151,7 +151,7 @@ export class RichText extends NonShadowLitElement {
 }
 
 @customElement('tool-bar')
-export class ToolBar extends LitElement {
+export class ToolBar extends NonShadowLitElement {
   static styles = css`
     .tool-bar {
       display: grid;
