@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "scroll-into-view-if-needed": "^3.0.6",
     "zod": "^3.20.6"
   }
 }
