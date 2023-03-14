@@ -1,3 +1,19 @@
+import {
+  almostEqual,
+  asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
+  type BlockComponentElement,
+  type ExtendedModel,
+  getBlockElementByModel,
+  getClosestBlockElementByElement,
+  getDefaultPageBlock,
+  getVirgoByModel,
+  hasNativeSelection,
+  isCollapsedNativeSelection,
+  isMultiBlockRange,
+  resetNativeSelection,
+  type TopLevelBlockModel,
+} from '@blocksuite/blocks/std';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -8,19 +24,6 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import {
-  almostEqual,
-  asyncGetBlockElementByModel,
-  asyncGetRichTextByModel,
-  type BlockComponentElement,
-  type ExtendedModel,
-  getDefaultPageBlock,
-  getVirgoByModel,
-  hasNativeSelection,
-  isCollapsedNativeSelection,
-  isMultiBlockRange,
-  type TopLevelBlockModel,
-} from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -30,11 +33,6 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import { getBlockElementByModel } from '../../__internal__/utils/query.js';
-import {
-  getCurrentNativeRange,
-  resetNativeSelection,
-} from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
@@ -407,14 +405,11 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     selection.state.selectedBlocks.length === 0 &&
     currentSelection?.focusNode?.nodeName === '#text'
   ) {
-    const currentRange = getCurrentNativeRange();
-    const rangeRect = currentRange.getBoundingClientRect();
-    selection.selectBlocksByRect(rangeRect);
+    selection.selectOneBlock(
+      getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
+    );
   } else {
-    const LARGE_BOUND = 999999;
-    const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
-    selection.state.focusedBlockIndex = -1; // SELECT_ALL
-    selection.selectBlocksByRect(rect);
+    selection.selectAllBlocks();
   }
 
   resetNativeSelection(null);

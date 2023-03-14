@@ -27,6 +27,7 @@ export class IconButton extends LitElement {
       fill: var(--affine-icon-color);
       font-family: var(--affine-font-family);
       color: var(--affine-popover-color);
+      pointer-events: auto;
     }
 
     :host(:hover) {

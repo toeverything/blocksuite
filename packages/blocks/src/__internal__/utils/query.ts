@@ -1,4 +1,7 @@
-import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
+  BLOCK_ID_ATTR as ATTR,
+} from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
@@ -6,8 +9,20 @@ import type { VRange } from '@blocksuite/virgo';
 import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import type { IPoint } from './gesture.js';
+import type { Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
+
+const AFFINE_DATABASE = 'AFFINE-DATABASE';
+const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
+const AFFINE_EMBED = 'AFFINE-EMBED';
+const AFFINE_FRAME = 'AFFINE-FRAME';
+const AFFINE_IMAGE = 'AFFINE-IMAGE';
+const ATTR_SELECTOR = `[${ATTR}]`;
+
+// margin-top: calc(var(--affine-paragraph-space) + 24px);
+// h1.margin-top = 8px + 24px = 32px;
+const MAX_SPACE = 32;
+const STEPS = MAX_SPACE / 2 / 2;
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -33,12 +48,6 @@ export function getBlockById<T extends ElementTagName>(
   ) as BlockComponentElement | null;
 }
 
-export function getBlockByPoint(
-  point: IPoint
-): BlockComponentElement | null | undefined {
-  return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
-}
-
 /**
  * @deprecated Use `page.getParent` instead
  */
@@ -49,7 +58,7 @@ export function getParentBlockById<T extends ElementTagName>(
   const currentBlock = getBlockById(id, ele);
   return (
     (currentBlock?.parentElement?.closest<T>(
-      `[${ATTR}]` as T
+      ATTR_SELECTOR as T
     ) as BlockComponentElement) || null
   );
 }
@@ -358,7 +367,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
   ) {
-    const parentElement = commonAncestor.closest(`[${ATTR}]`)
+    const parentElement = commonAncestor.closest(ATTR_SELECTOR)
       ?.parentElement as HTMLElement;
     if (parentElement != null) {
       commonAncestor = parentElement;
@@ -366,7 +375,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
   }
 
   const intersectedModels: BaseBlockModel[] = [];
-  const blockElements = commonAncestor.querySelectorAll(`[${ATTR}]`);
+  const blockElements = commonAncestor.querySelectorAll(ATTR_SELECTOR);
 
   if (!blockElements.length) return [];
 
@@ -397,17 +406,8 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
-  const containerBlock = element.closest(`[${ATTR}]`) as ContainerBlock;
-  // In extreme cases, the block may be loading, and the model is not yet available.
-  // For example
-  // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
-  if ('hostModel' in containerBlock) {
-    const loader = containerBlock as Loader;
-    assertExists(loader.hostModel);
-    return loader.hostModel;
-  }
-  assertExists(containerBlock.model);
-  return containerBlock.model;
+  // maybe should check element.closest(ATTR_SELECTOR) is not null
+  return getModelByBlockElement(element.closest(ATTR_SELECTOR) as Element);
 }
 
 function mergeRect(a: DOMRect, b: DOMRect) {
@@ -505,17 +505,6 @@ export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
   return [leaf, leafOffset] as const;
 }
 
-export function getAllBlocks() {
-  const blocks: BlockComponentElement[] = Array.from(
-    document.querySelectorAll(`[${ATTR}]`)
-  );
-  return blocks.filter(item => {
-    return (
-      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'
-    );
-  });
-}
-
 export function isInsideRichText(element: unknown): element is RichText {
   // Fool-proofing
   if (element instanceof Event) {
@@ -563,5 +552,278 @@ export function getElementFromEventTarget(
   if (!target) return null;
   if (target instanceof Element) return target;
   if (target instanceof Node) target.parentElement;
+  return null;
+}
+
+/**
+ * Returns `16` if node is contained in the parent.
+ * Otherwise return `0`.
+ */
+export function contains(parent: Element, node: Element) {
+  return (
+    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
+  );
+}
+
+/**
+ * Returns `true` if element has `data-block-id` attribute.
+ */
+export function hasBlockId(element: Element) {
+  return element.hasAttribute(ATTR);
+}
+
+/**
+ * Returns `true` if element is page or frame.
+ */
+export function isPageOrFrame({ tagName }: Element) {
+  return tagName === AFFINE_DEFAULT_PAGE || tagName === AFFINE_FRAME;
+}
+
+/**
+ * Returns `true` if element is not page or frame.
+ */
+export function isBlock(element: Element) {
+  return !isPageOrFrame(element);
+}
+
+/**
+ * Returns `true` if element is image.
+ */
+export function isImage({ tagName }: Element) {
+  return tagName === AFFINE_IMAGE;
+}
+
+/**
+ * Returns `true` if element is embed.
+ */
+function isEmbed({ tagName }: Element) {
+  return tagName === AFFINE_EMBED;
+}
+
+/**
+ * Returns `true` if element is codeblock.
+ */
+function isDatabase({ tagName }: Element) {
+  return tagName === AFFINE_DATABASE;
+}
+
+/**
+ * Returns the closest block element by a point in the rect.
+ *
+ * ```
+ * ############### block
+ * ||############# block
+ * ||||########### block
+ * ||||    ...
+ * ||||  y - 2 * n
+ * ||||    ...
+ * ||||----------- cursor
+ * ||||    ...
+ * ||||  y + 2 * n
+ * ||||    ...
+ * ||||########### block
+ * ||############# block
+ * ############### block
+ * ```
+ */
+export function getClosestBlockElementByPoint(
+  point: Point,
+  rect?: Rect
+): Element | null {
+  const { y } = point;
+
+  let element = null;
+  let bounds = null;
+  let childBounds = null;
+  let diff = 0;
+  let n = 1;
+
+  if (rect) {
+    point.x = Math.min(
+      Math.max(point.x, rect.left) + PADDING_LEFT - 1,
+      rect.right - 1
+    );
+  }
+
+  // find block element
+  element = find(document.elementsFromPoint(point.x, point.y));
+
+  // Horizontal direction: for nested structures
+  if (element) {
+    // Database
+    if (isDatabase(element)) {
+      bounds = element
+        .querySelector('.affine-database-block-title')
+        ?.getBoundingClientRect();
+      if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+        return element;
+      }
+    } else {
+      // Indented paragraphs or list
+      bounds = getRectByBlockElement(element);
+      childBounds = element
+        .querySelector('.affine-block-children-container')
+        ?.firstElementChild?.getBoundingClientRect();
+
+      if (childBounds && childBounds.height) {
+        if (bounds.x < point.x && point.x <= childBounds.x) {
+          return element;
+        }
+        childBounds = null;
+      } else {
+        return element;
+      }
+    }
+
+    bounds = null;
+    element = null;
+  }
+
+  // Vertical direction
+  do {
+    point.y = y - n * 2;
+
+    if (n < 0) n--;
+    n *= -1;
+
+    // find block element
+    element = find(document.elementsFromPoint(point.x, point.y));
+
+    if (element) {
+      bounds = getRectByBlockElement(element);
+      diff = bounds.bottom - point.y;
+      if (diff >= 0 && diff <= STEPS * 2) {
+        return element;
+      }
+      diff = point.y - bounds.top;
+      if (diff >= 0 && diff <= STEPS * 2) {
+        return element;
+      }
+      bounds = null;
+      element = null;
+    }
+  } while (n <= STEPS);
+
+  return element;
+}
+
+/**
+ * Returns the closest block element by element.
+ */
+export function getClosestBlockElementByElement(element: Element | null) {
+  if (!element) return null;
+  if (hasBlockId(element) && isBlock(element)) {
+    return element;
+  }
+  element = element.closest(ATTR_SELECTOR);
+  if (element && isBlock(element)) {
+    return element;
+  }
+  return null;
+}
+
+/**
+ * Returns the model of the block element.
+ */
+export function getModelByBlockElement(element: Element) {
+  const containerBlock = element as ContainerBlock;
+  // In extreme cases, the block may be loading, and the model is not yet available.
+  // For example
+  // // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
+  if ('hostModel' in containerBlock) {
+    const loader = containerBlock as Loader;
+    assertExists(loader.hostModel);
+    return loader.hostModel;
+  }
+  assertExists(containerBlock.model);
+  return containerBlock.model;
+}
+
+/**
+ * Returns all block elements in an element.
+ */
+export function getBlockElementsByElement(
+  element: BlockComponentElement | Document | Element = document
+) {
+  return Array.from(element.querySelectorAll(ATTR_SELECTOR)).filter(isBlock);
+}
+
+/**
+ * Returns rect of the block element.
+ *
+ * Compatible with Safari!
+ * https://github.com/toeverything/blocksuite/issues/902
+ * https://github.com/toeverything/blocksuite/pull/1121
+ */
+export function getRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
+  return (element.firstElementChild ?? element).getBoundingClientRect();
+}
+
+/**
+ * Returns selected state rect of the block element.
+ */
+export function getSelectedStateRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
+  if (isImage(element)) {
+    return (
+      element.querySelector('.resizable-img') ?? element
+    ).getBoundingClientRect();
+  }
+  return getRectByBlockElement(element);
+}
+
+/**
+ * Returns block elements excluding their subtrees.
+ * Only keep block elements of same level.
+ */
+export function getBlockElementsExcludeSubtrees(
+  elements: Element[] | BlockComponentElement[]
+) {
+  if (elements.length <= 1) return elements;
+  let parent = elements[0];
+  return elements.filter((node, index) => {
+    if (index === 0) return true;
+    if (contains(parent, node)) {
+      return false;
+    } else {
+      parent = node;
+      return true;
+    }
+  });
+}
+
+/**
+ * Returns block elements including their subtrees.
+ */
+export function getBlockElementsIncludeSubtrees(elements: Element[]) {
+  return elements.reduce<Element[]>((elements, element) => {
+    elements.push(element, ...getBlockElementsByElement(element));
+    return elements;
+  }, []);
+}
+
+/**
+ * Find block element from an `Element[]`.
+ * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
+ */
+function find(elements: Element[]) {
+  const len = elements.length;
+  let element = null;
+  let i = 0;
+  while (i < len) {
+    element = elements[i];
+    if (hasBlockId(element) && isBlock(element)) return element;
+    if (isEmbed(element)) {
+      i++;
+      if (i < len && hasBlockId(elements[i]) && isBlock(elements[i])) {
+        return elements[i];
+      }
+      return getClosestBlockElementByElement(element);
+    }
+    i++;
+  }
   return null;
 }

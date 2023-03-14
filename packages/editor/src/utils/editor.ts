@@ -17,7 +17,7 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: async (e, end) => {
+    onDropCallback: async (e, end, point) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -34,13 +34,12 @@ export const createBlockHub: (
         props = [props];
       }
 
-      const targetModel = end.model;
-      const rect = end.position;
+      const { model, rect } = end;
       page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
+      const distanceToTop = Math.abs(rect.top - point.y);
+      const distanceToBottom = Math.abs(rect.bottom - point.y);
       const ids = page.addSiblingBlocks(
-        targetModel,
+        model,
         props,
         distanceToTop < distanceToBottom ? 'before' : 'after'
       );

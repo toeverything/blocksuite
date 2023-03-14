@@ -189,9 +189,7 @@ export function focusBlockByModel(
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
     defaultPageBlock.selection &&
-      defaultPageBlock.selection.setFocusedBlockIndexByElement(
-        element as Element
-      );
+      defaultPageBlock.selection.setFocusedBlock(element as Element);
     focusRichText(editableContainer, position);
   }
 }

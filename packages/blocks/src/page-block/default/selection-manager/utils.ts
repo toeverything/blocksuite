@@ -2,10 +2,15 @@ import {
   type DefaultSelectionSlots,
   getCurrentBlockRange,
 } from '@blocksuite/blocks';
+import {
+  type BlockComponentElement,
+  contains,
+  getModelByElement,
+  getRectByBlockElement,
+  type IPoint,
+} from '@blocksuite/blocks/std';
 import type { Page, UserRange } from '@blocksuite/store';
 
-import { getModelByElement } from '../../../__internal__/index.js';
-import type { BlockComponentElement, IPoint } from '../../../std.js';
 import type { PageSelectionState, PageSelectionType } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
@@ -17,28 +22,12 @@ function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   );
 }
 
-/*
-function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
-  return (
-    a.left >= bound.left + offset.x &&
-    a.right <= bound.right + offset.x &&
-    a.top >= bound.top + offset.y &&
-    a.bottom <= bound.bottom + offset.y
-  );
-}
-*/
-function contains(parent: Element, node: Element) {
-  return (
-    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
-  );
-}
-
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
 // for more context.
 //
 // The `bound` is a rect of drag-and-drop selection.
-export function filterSelectedBlockWithoutSubtree(
+export function filterBlocksExcludeSubtrees(
   blockCache: Map<BlockComponentElement, DOMRect>,
   bound: DOMRect,
   offset: IPoint
@@ -101,121 +90,6 @@ export function filterSelectedBlockWithoutSubtree(
   return results;
 }
 
-// Find the current focused block and its substree.
-// The `bound` is a rect of block element.
-export function filterSelectedBlockByIndexAndBound(
-  blockCache: Map<BlockComponentElement, DOMRect>,
-  focusedBlockIndex: number,
-  bound: DOMRect,
-  offset: IPoint = {
-    x: 0,
-    y: 0,
-  }
-): BlockComponentElement[] {
-  // SELECT_ALL
-  if (focusedBlockIndex === -1) {
-    return Array.from(blockCache.keys());
-  }
-
-  const entries = Array.from(blockCache.entries());
-  const len = entries.length;
-  const results = [];
-  let prevBlock: Element | null = null;
-
-  for (let i = focusedBlockIndex; i < len; i++) {
-    const [block, rect] = entries[i];
-    if (prevBlock) {
-      // prev block contains block
-      if (contains(prevBlock, block)) {
-        results.push(block);
-      } else {
-        break;
-      }
-    } else {
-      const richText = block.querySelector('rich-text');
-      const nextRect = richText?.getBoundingClientRect() || rect;
-
-      if (nextRect && intersects(rect, bound, offset)) {
-        prevBlock = block;
-        results.push(block);
-      }
-    }
-  }
-
-  return results;
-}
-
-// Find the current focused block and its substree.
-export function filterSelectedBlockByIndex(
-  blockCache: Map<BlockComponentElement, DOMRect>,
-  index: number
-): BlockComponentElement[] {
-  const blocks = Array.from(blockCache.keys());
-  // SELECT_ALL
-  if (index === -1) {
-    return blocks;
-  }
-
-  const len = blocks.length;
-  const results: BlockComponentElement[] = [];
-
-  if (index > len - 1) {
-    return results;
-  }
-
-  const prevBlock = blocks[index];
-
-  results.push(prevBlock);
-
-  for (let i = index + 1; i < len; i++) {
-    // prev block contains block
-    if (contains(prevBlock, blocks[i])) {
-      results.push(blocks[i]);
-    } else {
-      break;
-    }
-  }
-
-  return results;
-}
-
-// clear subtree in block for drawing rect
-export function clearSubtree(
-  selectedBlocks: BlockComponentElement[],
-  prevBlock: BlockComponentElement
-) {
-  return selectedBlocks.filter((block, index) => {
-    if (index === 0) return true;
-    // prev block contains block
-    if (contains(prevBlock, block)) {
-      return false;
-    } else {
-      prevBlock = block;
-      return true;
-    }
-  });
-}
-
-// find blocks and its subtree
-export function findBlocksWithSubtree(
-  blockCache: Map<BlockComponentElement, DOMRect>,
-  selectedBlocksWithoutSubtree: {
-    block: BlockComponentElement;
-    index: number;
-  }[] = []
-) {
-  const results = [];
-  const len = selectedBlocksWithoutSubtree.length;
-
-  for (let i = 0; i < len; i++) {
-    const { index } = selectedBlocksWithoutSubtree[i];
-    // find block's subtree
-    results.push(...filterSelectedBlockByIndex(blockCache, index));
-  }
-
-  return results;
-}
-
 export function updateLocalSelectionRange(page: Page) {
   const blockRange = getCurrentBlockRange(page);
   if (blockRange && blockRange.type === 'Native') {
@@ -226,42 +100,6 @@ export function updateLocalSelectionRange(page: Page) {
     };
     page.awarenessStore.setLocalRange(page, userRange);
   }
-}
-
-export function getBlockWithIndexByElement(
-  state: PageSelectionState,
-  blockElement: Element
-) {
-  const entries = Array.from(state.blockCache.entries());
-  const len = entries.length;
-  const boundRect = blockElement.getBoundingClientRect();
-  const top = boundRect.top;
-
-  if (!boundRect) return null;
-
-  // fake a small rectangle: { top: top, bottom: top + h }
-  const h = 5;
-  let start = 0;
-  let end = len - 1;
-
-  // binary search block
-  while (start <= end) {
-    const mid = start + Math.floor((end - start) / 2);
-    const [block, rect] = entries[mid];
-    if (top <= rect.top + h) {
-      if (mid === 0 || top >= rect.top) {
-        return { block, index: mid };
-      }
-    }
-
-    if (rect.top > top) {
-      end = mid - 1;
-    } else if (rect.top + h < top) {
-      start = mid + 1;
-    }
-  }
-
-  return null;
 }
 
 function computeSelectionType(
@@ -313,7 +151,7 @@ export function setSelectedBlocks(
 
   const calculatedRects = [] as DOMRect[];
   for (const block of selectedBlocks) {
-    calculatedRects.push(block.getBoundingClientRect());
+    calculatedRects.push(getRectByBlockElement(block));
   }
 
   const newSelectionType = computeSelectionType(selectedBlocks, selectionType);

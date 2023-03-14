@@ -709,7 +709,7 @@ test('should format quick bar work in single block selection', async ({
     page,
     [1, 0],
     [1, 3],
-    { x: -10, y: -10 },
+    { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
   const blockSelections = page.locator(

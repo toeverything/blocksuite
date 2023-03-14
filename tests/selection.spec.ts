@@ -964,7 +964,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   await page.mouse.up();
   expect(await getSelectedTextByVirgo(page)).toBe('45');
 
@@ -973,9 +973,9 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   // ↓
-  await page.mouse.move(coord.x - 20, coord.y + 90);
+  await page.mouse.move(coord.x - 26 - 24, coord.y + 90);
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
@@ -1053,7 +1053,7 @@ test('should indent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 30, coord.y - 10);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10);
   await page.mouse.down();
   // ←
   await page.mouse.move(coord.x + 20, coord.y + 50);
@@ -2086,7 +2086,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await page.mouse.click(0, 0);
   await dragBetweenCoords(
     page,
-    { x: coord.x - 30, y: coord.y - 10 },
+    { x: coord.x - 26 - 24, y: coord.y - 10 },
     { x: coord.x + 20, y: coord.y + 50 }
   );
   await pressTab(page);

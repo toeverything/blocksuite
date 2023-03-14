@@ -1,4 +1,13 @@
 import {
+  type BlockComponentElement,
+  doesInSamePath,
+  getBlockById,
+  getBlockElementByModel,
+  getClosestBlockElementByPoint,
+  type OpenBlockInfo,
+  type Point,
+} from '@blocksuite/blocks/std';
+import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_SERVICE_LOADING_ATTR,
   DRAG_HANDLE_OFFSET_LEFT,
@@ -7,13 +16,6 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copy } from '../../__internal__/clipboard/index.js';
-import {
-  type BlockComponentElement,
-  doesInSamePath,
-  getBlockById,
-  getBlockElementByModel,
-  type OpenBlockInfo,
-} from '../../__internal__/utils/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -21,10 +23,9 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 export interface EditingState {
-  model: BaseBlockModel;
-  position: DOMRect;
-  index: number;
   element: BlockComponentElement;
+  model: BaseBlockModel;
+  rect: DOMRect;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -122,7 +123,7 @@ function binarySearchBlockEditingState(
   }
 ): EditingState | null {
   const noSkipX = !options?.skipX;
-  const dragging = Boolean(options?.dragging);
+  const dragging = !!options?.dragging;
   let containerLeft = 0;
 
   if (noSkipX) {
@@ -211,8 +212,7 @@ function binarySearchBlockEditingState(
               ) {
                 if (x >= result.blockRect.left && x < blockRect.left) {
                   return {
-                    index: mid,
-                    position: result.blockRect,
+                    rect: result.blockRect,
                     model: result.block,
                     element: result.hoverDom,
                   };
@@ -234,8 +234,7 @@ function binarySearchBlockEditingState(
       }
 
       return {
-        index: mid,
-        position: blockRect,
+        rect: blockRect,
         model: block,
         element: hoverDom,
       };
@@ -506,42 +505,18 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    getBlockEditingStateByCursor(
-      blocks,
-      pageX,
-      pageY,
-      cursor,
-      size,
-      skipX,
-      dragging
-    ) {
-      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
-        size,
-        skipX,
-        dragging,
-      });
-    },
-    getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
-      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
-        skipX,
-      });
-    },
-    onDropCallback(e, blocks, end): void {
+    onDropCallback(p, blocks, { rect, model }): void {
       const page = defaultPageBlock.page;
-      const rect = end.position;
-      const targetModel = end.model;
-      if (
-        blocks.length === 1 &&
-        doesInSamePath(page, targetModel, blocks[0].model)
-      ) {
+      if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
       }
       page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
+
+      const distanceToTop = Math.abs(rect.top - p.y);
+      const distanceToBottom = Math.abs(rect.bottom - p.y);
       page.moveBlocks(
         blocks.map(b => b.model),
-        targetModel,
+        model,
         distanceToTop < distanceToBottom
       );
       const type = defaultPageBlock.selection.state.type;
@@ -564,12 +539,21 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (Array.isArray(selectedBlocks)) {
         defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
       } else if (selectedBlocks) {
-        const { position, index } = selectedBlocks;
-        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
+        const { element, rect } = selectedBlocks;
+        defaultPageBlock.selection.selectOneBlock(element, rect);
       }
     },
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
+    },
+    getFocusedBlock() {
+      return defaultPageBlock.selection.state.focusedBlock;
+    },
+    // clearSelection() {
+    //   defaultPageBlock.selection.clear();
+    // },
+    getClosestBlockElement(point: Point) {
+      return getClosestBlockElementByPoint(point, defaultPageBlock.innerRect);
     },
   });
 }
