@@ -116,6 +116,7 @@ export async function focusRichText(
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
+  editableContainer.scrollIntoView({ block: 'nearest' });
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -188,8 +189,7 @@ export function focusBlockByModel(
   defaultPageBlock.selection &&
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection &&
-      defaultPageBlock.selection.setFocusedBlock(element as Element);
+    defaultPageBlock.selection?.setFocusedBlock(element as Element);
     focusRichText(editableContainer, position);
   }
 }
