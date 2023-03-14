@@ -10,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
+  waitNextFrame,
 } from 'utils/actions/misc.js';
 import {
   assertAlmostEqual,
@@ -272,6 +273,7 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await codeBlock.waitFor({ state: 'hidden' });
 
+    await waitNextFrame(page);
     await type(page, '111');
     await assertRichTexts(page, ['111000']);
   });
