@@ -175,7 +175,7 @@ test('readonly mode', async ({ page }) => {
   await page.evaluate(() => {
     const richTextA = document
       .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text');
+      ?.querySelector('virgo-test-rich-text');
 
     if (!richTextA) {
       throw new Error('Cannot find editor');

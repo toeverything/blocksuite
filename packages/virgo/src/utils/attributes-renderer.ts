@@ -41,7 +41,9 @@ function virgoTextStyles(
 export const getDefaultAttributeRenderer =
   <T extends BaseTextAttributes>(): AttributesRenderer<T> =>
   (unitText, attributes) => {
-    const style = attributes ? virgoTextStyles(attributes) : styleMap({});
+    const style = attributes
+      ? virgoTextStyles(attributes)
+      : styleMap({ 'white-space': 'pre-wrap' });
 
     return html`<span style=${style}>${unitText}</span>`;
   };

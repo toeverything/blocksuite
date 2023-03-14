@@ -22,10 +22,10 @@ export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
   await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.shadowRoot?.querySelectorAll('rich-text');
+      ?.querySelectorAll('virgo-test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find rich-text');
+      throw new Error('Cannot find virgo-test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,10 +41,10 @@ export async function getDeltaFromVirgoRichText(
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.shadowRoot?.querySelectorAll('rich-text');
+      ?.querySelectorAll('virgo-test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find rich-text');
+      throw new Error('Cannot find virgo-test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,10 +62,10 @@ export async function setVirgoRichTextRange(
     ([vRange, index]) => {
       const richTexts = document
         .querySelector('test-page')
-        ?.shadowRoot?.querySelectorAll('rich-text');
+        ?.querySelectorAll('virgo-test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find rich-text');
+        throw new Error('Cannot find virgo-test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,10 +85,10 @@ export async function getVirgoRichTextLine(
     ([index, i]) => {
       const richTexts = document
         .querySelector('test-page')
-        ?.shadowRoot?.querySelectorAll('rich-text');
+        ?.querySelectorAll('virgo-test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find rich-text');
+        throw new Error('Cannot find virgo-test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
