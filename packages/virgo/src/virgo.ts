@@ -717,7 +717,10 @@ export class VEditor<
     range.setEnd(focusText, focusOffset);
 
     if (shouldScrollIntoView && focusText.parentElement) {
-      scrollIntoView(focusText.parentElement, { scrollMode: 'if-needed' });
+      scrollIntoView(focusText.parentElement, {
+        scrollMode: 'if-needed',
+        block: 'nearest',
+      });
     }
 
     return range;
