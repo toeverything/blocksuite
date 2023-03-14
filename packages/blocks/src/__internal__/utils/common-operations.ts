@@ -9,6 +9,12 @@ import type { ExtendedModel } from './types.js';
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
   richText?.vEditor?.setVRange(vRange);
+
+  return new Promise<void>(resolve => {
+    richText?.vEditor?.slots.rangeUpdated.once(() => {
+      resolve();
+    });
+  });
 }
 
 export function asyncFocusRichText(

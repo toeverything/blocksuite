@@ -43,18 +43,15 @@ export class pageBlockClipboard implements Clipboard {
 
     await deleteModelsByRange(this._page);
 
-    // FIXME: deleteModelsByRange is async, but the time is not right, so have to use setTimeout
-    setTimeout(async () => {
-      const range = getCurrentBlockRange(this._page);
+    const range = getCurrentBlockRange(this._page);
 
-      const focusedBlockModel = range?.models[0];
-      assertExists(focusedBlockModel);
-      const service = getService(focusedBlockModel.flavour);
-      assertExists(range);
-      await service.json2Block(focusedBlockModel, blocks, range);
+    const focusedBlockModel = range?.models[0];
+    assertExists(focusedBlockModel);
+    const service = getService(focusedBlockModel.flavour);
+    assertExists(range);
+    await service.json2Block(focusedBlockModel, blocks, range);
 
-      this._page.captureSync();
-    });
+    this._page.captureSync();
   };
 
   private _onCopy = (e: ClipboardEvent) => {

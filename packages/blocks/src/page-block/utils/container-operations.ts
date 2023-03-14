@@ -64,8 +64,7 @@ export function handleBlockSelectionBatchDelete(
     return;
   }
   defaultPageBlock.selection.clear();
-  id && asyncFocusRichText(page, id);
-  return;
+  return id && asyncFocusRichText(page, id);
 }
 
 export function deleteModelsByRange(

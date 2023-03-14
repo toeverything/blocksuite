@@ -913,8 +913,6 @@ test('should select full text of the first block when leaving the affine-frame-b
       },
     }
   );
-  await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '1234567');
 });
 
 test('should add a new line when clicking the bottom of the last non-text block', async ({

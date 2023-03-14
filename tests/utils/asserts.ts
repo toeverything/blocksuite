@@ -509,6 +509,7 @@ export async function assertClipItems(
   // });
   // const actual = clipItems.find(item => item.mimeType === key)?.data;
   // expect(actual).toEqual(value);
+  return true;
 }
 
 export function assertAlmostEqual(

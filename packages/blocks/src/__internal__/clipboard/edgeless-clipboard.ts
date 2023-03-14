@@ -6,7 +6,6 @@ export class EdgelessClipboard implements Clipboard {
   private _page!: Page;
   constructor(page: Page) {
     this._page = page;
-    console.log('_page', this._page);
   }
   public initEvent(page: Page = this._page) {
     this._page = page;

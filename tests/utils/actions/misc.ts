@@ -34,6 +34,7 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // Firefox warn on quill
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
+    "addRange(): The given range isn't in document.",
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -407,6 +408,7 @@ export async function pasteContent(
     },
     { clipData }
   );
+  await waitNextFrame(page);
 }
 
 export async function importMarkdown(

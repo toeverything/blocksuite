@@ -2,6 +2,7 @@ import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
+import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 // @ts-ignore
@@ -11,11 +12,11 @@ import {
   type OpenBlockInfo,
 } from '../utils/index.js';
 
-export const json2block = async (
+export async function json2block(
   focusedBlockModel: BaseBlockModel,
   pastedBlocks: OpenBlockInfo[],
   range?: BlockRange
-) => {
+) {
   assertExists(range);
   const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
@@ -40,9 +41,7 @@ export const json2block = async (
         range?.startOffset || 0
       );
 
-      const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
-      assertExists(vEditor);
-      vEditor.setVRange({
+      await setRange(focusedBlockModel, {
         index: (range?.startOffset ?? 0) + textLength,
         length: 0,
       });
@@ -51,7 +50,8 @@ export const json2block = async (
         focusedBlockModel.text?.length !== range.endOffset;
 
       shouldSplitBlock &&
-        handleBlockSplit(page, focusedBlockModel, range.startOffset, 0);
+        (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+
       const [id] = addBlocks(
         page,
         pastedBlocks,
@@ -63,9 +63,7 @@ export const json2block = async (
 
       assertExists(model);
       if (model.text) {
-        const vEditor = getRichTextByModel(focusedBlockModel)?.vEditor;
-        assertExists(vEditor);
-        vEditor.setVRange({
+        await setRange(focusedBlockModel, {
           index: textLength,
           length: 0,
         });
@@ -83,13 +81,14 @@ export const json2block = async (
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
-      range.startOffset
+      range?.startOffset || 0
     );
   }
 
   const insertPosition =
     parent.children.indexOf(focusedBlockModel) +
     (shouldMergeFirstBlock ? 1 : 0);
+
   const ids = addBlocks(
     page,
     pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
@@ -110,18 +109,14 @@ export const json2block = async (
     page.deleteBlock(nextSiblingModel);
     // Wait for the block's rich text mounted
     requestAnimationFrame(() => {
-      const vEditor = getRichTextByModel(lastModel)?.vEditor;
-      assertExists(vEditor);
-      vEditor.setVRange({
+      setRange(lastModel, {
         index: rangeOffset,
         length: 0,
       });
     });
   } else {
     if (lastModel?.text) {
-      const vEditor = getRichTextByModel(lastModel)?.vEditor;
-      assertExists(vEditor);
-      vEditor.setVRange({
+      setRange(lastModel, {
         index: lastModel.text.length,
         length: 0,
       });
@@ -129,15 +124,21 @@ export const json2block = async (
       // TODO: set embed block selection
     }
   }
-};
+}
+
+async function setRange(model: BaseBlockModel, vRange: VRange) {
+  const vEditor = getRichTextByModel(model)?.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange(vRange);
+}
 
 // TODO: used old code, need optimize
-export const addBlocks = (
+export function addBlocks(
   page: Page,
   blocks: OpenBlockInfo[],
   parent: BaseBlockModel,
   index: number
-) => {
+) {
   const addedBlockIds = [];
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
@@ -166,4 +167,4 @@ export const addBlocks = (
     model && block.children && addBlocks(page, block.children, model, 0);
   }
   return addedBlockIds;
-};
+}

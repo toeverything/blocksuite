@@ -10,6 +10,7 @@ import {
   initThreeParagraphs,
   pressArrowDown,
   pressArrowLeft,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressShiftEnter,
@@ -792,9 +793,9 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowUp');
   // Now the caret is at the start of the second line of the first paragraph
 
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   await type(page, '0');
-  await page.keyboard.press('ArrowUp');
+  await pressArrowUp(page);
   // At title
   await type(page, '1');
   await assertTitle(page, '1');
