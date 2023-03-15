@@ -664,7 +664,6 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    // event.dataTransfer.setDragImage(blockHubElement, 0, 0);
     this.slots.selectedRectsUpdated.emit([]);
   };
 
