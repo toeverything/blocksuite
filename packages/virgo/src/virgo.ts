@@ -200,6 +200,7 @@ export class VEditor<
   private _isComposing = false;
   private _isReadonly = false;
   private _yText: Y.Text;
+  private _marks: TextAttributes | null = null;
 
   private _previousAnchor: NativePoint | null = null;
   private _previousFocus: NativePoint | null = null;
@@ -290,6 +291,10 @@ export class VEditor<
   get rootElement() {
     assertExists(this._rootElement);
     return this._rootElement;
+  }
+
+  get marks() {
+    return this._marks;
   }
 
   constructor(yText: VEditor['yText']) {
@@ -536,6 +541,29 @@ export class VEditor<
     });
   }
 
+  setMarks(marks: TextAttributes): void {
+    this._marks = marks;
+
+    let vRange = this.getVRange();
+    const dispose = this.slots.updateVRange.on(([r, t]) => {
+      if (
+        vRange &&
+        r &&
+        ((t === 'native' && r.index === vRange.index) ||
+          (t !== 'native' && r.index === vRange.index + 1))
+      ) {
+        vRange = r;
+      } else {
+        this.resetMarks();
+        dispose.dispose();
+      }
+    });
+  }
+
+  resetMarks(): void {
+    this._marks = null;
+  }
+
   setReadonly(isReadonly: boolean): void {
     this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
     this._isReadonly = isReadonly;
@@ -563,9 +591,14 @@ export class VEditor<
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
+    let attr = attributes;
+    if (this._marks) {
+      attr = { ...this._marks, ...attributes };
+    }
+
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text, attributes);
+      this.yText.insert(vRange.index, text, attr);
     });
   }
 

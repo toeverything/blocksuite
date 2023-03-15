@@ -368,3 +368,47 @@ test('getDeltasByVRange', () => {
     ],
   ]);
 });
+
+test('cursor with format', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  const virgo = new VEditor(yText);
+
+  virgo.insertText(
+    {
+      index: 0,
+      length: 0,
+    },
+    'aaa',
+    {
+      bold: true,
+    }
+  );
+
+  virgo.setMarks({
+    italic: true,
+  });
+
+  virgo.insertText(
+    {
+      index: 3,
+      length: 0,
+    },
+    'bbb'
+  );
+
+  expect(virgo.yText.toDelta()).toEqual([
+    {
+      insert: 'aaa',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        italic: true,
+      },
+    },
+  ]);
+});
