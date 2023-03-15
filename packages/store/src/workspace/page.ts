@@ -71,6 +71,11 @@ export class Page extends Space<PageData> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    subPageUpdated: new Slot<{
+      type: 'add' | 'delete' | 'move';
+      id: string;
+      subPageIds: string[];
+    }>(),
   };
 
   constructor(
@@ -562,8 +567,7 @@ export class Page extends Space<PageData> {
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
-      return ids;
+      return this.addBlocksByFlavour(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
@@ -807,8 +811,9 @@ export class Page extends Space<PageData> {
             this._handleYBlockAdd(visited, id);
           }
 
-          const child = this._blockMap.get(id) as BaseBlockModel;
-          model.children[index as number] = child;
+          model.children[index as number] = this._blockMap.get(
+            id
+          ) as BaseBlockModel;
         }
       });
     }
