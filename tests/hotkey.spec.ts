@@ -22,6 +22,7 @@ import {
   redoByKeyboard,
   resetHistory,
   selectAllByKeyboard,
+  setVirgoSelection,
   SHORT_KEY,
   strikethrough,
   type,
@@ -269,6 +270,142 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   // the format should be removed after trigger the hotkey again
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, {});
+});
+
+test('use formatted cursor with hotkey', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+  // format italic
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await type(page, 'bbb');
+  // format bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'ccc');
+  // unformat italic
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await type(page, 'ddd');
+  // unformat bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'eee');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaa"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  // format bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'fff');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaa"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fff"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await setVirgoSelection(page, 3, 0);
+  await type(page, 'ggg');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaaggg"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fff"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 });
 
 test('should single line format hotkey work', async ({ page }) => {

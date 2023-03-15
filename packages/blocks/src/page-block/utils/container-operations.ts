@@ -334,7 +334,7 @@ export function getCurrentCombinedFormat(page: Page): AffineTextAttributes {
 
 function formatBlockRange(
   blockRange: BlockRange,
-  key: keyof AffineTextAttributes
+  key: keyof Omit<AffineTextAttributes, 'link'>
 ) {
   const { startOffset, endOffset } = blockRange;
   const startModel = blockRange.models[0];
@@ -342,6 +342,14 @@ function formatBlockRange(
   // edge case 1: collapsed range
   if (blockRange.models.length === 1 && startOffset === endOffset) {
     // Collapsed range
+
+    const vEditor = getVirgoByModel(startModel);
+    if (!vEditor) return;
+    vEditor.setMarks({
+      ...vEditor.marks,
+      [key]: vEditor.marks && vEditor.marks[key] ? null : true,
+    });
+
     return;
   }
   const format = getCombinedFormat(blockRange);
@@ -392,7 +400,10 @@ function formatBlockRange(
   }
 }
 
-export function handleFormat(page: Page, key: keyof AffineTextAttributes) {
+export function handleFormat(
+  page: Page,
+  key: keyof Omit<AffineTextAttributes, 'link'>
+) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;
   page.captureSync();
