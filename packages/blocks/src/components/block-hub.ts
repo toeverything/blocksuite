@@ -599,7 +599,7 @@ export class BlockHub extends NonShadowLitElement {
    * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
-  private _onTransitionStart = (e: TransitionEvent) => {
+  private _onTransitionStart = (_: TransitionEvent) => {
     if (this._timer) {
       clearTimeout(this._timer);
     }
@@ -694,22 +694,26 @@ export class BlockHub extends NonShadowLitElement {
       return;
     }
 
-    const element = getClosestBlockElementByPoint(new Point(x, y));
-
-    if (element) {
-      const rect = getRectByBlockElement(element);
-      this._lastModelState = {
-        rect,
-        element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
-      };
-      this._indicator.targetRect = rect;
-    }
-
     this._indicator.cursorPosition = {
       x,
       y,
     };
+
+    const element = getClosestBlockElementByPoint(new Point(x, y));
+    let rect = null;
+    let lastModelState = null;
+
+    if (element) {
+      rect = getRectByBlockElement(element);
+      lastModelState = {
+        rect,
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+      };
+    }
+
+    this._lastModelState = lastModelState;
+    this._indicator.targetRect = rect;
   };
 
   private _onDragOver = (e: DragEvent) => {
@@ -724,7 +728,7 @@ export class BlockHub extends NonShadowLitElement {
     this._currentClientY = e.clientY;
   };
 
-  private _onDragEnd = (e: DragEvent) => {
+  private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
     this._indicator.cursorPosition = null;
@@ -747,11 +751,11 @@ export class BlockHub extends NonShadowLitElement {
     );
   };
 
-  private _onCardMouseDown = (e: Event) => {
+  private _onCardMouseDown = (_: Event) => {
     this._isGrabbing = true;
   };
 
-  private _onCardMouseUp = (e: Event) => {
+  private _onCardMouseUp = (_: Event) => {
     this._isGrabbing = false;
   };
 

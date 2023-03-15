@@ -535,7 +535,7 @@ export function isEdgelessPage({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is page or frame.
+ * Returns `true` if element is default/edgeless page or frame.
  */
 export function isPageOrFrame(element: Element) {
   return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
@@ -556,7 +556,7 @@ export function isImage({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is embed.
+ * Returns `true` if element is frame.
  */
 function isFrame({ tagName }: Element) {
   return tagName === 'AFFINE-FRAME';
