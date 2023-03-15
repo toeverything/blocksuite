@@ -187,10 +187,14 @@ export class EdgelessToolbar extends LitElement {
           ${HandIcon}
         </edgeless-tool-icon-button>
         <div class="divider"></div>
-        <edgeless-tool-icon-button @tool.click=${() => this._zoomToFit()}>
+        <edgeless-tool-icon-button
+          .tooltip=${'Fit to screen'}
+          @tool.click=${() => this._zoomToFit()}
+        >
           ${ViewBarIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
+          .tooltip=${'Zoom out'}
           @tool.click=${() => this._setZoom(viewport.zoom - 0.1)}
         >
           ${MinusIcon}
@@ -199,6 +203,7 @@ export class EdgelessToolbar extends LitElement {
           ${formattedZoom}
         </span>
         <edgeless-tool-icon-button
+          .tooltip=${'Zoom in'}
           @tool.click=${() => this._setZoom(viewport.zoom + 0.1)}
         >
           ${PlusIcon}
