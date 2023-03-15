@@ -144,6 +144,9 @@ export class RemoteSelection extends LitElement {
             return this.page.getBlockById(id);
           })
           .filter(Boolean) as BaseBlockModel[];
+        if (!models.length) {
+          return;
+        }
         requestAnimationFrame(() => {
           assertExists(this.page);
           // special case for title

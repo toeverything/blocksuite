@@ -169,6 +169,9 @@ export function updateBlockRange(
  * See also {@link resetNativeSelection}
  */
 export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
+  if (!blockRange.models.length) {
+    throw new Error("Can't restore selection, blockRange.models is empty");
+  }
   if (blockRange.type === 'Native') {
     const range = blockRangeToNativeRange(blockRange);
     resetNativeSelection(range);
