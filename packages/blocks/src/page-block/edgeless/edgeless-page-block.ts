@@ -369,8 +369,7 @@ export class EdgelessPageBlockComponent
     const translateY = -viewportY * zoom;
 
     const gridStyle = {
-      backgroundImage:
-        'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
+      backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
     };
     const defaultStyle = {};
     const style = this.showGrid ? gridStyle : defaultStyle;
