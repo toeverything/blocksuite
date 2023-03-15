@@ -366,7 +366,8 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     frameId
   );
 
-  await setVirgoSelection(page, 3, 0);
+  await pressArrowLeft(page);
+  await pressArrowRight(page);
   await type(page, 'ggg');
 
   await assertStoreMatchJSX(
@@ -377,7 +378,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     prop:text={
       <>
         <text
-          insert="aaaggg"
+          insert="aaa"
         />
         <text
           insert="bbb"
@@ -398,6 +399,53 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         <text
           bold={true}
           insert="fff"
+        />
+        <text
+          insert="ggg"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await setVirgoSelection(page, 3, 0);
+  await type(page, 'hhh');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaahhh"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fff"
+        />
+        <text
+          insert="ggg"
         />
       </>
     }

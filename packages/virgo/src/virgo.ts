@@ -545,17 +545,17 @@ export class VEditor<
     this._marks = marks;
 
     let vRange = this.getVRange();
-    const dispose = this.slots.updateVRange.on(([r]) => {
+    const dispose = this.slots.updateVRange.on(([r, t]) => {
       if (
-        !vRange ||
-        !r ||
-        r.length !== 0 ||
-        (r.index !== vRange.index && r.index !== vRange.index + 1)
+        vRange &&
+        r &&
+        ((t === 'native' && r.index === vRange.index) ||
+          (t !== 'native' && r.index === vRange.index + 1))
       ) {
+        vRange = r;
+      } else {
         this.resetMarks();
         dispose.dispose();
-      } else {
-        vRange = r;
       }
     });
   }
