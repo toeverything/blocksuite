@@ -994,23 +994,23 @@ export class VEditor<
 
         this.deleteText(currentVRange);
       } else if (currentVRange.index > 0) {
-      const str = this.yText.toString();
+        const str = this.yText.toString();
         const deleteLength =
           currentVRange.index -
           Math.max(0, str.slice(0, currentVRange.index).lastIndexOf('\n'));
 
-      this.slots.updateVRange.emit([
-        {
-          index: currentVRange.index - deleteLength,
-          length: 0,
-        },
-        'input',
-      ]);
+        this.slots.updateVRange.emit([
+          {
+            index: currentVRange.index - deleteLength,
+            length: 0,
+          },
+          'input',
+        ]);
 
-      this.deleteText({
-        index: currentVRange.index - deleteLength,
-        length: deleteLength,
-      });
+        this.deleteText({
+          index: currentVRange.index - deleteLength,
+          length: deleteLength,
+        });
       }
     } else if (
       // Chrome on Mac: Fn + Backspace or Ctrl + D
