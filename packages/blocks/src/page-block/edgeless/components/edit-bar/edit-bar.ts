@@ -38,7 +38,7 @@ export class EdgelessEditBar extends LitElement {
       border-radius: 8px;
     }
 
-    common-divider {
+    menu-divider {
       height: 24px;
     }
   `;
@@ -105,7 +105,7 @@ export class EdgelessEditBar extends LitElement {
     const brushButton = this._getBrushButton(brush);
     const divider =
       shapeButton || brushButton
-        ? html`<common-divider .vertical=${true}></common-divider>`
+        ? html`<menu-divider .vertical=${true}></menu-divider>`
         : nothing;
 
     return html`<div class="container">

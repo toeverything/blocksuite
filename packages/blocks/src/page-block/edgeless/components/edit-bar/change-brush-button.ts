@@ -39,7 +39,7 @@ export class EdgelessChangeBrushButton extends LitElement {
       stroke: currentColor;
     }
 
-    common-divider {
+    menu-divider {
       height: 24px;
     }
 
@@ -166,7 +166,7 @@ export class EdgelessChangeBrushButton extends LitElement {
           <div class="thick"></div>
         </div>
       </edgeless-tool-icon-button>
-      <common-divider .vertical=${true}></common-divider>
+      <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
         .tooltip=${'Color'}
         .active=${false}

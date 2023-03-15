@@ -2,8 +2,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 // FIXME: horizontal
-@customElement('common-divider')
-export class Divider extends LitElement {
+@customElement('menu-divider')
+export class MenuDivider extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
@@ -38,6 +38,6 @@ export class Divider extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'common-divider': Divider;
+    'menu-divider': MenuDivider;
   }
 }

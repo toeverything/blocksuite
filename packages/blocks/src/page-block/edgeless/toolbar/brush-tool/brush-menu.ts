@@ -103,7 +103,7 @@ export class EdgelessBrushMenu extends LitElement {
       height: 15px;
     }
 
-    common-divider {
+    menu-divider {
       height: 62px;
     }
 
@@ -150,7 +150,7 @@ export class EdgelessBrushMenu extends LitElement {
     return html`
       <div class="container">
         ${brushSizeButtonGroup}
-        <common-divider .vertical=${true}></common-divider>
+        <menu-divider .vertical=${true}></menu-divider>
         <edgeless-color-panel
           .value=${color}
           @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
