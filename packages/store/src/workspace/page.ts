@@ -236,8 +236,10 @@ export class Page extends Space<PageData> {
     return (this.tagSchema.get(id) ?? null) as TagSchema | null;
   }
 
-  setTagSchema(schema: Omit<TagSchema, 'id'>): string {
-    const id = this._idGenerator();
+  setTagSchema(
+    schema: Omit<TagSchema, 'id'> & { id?: TagSchema['id'] }
+  ): string {
+    const id = schema.id ?? this._idGenerator();
     this.transact(() => this.tagSchema.set(id, { ...schema, id }));
     return id;
   }
