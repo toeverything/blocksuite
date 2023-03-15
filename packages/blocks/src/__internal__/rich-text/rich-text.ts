@@ -65,10 +65,7 @@ export class RichText extends NonShadowLitElement {
       this._vEditor.setAttributesSchema(affineTextAttributes);
     }
 
-    const keyboardBindings = createKeyboardBindings(
-      this.model.page,
-      this.model
-    );
+    const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(
       this._vEditor,
       keyboardBindings
