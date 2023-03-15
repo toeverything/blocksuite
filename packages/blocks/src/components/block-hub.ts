@@ -620,8 +620,7 @@ export class BlockHub extends NonShadowLitElement {
   private _onClick = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
+      this._hideCardList();
     }
   };
 
@@ -630,18 +629,23 @@ export class BlockHub extends NonShadowLitElement {
       this._expanded = true;
     } else {
       this._expanded = false;
+      this._hideCardList();
+    }
+  }
+
+  private _onBlockHubButtonClick = (_: MouseEvent) => {
+    this._expanded = !this._expanded;
+    if (!this._expanded) {
+      this._hideCardList();
+    }
+  };
+
+  private _hideCardList() {
+    if (this._visibleCardType) {
       this._visibleCardType = null;
       this._isCardListVisible = false;
     }
   }
-
-  private _onBlockHubButtonClick = (e: MouseEvent) => {
-    this._expanded = !this._expanded;
-    if (!this._expanded) {
-      this._visibleCardType = null;
-      this._isCardListVisible = false;
-    }
-  };
 
   private _onDragStart = (event: DragEvent) => {
     this._showTooltip = false;
@@ -660,6 +664,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
+    // event.dataTransfer.setDragImage(blockHubElement, 0, 0);
     this.slots.selectedRectsUpdated.emit([]);
   };
 
@@ -671,6 +676,7 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
+    this._hideCardList();
     let x = e.clientX;
     let y = e.clientY;
     if (isFirefox) {
@@ -722,10 +728,6 @@ export class BlockHub extends NonShadowLitElement {
   private _onDragEnd = (e: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    if (this._indicator.cursorPosition && this._indicator.targetRect) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
-    }
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
   };
