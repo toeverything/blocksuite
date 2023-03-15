@@ -983,8 +983,21 @@ export class VEditor<
       // Chrome on Mac: Cmd + Backspace
       inputType === 'deleteSoftLineBackward'
     ) {
+      if (currentVRange.length > 0) {
+        this.slots.updateVRange.emit([
+          {
+            index: currentVRange.index,
+            length: 0,
+          },
+          'input',
+        ]);
+
+        this.deleteText(currentVRange);
+      } else if (currentVRange.index > 0) {
       const str = this.yText.toString();
-      const deleteLength = str.length - Math.max(0, str.lastIndexOf('\n'));
+        const deleteLength =
+          currentVRange.index -
+          Math.max(0, str.slice(0, currentVRange.index).lastIndexOf('\n'));
 
       this.slots.updateVRange.emit([
         {
@@ -998,6 +1011,7 @@ export class VEditor<
         index: currentVRange.index - deleteLength,
         length: deleteLength,
       });
+      }
     } else if (
       // Chrome on Mac: Fn + Backspace or Ctrl + D
       // Safari on Mac: Ctrl + K or Ctrl + D
