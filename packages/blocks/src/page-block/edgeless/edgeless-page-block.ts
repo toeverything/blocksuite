@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
-import './view-control-bar.js';
 import './components/edgeless-selected-rect.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
@@ -420,14 +419,11 @@ export class EdgelessPageBlockComponent
         ? html`
             <edgeless-toolbar
               .mouseMode=${this.mouseMode}
+              .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>
           `
         : nothing}
-      <edgeless-view-control-bar
-        .edgeless=${this}
-        .zoom=${zoom}
-      ></edgeless-view-control-bar>
     `;
   }
 }
