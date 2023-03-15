@@ -4,7 +4,9 @@ export * from './consts/block-hub.js';
 export const BLOCK_ID_ATTR = 'data-block-id';
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';
 export const PREVENT_DEFAULT = false;
+export type PREVENT_DEFAULT = typeof PREVENT_DEFAULT;
 export const ALLOW_DEFAULT = true;
+export type ALLOW_DEFAULT = typeof ALLOW_DEFAULT;
 
 export const HOTKEYS = {
   UNDO: 'command+z,ctrl+z',
