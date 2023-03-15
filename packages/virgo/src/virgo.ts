@@ -978,6 +978,27 @@ export class VEditor<
         length: deleteLength,
       });
     } else if (
+      // Safari on Mac: Cmd + Backspace
+      inputType === 'deleteHardLineBackward' ||
+      // Chrome on Mac: Cmd + Backspace
+      inputType === 'deleteSoftLineBackward'
+    ) {
+      const str = this.yText.toString();
+      const deleteLength = str.length - Math.max(0, str.lastIndexOf('\n'));
+
+      this.slots.updateVRange.emit([
+        {
+          index: currentVRange.index - deleteLength,
+          length: 0,
+        },
+        'input',
+      ]);
+
+      this.deleteText({
+        index: currentVRange.index - deleteLength,
+        length: deleteLength,
+      });
+    } else if (
       // Chrome on Mac: Fn + Backspace or Ctrl + D
       // Safari on Mac: Ctrl + K or Ctrl + D
       inputType === 'deleteContentForward'
