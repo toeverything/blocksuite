@@ -900,6 +900,8 @@ export class VEditor<
     const { inputType, data } = event;
     const currentVRange = this._vRange;
 
+    // You can find explanation of inputType here:
+    // [Input Events Level 2](https://w3c.github.io/input-events/#interface-InputEvent-Attributes)
     if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
       this.slots.updateVRange.emit([
         {
@@ -921,6 +923,7 @@ export class VEditor<
 
       this.insertLineBreak(currentVRange);
     } else if (
+      // Chrome and Safari on Mac: Backspace or Ctrl + H
       (inputType === 'deleteContentBackward' || inputType === 'deleteByCut') &&
       currentVRange.index >= 0
     ) {
@@ -951,9 +954,13 @@ export class VEditor<
           length: deletedCharacter.length,
         });
       }
-    } else if (inputType === 'deleteWordBackward') {
+    } else if (
+      // On Mac: Option + Backspace
+      // On iOS: Hold the backspace for a while and the whole words will start to disappear
+      inputType === 'deleteWordBackward'
+    ) {
       const matchs = /\S+\s*$/.exec(
-        this.yText.toString().substring(0, currentVRange.index)
+        this.yText.toString().slice(0, currentVRange.index)
       );
       if (!matchs) return;
       const deleteLength = matchs[0].length;
@@ -970,7 +977,11 @@ export class VEditor<
         index: currentVRange.index - deleteLength,
         length: deleteLength,
       });
-    } else if (inputType === 'deleteContentForward') {
+    } else if (
+      // Chrome on Mac: Fn + Backspace or Ctrl + D
+      // Safari on Mac: Ctrl + K or Ctrl + D
+      inputType === 'deleteContentForward'
+    ) {
       if (currentVRange.index < this.yText.length) {
         this.slots.updateVRange.emit([
           {
