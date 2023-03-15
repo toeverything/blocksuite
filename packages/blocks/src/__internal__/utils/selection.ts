@@ -15,6 +15,7 @@ import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
+  getDefaultPage,
   getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
@@ -96,9 +97,9 @@ async function setNewTop(y: number, editableContainer: Element) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(index = Infinity, len = 0) {
+export function focusTitle(page: Page, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const pageComponent = document.querySelector('affine-default-page');
+  const pageComponent = getDefaultPage(page);
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }

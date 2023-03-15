@@ -1,15 +1,13 @@
-import {
-  type DefaultSelectionSlots,
-  getCurrentBlockRange,
-} from '@blocksuite/blocks';
+import type { Page, UserRange } from '@blocksuite/store';
+
+import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
+import type { IPoint } from '../../../__internal__/utils/gesture.js';
 import {
   type BlockComponentElement,
   contains,
   getRectByBlockElement,
-  type IPoint,
-} from '@blocksuite/blocks/std';
-import type { Page, UserRange } from '@blocksuite/store';
-
+} from '../../../__internal__/utils/query.js';
+import type { DefaultSelectionSlots } from '../default-page-block.js';
 import type { PageSelectionState } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
@@ -90,15 +88,16 @@ export function filterBlocksExcludeSubtrees(
 }
 
 export function updateLocalSelectionRange(page: Page) {
-  const blockRange = getCurrentBlockRange(page);
-  if (blockRange && blockRange.type === 'Native') {
-    const userRange: UserRange = {
-      startOffset: blockRange.startOffset,
-      endOffset: blockRange.endOffset,
-      blockIds: blockRange.models.map(m => m.id),
-    };
-    page.awarenessStore.setLocalRange(page, userRange);
+  const blockRange = getExtendBlockRange(page);
+  if (!blockRange || blockRange.type === 'Block') {
+    return;
   }
+  const userRange: UserRange = {
+    startOffset: blockRange.startOffset,
+    endOffset: blockRange.endOffset,
+    blockIds: blockRange.models.map(m => m.id),
+  };
+  page.awarenessStore.setLocalRange(page, userRange);
 }
 
 /*
