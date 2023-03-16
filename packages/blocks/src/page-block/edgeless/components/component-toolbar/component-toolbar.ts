@@ -110,9 +110,19 @@ export class EdgelessComponentToolbar extends LitElement {
   }
 
   render() {
-    const { shape, brush } = this._category();
-    const shapeButton = this._getShapeButton(shape);
-    const brushButton = this._getBrushButton(brush);
+    const { shape, brush, frame } = this._category();
+    // when selected types more than two, only show `more` button
+    const selectedAtLeastTwoTypes = shape.length
+      ? brush.length || frame.length
+      : brush.length && frame.length;
+
+    const shapeButton = selectedAtLeastTwoTypes
+      ? null
+      : this._getShapeButton(shape);
+    const brushButton = selectedAtLeastTwoTypes
+      ? null
+      : this._getBrushButton(brush);
+
     const divider =
       shapeButton || brushButton
         ? html`<menu-divider .vertical=${true}></menu-divider>`
