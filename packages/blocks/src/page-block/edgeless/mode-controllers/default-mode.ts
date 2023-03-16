@@ -3,9 +3,16 @@ import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import type {
+  BlockComponentElement,
   DefaultMouseMode,
   SelectionEvent,
   TopLevelBlockModel,
+} from '../../../__internal__/index.js';
+import {
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  getSelectedStateRectByBlockElement,
+  Point,
 } from '../../../__internal__/index.js';
 import {
   handleNativeRangeClick,
@@ -299,6 +306,29 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseMove(e: SelectionEvent) {
+    const point = new Point(e.raw.clientX, e.raw.clientY);
+    point.x += 26 - 1;
+    let hoverEditingState = null;
+    let element = getClosestBlockElementByPoint(
+      point
+      // this._container.innerRect
+    );
+    if (element) {
+      if (element.tagName === 'AFFINE-EDGELESS-PAGE') {
+        element = null;
+      }
+      if (element) {
+        hoverEditingState = {
+          element: element as BlockComponentElement,
+          model: getModelByBlockElement(element),
+          rect: getSelectedStateRectByBlockElement(element),
+        };
+      }
+    }
+    this._edgeless.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
     noop();
   }
 

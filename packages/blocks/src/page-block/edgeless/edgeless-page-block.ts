@@ -24,6 +24,7 @@ import {
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type {
+  DragHandle,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
@@ -45,7 +46,12 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { bindEdgelessHotkey, getCursorMode, isTopLevelBlock } from './utils.js';
+import {
+  bindEdgelessHotkey,
+  createDragHandle,
+  getCursorMode,
+  isTopLevelBlock,
+} from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -95,6 +101,16 @@ export class EdgelessPageBlockComponent
   `;
 
   flavour = 'edgeless' as const;
+
+  /**
+   * Shared components
+   */
+  components = {
+    dragHandle: <DragHandle | null>null,
+  };
+
+  @property()
+  mouseRoot!: HTMLElement;
 
   @property()
   showGrid = false;
@@ -261,6 +277,65 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
+        // if (
+        //   draggingBlockIds &&
+        //   draggingBlockIds.length === 1 &&
+        //   Utils.doesInsideBlockByFlavour(
+        //     this.page,
+        //     draggingBlockIds[0],
+        //     'affine:database'
+        //   )
+        // ) {
+        //   return getAllowSelectedBlocks(
+        //     this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
+        //   );
+        // }
+        //
+        // if (!draggingBlockIds || draggingBlockIds.length === 1) {
+        //   return getAllowSelectedBlocks(this.model);
+        // } else {
+        //   return getAllowSelectedBlocks(this.model).filter(block => {
+        //     return !draggingBlockIds?.includes(block.id);
+        //   });
+        // }
+
+        return [];
+      };
+    };
+    console.log(
+      this.page.awarenessStore.getFlag('enable_drag_handle'),
+      !this.components.dragHandle
+    );
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.slots.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
   private _initSlotEffects() {
     // TODO: listen to new children
     // this.model.children.forEach(frame => {
@@ -340,6 +415,7 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     this._initSlotEffects();
     this.clipboard.initEvent(this.page);
+    this._initDragHandle();
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {

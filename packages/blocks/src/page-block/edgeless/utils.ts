@@ -1,3 +1,19 @@
+import {
+  DragHandle,
+  type EdgelessPageBlockComponent,
+} from '@blocksuite/blocks';
+import type {
+  BlockComponentElement,
+  EditingState,
+  MouseMode,
+  Point,
+  TopLevelBlockModel,
+} from '@blocksuite/blocks/std';
+import {
+  getClosestBlockElementByPoint,
+  hotkey,
+  HOTKEY_SCOPE,
+} from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
@@ -8,11 +24,6 @@ import {
 } from '@blocksuite/phasor';
 import type { KeyHandler } from 'hotkeys-js';
 
-import type {
-  MouseMode,
-  TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import { hotkey, HOTKEY_SCOPE } from '../../__internal__/index.js';
 import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
@@ -150,5 +161,61 @@ export function bindEdgelessHotkey(
   hotkey.addListener(key, listener, {
     scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
     ...options,
+  });
+}
+
+export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
+  return new DragHandle({
+    // drag handle should be the same level with editor-container
+    container: pageBlock.mouseRoot as HTMLElement,
+    onDropCallback(p, blocks, { rect, model }): void {
+      // const page = defaultPageBlock.page;
+      // if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
+      //   return;
+      // }
+      // page.captureSync();
+      // const distanceToTop = Math.abs(rect.top - p.y);
+      // const distanceToBottom = Math.abs(rect.bottom - p.y);
+      // page.moveBlocks(
+      //   blocks.map(b => b.model),
+      //   model,
+      //   distanceToTop < distanceToBottom
+      // );
+      // defaultPageBlock.selection.clear();
+      // defaultPageBlock.selection.state.type = 'block';
+      // defaultPageBlock.updateComplete.then(() => {
+      //   // update selection rects
+      //   // block may change its flavour after moved.
+      //   defaultPageBlock.selection.setSelectedBlocks(
+      //     blocks
+      //       .map(b => getBlockById(b.model.id))
+      //       .filter((b): b is BlockComponentElement => !!b)
+      //   );
+      // });
+    },
+    setSelectedBlocks(
+      selectedBlocks: EditingState | BlockComponentElement[] | null
+    ): void {
+      // if (Array.isArray(selectedBlocks)) {
+      //   defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
+      // } else if (selectedBlocks) {
+      //   const { element, rect } = selectedBlocks;
+      //   defaultPageBlock.selection.selectOneBlock(element, rect);
+      // }
+    },
+    getSelectedBlocks() {
+      return [];
+      // return defaultPageBlock.selection.state.selectedBlocks;
+    },
+    getFocusedBlock() {
+      return null;
+      // return defaultPageBlock.selection.state.focusedBlock;
+    },
+    // clearSelection() {
+    //   defaultPageBlock.selection.clear();
+    // },
+    getClosestBlockElement(point: Point) {
+      return getClosestBlockElementByPoint(point);
+    },
   });
 }

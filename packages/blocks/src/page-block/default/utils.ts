@@ -1,6 +1,7 @@
 import {
   type BlockComponentElement,
   doesInSamePath,
+  type EditingState,
   getBlockById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
@@ -21,12 +22,6 @@ import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-
-export interface EditingState {
-  element: BlockComponentElement;
-  model: BaseBlockModel;
-  rect: DOMRect;
-}
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
