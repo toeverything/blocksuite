@@ -100,9 +100,15 @@ export class SurfaceManager {
     });
   }
 
-  // FIXME: props type check
-  updateElementProps(id: string, props: ShapeProps | BrushProps) {
+  updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
     this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      const ElementCtor = ElementCtors[element.type];
+      assertExists(ElementCtor);
+
+      const props = ElementCtor.getProps(element, rawProps);
+
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
       for (const [key, value] of Object.entries(props)) {

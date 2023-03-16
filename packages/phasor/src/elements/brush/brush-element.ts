@@ -2,6 +2,7 @@ import { getStrokePoints } from 'perfect-freehand';
 
 import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { simplePick } from '../../utils/std.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
@@ -47,6 +48,21 @@ export class BrushElement extends BaseElement {
     return isPointIn(this, x, y);
   }
 
+  render(ctx: CanvasRenderingContext2D) {
+    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
+
+    // render stroke points
+    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+    const commands = Utils.getSvgPathFromStrokePoints(stroke);
+    const path = new Path2D(commands);
+
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(path);
+  }
+
   serialize(): SerializedBrushProps {
     return {
       id: this.id,
@@ -67,7 +83,7 @@ export class BrushElement extends BaseElement {
     setXYWH(element, { x, y, w, h });
     element.points = JSON.parse(data.points as string);
 
-    const { id, type, xywh, ...props } = data as SerializedBrushProps;
+    const { xywh, ...props } = BrushElement.getProps(element, data);
     BrushElement.updateProps(element, props);
 
     return element;
@@ -101,18 +117,18 @@ export class BrushElement extends BaseElement {
     };
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
+  static getProps(
+    element: BaseElement,
+    rawProps: BrushProps & { xywh?: string }
+  ): BrushProps & { xywh?: string } {
+    const props = simplePick(rawProps, ['index', 'color', 'lineWidth', 'xywh']);
 
-    // render stroke points
-    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-    const commands = Utils.getSvgPathFromStrokePoints(stroke);
-    const path = new Path2D(commands);
+    if (props.lineWidth) {
+      const { x, y, w, h } = element;
+      const d = props.lineWidth - (element as BrushElement).lineWidth;
+      props.xywh = serializeXYWH(x, y, w + d, h + d);
+    }
 
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = this.lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(path);
+    return props;
   }
 }
