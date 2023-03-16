@@ -9,6 +9,7 @@ import {
   hotkey,
   HOTKEY_SCOPE,
   type IPoint,
+  type Point,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
@@ -419,6 +420,45 @@ export class EdgelessPageBlockComponent
         this.slots.selectionUpdated.emit(selectionState);
       }
     });
+  }
+
+  setBlockSelectionState(state: EdgelessSelectionState) {
+    this._selection.currentController.setBlockSelectionState(state);
+  }
+
+  /**
+   * Adds a new frame with the given point and blocks.
+   * @param point Point
+   * @param blocks Array<Partial<BaseBlockModel>>
+   * @returns string[]
+   */
+  addFrame(point: Point, blocks: Array<Partial<BaseBlockModel>>) {
+    if (!this.page.root) return [];
+    this.page.captureSync();
+    const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    const frameId = this.page.addBlock(
+      'affine:frame',
+      {
+        xywh: serializeXYWH(
+          x - DEFAULT_FRAME_OFFSET_X,
+          y - DEFAULT_FRAME_OFFSET_Y,
+          DEFAULT_FRAME_WIDTH,
+          DEFAULT_FRAME_HEIGHT
+        ),
+      },
+      this.page.root.id
+    );
+    const ids = this.page.addBlocksByFlavour(
+      blocks.map(({ flavour, ...blockProps }) => {
+        assertExists(flavour);
+        return {
+          flavour,
+          blockProps,
+        };
+      }),
+      frameId
+    );
+    return ids;
   }
 
   update(changedProperties: Map<string, unknown>) {

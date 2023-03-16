@@ -6,8 +6,11 @@ import {
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
+import {
+  Point
+} from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -28,7 +31,7 @@ export const createBlockHub: (
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const blocks: Array<Partial<BaseBlockModel>> = [];
+      const blocks = [];
       const props = JSON.parse(data);
       if (props.flavour === 'affine:database') {
         if (!page.awarenessStore.getFlag('enable_database')) {
@@ -68,24 +71,9 @@ export const createBlockHub: (
 
       // Creates new frame block.
       if (!end) {
-        page.captureSync();
-        const { clientX, clientY } = e;
-        const [x, y] = edgelessPageBlock.surface.toModelCoord(clientX, clientY);
-        const xywh = `[${x},${y},720,480]`;
-        const frameId = page.addBlock(
-          'affine:frame',
-          { xywh },
-          page.root.id
-        );
-        const ids = page.addBlocksByFlavour(
-          blocks.map(({ flavour, ...blockProps }) => {
-            assertExists(flavour);
-            return {
-              flavour,
-              blockProps,
-            };
-          }),
-          frameId
+        const ids = edgelessPageBlock.addFrame(
+          new Point(e.clientX, e.clientY),
+          blocks
         );
         if (ids.length) {
           asyncFocusRichText(page, ids[0]);
