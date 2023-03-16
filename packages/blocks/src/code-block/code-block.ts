@@ -211,13 +211,23 @@ export class CodeBlockComponent extends NonShadowLitElement {
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
 
+    // At AFFiNE, avoid the option element to be covered by the header
+    // we need to reserve the space for the header
+    const HEADER_HEIGHT = 64;
+    // The height of the option element
+    // You need to change this value manually if you change the style of the option element
+    const OPTION_ELEMENT_HEIGHT = 96;
+
     let timer: number;
     const updatePosition = () => {
       // Update option position when scrolling
       const rect = this.getBoundingClientRect();
       this._optionPosition = {
         x: rect.right + 12,
-        y: Math.max(rect.top, 12),
+        y: Math.min(
+          Math.max(rect.top, HEADER_HEIGHT + 12),
+          rect.bottom - OPTION_ELEMENT_HEIGHT
+        ),
       };
     };
     this.hoverState.on(hover => {
