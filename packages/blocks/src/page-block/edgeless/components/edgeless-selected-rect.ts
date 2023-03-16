@@ -145,9 +145,18 @@ export class EdgelessSelectedRect extends LitElement {
       ],
     });
     _disposables.add(() => this._editBarPopper?.destroy());
+
+    // This hook is not waiting all children updated.
+    // But children effect popper position. So we use ResizeObserver watching sizing change.
+    const resizeObserver = new ResizeObserver(() =>
+      this._editBarPopper?.update()
+    );
+    resizeObserver.observe(this._editBar);
+    _disposables.add(() => resizeObserver.disconnect());
   }
 
   updated(changedProperties: Map<string, unknown>) {
+    // when viewport updates, popper should update too.
     this._editBarPopper?.update();
     super.updated(changedProperties);
   }
