@@ -66,15 +66,11 @@ export class DragIndicator extends LitElement {
     const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
-    return html`
-      <div
-        class="affine-drag-indicator"
-        style=${styleMap({
-          width: `${rect.width + 10}px`,
-          transform: `translate(${rect.left}px, ${offsetY}px)`,
-        })}
-      ></div>
-    `;
+    const style = styleMap({
+      width: `${rect.width + 10}px`,
+      transform: `translate(${rect.left}px, ${offsetY}px)`,
+    });
+    return html` <div class="affine-drag-indicator" style=${style}></div> `;
   }
 }
 
@@ -387,7 +383,7 @@ export class DragHandle extends LitElement {
       const { rect } = this._handleAnchorState;
       const element = this._getClosestBlockElement(new Point(rect.x, rect.y));
       if (element) {
-        const rect = element.getBoundingClientRect();
+        const rect = getRectByBlockElement(element);
         this._handleAnchorState = {
           rect,
           element: element as BlockComponentElement,
