@@ -780,8 +780,8 @@ export class Page extends Space<PageData> {
     });
 
     if (matchFlavours(model, ['affine:page'] as const)) {
-      model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+      model.tags = yBlock.get('ext:tags') as Y.Map<Y.Map<unknown>>;
+      model.tagSchema = yBlock.get('ext:tagSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
       model.title = new Text(titleText);
@@ -944,7 +944,7 @@ export class Page extends Space<PageData> {
         }
       }
     } else {
-      if (event.path.includes('meta:tags')) {
+      if (event.path.includes('ext:tags')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);

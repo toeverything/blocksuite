@@ -105,8 +105,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -121,8 +121,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -144,8 +144,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'sys:children': ['1', '2', '3'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -301,8 +301,8 @@ describe.concurrent('deleteBlock', () => {
     });
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -324,8 +324,8 @@ describe.concurrent('deleteBlock', () => {
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -345,8 +345,8 @@ describe.concurrent('deleteBlock', () => {
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:tags': {},
+        'ext:tagSchema': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',

@@ -19,6 +19,7 @@
         "list",
         "link",
         "code",
+        "database",
         "divider",
         "embed",
         "selection",
