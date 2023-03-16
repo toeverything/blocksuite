@@ -1,7 +1,7 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
-import type { z } from 'zod';
+import type { z, ZodTypeDef } from 'zod';
 
 import { VirgoElement, VirgoLine } from './components/index.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
@@ -196,14 +196,21 @@ export class VEditor<
   private _attributesRenderer: AttributesRenderer<TextAttributes> =
     getDefaultAttributeRenderer<TextAttributes>();
 
-  private _attributesSchema: z.ZodSchema<TextAttributes> =
-    baseTextAttributes as z.ZodSchema<TextAttributes>;
+  private _attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
+    baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
   private _eventService: VirgoEventService<TextAttributes> =
     new VirgoEventService<TextAttributes>(this);
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
-    return this._attributesSchema.optional().parse(textAttributes);
+    const attributesResult = this._attributesSchema
+      .optional()
+      .safeParse(textAttributes);
+    if (!attributesResult.success) {
+      console.error(attributesResult.error);
+      return undefined;
+    }
+    return attributesResult.data;
   };
 
   private _renderDeltas = async () => {
@@ -282,7 +289,9 @@ export class VEditor<
     this.slots.vRangeUpdated.on(this._onVRangeUpdated);
   }
 
-  setAttributesSchema = (schema: z.ZodSchema<TextAttributes>) => {
+  setAttributesSchema = (
+    schema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>
+  ) => {
     this._attributesSchema = schema;
   };
 
@@ -593,14 +602,14 @@ export class VEditor<
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
-    let attr = attributes;
     if (this._marks) {
-      attr = { ...this._marks, ...attributes };
+      attributes = { ...this._marks, ...attributes };
     }
+    const normalizedAttributes = this._parseSchema();
 
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text, attr);
+      this.yText.insert(vRange.index, text, normalizedAttributes);
     });
   }
 
