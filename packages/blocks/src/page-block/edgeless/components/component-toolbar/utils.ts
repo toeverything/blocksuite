@@ -1,5 +1,7 @@
 import { createPopper } from '@popperjs/core';
 
+import { listenClickAway } from '../utils.js';
+
 export function countBy<T>(items: T[], key: (item: T) => string | number) {
   const count: Record<string, number> = {};
   items.forEach(item => {
@@ -92,6 +94,8 @@ export function createButtonPopper(
     }
   };
 
+  const clickAway = listenClickAway(reference, () => hide());
+
   return {
     popper,
     show,
@@ -99,6 +103,7 @@ export function createButtonPopper(
     toggle,
     dispose: () => {
       popper.destroy();
+      clickAway.dispose();
     },
   };
 }

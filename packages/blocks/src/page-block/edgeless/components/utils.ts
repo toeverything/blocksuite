@@ -1,6 +1,7 @@
 import type { Bound } from '@blocksuite/phasor';
 import { deserializeXYWH, type SurfaceViewport } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
+import type { Disposable } from '@blocksuite/store';
 
 import type { Selectable } from '../selection-manager.js';
 import { getSelectionBoxBound, getXYWH, isTopLevelBlock } from '../utils.js';
@@ -69,4 +70,24 @@ export function getSelectableBounds(
     bounds.set(s.id, bound);
   }
   return bounds;
+}
+
+export function listenClickAway(
+  element: HTMLElement,
+  onClickAway: () => void
+): Disposable {
+  const callback = (event: MouseEvent) => {
+    const inside = event.composedPath().includes(element);
+    if (!inside) {
+      onClickAway();
+    }
+  };
+
+  document.addEventListener('click', callback);
+
+  return {
+    dispose: () => {
+      document.removeEventListener('click', callback);
+    },
+  };
 }
