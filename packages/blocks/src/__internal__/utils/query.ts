@@ -189,6 +189,15 @@ export function getDefaultPage(page: Page) {
   return pageComponent;
 }
 
+/**
+ * If it's not in the edgeless mode, it will return `null` directly.
+ */
+export function getEdgelessPage(page: Page) {
+  const editor = getEditorContainer(page);
+  const pageComponent = editor.querySelector('affine-edgeless-page');
+  return pageComponent;
+}
+
 export function getEditorContainer(page: Page) {
   assertExists(
     page.root,

@@ -485,7 +485,7 @@ export class BlockHub extends NonShadowLitElement {
 
   private readonly _onDropCallback: (
     e: DragEvent,
-    lastModelState: EditingState,
+    lastModelState: EditingState | null,
     point: IPoint
   ) => Promise<void>;
 
@@ -506,7 +506,7 @@ export class BlockHub extends NonShadowLitElement {
     enableDatabase: boolean;
     onDropCallback: (
       e: DragEvent,
-      lastModelState: EditingState,
+      lastModelState: EditingState | null,
       point: IPoint
     ) => Promise<void>;
   }) {
@@ -738,7 +738,6 @@ export class BlockHub extends NonShadowLitElement {
   private _onDrop = (e: DragEvent) => {
     assertExists(e.dataTransfer);
     if (!e.dataTransfer.getData('affine/block-hub')) return;
-    if (!this._lastModelState) return;
 
     this._onDropCallback(
       e,

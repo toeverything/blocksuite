@@ -2,7 +2,8 @@ import {
   asyncFocusRichText,
   BlockHub,
   getAllowSelectedBlocks,
-  getServiceOrRegister,
+  getDefaultPage,
+  getEdgelessPage,
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
@@ -38,36 +39,48 @@ export const createBlockHub: (
         props = [props];
       }
 
-      const { model, rect } = end;
-      page.captureSync();
-      const distanceToTop = Math.abs(rect.top - point.y);
-      const distanceToBottom = Math.abs(rect.bottom - point.y);
-      const ids = page.addSiblingBlocks(
-        model,
-        props,
-        distanceToTop < distanceToBottom ? 'before' : 'after'
-      );
-
-      if (props[0].flavour === 'affine:database') {
-        const service = await getServiceOrRegister(props[0].flavour);
-        service.initDatabaseBlock(page, model, ids[0]);
+      if (end) {
+        const { model, rect } = end;
+        page.captureSync();
+        const distanceToTop = Math.abs(rect.top - point.y);
+        const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const ids = page.addSiblingBlocks(
+          model,
+          props,
+          distanceToTop < distanceToBottom ? 'before' : 'after'
+        );
+        if (ids.length === 1) {
+          asyncFocusRichText(page, ids[0]);
+        }
+      } else if (editor.mode === 'edgeless' && page.root) {
+        page.captureSync();
+        const xywh = `[0,0,720,480]`;
+        const frameId = page.addBlock(
+          'affine:frame',
+          { xywh },
+          page.root.id
+        );
+        const id = page.addBlock(props[0].flavour, {}, frameId);
+        asyncFocusRichText(page, id);
       }
 
-      if (ids.length === 1) {
-        asyncFocusRichText(page, ids[0]);
+      let zoom = 1;
+      if (editor.mode === 'edgeless') {
+        const edgelessPageBlock = getEdgelessPage(page);
+        zoom = edgelessPageBlock?.surface.viewport.zoom ?? 1;
       }
-      tryUpdateFrameSize(page, 1);
+      tryUpdateFrameSize(page, zoom);
     },
   });
 
   if (editor.mode === 'page') {
-    const defaultPageBlock = editor.querySelector('affine-default-page');
+    const defaultPageBlock = getDefaultPage(page);
     assertExists(defaultPageBlock);
     blockHub.slots = defaultPageBlock.slots;
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(defaultPageBlock.model);
   } else {
-    const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
+    const edgelessPageBlock = getEdgelessPage(page);
     assertExists(edgelessPageBlock);
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(edgelessPageBlock.model);
