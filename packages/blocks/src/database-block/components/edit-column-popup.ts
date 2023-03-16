@@ -35,7 +35,9 @@ export class EditColumnPopup extends LitElement {
               ...this.targetTagSchema,
               name: newName,
             });
-            this.targetModel.propsUpdated.emit();
+            this.targetModel.page.updateBlock(this.targetModel, {
+              name: newName,
+            });
             requestAnimationFrame(() => {
               this.remove();
             });
