@@ -24,6 +24,8 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
+  await page.waitForTimeout(50);
+
   await type(page, 'abcdefg');
 
   expect(await editorA.innerText()).toBe('abcdefg');
@@ -167,6 +169,8 @@ test('readonly mode', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
+  await page.waitForTimeout(50);
+
   await type(page, 'abcdefg');
 
   expect(await editorA.innerText()).toBe('abcdefg');
@@ -209,6 +213,8 @@ test('basic styles', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await page.waitForTimeout(50);
 
   await type(page, 'abcdefg');
 
@@ -463,6 +469,8 @@ test('overlapping styles', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
+  await page.waitForTimeout(50);
+
   await type(page, 'abcdefghijk');
 
   expect(await editorA.innerText()).toBe('abcdefghijk');
@@ -633,6 +641,8 @@ test('input continuous spaces', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
+  await page.waitForTimeout(50);
+
   await type(page, 'abc   def');
 
   expect(await editorA.innerText()).toBe('abc   def');
@@ -660,6 +670,8 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await page.waitForTimeout(50);
 
   await type(page, 'abc');
   await press(page, 'Enter');
@@ -709,6 +721,8 @@ test('getLine', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await page.waitForTimeout(50);
 
   await type(page, 'abc');
   await press(page, 'Enter');

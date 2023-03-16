@@ -14,6 +14,7 @@ import {
   type BlockHost,
   getViewportElement,
   NonShadowLitElement,
+  queryCurrentMode,
 } from '../__internal__/index.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -87,6 +88,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container rich-text {
+      /* to make sure the resize observer can be triggered as expected */
+      display: block;
       position: relative;
     }
 
@@ -170,12 +173,27 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
+  private _documentMutationObserver: MutationObserver = new MutationObserver(
+    async () => {
+      if (!this._highlighter) return;
+      const richText = this.querySelector('rich-text');
+      const vEditor = richText?.vEditor;
+      if (!vEditor) return;
+
+      // update code-line theme
+      setTimeout(() => {
+        vEditor.requestUpdate();
+      });
+    }
+  );
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(langs: Lang[]) {
+    const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
-      theme: 'github-light',
+      theme: mode === 'light' ? 'github-light' : 'github-dark',
+      themes: ['github-light', 'github-dark'],
       langs,
       paths: {
         // TODO: use local path
@@ -211,13 +229,23 @@ export class CodeBlockComponent extends NonShadowLitElement {
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
 
+    // At AFFiNE, avoid the option element to be covered by the header
+    // we need to reserve the space for the header
+    const HEADER_HEIGHT = 64;
+    // The height of the option element
+    // You need to change this value manually if you change the style of the option element
+    const OPTION_ELEMENT_HEIGHT = 96;
+
     let timer: number;
     const updatePosition = () => {
       // Update option position when scrolling
       const rect = this.getBoundingClientRect();
       this._optionPosition = {
         x: rect.right + 12,
-        y: Math.max(rect.top, 12),
+        y: Math.min(
+          Math.max(rect.top, HEADER_HEIGHT + 12),
+          rect.bottom - OPTION_ELEMENT_HEIGHT
+        ),
       };
     };
     this.hoverState.on(hover => {
@@ -252,6 +280,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this._disposables.dispose();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
+    this._documentMutationObserver.disconnect();
   }
 
   private _onClickWrapBtn() {
@@ -269,6 +298,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
     } else {
       this._highlighter = null;
     }
+
+    this._documentMutationObserver.observe(document.documentElement, {
+      attributes: true,
+    });
   }
 
   updated() {

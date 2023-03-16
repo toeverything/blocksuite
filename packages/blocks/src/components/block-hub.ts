@@ -26,13 +26,16 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NonShadowLitElement } from '../__internal__/index.js';
+import type { BlockComponentElement, IPoint } from '../__internal__/index.js';
+import {
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  getRectByBlockElement,
+  NonShadowLitElement,
+  Point,
+} from '../__internal__/index.js';
 import type { DefaultSelectionSlots } from '../index.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import {
-  getBlockEditingStateByCursor,
-  getBlockEditingStateByPosition,
-} from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
@@ -482,14 +485,15 @@ export class BlockHub extends NonShadowLitElement {
 
   private readonly _onDropCallback: (
     e: DragEvent,
-    lastModelState: EditingState
+    lastModelState: EditingState,
+    point: IPoint
   ) => Promise<void>;
+
   private _currentClientX = 0;
   private _currentClientY = 0;
   private _isCardListVisible = false;
   private _indicator!: DragIndicator;
   private _lastModelState: EditingState | null = null;
-  private _cursor = 0;
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
@@ -502,7 +506,8 @@ export class BlockHub extends NonShadowLitElement {
     enableDatabase: boolean;
     onDropCallback: (
       e: DragEvent,
-      lastModelState: EditingState
+      lastModelState: EditingState,
+      point: IPoint
     ) => Promise<void>;
   }) {
     super();
@@ -615,8 +620,7 @@ export class BlockHub extends NonShadowLitElement {
   private _onClick = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
+      this._hideCardList();
     }
   };
 
@@ -625,18 +629,23 @@ export class BlockHub extends NonShadowLitElement {
       this._expanded = true;
     } else {
       this._expanded = false;
+      this._hideCardList();
+    }
+  }
+
+  private _onBlockHubButtonClick = (_: MouseEvent) => {
+    this._expanded = !this._expanded;
+    if (!this._expanded) {
+      this._hideCardList();
+    }
+  };
+
+  private _hideCardList() {
+    if (this._visibleCardType) {
       this._visibleCardType = null;
       this._isCardListVisible = false;
     }
   }
-
-  private _onBlockHubButtonClick = (e: MouseEvent) => {
-    this._expanded = !this._expanded;
-    if (!this._expanded) {
-      this._visibleCardType = null;
-      this._isCardListVisible = false;
-    }
-  };
 
   private _onDragStart = (event: DragEvent) => {
     this._showTooltip = false;
@@ -663,27 +672,10 @@ export class BlockHub extends NonShadowLitElement {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
     }
-
-    this._refreshCursor(e);
-  };
-
-  private _refreshCursor = (e: MouseEvent) => {
-    let x = e.clientX;
-    let y = e.clientY;
-    if (isFirefox) {
-      x = this._currentClientX;
-      y = this._currentClientY;
-    }
-    const blocks = this.getAllowedBlocks();
-    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
-      skipX: true,
-    });
-    modelState
-      ? (this._cursor = modelState.index)
-      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
+    this._hideCardList();
     let x = e.clientX;
     let y = e.clientY;
     if (isFirefox) {
@@ -693,27 +685,27 @@ export class BlockHub extends NonShadowLitElement {
       y = this._currentClientY;
     }
 
-    const modelState = this._cursor
-      ? getBlockEditingStateByCursor(
-          this.getAllowedBlocks(),
-          x,
-          y,
-          this._cursor,
-          {
-            size: 5,
-            skipX: false,
-            dragging: true,
-          }
-        )
-      : getBlockEditingStateByPosition(this.getAllowedBlocks(), x, y, {
-          skipX: true,
-        });
-
-    if (modelState) {
-      this._cursor = modelState.index;
-      this._lastModelState = modelState;
-      this._indicator.targetRect = modelState.position;
+    if (
+      !this._indicator ||
+      (this._indicator.cursorPosition &&
+        this._indicator.cursorPosition.x === x &&
+        this._indicator.cursorPosition.y === y)
+    ) {
+      return;
     }
+
+    const element = getClosestBlockElementByPoint(new Point(x, y));
+
+    if (element) {
+      const rect = getRectByBlockElement(element);
+      this._lastModelState = {
+        rect,
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+      };
+      this._indicator.targetRect = rect;
+    }
+
     this._indicator.cursorPosition = {
       x,
       y,
@@ -735,10 +727,6 @@ export class BlockHub extends NonShadowLitElement {
   private _onDragEnd = (e: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    if (this._indicator.cursorPosition && this._indicator.targetRect) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
-    }
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
   };
@@ -748,7 +736,15 @@ export class BlockHub extends NonShadowLitElement {
     if (!e.dataTransfer.getData('affine/block-hub')) return;
     if (!this._lastModelState) return;
 
-    this._onDropCallback(e, this._lastModelState);
+    this._onDropCallback(
+      e,
+      this._lastModelState,
+      // `drag.clientY` !== `dragend.clientY` in chrome.
+      this._indicator?.cursorPosition ?? {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    );
   };
 
   private _onCardMouseDown = (e: Event) => {

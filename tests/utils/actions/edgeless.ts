@@ -36,11 +36,12 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-export type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 
 export function locatorEdgelessToolButton(
   page: Page,
-  mode: MouseMode,
+  type: ToolType,
   innerContainer = true
 ) {
   const text = {
@@ -49,7 +50,10 @@ export function locatorEdgelessToolButton(
     brush: 'Pen',
     pan: 'Hand',
     text: 'Text',
-  }[mode];
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
   const button = page.locator('edgeless-tool-icon-button').filter({
     hasText: text,
   });
@@ -112,16 +116,12 @@ export async function getEdgelessSelectedRect(page: Page) {
 }
 
 export async function decreaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .first();
+  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
   await btn.click();
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .nth(1);
+  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
   await btn.click();
 }
 

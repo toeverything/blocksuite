@@ -10,11 +10,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import type {
-  DefaultSelectionSlots,
-  EmbedEditingState,
-} from './default-page-block.js';
+import type { DefaultSelectionSlots } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
+import type { EditingState } from './utils.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function DraggingArea(rect: DOMRect | null) {
@@ -40,7 +38,7 @@ export function DraggingArea(rect: DOMRect | null) {
 }
 
 export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[],
+  rects: DOMRect[],
   viewport: PageViewport
 ) {
   const { left, top, scrollLeft, scrollTop } = viewport;
@@ -104,7 +102,7 @@ export function SelectedRectsContainer(
 }
 
 export function EmbedEditingContainer(
-  embedEditingState: EmbedEditingState | null,
+  embedEditingState: EditingState | null,
   slots: DefaultSelectionSlots,
   viewport: PageViewport
 ) {
@@ -112,7 +110,7 @@ export function EmbedEditingContainer(
 
   const { left, top, scrollLeft, scrollTop } = viewport;
   const {
-    position: { x, y },
+    rect: { x, y },
     model,
   } = embedEditingState;
   const style = {

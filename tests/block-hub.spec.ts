@@ -253,3 +253,34 @@ test('drag numbered list block from list menu into text area and blockHub list c
   );
   await expect(blockHubListContainer).toBeHidden();
 });
+
+test('should auto hide card list when dragging a card', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
+  await listMenu.hover();
+  const blockHubListContainer = page.locator(
+    '.affine-block-hub-container[type="list"]'
+  );
+  await expect(blockHubListContainer).toBeVisible();
+
+  const numberedListPos = await getCenterPosition(
+    page,
+    '.has-tool-tip[affine-flavour="affine:list"][affine-type="numbered"]'
+  );
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: numberedListPos.x, y: numberedListPos.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+  await waitNextFrame(page);
+
+  await expect(blockHubListContainer).toBeHidden();
+});

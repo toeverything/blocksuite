@@ -57,14 +57,18 @@ export function noop() {
  * throttledLog("Hello, world!");
  * ```
  */
-export const throttle = <
+export function throttle<
+  Args extends unknown[],
+  T extends (...args: Args) => void
+>(
+  fn: (...args: Args) => void,
+  limit: number,
+  options?: { leading?: boolean; trailing?: boolean }
+): T;
+export function throttle<
   Args extends unknown[],
   T extends (this: unknown, ...args: Args) => void
->(
-  fn: T,
-  limit: number,
-  { leading = true, trailing = true } = {}
-): T => {
+>(fn: T, limit: number, { leading = true, trailing = true } = {}): T {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let lastArgs: Args | null = null;
 
@@ -90,7 +94,7 @@ export const throttle = <
     }
     timer = setTimeout(setTimer, limit);
   } as T;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debounce = <T extends (...args: any[]) => void>(

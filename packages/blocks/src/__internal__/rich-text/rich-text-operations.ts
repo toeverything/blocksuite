@@ -451,7 +451,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           title.join(text);
         }
         page.deleteBlock(model);
-        focusTitle(title.length - textLength);
+        focusTitle(page, title.length - textLength);
       }
     }
 

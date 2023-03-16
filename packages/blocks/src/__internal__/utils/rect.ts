@@ -1,4 +1,4 @@
-import { clamp } from '../index.js';
+import { clamp } from './std.js';
 
 export class Point {
   public x: number;
@@ -194,7 +194,7 @@ export class Rect {
   }
 
   clamp(p: Point) {
-    Point.clamp(p, this.min, this.max);
+    return Point.clamp(p, this.min, this.max);
   }
 
   clone() {

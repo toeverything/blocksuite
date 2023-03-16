@@ -301,12 +301,10 @@ importers:
     specifiers:
       '@blocksuite/global': workspace:*
       lit: ^2.6.1
-      scroll-into-view-if-needed: ^3.0.6
       yjs: ^13.5.48
       zod: ^3.20.6
     dependencies:
       '@blocksuite/global': link:../global
-      scroll-into-view-if-needed: 3.0.6
       zod: 3.20.6
     devDependencies:
       lit: 2.6.1
@@ -3072,10 +3070,6 @@ packages:
       array-ify: 1.0.0
       dot-prop: 5.3.0
     dev: true
-
-  /compute-scroll-into-view/3.0.0:
-    resolution: {integrity: sha512-Yk1An4qzo5++Cu6peT9PsmRKIU8tALpmdoE09n//AfGQFcPfx21/tMGMsmKYmLJWaBJrGOJ5Jz5hoU+7cZZUWQ==}
-    dev: false
 
   /concat-map/0.0.1:
     resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
@@ -6100,12 +6094,6 @@ packages:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
     dependencies:
       loose-envify: 1.4.0
-
-  /scroll-into-view-if-needed/3.0.6:
-    resolution: {integrity: sha512-x+CW0kOzlFNOnseF0DBr0AJ5m+TgGmSOdEZwyiZW0gV87XBvxQKw5A8DvFFgabznA68XqLgVX+PwPX8OzsFvRA==}
-    dependencies:
-      compute-scroll-into-view: 3.0.0
-    dev: false
 
   /semver/5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}

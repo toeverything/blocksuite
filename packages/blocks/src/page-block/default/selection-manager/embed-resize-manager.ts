@@ -1,11 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
-
-import type { DefaultSelectionSlots } from '../../../index.js';
 import {
   getModelByElement,
   type IPoint,
   type SelectionEvent,
-} from '../../../std.js';
+} from '@blocksuite/blocks/std';
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { DefaultSelectionSlots } from '../../../index.js';
 import type { PageSelectionState } from './selection-state.js';
 
 export class EmbedResizeManager {

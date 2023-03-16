@@ -1,13 +1,4 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
-import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-
-import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import {
   asyncFocusRichText,
   type BlockHost,
@@ -16,8 +7,23 @@ import {
   hasNativeSelection,
   hotkey,
   isMultiBlockRange,
+  Rect,
   type SelectionPosition,
-} from '../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
+import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
@@ -35,20 +41,16 @@ import {
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
+  type EditingState,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
 } from './utils.js';
-
-export interface EmbedEditingState {
-  position: { x: number; y: number };
-  model: BaseBlockModel;
-}
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
-  embedEditingStateUpdated: Slot<EmbedEditingState | null>;
+  embedEditingStateUpdated: Slot<EditingState | null>;
   codeBlockOptionUpdated?: Slot;
   nativeSelectionToggled: Slot<boolean>;
 }
@@ -151,7 +153,7 @@ export class DefaultPageBlockComponent
   private _selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  private _embedEditingState!: EmbedEditingState | null;
+  private _embedEditingState!: EditingState | null;
 
   @state()
   private _isComposing = false;
@@ -161,11 +163,14 @@ export class DefaultPageBlockComponent
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
+  @query('.affine-default-page-block-container')
+  pageBlockContainer!: HTMLDivElement;
+
   slots: DefaultSelectionSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
-    embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
+    embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
@@ -176,6 +181,17 @@ export class DefaultPageBlockComponent
   get titleVEditor() {
     assertExists(this._titleVEditor);
     return this._titleVEditor;
+  }
+
+  get innerRect() {
+    const { left, width } = this.pageBlockContainer.getBoundingClientRect();
+    const { clientHeight, top } = this.selection.state.viewport;
+    return Rect.fromLWTH(
+      left,
+      Math.min(width, window.innerWidth),
+      top,
+      Math.min(clientHeight, window.innerHeight)
+    );
   }
 
   private _initTitleVEditor() {
@@ -563,6 +579,8 @@ export class DefaultPageBlockComponent
       this.slots,
       viewport
     );
+    const isEmpty =
+      (!this.model.title || !this.model.title.length) && !this._isComposing;
 
     return html`
       <div class="affine-default-viewport">
@@ -570,9 +588,7 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${(!this.model.title ||
-                !this.model.title.length) &&
-              !this._isComposing
+              class="affine-default-page-block-title ${isEmpty
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>

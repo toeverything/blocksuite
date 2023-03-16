@@ -709,7 +709,7 @@ test('should format quick bar work in single block selection', async ({
     page,
     [1, 0],
     [1, 3],
-    { x: -10, y: -10 },
+    { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
   const blockSelections = page.locator(
@@ -1006,4 +1006,17 @@ test('should format bar style active correctly', async ({ page }) => {
   await expect(underlineBtn).toHaveAttribute('active', '');
   await expect(boldBtn).toHaveAttribute('active', '');
   await expect(codeBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format quick bar show when double click button', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const { formatQuickBar, boldBtn } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+  await boldBtn.dblclick();
+  await expect(formatQuickBar).toBeVisible();
 });

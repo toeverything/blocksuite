@@ -80,6 +80,7 @@ export class FormatQuickBar extends LitElement {
     this.addEventListener('mousedown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
       e.preventDefault();
+      e.stopPropagation();
     });
     this.abortController.signal.addEventListener('abort', () => {
       this.remove();

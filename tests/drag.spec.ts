@@ -555,9 +555,12 @@ test('hide drag handle when mouse is hovering over the title', async ({
     '.affine-frame-block-container'
   );
   const dragHandle = await page.locator('affine-drag-handle');
-  await page.mouse.move(rect.x, rect.y - 1, { steps: 2 });
+  // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
+  // when the mouse is over the gap. Therefore, we use rect.y - 20 to make the Y offset greater than the gap between the
+  // paragraph blocks.
+  await page.mouse.move(rect.x, rect.y - 20, { steps: 2 });
   expect(await dragHandle.isVisible()).toBe(false);
 
-  await page.mouse.move(rect.x, rect.y + 1, { steps: 2 });
+  await page.mouse.move(rect.x, rect.y, { steps: 2 });
   expect(await dragHandle.isVisible()).toBe(true);
 });

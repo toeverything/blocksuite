@@ -7,6 +7,7 @@ import {
   nonTextBlock,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { VirgoLine } from '@blocksuite/virgo';
 
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
@@ -14,6 +15,7 @@ import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
+  getDefaultPage,
   getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
@@ -95,9 +97,9 @@ async function setNewTop(y: number, editableContainer: Element) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(index = Infinity, len = 0) {
+export function focusTitle(page: Page, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const pageComponent = document.querySelector('affine-default-page');
+  const pageComponent = getDefaultPage(page);
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }
@@ -116,6 +118,9 @@ export async function focusRichText(
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
+  editableContainer
+    .querySelector<VirgoLine>('v-line')
+    ?.scrollIntoView({ block: 'nearest' });
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -188,10 +193,7 @@ export function focusBlockByModel(
   defaultPageBlock.selection &&
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection &&
-      defaultPageBlock.selection.setFocusedBlockIndexByElement(
-        element as Element
-      );
+    defaultPageBlock.selection?.setFocusedBlock(element as Element);
     focusRichText(editableContainer, position);
   }
 }

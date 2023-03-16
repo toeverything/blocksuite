@@ -1,11 +1,17 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-
 import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
+import type { VRange } from '@blocksuite/virgo';
+
+import type { RichText } from '../rich-text/rich-text.js';
+import {
+  getDefaultPage,
   getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
-  getTextNodeBySelectedBlock,
-  getVRangeByNode,
+  getVirgoByModel,
   isInsidePageTitle,
 } from './query.js';
 import {
@@ -35,26 +41,34 @@ export type BlockRange = {
   // collapsed: true;
 };
 
+type ExtendBlockRange = {
+  type: 'Title';
+  startOffset: number;
+  endOffset: number;
+  /**
+   * Only one model, the page model
+   */
+  models: [BaseBlockModel];
+};
+
 export function getCurrentBlockRange(page: Page): BlockRange | null {
   // check exist block selection
-  if (page.root) {
-    const pageBlock = getDefaultPageBlock(page.root);
-    if (pageBlock.selection) {
-      const selectedBlocks = pageBlock.selection.state.selectedBlocks;
-      // Add embeds block to fix click image and delete case
-      const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
-      // Fix order may be wrong
-      const models = [...selectedBlocks, ...selectedEmbeds]
-        .map(element => getModelByElement(element))
-        .filter(Boolean);
-      if (models.length) {
-        return {
-          type: 'Block',
-          startOffset: 0,
-          endOffset: models[models.length - 1].text?.length ?? 0,
-          models,
-        };
-      }
+  const pageBlock = getDefaultPage(page);
+  if (pageBlock) {
+    const selectedBlocks = pageBlock.selection.state.selectedBlocks;
+    // Add embeds block to fix click image and delete case
+    const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+    // Fix order may be wrong
+    const models = [...selectedBlocks, ...selectedEmbeds]
+      .map(element => getModelByElement(element))
+      .filter(Boolean);
+    if (models.length) {
+      return {
+        type: 'Block',
+        startOffset: 0,
+        endOffset: models[models.length - 1].text?.length ?? 0,
+        models,
+      };
     }
   }
   // check exist native selection
@@ -65,31 +79,44 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   return null;
 }
 
-export function blockRangeToNativeRange(blockRange: BlockRange) {
+export function blockRangeToNativeRange(
+  blockRange: BlockRange | ExtendBlockRange
+) {
+  // special case for title
+  if (blockRange.type === 'Title') {
+    const page = blockRange.models[0].page;
+    const pageElement = getDefaultPage(page);
+    if (!pageElement) {
+      // Maybe in edgeless mode
+      return null;
+    }
+    const titleVEditor = pageElement.titleVEditor;
+    const [startNode, startOffset] = titleVEditor.getTextPoint(
+      blockRange.startOffset
+    );
+    const [endNode, endOffset] = titleVEditor.getTextPoint(
+      blockRange.endOffset
+    );
+    const range = new Range();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    return range;
+  }
+
   const models = blockRange.models.filter(model => model.text);
   if (!models.length) {
     // BlockRange may be selected embeds, and it don't have text
     // so we can't convert it to native range
     return null;
   }
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(
+  const [startNode, startOffset] = getTextNodeByModel(
     models[0],
     blockRange.startOffset
   );
-  if (!startNode) {
-    throw new Error(
-      'Failed to convert block range to native range. Start node is null.'
-    );
-  }
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(
+  const [endNode, endOffset] = getTextNodeByModel(
     models[models.length - 1],
     blockRange.endOffset
   );
-  if (!endNode) {
-    throw new Error(
-      'Failed to convert block range to native range. End node is null.'
-    );
-  }
   const range = new Range();
   range.setStart(startNode, startOffset);
   range.setEnd(endNode, endOffset);
@@ -141,7 +168,10 @@ export function updateBlockRange(
  * Restore the block selection.
  * See also {@link resetNativeSelection}
  */
-export function restoreSelection(blockRange: BlockRange) {
+export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
+  if (!blockRange.models.length) {
+    throw new Error("Can't restore selection, blockRange.models is empty");
+  }
   if (blockRange.type === 'Native') {
     const range = blockRangeToNativeRange(blockRange);
     resetNativeSelection(range);
@@ -156,27 +186,34 @@ export function restoreSelection(blockRange: BlockRange) {
     defaultPageBlock.selection.state.type = 'native';
     return;
   }
-  const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
-  if (!defaultPageBlock.selection) {
-    // In the edgeless mode
+
+  if (blockRange.type === 'Block') {
+    const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
+    if (!defaultPageBlock.selection) {
+      // In the edgeless mode
+      return;
+    }
+    defaultPageBlock.selection.state.type = 'block';
+    defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
+      blockRange.models
+    );
+    // Try clean native selection
+    resetNativeSelection(null);
+    (document.activeElement as HTMLElement).blur();
     return;
   }
-  defaultPageBlock.selection.state.type = 'block';
-  defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
-    blockRange.models
-  );
-  // Try clean native selection
-  resetNativeSelection(null);
-  (document.activeElement as HTMLElement).blur();
-}
 
-type ExtendBlockRange =
-  | BlockRange
-  | {
-      type: 'Title';
-      startOffset: number;
-      endOffset: number;
-    };
+  if (blockRange.type === 'Title') {
+    const page = blockRange.models[0].page;
+    focusTitle(
+      page,
+      blockRange.startOffset,
+      blockRange.endOffset - blockRange.startOffset
+    );
+    return;
+  }
+  throw new Error('Invalid block range type: ' + blockRange.type);
+}
 
 /**
  * Get the block range that includes the title range.
@@ -184,38 +221,85 @@ type ExtendBlockRange =
  * In most cases, we should use {@link getCurrentBlockRange} to get current block range.
  *
  */
-export function getExtendBlockRange(page: Page): ExtendBlockRange | null {
+export function getExtendBlockRange(
+  page: Page
+): BlockRange | ExtendBlockRange | null {
   const basicBlockRange = getCurrentBlockRange(page);
   if (basicBlockRange) return basicBlockRange;
   // Check title
-  if (hasNativeSelection()) {
-    const range = getCurrentNativeRange();
-    if (
-      isInsidePageTitle(range.startContainer) &&
-      isInsidePageTitle(range.endContainer)
-    ) {
-      return {
-        type: 'Title' as const,
-        startOffset: range.startOffset,
-        endOffset: range.endOffset,
-      };
-    }
+  if (!hasNativeSelection()) {
+    return null;
   }
+  const range = getCurrentNativeRange();
+  const isTitleRange =
+    isInsidePageTitle(range.startContainer) &&
+    isInsidePageTitle(range.endContainer);
+  if (isTitleRange) {
+    const pageModel = page.root;
+    assertExists(pageModel);
+    return {
+      type: 'Title' as const,
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+      models: [pageModel],
+    };
+  }
+
   return null;
 }
 
+export function getVRangeByNode(node: Node): VRange | null {
+  if (!node.parentElement) return null;
+
+  const richText = node.parentElement.closest('rich-text') as RichText;
+  const vEditor = richText?.vEditor;
+  if (!vEditor) return null;
+
+  return vEditor.getVRange();
+}
+
 /**
- * In most cases, we should use {@link restoreSelection}.
+ * Get the specific text node and offset by the selected block.
+ * The reverse implementation of {@link getVRangeByNode}
+ * See also {@link getVRangeByNode}
+ *
+ * ```ts
+ * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
+ * const [endNode, endOffset] = getTextNodeBySelectedBlock(endModel, endOffset);
+ *
+ * const range = new Range();
+ * range.setStart(startNode, startOffset);
+ * range.setEnd(endNode, endOffset);
+ *
+ * const selection = window.getSelection();
+ * selection.removeAllRanges();
+ * selection.addRange(range);
+ * ```
  */
-export function restoreExtendSelection(extendBlockRange: ExtendBlockRange) {
-  if (extendBlockRange.type !== 'Title') {
-    restoreSelection(extendBlockRange);
-    return;
+export function getTextNodeByModel(model: BaseBlockModel, offset = 0) {
+  const text = model.text;
+  if (!text) {
+    throw new Error("Failed to get block's text!");
   }
-  focusTitle(
-    extendBlockRange.startOffset,
-    extendBlockRange.endOffset - extendBlockRange.startOffset
-  );
+  if (offset > text.length) {
+    offset = text.length;
+    // FIXME enable strict check
+    // console.error(
+    //   'Offset is out of range! model: ',
+    //   model,
+    //   'offset: ',
+    //   offset,
+    //   'text: ',
+    //   text.toString(),
+    //   'text.length: ',
+    //   text.length
+    // );
+  }
+
+  const vEditor = getVirgoByModel(model);
+  assertExists(vEditor);
+  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
+  return [leaf, leafOffset] as const;
 }
 
 // The following section is experimental code.
