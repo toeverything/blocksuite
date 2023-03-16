@@ -25,9 +25,6 @@ export const createBlockHub: (
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onDropCallback: async (e, end, point) => {
-      if (!page.root) {
-        return;
-      }
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
