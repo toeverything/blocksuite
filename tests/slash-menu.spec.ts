@@ -340,3 +340,63 @@ test.describe('slash menu with date & time', () => {
     await assertRichTexts(page, [strTime]);
   });
 });
+
+test.describe('slash menu with style', () => {
+  test('should style line works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, 'hello/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+    const bold = page.getByTestId('Bold');
+    await bold.click();
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        bold={true}
+        insert="hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+      paragraphId
+    );
+  });
+
+  test('should style empty line works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+    const bold = page.getByTestId('Bold');
+    await bold.click();
+    await page.waitForTimeout(50);
+    await type(page, 'hello');
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        bold={true}
+        insert="hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+      paragraphId
+    );
+  });
+});
