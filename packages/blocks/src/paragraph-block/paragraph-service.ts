@@ -1,18 +1,11 @@
+import type { BlockTransformContext } from '../__internal__/index.js';
 import { BaseService } from '../__internal__/service/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-export class ParagraphBlockService extends BaseService {
+export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
   block2html(
     model: ParagraphBlockModel,
-    {
-      childText = '',
-      begin,
-      end,
-    }: {
-      childText?: string;
-      begin?: number;
-      end?: number;
-    } = {}
+    { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     const text = super.block2html(model, {
       childText,

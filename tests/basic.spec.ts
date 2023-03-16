@@ -268,7 +268,7 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('should undo/redo work on title', async ({ page }) => {
+test('should undo/redo works on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -306,7 +306,41 @@ test('should undo/redo work on title', async ({ page }) => {
   await assertRichTexts(page, ['hello ']);
 });
 
-test.skip('undo multi frames', async ({ page }) => {
+test('should undo/redo cursor works on title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await waitNextFrame(page);
+
+  await focusTitle(page);
+  await type(page, 'title');
+  await focusRichText(page);
+  await type(page, 'hello');
+  await captureHistory(page);
+
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello']);
+
+  await focusTitle(page);
+  await type(page, '1');
+  await focusRichText(page);
+  await undoByKeyboard(page);
+  await waitNextFrame(page);
+  await type(page, '2');
+  await assertTitle(page, 'title2');
+  await assertRichTexts(page, ['hello']);
+
+  await type(page, '3');
+  await focusRichText(page);
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  await redoByKeyboard(page);
+  await waitNextFrame(page);
+  await type(page, '4');
+  await assertTitle(page, 'title23');
+  await assertRichTexts(page, ['hello4']);
+});
+
+test('undo multi frames', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

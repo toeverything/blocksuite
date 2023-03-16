@@ -519,9 +519,8 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         model,
         distanceToTop < distanceToBottom
       );
-      const type = defaultPageBlock.selection.state.type;
       defaultPageBlock.selection.clear();
-      defaultPageBlock.selection.state.type = type;
+      defaultPageBlock.selection.state.type = 'block';
 
       defaultPageBlock.updateComplete.then(() => {
         // update selection rects

@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
-import './view-control-bar.js';
 import './components/edgeless-selected-rect.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
@@ -369,8 +368,7 @@ export class EdgelessPageBlockComponent
     const translateY = -viewportY * zoom;
 
     const gridStyle = {
-      backgroundImage:
-        'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
+      backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
     };
     const defaultStyle = {};
     const style = this.showGrid ? gridStyle : defaultStyle;
@@ -420,14 +418,11 @@ export class EdgelessPageBlockComponent
         ? html`
             <edgeless-toolbar
               .mouseMode=${this.mouseMode}
+              .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>
           `
         : nothing}
-      <edgeless-view-control-bar
-        .edgeless=${this}
-        .zoom=${zoom}
-      ></edgeless-view-control-bar>
     `;
   }
 }

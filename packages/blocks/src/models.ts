@@ -1,5 +1,6 @@
 /// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
+import type { UnionToIntersection } from '@blocksuite/global/types';
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
@@ -97,3 +98,6 @@ export type BlockServiceInstance = {
       : never
     : InstanceType<typeof BaseService>;
 };
+
+export type BlockServiceInstanceByKey<Key extends Flavour> =
+  UnionToIntersection<BlockServiceInstance[Key]>;

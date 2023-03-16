@@ -1,9 +1,5 @@
-import {
-  type BlockService,
-  blockService,
-  type BlockServiceInstance,
-  type Flavour,
-} from '../models.js';
+import type { BlockServiceInstanceByKey } from '../models.js';
+import { type BlockService, blockService, type Flavour } from '../models.js';
 import { BaseService } from './service/index.js';
 
 const services = new Map<string, BaseService>();
@@ -40,17 +36,17 @@ export function registerService(
  */
 export function getService<Key extends Flavour>(
   flavour: Key
-): BlockServiceInstance[Key] {
+): BlockServiceInstanceByKey<Key> {
   const service = services.get(flavour);
   if (!service) {
     throw new Error(`cannot find service by flavour ${flavour}`);
   }
-  return service as BlockServiceInstance[Key];
+  return service as BlockServiceInstanceByKey<Key>;
 }
 
 export function getServiceOrRegister<Key extends Flavour>(
   flavour: Key
-): BlockServiceInstance[Key] | Promise<BlockServiceInstance[Key]> {
+): BlockServiceInstanceByKey<Key> | Promise<BlockServiceInstanceByKey<Key>> {
   const service = services.get(flavour);
   if (!service) {
     const Constructor =
@@ -58,11 +54,11 @@ export function getServiceOrRegister<Key extends Flavour>(
     const result = registerService(flavour, Constructor);
     if (result instanceof Promise) {
       return result.then(
-        () => services.get(flavour) as BlockServiceInstance[Key]
+        () => services.get(flavour) as BlockServiceInstanceByKey<Key>
       );
     } else {
-      return services.get(flavour) as BlockServiceInstance[Key];
+      return services.get(flavour) as BlockServiceInstanceByKey<Key>;
     }
   }
-  return service as BlockServiceInstance[Key];
+  return service as BlockServiceInstanceByKey<Key>;
 }

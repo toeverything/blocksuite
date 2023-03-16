@@ -5,7 +5,7 @@ import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockElement } from '../../../__internal__/index.js';
+import { BlockElement } from '../../../__internal__/service/components.js';
 import type {
   BlockHost,
   FrameBlockModel,

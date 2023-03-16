@@ -49,3 +49,5 @@ export type BlockModels = {
 export type BlockModelProps = {
   [K in keyof BlockSchemas]: ReturnType<BlockSchemas[K]['model']['props']>;
 };
+
+export * from './utils/types.js';

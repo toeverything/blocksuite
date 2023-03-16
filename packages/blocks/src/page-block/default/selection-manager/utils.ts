@@ -1,17 +1,14 @@
-import {
-  type DefaultSelectionSlots,
-  getCurrentBlockRange,
-} from '@blocksuite/blocks';
+import type { Page, UserRange } from '@blocksuite/store';
+
+import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
+import type { IPoint } from '../../../__internal__/utils/gesture.js';
 import {
   type BlockComponentElement,
   contains,
-  getModelByElement,
   getRectByBlockElement,
-  type IPoint,
-} from '@blocksuite/blocks/std';
-import type { Page, UserRange } from '@blocksuite/store';
-
-import type { PageSelectionState, PageSelectionType } from './index.js';
+} from '../../../__internal__/utils/query.js';
+import type { DefaultSelectionSlots } from '../default-page-block.js';
+import type { PageSelectionState } from './index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -91,22 +88,25 @@ export function filterBlocksExcludeSubtrees(
 }
 
 export function updateLocalSelectionRange(page: Page) {
-  const blockRange = getCurrentBlockRange(page);
-  if (blockRange && blockRange.type === 'Native') {
-    const userRange: UserRange = {
-      startOffset: blockRange.startOffset,
-      endOffset: blockRange.endOffset,
-      blockIds: blockRange.models.map(m => m.id),
-    };
-    page.awarenessStore.setLocalRange(page, userRange);
+  const blockRange = getExtendBlockRange(page);
+  if (!blockRange || blockRange.type === 'Block') {
+    return;
   }
+  const userRange: UserRange = {
+    startOffset: blockRange.startOffset,
+    endOffset: blockRange.endOffset,
+    blockIds: blockRange.models.map(m => m.id),
+  };
+  page.awarenessStore.setLocalRange(page, userRange);
 }
 
+/*
 function computeSelectionType(
   selectedBlocks: Element[],
   selectionType?: PageSelectionType
 ) {
   let newSelectionType: PageSelectionType = selectionType ?? 'native';
+
   const isOnlyBlock = selectedBlocks.length === 1;
   for (const block of selectedBlocks) {
     if (selectionType) continue;
@@ -133,16 +133,15 @@ function computeSelectionType(
   }
   return newSelectionType;
 }
+*/
 
 export function setSelectedBlocks(
   state: PageSelectionState,
   slots: DefaultSelectionSlots,
   selectedBlocks: BlockComponentElement[],
-  rects?: DOMRect[],
-  selectionType?: PageSelectionType
+  rects?: DOMRect[]
 ) {
   state.selectedBlocks = selectedBlocks;
-  state.type = selectionType ?? state.type;
 
   if (rects) {
     slots.selectedRectsUpdated.emit(rects);
@@ -154,7 +153,5 @@ export function setSelectedBlocks(
     calculatedRects.push(getRectByBlockElement(block));
   }
 
-  const newSelectionType = computeSelectionType(selectedBlocks, selectionType);
-  state.type = newSelectionType;
   slots.selectedRectsUpdated.emit(calculatedRects);
 }

@@ -13,8 +13,8 @@ import { html, unsafeStatic } from 'lit/static-html.js';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
 import { hasService, registerService } from '../service.js';
-import { BaseService } from '../service/index.js';
-import type { BlockHost } from './types.js';
+import type { BlockHost } from '../utils/types.js';
+import { BaseService } from './index.js';
 
 // TODO support dynamic block types
 export function BlockElement(

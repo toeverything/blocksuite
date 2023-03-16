@@ -11,15 +11,19 @@ import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
-  type ExtendedModel,
-  focusBlockByModel,
-  focusTitle,
-  getCurrentNativeRange,
+} from '../utils/common-operations.js';
+import {
   getModelByElement,
   getPreviousBlock,
   getVirgoByModel,
-  supportsChildren,
-} from '../utils/index.js';
+} from '../utils/query.js';
+import {
+  focusBlockByModel,
+  focusTitle,
+  getCurrentNativeRange,
+} from '../utils/selection.js';
+import { supportsChildren } from '../utils/std.js';
+import type { ExtendedModel } from '../utils/types.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -447,7 +451,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           title.join(text);
         }
         page.deleteBlock(model);
-        focusTitle(title.length - textLength);
+        focusTitle(page, title.length - textLength);
       }
     }
 

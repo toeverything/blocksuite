@@ -1,8 +1,6 @@
 /// <reference types="vite/client" />
-import { getCurrentBlockRange } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
-  BlockChildrenContainer,
   type BlockHost,
   getCurrentNativeRange,
   getVirgoByModel,
@@ -27,6 +25,8 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
+import { BlockChildrenContainer } from '../../__internal__/service/components.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';

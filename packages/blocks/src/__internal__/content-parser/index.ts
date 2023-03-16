@@ -1,4 +1,4 @@
-import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
+import type { PageBlockModel } from '@blocksuite/blocks';
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -205,7 +205,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
-    const service = (await getServiceOrRegister(model.flavour)) as BaseService;
+    const service = await getServiceOrRegister(model.flavour);
 
     return service.block2html(model, {
       childText: children.join(''),
@@ -230,7 +230,6 @@ export class ContentParser {
 
     const service = await getServiceOrRegister(model.flavour);
 
-    // @ts-ignore
     return service.block2Text(model, {
       childText: children.join(''),
       begin: selectedBlock.startPos,
