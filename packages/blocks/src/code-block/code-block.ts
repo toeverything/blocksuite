@@ -170,7 +170,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(e => {
-    console.log('resize', e);
     this._updateLineNumbers();
   });
 
@@ -319,7 +318,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     const richText = this.querySelector('rich-text');
     assertExists(richText);
-    console.log('richText', richText);
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(richText);
   }
