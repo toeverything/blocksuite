@@ -11,11 +11,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
   getViewportElement,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
