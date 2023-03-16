@@ -17,7 +17,7 @@ export interface VRange {
   length: number;
 }
 
-export type UpdateVRangeProp = [
+export type VRangeUpdatedProp = [
   range: VRange | null,
   type: 'native' | 'input' | 'other'
 ];
@@ -280,7 +280,7 @@ export class VEditor<
     mounted: Slot;
     unmounted: Slot;
     updated: Slot;
-    updateVRange: Slot<UpdateVRangeProp>;
+    vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
   };
 
@@ -308,11 +308,11 @@ export class VEditor<
       mounted: new Slot(),
       unmounted: new Slot(),
       updated: new Slot(),
-      updateVRange: new Slot<UpdateVRangeProp>(),
+      vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
     };
 
-    this.slots.updateVRange.on(this._onUpdateVRange);
+    this.slots.vRangeUpdated.on(this._onVRangeUpdated);
   }
 
   setAttributesSchema = (schema: z.ZodSchema<TextAttributes>) => {
@@ -421,6 +421,31 @@ export class VEditor<
     return selection;
   }
 
+  /**
+   * Here are examples of how this function computes and gets the delta.
+   *
+   * We have such a text:
+   * ```
+   * [
+   *   {
+   *      insert: 'aaa',
+   *      attributes: { bold: true },
+   *   },
+   *   {
+   *      insert: 'bbb',
+   *      attributes: { italic: true },
+   *   },
+   * ]
+   * ```
+   *
+   * `getDeltaByRangeIndex(0)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(1)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(3)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(4)` returns `{ insert: 'bbb', attributes: { italic: true } }`.
+   */
   getDeltaByRangeIndex(rangeIndex: VRange['index']): DeltaInsert | null {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
@@ -485,6 +510,62 @@ export class VEditor<
     throw new Error('failed to find line');
   }
 
+  /**
+   * Here are examples of how this function computes and gets the deltas.
+   *
+   * We have such a text:
+   * ```
+   * [
+   *   {
+   *      insert: 'aaa',
+   *      attributes: { bold: true },
+   *   },
+   *   {
+   *      insert: 'bbb',
+   *      attributes: { italic: true },
+   *   },
+   *   {
+   *      insert: 'ccc',
+   *      attributes: { underline: true },
+   *   },
+   * ]
+   * ```
+   *
+   * `getDeltasByVRange({ index: 0, length: 0 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
+   * ```
+   *
+   * `getDeltasByVRange({ index: 0, length: 1 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
+   * ```
+   *
+   * `getDeltasByVRange({ index: 0, length: 4 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
+   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
+   * ```
+   *
+   * `getDeltasByVRange({ index: 3, length: 1 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
+   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
+   * ```
+   *
+   * `getDeltasByVRange({ index: 3, length: 3 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
+   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
+   * ```
+   *
+   *  `getDeltasByVRange({ index: 3, length: 4 })` returns
+   * ```
+   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
+   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }],
+   *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
+   * ```
+   */
   getDeltasByVRange(vRange: VRange): DeltaEntry[] {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
@@ -545,7 +626,7 @@ export class VEditor<
     this._marks = marks;
 
     let vRange = this.getVRange();
-    const dispose = this.slots.updateVRange.on(([r, t]) => {
+    const dispose = this.slots.vRangeUpdated.on(([r, t]) => {
       if (
         vRange &&
         r &&
@@ -569,10 +650,16 @@ export class VEditor<
     this._isReadonly = isReadonly;
   }
 
+  /**
+   * the vRange is synced to the native selection asynchronically
+   */
   setVRange(vRange: VRange): void {
-    this.slots.updateVRange.emit([vRange, 'other']);
+    this.slots.vRangeUpdated.emit([vRange, 'other']);
   }
 
+  /**
+   * the vRange is synced to the native selection asynchronically
+   */
   focusEnd(): void {
     this.setVRange({
       index: this.yText.length,
@@ -936,7 +1023,7 @@ export class VEditor<
     // You can find explanation of inputType here:
     // [Input Events Level 2](https://w3c.github.io/input-events/#interface-InputEvent-Attributes)
     if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
-      this.slots.updateVRange.emit([
+      this.slots.vRangeUpdated.emit([
         {
           index: currentVRange.index + data.length,
           length: 0,
@@ -946,7 +1033,7 @@ export class VEditor<
 
       this.insertText(currentVRange, data);
     } else if (inputType === 'insertParagraph' && currentVRange.index >= 0) {
-      this.slots.updateVRange.emit([
+      this.slots.vRangeUpdated.emit([
         {
           index: currentVRange.index + 1,
           length: 0,
@@ -961,7 +1048,7 @@ export class VEditor<
       currentVRange.index >= 0
     ) {
       if (currentVRange.length > 0) {
-        this.slots.updateVRange.emit([
+        this.slots.vRangeUpdated.emit([
           {
             index: currentVRange.index,
             length: 0,
@@ -974,7 +1061,7 @@ export class VEditor<
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
         const tmpString = this.yText.toString().slice(0, currentVRange.index);
         const deletedCharacter = [...tmpString].slice(-1).join('');
-        this.slots.updateVRange.emit([
+        this.slots.vRangeUpdated.emit([
           {
             index: currentVRange.index - deletedCharacter.length,
             length: 0,
@@ -998,7 +1085,7 @@ export class VEditor<
       if (!matchs) return;
       const deleteLength = matchs[0].length;
 
-      this.slots.updateVRange.emit([
+      this.slots.vRangeUpdated.emit([
         {
           index: currentVRange.index - deleteLength,
           length: 0,
@@ -1017,7 +1104,7 @@ export class VEditor<
       inputType === 'deleteSoftLineBackward'
     ) {
       if (currentVRange.length > 0) {
-        this.slots.updateVRange.emit([
+        this.slots.vRangeUpdated.emit([
           {
             index: currentVRange.index,
             length: 0,
@@ -1032,7 +1119,7 @@ export class VEditor<
           currentVRange.index -
           Math.max(0, str.slice(0, currentVRange.index).lastIndexOf('\n'));
 
-        this.slots.updateVRange.emit([
+        this.slots.vRangeUpdated.emit([
           {
             index: currentVRange.index - deleteLength,
             length: 0,
@@ -1051,7 +1138,7 @@ export class VEditor<
       inputType === 'deleteContentForward'
     ) {
       if (currentVRange.index < this.yText.length) {
-        this.slots.updateVRange.emit([
+        this.slots.vRangeUpdated.emit([
           {
             index: currentVRange.index,
             length: 0,
@@ -1085,7 +1172,7 @@ export class VEditor<
     const { data } = event;
     if (this._vRange.index >= 0 && data) {
       this.insertText(this._vRange, data);
-      this.slots.updateVRange.emit([
+      this.slots.vRangeUpdated.emit([
         {
           index: this._vRange.index + data.length,
           length: 0,
@@ -1134,7 +1221,7 @@ export class VEditor<
 
     const vRange = this.toVRange(selection);
     if (vRange) {
-      this.slots.updateVRange.emit([vRange, 'native']);
+      this.slots.vRangeUpdated.emit([vRange, 'native']);
     }
 
     // avoid infinite syncVRange
@@ -1152,7 +1239,7 @@ export class VEditor<
     }
   };
 
-  private _onUpdateVRange = ([newVRange, origin]: UpdateVRangeProp) => {
+  private _onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
     if (origin === 'native') {
