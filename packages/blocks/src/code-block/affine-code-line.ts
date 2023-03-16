@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, Lang } from 'shiki';
 
-import { NonShadowLitElement } from '../std.js';
+import { NonShadowLitElement, queryCurrentMode } from '../std.js';
 
 @customElement('affine-code-line')
 export class AffineCodeLine extends NonShadowLitElement {
@@ -30,7 +30,13 @@ export class AffineCodeLine extends NonShadowLitElement {
       return html`<span>${vText}</span>`;
     }
 
-    const tokens = highlighter.codeToThemedTokens(this.vText.str, lang)[0];
+    const mode = queryCurrentMode();
+
+    const tokens = highlighter.codeToThemedTokens(
+      this.vText.str,
+      lang,
+      mode === 'light' ? 'github-light' : 'github-dark'
+    )[0];
     const vTexts = tokens.map(token => {
       const vText = new VText();
       vText.str = token.content;
