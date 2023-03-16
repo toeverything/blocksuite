@@ -203,14 +203,19 @@ export class VEditor<
     new VirgoEventService<TextAttributes>(this);
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
-    const attributesResult = this._attributesSchema
-      .optional()
-      .safeParse(textAttributes);
+    if (!textAttributes) {
+      return undefined;
+    }
+    const attributesResult = this._attributesSchema.safeParse(textAttributes);
     if (!attributesResult.success) {
       console.error(attributesResult.error);
       return undefined;
     }
-    return attributesResult.data;
+    const attributes = Object.fromEntries(
+      // filter out undefined values
+      Object.entries(attributesResult.data).filter(([k, v]) => v)
+    ) as TextAttributes;
+    return attributes;
   };
 
   private _renderDeltas = async () => {
@@ -606,6 +611,10 @@ export class VEditor<
       attributes = { ...this._marks, ...attributes };
     }
     const normalizedAttributes = this._parseSchema(attributes);
+
+    if (!text || !text.length) {
+      throw new Error('text must not be empty');
+    }
 
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
