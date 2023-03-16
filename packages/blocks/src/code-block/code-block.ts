@@ -87,6 +87,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container rich-text {
+      /* to make sure the resize observer can be triggered as expected */
+      display: block;
       position: relative;
     }
 
