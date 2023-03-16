@@ -215,12 +215,12 @@ export const database: InitFn = (workspace: Workspace) => {
         databaseId
       );
 
-      page.updateBlockTag(p1, {
+      page.updateBlockColumn(p1, {
         schemaId: col1,
         value: 0.1,
       });
 
-      page.updateBlockTag(p2, {
+      page.updateBlockColumn(p2, {
         schemaId: col2,
         value: 'TODO',
       });
@@ -228,7 +228,7 @@ export const database: InitFn = (workspace: Workspace) => {
       const text = new page.YText();
       text.insert(0, '123');
       text.insert(0, 'code');
-      page.updateBlockTag(p2, {
+      page.updateBlockColumn(p2, {
         schemaId: col3,
         value: text,
       });

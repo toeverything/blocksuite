@@ -155,7 +155,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
                   <affine-database-cell-container
                     .databaseModel=${databaseModel}
                     .rowModel=${child}
-                    .column=${column}
+                    .columnSchema=${column}
                   >
                   </affine-database-cell-container>
                 `;

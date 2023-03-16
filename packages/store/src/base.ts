@@ -7,7 +7,7 @@ import { Text } from './text-adapter.js';
 import type { Page } from './workspace/index.js';
 
 const FlavourSchema = z.string();
-const ColumnSchema = z.object({
+const ElementTagSchema = z.object({
   _$litStatic$: z.string(),
   r: z.symbol(),
 });
@@ -24,7 +24,7 @@ export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
     flavour: FlavourSchema,
-    tag: ColumnSchema,
+    tag: ElementTagSchema,
     props: z
       .function()
       .args(z.custom<InternalPrimitives>())

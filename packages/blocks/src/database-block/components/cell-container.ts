@@ -29,7 +29,7 @@ export class DatabaseCellContainer
     if (value) {
       setTimeout(() => {
         this.databaseModel.page.captureSync();
-        this.databaseModel.page.updateBlockTag(this.rowModel.id, {
+        this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
           schemaId: this.columnSchema.id,
           value,
         });
@@ -105,7 +105,7 @@ export class DatabaseCellContainer
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   protected render() {
     const renderer = getColumnSchemaRenderer(this.columnSchema.type);
-    const tag = this.databaseModel.page.getBlockColumnBySchema(
+    const column = this.databaseModel.page.getBlockColumnBySchema(
       this.rowModel,
       this.columnSchema
     );
@@ -117,8 +117,8 @@ export class DatabaseCellContainer
           .rowHost=${this}
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
-          .column=${this.columnSchema}
-          .tag=${tag}
+          .columnSchema=${this.columnSchema}
+          .column=${column}
         ></${editingTag}>
       `;
     }
@@ -128,8 +128,8 @@ export class DatabaseCellContainer
         .rowHost=${this}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .column=${this.columnSchema}
-        .tag=${tag}
+        .columnSchema=${this.columnSchema}
+        .column=${column}
       ></${previewTag}>
     `;
   }

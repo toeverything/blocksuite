@@ -197,23 +197,26 @@ export class Page extends Space<PageData> {
     this._history.clear();
   };
 
-  updateBlockTag<Tag extends BlockColumn>(id: BaseBlockModel['id'], tag: Tag) {
+  updateBlockColumn<Column extends BlockColumn>(
+    id: BaseBlockModel['id'],
+    column: Column
+  ) {
     const already = this.columns.has(id);
-    let tags: Y.Map<unknown>;
+    let columns: Y.Map<unknown>;
     if (!already) {
-      tags = new Y.Map();
+      columns = new Y.Map();
     } else {
-      tags = this.columns.get(id) as Y.Map<unknown>;
+      columns = this.columns.get(id) as Y.Map<unknown>;
     }
     this.transact(() => {
       if (!already) {
-        this.columns.set(id, tags);
+        this.columns.set(id, columns);
       }
       // Related issue: https://github.com/yjs/yjs/issues/255
-      const tagMap = new Y.Map();
-      tagMap.set('schemaId', tag.schemaId);
-      tagMap.set('value', tag.value);
-      tags.set(tag.schemaId, tagMap);
+      const columnMap = new Y.Map();
+      columnMap.set('schemaId', column.schemaId);
+      columnMap.set('value', column.value);
+      columns.set(column.schemaId, columnMap);
     });
   }
 
@@ -221,14 +224,14 @@ export class Page extends Space<PageData> {
     model: BaseBlockModel,
     schema: ColumnSchema
   ): BlockColumn | null {
-    const tags = this.columns.get(model.id);
-    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
-    if (!tagMap) {
+    const columns = this.columns.get(model.id);
+    const columnMap = (columns?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!columnMap) {
       return null;
     }
     return {
-      schemaId: tagMap.get('schemaId') as string,
-      value: tagMap.get('value') as unknown,
+      schemaId: columnMap.get('schemaId') as string,
+      value: columnMap.get('value') as unknown,
     };
   }
 
