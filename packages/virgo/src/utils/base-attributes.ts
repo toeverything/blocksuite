@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 export const baseTextAttributes = z.object({
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  strike: z.boolean().optional(),
-  code: z.boolean().optional(),
+  bold: z.literal(true).optional().catch(undefined),
+  italic: z.literal(true).optional().catch(undefined),
+  underline: z.literal(true).optional().catch(undefined),
+  strike: z.literal(true).optional().catch(undefined),
+  code: z.literal(true).optional().catch(undefined),
+  link: z.string().optional().catch(undefined),
 });
+// .partial();
 
 export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;

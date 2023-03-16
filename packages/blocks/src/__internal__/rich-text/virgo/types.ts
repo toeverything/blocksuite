@@ -1,14 +1,8 @@
 import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
-import { z } from 'zod';
+import { baseTextAttributes } from '@blocksuite/virgo';
+import type { z } from 'zod';
 
-export const affineTextAttributes = z.object({
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  strike: z.boolean().optional(),
-  code: z.boolean().optional(),
-  link: z.string().optional(),
-});
+export const affineTextAttributes = baseTextAttributes.extend({});
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
 
