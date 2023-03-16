@@ -8,13 +8,13 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type {
   ColorEvent,
   EdgelessColorPanel,
 } from '../../toolbar/brush-tool/color-panel.js';
 import { createButtonPopper } from '../utils.js';
-import { countBy, maxBy } from './utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): Color | undefined {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
