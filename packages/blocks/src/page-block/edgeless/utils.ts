@@ -15,6 +15,7 @@ import type {
   MouseMode,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import { SHORTKEY } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
@@ -74,9 +75,8 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
     e.preventDefault();
 
     const { viewport } = container.surface;
-
     // pan
-    if (!e.ctrlKey) {
+    if (!e[SHORTKEY]) {
       const dx = e.deltaX / viewport.zoom;
       const dy = e.deltaY / viewport.zoom;
       viewport.applyDeltaCenter(dx, dy);
