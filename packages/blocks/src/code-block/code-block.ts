@@ -169,7 +169,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return service.hljs.default.highlight;
   }
 
-  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(e => {
+  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
 
