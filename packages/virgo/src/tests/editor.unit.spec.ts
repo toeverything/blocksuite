@@ -412,3 +412,48 @@ test('cursor with format', () => {
     },
   ]);
 });
+
+test('incorrect format value `false`', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  const virgo = new VEditor(yText);
+
+  virgo.insertText(
+    {
+      index: 0,
+      length: 0,
+    },
+    'aaa',
+    {
+      // @ts-expect-error insert incorrect value
+      bold: false,
+      italic: true,
+    }
+  );
+
+  virgo.insertText(
+    {
+      index: 3,
+      length: 0,
+    },
+    'bbb',
+    {
+      underline: true,
+    }
+  );
+
+  expect(virgo.yText.toDelta()).toEqual([
+    {
+      insert: 'aaa',
+      attributes: {
+        italic: true,
+      },
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        underline: true,
+      },
+    },
+  ]);
+});
