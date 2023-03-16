@@ -162,7 +162,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(21);
+  await expect(slashItems).toHaveCount(25);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -233,7 +233,12 @@ test('slash menu supports fuzzy query', async ({ page }) => {
 
   const slashItems = slashMenu.locator('format-bar-button');
   await type(page, 'c');
-  await expect(slashItems).toHaveText(['Code Block', 'Copy', 'Duplicate']);
+  await expect(slashItems).toHaveText([
+    'Code Block',
+    'Italic',
+    'Copy',
+    'Duplicate',
+  ]);
   await type(page, 'b');
   await expect(slashItems).toHaveText(['Code Block']);
 });
