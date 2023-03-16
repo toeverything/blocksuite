@@ -9,6 +9,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
@@ -94,6 +95,9 @@ export class EdgelessMoreButton extends LitElement {
   @property()
   surface!: SurfaceManager;
 
+  @property()
+  slots!: EdgelessSelectionSlots;
+
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
 
@@ -102,20 +106,25 @@ export class EdgelessMoreButton extends LitElement {
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
+  private _delete() {
+    this.page.captureSync();
+    this.elements.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        const children = this.page.root?.children ?? [];
+        if (children.length > 1) {
+          this.page.deleteBlock(element);
+        }
+      } else {
+        this.surface.removeElement(element.id);
+      }
+    });
+    this.page.captureSync();
+    this.slots.selectionUpdated.emit({ selected: [], active: false });
+  }
+
   private _runAction = (action: Action) => {
     if (action.value === 'delete') {
-      this.page.captureSync();
-      this.elements.forEach(element => {
-        if (isTopLevelBlock(element)) {
-          const children = this.page.root?.children ?? [];
-          if (children.length > 1) {
-            this.page.deleteBlock(element);
-          }
-        } else {
-          this.surface.removeElement(element.id);
-        }
-      });
-      this.page.captureSync();
+      this._delete();
     }
   };
 

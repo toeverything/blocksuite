@@ -13,6 +13,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
+import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 
@@ -51,6 +52,9 @@ export class EdgelessComponentToolbar extends LitElement {
 
   @property()
   surface!: SurfaceManager;
+
+  @property()
+  slots!: EdgelessSelectionSlots;
 
   private _category(): CategorizedElements {
     const cate = {
@@ -114,6 +118,7 @@ export class EdgelessComponentToolbar extends LitElement {
         .elements=${this.selected}
         .page=${this.page}
         .surface=${this.surface}
+        .slots=${this.slots}
       >
       </edgeless-more-button>
     </div>`;
