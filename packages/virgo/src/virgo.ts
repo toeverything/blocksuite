@@ -12,7 +12,7 @@ import type {
   DeltaInsert,
   DomPoint,
   VRange,
-  VRangeUpdatedProp
+  VRangeUpdatedProp,
 } from './types.js';
 import type { TextPoint } from './types.js';
 import {
