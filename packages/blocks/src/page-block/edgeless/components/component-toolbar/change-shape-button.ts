@@ -10,7 +10,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { EdgelessShapeMenu } from '../../toolbar/shape-tool/shape-menu.js';
 import { ShapeComponentConfigMap } from '../../toolbar/shape-tool/shape-menu-config.js';
-import { countBy, createButtonPopper, maxBy } from './utils.js';
+import { createButtonPopper } from '../utils.js';
+import { countBy, maxBy } from './utils.js';
 
 function getMostCommonShape(
   elements: ShapeElement[]

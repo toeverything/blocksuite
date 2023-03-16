@@ -13,7 +13,8 @@ import type {
   ColorEvent,
   EdgelessColorPanel,
 } from '../../toolbar/brush-tool/color-panel.js';
-import { countBy, createButtonPopper, maxBy } from './utils.js';
+import { createButtonPopper } from '../utils.js';
+import { countBy, maxBy } from './utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): Color | undefined {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);

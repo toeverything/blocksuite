@@ -11,7 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
-import { createButtonPopper } from './utils.js';
+import { createButtonPopper } from '../utils.js';
 
 type Action = { name: string; value: string; disabled: boolean };
 const ACTIONS: Action[] = [
