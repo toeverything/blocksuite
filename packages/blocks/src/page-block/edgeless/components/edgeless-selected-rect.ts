@@ -201,6 +201,7 @@ export class EdgelessSelectedRect extends LitElement {
         .page=${this.page}
         .surface=${this.surface}
         .slots=${this.slots}
+        .selectionState=${this.state}
       >
       </edgeless-component-toolbar>
     `;

@@ -10,6 +10,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
+import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type {
   ColorEvent,
   EdgelessColorPanel,
@@ -92,11 +94,17 @@ export class EdgelessChangeBrushButton extends LitElement {
   @property()
   elements: BrushElement[] = [];
 
+  @property({ type: Object })
+  selectionState!: EdgelessSelectionState;
+
   @property()
   page!: Page;
 
   @property()
   surface!: SurfaceManager;
+
+  @property()
+  slots!: EdgelessSelectionSlots;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -106,7 +114,6 @@ export class EdgelessChangeBrushButton extends LitElement {
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  // FIXME: set brush size should change bound
   private _setBrushSize(size: BrushSize) {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -115,7 +122,8 @@ export class EdgelessChangeBrushButton extends LitElement {
       }
     });
     this.page.captureSync();
-    this.requestUpdate();
+    // FIXME: force update selection, because brush size changed
+    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setBrushColor(color: Color) {

@@ -14,6 +14,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 
@@ -46,6 +47,9 @@ export class EdgelessComponentToolbar extends LitElement {
 
   @property()
   selected: Selectable[] = [];
+
+  @property({ type: Object })
+  selectionState!: EdgelessSelectionState;
 
   @property()
   page!: Page;
@@ -98,6 +102,8 @@ export class EdgelessComponentToolbar extends LitElement {
           .elements=${brushElements}
           .page=${this.page}
           .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
         >
         </edgeless-change-brush-button>`
       : null;
