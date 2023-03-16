@@ -777,3 +777,18 @@ function find(elements: Element[]) {
   }
   return null;
 }
+
+/**
+ * query current mode whether is light or dark
+ */
+export function queryCurrentMode(): 'light' | 'dark' {
+  const mode = getComputedStyle(document.documentElement).getPropertyValue(
+    '--affine-theme-mode'
+  );
+
+  if (mode === 'light') {
+    return 'light';
+  } else {
+    return 'dark';
+  }
+}
