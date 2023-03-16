@@ -251,7 +251,12 @@ export class EdgelessPageBlockComponent
       })
     );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
-    _disposables.add(slots.selectionUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.selectionUpdated.on(state => {
+        this._selection.currentController.setBlockSelectionState(state);
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.mouseModeUpdated.on(mouseMode => {
@@ -288,16 +293,11 @@ export class EdgelessPageBlockComponent
         });
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
-        this.setBlockSelectionState({
+        slots.selectionUpdated.emit({
           ...this._selection.blockSelectionState,
         });
-        slots.selectionUpdated.emit(this._selection.blockSelectionState);
       })
     );
-  }
-
-  setBlockSelectionState(state: EdgelessSelectionState) {
-    this._selection.currentController.setBlockSelectionState(state);
   }
 
   update(changedProperties: Map<string, unknown>) {

@@ -53,7 +53,7 @@ function addBrushElements(surface: SurfaceManager) {
       lineWidth: 4,
     }
   );
-  surface.updateBrushElement(brushId, { x: 0, y: 0, w: 104, h: 104 }, [
+  surface.updateBrushElementPoints(brushId, { x: 0, y: 0, w: 104, h: 104 }, [
     [0, 0],
     [10, 10],
     [20, 20],

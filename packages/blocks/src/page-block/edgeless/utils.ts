@@ -1,8 +1,4 @@
-import type {
-  Bound,
-  SurfaceElement,
-  SurfaceViewport,
-} from '@blocksuite/phasor';
+import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
@@ -27,9 +23,9 @@ export function isTopLevelBlock(
   return !!selectable && 'flavour' in selectable;
 }
 
-export function isSurfaceElement(
+export function isPhasorElement(
   selectable: Selectable | null
-): selectable is SurfaceElement {
+): selectable is PhasorElement {
   return !isTopLevelBlock(selectable);
 }
 

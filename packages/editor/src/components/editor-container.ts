@@ -187,6 +187,7 @@ export class EditorContainer extends NonShadowLitElement {
           height: 100%;
           position: relative;
           overflow: hidden;
+          font-family: var(--affine-font-family);
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

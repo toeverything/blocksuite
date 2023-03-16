@@ -1,4 +1,4 @@
-import '../tool-icon-button.js';
+import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
 import { PenIcon } from '@blocksuite/global/config';

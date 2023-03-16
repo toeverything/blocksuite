@@ -44,7 +44,6 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
           selected: [element],
           active: true,
         };
-        this._edgeless.setBlockSelectionState(selectionState);
         this._edgeless.slots.selectionUpdated.emit(selectionState);
 
         // Waiting dom updated, `frame mask` is removed

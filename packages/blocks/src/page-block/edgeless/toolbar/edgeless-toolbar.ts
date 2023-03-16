@@ -1,4 +1,4 @@
-import './tool-icon-button.js';
+import '../components/tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
 import './brush-tool/brush-tool-button.js';
 
