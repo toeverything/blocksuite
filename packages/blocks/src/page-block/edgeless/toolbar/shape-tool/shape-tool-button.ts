@@ -89,7 +89,7 @@ export class EdgelessShapeToolButton extends LitElement {
         .tooltip=${'Shape'}
         .active=${type === 'shape'}
         .testId=${'shape'}
-        @tool.click=${async () => this._toggleShapeMenu()}
+        @tool.click=${() => this._toggleShapeMenu()}
       >
         ${ShapeIcon}
       </edgeless-tool-icon-button>
