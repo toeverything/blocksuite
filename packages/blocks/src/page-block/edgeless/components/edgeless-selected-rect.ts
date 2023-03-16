@@ -10,7 +10,11 @@ import type {
   EdgelessSelectionState,
   Selectable,
 } from '../selection-manager.js';
-import { FRAME_MIN_SIZE, isTopLevelBlock } from '../utils.js';
+import {
+  FRAME_MIN_HEIGHT,
+  FRAME_MIN_WIDTH,
+  isTopLevelBlock,
+} from '../utils.js';
 import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
@@ -72,13 +76,13 @@ export class EdgelessSelectedRect extends LitElement {
         let frameW = bound.w;
         let frameH = deserializeXYWH(element.xywh)[3];
         // Limit the width of the selected frame
-        if (frameW < FRAME_MIN_SIZE) {
-          frameW = FRAME_MIN_SIZE;
+        if (frameW < FRAME_MIN_WIDTH) {
+          frameW = FRAME_MIN_WIDTH;
           frameX = bound.x;
         }
         // Limit the height of the selected frame
-        if (frameH < FRAME_MIN_SIZE) {
-          frameH = FRAME_MIN_SIZE;
+        if (frameH < FRAME_MIN_HEIGHT) {
+          frameH = FRAME_MIN_HEIGHT;
           frameY = bound.y;
         }
         const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
