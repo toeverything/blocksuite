@@ -81,16 +81,22 @@ export class BrushElement extends BaseElement {
     element: BaseElement,
     bound: IBound
   ): Record<string, string> {
-    const elementH = element.h || 1;
-    const elementW = element.w || 1;
-    const boundH = bound.h || 1;
-    const boundW = bound.w || 1;
+    const { lineWidth } = element as BrushElement;
+    const elementH = Math.max(element.h - lineWidth, 1);
+    const elementW = Math.max(element.w - lineWidth, 1);
+    const boundH = Math.max(bound.h - lineWidth, 1);
+    const boundW = Math.max(bound.w - lineWidth, 1);
     const points = (element as BrushElement).points.map(([x, y]) => {
       return [boundW * (x / elementW), boundH * (y / elementH)];
     });
 
     return {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+      xywh: serializeXYWH(
+        bound.x,
+        bound.y,
+        boundW + lineWidth,
+        boundH + lineWidth
+      ),
       points: JSON.stringify(points),
     };
   }
