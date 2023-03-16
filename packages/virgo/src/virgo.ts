@@ -543,7 +543,7 @@ export class VEditor<
   }
 
   setMarks(marks: TextAttributes): void {
-    this._marks = marks;
+    this._marks = this._parseSchema(marks) ?? null;
 
     let vRange = this.getVRange();
     const dispose = this.slots.vRangeUpdated.on(([r, t]) => {
@@ -605,7 +605,7 @@ export class VEditor<
     if (this._marks) {
       attributes = { ...this._marks, ...attributes };
     }
-    const normalizedAttributes = this._parseSchema();
+    const normalizedAttributes = this._parseSchema(attributes);
 
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
