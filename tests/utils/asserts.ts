@@ -655,3 +655,8 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
 }
+
+export async function assertEdgelessNonSelectedRect(page: Page) {
+  const rect = page.locator('edgeless-selected-rect');
+  await expect(rect).toBeHidden();
+}

@@ -57,4 +57,11 @@ export abstract class BaseElement implements SurfaceElement {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     };
   }
+
+  static getProps(
+    _: BaseElement,
+    rawProps: Record<string, unknown>
+  ): Record<string, unknown> {
+    return rawProps;
+  }
 }

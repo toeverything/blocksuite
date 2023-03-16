@@ -151,3 +151,58 @@ export const clamp = (value: number, min: number, max: number): number => {
   }
   return value;
 };
+
+/**
+ *
+ * @example
+ * ```ts
+ * const items = [
+ *  {name: 'a', classroom: 'c1'},
+ *  {name: 'b', classroom: 'c2'},
+ *  {name: 'a', classroom: 't0'}
+ * ]
+ * const counted = countBy(items1, i => i.name);
+ * // counted: { a: 2, b: 1}
+ * ```
+ */
+export function countBy<T>(
+  items: T[],
+  key: (item: T) => string | number
+): Record<string, number> {
+  const count: Record<string, number> = {};
+  items.forEach(item => {
+    const k = key(item);
+    if (!count[k]) {
+      count[k] = 0;
+    }
+    count[k] += 1;
+  });
+  return count;
+}
+
+/**
+ * @example
+ * ```ts
+ * const items = [{n: 1}, {n: 2}]
+ * const max = maxBy(items, i => i.n);
+ * // max: {n: 2}
+ * ```
+ */
+export function maxBy<T>(items: T[], value: (item: T) => number): T | null {
+  if (!items.length) {
+    return null;
+  }
+  let maxItem = items[0];
+  let max = value(maxItem);
+
+  for (let i = 1; i < items.length; i++) {
+    const item = items[i];
+    const v = value(item);
+    if (v > max) {
+      max = v;
+      maxItem = item;
+    }
+  }
+
+  return maxItem;
+}

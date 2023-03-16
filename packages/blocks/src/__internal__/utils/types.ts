@@ -65,10 +65,15 @@ export type ShapeMouseMode = {
   color: `#${string}`;
 };
 
+export enum BrushSize {
+  Thin = 4,
+  Thick = 16,
+}
+
 export type BrushMouseMode = {
   type: 'brush';
   color: `#${string}`;
-  lineWidth: number;
+  lineWidth: BrushSize;
 };
 
 export type PanMouseMode = {
