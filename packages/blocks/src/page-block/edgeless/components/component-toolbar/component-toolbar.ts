@@ -22,8 +22,8 @@ type CategorizedElements = {
   frame: TopLevelBlockModel[];
 };
 
-@customElement('edgeless-edit-bar')
-export class EdgelessEditBar extends LitElement {
+@customElement('edgeless-component-toolbar')
+export class EdgelessComponentToolbar extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -122,6 +122,6 @@ export class EdgelessEditBar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-edit-bar': EdgelessEditBar;
+    'edgeless-component-toolbar': EdgelessComponentToolbar;
   }
 }

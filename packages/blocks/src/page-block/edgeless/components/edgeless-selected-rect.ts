@@ -1,4 +1,4 @@
-import './edit-bar/edit-bar.js';
+import './component-toolbar/component-toolbar.js';
 
 import type { Bound } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
@@ -15,7 +15,7 @@ import type {
   Selectable,
 } from '../selection-manager.js';
 import { FRAME_MIN_SIZE, isTopLevelBlock, stopPropagation } from '../utils.js';
-import type { EdgelessEditBar } from './edit-bar/edit-bar.js';
+import type { EdgelessComponentToolbar } from './component-toolbar/component-toolbar.js';
 import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
@@ -32,7 +32,7 @@ export class EdgelessSelectedRect extends LitElement {
       display: block;
     }
 
-    edgeless-edit-bar {
+    edgeless-component-toolbar {
       /* greater than handle */
       z-index: 11;
     }
@@ -53,8 +53,8 @@ export class EdgelessSelectedRect extends LitElement {
   @query('.affine-edgeless-selected-rect')
   private _selectedRect!: HTMLDivElement;
 
-  @query('edgeless-edit-bar')
-  private _editBar!: EdgelessEditBar;
+  @query('edgeless-component-toolbar')
+  private _editBar!: EdgelessComponentToolbar;
 
   private _editBarPopper: PopperInstance | null = null;
 
@@ -123,7 +123,7 @@ export class EdgelessSelectedRect extends LitElement {
     this._lock = false;
   };
 
-  async firstUpdated() {
+  firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
 
@@ -140,7 +140,6 @@ export class EdgelessSelectedRect extends LitElement {
           name: 'flip',
           options: {
             fallbackPlacements: ['bottom'],
-            boundary: document.querySelector('#app'),
           },
         },
       ],
@@ -184,12 +183,12 @@ export class EdgelessSelectedRect extends LitElement {
     return html`
       ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
-      <edgeless-edit-bar
+      <edgeless-component-toolbar
         .selected=${selected}
         .page=${this.page}
         .surface=${this.surface}
       >
-      </edgeless-edit-bar>
+      </edgeless-component-toolbar>
     `;
   }
 }
