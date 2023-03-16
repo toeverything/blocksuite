@@ -87,6 +87,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container rich-text {
+      /* to make sure the resize observer can be triggered as expected */
+      display: block;
       position: relative;
     }
 
@@ -167,7 +169,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return service.hljs.default.highlight;
   }
 
-  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
+  private _richTextResizeObserver: ResizeObserver = new ResizeObserver(e => {
+    console.log('resize', e);
     this._updateLineNumbers();
   });
 
@@ -316,6 +319,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     const richText = this.querySelector('rich-text');
     assertExists(richText);
+    console.log('richText', richText);
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(richText);
   }
