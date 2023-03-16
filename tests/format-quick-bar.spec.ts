@@ -1007,3 +1007,16 @@ test('should format bar style active correctly', async ({ page }) => {
   await expect(boldBtn).toHaveAttribute('active', '');
   await expect(codeBtn).not.toHaveAttribute('active', '');
 });
+
+test('should format quick bar show when double click button', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const { formatQuickBar, boldBtn } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+  await boldBtn.dblclick();
+  await expect(formatQuickBar).toBeVisible();
+});
