@@ -1,6 +1,7 @@
 import {
   asyncFocusRichText,
   BlockHub,
+  EDGELESS_BLOCK_CHILD_PADDING,
   getAllowSelectedBlocks,
   getDefaultPage,
   getEdgelessPage,
@@ -23,6 +24,9 @@ export const createBlockHub: (
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onDropCallback: async (e, end, point) => {
+      if (!page.root) {
+        return;
+      }
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -52,9 +56,26 @@ export const createBlockHub: (
         if (ids.length === 1) {
           asyncFocusRichText(page, ids[0]);
         }
-      } else if (editor.mode === 'edgeless' && page.root) {
+      }
+
+      if (editor.mode === 'page') {
+        tryUpdateFrameSize(page, 1);
+        return;
+      }
+
+      // In edgeless mode.
+      const edgelessPageBlock = getEdgelessPage(page);
+      assertExists(edgelessPageBlock);
+
+      // Creates new frame block.
+      if (!end) {
         page.captureSync();
-        const xywh = `[0,0,720,480]`;
+        const { clientX, clientY } = e;
+        const [x, y] = edgelessPageBlock.surface.toModelCoord(
+          clientX - EDGELESS_BLOCK_CHILD_PADDING,
+          clientY - EDGELESS_BLOCK_CHILD_PADDING
+        );
+        const xywh = `[${x},${y},720,480]`;
         const frameId = page.addBlock(
           'affine:frame',
           { xywh },
@@ -64,12 +85,7 @@ export const createBlockHub: (
         asyncFocusRichText(page, id);
       }
 
-      let zoom = 1;
-      if (editor.mode === 'edgeless') {
-        const edgelessPageBlock = getEdgelessPage(page);
-        zoom = edgelessPageBlock?.surface.viewport.zoom ?? 1;
-      }
-      tryUpdateFrameSize(page, zoom);
+      tryUpdateFrameSize(page, edgelessPageBlock.surface.viewport.zoom);
     },
   });
 

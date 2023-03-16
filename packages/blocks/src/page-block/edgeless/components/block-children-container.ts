@@ -37,6 +37,8 @@ function EdgelessBlockChild(
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
   const translateY = (modelY - viewportY) * zoom;
+  console.log('viewport', viewportX, viewportY);
+  console.log('model', modelX, modelY);
 
   const style = {
     position: 'absolute',

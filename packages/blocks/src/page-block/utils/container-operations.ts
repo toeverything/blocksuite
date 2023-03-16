@@ -451,7 +451,7 @@ export async function onModelElementUpdated(
   }
 }
 
-export function tryUpdateFrameSize(page: Page, zoom = 1) {
+export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
     const frames = page.root.children as TopLevelBlockModel[];
@@ -463,7 +463,6 @@ export function tryUpdateFrameSize(page: Page, zoom = 1) {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
-      if (!bound) return;
 
       const [x, y, w, h] = deserializeXYWH(model.xywh);
       const newModelHeight =
