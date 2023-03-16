@@ -18,7 +18,8 @@ import type {
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
-export const FRAME_MIN_SIZE = 20;
+export const FRAME_MIN_WIDTH = 200;
+export const FRAME_MIN_HEIGHT = 20;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
