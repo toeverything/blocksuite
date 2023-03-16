@@ -118,7 +118,6 @@ export class EdgelessMoreButton extends LitElement {
         this.surface.removeElement(element.id);
       }
     });
-    this.page.captureSync();
     this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 

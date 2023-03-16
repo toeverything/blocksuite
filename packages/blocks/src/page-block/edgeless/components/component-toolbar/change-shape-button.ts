@@ -75,7 +75,6 @@ export class EdgelessChangeShapeButton extends LitElement {
         this.elements.forEach(element => {
           this.surface.updateElementProps(element.id, updatedProps);
         });
-        this.page.captureSync();
       })
     );
     super.firstUpdated(changedProperties);

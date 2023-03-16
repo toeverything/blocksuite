@@ -121,7 +121,6 @@ export class EdgelessChangeBrushButton extends LitElement {
         this.surface.updateElementProps(element.id, { lineWidth: size });
       }
     });
-    this.page.captureSync();
     // FIXME: force update selection, because brush size changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
@@ -133,7 +132,6 @@ export class EdgelessChangeBrushButton extends LitElement {
         this.surface.updateElementProps(element.id, { color });
       }
     });
-    this.page.captureSync();
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
