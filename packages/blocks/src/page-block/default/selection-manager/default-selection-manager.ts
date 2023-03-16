@@ -518,6 +518,8 @@ export class DefaultSelectionManager {
   }
 
   selectOneBlock(element: Element | null, rect?: DOMRect) {
+    // clear selection first
+    this.clear();
     // rich-text should be unfocused
     this.state.blur();
     this.state.type = 'block';
