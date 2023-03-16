@@ -5,18 +5,21 @@ import { expect } from '@playwright/test';
 
 import {
   activeFrameInEdgeless,
+  clickComponentToolbarMoreMenuButton,
   decreaseZoomLevel,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
   getFrameRect,
   increaseZoomLevel,
+  openComponentToolbarMoreMenu,
   pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
   selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
+  updateExistedBrushElementSize,
 } from './utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
@@ -40,6 +43,7 @@ import {
 import {
   assertEdgelessHoverRect,
   assertEdgelessNonHoverRect,
+  assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertNativeSelectionRangeCount,
@@ -741,4 +745,46 @@ test('dragging un-selected frame', async ({ page }) => {
     frameBox.width,
     frameBox.height,
   ]);
+});
+
+test('change brush element size by component-toolbar', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  // change to thick
+  await page.mouse.click(110, 110);
+  await updateExistedBrushElementSize(page, 'thick');
+
+  await page.mouse.move(110, 110);
+  await assertEdgelessHoverRect(page, [100, 100, 116, 116]);
+
+  // change to thin
+  await page.mouse.click(110, 110);
+  await updateExistedBrushElementSize(page, 'thin');
+
+  await page.mouse.move(110, 110);
+  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+});
+
+test('delete shape by component-toolbar', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.click(110, 110);
+  await openComponentToolbarMoreMenu(page);
+  await clickComponentToolbarMoreMenuButton(page, 'delete');
+  await assertEdgelessNonSelectedRect(page);
+
+  await page.mouse.move(110, 110);
+  await assertEdgelessNonHoverRect(page);
 });
