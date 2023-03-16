@@ -4,7 +4,7 @@ import { literal } from 'lit/static-html.js';
 
 import {
   DatabaseCellLitElement,
-  defineTagSchemaRenderer,
+  defineColumnSchemaRenderer,
 } from '../../register.js';
 
 @customElement('affine-database-number-cell')
@@ -19,7 +19,7 @@ class NumberCell extends DatabaseCellLitElement {
   static tag = literal`affine-database-number-cell`;
 
   render() {
-    return html` <span>${this.tag?.value}</span> `;
+    return html` <span>${this.column?.value}</span> `;
   }
 }
 
@@ -55,7 +55,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
           this.rowHost.setValue(this.value);
         }}
         type="number"
-        value=${this.tag?.value}
+        value=${this.column?.value ?? ''}
       />
     `;
   }
@@ -65,7 +65,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
 class NumberColumnPropertyEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-number-column-property-editing`;
 }
-export const NumberTagSchemaRenderer = defineTagSchemaRenderer(
+export const NumberColumnSchemaRenderer = defineColumnSchemaRenderer(
   'number',
   () => ({
     decimal: 0,

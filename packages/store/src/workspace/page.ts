@@ -1,4 +1,4 @@
-import type { BlockTag, TagSchema } from '@blocksuite/global/database';
+import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -101,16 +101,16 @@ export class Page extends Space<PageData> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get tags() {
+  get columns() {
     assertExists(this.root);
     assertExists(this.root.flavour === 'affine:page');
-    return this.root.tags as Y.Map<Y.Map<unknown>>;
+    return this.root.columns as Y.Map<Y.Map<unknown>>;
   }
 
-  get tagSchema() {
+  get columnSchema() {
     assertExists(this.root);
     assertExists(this.root.flavour === 'affine:page');
-    return this.root.tagSchema as Y.Map<unknown>;
+    return this.root.columnSchema as Y.Map<unknown>;
   }
 
   get blobs() {
@@ -197,17 +197,17 @@ export class Page extends Space<PageData> {
     this._history.clear();
   };
 
-  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
-    const already = this.tags.has(id);
+  updateBlockTag<Tag extends BlockColumn>(id: BaseBlockModel['id'], tag: Tag) {
+    const already = this.columns.has(id);
     let tags: Y.Map<unknown>;
     if (!already) {
       tags = new Y.Map();
     } else {
-      tags = this.tags.get(id) as Y.Map<unknown>;
+      tags = this.columns.get(id) as Y.Map<unknown>;
     }
     this.transact(() => {
       if (!already) {
-        this.tags.set(id, tags);
+        this.columns.set(id, tags);
       }
       // Related issue: https://github.com/yjs/yjs/issues/255
       const tagMap = new Y.Map();
@@ -217,11 +217,11 @@ export class Page extends Space<PageData> {
     });
   }
 
-  getBlockTagByTagSchema(
+  getBlockColumnBySchema(
     model: BaseBlockModel,
-    schema: TagSchema
-  ): BlockTag | null {
-    const tags = this.tags.get(model.id);
+    schema: ColumnSchema
+  ): BlockColumn | null {
+    const tags = this.columns.get(model.id);
     const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
     if (!tagMap) {
       return null;
@@ -232,15 +232,15 @@ export class Page extends Space<PageData> {
     };
   }
 
-  getTagSchema(id: TagSchema['id']): TagSchema | null {
-    return (this.tagSchema.get(id) ?? null) as TagSchema | null;
+  getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
+    return (this.columnSchema.get(id) ?? null) as ColumnSchema | null;
   }
 
-  setTagSchema(
-    schema: Omit<TagSchema, 'id'> & { id?: TagSchema['id'] }
+  setColumnSchema(
+    schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
   ): string {
     const id = schema.id ?? this._idGenerator();
-    this.transact(() => this.tagSchema.set(id, { ...schema, id }));
+    this.transact(() => this.columnSchema.set(id, { ...schema, id }));
     return id;
   }
 
@@ -780,8 +780,8 @@ export class Page extends Space<PageData> {
     });
 
     if (matchFlavours(model, ['affine:page'] as const)) {
-      model.tags = yBlock.get('ext:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('ext:tagSchema') as Y.Map<unknown>;
+      model.columns = yBlock.get('ext:columns') as Y.Map<Y.Map<unknown>>;
+      model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
       model.title = new Text(titleText);
@@ -944,7 +944,7 @@ export class Page extends Space<PageData> {
         }
       }
     } else {
-      if (event.path.includes('ext:tags')) {
+      if (event.path.includes('ext:columns')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);

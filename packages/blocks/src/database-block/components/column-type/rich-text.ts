@@ -9,7 +9,7 @@ import type {
 } from '../../../__internal__/rich-text/virgo/types.js';
 import {
   DatabaseCellLitElement,
-  defineTagSchemaRenderer,
+  defineColumnSchemaRenderer,
 } from '../../register.js';
 
 function toggleStyle(
@@ -81,10 +81,10 @@ class TextCell extends DatabaseCellLitElement {
 
   private _handleClick() {
     this.databaseModel.page.captureSync();
-    if (!this.tag) {
+    if (!this.column) {
       const yText = new this.databaseModel.page.YText();
       this.databaseModel.page.updateBlockTag(this.rowModel.id, {
-        schemaId: this.column.id,
+        schemaId: this.columnSchema.id,
         value: yText,
       });
       this.vEditor = new VEditor(yText);
@@ -150,14 +150,14 @@ class TextCell extends DatabaseCellLitElement {
 
   protected update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
-    if (this.tag && !this.vEditor) {
+    if (this.column && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.vEditor = new VEditor(this.tag.value as any);
+      this.vEditor = new VEditor(this.column.value as any);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
       });
-    } else if (!this.tag && this.vEditor) {
+    } else if (!this.column && this.vEditor) {
       this.vEditor.unmount();
       this.vEditor = null;
     }
@@ -193,7 +193,7 @@ class TextCell extends DatabaseCellLitElement {
 class TextColumnPropertyEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-rich-text-column-property-editing`;
 }
-export const RichTextTagSchemaRenderer = defineTagSchemaRenderer(
+export const RichTextColumnSchemaRenderer = defineColumnSchemaRenderer(
   'rich-text',
   () => ({}),
   page => new page.YText(''),

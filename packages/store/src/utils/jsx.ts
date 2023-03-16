@@ -35,8 +35,8 @@ const IGNORE_PROPS = [
   'sys:flavour',
   'sys:children',
   'prop:xywh',
-  'ext:tags',
-  'ext:tagSchema',
+  'ext:columns',
+  'ext:columnSchema',
 ];
 
 export function yDocToJSXNode(

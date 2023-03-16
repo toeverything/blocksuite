@@ -1,10 +1,10 @@
-import { registerTagSchemaRenderer } from '../../register.js';
-import { NumberTagSchemaRenderer } from './number.js';
-import { RichTextTagSchemaRenderer } from './rich-text.js';
-import { SelectTagSchemaRenderer } from './select.js';
+import { registerColumnSchemaRenderer } from '../../register.js';
+import { NumberColumnSchemaRenderer } from './number.js';
+import { RichTextColumnSchemaRenderer } from './rich-text.js';
+import { SelectColumnSchemaRenderer } from './select.js';
 
 export function registerInternalRenderer() {
-  registerTagSchemaRenderer(NumberTagSchemaRenderer);
-  registerTagSchemaRenderer(SelectTagSchemaRenderer);
-  registerTagSchemaRenderer(RichTextTagSchemaRenderer);
+  registerColumnSchemaRenderer(NumberColumnSchemaRenderer);
+  registerColumnSchemaRenderer(SelectColumnSchemaRenderer);
+  registerColumnSchemaRenderer(RichTextColumnSchemaRenderer);
 }

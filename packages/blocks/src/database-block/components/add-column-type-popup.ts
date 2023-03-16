@@ -1,9 +1,9 @@
-import type { TagSchema } from '@blocksuite/global/database';
+import type { ColumnSchema } from '@blocksuite/global/database';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { listTagSchemaRenderer } from '../register.js';
+import { listColumnSchemaRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
 
 export const DATABASE_ADD_COLUMN_TYPE_POPUP =
@@ -55,12 +55,12 @@ export class DatabaseAddColumnTypePopup extends LitElement {
   show = false;
 
   @property()
-  onSelectType!: (type: TagSchema['type']) => void;
+  onSelectType!: (type: ColumnSchema['type']) => void;
 
   private _handleSelectType = (e: MouseEvent) => {
     if (e.target instanceof HTMLElement) {
       const type = e.target.getAttribute('data-type');
-      this.onSelectType(type as TagSchema['type']);
+      this.onSelectType(type as ColumnSchema['type']);
       this.show = false;
     }
   };
@@ -105,7 +105,7 @@ export class DatabaseAddColumnTypePopup extends LitElement {
       <div class="affine-database-add-column-type-popup-subtitle">Type</div>
       <div class="affine-database-add-column-type-popup-list">
         ${repeat(
-          listTagSchemaRenderer(),
+          listColumnSchemaRenderer(),
           renderer => renderer.type,
           renderer =>
             html`

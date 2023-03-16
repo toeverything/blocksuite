@@ -2,7 +2,7 @@
 import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
-import type { TagSchema } from '@blocksuite/global/database';
+import type { ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
@@ -20,7 +20,7 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
-import { getTagSchemaRenderer } from './register.js';
+import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
@@ -58,7 +58,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
               @click=${(event: MouseEvent) => {
                 const editColumn = new EditColumnPopup();
                 editColumn.targetModel = block.model;
-                editColumn.targetTagSchema = column;
+                editColumn.targetColumnSchema = column;
                 document.body.appendChild(editColumn);
                 requestAnimationFrame(() => {
                   createPopper(event.target as Element, editColumn, {
@@ -259,10 +259,10 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
   @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
   addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
-  get columns(): TagSchema[] {
+  get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
-      this.model.page.getTagSchema(id)
-    ) as TagSchema[];
+      this.model.page.getColumnSchema(id)
+    ) as ColumnSchema[];
   }
 
   private _addRow = () => {
@@ -270,10 +270,10 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     this.model.page.addBlockByFlavour('affine:paragraph', {}, this.model.id);
   };
 
-  private _addColumn = (columnType: TagSchema['type']) => {
+  private _addColumn = (columnType: ColumnSchema['type']) => {
     this.model.page.captureSync();
-    const renderer = getTagSchemaRenderer(columnType);
-    const schema: Omit<TagSchema, 'id'> = {
+    const renderer = getColumnSchemaRenderer(columnType);
+    const schema: Omit<ColumnSchema, 'id'> = {
       type: columnType,
       name: 'new column',
       internalProperty: {
@@ -283,7 +283,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       },
       property: renderer.propertyCreator(),
     };
-    const id = this.model.page.setTagSchema(schema);
+    const id = this.model.page.setColumnSchema(schema);
     this.model.page.updateBlock(this.model, {
       columns: [...this.model.columns, id],
     });

@@ -4,7 +4,10 @@ import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { DatabaseCellLitElement, getTagSchemaRenderer } from '../register.js';
+import {
+  DatabaseCellLitElement,
+  getColumnSchemaRenderer,
+} from '../register.js';
 import { onClickOutside } from '../utils.js';
 
 @customElement('affine-database-cell-container')
@@ -27,7 +30,7 @@ export class DatabaseCellContainer
       setTimeout(() => {
         this.databaseModel.page.captureSync();
         this.databaseModel.page.updateBlockTag(this.rowModel.id, {
-          schemaId: this.column.id,
+          schemaId: this.columnSchema.id,
           value,
         });
       });
@@ -47,10 +50,10 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.column.property);
+    const newProperty = apply(this.columnSchema.property);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setTagSchema({
-      ...this.column,
+    this.databaseModel.page.setColumnSchema({
+      ...this.columnSchema,
       property: newProperty,
     });
   }
@@ -62,14 +65,14 @@ export class DatabaseCellContainer
     this.rowModel.childrenUpdated.on(() => this.requestUpdate());
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
-    this.setAttribute('data-column-id', this.column.id);
+    this.setAttribute('data-column-id', this.columnSchema.id);
   }
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('column')) {
       requestAnimationFrame(() => {
-        this.style.minWidth = `${this.column.internalProperty.width}px`;
-        this.style.maxWidth = `${this.column.internalProperty.width}px`;
+        this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
+        this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
       });
     }
   }
@@ -101,10 +104,10 @@ export class DatabaseCellContainer
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   protected render() {
-    const renderer = getTagSchemaRenderer(this.column.type);
-    const tag = this.databaseModel.page.getBlockTagByTagSchema(
+    const renderer = getColumnSchemaRenderer(this.columnSchema.type);
+    const tag = this.databaseModel.page.getBlockColumnBySchema(
       this.rowModel,
-      this.column
+      this.columnSchema
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
@@ -114,7 +117,7 @@ export class DatabaseCellContainer
           .rowHost=${this}
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
-          .column=${this.column}
+          .column=${this.columnSchema}
           .tag=${tag}
         ></${editingTag}>
       `;
@@ -125,7 +128,7 @@ export class DatabaseCellContainer
         .rowHost=${this}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .column=${this.column}
+        .column=${this.columnSchema}
         .tag=${tag}
       ></${previewTag}>
     `;

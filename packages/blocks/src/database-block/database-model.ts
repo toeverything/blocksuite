@@ -1,4 +1,4 @@
-import type { TagSchema } from '@blocksuite/global/database';
+import type { ColumnSchema } from '@blocksuite/global/database';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
@@ -12,7 +12,7 @@ export const DatabaseBlockModelSchema = defineBlockSchema(
   'affine:database',
   () => ({
     title: '',
-    columns: [] as TagSchema['id'][],
+    columns: [] as ColumnSchema['id'][],
     mode: DatabaseBlockDisplayMode.Database,
   }),
   {
