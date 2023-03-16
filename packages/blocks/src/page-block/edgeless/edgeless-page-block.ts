@@ -458,6 +458,17 @@ export class EdgelessPageBlockComponent
       }),
       frameId
     );
+
+    const element = this.page.root?.children.find(b => b.id === frameId);
+    if (element) {
+      const selectionState = {
+        selected: [element],
+        active: true,
+      } as EdgelessSelectionState;
+      this.setBlockSelectionState(selectionState);
+      this.slots.selectionUpdated.emit(selectionState);
+    }
+
     return ids;
   }
 
