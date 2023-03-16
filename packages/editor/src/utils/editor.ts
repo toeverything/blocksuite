@@ -2,7 +2,6 @@ import {
   asyncFocusRichText,
   BlockHub,
   getAllowSelectedBlocks,
-  getDefaultPage,
   getEdgelessPage,
   tryUpdateFrameSize,
   uploadImageFromLocal,
@@ -98,13 +97,13 @@ export const createBlockHub: (
   });
 
   if (editor.mode === 'page') {
-    const defaultPageBlock = getDefaultPage(page);
+    const defaultPageBlock = editor.querySelector('affine-default-page');
     assertExists(defaultPageBlock);
     blockHub.slots = defaultPageBlock.slots;
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(defaultPageBlock.model);
   } else {
-    const edgelessPageBlock = getEdgelessPage(page);
+    const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
     assertExists(edgelessPageBlock);
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(edgelessPageBlock.model);
