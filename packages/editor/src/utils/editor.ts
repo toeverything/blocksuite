@@ -1,7 +1,6 @@
 import {
   asyncFocusRichText,
   BlockHub,
-  EDGELESS_BLOCK_CHILD_PADDING,
   getAllowSelectedBlocks,
   getDefaultPage,
   getEdgelessPage,
@@ -9,7 +8,7 @@ import {
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -30,7 +29,8 @@ export const createBlockHub: (
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      let props = JSON.parse(data);
+      const blocks: Array<Partial<BaseBlockModel>> = [];
+      const props = JSON.parse(data);
       if (props.flavour === 'affine:database') {
         if (!page.awarenessStore.getFlag('enable_database')) {
           console.warn('database block is not enabled');
@@ -38,9 +38,9 @@ export const createBlockHub: (
         }
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        props = await uploadImageFromLocal(page);
+        blocks.push(...(await uploadImageFromLocal(page)));
       } else {
-        props = [props];
+        blocks.push(props);
       }
 
       if (end) {
@@ -50,10 +50,10 @@ export const createBlockHub: (
         const distanceToBottom = Math.abs(rect.bottom - point.y);
         const ids = page.addSiblingBlocks(
           model,
-          props,
+          blocks,
           distanceToTop < distanceToBottom ? 'before' : 'after'
         );
-        if (ids.length === 1) {
+        if (ids.length) {
           asyncFocusRichText(page, ids[0]);
         }
       }
@@ -71,18 +71,26 @@ export const createBlockHub: (
       if (!end) {
         page.captureSync();
         const { clientX, clientY } = e;
-        const [x, y] = edgelessPageBlock.surface.toModelCoord(
-          clientX - EDGELESS_BLOCK_CHILD_PADDING,
-          clientY - EDGELESS_BLOCK_CHILD_PADDING
-        );
+        const [x, y] = edgelessPageBlock.surface.toModelCoord(clientX, clientY);
         const xywh = `[${x},${y},720,480]`;
         const frameId = page.addBlock(
           'affine:frame',
           { xywh },
           page.root.id
         );
-        const id = page.addBlock(props[0].flavour, {}, frameId);
-        asyncFocusRichText(page, id);
+        const ids = page.addBlocksByFlavour(
+          blocks.map(({ flavour, ...blockProps }) => {
+            assertExists(flavour);
+            return {
+              flavour,
+              blockProps,
+            };
+          }),
+          frameId
+        );
+        if (ids.length) {
+          asyncFocusRichText(page, ids[0]);
+        }
       }
 
       tryUpdateFrameSize(page, edgelessPageBlock.surface.viewport.zoom);
