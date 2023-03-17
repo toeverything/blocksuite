@@ -27,7 +27,7 @@ export class BlockSuiteDoc<
   }
 
   @debug('transact')
-  transact(f: (arg0: Transaction) => void, origin?: number) {
-    super.transact(f, origin);
+  transact<T>(f: (arg0: Transaction) => T, origin?: number) {
+    return super.transact(f, origin);
   }
 }
