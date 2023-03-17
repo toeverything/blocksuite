@@ -64,12 +64,12 @@ test('database rich text column', async ({ page }) => {
   await waitNextFrame(page);
   await richTextCell.type('hello', { delay: 50 });
   const text1 = await page.evaluate(() => {
-    return window.page.tags.toJSON()[4][3].value;
+    return window.page.columns.toJSON()[4][3].value;
   });
   expect(text1).toBe('hello');
   await richTextCell.type(' world', { delay: 50 });
   const text2 = await page.evaluate(() => {
-    return window.page.tags.toJSON()[4][3].value;
+    return window.page.columns.toJSON()[4][3].value;
   });
   expect(() => expect(text2).toBe('hello world'));
 });

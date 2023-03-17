@@ -69,7 +69,7 @@ export class DatabaseCellContainer
   }
 
   updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('column')) {
+    if (changedProperties.has('columnSchema')) {
       requestAnimationFrame(() => {
         this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
         this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
