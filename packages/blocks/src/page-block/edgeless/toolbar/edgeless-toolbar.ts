@@ -106,7 +106,7 @@ export class EdgelessToolbar extends LitElement {
   private _zoomToFit() {
     const { viewport } = this.edgeless.surface;
     const { width, height } = viewport;
-    const frame = this.edgeless.pageModel.children[0] as FrameBlockModel;
+    const frame = this.edgeless.model.children[0] as FrameBlockModel;
     const frameXYWH = deserializeXYWH(frame.xywh);
     const frameBound = new Bound(...frameXYWH);
 
