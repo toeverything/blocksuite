@@ -62,9 +62,15 @@ export class EditorContainer extends NonShadowLitElement {
     getServiceOrRegister('affine:code');
   }
 
+  protected update(changedProperties: Map<string, unknown>) {
+    super.update(changedProperties);
+    if (changedProperties.has('page')) {
+      this.contentParser = new ContentParser(this.page);
+    }
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-    this.contentParser = new ContentParser(this.page);
 
     // Question: Why do we prevent this?
     this._disposables.addFromEvent(window, 'keydown', e => {
