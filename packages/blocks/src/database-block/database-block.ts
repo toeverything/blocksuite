@@ -4,7 +4,7 @@ import './components/cell-container.js';
 
 import type { ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals } from '@blocksuite/global/utils';
-import { VEditor } from '@blocksuite/virgo/';
+import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
