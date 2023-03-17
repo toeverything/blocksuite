@@ -35,7 +35,7 @@ export class AffineCodeLine extends NonShadowLitElement {
     const tokens = highlighter.codeToThemedTokens(
       this.vText.str,
       lang,
-      mode === 'light' ? 'github-light' : 'github-dark'
+      mode === 'dark' ? 'github-dark' : 'github-light'
     )[0];
     const vTexts = tokens.map(token => {
       const vText = new VText();
