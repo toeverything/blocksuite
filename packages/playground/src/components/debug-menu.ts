@@ -12,6 +12,7 @@ import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 
+import type { ContentParser } from '@blocksuite/blocks';
 import {
   createEvent,
   getCurrentBlockRange,
@@ -57,6 +58,9 @@ export class DebugMenu extends NonShadowLitElement {
   @property()
   editor!: EditorContainer;
 
+  @property()
+  contentParser!: ContentParser;
+
   @state()
   private _connected = true;
 
@@ -86,10 +90,6 @@ export class DebugMenu extends NonShadowLitElement {
 
   get page() {
     return this.editor.page;
-  }
-
-  get contentParser() {
-    return this.editor.contentParser;
   }
 
   createRenderRoot() {

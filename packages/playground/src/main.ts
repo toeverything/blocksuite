@@ -47,6 +47,7 @@ function subscribePage(workspace: Workspace) {
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
+    debugMenu.contentParser = contentParser;
     document.body.appendChild(debugMenu);
     editor.createBlockHub().then(blockHub => {
       document.body.appendChild(blockHub);
