@@ -66,7 +66,7 @@ export class DragIndicator extends LitElement {
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
     const style = styleMap({
-      width: `${rect.width + 10}px`,
+      width: `${rect.width}px`,
       transform: `translate(${rect.left}px, ${offsetY}px)`,
     });
     return html` <div class="affine-drag-indicator" style=${style}></div> `;
@@ -116,7 +116,7 @@ export class DragHandle extends LitElement {
     onDropCallback: (
       point: IPoint,
       dragged: BlockComponentElement[],
-      lastModelState: EditingState
+      lastModelState: EditingState | null
     ) => void;
     setSelectedBlocks: (
       selectedBlocks: EditingState | BlockComponentElement[] | null
@@ -156,7 +156,7 @@ export class DragHandle extends LitElement {
   public onDropCallback: (
     point: IPoint,
     draggingBlockElements: BlockComponentElement[],
-    lastModelState: EditingState
+    lastModelState: EditingState | null
   ) => void;
 
   @property()
@@ -480,29 +480,29 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    const element = this._getClosestBlockElement(new Point(x, y));
-
-    if (element) {
-      const rect = getRectByBlockElement(element);
-      this._lastDroppingTarget = {
-        rect,
-        element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
-      };
-      this._indicator.targetRect = rect;
-    }
-
     this._indicator.cursorPosition = {
       x,
       y,
     };
+
+    const element = this._getClosestBlockElement(new Point(x, y));
+    let rect = null;
+    let lastModelState = null;
+
+    if (element) {
+      rect = getRectByBlockElement(element);
+      lastModelState = {
+        rect,
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+      };
+    }
+
+    this._lastDroppingTarget = lastModelState;
+    this._indicator.targetRect = rect;
   };
 
   private _onDragEnd = (e: DragEvent) => {
-    if (!this._lastDroppingTarget) {
-      // may drop to the same block position
-      return;
-    }
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;

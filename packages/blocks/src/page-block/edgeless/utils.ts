@@ -1,7 +1,3 @@
-import {
-  DragHandle,
-  type EdgelessPageBlockComponent,
-} from '@blocksuite/blocks';
 import type {
   BlockComponentElement,
   EditingState,
@@ -10,6 +6,7 @@ import type {
   TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
 import {
+  doesInSamePath,
   getClosestBlockElementByPoint,
   hotkey,
   HOTKEY_SCOPE,
@@ -25,11 +22,20 @@ import {
 import type { KeyHandler } from 'hotkeys-js';
 
 import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
-import type { EdgelessContainer } from './edgeless-page-block.js';
+import { DragHandle } from '../../components/index.js';
+import type {
+  EdgelessContainer,
+  EdgelessPageBlockComponent,
+} from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export const FRAME_MIN_WIDTH = 200;
 export const FRAME_MIN_HEIGHT = 20;
+
+export const DEFAULT_FRAME_WIDTH = 448;
+export const DEFAULT_FRAME_HEIGHT = 72;
+export const DEFAULT_FRAME_OFFSET_X = 30;
+export const DEFAULT_FRAME_OFFSET_Y = 40;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -168,52 +174,44 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(p, blocks, { rect, model }): void {
-      // const page = defaultPageBlock.page;
-      // if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
-      //   return;
-      // }
-      // page.captureSync();
-      // const distanceToTop = Math.abs(rect.top - p.y);
-      // const distanceToBottom = Math.abs(rect.bottom - p.y);
-      // page.moveBlocks(
-      //   blocks.map(b => b.model),
-      //   model,
-      //   distanceToTop < distanceToBottom
-      // );
-      // defaultPageBlock.selection.clear();
-      // defaultPageBlock.selection.state.type = 'block';
-      // defaultPageBlock.updateComplete.then(() => {
-      //   // update selection rects
-      //   // block may change its flavour after moved.
-      //   defaultPageBlock.selection.setSelectedBlocks(
-      //     blocks
-      //       .map(b => getBlockById(b.model.id))
-      //       .filter((b): b is BlockComponentElement => !!b)
-      //   );
-      // });
+    onDropCallback(point, blocks, editingState): void {
+      const page = pageBlock.page;
+      if (editingState) {
+        page.captureSync();
+        const { rect, model } = editingState;
+        if (
+          blocks.length === 1 &&
+          doesInSamePath(page, model, blocks[0].model)
+        ) {
+          return;
+        }
+        const distanceToTop = Math.abs(rect.top - point.y);
+        const distanceToBottom = Math.abs(rect.bottom - point.y);
+        page.moveBlocks(
+          blocks.map(b => b.model),
+          model,
+          distanceToTop < distanceToBottom
+        );
+      } else {
+        // bank area
+        page.captureSync();
+        pageBlock.separateFrame(
+          point,
+          blocks.map(b => b.model)
+        );
+      }
     },
     setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ): void {
-      // if (Array.isArray(selectedBlocks)) {
-      //   defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
-      // } else if (selectedBlocks) {
-      //   const { element, rect } = selectedBlocks;
-      //   defaultPageBlock.selection.selectOneBlock(element, rect);
-      // }
+      _selectedBlocks: EditingState | BlockComponentElement[] | null
+    ) {
+      return;
     },
     getSelectedBlocks() {
       return [];
-      // return defaultPageBlock.selection.state.selectedBlocks;
     },
     getFocusedBlock() {
       return null;
-      // return defaultPageBlock.selection.state.focusedBlock;
     },
-    // clearSelection() {
-    //   defaultPageBlock.selection.clear();
-    // },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPoint(point);
     },

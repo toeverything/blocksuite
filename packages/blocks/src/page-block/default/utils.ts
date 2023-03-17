@@ -496,7 +496,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(p, blocks, { rect, model }): void {
+    onDropCallback(p, blocks, editingState): void {
+      if (!editingState) return;
+      const { rect, model } = editingState;
       const page = defaultPageBlock.page;
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;

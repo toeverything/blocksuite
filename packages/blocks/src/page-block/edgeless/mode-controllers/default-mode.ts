@@ -308,18 +308,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const point = new Point(e.raw.clientX, e.raw.clientY);
     point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
     let hoverEditingState = null;
-    let element = getClosestBlockElementByPoint(point);
+    const element = getClosestBlockElementByPoint(point);
     if (element) {
-      if (element.tagName === 'AFFINE-EDGELESS-PAGE') {
-        element = null;
-      }
-      if (element) {
-        hoverEditingState = {
-          element: element as BlockComponentElement,
-          model: getModelByBlockElement(element),
-          rect: getSelectedStateRectByBlockElement(element),
-        };
-      }
+      hoverEditingState = {
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
+      };
     }
     this._edgeless.components.dragHandle?.onContainerMouseMove(
       e,

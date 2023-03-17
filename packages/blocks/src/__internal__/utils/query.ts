@@ -14,11 +14,6 @@ import type { RichText } from '../rich-text/rich-text.js';
 import type { Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
 
-const AFFINE_DATABASE = 'AFFINE-DATABASE';
-const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
-const AFFINE_EMBED = 'AFFINE-EMBED';
-const AFFINE_FRAME = 'AFFINE-FRAME';
-const AFFINE_IMAGE = 'AFFINE-IMAGE';
 const ATTR_SELECTOR = `[${ATTR}]`;
 
 // margin-top: calc(var(--affine-paragraph-space) + 24px);
@@ -526,10 +521,24 @@ export function hasBlockId(element: Element) {
 }
 
 /**
+ * Returns `true` if element is default page.
+ */
+export function isDefaultPage({ tagName }: Element) {
+  return tagName === 'AFFINE-DEFAULT-PAGE';
+}
+
+/**
+ * Returns `true` if element is edgeless page.
+ */
+export function isEdgelessPage({ tagName }: Element) {
+  return tagName === 'AFFINE-EDGELESS-PAGE';
+}
+
+/**
  * Returns `true` if element is page or frame.
  */
-export function isPageOrFrame({ tagName }: Element) {
-  return tagName === AFFINE_DEFAULT_PAGE || tagName === AFFINE_FRAME;
+export function isPageOrFrame(element: Element) {
+  return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
 }
 
 /**
@@ -543,21 +552,28 @@ export function isBlock(element: Element) {
  * Returns `true` if element is image.
  */
 export function isImage({ tagName }: Element) {
-  return tagName === AFFINE_IMAGE;
+  return tagName === 'AFFINE-IMAGE';
+}
+
+/**
+ * Returns `true` if element is embed.
+ */
+function isFrame({ tagName }: Element) {
+  return tagName === 'AFFINE-FRAME';
 }
 
 /**
  * Returns `true` if element is embed.
  */
 function isEmbed({ tagName }: Element) {
-  return tagName === AFFINE_EMBED;
+  return tagName === 'AFFINE-EMBED';
 }
 
 /**
  * Returns `true` if element is codeblock.
  */
 function isDatabase({ tagName }: Element) {
-  return tagName === AFFINE_DATABASE;
+  return tagName === 'AFFINE-DATABASE';
 }
 
 /**

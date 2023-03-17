@@ -2,25 +2,33 @@
 import './toolbar/edgeless-toolbar.js';
 import './components/edgeless-selected-rect.js';
 
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import { SurfaceManager } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-
-import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
   BrushSize,
   hotkey,
   HOTKEY_SCOPE,
+  type IPoint,
   resetNativeSelection,
   type TopLevelBlockModel,
-} from '../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+  SurfaceManager,
+} from '@blocksuite/phasor';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  Slot,
+} from '@blocksuite/store';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type {
@@ -49,6 +57,10 @@ import {
 import {
   bindEdgelessHotkey,
   createDragHandle,
+  DEFAULT_FRAME_HEIGHT,
+  DEFAULT_FRAME_OFFSET_X,
+  DEFAULT_FRAME_OFFSET_Y,
+  DEFAULT_FRAME_WIDTH,
   getCursorMode,
   isTopLevelBlock,
 } from './utils.js';
@@ -280,36 +292,7 @@ export class EdgelessPageBlockComponent
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
-        // if (
-        //   draggingBlockIds &&
-        //   draggingBlockIds.length === 1 &&
-        //   Utils.doesInsideBlockByFlavour(
-        //     this.page,
-        //     draggingBlockIds[0],
-        //     'affine:database'
-        //   )
-        // ) {
-        //   return getAllowSelectedBlocks(
-        //     this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
-        //   );
-        // }
-        //
-        // if (!draggingBlockIds || draggingBlockIds.length === 1) {
-        //   return getAllowSelectedBlocks(this.model);
-        // } else {
-        //   return getAllowSelectedBlocks(this.model).filter(block => {
-        //     return !draggingBlockIds?.includes(block.id);
-        //   });
-        // }
-
-        return [];
-      };
     };
-    console.log(
-      this.page.awarenessStore.getFlag('enable_drag_handle'),
-      !this.components.dragHandle
-    );
     if (
       this.page.awarenessStore.getFlag('enable_drag_handle') &&
       !this.components.dragHandle
@@ -399,6 +382,41 @@ export class EdgelessPageBlockComponent
         });
       })
     );
+  }
+
+  /**
+   * Adds a new frame with the given point and blocks.
+   * @param point Point
+   * @param blocks BaseBlockModel[]
+   */
+  separateFrame(point: IPoint, blocks: BaseBlockModel[]) {
+    if (!this.page.root) return;
+    this.page.captureSync();
+    const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    const frameId = this.page.addBlock(
+      'affine:frame',
+      {
+        xywh: serializeXYWH(
+          x - DEFAULT_FRAME_OFFSET_X,
+          y - DEFAULT_FRAME_OFFSET_Y,
+          DEFAULT_FRAME_WIDTH,
+          DEFAULT_FRAME_HEIGHT
+        ),
+      },
+      this.page.root.id
+    );
+    this.page.moveBlocksToFrame(blocks, frameId);
+
+    requestAnimationFrame(() => {
+      const element = this.page.root?.children.find(b => b.id === frameId);
+      if (element) {
+        const selectionState = {
+          selected: [element],
+          active: true,
+        } as EdgelessSelectionState;
+        this.slots.selectionUpdated.emit(selectionState);
+      }
+    });
   }
 
   update(changedProperties: Map<string, unknown>) {
