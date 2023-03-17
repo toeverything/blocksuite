@@ -7,7 +7,6 @@ import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
-import { handleIndent, handleUnindent } from './rich-text-operations.js';
 import type { AffineVEditor } from './virgo/types.js';
 
 // Type definitions is ported from quill
@@ -65,76 +64,6 @@ export function createKeyboardBindings(
   vEditor: AffineVEditor
 ): KeyboardBindings {
   const page = model.page;
-  function onTab(this: KeyboardEventThis, e: KeyboardEvent, vRange: VRange) {
-    if (matchFlavours(model, ['affine:code'] as const)) {
-      e.stopPropagation();
-
-      const lastLineBreakBeforeCursor = this.vEditor.yText
-        .toString()
-        .lastIndexOf('\n', vRange.index - 1);
-
-      const lineStart =
-        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
-      this.vEditor.insertText(
-        {
-          index: lineStart,
-          length: 0,
-        },
-        '  '
-      );
-      this.vEditor.setVRange({
-        index: vRange.index + 2,
-        length: 0,
-      });
-
-      return PREVENT_DEFAULT;
-    }
-
-    const index = vRange.index;
-    handleIndent(page, model, index);
-    e.stopPropagation();
-    return PREVENT_DEFAULT;
-  }
-
-  function onShiftTab(
-    this: KeyboardEventThis,
-    e: KeyboardEvent,
-    vRange: VRange
-  ) {
-    if (matchFlavours(model, ['affine:code'] as const)) {
-      e.stopPropagation();
-
-      const lastLineBreakBeforeCursor = this.vEditor.yText
-        .toString()
-        .lastIndexOf('\n', vRange.index - 1);
-
-      const lineStart =
-        lastLineBreakBeforeCursor !== -1 ? lastLineBreakBeforeCursor + 1 : 0;
-      if (
-        this.vEditor.yText.length >= 2 &&
-        this.vEditor.yText.toString().slice(lineStart, lineStart + 2) === '  '
-      ) {
-        this.vEditor.deleteText({
-          index: lineStart,
-          length: 2,
-        });
-        this.vEditor.setVRange({
-          index: vRange.index - 2,
-          length: 0,
-        });
-      }
-
-      return PREVENT_DEFAULT;
-    }
-
-    const index = vRange.index;
-    handleUnindent(page, model, index);
-    e.stopPropagation();
-    return PREVENT_DEFAULT;
-  }
-
-  onTab;
-  onShiftTab;
 
   const service = getService(model.flavour);
   const blockKeyBinding = service.defineKeymap(model, vEditor);

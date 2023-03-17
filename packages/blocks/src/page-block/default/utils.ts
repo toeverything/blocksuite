@@ -468,10 +468,6 @@ async function getUrlByModel(model: BaseBlockModel) {
   return url;
 }
 
-export function isControlledKeyboardEvent(e: KeyboardEvent) {
-  return e.ctrlKey || e.metaKey || e.shiftKey;
-}
-
 export function copyCode(codeBlockModel: CodeBlockModel) {
   copy({
     type: 'Block',
