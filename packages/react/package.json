@@ -16,7 +16,7 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "zustand": "^4.3.5"
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
