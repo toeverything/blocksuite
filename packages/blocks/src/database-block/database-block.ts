@@ -4,6 +4,7 @@ import './components/cell-container.js';
 
 import type { ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals } from '@blocksuite/global/utils';
+import { VEditor } from '@blocksuite/virgo/';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -214,12 +215,15 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       outline: none;
     }
 
-    .affine-database-block-title::placeholder {
-      color: var(--affine-placeholder-color);
-    }
-
     .affine-database-block-title:disabled {
       background-color: transparent;
+    }
+
+    .affine-database-block-title-empty::before {
+      content: 'Database';
+      color: var(--affine-placeholder-color);
+      position: absolute;
+      opacity: 0.5;
     }
 
     .affine-database-block-footer {
@@ -259,6 +263,11 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
   @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
   addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
+  private _vEditor: VEditor | null = null;
+
+  @query('.affine-database-block-title')
+  private _container!: HTMLDivElement;
+
   get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
       this.model.page.getColumnSchema(id)
@@ -289,17 +298,24 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     });
   };
 
+  private _initTitleVEditor() {
+    this._vEditor = new VEditor(this.model.title.yText);
+    this._vEditor.mount(this._container);
+    this._vEditor.focusEnd();
+    this._vEditor.setReadonly(this.model.page.readonly);
+
+    // for title placeholder
+    this.model.title.yText.observe(() => {
+      this.requestUpdate();
+    });
+  }
+
   firstUpdated() {
+    this._initTitleVEditor();
+
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
-
-  private _onTitleInput = (e: InputEvent) => {
-    const value = (e.target as HTMLInputElement).value;
-    this.model.page.updateBlock(this.model, {
-      title: value,
-    });
-  };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
@@ -310,15 +326,12 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       FIRST_LINE_TEXT_WIDTH +
       ADD_COLUMN_BUTTON_WIDTH;
 
+    const isEmpty = !this.model.title || !this.model.title.length;
+
     return html`
-      <div>
-        <input
-          class="affine-database-block-title"
-          data-block-is-title="true"
-          .value=${this.model.title}
-          placeholder="Database"
-          @input=${this._onTitleInput}
-        />
+      <div class="affine-database-block-title ${
+        isEmpty ? 'affine-database-block-title-empty' : ''
+      }" data-block-is-title="true">
       </div>
       <div class="affine-database-block">
         <div
