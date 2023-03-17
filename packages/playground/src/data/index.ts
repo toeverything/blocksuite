@@ -110,8 +110,10 @@ export const preset: InitFn = (workspace: Workspace) => {
 
       // Add frame block inside page block
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      // Import preset markdown content inside frame block
-      await window.editor.contentParser.importMarkdown(presetMarkdown, frameId);
+      page.slots.blockUpdated.once(() => {
+        // Import preset markdown content inside frame block
+        window.editor.contentParser.importMarkdown(presetMarkdown, frameId);
+      });
 
       addShapeElement(page, {
         id: '0',
