@@ -16,6 +16,8 @@ import {
   almostEqual,
   type BlockHost,
   BrushSize,
+  hotkey,
+  HOTKEY_SCOPE,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -44,10 +46,9 @@ import {
   type EdgelessSelectionState,
 } from './selection-manager.js';
 import {
-  bindHotkey,
+  bindHotkeyInEdgeless,
   getCursorMode,
   isTopLevelBlock,
-  unbindAllHotkeys,
 } from './utils.js';
 
 export interface EdgelessSelectionSlots {
@@ -147,27 +148,31 @@ export class EdgelessPageBlockComponent
   private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
-    bindHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
-    bindHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
-    bindHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    bindHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
-    bindHotkey('v', () => this._setMouseMode({ type: 'default' }));
-    bindHotkey('h', () => this._setMouseMode({ type: 'pan', panning: false }));
-    bindHotkey('t', () => this._setMouseMode({ type: 'text' }));
-    bindHotkey('p', () =>
+    bindHotkeyInEdgeless(HOTKEYS.BACKSPACE, this._handleBackspace);
+    bindHotkeyInEdgeless(HOTKEYS.UP, e => handleUp(e, this.page));
+    bindHotkeyInEdgeless(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    bindHotkeyInEdgeless(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindHotkeyInEdgeless('v', () => this._setMouseMode({ type: 'default' }));
+    bindHotkeyInEdgeless('h', () =>
+      this._setMouseMode({ type: 'pan', panning: false })
+    );
+    bindHotkeyInEdgeless('t', () => this._setMouseMode({ type: 'text' }));
+    bindHotkeyInEdgeless('p', () =>
       this._setMouseMode({
         type: 'brush',
         color: '#000',
         lineWidth: BrushSize.Thin,
       })
     );
-    bindHotkey('s', () =>
+    bindHotkeyInEdgeless('s', () =>
       this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
     );
+
+    hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
     bindCommonHotkey(this.page);
 
     return () => {
-      unbindAllHotkeys();
+      hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
       removeCommonHotKey();
     };
   }

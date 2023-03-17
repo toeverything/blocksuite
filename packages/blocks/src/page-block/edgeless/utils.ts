@@ -12,7 +12,7 @@ import type {
   MouseMode,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { hotkey } from '../../__internal__/index.js';
+import { hotkey, HOTKEY_SCOPE } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
@@ -139,8 +139,7 @@ export function getCursorMode(mouseMode: MouseMode) {
   }
 }
 
-const HOTKEY_SCOPE = 'affine:edgeless';
-export function bindHotkey(
+export function bindHotkeyInEdgeless(
   key: string,
   listener: KeyHandler,
   options: {
@@ -148,9 +147,8 @@ export function bindHotkey(
     keydown?: boolean;
   } = {}
 ) {
-  hotkey.addListener(key, listener, { scope: HOTKEY_SCOPE, ...options });
-}
-
-export function unbindAllHotkeys() {
-  hotkey.removeScope(HOTKEY_SCOPE);
+  hotkey.addListener(key, listener, {
+    scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
+    ...options,
+  });
 }
