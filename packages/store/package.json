@@ -23,17 +23,17 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
-    "ky": "^0.33.2",
-    "lib0": "^0.2.63",
+    "ky": "^0.33.3",
+    "lib0": "^0.2.68",
     "merge": "^2.1.1",
     "nanoid": "^4.0.1",
     "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.4",
-    "zod": "^3.20.6"
+    "y-webrtc": "^10.2.5",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "lit": "^2.6.1",
-    "yjs": "^13.5.48"
+    "yjs": "^13.5.50"
   },
   "peerDependencies": {
     "yjs": "^13"
