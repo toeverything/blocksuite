@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -5,6 +6,7 @@ import {
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
+  Rect,
   type SelectionEvent,
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
@@ -13,6 +15,7 @@ import {
   type Disposable,
   DisposableGroup,
   isFirefox,
+  matchFlavours,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
@@ -224,6 +227,7 @@ export class DragHandle extends LitElement {
   private _scale = 1;
   private _currentClientX = 0;
   private _currentClientY = 0;
+  private _stopPropagation = false;
 
   /**
    * Current drag handle model state
@@ -413,7 +417,9 @@ export class DragHandle extends LitElement {
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
 
-    e.stopPropagation();
+    if (this._stopPropagation) {
+      e.stopPropagation();
+    }
   }
 
   private _calcDragHandleY(
@@ -515,6 +521,12 @@ export class DragHandle extends LitElement {
   };
 
   private _onMouseDown = (e: MouseEvent) => {
+    this._stopPropagation = true;
+    e.stopPropagation();
+  };
+
+  private _onMouseUp = (e: MouseEvent) => {
+    this._stopPropagation = false;
     e.stopPropagation();
   };
 
@@ -589,11 +601,23 @@ export class DragHandle extends LitElement {
 
     if (element) {
       rect = getRectByBlockElement(element);
+      const model = getModelByBlockElement(element);
       lastModelState = {
         rect,
+        model,
         element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
       };
+      if (
+        matchFlavours(model, ['affine:database']) &&
+        (model as DatabaseBlockModel).children.length === 0
+      ) {
+        const bounds = element
+          .querySelector('.affine-database-block-footer')
+          ?.getBoundingClientRect();
+        if (bounds && Rect.fromDOMRect(bounds).isPointIn(point)) {
+          rect = new DOMRect(bounds.x, bounds.y, rect.width, 1);
+        }
+      }
     }
 
     this._lastDroppingTarget = lastModelState;
@@ -625,6 +649,7 @@ export class DragHandle extends LitElement {
       this._lastDroppingTarget
     );
 
+    this._stopPropagation = false;
     this.hide();
   };
 

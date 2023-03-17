@@ -1,12 +1,16 @@
+import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
+import type {
+  BlockComponentElement,
+  EditingState,
+  OpenBlockInfo,
+} from '@blocksuite/blocks/std';
 import {
-  type BlockComponentElement,
   doesInSamePath,
-  type EditingState,
   getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
-  type OpenBlockInfo,
-  type Point,
+  Point,
+  Rect,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -496,25 +500,47 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(p, blocks, editingState): void {
+    onDropCallback(point, blocks, editingState): void {
       if (!editingState) return;
-      const { rect, model } = editingState;
+      const { rect, model, element } = editingState;
       const page = defaultPageBlock.page;
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
       }
       page.captureSync();
 
-      const distanceToTop = Math.abs(rect.top - p.y);
-      const distanceToBottom = Math.abs(rect.bottom - p.y);
-      const parent = page.getParent(model);
-      assertExists(parent);
-      page.moveBlocks(
-        blocks.map(b => b.model),
-        parent,
-        model,
-        distanceToTop < distanceToBottom
-      );
+      let shouldMove = true;
+      if (matchFlavours(model, ['affine:database'])) {
+        if ((model as DatabaseBlockModel).children.length === 0) {
+          const bounds = element
+            .querySelector('.affine-database-block')
+            ?.getBoundingClientRect();
+          if (
+            bounds &&
+            Rect.fromDOMRect(bounds).isPointIn(new Point(point.x, point.y))
+          ) {
+            shouldMove = false;
+            page.moveBlocksToParent(
+              blocks.map(b => b.model),
+              model
+            );
+          }
+        }
+      }
+
+      if (shouldMove) {
+        const distanceToTop = Math.abs(rect.top - point.y);
+        const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const parent = page.getParent(model);
+        assertExists(parent);
+        page.moveBlocks(
+          blocks.map(b => b.model),
+          parent,
+          model,
+          distanceToTop < distanceToBottom
+        );
+      }
+
       defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = 'block';
 

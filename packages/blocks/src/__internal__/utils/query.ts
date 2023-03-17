@@ -653,10 +653,17 @@ export function getClosestBlockElementByPoint(
   if (element) {
     // Database
     if (isDatabase(element)) {
-      bounds = element
-        .querySelector('.affine-database-block-title')
+      bounds = element.getBoundingClientRect();
+      childBounds = element
+        .querySelector('.affine-database-block-rows')
         ?.getBoundingClientRect();
-      if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+
+      if (childBounds && childBounds.height) {
+        if (point.y < childBounds.top || point.y > childBounds.bottom) {
+          return element;
+        }
+        childBounds = null;
+      } else {
         return element;
       }
     } else {
@@ -785,6 +792,9 @@ export function getClosestFrameBlockElementById(
 export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
+  if (isDatabase(element)) {
+    return element.getBoundingClientRect();
+  }
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
 
