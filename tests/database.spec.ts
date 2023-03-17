@@ -66,12 +66,12 @@ test('database rich text column', async ({ page }) => {
   await waitNextFrame(page);
   await richTextCell.type('hello', { delay: 50 });
   const text1 = await page.evaluate(() => {
-    return window.page.tags.toJSON()[4][3].value;
+    return window.page.columns.toJSON()[4][3].value;
   });
   expect(text1).toBe('hello');
   await richTextCell.type(' world', { delay: 50 });
   const text2 = await page.evaluate(() => {
-    return window.page.tags.toJSON()[4][3].value;
+    return window.page.columns.toJSON()[4][3].value;
   });
   expect(() => expect(text2).toBe('hello world'));
 });
@@ -80,34 +80,26 @@ test('edit column title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  const columnAddBtn = await page.locator(
-    '.affine-database-block-add-column-button'
-  );
+  const columnAddBtn = page.locator('.affine-database-block-add-column-button');
   await columnAddBtn.click();
 
-  const columnAddPopup = await page.locator(
-    'affine-database-add-column-type-popup'
-  );
+  const columnAddPopup = page.locator('affine-database-add-column-type-popup');
   expect(columnAddPopup).toBeVisible();
-  const columnType = await columnAddPopup.locator('[data-type="number"]');
+  const columnType = columnAddPopup.locator('[data-type="number"]');
   await columnType.click();
 
   // first added column
-  const columnTitle = await page
-    .locator('.affine-database-block-column')
-    .nth(1);
+  const columnTitle = page.locator('.affine-database-block-column').nth(1);
   expect(columnTitle).toBeVisible();
   await columnTitle.click();
 
-  const columnEditPopup = await page.locator(
-    'affine-database-edit-column-popup'
-  );
+  const columnEditPopup = page.locator('affine-database-edit-column-popup');
   expect(columnEditPopup).toBeVisible();
-  const input = await columnEditPopup.locator('div > input');
+  const input = columnEditPopup.locator('div > input');
   await input.click();
   await page.keyboard.press(`${SHORT_KEY}+a`);
   await type(page, '1');
-  const saveBtn = await columnEditPopup.locator('div > button');
+  const saveBtn = columnEditPopup.locator('div > button');
   await saveBtn.click();
   expect(await columnTitle.innerText()).toBe('1');
 

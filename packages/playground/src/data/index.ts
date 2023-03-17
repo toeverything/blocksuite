@@ -158,7 +158,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
       type Option = 'Done' | 'TODO' | 'WIP';
       const selection = ['Done', 'TODO', 'WIP'] as Option[];
-      const col1 = page.setTagSchema({
+      const col1 = page.setColumnSchema({
         internalProperty: {
           color: '#ff0000',
           width: 200,
@@ -170,7 +170,7 @@ export const database: InitFn = (workspace: Workspace) => {
         name: 'Number',
         type: 'number',
       });
-      const col2 = page.setTagSchema({
+      const col2 = page.setColumnSchema({
         internalProperty: {
           color: '#ff0000',
           width: 200,
@@ -182,7 +182,7 @@ export const database: InitFn = (workspace: Workspace) => {
         name: 'Select 2',
         type: 'select',
       });
-      const col3 = page.setTagSchema({
+      const col3 = page.setColumnSchema({
         internalProperty: {
           color: '#ff0000',
           width: 200,
@@ -215,12 +215,12 @@ export const database: InitFn = (workspace: Workspace) => {
         databaseId
       );
 
-      page.updateBlockTag(p1, {
+      page.updateBlockColumn(p1, {
         schemaId: col1,
         value: 0.1,
       });
 
-      page.updateBlockTag(p2, {
+      page.updateBlockColumn(p2, {
         schemaId: col2,
         value: 'TODO',
       });
@@ -228,7 +228,7 @@ export const database: InitFn = (workspace: Workspace) => {
       const text = new page.YText();
       text.insert(0, '123');
       text.insert(0, 'code');
-      page.updateBlockTag(p2, {
+      page.updateBlockColumn(p2, {
         schemaId: col3,
         value: text,
       });

@@ -1,4 +1,4 @@
-import type { TagSchema } from '@blocksuite/global/database';
+import type { ColumnSchema } from '@blocksuite/global/database';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -18,7 +18,7 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  targetTagSchema!: TagSchema;
+  targetColumnSchema!: ColumnSchema;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -26,13 +26,13 @@ export class EditColumnPopup extends LitElement {
   protected render(): unknown {
     return html`
       <div>
-        <input value=${this.targetTagSchema.name} />
+        <input value=${this.targetColumnSchema.name} />
         <button
           @click=${(event: MouseEvent) => {
             const newName = this.titleInput.value;
             this.targetModel.page.captureSync();
-            this.targetModel.page.setTagSchema({
-              ...this.targetTagSchema,
+            this.targetModel.page.setColumnSchema({
+              ...this.targetColumnSchema,
               name: newName,
             });
             this.targetModel.propsUpdated.emit();

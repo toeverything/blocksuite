@@ -5,7 +5,7 @@ import { html, literal } from 'lit/static-html.js';
 
 import {
   DatabaseCellLitElement,
-  defineTagSchemaRenderer,
+  defineColumnSchemaRenderer,
 } from '../../register.js';
 
 @customElement('affine-database-select-cell')
@@ -19,7 +19,7 @@ class SelectCell extends DatabaseCellLitElement {
 
   static tag = literal`affine-database-select-cell`;
   override render() {
-    return html` <div>${this.tag?.value}</div> `;
+    return html` <div>${this.column?.value}</div> `;
   }
 }
 
@@ -37,7 +37,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-select-cell-editing`;
 
   protected firstUpdated() {
-    this.style.width = `${this.column.internalProperty.width}px`;
+    this.style.width = `${this.columnSchema.internalProperty.width}px`;
   }
 
   connectedCallback() {
@@ -59,7 +59,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
   }
 
   override render() {
-    const selection = this.column.property.selection as string[];
+    const selection = this.columnSchema.property.selection as string[];
     return html`
       <div>
         <input
@@ -104,7 +104,7 @@ class SelectColumnPropertyEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
-export const SelectTagSchemaRenderer = defineTagSchemaRenderer(
+export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
   'select',
   () => ({
     selection: [] as string[],

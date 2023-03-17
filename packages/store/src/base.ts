@@ -7,7 +7,7 @@ import { Text } from './text-adapter.js';
 import type { Page } from './workspace/index.js';
 
 const FlavourSchema = z.string();
-const TagSchema = z.object({
+const ElementTagSchema = z.object({
   _$litStatic$: z.string(),
   r: z.symbol(),
 });
@@ -24,7 +24,7 @@ export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
     flavour: FlavourSchema,
-    tag: TagSchema,
+    tag: ElementTagSchema,
     props: z
       .function()
       .args(z.custom<InternalPrimitives>())
@@ -112,8 +112,8 @@ export class BaseBlockModel<Props = unknown>
   type?: string;
   children: BaseBlockModel[];
   // TODO use schema
-  tags?: Y.Map<Y.Map<unknown>>;
-  tagSchema?: Y.Map<unknown>;
+  columns?: Y.Map<Y.Map<unknown>>;
+  columnSchema?: Y.Map<unknown>;
   text?: Text;
   sourceId?: string;
 

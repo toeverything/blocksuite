@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
 import { DividerBlockModelSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -10,6 +9,7 @@ import { ListBlockModelSchema } from '../../../blocks/src/list-block/list-model.
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModelSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockModelSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import type { Slot } from '../../../global/src/utils/slot.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
@@ -105,8 +105,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -121,8 +121,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -144,8 +144,8 @@ describe.concurrent('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'sys:children': ['1', '2', '3'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -183,7 +183,7 @@ describe.concurrent('addBlock', () => {
         title: new page.Text(),
       })
     );
-    const block = await waitOnce(page.slots.rootAdded);
+    const block = (await waitOnce(page.slots.rootAdded)) as BaseBlockModel;
     if (Array.isArray(block)) {
       throw new Error('');
     }
@@ -301,8 +301,8 @@ describe.concurrent('deleteBlock', () => {
     });
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -324,8 +324,8 @@ describe.concurrent('deleteBlock', () => {
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -345,8 +345,8 @@ describe.concurrent('deleteBlock', () => {
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'meta:tags': {},
-        'meta:tagSchema': {},
+        'ext:columns': {},
+        'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',

@@ -1,4 +1,4 @@
-import type { BlockTag, TagSchema } from '@blocksuite/global/database';
+import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -101,16 +101,16 @@ export class Page extends Space<PageData> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get tags() {
+  get columns() {
     assertExists(this.root);
     assertExists(this.root.flavour === 'affine:page');
-    return this.root.tags as Y.Map<Y.Map<unknown>>;
+    return this.root.columns as Y.Map<Y.Map<unknown>>;
   }
 
-  get tagSchema() {
+  get columnSchema() {
     assertExists(this.root);
     assertExists(this.root.flavour === 'affine:page');
-    return this.root.tagSchema as Y.Map<unknown>;
+    return this.root.columnSchema as Y.Map<unknown>;
   }
 
   get blobs() {
@@ -197,50 +197,53 @@ export class Page extends Space<PageData> {
     this._history.clear();
   };
 
-  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
-    const already = this.tags.has(id);
-    let tags: Y.Map<unknown>;
+  updateBlockColumn<Column extends BlockColumn>(
+    id: BaseBlockModel['id'],
+    column: Column
+  ) {
+    const already = this.columns.has(id);
+    let columns: Y.Map<unknown>;
     if (!already) {
-      tags = new Y.Map();
+      columns = new Y.Map();
     } else {
-      tags = this.tags.get(id) as Y.Map<unknown>;
+      columns = this.columns.get(id) as Y.Map<unknown>;
     }
     this.transact(() => {
       if (!already) {
-        this.tags.set(id, tags);
+        this.columns.set(id, columns);
       }
       // Related issue: https://github.com/yjs/yjs/issues/255
-      const tagMap = new Y.Map();
-      tagMap.set('schemaId', tag.schemaId);
-      tagMap.set('value', tag.value);
-      tags.set(tag.schemaId, tagMap);
+      const columnMap = new Y.Map();
+      columnMap.set('schemaId', column.schemaId);
+      columnMap.set('value', column.value);
+      columns.set(column.schemaId, columnMap);
     });
   }
 
-  getBlockTagByTagSchema(
+  getBlockColumnBySchema(
     model: BaseBlockModel,
-    schema: TagSchema
-  ): BlockTag | null {
-    const tags = this.tags.get(model.id);
-    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
-    if (!tagMap) {
+    schema: ColumnSchema
+  ): BlockColumn | null {
+    const columns = this.columns.get(model.id);
+    const columnMap = (columns?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!columnMap) {
       return null;
     }
     return {
-      schemaId: tagMap.get('schemaId') as string,
-      value: tagMap.get('value') as unknown,
+      schemaId: columnMap.get('schemaId') as string,
+      value: columnMap.get('value') as unknown,
     };
   }
 
-  getTagSchema(id: TagSchema['id']): TagSchema | null {
-    return (this.tagSchema.get(id) ?? null) as TagSchema | null;
+  getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
+    return (this.columnSchema.get(id) ?? null) as ColumnSchema | null;
   }
 
-  setTagSchema(
-    schema: Omit<TagSchema, 'id'> & { id?: TagSchema['id'] }
+  setColumnSchema(
+    schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
   ): string {
     const id = schema.id ?? this._idGenerator();
-    this.transact(() => this.tagSchema.set(id, { ...schema, id }));
+    this.transact(() => this.columnSchema.set(id, { ...schema, id }));
     return id;
   }
 
@@ -780,8 +783,8 @@ export class Page extends Space<PageData> {
     });
 
     if (matchFlavours(model, ['affine:page'] as const)) {
-      model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+      model.columns = yBlock.get('ext:columns') as Y.Map<Y.Map<unknown>>;
+      model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
       model.title = new Text(titleText);
@@ -942,7 +945,7 @@ export class Page extends Space<PageData> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
-      } else if (event.path.includes('meta:tagSchema')) {
+      } else if (event.path.includes('ext:columnSchema')) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
           // todo: refactor here
@@ -952,7 +955,7 @@ export class Page extends Space<PageData> {
         });
       }
     } else {
-      if (event.path.includes('meta:tags')) {
+      if (event.path.includes('ext:columns')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);
