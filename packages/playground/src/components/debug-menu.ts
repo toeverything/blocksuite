@@ -16,6 +16,7 @@ import {
   createEvent,
   getCurrentBlockRange,
   NonShadowLitElement,
+  SelectionUtils,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
@@ -315,7 +316,10 @@ export class DebugMenu extends NonShadowLitElement {
                 size="small"
                 content="Undo"
                 .disabled=${!this._canUndo}
-                @click=${() => this.page.undo()}
+                @click=${() => {
+                  SelectionUtils.clearSelection(this.page);
+                  this.page.undo();
+                }}
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -326,7 +330,10 @@ export class DebugMenu extends NonShadowLitElement {
                 size="small"
                 content="Redo"
                 .disabled=${!this._canRedo}
-                @click=${() => this.page.redo()}
+                @click=${() => {
+                  SelectionUtils.clearSelection(this.page);
+                  this.page.redo();
+                }}
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
