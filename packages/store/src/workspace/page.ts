@@ -945,6 +945,14 @@ export class Page extends Space<PageData> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
+      } else if (event.path.includes('meta:tagSchema')) {
+        const blocks = this.getBlockByFlavour('affine:database');
+        blocks.forEach(block => {
+          // todo: refactor here
+          //  force update all blocks that used tagSchema, which is not efficient
+          //  but it's ok for now
+          block.propsUpdated.emit();
+        });
       }
     } else {
       if (event.path.includes('ext:columns')) {

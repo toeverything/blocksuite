@@ -3,6 +3,8 @@ import { expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   initEmptyDatabaseState,
+  SHORT_KEY,
+  type,
   undoByClick,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -72,4 +74,43 @@ test('database rich text column', async ({ page }) => {
     return window.page.columns.toJSON()[4][3].value;
   });
   expect(() => expect(text2).toBe('hello world'));
+});
+
+test('edit column title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  const columnAddBtn = await page.locator(
+    '.affine-database-block-add-column-button'
+  );
+  await columnAddBtn.click();
+
+  const columnAddPopup = await page.locator(
+    'affine-database-add-column-type-popup'
+  );
+  expect(columnAddPopup).toBeVisible();
+  const columnType = await columnAddPopup.locator('[data-type="number"]');
+  await columnType.click();
+
+  // first added column
+  const columnTitle = await page
+    .locator('.affine-database-block-column')
+    .nth(1);
+  expect(columnTitle).toBeVisible();
+  await columnTitle.click();
+
+  const columnEditPopup = await page.locator(
+    'affine-database-edit-column-popup'
+  );
+  expect(columnEditPopup).toBeVisible();
+  const input = await columnEditPopup.locator('div > input');
+  await input.click();
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await type(page, '1');
+  const saveBtn = await columnEditPopup.locator('div > button');
+  await saveBtn.click();
+  expect(await columnTitle.innerText()).toBe('1');
+
+  await undoByClick(page);
+  expect(await columnTitle.innerText()).toBe('new column');
 });
