@@ -2,6 +2,7 @@
 import {
   asyncFocusRichText,
   type BlockHost,
+  type EditingState,
   hotkey,
   Rect,
   type SelectionPosition,
@@ -36,7 +37,6 @@ import {
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
-  type EditingState,
   getAllowSelectedBlocks,
 } from './utils.js';
 
