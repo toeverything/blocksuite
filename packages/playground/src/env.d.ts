@@ -9,7 +9,7 @@ declare global {
     page: Page;
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];
-    contentParser: ContentParser;
+    ContentParser: typeof ContentParser;
     Y: typeof Workspace.Y;
     std: typeof std;
   }

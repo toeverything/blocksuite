@@ -418,7 +418,8 @@ export async function importMarkdown(
 ) {
   await page.evaluate(
     ({ data, focusedBlockId }) => {
-      window.contentParser.importMarkdown(data, focusedBlockId);
+      const contentParser = new window.ContentParser(window.page);
+      contentParser.importMarkdown(data, focusedBlockId);
     },
     { data, focusedBlockId }
   );

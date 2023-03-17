@@ -21,7 +21,7 @@ declare global {
       editor: typeof import('../../packages/editor/src/index.js');
     };
     workspace: Workspace;
-    contentParser: ContentParser;
+    ContentParser: typeof ContentParser;
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;
     debugMenu: DebugMenu;

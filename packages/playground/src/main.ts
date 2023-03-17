@@ -55,7 +55,6 @@ function subscribePage(workspace: Workspace) {
 
     window.editor = editor;
     window.page = page;
-    window.contentParser = contentParser;
   });
 }
 
@@ -88,8 +87,12 @@ async function main() {
   const workspace = new Workspace(options)
     .register(builtInSchemas)
     .register(__unstableSchemas);
-  [window.workspace, window.blockSchemas] = [workspace, builtInSchemas];
-  [window.Y, window.std] = [Workspace.Y, std];
+
+  window.workspace = workspace;
+  window.blockSchemas = builtInSchemas;
+  window.Y = Workspace.Y;
+  window.std = std;
+  window.ContentParser = ContentParser;
 
   workspace.connect();
 
