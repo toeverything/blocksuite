@@ -5,6 +5,7 @@ import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
 
+import { ContentParser } from '@blocksuite/blocks';
 import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import { EditorContainer } from '@blocksuite/editor';
@@ -27,7 +28,7 @@ initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
-  const dispose = workspace.slots.pageAdded.on(pageId => {
+  workspace.slots.pageAdded.once(pageId => {
     if (typeof globalThis.targetPageId === 'string') {
       if (pageId !== globalThis.targetPageId) {
         // if there's `targetPageId` which not same as the `pageId`
@@ -41,6 +42,7 @@ function subscribePage(workspace: Workspace) {
 
     document.getElementById('app')?.append(editor);
 
+    const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
@@ -50,8 +52,9 @@ function subscribePage(workspace: Workspace) {
       document.body.appendChild(blockHub);
     });
 
-    [window.editor, window.page] = [editor, page];
-    dispose.dispose();
+    window.editor = editor;
+    window.page = page;
+    window.contentParser = contentParser;
   });
 }
 

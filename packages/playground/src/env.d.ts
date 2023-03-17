@@ -1,3 +1,4 @@
+import type { ContentParser } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
 import type { BlockSchema, Page, Workspace } from '@blocksuite/store';
 import type { z } from 'zod';
@@ -8,6 +9,7 @@ declare global {
     page: Page;
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];
+    contentParser: ContentParser;
     Y: typeof Workspace.Y;
     std: typeof std;
   }
