@@ -364,7 +364,7 @@ export async function assertBlockProps(
       const model = element.model as BaseBlockModel;
       return Object.fromEntries(
         // @ts-ignore
-        Object.keys(props).map(key => [key, model[key]])
+        Object.keys(props).map(key => [key, (model[key] as unknown).toString()])
       );
     },
     [id, props] as const
