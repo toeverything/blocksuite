@@ -814,6 +814,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await pressEnter(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['1', '23']);
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
   await assertRichTexts(page, ['1', '23', '']);

@@ -52,8 +52,7 @@ function onAbort(
   e: Event,
   slashMenu: SlashMenu,
   positionCallback: () => void,
-  model: BaseBlockModel,
-  range: Range
+  model: BaseBlockModel
 ) {
   slashMenu.remove();
   window.removeEventListener('resize', positionCallback);
@@ -142,7 +141,7 @@ export function showSlashMenu({
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {
-    onAbort(e, slashMenu, updatePosition, model, range);
+    onAbort(e, slashMenu, updatePosition, model);
   });
 
   return slashMenu;
