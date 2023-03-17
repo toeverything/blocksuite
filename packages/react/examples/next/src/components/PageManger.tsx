@@ -1,3 +1,4 @@
+import { ContentParser } from '@blocksuite/blocks';
 import { type EditorProps, useBlockSuiteStore } from '@blocksuite/react';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import dynamic from 'next/dynamic';
@@ -107,7 +108,8 @@ export const PageManger = () => {
               pageBlockId
             );
             // Import preset markdown content inside frame block
-            await editor.contentParser.importMarkdown(presetMarkdown, frameId);
+            const contentParser = new ContentParser(page);
+            await contentParser.importMarkdown(presetMarkdown, frameId);
             page.resetHistory();
           }}
         />
