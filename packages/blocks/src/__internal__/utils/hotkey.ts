@@ -100,6 +100,10 @@ class HotkeyManager {
     );
   }
 
+  removeScope(scope: string) {
+    this._hotkeys.deleteScope(scope);
+  }
+
   disableHotkey(): void {
     this._hotkeys.setScope(SCOPE.OTHER);
   }

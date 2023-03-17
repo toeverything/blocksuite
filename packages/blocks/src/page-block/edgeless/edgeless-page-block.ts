@@ -15,7 +15,7 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
-  hotkey,
+  BrushSize,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -43,7 +43,12 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { getCursorMode, isTopLevelBlock } from './utils.js';
+import {
+  bindHotkey,
+  getCursorMode,
+  isTopLevelBlock,
+  unbindAllHotkeys,
+} from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -142,16 +147,36 @@ export class EdgelessPageBlockComponent
   private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
+    bindHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
+    bindHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    bindHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindHotkey('v', () => this._setMouseMode({ type: 'default' }));
+    bindHotkey('h', () => this._setMouseMode({ type: 'pan', panning: false }));
+    bindHotkey('t', () => this._setMouseMode({ type: 'text' }));
+    bindHotkey('p', () =>
+      this._setMouseMode({
+        type: 'brush',
+        color: '#000',
+        lineWidth: BrushSize.Thin,
+      })
+    );
+    bindHotkey('s', () =>
+      this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
+    );
     bindCommonHotkey(this.page);
 
     return () => {
-      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+      unbindAllHotkeys();
       removeCommonHotKey();
     };
+  }
+
+  private _setMouseMode(mode: MouseMode) {
+    if (this._selection.isActive) {
+      return;
+    }
+    this.slots.mouseModeUpdated.emit(mode);
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {

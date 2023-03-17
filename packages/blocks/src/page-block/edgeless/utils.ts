@@ -6,11 +6,13 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import type { KeyHandler } from 'hotkeys-js';
 
 import type {
   MouseMode,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import { hotkey } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
@@ -135,4 +137,20 @@ export function getCursorMode(mouseMode: MouseMode) {
     default:
       return 'default';
   }
+}
+
+const HOTKEY_SCOPE = 'affine:edgeless';
+export function bindHotkey(
+  key: string,
+  listener: KeyHandler,
+  options: {
+    keyup?: boolean;
+    keydown?: boolean;
+  } = {}
+) {
+  hotkey.addListener(key, listener, { scope: HOTKEY_SCOPE, ...options });
+}
+
+export function unbindAllHotkeys() {
+  hotkey.removeScope(HOTKEY_SCOPE);
 }

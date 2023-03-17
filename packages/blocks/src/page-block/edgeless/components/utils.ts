@@ -3,6 +3,7 @@ import { deserializeXYWH, type SurfaceViewport } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
+import { html } from 'lit';
 
 import type { Selectable } from '../selection-manager.js';
 import { getSelectionBoxBound, getXYWH, isTopLevelBlock } from '../utils.js';
@@ -166,4 +167,9 @@ export function createButtonPopper(
       clickAway.dispose();
     },
   };
+}
+
+export function getTooltipWithShortcut(tip: string, shortcut: string) {
+  return html`<span>${tip}</span
+    ><span style="margin-left: 10px;">${shortcut}</span>`;
 }
