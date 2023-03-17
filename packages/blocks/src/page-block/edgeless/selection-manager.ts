@@ -1,17 +1,9 @@
 import type {
-  BlockComponentElement,
   MouseMode,
   SelectionEvent,
   TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import {
-  getClosestBlockElementByPoint,
-  getModelByBlockElement,
-  getSelectedStateRectByBlockElement,
-  initMouseEventHandlers,
-  noop,
-  Point,
-} from '@blocksuite/blocks/std';
+import { initMouseEventHandlers, noop } from '@blocksuite/blocks/std';
 import type { PhasorElement } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
@@ -168,30 +160,6 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const point = new Point(e.raw.clientX, e.raw.clientY);
-    point.x += 26 - 1;
-    let hoverEditingState = null;
-    let element = getClosestBlockElementByPoint(
-      point
-      // this._container.innerRect
-    );
-    if (element) {
-      if (element.tagName === 'AFFINE-EDGELESS-PAGE') {
-        element = null;
-      }
-      if (element) {
-        hoverEditingState = {
-          element: element as BlockComponentElement,
-          model: getModelByBlockElement(element),
-          rect: getSelectedStateRectByBlockElement(element),
-        };
-      }
-    }
-    this._container.components.dragHandle?.onContainerMouseMove(
-      e,
-      hoverEditingState
-    );
-
     this._updateLastMousePos(e);
     this._container.slots.hoverUpdated.emit();
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
