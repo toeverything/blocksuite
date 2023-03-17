@@ -101,7 +101,8 @@ async function initWithMarkdownContent(workspace: Workspace, url: URL) {
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());
-  return window.contentParser.importMarkdown(content, page.root.id);
+  const contentParser = new window.ContentParser(page);
+  return contentParser.importMarkdown(content, page.root.id);
 }
 
 export async function tryInitExternalContent(
