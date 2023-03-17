@@ -156,8 +156,7 @@ export function createWorkspaceOptions(): Pick<
       enable_block_hub: true,
       enable_database: true,
       enable_edgeless_toolbar: true,
-      enable_slash_menu: params.get('slash') !== '0',
-      enable_block_selection_format_bar: true,
+      enable_bi_directional_link: true,
       readonly: {
         'space:page0': false,
       },

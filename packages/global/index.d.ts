@@ -70,6 +70,7 @@ declare type BlockSuiteFlags = {
 
   enable_toggle_block: boolean;
   enable_edgeless_toolbar: boolean;
+  enable_bi_directional_link: boolean;
   readonly: Record<string, boolean>;
 };
 
