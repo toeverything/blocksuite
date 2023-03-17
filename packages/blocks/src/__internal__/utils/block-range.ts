@@ -8,7 +8,6 @@ import type { VRange } from '@blocksuite/virgo';
 import type { RichText } from '../rich-text/rich-text.js';
 import {
   getDefaultPage,
-  getDefaultPageBlock,
   getModelByElement,
   getModelsByRange,
   getVirgoByModel,
@@ -172,39 +171,38 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
   if (!blockRange.models.length) {
     throw new Error("Can't restore selection, blockRange.models is empty");
   }
+
+  const page = blockRange.models[0].page;
+  const defaultPageBlock = getDefaultPage(page);
+
   if (blockRange.type === 'Native') {
     const range = blockRangeToNativeRange(blockRange);
     resetNativeSelection(range);
 
-    // Try clean block selection
-    const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
-    if (!defaultPageBlock.selection) {
-      // In the edgeless mode
-      return;
+    // In the default mode
+    if (defaultPageBlock) {
+      defaultPageBlock.selection.state.clearBlockSelection();
+      defaultPageBlock.selection.state.type = 'native';
     }
-    defaultPageBlock.selection.state.clearBlockSelection();
-    defaultPageBlock.selection.state.type = 'native';
     return;
   }
 
   if (blockRange.type === 'Block') {
-    const defaultPageBlock = getDefaultPageBlock(blockRange.models[0]);
-    if (!defaultPageBlock.selection) {
-      // In the edgeless mode
-      return;
+    // In the default mode
+    if (defaultPageBlock) {
+      defaultPageBlock.selection.state.type = 'block';
+      defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
+        blockRange.models
+      );
     }
-    defaultPageBlock.selection.state.type = 'block';
-    defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
-      blockRange.models
-    );
     // Try clean native selection
     resetNativeSelection(null);
     (document.activeElement as HTMLElement).blur();
     return;
   }
 
-  if (blockRange.type === 'Title') {
-    const page = blockRange.models[0].page;
+  // In the default mode
+  if (defaultPageBlock && blockRange.type === 'Title') {
     focusTitle(
       page,
       blockRange.startOffset,
