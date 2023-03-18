@@ -305,6 +305,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseMove(e: SelectionEvent) {
+    this.detectClosestBlockElement(e);
+  }
+
+  onContainerMouseOut(_: SelectionEvent) {
+    noop();
+  }
+
+  detectClosestBlockElement(e: SelectionEvent) {
     const point = new Point(e.raw.clientX, e.raw.clientY);
     point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
     let hoverEditingState = null;
@@ -320,10 +328,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       e,
       hoverEditingState
     );
-  }
-
-  onContainerMouseOut(_: SelectionEvent) {
-    noop();
   }
 
   clearSelection() {

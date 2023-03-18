@@ -344,6 +344,9 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.mouseModeUpdated.on(mouseMode => {
+        if (mouseMode.type !== 'default') {
+          this.components.dragHandle?.hide();
+        }
         this.mouseMode = mouseMode;
       })
     );
@@ -432,8 +435,8 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     this._initSlotEffects();
-    this.clipboard.initEvent(this.page);
     this._initDragHandle();
+    this.clipboard.initEvent(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {

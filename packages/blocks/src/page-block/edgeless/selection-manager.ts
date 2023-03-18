@@ -198,8 +198,14 @@ export class EdgelessSelectionManager {
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
-    const hovered =
-      surface.pickTop(modelX, modelY) ?? pickTopBlock(frames, modelX, modelY);
+    let hovered: Selectable | null = surface.pickTop(modelX, modelY);
+
+    if (hovered) {
+      this._container.components.dragHandle?.hide();
+    } else {
+      hovered = pickTopBlock(frames, modelX, modelY);
+    }
+
     if (!hovered) {
       return null;
     }
