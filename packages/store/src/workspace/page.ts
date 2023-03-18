@@ -43,11 +43,11 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export type PageData = {
+type FlatBlockMap = {
   [key: string]: YBlock;
 };
 
-export class Page extends Space<PageData> {
+export class Page extends Space<FlatBlockMap> {
   private _workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
@@ -119,7 +119,7 @@ export class Page extends Space<PageData> {
 
   /** key-value store of blocks */
   private get _yBlocks(): YBlocks {
-    return this.origin;
+    return this._ySpace;
   }
 
   get root() {
@@ -134,7 +134,7 @@ export class Page extends Space<PageData> {
     return Array.isArray(this._root) ? this._root[1] : null;
   }
 
-  /** @internal used for getting surface block elements for phasor */
+  /** @internal Used for getting surface elements for phasor. */
   get ySurfaceContainer() {
     assertExists(this.surface);
     const ySurface = this._yBlocks.get(this.surface.id);
