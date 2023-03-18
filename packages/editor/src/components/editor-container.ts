@@ -5,14 +5,13 @@ import {
   type PageBlockModel,
 } from '@blocksuite/blocks';
 import {
-  ContentParser,
   NonShadowLitElement,
   type SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
@@ -33,8 +32,6 @@ export class EditorContainer extends NonShadowLitElement {
   @state()
   private showGrid = false;
 
-  contentParser!: ContentParser;
-
   get model() {
     return [this.page.root, this.page.surface] as [
       PageBlockModel | null,
@@ -52,24 +49,14 @@ export class EditorContainer extends NonShadowLitElement {
       : null;
   }
 
-  @query('.affine-block-placeholder-input')
-  private _placeholderInput!: HTMLInputElement;
-
   private _disposables = new DisposableGroup();
 
-  override firstUpdated() {
+  firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
   }
 
-  protected update(changedProperties: Map<string, unknown>) {
-    super.update(changedProperties);
-    if (changedProperties.has('page')) {
-      this.contentParser = new ContentParser(this.page);
-    }
-  }
-
-  override connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
 
     // Question: Why do we prevent this?
@@ -133,11 +120,9 @@ export class EditorContainer extends NonShadowLitElement {
         }
       })
     );
-
-    this._placeholderInput?.focus();
   }
 
-  public async createBlockHub() {
+  async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
       await new Promise(res => this.page.slots.rootAdded.once(res));
@@ -145,7 +130,7 @@ export class EditorContainer extends NonShadowLitElement {
     return createBlockHub(this, this.page);
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
     this._disposables.dispose();

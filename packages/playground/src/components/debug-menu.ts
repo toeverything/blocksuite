@@ -18,6 +18,7 @@ import {
   NonShadowLitElement,
   updateBlockType,
 } from '@blocksuite/blocks';
+import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import {
   CSSColorProperties,
@@ -57,6 +58,9 @@ export class DebugMenu extends NonShadowLitElement {
   @property()
   editor!: EditorContainer;
 
+  @property()
+  contentParser!: ContentParser;
+
   @state()
   private _connected = true;
 
@@ -86,10 +90,6 @@ export class DebugMenu extends NonShadowLitElement {
 
   get page() {
     return this.editor.page;
-  }
-
-  get contentParser() {
-    return this.editor.contentParser;
   }
 
   createRenderRoot() {

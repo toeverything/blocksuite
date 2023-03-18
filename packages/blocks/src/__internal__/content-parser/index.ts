@@ -6,7 +6,7 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import { getFileFromClipboard } from '../clipboard/utils.js';
-import { getService, getServiceOrRegister } from '../service.js';
+import { getServiceOrRegister } from '../service.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
@@ -155,7 +155,7 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
-    const service = getService(insertBlockModel.flavour);
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
   }
