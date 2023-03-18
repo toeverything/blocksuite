@@ -388,7 +388,7 @@ export class Page extends Space<FlatBlockMap> {
       ALLProps[Flavour] &
         Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
     > = {},
-    parent: BaseBlockModel | string | null = null,
+    parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
     if (this.readonly) {
@@ -433,7 +433,7 @@ export class Page extends Space<FlatBlockMap> {
 
       let parentId = null;
       if (parent !== null) {
-        parentId = parent.id ?? this.root?.id;
+        parentId = parent?.id ?? this.root?.id;
       }
 
       if (parentId) {
