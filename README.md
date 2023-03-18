@@ -47,7 +47,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
-- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10/views/6)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
@@ -110,46 +110,20 @@ import { Workspace, Page } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 
-/**
- * Manually create the initial page structure.
- * In collaboration mode or on page refresh with local persistence,
- * the page data will be automatically loaded from store providers.
- * In these cases, this function should not be called.
- */
-function createInitialPage(workspace: Workspace) {
-  // Events are being emitted using slots.
-  workspace.slots.pageAdded.once(pageId => {
-    const page = workspace.getPage(pageId) as Page;
-
-    // Block types are defined and registered in BlockSchema.
-    const pageBlockId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    page.addBlock({ flavour: 'affine:paragraph' }, frameId);
-  });
-
-  // Create a new page. This will trigger the slot above.
-  workspace.createPage('page0');
-}
-
-// Subscribe for page update and create editor on page added.
-function initEditorOnPageAdded(workspace: Workspace) {
-  workspace.slots.pageAdded.once(pageId => {
-    const page = workspace.getPage(pageId) as Page;
-    const editor = new EditorContainer();
-    editor.page = page;
-    document.body.appendChild(editor);
-  });
-}
-
 function main() {
   // Initialize the store.
   const workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
 
-  // Start waiting for the first page...
-  initEditorOnPageAdded(workspace);
+  // Create a new page. This will trigger the slot above.
+  const page = workspace.createPage('page0');
+  // Block types are defined and registered in BlockSchema.
+  const pageBlockId = page.addBlockByFlavour('affine:page');
+  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+  page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
-  // Suppose we are the first one to create the page.
-  createInitialPage(workspace);
+  const editor = new EditorContainer();
+  editor.page = page;
+  document.body.appendChild(editor);
 }
 
 main();
@@ -159,7 +133,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
 
 ## Current Status (`@blocksuite/editor`)
 
-> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10/views/6).
+> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10).
 
 - Basic text editing
   - ✅ Paragraph with inline style

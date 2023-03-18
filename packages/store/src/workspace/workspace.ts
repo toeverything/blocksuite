@@ -34,14 +34,14 @@ type WorkspaceMetaState = {
 
 class WorkspaceMeta extends Space<WorkspaceMetaState> {
   private _prevPages = new Set<string>();
-  pageAdded = new Slot<string>();
-  pageRemoved = new Slot<string>();
-  pagesUpdated = new Slot();
+  pageMetaAdded = new Slot<string>();
+  pageMetaRemoved = new Slot<string>();
+  pageMetasUpdated = new Slot();
   commonFieldsUpdated = new Slot();
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     super(id, doc, awarenessStore);
-    this._ySpace.observeDeep(this._handleEvents);
+    this._ySpace.observeDeep(this._handleWorkspaceMetaEvents);
   }
 
   get pages() {
@@ -181,7 +181,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
-  private _handlePageEvent() {
+  private _handlePageMetaEvent() {
     const { pageMetas, _prevPages } = this;
 
     pageMetas.forEach(pageMeta => {
@@ -190,29 +190,28 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
       this.doc.getMap('space:' + pageMeta.id);
 
       if (!_prevPages.has(pageMeta.id)) {
-        // Ensure following YEvent handler could be triggered in correct order.
-        queueMicrotask(() => this.pageAdded.emit(pageMeta.id));
+        this.pageMetaAdded.emit(pageMeta.id);
       }
     });
 
     _prevPages.forEach(prevPageId => {
       const isRemoved = !pageMetas.find(p => p.id === prevPageId);
       if (isRemoved) {
-        this.pageRemoved.emit(prevPageId);
+        this.pageMetaRemoved.emit(prevPageId);
       }
     });
 
     _prevPages.clear();
     pageMetas.forEach(page => _prevPages.add(page.id));
 
-    this.pagesUpdated.emit();
+    this.pageMetasUpdated.emit();
   }
 
   private _handleCommonFieldsEvent() {
     this.commonFieldsUpdated.emit();
   }
 
-  private _handleEvents = (
+  private _handleWorkspaceMetaEvents = (
     events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
   ) => {
     events.forEach(e => {
@@ -224,7 +223,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
         e.target.parent === this.pages ||
         hasKey('pages')
       ) {
-        this._handlePageEvent();
+        this._handlePageMetaEvent();
       }
 
       if (hasKey('name') || hasKey('avatar')) {
@@ -245,10 +244,10 @@ export class Workspace {
 
   meta: WorkspaceMeta;
 
-  slots: {
-    pagesUpdated: Slot;
-    pageAdded: Slot<string>;
-    pageRemoved: Slot<string>;
+  slots = {
+    pagesUpdated: new Slot(),
+    pageAdded: new Slot<string>(),
+    pageRemoved: new Slot<string>(),
   };
 
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
@@ -265,41 +264,14 @@ export class Workspace {
       this._blobStorage = getBlobStorage(options.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
-      this._blobStorage.then(blobStorage => {
-        blobStorage?.slots.onBlobSyncStateChange.on(state => {
-          const blobId = state.id;
-          const syncState = state.state;
-          if (
-            syncState === BlobSyncState.Waiting ||
-            syncState === BlobSyncState.Syncing
-          ) {
-            this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploading);
-            return;
-          }
-
-          if (
-            syncState === BlobSyncState.Success ||
-            syncState === BlobSyncState.Failed
-          ) {
-            this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploaded);
-            return;
-          }
-        });
-      });
+      this._initBlobStorage();
     } else {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
-
-    this.slots = {
-      pagesUpdated: this.meta.pagesUpdated,
-      pageAdded: this.meta.pageAdded,
-      pageRemoved: this.meta.pageRemoved,
-    };
-
-    this._handlePageEvent();
+    this._bindPageMetaEvents();
   }
 
   get id() {
@@ -377,8 +349,32 @@ export class Workspace {
     return page;
   }
 
-  private _handlePageEvent() {
-    this.slots.pageAdded.on(pageId => {
+  private _initBlobStorage() {
+    this._blobStorage.then(blobStorage => {
+      blobStorage?.slots.onBlobSyncStateChange.on(state => {
+        const blobId = state.id;
+        const syncState = state.state;
+        if (
+          syncState === BlobSyncState.Waiting ||
+          syncState === BlobSyncState.Syncing
+        ) {
+          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploading);
+          return;
+        }
+
+        if (
+          syncState === BlobSyncState.Success ||
+          syncState === BlobSyncState.Failed
+        ) {
+          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploaded);
+          return;
+        }
+      });
+    });
+  }
+
+  private _bindPageMetaEvents() {
+    this.meta.pageMetaAdded.on(pageId => {
       const page = new Page(
         this,
         pageId,
@@ -387,15 +383,16 @@ export class Workspace {
         this._store.idGenerator
       );
       this._store.addSpace(page);
-      // TODO: should trigger the pageAdded event here
-      page.syncFromExistingDoc();
-      this._indexer.onCreatePage(pageId);
+      page.trySyncFromExistingDoc();
     });
 
-    this.slots.pageRemoved.on(id => {
+    this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
+
+    this.meta.pageMetaRemoved.on(id => {
       const page = this.getPage(id) as Page;
       page.dispose();
       this._store.removeSpace(page);
+      this.slots.pageRemoved.emit(id);
       // TODO remove page from indexer
     });
   }
@@ -410,6 +407,8 @@ export class Workspace {
       title: '',
       createDate: +new Date(),
     });
+
+    return this.getPage(pageId) as Page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
@@ -418,7 +417,12 @@ export class Workspace {
   }
 
   removePage(pageId: string) {
+    const page = this.getPage(pageId);
+    if (!page) return;
+
+    page.dispose();
     this.meta.removePage(pageId);
+    this._store.removeSpace(page);
   }
 
   search(query: QueryContent) {

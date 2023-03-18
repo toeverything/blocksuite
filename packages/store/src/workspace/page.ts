@@ -646,7 +646,7 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  syncFromExistingDoc() {
+  trySyncFromExistingDoc() {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
@@ -821,6 +821,7 @@ export class Page extends Space<FlatBlockMap> {
     if (isRoot) {
       this._root = model;
       this.slots.rootAdded.emit(model);
+      this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
       this._root = [this.root as BaseBlockModel, model];
       this.slots.rootAdded.emit(this._root);
