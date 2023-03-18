@@ -150,7 +150,7 @@ export async function dragHandleFromBlockToBlockBottomById(
   await page.mouse.up();
 }
 
-export async function dragHandleBlockToPoint(
+export async function dragBlockToPoint(
   page: Page,
   sourceId: string,
   point: { x: number; y: number }

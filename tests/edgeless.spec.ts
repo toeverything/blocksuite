@@ -27,7 +27,7 @@ import {
   addBasicRectShapeElement,
   clickBlockById,
   dragBetweenCoords,
-  dragHandleBlockToPoint,
+  dragBlockToPoint,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   focusRichText,
@@ -897,7 +897,7 @@ test('drag handle should add new frame when dragged outside frame', async ({
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 
-  await dragHandleBlockToPoint(page, '3', { x: 30, y: 40 });
+  await dragBlockToPoint(page, '3', { x: 30, y: 40 });
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 
