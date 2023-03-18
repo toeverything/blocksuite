@@ -101,7 +101,7 @@ export class DragHandle extends LitElement {
       justify-content: center;
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
-      background-color: var(--affine-page-background);
+      /* background-color: var(--affine-page-background); */
       pointer-events: auto;
     }
 
@@ -503,6 +503,14 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragEnd = (e: DragEvent) => {
+    const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
+
+    // `Esc`
+    if (dropEffect === 'none') {
+      this.hide();
+      return;
+    }
+
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;
