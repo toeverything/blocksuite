@@ -2,6 +2,8 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  initDatabaseColumn,
+  initDatabaseRow,
   initEmptyDatabaseState,
   pressBackspace,
   SHORT_KEY,
@@ -108,4 +110,23 @@ test('edit column title', async ({ page }) => {
 
   await undoByClick(page);
   expect(await columnTitle.innerText()).toBe('new column');
+});
+
+test('should modify the value when the input loses focus', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
+
+  const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
+  await cell.click();
+  await cell.click();
+  await type(page, '1');
+
+  // click outside
+  await page.mouse.click(200, 200);
+
+  const numberCell = page.locator('affine-database-number-cell > span');
+  expect(await numberCell.innerText()).toBe('1');
 });
