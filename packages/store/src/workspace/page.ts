@@ -945,7 +945,10 @@ export class Page extends Space<FlatBlockMap> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
-      } else if (event.path.includes('ext:columnSchema')) {
+      } else if (
+        event.path.includes('ext:columnSchema') ||
+        event.path.includes('ext:columns')
+      ) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
           // todo: refactor here

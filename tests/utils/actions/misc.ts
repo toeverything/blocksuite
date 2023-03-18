@@ -267,6 +267,23 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initDatabaseColumn(page: Page, columnType = 'number') {
+  const columnAddBtn = page.locator('.affine-database-block-add-column-button');
+  await columnAddBtn.click();
+
+  const columnAddPopup = page.locator('affine-database-add-column-type-popup');
+  expect(columnAddPopup).toBeVisible();
+  const columnTypeItem = columnAddPopup.locator(`[data-type="${columnType}"]`);
+  await columnTypeItem.click();
+}
+
+export async function initDatabaseRow(page: Page) {
+  const columnAddBtn = page.locator(
+    '[data-test-id="affine-database-add-row-button"]'
+  );
+  await columnAddBtn.click();
+}
+
 export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
