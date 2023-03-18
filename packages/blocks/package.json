@@ -34,7 +34,8 @@
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
     "./std": "./src/std.ts",
-    "./models": "./src/models.ts"
+    "./models": "./src/models.ts",
+    "./content-parser": "./src/content-parser.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -54,6 +55,10 @@
       "./models": {
         "types": "./dist/models.d.ts",
         "default": "./dist/models.js"
+      },
+      "./content-parser": {
+        "types": "./dist/content-parser.d.ts",
+        "default": "./dist/content-parser.js"
       }
     }
   },

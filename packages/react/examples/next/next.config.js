@@ -20,6 +20,13 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@blocksuite/editor': path.resolve(baseDir, 'packages', 'editor'),
+      '@blocksuite/blocks/content-parser': path.resolve(
+        baseDir,
+        'packages',
+        'blocks',
+        'src',
+        'content-parser'
+      ),
       '@blocksuite/blocks/models': path.resolve(
         baseDir,
         'packages',

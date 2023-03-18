@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { ContentParser } from '../../packages/blocks/src/index.js';
+import type { ContentParser } from '../../packages/blocks/src/content-parser.js';
 import type { EditorContainer } from '../../packages/editor/src/index.js';
 import type {} from '../../packages/playground/src/components/debug-menu.js';
 import type { DebugMenu } from '../../packages/playground/src/components/debug-menu.js';

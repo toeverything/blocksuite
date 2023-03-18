@@ -1,4 +1,4 @@
-import { ContentParser } from '@blocksuite/blocks';
+import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { type EditorProps, useBlockSuiteStore } from '@blocksuite/react';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import dynamic from 'next/dynamic';
