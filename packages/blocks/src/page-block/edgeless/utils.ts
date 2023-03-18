@@ -139,7 +139,7 @@ export function getCursorMode(mouseMode: MouseMode) {
   }
 }
 
-export function bindHotkeyInEdgeless(
+export function bindEdgelessHotkey(
   key: string,
   listener: KeyHandler,
   options: {

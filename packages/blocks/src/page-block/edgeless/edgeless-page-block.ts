@@ -45,11 +45,7 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import {
-  bindHotkeyInEdgeless,
-  getCursorMode,
-  isTopLevelBlock,
-} from './utils.js';
+import { bindEdgelessHotkey, getCursorMode, isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -148,23 +144,23 @@ export class EdgelessPageBlockComponent
   private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
-    bindHotkeyInEdgeless(HOTKEYS.BACKSPACE, this._handleBackspace);
-    bindHotkeyInEdgeless(HOTKEYS.UP, e => handleUp(e, this.page));
-    bindHotkeyInEdgeless(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    bindHotkeyInEdgeless(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
-    bindHotkeyInEdgeless('v', () => this._setMouseMode({ type: 'default' }));
-    bindHotkeyInEdgeless('h', () =>
+    bindEdgelessHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
+    bindEdgelessHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindEdgelessHotkey('v', () => this._setMouseMode({ type: 'default' }));
+    bindEdgelessHotkey('h', () =>
       this._setMouseMode({ type: 'pan', panning: false })
     );
-    bindHotkeyInEdgeless('t', () => this._setMouseMode({ type: 'text' }));
-    bindHotkeyInEdgeless('p', () =>
+    bindEdgelessHotkey('t', () => this._setMouseMode({ type: 'text' }));
+    bindEdgelessHotkey('p', () =>
       this._setMouseMode({
         type: 'brush',
         color: '#000',
         lineWidth: BrushSize.Thin,
       })
     );
-    bindHotkeyInEdgeless('s', () =>
+    bindEdgelessHotkey('s', () =>
       this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
     );
 
