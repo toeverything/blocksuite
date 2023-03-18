@@ -101,7 +101,7 @@ export class EdgelessPageBlockComponent
   page!: Page;
 
   @property()
-  pageModel!: PageBlockModel;
+  model!: PageBlockModel;
 
   @property()
   surfaceModel!: SurfaceBlockModel;
@@ -211,7 +211,7 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-    const frame = this.pageModel.children[0] as FrameBlockModel;
+    const frame = this.model.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
@@ -237,7 +237,7 @@ export class EdgelessPageBlockComponent
 
   private _initSlotEffects() {
     // TODO: listen to new children
-    // this.pageModel.children.forEach(frame => {
+    // this.model.children.forEach(frame => {
     //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
     // });
     const { _disposables, slots } = this;
@@ -345,14 +345,14 @@ export class EdgelessPageBlockComponent
       this._selection.refreshRemoteSelection();
     });
 
-    this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { viewport } = this.surface;
     const { _selection, page } = this;
     const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.pageModel,
+      this.model,
       this,
       this.surface.viewport,
       active ? selected[0].id : null

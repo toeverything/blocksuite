@@ -60,7 +60,7 @@ export const createBlockHub: (
     const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
     assertExists(edgelessPageBlock);
     blockHub.getAllowedBlocks = () =>
-      getAllowSelectedBlocks(edgelessPageBlock.pageModel);
+      getAllowSelectedBlocks(edgelessPageBlock.model);
   }
 
   return blockHub;
