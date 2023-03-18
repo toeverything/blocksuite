@@ -12,7 +12,11 @@ import {
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
-import { Store, type StoreOptions } from '../store.js';
+import {
+  type InlineSuggestProvider,
+  Store,
+  type StoreOptions,
+} from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
 import { Indexer, type QueryContent } from './search.js';
@@ -254,7 +258,10 @@ export class Workspace {
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
   flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
+  inlineSuggestProvider?: InlineSuggestProvider;
+
   constructor(options: StoreOptions) {
+    this.inlineSuggestProvider = options.inlineSuggestProvider;
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
     if (options.blobOptionsGetter) {

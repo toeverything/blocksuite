@@ -55,6 +55,12 @@ export interface SSROptions {
   isSSR?: boolean;
 }
 
+// TODO Support ReadableStream
+export type InlineSuggestProvider = (context: {
+  title: string;
+  text: string;
+}) => Promise<string>; // | Promise<ReadableStream<string>>;
+
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
@@ -64,6 +70,7 @@ export interface StoreOptions<
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
   blobOptionsGetter?: BlobOptionsGetter;
+  inlineSuggestProvider?: InlineSuggestProvider;
 }
 
 const flagsPreset = {
