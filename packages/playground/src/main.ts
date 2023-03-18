@@ -5,7 +5,7 @@ import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
 
-import { ContentParser } from '@blocksuite/blocks';
+import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import { EditorContainer } from '@blocksuite/editor';
