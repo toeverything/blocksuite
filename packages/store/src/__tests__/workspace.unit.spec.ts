@@ -38,6 +38,7 @@ function waitOnce<T>(slot: Slot<T>) {
 
 function createRoot(page: Page) {
   page.addBlockByFlavour('affine:page');
+  if (!page.root) throw new Error('root not found');
   return page.root;
 }
 
@@ -182,6 +183,8 @@ describe.concurrent('addBlock', () => {
     queueMicrotask(() => page.addBlockByFlavour('affine:page'));
     await waitOnce(page.slots.rootAdded);
     const { root } = page;
+    if (!root) throw new Error('root is null');
+
     assert.equal(root.flavour, 'affine:page');
 
     page.addBlockByFlavour('affine:paragraph');
@@ -295,7 +298,7 @@ describe.concurrent('deleteBlock', () => {
 
   it('can delete model with parent', () => {
     const page = createTestPage();
-    createRoot(page);
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
 
@@ -318,7 +321,7 @@ describe.concurrent('deleteBlock', () => {
       },
     });
 
-    page.deleteBlock(page.root.children[0]);
+    page.deleteBlock(root.children[0]);
 
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
@@ -331,21 +334,21 @@ describe.concurrent('deleteBlock', () => {
         'sys:id': '0',
       },
     });
-    assert.equal(page.root.children.length, 0);
+    assert.equal(root.children.length, 0);
   });
 });
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', () => {
     const page = createTestPage();
-    createRoot(page);
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
     page.addBlockByFlavour('affine:paragraph');
 
     const text = page.getBlockById('2') as BaseBlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
-    assert.equal(page.root.children.indexOf(text), 1);
+    assert.equal(root.children.indexOf(text), 1);
 
     const invalid = page.getBlockById('😅');
     assert.equal(invalid, null);

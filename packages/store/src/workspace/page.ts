@@ -122,9 +122,8 @@ export class Page extends Space<FlatBlockMap> {
     return this._ySpace;
   }
 
-  get root(): BaseBlockModel {
+  get root() {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    assertExists(root);
     if (root && root.flavour !== 'affine:page') {
       console.error('data broken');
     }
