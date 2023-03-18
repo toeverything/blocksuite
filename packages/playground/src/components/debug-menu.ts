@@ -12,13 +12,13 @@ import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 
-import type { ContentParser } from '@blocksuite/blocks';
 import {
   createEvent,
   getCurrentBlockRange,
   NonShadowLitElement,
   updateBlockType,
 } from '@blocksuite/blocks';
+import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import {
   CSSColorProperties,
