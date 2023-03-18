@@ -25,16 +25,14 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-type WorkspaceMetaFields = {
+type WorkspaceMetaState = {
   pages?: Y.Array<unknown>;
   versions?: Y.Map<unknown>;
   name?: string;
   avatar?: string;
 };
 
-class WorkspaceMeta<
-  Flags extends Record<string, unknown> = BlockSuiteFlags
-> extends Space<WorkspaceMetaFields, Flags> {
+class WorkspaceMeta extends Space<WorkspaceMetaState> {
   private _prevPages = new Set<string>();
   pageAdded = new Slot<string>();
   pageRemoved = new Slot<string>();
@@ -43,35 +41,35 @@ class WorkspaceMeta<
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     super(id, doc, awarenessStore);
-    this.origin.observeDeep(this._handleEvents);
+    this._ySpace.observeDeep(this._handleEvents);
   }
 
   get pages() {
-    return this.proxy.pages;
+    return this._proxy.pages;
   }
 
   get name() {
-    return this.proxy.name;
+    return this._proxy.name;
   }
 
   get avatar() {
-    return this.proxy.avatar;
+    return this._proxy.avatar;
   }
 
   setName(name: string) {
     this.doc.transact(() => {
-      this.proxy.name = name;
+      this._proxy.name = name;
     });
   }
 
   setAvatar(avatar: string) {
     this.doc.transact(() => {
-      this.proxy.avatar = avatar;
+      this._proxy.avatar = avatar;
     });
   }
 
   get pageMetas() {
-    return this.proxy.pages?.toJSON() ?? ([] as PageMeta[]);
+    return this._proxy.pages?.toJSON() ?? ([] as PageMeta[]);
   }
 
   getPageMeta(id: string) {
@@ -91,7 +89,7 @@ class WorkspaceMeta<
         pages.insert(index, [yPage]);
       }
       if (!this.pages) {
-        this.origin.set('pages', pages);
+        this._ySpace.set('pages', pages);
       }
     });
   }
@@ -102,7 +100,7 @@ class WorkspaceMeta<
 
     this.doc.transact(() => {
       if (!this.pages) {
-        this.origin.set('pages', new Y.Array());
+        this._ySpace.set('pages', new Y.Array());
       }
       if (index === -1) return;
       assertExists(this.pages);
@@ -132,13 +130,13 @@ class WorkspaceMeta<
    * @internal Only for page initialization
    */
   writeVersion(workspace: Workspace) {
-    let versions = this.proxy.versions;
+    let versions = this._proxy.versions;
     if (!versions) {
       versions = new Y.Map<unknown>();
       workspace.flavourSchemaMap.forEach((schema, flavour) => {
         (versions as Y.Map<unknown>).set(flavour, schema.version);
       });
-      this.origin.set('versions', versions);
+      this._ySpace.set('versions', versions);
       return;
     } else {
       console.error('Workspace versions already set.');
@@ -149,7 +147,7 @@ class WorkspaceMeta<
    * @internal Only for page initialization
    */
   validateVersion(workspace: Workspace) {
-    const versions = this.proxy.versions?.toJSON();
+    const versions = this._proxy.versions?.toJSON();
     if (!versions) {
       throw new Error(
         'Invalid workspace data, versions data is missing. Please make sure the data is valid'
@@ -219,7 +217,7 @@ class WorkspaceMeta<
   ) => {
     events.forEach(e => {
       const hasKey = (k: string) =>
-        e.target === this.origin && e.changes.keys.has(k);
+        e.target === this._ySpace && e.changes.keys.has(k);
 
       if (
         e.target === this.pages ||
@@ -389,6 +387,7 @@ export class Workspace {
         this._store.idGenerator
       );
       this._store.addSpace(page);
+      // TODO: should trigger the pageAdded event here
       page.syncFromExistingDoc();
       this._indexer.onCreatePage(pageId);
     });
