@@ -10,8 +10,8 @@ export enum DatabaseBlockDisplayMode {
 
 export const DatabaseBlockModelSchema = defineBlockSchema(
   'affine:database',
-  () => ({
-    title: '',
+  internal => ({
+    title: internal.Text(),
     columns: [] as ColumnSchema['id'][],
     mode: DatabaseBlockDisplayMode.Database,
   }),

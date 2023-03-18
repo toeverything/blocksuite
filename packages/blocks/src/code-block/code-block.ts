@@ -192,7 +192,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private async _startHighlight(langs: Lang[]) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
-      theme: mode === 'light' ? 'github-light' : 'github-dark',
+      theme: mode === 'dark' ? 'github-dark' : 'github-light',
       themes: ['github-light', 'github-dark'],
       langs,
       paths: {

@@ -2,11 +2,7 @@
 import {
   asyncFocusRichText,
   type BlockHost,
-  getCurrentNativeRange,
-  getVirgoByModel,
-  hasNativeSelection,
   hotkey,
-  isMultiBlockRange,
   Rect,
   type SelectionPosition,
 } from '@blocksuite/blocks/std';
@@ -26,12 +22,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
-import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
+import { tryUpdateFrameSize } from '../utils/index.js';
 import {
   DraggingArea,
   EmbedEditingContainer,
@@ -43,7 +38,6 @@ import {
   createDragHandle,
   type EditingState,
   getAllowSelectedBlocks,
-  isControlledKeyboardEvent,
 } from './utils.js';
 
 export interface DefaultSelectionSlots {
@@ -52,6 +46,9 @@ export interface DefaultSelectionSlots {
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
   codeBlockOptionUpdated?: Slot;
+  /**
+   * @deprecated Not used yet
+   */
   nativeSelectionToggled: Slot<boolean>;
 }
 
@@ -368,51 +365,6 @@ export class DefaultPageBlockComponent
     super.update(changedProperties);
   }
 
-  // TODO migrate to bind-hotkey
-  // Fixes: https://github.com/toeverything/blocksuite/issues/200
-  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
-  //  that have pop-up for selecting local characters.
-  // So we could just hook on the keydown event and detect whether user input a new character.
-  private _handleNativeKeydown = (e: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(e) || this.page.readonly) return;
-    // Only the length of character buttons is 1
-    if (e.key.length === 1 && hasNativeSelection()) {
-      const range = getCurrentNativeRange();
-      if (isMultiBlockRange(range)) {
-        deleteModelsByRange(this.page);
-
-        // handle user input
-        const blockRange = getCurrentBlockRange(this.page);
-        if (
-          !blockRange ||
-          blockRange.models.length === 0 ||
-          blockRange.type !== 'Native'
-        ) {
-          return;
-        }
-        const startBlock = blockRange.models[0];
-        const vEditor = getVirgoByModel(startBlock);
-        if (vEditor) {
-          vEditor.insertText(
-            {
-              index: blockRange.startOffset,
-              length: 0,
-            },
-            e.key
-          );
-          vEditor.setVRange({
-            index: blockRange.startOffset + 1,
-            length: 0,
-          });
-        }
-      }
-      window.removeEventListener('keydown', this._handleNativeKeydown);
-    } else if (window.getSelection()?.type !== 'Range') {
-      // remove, user don't have native selection
-      window.removeEventListener('keydown', this._handleNativeKeydown);
-    }
-  };
-
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
@@ -483,10 +435,6 @@ export class DefaultPageBlockComponent
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-    });
-    slots.nativeSelectionToggled.on(flag => {
-      if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
-      else window.removeEventListener('keydown', this._handleNativeKeydown);
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());

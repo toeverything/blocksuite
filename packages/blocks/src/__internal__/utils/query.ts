@@ -786,9 +786,9 @@ export function queryCurrentMode(): 'light' | 'dark' {
     '--affine-theme-mode'
   );
 
-  if (mode === 'light') {
-    return 'light';
-  } else {
+  if (mode === 'dark') {
     return 'dark';
+  } else {
+    return 'light';
   }
 }

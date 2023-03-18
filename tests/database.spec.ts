@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   initEmptyDatabaseState,
+  pressBackspace,
   SHORT_KEY,
   type,
   undoByClick,
@@ -17,13 +18,15 @@ test('edit database block title and create new rows', async ({ page }) => {
 
   const locator = page.locator('affine-database');
   await expect(locator).toBeVisible();
+  const dbTitle = 'Database 1';
   await assertBlockProps(page, '2', {
-    title: 'Database 1',
+    title: dbTitle,
   });
-  const databaseTitle = page.locator('.affine-database-block-title');
-  await databaseTitle.clear();
+  for (let i = 0; i < dbTitle.length; i++) {
+    await pressBackspace(page);
+  }
   const expected = 'hello';
-  await databaseTitle.type(expected);
+  await type(page, expected);
   await assertBlockProps(page, '2', {
     title: 'hello',
   });

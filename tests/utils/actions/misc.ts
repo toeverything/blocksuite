@@ -257,7 +257,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const paragraphId = page.addBlockByFlavour(
       'affine:database',
       {
-        title: 'Database 1',
+        title: new page.Text('Database 1'),
       },
       frameId
     );
