@@ -11,6 +11,7 @@ import type {
   ShapeMouseMode,
 } from '../../../../__internal__/index.js';
 import { createButtonPopper } from '../../components/utils.js';
+import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
@@ -86,7 +87,7 @@ export class EdgelessShapeToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'Shape'}
+        .tooltip=${getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         .testId=${'shape'}
         @tool.click=${() => this._toggleShapeMenu()}

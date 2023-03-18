@@ -1,3 +1,4 @@
+import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -43,7 +44,7 @@ export class EdgelessToolIconButton extends LitElement {
   disabled = false;
 
   @property()
-  tooltip!: string;
+  tooltip!: string | TemplateResult<1>;
 
   @property()
   active = false;

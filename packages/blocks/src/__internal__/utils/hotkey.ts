@@ -60,8 +60,9 @@ function shouldFilterHotkey(event: KeyboardEvent) {
   return false;
 }
 
-const SCOPE = {
+export const HOTKEY_SCOPE = {
   AFFINE_PAGE: 'affine:page',
+  AFFINE_EDGELESS: 'affine:edgeless',
   OTHER: 'other',
 };
 
@@ -86,13 +87,13 @@ class HotkeyManager {
       keydown?: boolean;
     } = {}
   ): void {
-    const scope = options.scope ?? SCOPE.AFFINE_PAGE;
+    const scope = options.scope ?? HOTKEY_SCOPE.AFFINE_PAGE;
     this._hotkeys(hotkey, { ...options, scope }, listener);
   }
 
   removeListener(
     hotkey: string | Array<string>,
-    scope: string = SCOPE.AFFINE_PAGE
+    scope: string = HOTKEY_SCOPE.AFFINE_PAGE
   ): void {
     this._hotkeys.unbind(
       (Array.isArray(hotkey) ? hotkey : [hotkey]).join(','),
@@ -100,12 +101,20 @@ class HotkeyManager {
     );
   }
 
+  setScope(scope: string) {
+    this._hotkeys.setScope(scope);
+  }
+
+  deleteScope(scope: string) {
+    this._hotkeys.deleteScope(scope);
+  }
+
   disableHotkey(): void {
-    this._hotkeys.setScope(SCOPE.OTHER);
+    this._hotkeys.setScope(HOTKEY_SCOPE.OTHER);
   }
 
   enableHotkey(): void {
-    this._setScope(SCOPE.AFFINE_PAGE);
+    this._setScope(HOTKEY_SCOPE.AFFINE_PAGE);
   }
 
   /**

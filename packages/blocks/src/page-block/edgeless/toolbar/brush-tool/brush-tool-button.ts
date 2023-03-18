@@ -7,6 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
@@ -100,7 +101,7 @@ export class EdgelessBrushToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'Pen'}
+        .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @tool.click=${() => {
           this._trySetBrushMode();

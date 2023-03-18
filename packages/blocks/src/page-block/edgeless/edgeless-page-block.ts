@@ -15,7 +15,9 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
+  BrushSize,
   hotkey,
+  HOTKEY_SCOPE,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -43,7 +45,7 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { getCursorMode, isTopLevelBlock } from './utils.js';
+import { bindEdgelessHotkey, getCursorMode, isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -142,16 +144,40 @@ export class EdgelessPageBlockComponent
   private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindEdgelessHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
+    bindEdgelessHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindEdgelessHotkey('v', () => this._setMouseMode({ type: 'default' }));
+    bindEdgelessHotkey('h', () =>
+      this._setMouseMode({ type: 'pan', panning: false })
+    );
+    bindEdgelessHotkey('t', () => this._setMouseMode({ type: 'text' }));
+    bindEdgelessHotkey('p', () =>
+      this._setMouseMode({
+        type: 'brush',
+        color: '#000',
+        lineWidth: BrushSize.Thin,
+      })
+    );
+    bindEdgelessHotkey('s', () =>
+      this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
+    );
+
+    hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
     bindCommonHotkey(this.page);
 
     return () => {
-      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+      hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
       removeCommonHotKey();
     };
+  }
+
+  private _setMouseMode(mode: MouseMode) {
+    if (this._selection.isActive) {
+      return;
+    }
+    this.slots.mouseModeUpdated.emit(mode);
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {

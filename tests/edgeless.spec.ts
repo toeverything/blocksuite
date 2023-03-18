@@ -12,6 +12,7 @@ import {
   getEdgelessSelectedRect,
   getFrameRect,
   increaseZoomLevel,
+  locatorEdgelessToolButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
   selectBrushColor,
@@ -787,4 +788,28 @@ test('delete shape by component-toolbar', async ({ page }) => {
 
   await page.mouse.move(110, 110);
   await assertEdgelessNonHoverRect(page);
+});
+
+test('shortcut', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await page.mouse.click(100, 100);
+
+  await page.keyboard.press('t');
+  const textButton = locatorEdgelessToolButton(page, 'text');
+  await expect(textButton).toHaveAttribute('active', '');
+
+  await page.keyboard.press('s');
+  const shapeButton = locatorEdgelessToolButton(page, 'shape');
+  await expect(shapeButton).toHaveAttribute('active', '');
+
+  await page.keyboard.press('p');
+  const penButton = locatorEdgelessToolButton(page, 'brush');
+  await expect(penButton).toHaveAttribute('active', '');
+
+  await page.keyboard.press('h');
+  const panButton = locatorEdgelessToolButton(page, 'pan');
+  await expect(panButton).toHaveAttribute('active', '');
 });
