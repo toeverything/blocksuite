@@ -513,7 +513,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  moveBlocksToFrame(blocks: BaseBlockModel[], frameId: string) {
+  moveBlocksToParent(blocks: BaseBlockModel[], parentId: string) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -531,9 +531,9 @@ export class Page extends Space<FlatBlockMap> {
       console.error('the blocks must have the same parent');
     }
 
-    const frameModel = this.getBlockById(frameId);
-    if (frameModel === null) {
-      throw new Error('cannot find frame model');
+    const parentModel = this.getBlockById(parentId);
+    if (parentModel === null) {
+      throw new Error('cannot find parent model by id');
     }
 
     this.transact(() => {
@@ -541,14 +541,14 @@ export class Page extends Space<FlatBlockMap> {
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
       const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
       yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(frameModel.id) as YBlock;
+      const yParentB = this._yBlocks.get(parentModel.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
 
       const ids = blocks.map(block => block.id);
       yChildrenB.push(ids);
     });
     currentParentModel.propsUpdated.emit();
-    frameModel.propsUpdated.emit();
+    parentModel.propsUpdated.emit();
   }
 
   @debug('CRUD')
