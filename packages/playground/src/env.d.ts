@@ -1,4 +1,4 @@
-import type { ContentParser } from '@blocksuite/blocks';
+import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import type { BlockSchema, Page, Workspace } from '@blocksuite/store';
 import type { z } from 'zod';

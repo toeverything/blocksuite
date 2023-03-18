@@ -96,8 +96,8 @@ export function initDebugConfig() {
 async function initWithMarkdownContent(workspace: Workspace, url: URL) {
   const { empty: emptyInit } = await import('./data/index.js');
 
-  const pageId = await emptyInit(workspace);
-  const page = workspace.getPage(pageId);
+  emptyInit(workspace);
+  const page = workspace.getPage('page0');
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());

@@ -13,7 +13,6 @@ import type { Slot } from '../../../global/src/utils/slot.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
-import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -37,28 +36,16 @@ function waitOnce<T>(slot: Slot<T>) {
   return new Promise<T>(resolve => slot.once(val => resolve(val)));
 }
 
-async function createRoot(page: Page) {
-  queueMicrotask(() =>
-    page.addBlockByFlavour('affine:page', {
-      title: new page.Text(),
-    })
-  );
-  const root = await waitOnce(page.slots.rootAdded);
-  return root;
+function createRoot(page: Page) {
+  page.addBlockByFlavour('affine:page');
+  if (!page.root) throw new Error('root not found');
+  return page.root;
 }
 
-async function createPage(workspace: Workspace, pageId = 'page0') {
-  queueMicrotask(() => workspace.createPage(pageId));
-  await waitOnce(workspace.slots.pageAdded);
-  const page = workspace.getPage(pageId);
-  assertExists(page);
-  return page;
-}
-
-async function createTestPage() {
+function createTestPage() {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchema);
-  const page = await createPage(workspace);
+  const page = workspace.createPage('page0');
   return page;
 }
 
@@ -67,12 +54,12 @@ const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
-  it('can init workspace', async () => {
+  it('can init workspace', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = await createPage(workspace);
+    const page = workspace.createPage('page0');
     const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -97,8 +84,8 @@ describe.concurrent('basic', () => {
 });
 
 describe.concurrent('addBlock', () => {
-  it('can add single model', async () => {
-    const page = await createTestPage();
+  it('can add single model', () => {
+    const page = createTestPage();
     page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
     });
@@ -115,8 +102,8 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can add model with props', async () => {
-    const page = await createTestPage();
+  it('can add model with props', () => {
+    const page = createTestPage();
     page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serialize(page)[spaceId], {
@@ -131,8 +118,8 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can add multi models', async () => {
-    const page = await createTestPage();
+  it('can add multi models', () => {
+    const page = createTestPage();
     page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
     });
@@ -176,7 +163,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const page = await createTestPage();
+    const page = createTestPage();
 
     queueMicrotask(() =>
       page.addBlockByFlavour('affine:page', {
@@ -191,18 +178,13 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const page = await createTestPage();
+    const page = createTestPage();
 
-    queueMicrotask(() =>
-      page.addBlockByFlavour('affine:page', {
-        title: new page.Text(),
-      })
-    );
-    const roots = await waitOnce(page.slots.rootAdded);
-    const root = Array.isArray(roots) ? roots[0] : roots;
-    if (Array.isArray(root)) {
-      throw new Error('');
-    }
+    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+    await waitOnce(page.slots.rootAdded);
+    const { root } = page;
+    if (!root) throw new Error('root is null');
+
     assert.equal(root.flavour, 'affine:page');
 
     page.addBlockByFlavour('affine:paragraph');
@@ -214,12 +196,12 @@ describe.concurrent('addBlock', () => {
     assert.equal(root.children[0].id, '1');
   });
 
-  it('can add and remove multi pages', async () => {
+  it('can add and remove multi pages', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
 
-    const page0 = await createPage(workspace, 'page0');
-    const page1 = await createPage(workspace, 'page1');
+    const page0 = workspace.createPage('page0');
+    const page1 = workspace.createPage('page1');
     // @ts-ignore
     assert.equal(workspace._pages.size, 2);
 
@@ -237,7 +219,7 @@ describe.concurrent('addBlock', () => {
     assert.equal(workspace._pages.size, 0);
   });
 
-  it('can set page state', async () => {
+  it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
     workspace.createPage('page0');
@@ -256,7 +238,7 @@ describe.concurrent('addBlock', () => {
     );
 
     let called = false;
-    workspace.meta.pagesUpdated.on(() => {
+    workspace.meta.pageMetasUpdated.on(() => {
       called = true;
     });
 
@@ -293,8 +275,8 @@ describe.concurrent('addBlock', () => {
 });
 
 describe.concurrent('deleteBlock', () => {
-  it('can delete single model', async () => {
-    const page = await createTestPage();
+  it('can delete single model', () => {
+    const page = createTestPage();
 
     page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
@@ -314,10 +296,9 @@ describe.concurrent('deleteBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {});
   });
 
-  it('can delete model with parent', async () => {
-    const page = await createTestPage();
-    const roots = await createRoot(page);
-    const root = Array.isArray(roots) ? roots[0] : roots;
+  it('can delete model with parent', () => {
+    const page = createTestPage();
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
 
@@ -358,10 +339,9 @@ describe.concurrent('deleteBlock', () => {
 });
 
 describe.concurrent('getBlock', () => {
-  it('can get block by id', async () => {
-    const page = await createTestPage();
-    const roots = await createRoot(page);
-    const root = Array.isArray(roots) ? roots[0] : roots;
+  it('can get block by id', () => {
+    const page = createTestPage();
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
     page.addBlockByFlavour('affine:paragraph');
@@ -374,10 +354,9 @@ describe.concurrent('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get parent', async () => {
-    const page = await createTestPage();
-    const roots = await createRoot(page);
-    const root = Array.isArray(roots) ? roots[0] : roots;
+  it('can get parent', () => {
+    const page = createTestPage();
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
     page.addBlockByFlavour('affine:paragraph');
@@ -389,10 +368,9 @@ describe.concurrent('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get previous sibling', async () => {
-    const page = await createTestPage();
-    const roots = await createRoot(page);
-    const root = Array.isArray(roots) ? roots[0] : roots;
+  it('can get previous sibling', () => {
+    const page = createTestPage();
+    const root = createRoot(page);
 
     page.addBlockByFlavour('affine:paragraph');
     page.addBlockByFlavour('affine:paragraph');
@@ -406,11 +384,11 @@ describe.concurrent('getBlock', () => {
 });
 
 // Inline snapshot is not supported under describe.parallel config
-describe('workspace.exportJSX works', async () => {
-  it('workspace matches snapshot', async () => {
+describe('workspace.exportJSX works', () => {
+  it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
-    const page = await createPage(workspace);
+    const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
@@ -421,18 +399,18 @@ describe('workspace.exportJSX works', async () => {
     `);
   });
 
-  it('empty workspace matches snapshot', async () => {
+  it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
-    await createPage(workspace);
+    workspace.createPage('page0');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
 
-  it('workspace with multiple blocks children matches snapshot', async () => {
+  it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
-    const page = await createPage(workspace);
+    const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', {
       title: new page.Text(),
@@ -453,11 +431,11 @@ describe('workspace.exportJSX works', async () => {
   });
 });
 
-describe.concurrent('workspace.search works', async () => {
-  it('workspace search matching', async () => {
+describe.concurrent('workspace.search works', () => {
+  it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
-    const page = await createPage(workspace);
+    const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
@@ -475,8 +453,9 @@ describe.concurrent('workspace.search works', async () => {
 
     const id = page.id.replace('space:', '');
 
-    expect(workspace.search('处理器')).toStrictEqual(new Map([['1', id]]));
-
-    expect(workspace.search('索尼')).toStrictEqual(new Map([['2', id]]));
+    queueMicrotask(() => {
+      expect(workspace.search('处理器')).toStrictEqual(new Map([['1', id]]));
+      expect(workspace.search('索尼')).toStrictEqual(new Map([['2', id]]));
+    });
   });
 });
