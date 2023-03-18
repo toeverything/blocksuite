@@ -242,6 +242,16 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+export function clearSelection(page: Page) {
+  if (!page.root) return;
+  const defaultPageBlock = getDefaultPageBlock(page.root);
+
+  if ('selection' in defaultPageBlock) {
+    // this is not EdgelessPageBlockComponent
+    defaultPageBlock.selection.clear();
+  }
+}
+
 /**
  * @deprecated Use {@link focusBlockByModel} instead.
  */

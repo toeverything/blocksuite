@@ -20,6 +20,7 @@ import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
+  clearSelection,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -454,15 +455,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
 
-function clearSelection(page: Page) {
-  if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
-}
 export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([
