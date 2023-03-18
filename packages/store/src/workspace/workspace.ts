@@ -272,6 +272,11 @@ export class Workspace {
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
     this._bindPageMetaEvents();
+
+    this.slots.pageAdded.on(id => {
+      // For potentially batch-added blocks, it's best to build index asynchronously
+      queueMicrotask(() => this._indexer.onPageCreated(id));
+    });
   }
 
   get id() {

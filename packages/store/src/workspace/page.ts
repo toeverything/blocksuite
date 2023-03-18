@@ -122,8 +122,9 @@ export class Page extends Space<FlatBlockMap> {
     return this._ySpace;
   }
 
-  get root() {
+  get root(): BaseBlockModel {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
+    assertExists(root);
     if (root && root.flavour !== 'affine:page') {
       console.error('data broken');
     }
@@ -431,7 +432,16 @@ export class Page extends Space<FlatBlockMap> {
         parent = this._blockMap.get(parent);
       }
 
-      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
+      let parentId: string | null = null;
+      if (parent) {
+        parentId = parent.id;
+      } else if (this._root !== null) {
+        if (Array.isArray(this._root)) {
+          parentId = this._root[0].id;
+        } else {
+          parentId = this._root.id;
+        }
+      }
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;

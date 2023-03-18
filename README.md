@@ -105,22 +105,21 @@ And here is a minimal collaboration-ready editor showing how these underlying Bl
 
 ```ts
 import '@blocksuite/blocks';
-// A workspace can hold multiple pages, and a page can hold multiple blocks.
 import { Workspace, Page } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 
 function main() {
-  // Initialize the store.
+  // Create a workspace with one default page
   const workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
-
-  // Create a new page. This will trigger the slot above.
   const page = workspace.createPage('page0');
-  // Block types are defined and registered in BlockSchema.
+
+  // Create default blocks in the page
   const pageBlockId = page.addBlockByFlavour('affine:page');
   const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
   page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
+  // Init editor with the page store
   const editor = new EditorContainer();
   editor.page = page;
   document.body.appendChild(editor);
