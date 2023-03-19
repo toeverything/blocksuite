@@ -461,6 +461,7 @@ export class EdgelessPageBlockComponent
     this.clipboard.disposeEvent();
     super.disconnectedCallback();
     this._disposables.dispose();
+    this.components.dragHandle?.remove();
   }
 
   render() {
