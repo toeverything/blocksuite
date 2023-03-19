@@ -301,12 +301,16 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
   private _initTitleVEditor() {
     this._vEditor = new VEditor(this.model.title.yText);
     this._vEditor.mount(this._container);
-    this._vEditor.focusEnd();
     this._vEditor.setReadonly(this.model.page.readonly);
 
     // for title placeholder
     this.model.title.yText.observe(() => {
       this.requestUpdate();
+    });
+
+    // after the database structure is created
+    requestAnimationFrame(() => {
+      this._vEditor?.focusEnd();
     });
   }
 

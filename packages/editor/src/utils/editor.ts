@@ -1,7 +1,11 @@
-import { BlockHub } from '@blocksuite/blocks';
-import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
-import { getAllowSelectedBlocks } from '@blocksuite/blocks';
-import { uploadImageFromLocal } from '@blocksuite/blocks';
+import {
+  asyncFocusRichText,
+  BlockHub,
+  getAllowSelectedBlocks,
+  getServiceOrRegister,
+  tryUpdateFrameSize,
+  uploadImageFromLocal,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -43,6 +47,12 @@ export const createBlockHub: (
         props,
         distanceToTop < distanceToBottom ? 'before' : 'after'
       );
+
+      if (props[0].flavour === 'affine:database') {
+        const service = await getServiceOrRegister(props[0].flavour);
+        service.initDatabaseBlock(page, model, ids[0]);
+      }
+
       if (ids.length === 1) {
         asyncFocusRichText(page, ids[0]);
       }

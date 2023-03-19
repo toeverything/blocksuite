@@ -12,6 +12,7 @@ import {
 import { CodeBlockService } from './code-block/code-service.js';
 import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
+import { DatabaseBlockService } from './database-block/database-service.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
 import { DividerBlockService } from './divider-block/divider-service.js';
@@ -78,6 +79,7 @@ export type Flavour = keyof BlockSchemas;
 
 export const blockService = {
   'affine:code': CodeBlockService,
+  'affine:database': DatabaseBlockService,
   'affine:paragraph': ParagraphBlockService,
   'affine:list': ListBlockService,
   'affine:embed': EmbedBlockService,
