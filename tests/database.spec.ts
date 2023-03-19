@@ -138,7 +138,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   expect(await numberCell.innerText()).toBe('1');
 });
 
-test.only('should rich-text column support soft enter', async ({ page }) => {
+test('should rich-text column support soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
