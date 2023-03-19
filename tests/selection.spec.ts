@@ -754,6 +754,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await page.mouse.click(rect.right + 50, rect.top + 5);
 
   await pressBackspace(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
