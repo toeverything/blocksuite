@@ -172,9 +172,9 @@ export function bindEdgelessHotkey(
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
-    // drag handle should be the same level with editor-container
+    // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blocks, editingState): void {
+    onDropCallback(point, blocks, editingState) {
       const page = pageBlock.page;
       if (editingState) {
         page.captureSync();
@@ -193,16 +193,16 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           distanceToTop < distanceToBottom
         );
       } else {
-        // bank area
+        // blank area
         page.captureSync();
-        pageBlock.separateFrame(
-          point,
-          blocks.map(b => b.model)
+        pageBlock.moveBlocksToNewFrame(
+          blocks.map(b => b.model),
+          point
         );
       }
     },
     setSelectedBlocks(
-      _selectedBlocks: EditingState | BlockComponentElement[] | null
+      selectedBlocks: EditingState | BlockComponentElement[] | null
     ) {
       return;
     },

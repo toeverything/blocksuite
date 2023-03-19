@@ -389,12 +389,8 @@ export class EdgelessPageBlockComponent
     );
   }
 
-  /**
-   * Adds a new frame with the given point and blocks.
-   * @param point Point
-   * @param blocks BaseBlockModel[]
-   */
-  separateFrame(point: IPoint, blocks: BaseBlockModel[]) {
+  /** Moves selected blocks into a new frame at the given point. */
+  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: IPoint) {
     if (!this.page.root) return;
     this.page.captureSync();
     const [x, y] = this.surface.toModelCoord(point.x, point.y);

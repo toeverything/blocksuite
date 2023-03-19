@@ -192,6 +192,25 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
   }
 
+  /** Update drag handle by closest block elements */
+  private _updateDragHandle(e: SelectionEvent) {
+    const point = new Point(e.raw.clientX, e.raw.clientY);
+    point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
+    let hoverEditingState = null;
+    const element = getClosestBlockElementByPoint(point);
+    if (element) {
+      hoverEditingState = {
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
+      };
+    }
+    this._edgeless.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
+  }
+
   onContainerClick(e: SelectionEvent) {
     this._tryDeleteEmptyBlocks();
 
@@ -305,29 +324,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseMove(e: SelectionEvent) {
-    this.detectClosestBlockElement(e);
+    this._updateDragHandle(e);
   }
 
   onContainerMouseOut(_: SelectionEvent) {
     noop();
-  }
-
-  detectClosestBlockElement(e: SelectionEvent) {
-    const point = new Point(e.raw.clientX, e.raw.clientY);
-    point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
-    let hoverEditingState = null;
-    const element = getClosestBlockElementByPoint(point);
-    if (element) {
-      hoverEditingState = {
-        element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
-        rect: getSelectedStateRectByBlockElement(element),
-      };
-    }
-    this._edgeless.components.dragHandle?.onContainerMouseMove(
-      e,
-      hoverEditingState
-    );
   }
 
   clearSelection() {
