@@ -5,9 +5,9 @@ export async function createViewer(value: Record<string, unknown>) {
   const inspector = document.getElementById('inspector') as HTMLElement;
   const root = createRoot(inspector);
   root.render(
-    <JsonViewer
+    <div
       style={{
-        position: 'fixed',
+        position: 'absolute',
         backgroundColor: 'white',
         zIndex: '1002',
         width: '30vw',
@@ -16,7 +16,23 @@ export async function createViewer(value: Record<string, unknown>) {
         top: '30px',
         overflow: 'auto',
       }}
-      value={value}
-    />
+    >
+      <JsonViewer value={value} />
+      <button
+        style={{
+          position: 'absolute',
+          padding: '0',
+          width: '20px',
+          height: '20px',
+          top: '0',
+          right: '0',
+        }}
+        onClick={() => {
+          root.unmount();
+        }}
+      >
+        X
+      </button>
+    </div>
   );
 }
