@@ -2,7 +2,7 @@ import {
   assertExists,
   type BaseBlockModel,
   type Page,
-} from '@blocksuite/store/index.js';
+} from '@blocksuite/store';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
