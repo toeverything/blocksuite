@@ -860,6 +860,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   await focusRichText(page, 2);
   // goto next frame
   pressArrowDown(page);
+  await waitNextFrame(page);
   await type(page, 'ABC');
 
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
