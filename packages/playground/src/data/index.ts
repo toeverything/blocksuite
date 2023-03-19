@@ -154,7 +154,7 @@ export const database: InitFn = (workspace: Workspace) => {
     property: {
       selection: selection,
     },
-    name: 'Select 2',
+    name: 'Single Select',
     type: 'select',
   });
   const col3 = page.setColumnSchema({
@@ -164,7 +164,7 @@ export const database: InitFn = (workspace: Workspace) => {
       hide: false,
     },
     property: {},
-    name: 'Select 2',
+    name: 'Rich Text',
     type: 'rich-text',
   });
   // Add database block inside frame block
@@ -197,7 +197,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
   page.updateBlockColumn(p2, {
     schemaId: col2,
-    value: 'TODO',
+    value: ['TODO'],
   });
 
   const text = new page.YText();
