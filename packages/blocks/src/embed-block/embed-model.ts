@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const EmbedBlockModelSchema = defineBlockSchema(
+export const EmbedBlockSchema = defineBlockSchema(
   'affine:embed',
   () => ({
     type: 'image',
@@ -16,4 +16,4 @@ export const EmbedBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type EmbedBlockModel = SchemaToModel<typeof EmbedBlockModelSchema>;
+export type EmbedBlockModel = SchemaToModel<typeof EmbedBlockSchema>;

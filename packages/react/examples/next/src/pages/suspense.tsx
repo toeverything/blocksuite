@@ -1,4 +1,4 @@
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorProps } from '@blocksuite/react/editor';
 import { type Page, Workspace } from '@blocksuite/store';
 import dynamic from 'next/dynamic';
@@ -19,7 +19,7 @@ const localWorkspace = new Workspace({
   isSSR: typeof window === 'undefined',
 });
 
-localWorkspace.register(builtInSchemas);
+localWorkspace.register(AffineSchemas);
 
 const promise = new Promise<Page>(resolve => {
   localWorkspace.slots.pageAdded.once(pageId => {

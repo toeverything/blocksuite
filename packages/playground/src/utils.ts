@@ -1,5 +1,5 @@
 import * as blocks from '@blocksuite/blocks';
-import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import {
   configDebugLog,
@@ -68,7 +68,7 @@ if (isE2E) {
       const workspace = new Workspace({
         id: 'temporary',
       })
-        .register(builtInSchemas)
+        .register(AffineSchemas)
         .register(__unstableSchemas);
       Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
       globalThis.debugWorkspace = workspace;

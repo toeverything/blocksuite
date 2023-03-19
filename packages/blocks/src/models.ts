@@ -7,30 +7,45 @@ import type { z } from 'zod';
 import type { BaseService } from './__internal__/service/index.js';
 import {
   type CodeBlockModel,
-  CodeBlockModelSchema,
-} from './code-block/code-model.js';
-import { CodeBlockService } from './code-block/code-service.js';
-import type { DatabaseBlockModel } from './database-block/database-model.js';
-import { DatabaseBlockModelSchema } from './database-block/database-model.js';
-import type { DividerBlockModel } from './divider-block/divider-model.js';
-import { DividerBlockModelSchema } from './divider-block/divider-model.js';
-import { DividerBlockService } from './divider-block/divider-service.js';
-import type { EmbedBlockModel } from './embed-block/embed-model.js';
-import { EmbedBlockModelSchema } from './embed-block/embed-model.js';
-import { EmbedBlockService } from './embed-block/embed-service.js';
-import type { FrameBlockModel } from './frame-block/frame-model.js';
-import { FrameBlockModelSchema } from './frame-block/frame-model.js';
-import { FrameBlockService } from './frame-block/frame-service.js';
-import type { ListBlockModel } from './list-block/list-model.js';
-import { ListBlockModelSchema } from './list-block/list-model.js';
-import { ListBlockService } from './list-block/list-service.js';
-import type { PageBlockModel } from './page-block/page-model.js';
-import { PageBlockModelSchema } from './page-block/page-model.js';
-import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
-import { ParagraphBlockModelSchema } from './paragraph-block/paragraph-model.js';
-import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
-import type { SurfaceBlockModel } from './surface-block/surface-model.js';
-import { SurfaceBlockModelSchema } from './surface-block/surface-model.js';
+  CodeBlockSchema,
+  CodeBlockService,
+} from './code-block/index.js';
+import {
+  type DatabaseBlockModel,
+  DatabaseBlockSchema,
+} from './database-block/index.js';
+import {
+  type DividerBlockModel,
+  DividerBlockSchema,
+  DividerBlockService,
+} from './divider-block/index.js';
+import {
+  type EmbedBlockModel,
+  EmbedBlockSchema,
+  EmbedBlockService,
+} from './embed-block/index.js';
+import {
+  type FrameBlockModel,
+  FrameBlockSchema,
+  FrameBlockService,
+} from './frame-block/index.js';
+import {
+  type ListBlockModel,
+  ListBlockSchema,
+  ListBlockService,
+} from './list-block/index.js';
+import type { PageBlockModel } from './page-block/index.js';
+// FIXME: unable to import from ./page-block/index.js
+import { PageBlockSchema } from './page-block/page-model.js';
+import {
+  type ParagraphBlockModel,
+  ParagraphBlockSchema,
+  ParagraphBlockService,
+} from './paragraph-block/index.js';
+import {
+  type SurfaceBlockModel,
+  SurfaceBlockSchema,
+} from './surface-block/index.js';
 
 export type {
   CodeBlockModel,
@@ -44,25 +59,25 @@ export type {
   SurfaceBlockModel,
 };
 
-/** Default first party model types built for affine */
-export const builtInSchemas = [
-  CodeBlockModelSchema,
-  ParagraphBlockModelSchema,
-  PageBlockModelSchema,
-  ListBlockModelSchema,
-  FrameBlockModelSchema,
-  DividerBlockModelSchema,
-  EmbedBlockModelSchema,
-  SurfaceBlockModelSchema,
-  // DatabaseBlockModelSchema,
+/** Built-in first party block models built for affine */
+export const AffineSchemas = [
+  CodeBlockSchema,
+  ParagraphBlockSchema,
+  PageBlockSchema,
+  ListBlockSchema,
+  FrameBlockSchema,
+  DividerBlockSchema,
+  EmbedBlockSchema,
+  SurfaceBlockSchema,
+  // DatabaseBlockSchema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
-export const __unstableSchemas = [DatabaseBlockModelSchema] satisfies z.infer<
+export const __unstableSchemas = [DatabaseBlockSchema] satisfies z.infer<
   typeof BlockSchema
 >[];
 
 // TODO support dynamic register
-export type BlockSchema = {
+export type BlockSchemas = {
   'affine:code': CodeBlockModel;
   'affine:paragraph': ParagraphBlockModel;
   'affine:page': PageBlockModel;
@@ -74,7 +89,7 @@ export type BlockSchema = {
   'affine:database': DatabaseBlockModel;
 };
 
-export type Flavour = keyof BlockSchema;
+export type Flavour = keyof BlockSchemas;
 
 export const blockService = {
   'affine:code': CodeBlockService,
