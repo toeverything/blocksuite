@@ -35,6 +35,8 @@ import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { createViewer } from './doc-inspector';
+
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
@@ -191,6 +193,10 @@ export class DebugMenu extends NonShadowLitElement {
 
   private _exportYDoc() {
     this.workspace.exportYDoc();
+  }
+
+  private async _inspect() {
+    await createViewer(this.workspace.doc.toJSON());
   }
 
   private _shareUrl() {
@@ -439,6 +445,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
