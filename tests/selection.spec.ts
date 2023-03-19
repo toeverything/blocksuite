@@ -412,6 +412,7 @@ test('select text leaving a few words in the last line and delete', async ({
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
+  await waitNextFrame(page);
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('abc89');
