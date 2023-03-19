@@ -2,7 +2,7 @@ import {
   asyncFocusRichText,
   BlockHub,
   getAllowSelectedBlocks,
-  initDatabaseBlock,
+  getServiceOrRegister,
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
@@ -49,7 +49,8 @@ export const createBlockHub: (
       );
 
       if (props[0].flavour === 'affine:database') {
-        initDatabaseBlock(page, model, ids[0]);
+        const service = await getServiceOrRegister(props[0].flavour);
+        service.initDatabaseBlock(page, model, ids[0]);
       }
 
       if (ids.length === 1) {

@@ -1,0 +1,46 @@
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store/index.js';
+
+import { BaseService } from '../__internal__/service/index.js';
+import type { DatabaseBlockModel } from './database-model.js';
+
+export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
+  initDatabaseBlock(page: Page, model: BaseBlockModel, databaseId: string) {
+    // By default, database has 3 empty rows
+    for (let i = 0; i < 3; i++) {
+      page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(''),
+        },
+        databaseId
+      );
+    }
+    // Add a paragraph after database
+    const parent = page.getParent(model);
+    assertExists(parent);
+    page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+
+    // default column
+    const tagColumnId = page.setColumnSchema({
+      internalProperty: {
+        color: '#ff0000',
+        width: 200,
+        hide: false,
+      },
+      property: {
+        selection: [],
+      },
+      name: 'Tag',
+      type: 'select',
+    });
+    const blockModel = page.getBlockById(databaseId);
+    assertExists(blockModel);
+    page.updateBlock(blockModel, {
+      columns: [tagColumnId],
+    });
+  }
+}
