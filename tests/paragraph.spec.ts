@@ -342,9 +342,7 @@ test('update paragraph with children to head type', async ({ page }) => {
   await assertBlockChildrenIds(page, '2', ['3', '4']);
 
   await focusRichText(page);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
 
   await type(page, '# ');
 
@@ -692,11 +690,11 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await type(page, 'w');
   await assertRichTexts(page, ['hello', 'w']);
   await assertSelection(page, 1, 1, 0);
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowDown');
+  await pressArrowUp(page);
+  await pressArrowDown(page);
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('Backspace');
+  await pressArrowLeft(page);
+  await pressBackspace(page);
   await assertSelection(page, 0, 5, 0);
 });
 
@@ -761,9 +759,9 @@ test('press arrow down should move caret to the start of line', async ({
 
   // Focus the empty child paragraph
   await focusRichText(page, 1);
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowDown');
+  await pressArrowLeft(page);
+  await pressArrowUp(page);
+  await pressArrowDown(page);
   await type(page, '2');
   await assertRichTexts(page, ['0'.repeat(100), '21']);
 });
@@ -844,11 +842,13 @@ test('press arrow down in indent line should not move caret to the start of line
   // Focus the empty child paragraph
   await focusRichText(page, 2);
   await page.keyboard.press('ArrowDown');
+  await waitNextFrame(page);
   // Now the caret should be at the end of the last paragraph
   await type(page, '1');
   await assertRichTexts(page, ['', '', '', '01']);
 
   await focusRichText(page, 2);
+  await waitNextFrame(page);
   // Insert a new long text to wrap the line
   await page.keyboard.insertText('0'.repeat(100));
   await waitNextFrame(page);

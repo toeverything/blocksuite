@@ -277,9 +277,9 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await expect(slashMenu).toBeHidden();
 
-    await waitNextFrame(page);
+    await page.waitForTimeout(500);
     await type(page, 'let a');
-    await waitNextFrame(page);
+    await page.waitForTimeout(500);
     await assertRichTexts(page, ['let a']);
   });
 
@@ -299,9 +299,9 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await expect(slashMenu).toBeHidden();
 
-    await waitNextFrame(page);
+    await page.waitForTimeout(500);
     await type(page, '111');
-    await waitNextFrame(page);
+    await page.waitForTimeout(500);
     await assertRichTexts(page, ['111000']);
   });
 });
