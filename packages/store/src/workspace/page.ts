@@ -428,10 +428,13 @@ export class Page extends Space<FlatBlockMap> {
       );
 
       if (typeof parent === 'string') {
-        parent = this._blockMap.get(parent);
+        parent = this._blockMap.get(parent) ?? null;
       }
 
-      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
+      let parentId = null;
+      if (parent !== null) {
+        parentId = parent?.id ?? this.root?.id;
+      }
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -646,7 +649,7 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  syncFromExistingDoc() {
+  trySyncFromExistingDoc() {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
@@ -821,6 +824,7 @@ export class Page extends Space<FlatBlockMap> {
     if (isRoot) {
       this._root = model;
       this.slots.rootAdded.emit(model);
+      this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
       this._root = [this.root as BaseBlockModel, model];
       this.slots.rootAdded.emit(this._root);

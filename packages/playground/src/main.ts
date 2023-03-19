@@ -59,15 +59,10 @@ function subscribePage(workspace: Workspace) {
 }
 
 async function initPageContentByParam(workspace: Workspace, param: string) {
-  const functionMap = new Map<
-    string,
-    (workspace: Workspace) => Promise<string>
-  >();
+  const functionMap = new Map<string, (workspace: Workspace) => void>();
   Object.values(
     (await import('./data/index.js')) as Record<string, InitFn>
-  ).forEach(fn => {
-    functionMap.set(fn.id, fn);
-  });
+  ).forEach(fn => functionMap.set(fn.id, fn));
   // Load the preset playground documentation when `?init` param provided
   if (param === '') {
     param = 'preset';
@@ -75,7 +70,7 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
 
   // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(param)) {
-    await functionMap.get(param)?.(workspace);
+    functionMap.get(param)?.(workspace);
     return;
   }
 

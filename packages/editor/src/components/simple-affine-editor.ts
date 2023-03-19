@@ -1,7 +1,7 @@
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
-import { Text, Workspace } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
@@ -16,34 +16,24 @@ import { EditorContainer } from './editor-container.js';
 @customElement('simple-affine-editor')
 export class SimpleAffineEditor extends NonShadowLitElement {
   readonly workspace: Workspace;
-  page!: Page;
+  page: Page;
 
   constructor() {
     super();
 
     this.workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
-    this._subscribePage();
+    const page = this.workspace.createPage('page0');
+    this.page = page;
 
-    this.workspace.createPage('page0');
+    const pageBlockId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+    page.addBlockByFlavour('affine:paragraph', {}, frameId);
   }
 
-  // Subscribe for page update and create editor after page loaded.
-  private _subscribePage() {
-    const { workspace } = this;
-    workspace.slots.pageAdded.once(pageId => {
-      const page = workspace.getPage(pageId) as Page;
-      this.page = page;
-
-      const editor = new EditorContainer();
-      editor.page = page;
-      this.appendChild(editor);
-
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text(),
-      });
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      page.addBlockByFlavour('affine:paragraph', {}, frameId);
-    });
+  connectedCallback(): void {
+    const editor = new EditorContainer();
+    editor.page = this.page;
+    this.appendChild(editor);
   }
 }
 

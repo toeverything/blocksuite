@@ -6,10 +6,7 @@ import type { ConsoleMessage, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type {
-  BaseBlockModel,
-  Page as StorePage,
-} from '../../../packages/store/src/index.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -55,36 +52,32 @@ async function initEmptyEditor(
 ) {
   await page.evaluate(flags => {
     const { workspace } = window;
+    const page = workspace.createPage('page0');
 
-    workspace.slots.pageAdded.once(async pageId => {
-      const page = workspace.getPage(pageId) as StorePage;
-      for (const [key, value] of Object.entries(flags)) {
-        page.awarenessStore.setFlag(key as keyof typeof flags, value);
-      }
+    for (const [key, value] of Object.entries(flags)) {
+      page.awarenessStore.setFlag(key as keyof typeof flags, value);
+    }
 
-      const editor = document.createElement('editor-container');
-      editor.page = page;
+    const editor = document.createElement('editor-container');
+    editor.page = page;
 
-      const debugMenu = document.createElement('debug-menu');
-      debugMenu.workspace = workspace;
-      debugMenu.editor = editor;
+    const debugMenu = document.createElement('debug-menu');
+    debugMenu.workspace = workspace;
+    debugMenu.editor = editor;
 
-      // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
-      const appRoot = document.querySelector('#app');
-      if (!appRoot) {
-        throw new Error('Cannot find app root element(#app).');
-      }
-      appRoot.appendChild(editor);
-      document.body.appendChild(debugMenu);
-      editor.createBlockHub().then(blockHub => {
-        document.body.appendChild(blockHub);
-      });
-      window.debugMenu = debugMenu;
-      window.editor = editor;
-      window.page = page;
+    // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+    const appRoot = document.querySelector('#app');
+    if (!appRoot) {
+      throw new Error('Cannot find app root element(#app).');
+    }
+    appRoot.appendChild(editor);
+    document.body.appendChild(debugMenu);
+    editor.createBlockHub().then(blockHub => {
+      document.body.appendChild(blockHub);
     });
-
-    workspace.createPage('page0');
+    window.debugMenu = debugMenu;
+    window.editor = editor;
+    window.page = page;
   }, flags);
   await waitNextFrame(page);
 }
