@@ -860,7 +860,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   // focus last block in first frame
   await focusRichText(page, 2);
   // goto next frame
-  pressArrowDown(page);
+  await pressArrowDown(page);
   await waitNextFrame(page);
   await type(page, 'ABC');
 
