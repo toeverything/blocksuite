@@ -88,7 +88,7 @@ export const preset: InitFn = (workspace: Workspace) => {
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Welcome to BlockSuite playground'),
+    title: new Text('Welcome to BlockSuite Playground'),
   });
   page.addBlock('affine:surface', {}, null);
 
@@ -124,7 +124,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Welcome to BlockSuite playground'),
+    title: new Text('Welcome to BlockSuite Playground'),
   });
   page.addBlock('affine:surface', {}, null);
 
