@@ -1,5 +1,5 @@
 import type {
-  CodeSchema,
+  CodeBlockSchema,
   DatabaseBlockSchema,
   DividerBlockSchema,
   EmbedBlockSchema,
@@ -27,7 +27,7 @@ export type BlockSchemas = {
   'affine:page': typeof PageBlockSchema;
   'affine:list': typeof ListBlockSchema;
   'affine:frame': typeof FrameBlockSchema;
-  'affine:code': typeof CodeSchema;
+  'affine:code': typeof CodeBlockSchema;
   'affine:divider': typeof DividerBlockSchema;
   'affine:embed': typeof EmbedBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
