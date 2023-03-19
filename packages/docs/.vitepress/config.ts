@@ -28,7 +28,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      { icon: 'github', link: 'https://github.com/toeverything/blocksuite' },
       { icon: 'twitter', link: 'https://twitter.com/AffineDev' },
     ],
   },
