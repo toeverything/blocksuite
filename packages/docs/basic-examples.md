@@ -1,4 +1,4 @@
-<div id="editor-example" style="height: 300px; border: 1px solid black; padding: 0.75rem 0.5rem;"/>
+<div id="editor-example" style="height: 300px; border: 1px solid black;"/>
 
 <script>
 import '@blocksuite/editor/themes/affine.css';
