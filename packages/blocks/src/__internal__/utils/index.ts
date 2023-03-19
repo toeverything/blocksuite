@@ -13,6 +13,7 @@ export * from './lit.js';
 export * from './query.js';
 export * from './rect.js';
 export * from './selection.js';
-export * from './shortcut.js';
+// Compat with SSR
+// export * from './shortcut.js';
 export * from './std.js';
 export * from './types.js';

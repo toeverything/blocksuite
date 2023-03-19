@@ -12,7 +12,8 @@ import type {
   MouseMode,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { hotkey, HOTKEY_SCOPE, SHORTKEY } from '../../__internal__/index.js';
+import { hotkey, HOTKEY_SCOPE } from '../../__internal__/index.js';
+import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
