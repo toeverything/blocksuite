@@ -3,9 +3,13 @@ import { VText } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import type { Highlighter, Lang } from 'shiki';
+import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
-import { NonShadowLitElement } from '../std.js';
+import { NonShadowLitElement, queryCurrentMode } from '../std.js';
+import {
+  highlightCache,
+  type highlightCacheKey,
+} from './utils/highlight-cache.js';
 
 @customElement('affine-code-line')
 export class AffineCodeLine extends NonShadowLitElement {
@@ -30,7 +34,26 @@ export class AffineCodeLine extends NonShadowLitElement {
       return html`<span>${vText}</span>`;
     }
 
-    const tokens = highlighter.codeToThemedTokens(this.vText.str, lang)[0];
+    const mode = queryCurrentMode();
+    const cacheKey: highlightCacheKey = `${this.vText.str}-${lang}-${mode}`;
+    const cache = highlightCache.get(cacheKey);
+
+    let tokens: IThemedToken[] = [
+      {
+        content: this.vText.str,
+      },
+    ];
+    if (cache) {
+      tokens = cache;
+    } else {
+      tokens = highlighter.codeToThemedTokens(
+        this.vText.str,
+        lang,
+        mode === 'dark' ? 'github-dark' : 'github-light'
+      )[0];
+      highlightCache.set(cacheKey, tokens);
+    }
+
     const vTexts = tokens.map(token => {
       const vText = new VText();
       vText.str = token.content;

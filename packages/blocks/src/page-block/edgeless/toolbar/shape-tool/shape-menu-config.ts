@@ -9,12 +9,14 @@ import type { TemplateResult } from 'lit';
 
 import type { ShapeMouseMode } from '../../../../__internal__/index.js';
 
-export const ShapeComponentConfig: {
+type Config = {
   name: ShapeMouseMode['shape'];
   icon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;
-}[] = [
+};
+
+export const ShapeComponentConfig: Config[] = [
   {
     name: 'rect',
     icon: SquareIcon,
@@ -46,3 +48,11 @@ export const ShapeComponentConfig: {
     disabled: false,
   },
 ];
+
+export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
+  (acc, config) => {
+    acc[config.name] = config;
+    return acc;
+  },
+  {} as Record<Config['name'], Config>
+);

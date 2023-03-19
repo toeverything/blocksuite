@@ -1,8 +1,4 @@
-import type {
-  Bound,
-  SurfaceElement,
-  SurfaceViewport,
-} from '@blocksuite/phasor';
+import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
@@ -10,16 +6,18 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import type { KeyHandler } from 'hotkeys-js';
 
 import type {
   MouseMode,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { SHORTKEY } from '../../__internal__/index.js';
+import { hotkey, HOTKEY_SCOPE, SHORTKEY } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
-export const FRAME_MIN_SIZE = 20;
+export const FRAME_MIN_WIDTH = 200;
+export const FRAME_MIN_HEIGHT = 20;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -27,9 +25,9 @@ export function isTopLevelBlock(
   return !!selectable && 'flavour' in selectable;
 }
 
-export function isSurfaceElement(
+export function isPhasorElement(
   selectable: Selectable | null
-): selectable is SurfaceElement {
+): selectable is PhasorElement {
   return !isTopLevelBlock(selectable);
 }
 
@@ -138,4 +136,18 @@ export function getCursorMode(mouseMode: MouseMode) {
     default:
       return 'default';
   }
+}
+
+export function bindEdgelessHotkey(
+  key: string,
+  listener: KeyHandler,
+  options: {
+    keyup?: boolean;
+    keydown?: boolean;
+  } = {}
+) {
+  hotkey.addListener(key, listener, {
+    scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
+    ...options,
+  });
 }

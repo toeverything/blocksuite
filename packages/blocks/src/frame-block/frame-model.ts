@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const FrameBlockModelSchema = defineBlockSchema(
+export const FrameBlockSchema = defineBlockSchema(
   'affine:frame',
   () => ({
     xywh: '[0,0,720,480]',
@@ -12,4 +12,4 @@ export const FrameBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type FrameBlockModel = SchemaToModel<typeof FrameBlockModelSchema>;
+export type FrameBlockModel = SchemaToModel<typeof FrameBlockSchema>;

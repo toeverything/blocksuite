@@ -81,7 +81,7 @@ export class Indexer {
       .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
   }
 
-  onCreatePage(pageId: string) {
+  onPageCreated(pageId: string) {
     this._handlePageIndexing(pageId, this._getPage(pageId));
   }
 

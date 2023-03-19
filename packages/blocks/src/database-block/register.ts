@@ -1,4 +1,8 @@
-import type { BlockTag, RowHost, TagSchema } from '@blocksuite/global/database';
+import type {
+  BlockColumn,
+  ColumnSchema,
+  RowHost,
+} from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { LitElement } from 'lit';
@@ -16,12 +20,12 @@ export abstract class DatabaseCellLitElement extends LitElement {
   @property()
   rowModel!: BaseBlockModel;
   @property()
-  column!: TagSchema;
+  columnSchema!: ColumnSchema;
   @property()
-  tag!: BlockTag | null;
+  column!: BlockColumn | null;
 }
 
-export interface TagSchemaRenderer<
+export interface ColumnSchemaRenderer<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
@@ -29,20 +33,20 @@ export interface TagSchemaRenderer<
   displayName: string;
   type: Type;
   propertyCreator: () => Property;
-  components: TagUIComponents;
+  components: ColumnUIComponents;
 }
 
-export type RendererToTagSchema<Renderer extends TagSchemaRenderer> =
-  Renderer extends TagSchemaRenderer<infer Type, infer Property, infer Value>
-    ? TagSchema<Type, Property, Value>
+export type RendererToColumnSchema<Renderer extends ColumnSchemaRenderer> =
+  Renderer extends ColumnSchemaRenderer<infer Type, infer Property, infer Value>
+    ? ColumnSchema<Type, Property, Value>
     : never;
 
 /**
  * @internal
  */
-const registry = new Map<TagSchemaRenderer['type'], TagSchemaRenderer>();
+const registry = new Map<ColumnSchemaRenderer['type'], ColumnSchemaRenderer>();
 
-export interface TagUIComponents<
+export interface ColumnUIComponents<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
   Value = unknown
@@ -52,7 +56,7 @@ export interface TagUIComponents<
   ColumnPropertyEditing: typeof DatabaseCellLitElement;
 }
 
-export function defineTagSchemaRenderer<
+export function defineColumnSchemaRenderer<
   Type extends string,
   Property extends Record<string, unknown>,
   Value
@@ -68,7 +72,7 @@ export function defineTagSchemaRenderer<
   config: {
     displayName: string;
   }
-): TagSchemaRenderer<Type, Property, Value> {
+): ColumnSchemaRenderer<Type, Property, Value> {
   return {
     displayName: config.displayName,
     type,
@@ -77,20 +81,20 @@ export function defineTagSchemaRenderer<
   };
 }
 
-export function registerTagSchemaRenderer(renderer: TagSchemaRenderer) {
+export function registerColumnSchemaRenderer(renderer: ColumnSchemaRenderer) {
   if (registry.has(renderer.type)) {
     throw new Error('cannot register twice for ' + renderer.type);
   }
   registry.set(renderer.type, renderer);
 }
 
-export function listTagSchemaRenderer(): TagSchemaRenderer[] {
+export function listColumnSchemaRenderer(): ColumnSchemaRenderer[] {
   return [...registry.values()];
 }
 
-export function getTagSchemaRenderer(
-  type: TagSchemaRenderer['type']
-): TagSchemaRenderer {
+export function getColumnSchemaRenderer(
+  type: ColumnSchemaRenderer['type']
+): ColumnSchemaRenderer {
   const renderer = registry.get(type);
   if (!renderer) {
     throw new Error('cannot find renderer');

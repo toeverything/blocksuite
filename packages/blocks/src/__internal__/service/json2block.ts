@@ -5,12 +5,8 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
-// @ts-ignore
-import {
-  type BlockRange,
-  getRichTextByModel,
-  type OpenBlockInfo,
-} from '../utils/index.js';
+import { type BlockRange, type OpenBlockInfo } from '../utils/index.js';
+import { getVirgoByModel } from '../utils/query.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
@@ -127,7 +123,7 @@ export async function json2block(
 }
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
-  const vEditor = getRichTextByModel(model)?.vEditor;
+  const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
   vEditor.setVRange(vRange);
 }
@@ -153,7 +149,7 @@ export function addBlocks(
       height: block.height,
       language: block.language,
     };
-    const id = page.addBlockByFlavour(flavour, blockProps, parent, index + i);
+    const id = page.addBlock(flavour, blockProps, parent, index + i);
 
     addedBlockIds.push(id);
     const model = page.getBlockById(id);

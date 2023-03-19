@@ -9,7 +9,7 @@ export interface RowHost extends HTMLElement {
 
 export interface SchemaInternalProperty {
   /**
-   * color of the tag
+   * color of the column
    */
   color: `#${string}`;
   /**
@@ -22,10 +22,10 @@ export interface SchemaInternalProperty {
   hide: boolean;
 }
 
-export type TagSchemaProperty<Property extends Record<string, unknown>> =
+export type ColumnSchemaProperty<Property extends Record<string, unknown>> =
   Property;
 
-export interface TagSchema<
+export interface ColumnSchema<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
@@ -40,7 +40,7 @@ export interface TagSchema<
    */
   name: string;
   internalProperty: SchemaInternalProperty;
-  property: TagSchemaProperty<Property>;
+  property: ColumnSchemaProperty<Property>;
   /**
    * this value is just for hold the `BaseValue`,
    *  don't use this value in the runtime.
@@ -48,9 +48,9 @@ export interface TagSchema<
   __$TYPE_HOLDER$__?: BaseValue;
 }
 
-export type BlockTag<Schema extends TagSchema = TagSchema> = {
+export type BlockColumn<Schema extends ColumnSchema = ColumnSchema> = {
   schemaId: Schema['id'];
-  value: Schema extends TagSchema<infer _, infer __, infer Value>
+  value: Schema extends ColumnSchema<infer _, infer __, infer Value>
     ? Value
     : never;
 };

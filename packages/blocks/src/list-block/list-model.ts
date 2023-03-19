@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const ListBlockModelSchema = defineBlockSchema(
+export const ListBlockSchema = defineBlockSchema(
   'affine:list',
   internal => ({
     type: 'bulleted' as ListType,
@@ -14,4 +14,4 @@ export const ListBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type ListBlockModel = SchemaToModel<typeof ListBlockModelSchema>;
+export type ListBlockModel = SchemaToModel<typeof ListBlockSchema>;

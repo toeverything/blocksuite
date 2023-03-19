@@ -1,4 +1,4 @@
-import './tool-icon-button.js';
+import '../components/tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
 import './brush-tool/brush-tool-button.js';
 
@@ -19,6 +19,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
+import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
 
@@ -106,7 +107,7 @@ export class EdgelessToolbar extends LitElement {
   private _zoomToFit() {
     const { viewport } = this.edgeless.surface;
     const { width, height } = viewport;
-    const frame = this.edgeless.pageModel.children[0] as FrameBlockModel;
+    const frame = this.edgeless.model.children[0] as FrameBlockModel;
     const frameXYWH = deserializeXYWH(frame.xywh);
     const frameBound = new Bound(...frameXYWH);
 
@@ -141,14 +142,14 @@ export class EdgelessToolbar extends LitElement {
         @mouseup=${stopPropagation}
       >
         <edgeless-tool-icon-button
-          .tooltip=${'Select'}
+          .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
           @tool.click=${() => this._setMouseMode({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .tooltip=${'Text'}
+          .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
           @tool.click=${() => this._setMouseMode({ type: 'text' })}
         >
@@ -179,7 +180,7 @@ export class EdgelessToolbar extends LitElement {
           .edgeless=${this.edgeless}
         ></edgeless-brush-tool-button>
         <edgeless-tool-icon-button
-          .tooltip=${'Hand'}
+          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
           @tool.click=${() =>
             this._setMouseMode({ type: 'pan', panning: false })}

@@ -9,6 +9,7 @@ export const ALLOW_DEFAULT = true;
 export type ALLOW_DEFAULT = typeof ALLOW_DEFAULT;
 
 export const HOTKEYS = {
+  ANY_KEY: '*',
   UNDO: 'command+z,ctrl+z',
   REDO: 'command+shift+z,ctrl+shift+z,ctrl+y',
   BACKSPACE: 'backspace',

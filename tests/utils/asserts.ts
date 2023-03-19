@@ -56,8 +56,8 @@ export const defaultStore: SerializedStore = {
   },
   'space:page0': {
     '0': {
-      'meta:tags': {},
-      'meta:tagSchema': {},
+      'ext:columns': {},
+      'ext:columnSchema': {},
       'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',
@@ -364,7 +364,7 @@ export async function assertBlockProps(
       const model = element.model as BaseBlockModel;
       return Object.fromEntries(
         // @ts-ignore
-        Object.keys(props).map(key => [key, model[key]])
+        Object.keys(props).map(key => [key, (model[key] as unknown).toString()])
       );
     },
     [id, props] as const
@@ -654,4 +654,9 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.y).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessNonSelectedRect(page: Page) {
+  const rect = page.locator('edgeless-selected-rect');
+  await expect(rect).toBeHidden();
 }

@@ -11,8 +11,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
     "noEmit": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true

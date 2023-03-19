@@ -4,7 +4,11 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import {
+  getRichTextByModel,
+  isControlledKeyboardEvent,
+  isPrintableKeyEvent,
+} from '../../__internal__/utils/index.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
 
@@ -126,7 +130,13 @@ export class SlashMenu extends LitElement {
       this._hide = false;
       return;
     }
-    if (e.key === ' ' || e.key === 'Escape') {
+    if (
+      // Abort when press modifier key to avoid weird behavior
+      // e.g. press ctrl + a to select all or press ctrl + v to paste
+      isControlledKeyboardEvent(e) ||
+      e.key === ' ' ||
+      e.key === 'Escape'
+    ) {
       this.abortController.abort();
       return;
     }
@@ -139,7 +149,7 @@ export class SlashMenu extends LitElement {
       return;
     }
     // Assume input a character, append it to the search string
-    if (e.key.length === 1) {
+    if (isPrintableKeyEvent(e)) {
       this._searchString += e.key;
       this._filterItems = this._updateItem();
       if (!this._filterItems.length) {

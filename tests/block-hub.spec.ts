@@ -284,3 +284,28 @@ test('should auto hide card list when dragging a card', async ({ page }) => {
 
   await expect(blockHubListContainer).toBeHidden();
 });
+
+test('drag database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const databaseMenu = '.block-hub-icon-container:nth-child(5)';
+
+  const databaseRect = await getCenterPosition(page, databaseMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: databaseRect.x, y: databaseRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  const database = page.locator('affine-database');
+  expect(database).toBeVisible();
+  const tagColumn = page.locator('.affine-database-block-column').nth(1);
+  expect(await tagColumn.innerText()).toBe('Tag');
+  const defaultRows = page.locator('.affine-database-block-row');
+  expect(await defaultRows.count()).toBe(3);
+});

@@ -412,6 +412,7 @@ test('select text leaving a few words in the last line and delete', async ({
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
+  await waitNextFrame(page);
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('abc89');
@@ -745,14 +746,16 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   await page.mouse.click(rect.left - 50, rect.top + 5);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['123456', '789']);
 
   await undoByKeyboard(page);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.mouse.click(rect.right + 50, rect.top + 5);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
@@ -857,7 +860,8 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   // focus last block in first frame
   await focusRichText(page, 2);
   // goto next frame
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
+  await waitNextFrame(page);
   await type(page, 'ABC');
 
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
@@ -923,6 +927,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await pressEnter(page);
+  await waitNextFrame(page);
 
   // code block
   await type(page, '```');
@@ -940,8 +945,9 @@ test('should add a new line when clicking the bottom of the last non-text block'
     return secondRichText.getBoundingClientRect();
   });
   await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
-  await waitNextFrame(page);
+  await page.waitForTimeout(200);
   await type(page, 'ABC');
+  await page.waitForTimeout(200);
   await assertRichTexts(page, [
     '123',
     '456',

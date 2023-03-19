@@ -11,11 +11,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
   getViewportElement,
   NonShadowLitElement,
+  queryCurrentMode,
 } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -172,12 +173,27 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
+  private _documentMutationObserver: MutationObserver = new MutationObserver(
+    async () => {
+      if (!this._highlighter) return;
+      const richText = this.querySelector('rich-text');
+      const vEditor = richText?.vEditor;
+      if (!vEditor) return;
+
+      // update code-line theme
+      setTimeout(() => {
+        vEditor.requestUpdate();
+      });
+    }
+  );
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(langs: Lang[]) {
+    const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
-      theme: 'github-light',
+      theme: mode === 'dark' ? 'github-dark' : 'github-light',
+      themes: ['github-light', 'github-dark'],
       langs,
       paths: {
         // TODO: use local path
@@ -264,6 +280,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this._disposables.dispose();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
+    this._documentMutationObserver.disconnect();
   }
 
   private _onClickWrapBtn() {
@@ -281,6 +298,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
     } else {
       this._highlighter = null;
     }
+
+    this._documentMutationObserver.observe(document.documentElement, {
+      attributes: true,
+    });
   }
 
   updated() {

@@ -468,10 +468,6 @@ async function getUrlByModel(model: BaseBlockModel) {
   return url;
 }
 
-export function isControlledKeyboardEvent(e: KeyboardEvent) {
-  return e.ctrlKey || e.metaKey || e.shiftKey;
-}
-
 export function copyCode(codeBlockModel: CodeBlockModel) {
   copy({
     type: 'Block',
@@ -538,8 +534,8 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (Array.isArray(selectedBlocks)) {
         defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
       } else if (selectedBlocks) {
-        const { element, rect } = selectedBlocks;
-        defaultPageBlock.selection.selectOneBlock(element, rect);
+        const { element } = selectedBlocks;
+        defaultPageBlock.selection.selectOneBlock(element);
       }
     },
     getSelectedBlocks() {

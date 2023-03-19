@@ -6,7 +6,10 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { Loader } from '../../components/loader.js';
-import type { DefaultPageBlockComponent } from '../../index.js';
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+} from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
@@ -245,9 +248,9 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector<DefaultPageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
+  const page = document.querySelector<
+    DefaultPageBlockComponent | EdgelessPageBlockComponent
+  >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
@@ -261,9 +264,9 @@ export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const page = document.querySelector<DefaultPageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
+  const page = document.querySelector<
+    DefaultPageBlockComponent | EdgelessPageBlockComponent
+  >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return Promise.resolve(null);
 
   if (model.id === model.page.root.id) {
@@ -776,4 +779,19 @@ function find(elements: Element[]) {
     i++;
   }
   return null;
+}
+
+/**
+ * query current mode whether is light or dark
+ */
+export function queryCurrentMode(): 'light' | 'dark' {
+  const mode = getComputedStyle(document.documentElement).getPropertyValue(
+    '--affine-theme-mode'
+  );
+
+  if (mode === 'dark') {
+    return 'dark';
+  } else {
+    return 'light';
+  }
 }

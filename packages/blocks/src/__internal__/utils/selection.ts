@@ -242,6 +242,16 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+export function clearSelection(page: Page) {
+  if (!page.root) return;
+  const defaultPageBlock = getDefaultPageBlock(page.root);
+
+  if ('selection' in defaultPageBlock) {
+    // this is not EdgelessPageBlockComponent
+    defaultPageBlock.selection.clear();
+  }
+}
+
 /**
  * @deprecated Use {@link focusBlockByModel} instead.
  */
@@ -493,7 +503,7 @@ function retargetClick(page: Page, e: SelectionEvent) {
   if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
     const parent = page.getParent(model);
     assertExists(parent);
-    const id = page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    const id = page.addBlock('affine:paragraph', {}, parent.id);
     asyncFocusRichText(page, id);
     return;
   }
