@@ -8,6 +8,7 @@ export async function createViewer(value: Record<string, unknown>) {
     <JsonViewer
       style={{
         position: 'fixed',
+        backgroundColor: 'white',
         zIndex: '1002',
         width: '30vw',
         height: '50vh',
