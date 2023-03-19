@@ -6,6 +6,7 @@ import type { VRange } from '@blocksuite/virgo';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
+import { SHORTKEY } from '../utils/shortcut.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import type { AffineVEditor } from './virgo/types.js';
 
@@ -52,12 +53,6 @@ interface KeyboardEventThis {
     bindings: KeyboardBindings;
   };
 }
-
-const IS_SAFARI = /Apple Computer/.test(navigator.vendor);
-const IS_IOS =
-  IS_SAFARI &&
-  (/Mobile\/\w+/.test(navigator.userAgent) || navigator.maxTouchPoints > 2);
-const IS_MAC = /Mac/i.test(navigator.platform);
 
 export function createKeyboardBindings(
   model: BaseBlockModel,
@@ -123,9 +118,6 @@ export function createKeyDownHandler(
   bindings: KeyboardBindings
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};
-
-  const SHORTKEY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
-
   function normalize(binding: KeyboardBinding): KeyboardBinding {
     if (binding.shortKey) {
       binding[SHORTKEY] = binding.shortKey;
