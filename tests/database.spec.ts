@@ -5,13 +5,20 @@ import {
   initDatabaseColumn,
   initDatabaseRow,
   initEmptyDatabaseState,
+  pressArrowLeft,
   pressBackspace,
+  pressEnter,
+  pressShiftEnter,
   SHORT_KEY,
   type,
   undoByClick,
   waitNextFrame,
 } from './utils/actions/index.js';
-import { assertBlockCount, assertBlockProps } from './utils/asserts.js';
+import {
+  assertBlockCount,
+  assertBlockProps,
+  assertDatabaseCellRichTexts,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
@@ -129,4 +136,25 @@ test('should modify the value when the input loses focus', async ({ page }) => {
 
   const numberCell = page.locator('affine-database-number-cell > span');
   expect(await numberCell.innerText()).toBe('1');
+});
+
+test('should rich-text column support soft enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page, 'rich-text');
+  await initDatabaseRow(page);
+
+  const cellSelector = '[data-row-id="4"][data-column-id="3"]';
+  const cell = page.locator(cellSelector);
+  await cell.click();
+  await cell.click();
+  await type(page, '123');
+
+  await pressArrowLeft(page);
+  await pressEnter(page);
+  await assertDatabaseCellRichTexts(page, cellSelector, '123');
+
+  await pressShiftEnter(page);
+  await assertDatabaseCellRichTexts(page, cellSelector, '12\n3');
 });
