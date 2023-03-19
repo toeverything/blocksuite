@@ -753,7 +753,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await page.waitForTimeout(50);
   await page.mouse.click(rect.right + 50, rect.top + 5);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
@@ -943,6 +943,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
   await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
   await waitNextFrame(page);
   await type(page, 'ABC');
+  await waitNextFrame(page);
   await assertRichTexts(page, [
     '123',
     '456',
