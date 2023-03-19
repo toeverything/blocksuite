@@ -858,7 +858,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   // focus last block in first frame
   await focusRichText(page, 2);
   // goto next frame
-  await page.keyboard.press('ArrowDown');
+  pressArrowDown(page);
   await type(page, 'ABC');
 
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
@@ -924,6 +924,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await pressEnter(page);
+  await waitNextFrame(page);
 
   // code block
   await type(page, '```');
