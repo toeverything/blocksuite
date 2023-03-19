@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /markdown-examples
+      link: /basic-examples
     - theme: alt
       text: Visit Playground
       link: https://blocksuite-toeverything.vercel.app/?init
