@@ -8,7 +8,7 @@ import {
 } from '../../register.js';
 
 @customElement('affine-database-number-cell')
-class NumberCell extends DatabaseCellLitElement {
+class NumberCell extends DatabaseCellLitElement<number> {
   static styles = css`
     :host {
       width: 100%;
@@ -24,7 +24,7 @@ class NumberCell extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellLitElement {
+class NumberCellEditing extends DatabaseCellLitElement<number> {
   static styles = css`
     :host {
       width: 100%;
@@ -38,7 +38,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && this.value) {
         this.rowHost.setValue(this.value);
         this.rowHost.setEditing(false);
       }
@@ -52,7 +52,9 @@ class NumberCellEditing extends DatabaseCellLitElement {
           this.value = (event.target as HTMLInputElement).valueAsNumber;
         }}
         @blur=${() => {
-          this.rowHost.setValue(this.value);
+          if (this.value) {
+            this.rowHost.setValue(this.value);
+          }
         }}
         type="number"
         value=${this.column?.value ?? ''}
@@ -62,7 +64,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-number-column-property-editing')
-class NumberColumnPropertyEditing extends DatabaseCellLitElement {
+class NumberColumnPropertyEditing extends DatabaseCellLitElement<number> {
   static tag = literal`affine-database-number-column-property-editing`;
 }
 export const NumberColumnSchemaRenderer = defineColumnSchemaRenderer(
@@ -70,7 +72,7 @@ export const NumberColumnSchemaRenderer = defineColumnSchemaRenderer(
   () => ({
     decimal: 0,
   }),
-  () => 0,
+  () => null as number | null,
   {
     Cell: NumberCell,
     CellEditing: NumberCellEditing,
