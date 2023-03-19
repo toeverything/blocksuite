@@ -1,6 +1,5 @@
-import { createRoot } from 'react-dom/client';
-
 export async function createViewer(value: Record<string, unknown>) {
+  const { createRoot } = await import('react-dom/client');
   const { JsonViewer } = await import('@rich-data/viewer');
   const inspector = document.getElementById('inspector') as HTMLElement;
   const root = createRoot(inspector);
