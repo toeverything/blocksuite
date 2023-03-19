@@ -12,7 +12,7 @@ export default defineConfig({
         text: 'Playground',
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
-      { text: 'Docs', link: '/markdown-examples' },
+      { text: 'Docs', link: '/basic-examples' },
       { text: 'API', link: '/api-examples' },
       { text: 'Examples', link: '' },
     ],
@@ -21,7 +21,7 @@ export default defineConfig({
       {
         text: 'BlockSuite Documentation',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
+          { text: 'Basic Examples', link: '/basic-examples' },
           { text: 'Runtime API Examples', link: '/api-examples' },
         ],
       },

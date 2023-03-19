@@ -2,7 +2,6 @@
   "name": "@blocksuite/docs",
   "version": "0.5.0-alpha.1",
   "description": "BlockSuite documentation",
-  "type": "module",
   "private": true,
   "keywords": [],
   "author": "toeverything",
@@ -14,5 +13,12 @@
     "dev": "vitepress dev --port 5200",
     "build": "vitepress build",
     "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "@algolia/client-search": "^4.15.0",
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/react": "workspace:*",
+    "@blocksuite/store": "workspace:*"
   }
 }

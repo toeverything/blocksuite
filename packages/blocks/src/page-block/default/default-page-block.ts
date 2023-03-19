@@ -66,12 +66,13 @@ export class DefaultPageBlockComponent
     }
 
     .affine-default-page-block-container {
+      width: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-color);
       font-weight: 400;
-      width: var(--affine-editor-width);
+      max-width: var(--affine-editor-width);
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
