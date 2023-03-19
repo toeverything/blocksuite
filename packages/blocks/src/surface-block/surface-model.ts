@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const SurfaceBlockModelSchema = defineBlockSchema(
+export const SurfaceBlockSchema = defineBlockSchema(
   'affine:surface',
   () => ({}),
   {
@@ -10,4 +10,4 @@ export const SurfaceBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type SurfaceBlockModel = SchemaToModel<typeof SurfaceBlockModelSchema>;
+export type SurfaceBlockModel = SchemaToModel<typeof SurfaceBlockSchema>;

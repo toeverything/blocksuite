@@ -11,7 +11,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   initDatabaseBlock(page: Page, model: BaseBlockModel, databaseId: string) {
     // By default, database has 3 empty rows
     for (let i = 0; i < 3; i++) {
-      page.addBlockByFlavour(
+      page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text(''),
@@ -22,7 +22,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     // Add a paragraph after database
     const parent = page.getParent(model);
     assertExists(parent);
-    page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    page.addBlock('affine:paragraph', {}, parent.id);
 
     // default column
     const tagColumnId = page.setColumnSchema({

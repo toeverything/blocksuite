@@ -1,4 +1,4 @@
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import {
   BlockSuiteProvider,
   createBlockSuiteStore,
@@ -29,7 +29,7 @@ const localWorkspace = new Workspace({
       : [DebugDocProvider, IndexedDBDocProvider],
 });
 
-localWorkspace.register(builtInSchemas);
+localWorkspace.register(AffineSchemas);
 
 const HomeInner = () => {
   const workspace = useBlockSuiteStore(store => store.currentWorkspace);

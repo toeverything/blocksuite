@@ -8,7 +8,7 @@ export enum DatabaseBlockDisplayMode {
   Database,
 }
 
-export const DatabaseBlockModelSchema = defineBlockSchema(
+export const DatabaseBlockSchema = defineBlockSchema(
   'affine:database',
   internal => ({
     title: internal.Text(),
@@ -21,4 +21,4 @@ export const DatabaseBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type DatabaseBlockModel = SchemaToModel<typeof DatabaseBlockModelSchema>;
+export type DatabaseBlockModel = SchemaToModel<typeof DatabaseBlockSchema>;

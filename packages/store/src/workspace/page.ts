@@ -364,7 +364,7 @@ export class Page extends Space<FlatBlockMap> {
   ): string[] {
     const ids: string[] = [];
     blocks.forEach(block => {
-      const id = this.addBlockByFlavour<ALLProps, Flavour>(
+      const id = this.addBlock<ALLProps, Flavour>(
         block.flavour,
         block.blockProps ?? {},
         parent,
@@ -378,7 +378,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlockByFlavour<
+  public addBlock<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -428,10 +428,13 @@ export class Page extends Space<FlatBlockMap> {
       );
 
       if (typeof parent === 'string') {
-        parent = this._blockMap.get(parent);
+        parent = this._blockMap.get(parent) ?? null;
       }
 
-      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
+      let parentId = null;
+      if (parent !== null) {
+        parentId = parent?.id ?? this.root?.id;
+      }
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -572,12 +575,7 @@ export class Page extends Space<FlatBlockMap> {
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
-      const id = this.addBlockByFlavour(
-        flavour,
-        blockProps,
-        parent.id,
-        insertIndex
-      );
+      const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
   }
@@ -646,7 +644,7 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  syncFromExistingDoc() {
+  trySyncFromExistingDoc() {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
@@ -821,6 +819,7 @@ export class Page extends Space<FlatBlockMap> {
     if (isRoot) {
       this._root = model;
       this.slots.rootAdded.emit(model);
+      this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
       this._root = [this.root as BaseBlockModel, model];
       this.slots.rootAdded.emit(this._root);

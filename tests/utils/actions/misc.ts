@@ -6,10 +6,7 @@ import type { ConsoleMessage, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type {
-  BaseBlockModel,
-  Page as StorePage,
-} from '../../../packages/store/src/index.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -55,36 +52,32 @@ async function initEmptyEditor(
 ) {
   await page.evaluate(flags => {
     const { workspace } = window;
+    const page = workspace.createPage('page0');
 
-    workspace.slots.pageAdded.once(async pageId => {
-      const page = workspace.getPage(pageId) as StorePage;
-      for (const [key, value] of Object.entries(flags)) {
-        page.awarenessStore.setFlag(key as keyof typeof flags, value);
-      }
+    for (const [key, value] of Object.entries(flags)) {
+      page.awarenessStore.setFlag(key as keyof typeof flags, value);
+    }
 
-      const editor = document.createElement('editor-container');
-      editor.page = page;
+    const editor = document.createElement('editor-container');
+    editor.page = page;
 
-      const debugMenu = document.createElement('debug-menu');
-      debugMenu.workspace = workspace;
-      debugMenu.editor = editor;
+    const debugMenu = document.createElement('debug-menu');
+    debugMenu.workspace = workspace;
+    debugMenu.editor = editor;
 
-      // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
-      const appRoot = document.querySelector('#app');
-      if (!appRoot) {
-        throw new Error('Cannot find app root element(#app).');
-      }
-      appRoot.appendChild(editor);
-      document.body.appendChild(debugMenu);
-      editor.createBlockHub().then(blockHub => {
-        document.body.appendChild(blockHub);
-      });
-      window.debugMenu = debugMenu;
-      window.editor = editor;
-      window.page = page;
+    // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+    const appRoot = document.querySelector('#app');
+    if (!appRoot) {
+      throw new Error('Cannot find app root element(#app).');
+    }
+    appRoot.appendChild(editor);
+    document.body.appendChild(debugMenu);
+    editor.createBlockHub().then(blockHub => {
+      document.body.appendChild(blockHub);
     });
-
-    workspace.createPage('page0');
+    window.debugMenu = debugMenu;
+    window.editor = editor;
+    window.page = page;
   }, flags);
   await waitNextFrame(page);
 }
@@ -188,12 +181,12 @@ export async function enterPlaygroundWithList(
   await page.evaluate(
     ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
-      const pageId = page.addBlockByFlavour('affine:page', {
+      const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+      const frameId = page.addBlock('affine:frame', {}, pageId);
       for (let i = 0; i < contents.length; i++) {
-        page.addBlockByFlavour(
+        page.addBlock(
           'affine:list',
           contents.length > 0
             ? { text: new page.Text(contents[i]), type }
@@ -214,13 +207,13 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
     page.captureSync();
 
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page', {
+      pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
 
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.captureSync();
     return { pageId, frameId, paragraphId };
   }, pageId);
@@ -231,12 +224,12 @@ export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
 
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlockByFlavour('affine:surface', {}, null);
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    page.addBlock('affine:surface', {}, null);
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.resetHistory();
 
     return { pageId, frameId, paragraphId };
@@ -249,12 +242,12 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page', {
+      pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour(
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
@@ -288,9 +281,9 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlockByFlavour('affine:page');
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const codeBlockId = page.addBlockByFlavour('affine:code', {}, frameId);
+    const pageId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const codeBlockId = page.addBlock('affine:code', {}, frameId);
     page.captureSync();
     return { pageId, frameId, codeBlockId };
   });

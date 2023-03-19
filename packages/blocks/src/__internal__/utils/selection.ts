@@ -503,7 +503,7 @@ function retargetClick(page: Page, e: SelectionEvent) {
   if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
     const parent = page.getParent(model);
     assertExists(parent);
-    const id = page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    const id = page.addBlock('affine:paragraph', {}, parent.id);
     asyncFocusRichText(page, id);
     return;
   }

@@ -24,7 +24,7 @@ import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
-import type { PageBlockModel } from '../index.js';
+import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
 import {
@@ -236,7 +236,7 @@ export class DefaultPageBlockComponent
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
       const right = model.title.split(vRange.index);
-      const newFirstParagraphId = page.addBlockByFlavour(
+      const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
         defaultFrame,
@@ -250,7 +250,7 @@ export class DefaultPageBlockComponent
       if (firstParagraph) {
         asyncFocusRichText(page, firstParagraph.id);
       } else {
-        const newFirstParagraphId = page.addBlockByFlavour(
+        const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
           {},
           defaultFrame,

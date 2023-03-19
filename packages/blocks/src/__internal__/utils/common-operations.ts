@@ -83,7 +83,7 @@ export function convertToList(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlockByFlavour('affine:list', blockProps, parent, index);
+    const id = page.addBlock('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:list'] as const) &&
@@ -124,12 +124,7 @@ export function convertToParagraph(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlockByFlavour(
-      'affine:paragraph',
-      blockProps,
-      parent,
-      index
-    );
+    const id = page.addBlock('affine:paragraph', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:paragraph'] as const) &&
@@ -175,13 +170,13 @@ export function convertToDivider(
       children: model.children,
     };
     // space.deleteBlock(model);
-    page.addBlockByFlavour('affine:divider', blockProps, parent, index);
+    page.addBlock('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {
       asyncFocusRichText(page, nextBlock.id);
     } else {
-      const nextId = page.addBlockByFlavour('affine:paragraph', {}, parent);
+      const nextId = page.addBlock('affine:paragraph', {}, parent);
       asyncFocusRichText(page, nextId);
     }
   }

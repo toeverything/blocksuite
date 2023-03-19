@@ -276,7 +276,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
 
   private _addRow = () => {
     this.model.page.captureSync();
-    this.model.page.addBlockByFlavour('affine:paragraph', {}, this.model.id);
+    this.model.page.addBlock('affine:paragraph', {}, this.model.id);
   };
 
   private _addColumn = (columnType: ColumnSchema['type']) => {
