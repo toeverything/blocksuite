@@ -54,9 +54,9 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
-    ? page.addBlockByFlavour(flavour, blockProps, parent, index + 1)
+    ? page.addBlock(flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
-      page.addBlockByFlavour(flavour, blockProps, model, 0);
+      page.addBlock(flavour, blockProps, model, 0);
 
   // 4. If the target block is a numbered list, update the prefix of next siblings
   if (
@@ -116,7 +116,7 @@ export function handleBlockSplit(
   }
   const children = [...model.children];
   page.updateBlockById(model.id, { children: [] });
-  const id = page.addBlockByFlavour(
+  const id = page.addBlock(
     model.flavour,
     {
       text: right,
@@ -365,12 +365,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     };
     page.captureSync();
     page.deleteBlock(model);
-    const id = page.addBlockByFlavour(
-      'affine:paragraph',
-      blockProps,
-      parent,
-      index
-    );
+    const id = page.addBlock('affine:paragraph', blockProps, parent, index);
     asyncFocusRichText(page, id);
     return;
   }

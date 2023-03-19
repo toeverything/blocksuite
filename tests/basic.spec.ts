@@ -50,19 +50,19 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text('hello'),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const frame = page.addBlock('affine:frame', {}, pageId);
 
     const text = new page.Text('world');
-    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, frame);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    page.addBlockByFlavour(
+    page.addBlock(
       'affine:paragraph',
       {
         text: page.Text.fromDelta(delta),

@@ -359,7 +359,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       const index = parentModel?.children.indexOf(endModel);
       assertExists(index);
       assertExists(parentModel);
-      const id = page.addBlockByFlavour(
+      const id = page.addBlock(
         'affine:paragraph',
         { type: 'text' },
         parentModel,

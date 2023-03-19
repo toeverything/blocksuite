@@ -149,7 +149,7 @@ export function addBlocks(
       height: block.height,
       language: block.language,
     };
-    const id = page.addBlockByFlavour(flavour, blockProps, parent, index + i);
+    const id = page.addBlock(flavour, blockProps, parent, index + i);
 
     addedBlockIds.push(id);
     const model = page.getBlockById(id);

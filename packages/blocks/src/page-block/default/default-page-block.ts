@@ -236,7 +236,7 @@ export class DefaultPageBlockComponent
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
       const right = model.title.split(vRange.index);
-      const newFirstParagraphId = page.addBlockByFlavour(
+      const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
         defaultFrame,
@@ -250,7 +250,7 @@ export class DefaultPageBlockComponent
       if (firstParagraph) {
         asyncFocusRichText(page, firstParagraph.id);
       } else {
-        const newFirstParagraphId = page.addBlockByFlavour(
+        const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
           {},
           defaultFrame,

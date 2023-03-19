@@ -115,9 +115,9 @@ function main() {
   const page = workspace.createPage('page0');
 
   // Create default blocks in the page
-  const pageBlockId = page.addBlockByFlavour('affine:page');
-  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-  page.addBlockByFlavour('affine:paragraph', {}, frameId);
+  const pageBlockId = page.addBlock('affine:page');
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  page.addBlock('affine:paragraph', {}, frameId);
 
   // Init editor with the page store
   const editor = new EditorContainer();

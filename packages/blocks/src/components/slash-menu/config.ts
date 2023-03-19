@@ -68,7 +68,7 @@ const dividerItem: SlashItem = {
       return;
     }
     const index = parent.children.indexOf(model);
-    page.addBlockByFlavour('affine:divider', {}, parent, index + 1);
+    page.addBlock('affine:divider', {}, parent, index + 1);
   },
 };
 
@@ -251,7 +251,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlockByFlavour(
+          page.addBlock(
             model.flavour,
             {
               type: model.type,

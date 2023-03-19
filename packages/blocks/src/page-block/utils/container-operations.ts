@@ -48,7 +48,7 @@ export function handleBlockSelectionBatchDelete(
   const index = parentModel.children.indexOf(models[0]);
   page.captureSync();
   models.forEach(model => page.deleteBlock(model));
-  const id = page.addBlockByFlavour(
+  const id = page.addBlock(
     'affine:paragraph',
     { type: 'text' },
     parentModel,
@@ -151,7 +151,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
     .join('\n');
   models.map(model => page.deleteBlock(model));
 
-  const id = page.addBlockByFlavour(
+  const id = page.addBlock(
     'affine:code',
     { text: new Text(text) },
     parent,
@@ -236,7 +236,7 @@ function transformBlock(
   };
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
-  return page.addBlockByFlavour(flavour, blockProps, parent, index);
+  return page.addBlock(flavour, blockProps, parent, index);
 }
 
 /**

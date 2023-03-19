@@ -140,7 +140,7 @@ export class DebugMenu extends NonShadowLitElement {
     assertExists(parent);
     this.page.captureSync();
     this.page.deleteBlock(startModel);
-    this.page.addBlockByFlavour('affine:code', blockProps, parent, index);
+    this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _convertToParagraph(e: PointerEvent, type: string) {
@@ -173,12 +173,8 @@ export class DebugMenu extends NonShadowLitElement {
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const frameId = this.page.addBlockByFlavour(
-      'affine:frame',
-      { xywh },
-      pageId
-    );
-    this.page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
+    this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
   private _switchShowGrid() {

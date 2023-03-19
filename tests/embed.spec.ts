@@ -146,9 +146,9 @@ async function initMockImage(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlockByFlavour('affine:page');
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    page.addBlockByFlavour(
+    const pageId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock(
       'affine:embed',
       {
         type: 'image',

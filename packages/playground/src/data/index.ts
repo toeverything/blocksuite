@@ -20,16 +20,16 @@ export const empty: InitFn = (workspace: Workspace) => {
   const page = workspace.createPage('page0');
 
   // Add page block and surface block at root level
-  const pageBlockId = page.addBlockByFlavour('affine:page', {
+  const pageBlockId = page.addBlock('affine:page', {
     title: new Text(),
   });
 
-  page.addBlockByFlavour('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, null);
 
   // Add frame block inside page block
-  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   // Add paragraph block inside frame block
-  page.addBlockByFlavour('affine:paragraph', {}, frameId);
+  page.addBlock('affine:paragraph', {}, frameId);
   page.resetHistory();
 };
 
@@ -41,16 +41,16 @@ export const heavy: InitFn = (workspace: Workspace) => {
   const page = workspace.createPage('page0');
 
   // Add page block and surface block at root level
-  const pageBlockId = page.addBlockByFlavour('affine:page', {
+  const pageBlockId = page.addBlock('affine:page', {
     title: new Text(),
   });
-  page.addBlockByFlavour('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, null);
 
   // Add frame block inside page block
-  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   for (let i = 0; i < 1000; i++) {
     // Add paragraph block inside frame block
-    page.addBlockByFlavour(
+    page.addBlock(
       'affine:paragraph',
       {
         text: new Text('Hello, world! ' + i),
@@ -87,13 +87,13 @@ export const preset: InitFn = (workspace: Workspace) => {
   const page = workspace.createPage('page0');
 
   // Add page block and surface block at root level
-  const pageBlockId = page.addBlockByFlavour('affine:page', {
+  const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite playground'),
   });
-  page.addBlockByFlavour('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, null);
 
   // Add frame block inside page block
-  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   // Import preset markdown content inside frame block
   const contentParser = new window.ContentParser(page);
   addShapeElement(page, {
@@ -123,13 +123,13 @@ export const database: InitFn = (workspace: Workspace) => {
   page.awarenessStore.setFlag('enable_database', true);
 
   // Add page block and surface block at root level
-  const pageBlockId = page.addBlockByFlavour('affine:page', {
+  const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite playground'),
   });
-  page.addBlockByFlavour('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, null);
 
   // Add frame block inside page block
-  const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
   type Option = 'Done' | 'TODO' | 'WIP';
   const selection = ['Done', 'TODO', 'WIP'] as Option[];
@@ -168,21 +168,21 @@ export const database: InitFn = (workspace: Workspace) => {
     type: 'rich-text',
   });
   // Add database block inside frame block
-  const databaseId = page.addBlockByFlavour(
+  const databaseId = page.addBlock(
     'affine:database',
     {
       columns: [col1, col2, col3],
     },
     frameId
   );
-  const p1 = page.addBlockByFlavour(
+  const p1 = page.addBlock(
     'affine:paragraph',
     {
       text: new page.Text('text1'),
     },
     databaseId
   );
-  const p2 = page.addBlockByFlavour(
+  const p2 = page.addBlock(
     'affine:paragraph',
     {
       text: new page.Text('text2'),
@@ -209,7 +209,7 @@ export const database: InitFn = (workspace: Workspace) => {
   });
 
   // Add a paragraph after database
-  page.addBlockByFlavour('affine:paragraph', {}, frameId);
+  page.addBlock('affine:paragraph', {}, frameId);
   page.resetHistory();
 };
 

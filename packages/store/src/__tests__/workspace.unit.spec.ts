@@ -36,7 +36,7 @@ function waitOnce<T>(slot: Slot<T>) {
 }
 
 function createRoot(page: Page) {
-  page.addBlockByFlavour('affine:page');
+  page.addBlock('affine:page');
   if (!page.root) throw new Error('root not found');
   return page.root;
 }
@@ -85,7 +85,7 @@ describe.concurrent('basic', () => {
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
     const page = createTestPage();
-    page.addBlockByFlavour('affine:page', {
+    page.addBlock('affine:page', {
       title: new page.Text(),
     });
 
@@ -103,7 +103,7 @@ describe.concurrent('addBlock', () => {
 
   it('can add model with props', () => {
     const page = createTestPage();
-    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
+    page.addBlock('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
@@ -119,10 +119,10 @@ describe.concurrent('addBlock', () => {
 
   it('can add multi models', () => {
     const page = createTestPage();
-    page.addBlockByFlavour('affine:page', {
+    page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
     page.addBlocksByFlavour([
       { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
       { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
@@ -165,7 +165,7 @@ describe.concurrent('addBlock', () => {
     const page = createTestPage();
 
     queueMicrotask(() =>
-      page.addBlockByFlavour('affine:page', {
+      page.addBlock('affine:page', {
         title: new page.Text(),
       })
     );
@@ -179,14 +179,14 @@ describe.concurrent('addBlock', () => {
   it('can add block to root', async () => {
     const page = createTestPage();
 
-    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+    queueMicrotask(() => page.addBlock('affine:page'));
     await waitOnce(page.slots.rootAdded);
     const { root } = page;
     if (!root) throw new Error('root is null');
 
     assert.equal(root.flavour, 'affine:page');
 
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
     assert.equal(root.children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
@@ -204,7 +204,7 @@ describe.concurrent('addBlock', () => {
     // @ts-ignore
     assert.equal(workspace._pages.size, 2);
 
-    page0.addBlockByFlavour('affine:page', {
+    page0.addBlock('affine:page', {
       title: new page0.Text(),
     });
     workspace.removePage(page0.id);
@@ -277,7 +277,7 @@ describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
     const page = createTestPage();
 
-    page.addBlockByFlavour('affine:page', {
+    page.addBlock('affine:page', {
       title: new page.Text(),
     });
     assert.deepEqual(serialize(page)[spaceId], {
@@ -299,7 +299,7 @@ describe.concurrent('deleteBlock', () => {
     const page = createTestPage();
     const root = createRoot(page);
 
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
 
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
@@ -342,8 +342,8 @@ describe.concurrent('getBlock', () => {
     const page = createTestPage();
     const root = createRoot(page);
 
-    page.addBlockByFlavour('affine:paragraph');
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph');
 
     const text = page.getBlockById('2') as BaseBlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
@@ -357,8 +357,8 @@ describe.concurrent('getBlock', () => {
     const page = createTestPage();
     const root = createRoot(page);
 
-    page.addBlockByFlavour('affine:paragraph');
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph');
 
     const result = page.getParent(root.children[1]) as BaseBlockModel;
     assert.equal(result, root);
@@ -371,8 +371,8 @@ describe.concurrent('getBlock', () => {
     const page = createTestPage();
     const root = createRoot(page);
 
-    page.addBlockByFlavour('affine:paragraph');
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph');
 
     const result = page.getPreviousSibling(root.children[1]) as BaseBlockModel;
     assert.equal(result, root.children[0]);
@@ -389,7 +389,7 @@ describe('workspace.exportJSX works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
-    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
+    page.addBlock('affine:page', { title: new page.Text('hello') });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
@@ -411,11 +411,11 @@ describe('workspace.exportJSX works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
-    page.addBlockByFlavour('affine:page', {
+    page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlockByFlavour('affine:paragraph');
-    page.addBlockByFlavour('affine:paragraph');
+    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
@@ -436,15 +436,15 @@ describe.concurrent('workspace.search works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
-    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
+    page.addBlock('affine:page', { title: new page.Text('hello') });
 
-    page.addBlockByFlavour('affine:paragraph', {
+    page.addBlock('affine:paragraph', {
       text: new page.Text(
         '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
       ),
     });
 
-    page.addBlockByFlavour('affine:paragraph', {
+    page.addBlock('affine:paragraph', {
       text: new page.Text(
         '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
       ),
