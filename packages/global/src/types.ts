@@ -1,13 +1,13 @@
 import type {
-  CodeBlockModelSchema,
-  DatabaseBlockModelSchema,
-  DividerBlockModelSchema,
-  EmbedBlockModelSchema,
-  FrameBlockModelSchema,
-  ListBlockModelSchema,
-  PageBlockModelSchema,
-  ParagraphBlockModelSchema,
-  SurfaceBlockModelSchema,
+  CodeBlockSchema,
+  DatabaseBlockSchema,
+  DividerBlockSchema,
+  EmbedBlockSchema,
+  FrameBlockSchema,
+  ListBlockSchema,
+  PageBlockSchema,
+  ParagraphBlockSchema,
+  SurfaceBlockSchema,
 } from '@blocksuite/blocks';
 import type {
   // Model
@@ -23,15 +23,15 @@ import type {
 } from '@blocksuite/blocks/models';
 
 export type BlockSchemas = {
-  'affine:paragraph': typeof ParagraphBlockModelSchema;
-  'affine:page': typeof PageBlockModelSchema;
-  'affine:list': typeof ListBlockModelSchema;
-  'affine:frame': typeof FrameBlockModelSchema;
-  'affine:code': typeof CodeBlockModelSchema;
-  'affine:divider': typeof DividerBlockModelSchema;
-  'affine:embed': typeof EmbedBlockModelSchema;
-  'affine:surface': typeof SurfaceBlockModelSchema;
-  'affine:database': typeof DatabaseBlockModelSchema;
+  'affine:paragraph': typeof ParagraphBlockSchema;
+  'affine:page': typeof PageBlockSchema;
+  'affine:list': typeof ListBlockSchema;
+  'affine:frame': typeof FrameBlockSchema;
+  'affine:code': typeof CodeBlockSchema;
+  'affine:divider': typeof DividerBlockSchema;
+  'affine:embed': typeof EmbedBlockSchema;
+  'affine:surface': typeof SurfaceBlockSchema;
+  'affine:database': typeof DatabaseBlockSchema;
 };
 
 export type BlockModels = {

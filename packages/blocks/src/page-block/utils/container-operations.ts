@@ -33,7 +33,7 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import type { BlockSchema } from '../../models.js';
+import type { BlockSchemas } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
 const DEFAULT_SPACING = 64;
@@ -162,7 +162,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
 
 export function updateBlockType(
   models: BaseBlockModel[],
-  flavour: keyof BlockSchema,
+  flavour: keyof BlockSchemas,
   type?: string
 ) {
   if (!models.length) {

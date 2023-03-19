@@ -3,12 +3,12 @@
 
 import { assert, describe, expect, it } from 'vitest';
 
-import { DividerBlockModelSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { FrameBlockModelSchema } from '../../../blocks/src/frame-block/frame-model.js';
-import { ListBlockModelSchema } from '../../../blocks/src/list-block/list-model.js';
+import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
+import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
+import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 // Use manual per-module import/export to support vitest environment on Node.js
-import { PageBlockModelSchema } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockModelSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
+import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { Slot } from '../../../global/src/utils/slot.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
@@ -19,13 +19,12 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
-// Create BlockSchema manually
-export const BlockSchema = [
-  ParagraphBlockModelSchema,
-  PageBlockModelSchema,
-  ListBlockModelSchema,
-  FrameBlockModelSchema,
-  DividerBlockModelSchema,
+export const BlockSchemas = [
+  ParagraphBlockSchema,
+  PageBlockSchema,
+  ListBlockSchema,
+  FrameBlockSchema,
+  DividerBlockSchema,
 ];
 
 function serialize(page: Page) {
@@ -44,7 +43,7 @@ function createRoot(page: Page) {
 
 function createTestPage() {
   const options = createTestOptions();
-  const workspace = new Workspace(options).register(BlockSchema);
+  const workspace = new Workspace(options).register(BlockSchemas);
   const page = workspace.createPage('page0');
   return page;
 }
@@ -198,7 +197,7 @@ describe.concurrent('addBlock', () => {
 
   it('can add and remove multi pages', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
 
     const page0 = workspace.createPage('page0');
     const page1 = workspace.createPage('page1');
@@ -221,7 +220,7 @@ describe.concurrent('addBlock', () => {
 
   it('can set page state', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
     workspace.createPage('page0');
 
     assert.deepEqual(
@@ -387,7 +386,7 @@ describe.concurrent('getBlock', () => {
 describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
@@ -401,7 +400,7 @@ describe('workspace.exportJSX works', () => {
 
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
     workspace.createPage('page0');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
@@ -409,7 +408,7 @@ describe('workspace.exportJSX works', () => {
 
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', {
@@ -434,7 +433,7 @@ describe('workspace.exportJSX works', () => {
 describe.concurrent('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
     page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });

@@ -106,12 +106,12 @@ And here is a minimal collaboration-ready editor showing how these underlying Bl
 ```ts
 import '@blocksuite/blocks';
 import { Workspace, Page } from '@blocksuite/store';
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 
 function main() {
   // Create a workspace with one default page
-  const workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
+  const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
   const page = workspace.createPage('page0');
 
   // Create default blocks in the page

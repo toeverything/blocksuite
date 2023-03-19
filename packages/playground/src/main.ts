@@ -6,7 +6,7 @@ import './components/start-panel';
 import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import { EditorContainer } from '@blocksuite/editor';
 import type { Page } from '@blocksuite/store';
@@ -80,11 +80,11 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
 
 async function main() {
   const workspace = new Workspace(options)
-    .register(builtInSchemas)
+    .register(AffineSchemas)
     .register(__unstableSchemas);
 
   window.workspace = workspace;
-  window.blockSchemas = builtInSchemas;
+  window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
   window.std = std;
   window.ContentParser = ContentParser;
