@@ -364,7 +364,7 @@ export class Page extends Space<FlatBlockMap> {
   ): string[] {
     const ids: string[] = [];
     blocks.forEach(block => {
-      const id = this.addBlockByFlavour<ALLProps, Flavour>(
+      const id = this.addBlock<ALLProps, Flavour>(
         block.flavour,
         block.blockProps ?? {},
         parent,
@@ -378,7 +378,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlockByFlavour<
+  public addBlock<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -575,12 +575,7 @@ export class Page extends Space<FlatBlockMap> {
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
-      const id = this.addBlockByFlavour(
-        flavour,
-        blockProps,
-        parent.id,
-        insertIndex
-      );
+      const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
   }

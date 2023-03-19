@@ -98,15 +98,11 @@ export const PageManger = () => {
         <Editor
           page={() => currentPage}
           onInit={async (page, editor) => {
-            const pageBlockId = page.addBlockByFlavour('affine:page', {
+            const pageBlockId = page.addBlock('affine:page', {
               title: new page.Text('Welcome to BlockSuite React example'),
             });
-            page.addBlockByFlavour('affine:surface', {}, null);
-            const frameId = page.addBlockByFlavour(
-              'affine:frame',
-              {},
-              pageBlockId
-            );
+            page.addBlock('affine:surface', {}, null);
+            const frameId = page.addBlock('affine:frame', {}, pageBlockId);
             // Import preset markdown content inside frame block
             const contentParser = new ContentParser(page);
             await contentParser.importMarkdown(presetMarkdown, frameId);

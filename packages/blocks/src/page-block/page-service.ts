@@ -30,7 +30,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     pastedBlocks: OpenBlockInfo[]
   ) {
     // this is page block empty case
-    const frameId = focusedBlockModel.page.addBlockByFlavour(
+    const frameId = focusedBlockModel.page.addBlock(
       'affine:frame',
       {},
       focusedBlockModel.id

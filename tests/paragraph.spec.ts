@@ -739,18 +739,18 @@ test('press arrow down should move caret to the start of line', async ({
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
-    page.addBlockByFlavour(
+    const frame = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock(
       'affine:paragraph',
       {
         text: new page.Text('0'.repeat(100)),
       },
       frame
     );
-    page.addBlockByFlavour(
+    page.addBlock(
       'affine:paragraph',
       {
         text: new page.Text('1'),
@@ -774,18 +774,18 @@ test('press arrow up in the second line should move caret to the first line', as
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const frame = page.addBlock('affine:frame', {}, pageId);
     const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
     });
     const text = page.Text.fromDelta(delta);
-    page.addBlockByFlavour('affine:paragraph', { text }, frame);
-    page.addBlockByFlavour('affine:paragraph', {}, frame);
+    page.addBlock('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', {}, frame);
   });
 
   // Focus the empty paragraph
@@ -825,14 +825,14 @@ test('press arrow down in indent line should not move caret to the start of line
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
-    const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);
-    page.addBlockByFlavour('affine:paragraph', {}, p2);
-    page.addBlockByFlavour(
+    const frame = page.addBlock('affine:frame', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, frame);
+    const p2 = page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p2);
+    page.addBlock(
       'affine:paragraph',
       {
         text: new page.Text('0'),

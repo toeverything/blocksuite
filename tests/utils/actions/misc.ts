@@ -181,12 +181,12 @@ export async function enterPlaygroundWithList(
   await page.evaluate(
     ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
-      const pageId = page.addBlockByFlavour('affine:page', {
+      const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+      const frameId = page.addBlock('affine:frame', {}, pageId);
       for (let i = 0; i < contents.length; i++) {
-        page.addBlockByFlavour(
+        page.addBlock(
           'affine:list',
           contents.length > 0
             ? { text: new page.Text(contents[i]), type }
@@ -207,13 +207,13 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
     page.captureSync();
 
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page', {
+      pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
 
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.captureSync();
     return { pageId, frameId, paragraphId };
   }, pageId);
@@ -224,12 +224,12 @@ export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
 
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlockByFlavour('affine:surface', {}, null);
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    page.addBlock('affine:surface', {}, null);
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.resetHistory();
 
     return { pageId, frameId, paragraphId };
@@ -242,12 +242,12 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
-      pageId = page.addBlockByFlavour('affine:page', {
+      pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const paragraphId = page.addBlockByFlavour(
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const paragraphId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
@@ -281,9 +281,9 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlockByFlavour('affine:page');
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const codeBlockId = page.addBlockByFlavour('affine:code', {}, frameId);
+    const pageId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const codeBlockId = page.addBlock('affine:code', {}, frameId);
     page.captureSync();
     return { pageId, frameId, codeBlockId };
   });

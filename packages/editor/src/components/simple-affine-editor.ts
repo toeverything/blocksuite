@@ -25,9 +25,9 @@ export class SimpleAffineEditor extends NonShadowLitElement {
     const page = this.workspace.createPage('page0');
     this.page = page;
 
-    const pageBlockId = page.addBlockByFlavour('affine:page');
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-    page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    const pageBlockId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+    page.addBlock('affine:paragraph', {}, frameId);
   }
 
   connectedCallback(): void {
