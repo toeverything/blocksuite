@@ -8,44 +8,29 @@ import type { BaseService } from './__internal__/service/index.js';
 import {
   type CodeBlockModel,
   CodeBlockSchema,
-  CodeBlockService,
-} from './code-block/index.js';
-import {
-  type DatabaseBlockModel,
-  DatabaseBlockSchema,
-} from './database-block/index.js';
-import {
-  type DividerBlockModel,
-  DividerBlockSchema,
-  DividerBlockService,
-} from './divider-block/index.js';
-import {
-  type EmbedBlockModel,
-  EmbedBlockSchema,
-  EmbedBlockService,
-} from './embed-block/index.js';
-import {
-  type FrameBlockModel,
-  FrameBlockSchema,
-  FrameBlockService,
-} from './frame-block/index.js';
-import {
-  type ListBlockModel,
-  ListBlockSchema,
-  ListBlockService,
-} from './list-block/index.js';
-import type { PageBlockModel } from './page-block/index.js';
-// FIXME: unable to import from ./page-block/index.js
+} from './code-block/code-model.js';
+import { CodeBlockService } from './code-block/code-service.js';
+import type { DatabaseBlockModel } from './database-block/database-model.js';
+import { DatabaseBlockSchema } from './database-block/database-model.js';
+import type { DividerBlockModel } from './divider-block/divider-model.js';
+import { DividerBlockSchema } from './divider-block/divider-model.js';
+import { DividerBlockService } from './divider-block/divider-service.js';
+import type { EmbedBlockModel } from './embed-block/embed-model.js';
+import { EmbedBlockSchema } from './embed-block/embed-model.js';
+import { EmbedBlockService } from './embed-block/embed-service.js';
+import type { FrameBlockModel } from './frame-block/frame-model.js';
+import { FrameBlockSchema } from './frame-block/frame-model.js';
+import { FrameBlockService } from './frame-block/frame-service.js';
+import type { ListBlockModel } from './list-block/list-model.js';
+import { ListBlockSchema } from './list-block/list-model.js';
+import { ListBlockService } from './list-block/list-service.js';
+import type { PageBlockModel } from './page-block/page-model.js';
 import { PageBlockSchema } from './page-block/page-model.js';
-import {
-  type ParagraphBlockModel,
-  ParagraphBlockSchema,
-  ParagraphBlockService,
-} from './paragraph-block/index.js';
-import {
-  type SurfaceBlockModel,
-  SurfaceBlockSchema,
-} from './surface-block/index.js';
+import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
+import { ParagraphBlockSchema } from './paragraph-block/paragraph-model.js';
+import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
+import type { SurfaceBlockModel } from './surface-block/surface-model.js';
+import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 
 export type {
   CodeBlockModel,
