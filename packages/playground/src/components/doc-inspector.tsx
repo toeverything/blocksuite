@@ -9,8 +9,8 @@ export async function createViewer(value: Record<string, unknown>) {
       style={{
         position: 'fixed',
         zIndex: '1002',
-        width: '300px',
-        height: '400px',
+        width: '30vw',
+        height: '50vh',
         right: '30px',
         top: '30px',
         overflow: 'auto',
