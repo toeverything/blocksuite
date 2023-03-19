@@ -9,7 +9,7 @@ import {
 } from '../../register.js';
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellLitElement {
+class SelectCell extends DatabaseCellLitElement<string> {
   static styles = css`
     :host {
       width: 100%;
@@ -24,7 +24,7 @@ class SelectCell extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-select-cell-editing')
-class SelectCellEditing extends DatabaseCellLitElement {
+class SelectCellEditing extends DatabaseCellLitElement<string> {
   value: string | undefined = undefined;
 
   static styles = css`
@@ -100,7 +100,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellLitElement {
+class SelectColumnPropertyEditing extends DatabaseCellLitElement<string> {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
@@ -109,7 +109,7 @@ export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
   () => ({
     selection: [] as string[],
   }),
-  () => [] as string[],
+  () => null as string | null,
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,

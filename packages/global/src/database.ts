@@ -1,7 +1,7 @@
-export interface RowHost extends HTMLElement {
+export interface RowHost<Value = unknown> extends HTMLElement {
   setEditing(isEditing: boolean): void;
-  // todo: type improvement
-  setValue(value: unknown): void;
+
+  setValue(value: Value): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ): void;

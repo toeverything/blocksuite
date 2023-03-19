@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Y } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
@@ -63,7 +64,7 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellLitElement {
+class TextCell extends DatabaseCellLitElement<Y.Text> {
   static styles = css`
     :host {
       width: 100%;
@@ -219,9 +220,10 @@ class TextCell extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-rich-text-column-property-editing')
-class TextColumnPropertyEditing extends DatabaseCellLitElement {
+class TextColumnPropertyEditing extends DatabaseCellLitElement<Y.Text> {
   static tag = literal`affine-database-rich-text-column-property-editing`;
 }
+
 export const RichTextColumnSchemaRenderer = defineColumnSchemaRenderer(
   'rich-text',
   () => ({}),

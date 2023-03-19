@@ -12,7 +12,7 @@ import { onClickOutside } from '../utils.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
-  extends DatabaseCellLitElement
+  extends DatabaseCellLitElement<unknown>
   implements RowHost
 {
   static styles = css`

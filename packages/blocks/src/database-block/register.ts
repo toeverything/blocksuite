@@ -11,10 +11,10 @@ import type { literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from './database-model.js';
 
-export abstract class DatabaseCellLitElement extends LitElement {
+export abstract class DatabaseCellLitElement<Value> extends LitElement {
   static tag: ReturnType<typeof literal>;
   @property()
-  rowHost!: RowHost;
+  rowHost!: RowHost<Value>;
   @property()
   databaseModel!: DatabaseBlockModel;
   @property()
@@ -51,9 +51,9 @@ export interface ColumnUIComponents<
   Property extends Record<string, unknown> = Record<string, unknown>,
   Value = unknown
 > {
-  Cell: typeof DatabaseCellLitElement;
-  CellEditing: typeof DatabaseCellLitElement | false;
-  ColumnPropertyEditing: typeof DatabaseCellLitElement;
+  Cell: typeof DatabaseCellLitElement<Value>;
+  CellEditing: typeof DatabaseCellLitElement<Value> | false;
+  ColumnPropertyEditing: typeof DatabaseCellLitElement<Value>;
 }
 
 export function defineColumnSchemaRenderer<
@@ -65,9 +65,9 @@ export function defineColumnSchemaRenderer<
   propertyCreator: () => Property,
   defaultValue: (page: Page) => Value | null,
   components: {
-    Cell: typeof DatabaseCellLitElement;
-    CellEditing: typeof DatabaseCellLitElement | false;
-    ColumnPropertyEditing: typeof DatabaseCellLitElement;
+    Cell: typeof DatabaseCellLitElement<Value>;
+    CellEditing: typeof DatabaseCellLitElement<Value> | false;
+    ColumnPropertyEditing: typeof DatabaseCellLitElement<Value>;
   },
   config: {
     displayName: string;
