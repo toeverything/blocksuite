@@ -327,10 +327,12 @@ export class EdgelessPageBlockComponent
     const { _disposables, slots } = this;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this.style.setProperty(
-          '--affine-zoom',
-          `${this.surface.viewport.zoom}`
-        );
+        const prevZoom = this.style.getPropertyValue('--affine-zoom');
+        const newZoom = this.surface.viewport.zoom;
+        if (!prevZoom || +prevZoom !== newZoom) {
+          this.style.setProperty('--affine-zoom', `${newZoom}`);
+          this.components.dragHandle?.setScale(newZoom);
+        }
         this.requestUpdate();
       })
     );

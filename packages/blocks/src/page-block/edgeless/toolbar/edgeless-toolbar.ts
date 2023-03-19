@@ -196,7 +196,7 @@ export class EdgelessToolbar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @tool.click=${() => this._setZoom(viewport.zoom - 0.1)}
+          @tool.click=${() => this._setZoom(Math.max(viewport.zoom - 0.1, 0.1))}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
