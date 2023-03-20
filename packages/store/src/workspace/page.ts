@@ -471,7 +471,7 @@ export class Page extends Space<FlatBlockMap> {
     blocks: BaseBlockModel[],
     newParent: BaseBlockModel,
     newSibling: BaseBlockModel | null = null,
-    top = true
+    insertBeforeSibling = true
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -504,7 +504,7 @@ export class Page extends Space<FlatBlockMap> {
       }
 
       const ids = blocks.map(block => block.id);
-      if (top) {
+      if (insertBeforeSibling) {
         yChildrenB.insert(nextIdx, ids);
       } else {
         yChildrenB.insert(nextIdx + 1, ids);
