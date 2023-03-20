@@ -19,7 +19,7 @@ export class InlineSuggestController implements ReactiveController {
       top: 0;
       color: var(--affine-placeholder-color);
       fill: var(--affine-placeholder-color);
-      cursor: pointer;
+      pointer-events: none;
     }
   `;
 
@@ -53,11 +53,12 @@ export class InlineSuggestController implements ReactiveController {
     this.host = host;
   }
 
-  hostDisconnected() {
-    // Clear the timer when the host is disconnected
-    // We should not observe text change when focus out
-    this._disposableGroup.dispose();
+  hostConnected(): void {
     this._disposableGroup = new DisposableGroup();
+  }
+
+  hostDisconnected() {
+    this._disposableGroup.dispose();
   }
 
   init({
@@ -84,7 +85,7 @@ export class InlineSuggestController implements ReactiveController {
     };
   }
 
-  onFocusIn = (e: FocusEvent) => {
+  readonly onFocusIn = (e: FocusEvent) => {
     const inlineSuggestProvider = this.provider;
     assertExists(inlineSuggestProvider);
     assertExists(this.model);
@@ -156,7 +157,7 @@ export class InlineSuggestController implements ReactiveController {
     );
   };
 
-  onFocusOut = (e: FocusEvent) => {
+  readonly onFocusOut = (e: FocusEvent) => {
     this._suggestState = {
       ...this._suggestState,
       show: false,
@@ -168,7 +169,7 @@ export class InlineSuggestController implements ReactiveController {
     this._disposableGroup = new DisposableGroup();
   };
 
-  onKeyDown = (e: KeyboardEvent) => {
+  readonly onKeyDown = (e: KeyboardEvent) => {
     if (!this._suggestState.show) return;
     if (e.isComposing || e.key !== 'Tab') {
       if (e.key !== 'Tab') {
