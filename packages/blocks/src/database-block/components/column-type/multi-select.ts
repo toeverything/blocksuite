@@ -7,9 +7,9 @@ import {
 } from '../../register.js';
 import { SelectMode } from './select.js';
 
-@customElement('affine-database-single-select-cell')
-class MultiSelectCell extends DatabaseCellLitElement {
-  static tag = literal`affine-database-single-select-cell`;
+@customElement('affine-database-multi-select-cell')
+class MultiSelectCell extends DatabaseCellLitElement<string[]> {
+  static tag = literal`affine-database-multi-select-cell`;
   override render() {
     return html`
       <affine-database-select-cell
@@ -23,9 +23,9 @@ class MultiSelectCell extends DatabaseCellLitElement {
   }
 }
 
-@customElement('affine-database-single-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellLitElement {
-  static tag = literal`affine-database-single-select-cell-editing`;
+@customElement('affine-database-multi-select-cell-editing')
+class MultiSelectCellEditing extends DatabaseCellLitElement<string[]> {
+  static tag = literal`affine-database-multi-select-cell-editing`;
 
   override render() {
     return html`
@@ -42,9 +42,11 @@ class MultiSelectCellEditing extends DatabaseCellLitElement {
   }
 }
 
-@customElement('affine-database-single-select-column-property-editing')
-class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement {
-  static tag = literal`affine-database-single-select-column-property-editing`;
+@customElement('affine-database-multi-select-column-property-editing')
+class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement<
+  string[]
+> {
+  static tag = literal`affine-database-multi-select-column-property-editing`;
 }
 
 export const MultiSelectColumnSchemaRenderer = defineColumnSchemaRenderer(
