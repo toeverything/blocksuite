@@ -465,7 +465,7 @@ test('yText should not contain \r', () => {
 
   expect(yText.toString()).toEqual('aaa\r');
   expect(() => {
-    const virgo = new VEditor(yText);
+    new VEditor(yText);
   }).toThrow(
     'yText must not contain \r because it will break the range synclization'
   );
