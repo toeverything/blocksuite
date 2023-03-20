@@ -246,15 +246,12 @@ export class VEditor<
     });
 
     this._rootElement.replaceChildren(...lines);
-    this._rootElement.focus();
 
     await Promise.all(
       lines.map(async line => {
         await line.updateComplete;
       })
     );
-
-    this._rootElement.focus();
 
     this.slots.updated.emit();
   };
@@ -947,6 +944,8 @@ export class VEditor<
       assertExists(this._rootElement);
 
       this._renderDeltas();
+
+      this.rootElement.focus();
     });
   };
 
