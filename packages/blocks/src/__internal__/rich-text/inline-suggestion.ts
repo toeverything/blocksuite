@@ -36,8 +36,12 @@ export class InlineSuggestionController implements ReactiveController {
   };
 
   private _setSuggestionState(newState: Partial<typeof this._suggestionState>) {
-    this._suggestionState = { ...this._suggestionState, ...newState };
-    // TODO diff to optimize
+    const previousState = this._suggestionState;
+    if (previousState.show === newState.show) {
+      return;
+    }
+    // TODO diff to optimize performance
+    this._suggestionState = { ...previousState, ...newState };
     this.host.requestUpdate();
   }
 
@@ -167,16 +171,15 @@ export class InlineSuggestionController implements ReactiveController {
   readonly onKeyDown = (e: KeyboardEvent) => {
     if (!this._suggestionState.show) return;
     if (e.isComposing || e.key !== 'Tab') {
-      if (e.key !== 'Tab') {
-        requestAnimationFrame(() => {
-          const position = this._updatePosition();
-          this._setSuggestionState({
-            position,
-          });
+      requestAnimationFrame(() => {
+        const position = this._updatePosition();
+        this._setSuggestionState({
+          position,
         });
-      }
+      });
       return;
     }
+    // accept suggestion
     const editor = this.vEditor;
     assertExists(editor);
     const vRange = editor.getVRange();
