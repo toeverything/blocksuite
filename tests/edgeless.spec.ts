@@ -31,6 +31,7 @@ import {
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   focusRichText,
+  getCenterPosition,
   initEmptyEdgelessState,
   initThreeParagraphs,
   locatorPanButton,
@@ -902,6 +903,67 @@ test('drag handle should add new frame when dragged outside frame', async ({
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('block hub should drag and drop a card into existing frame', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="3"]');
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  await type(page, '000');
+  await assertRichTexts(page, ['123', '000', '456', '789']);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+});
+
+test('block hub should add new frame when dragged to blank area', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: 30, y: 40 },
+    { steps: 50 }
+  );
+
+  await type(page, '000');
+  await assertRichTexts(page, ['123', '456', '789', '000']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
 });
