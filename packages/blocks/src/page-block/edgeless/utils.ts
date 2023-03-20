@@ -19,6 +19,7 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/store';
 import type { KeyHandler } from 'hotkeys-js';
 
 import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
@@ -187,8 +188,11 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         }
         const distanceToTop = Math.abs(rect.top - point.y);
         const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const parent = page.getParent(model);
+        assertExists(parent);
         page.moveBlocks(
           blocks.map(b => b.model),
+          parent,
           model,
           distanceToTop < distanceToBottom
         );
