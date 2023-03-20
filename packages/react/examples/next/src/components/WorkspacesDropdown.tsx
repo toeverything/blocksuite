@@ -1,4 +1,4 @@
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import { useBlockSuiteStore } from '@blocksuite/react';
 import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
 import { Dropdown } from '@nextui-org/react';
@@ -42,7 +42,7 @@ export const WorkspacesDropdown = (): React.ReactElement => {
               id: 'random:' + uuidv4(),
               providers: [IndexedDBDocProvider],
             });
-            workspace.register(builtInSchemas);
+            workspace.register(AffineSchemas);
             addWorkspace(workspace);
             setCurrentWorkspace(workspace);
           } else if (array[0] === 'delete-workspace') {

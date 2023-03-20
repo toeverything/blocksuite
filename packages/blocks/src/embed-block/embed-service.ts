@@ -1,29 +1,20 @@
 import { BaseService } from '../__internal__/service/index.js';
-import type { OpenBlockInfo } from '../__internal__/utils/index.js';
+import type {
+  BlockTransformContext,
+  OpenBlockInfo,
+} from '../__internal__/utils/index.js';
 import type { EmbedBlockModel } from './embed-model.js';
-export class EmbedBlockService extends BaseService {
+export class EmbedBlockService extends BaseService<EmbedBlockModel> {
   override block2html(
     block: EmbedBlockModel,
-    {
-      childText = '',
-      begin,
-      end,
-    }: {
-      childText?: string;
-      begin?: number;
-      end?: number;
-    } = {}
+    { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     return `<figure><img src="${block.sourceId}" alt="${block.caption}"><figcaption>${block.caption}</figcaption></figure>`;
   }
 
   override block2Text(
     block: EmbedBlockModel,
-    {
-      childText = '',
-      begin,
-      end,
-    }: { childText?: string; begin?: number; end?: number } = {}
+    { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
     return block.caption;
   }

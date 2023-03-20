@@ -1,5 +1,5 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Page, UserRange } from '@blocksuite/store';
+import type { PhasorElement } from '@blocksuite/phasor';
+import type { Page } from '@blocksuite/store';
 
 import {
   initMouseEventHandlers,
@@ -8,7 +8,7 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
@@ -23,7 +23,7 @@ import {
   pickTopBlock,
 } from './utils.js';
 
-export type Selectable = TopLevelBlockModel | SurfaceElement;
+export type Selectable = TopLevelBlockModel | PhasorElement;
 
 export interface EdgelessHoverState {
   rect: DOMRect;
@@ -175,25 +175,12 @@ export class EdgelessSelectionManager {
   };
 
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
-    this.updateLocalSelection();
+    updateLocalSelectionRange(this.page);
   };
 
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
-  }
-
-  updateLocalSelection() {
-    const page = this.page;
-    const blockRange = getCurrentBlockRange(page);
-    if (blockRange && blockRange.type === 'Native') {
-      const userRange: UserRange = {
-        startOffset: blockRange.startOffset,
-        endOffset: blockRange.endOffset,
-        blockIds: blockRange.models.map(m => m.id),
-      };
-      page.awarenessStore.setLocalRange(page, userRange);
-    }
   }
 
   refreshRemoteSelection() {

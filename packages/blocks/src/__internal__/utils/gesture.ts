@@ -81,6 +81,9 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (target.tagName === 'INPUT') {
     return true;
   }
+  if (target.tagName === 'FORMAT-QUICK-BAR') {
+    return true;
+  }
   return false;
 }
 

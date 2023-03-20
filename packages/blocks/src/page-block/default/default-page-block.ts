@@ -1,31 +1,32 @@
 /// <reference types="vite/client" />
+import {
+  asyncFocusRichText,
+  type BlockHost,
+  hotkey,
+  Rect,
+  type SelectionPosition,
+} from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup, Slot, Utils } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
-import {
-  asyncFocusRichText,
-  BlockChildrenContainer,
-  type BlockHost,
-  getCurrentNativeRange,
-  getVirgoByModel,
-  hasNativeSelection,
-  hotkey,
-  isMultiBlockRange,
-  type SelectionPosition,
-} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
-import type { PageBlockModel } from '../index.js';
+import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
-import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
+import { tryUpdateFrameSize } from '../utils/index.js';
 import {
   DraggingArea,
   EmbedEditingContainer,
@@ -35,21 +36,19 @@ import {
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import {
   createDragHandle,
+  type EditingState,
   getAllowSelectedBlocks,
-  isControlledKeyboardEvent,
 } from './utils.js';
-
-export interface EmbedEditingState {
-  position: { x: number; y: number };
-  model: BaseBlockModel;
-}
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
-  embedEditingStateUpdated: Slot<EmbedEditingState | null>;
+  embedEditingStateUpdated: Slot<EditingState | null>;
   codeBlockOptionUpdated?: Slot;
+  /**
+   * @deprecated Not used yet
+   */
   nativeSelectionToggled: Slot<boolean>;
 }
 
@@ -67,12 +66,13 @@ export class DefaultPageBlockComponent
     }
 
     .affine-default-page-block-container {
+      width: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-color);
       font-weight: 400;
-      width: var(--affine-editor-width);
+      max-width: var(--affine-editor-width);
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
@@ -151,7 +151,7 @@ export class DefaultPageBlockComponent
   private _selectedEmbedRects: DOMRect[] = [];
 
   @state()
-  private _embedEditingState!: EmbedEditingState | null;
+  private _embedEditingState!: EditingState | null;
 
   @state()
   private _isComposing = false;
@@ -161,11 +161,14 @@ export class DefaultPageBlockComponent
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
+  @query('.affine-default-page-block-container')
+  pageBlockContainer!: HTMLDivElement;
+
   slots: DefaultSelectionSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
-    embedEditingStateUpdated: new Slot<EmbedEditingState | null>(),
+    embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
   };
 
@@ -176,6 +179,17 @@ export class DefaultPageBlockComponent
   get titleVEditor() {
     assertExists(this._titleVEditor);
     return this._titleVEditor;
+  }
+
+  get innerRect() {
+    const { left, width } = this.pageBlockContainer.getBoundingClientRect();
+    const { clientHeight, top } = this.selection.state.viewport;
+    return Rect.fromLWTH(
+      left,
+      Math.min(width, window.innerWidth),
+      top,
+      Math.min(clientHeight, window.innerHeight)
+    );
   }
 
   private _initTitleVEditor() {
@@ -223,7 +237,7 @@ export class DefaultPageBlockComponent
       const vRange = this._titleVEditor.getVRange();
       assertExists(vRange);
       const right = model.title.split(vRange.index);
-      const newFirstParagraphId = page.addBlockByFlavour(
+      const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
         defaultFrame,
@@ -237,7 +251,7 @@ export class DefaultPageBlockComponent
       if (firstParagraph) {
         asyncFocusRichText(page, firstParagraph.id);
       } else {
-        const newFirstParagraphId = page.addBlockByFlavour(
+        const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
           {},
           defaultFrame,
@@ -352,51 +366,6 @@ export class DefaultPageBlockComponent
     super.update(changedProperties);
   }
 
-  // TODO migrate to bind-hotkey
-  // Fixes: https://github.com/toeverything/blocksuite/issues/200
-  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
-  //  that have pop-up for selecting local characters.
-  // So we could just hook on the keydown event and detect whether user input a new character.
-  private _handleNativeKeydown = (e: KeyboardEvent) => {
-    if (isControlledKeyboardEvent(e) || this.page.readonly) return;
-    // Only the length of character buttons is 1
-    if (e.key.length === 1 && hasNativeSelection()) {
-      const range = getCurrentNativeRange();
-      if (isMultiBlockRange(range)) {
-        deleteModelsByRange(this.page);
-
-        // handle user input
-        const blockRange = getCurrentBlockRange(this.page);
-        if (
-          !blockRange ||
-          blockRange.models.length === 0 ||
-          blockRange.type !== 'Native'
-        ) {
-          return;
-        }
-        const startBlock = blockRange.models[0];
-        const vEditor = getVirgoByModel(startBlock);
-        if (vEditor) {
-          vEditor.insertText(
-            {
-              index: blockRange.startOffset,
-              length: 0,
-            },
-            e.key
-          );
-          vEditor.setVRange({
-            index: blockRange.startOffset + 1,
-            length: 0,
-          });
-        }
-      }
-      window.removeEventListener('keydown', this._handleNativeKeydown);
-    } else if (window.getSelection()?.type !== 'Range') {
-      // remove, user don't have native selection
-      window.removeEventListener('keydown', this._handleNativeKeydown);
-    }
-  };
-
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
@@ -467,10 +436,6 @@ export class DefaultPageBlockComponent
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-    });
-    slots.nativeSelectionToggled.on(flag => {
-      if (flag) window.addEventListener('keydown', this._handleNativeKeydown);
-      else window.removeEventListener('keydown', this._handleNativeKeydown);
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -563,6 +528,8 @@ export class DefaultPageBlockComponent
       this.slots,
       viewport
     );
+    const isEmpty =
+      (!this.model.title || !this.model.title.length) && !this._isComposing;
 
     return html`
       <div class="affine-default-viewport">
@@ -570,9 +537,7 @@ export class DefaultPageBlockComponent
           <div class="affine-default-page-block-title-container">
             <div
               data-block-is-title="true"
-              class="affine-default-page-block-title ${(!this.model.title ||
-                !this.model.title.length) &&
-              !this._isComposing
+              class="affine-default-page-block-title ${isEmpty
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>

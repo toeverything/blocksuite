@@ -1,7 +1,11 @@
-import { BlockHub } from '@blocksuite/blocks';
-import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
-import { getAllowSelectedBlocks } from '@blocksuite/blocks';
-import { uploadImageFromLocal } from '@blocksuite/blocks';
+import {
+  asyncFocusRichText,
+  BlockHub,
+  getAllowSelectedBlocks,
+  getServiceOrRegister,
+  tryUpdateFrameSize,
+  uploadImageFromLocal,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -17,7 +21,7 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: async (e, end) => {
+    onDropCallback: async (e, end, point) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -34,16 +38,21 @@ export const createBlockHub: (
         props = [props];
       }
 
-      const targetModel = end.model;
-      const rect = end.position;
+      const { model, rect } = end;
       page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
+      const distanceToTop = Math.abs(rect.top - point.y);
+      const distanceToBottom = Math.abs(rect.bottom - point.y);
       const ids = page.addSiblingBlocks(
-        targetModel,
+        model,
         props,
         distanceToTop < distanceToBottom ? 'before' : 'after'
       );
+
+      if (props[0].flavour === 'affine:database') {
+        const service = await getServiceOrRegister(props[0].flavour);
+        service.initDatabaseBlock(page, model, ids[0]);
+      }
+
       if (ids.length === 1) {
         asyncFocusRichText(page, ids[0]);
       }
@@ -61,7 +70,7 @@ export const createBlockHub: (
     const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
     assertExists(edgelessPageBlock);
     blockHub.getAllowedBlocks = () =>
-      getAllowSelectedBlocks(edgelessPageBlock.pageModel);
+      getAllowSelectedBlocks(edgelessPageBlock.model);
   }
 
   return blockHub;

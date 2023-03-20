@@ -643,16 +643,12 @@ test('should format quick bar position correct at the start of second line', asy
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const frame = page.addBlock('affine:frame', {}, pageId);
     const text = new page.Text('a'.repeat(100));
-    const paragraphId = page.addBlockByFlavour(
-      'affine:paragraph',
-      { text },
-      frame
-    );
+    const paragraphId = page.addBlock('affine:paragraph', { text }, frame);
     return paragraphId;
   });
   // await focusRichText(page);
@@ -709,7 +705,7 @@ test('should format quick bar work in single block selection', async ({
     page,
     [1, 0],
     [1, 3],
-    { x: -10, y: -10 },
+    { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
   const blockSelections = page.locator(
@@ -983,17 +979,17 @@ test('should format bar style active correctly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const frame = page.addBlock('affine:frame', {}, pageId);
     const delta = [
       { insert: '1', attributes: { bold: true, italic: true } },
       { insert: '2', attributes: { bold: true, underline: true } },
       { insert: '3', attributes: { bold: true, code: true } },
     ];
     const text = page.Text.fromDelta(delta);
-    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, frame);
   });
 
   const { boldBtn, codeBtn, underlineBtn } = getFormatBar(page);
@@ -1006,4 +1002,17 @@ test('should format bar style active correctly', async ({ page }) => {
   await expect(underlineBtn).toHaveAttribute('active', '');
   await expect(boldBtn).toHaveAttribute('active', '');
   await expect(codeBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format quick bar show when double click button', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const { formatQuickBar, boldBtn } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+  await boldBtn.dblclick();
+  await expect(formatQuickBar).toBeVisible();
 });

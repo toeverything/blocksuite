@@ -2,8 +2,9 @@
 import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
-import type { TagSchema } from '@blocksuite/global/database';
+import type { ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals } from '@blocksuite/global/utils';
+import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -11,10 +12,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
-import {
-  BlockElementWithService,
-  type BlockHost,
-} from '../__internal__/index.js';
+import { type BlockHost } from '../__internal__/index.js';
+import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
 import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
@@ -22,7 +21,7 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
-import { getTagSchemaRenderer } from './register.js';
+import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
@@ -60,7 +59,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
               @click=${(event: MouseEvent) => {
                 const editColumn = new EditColumnPopup();
                 editColumn.targetModel = block.model;
-                editColumn.targetTagSchema = column;
+                editColumn.targetColumnSchema = column;
                 document.body.appendChild(editColumn);
                 requestAnimationFrame(() => {
                   createPopper(event.target as Element, editColumn, {
@@ -157,7 +156,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
                   <affine-database-cell-container
                     .databaseModel=${databaseModel}
                     .rowModel=${child}
-                    .column=${column}
+                    .columnSchema=${column}
                   >
                   </affine-database-cell-container>
                 `;
@@ -216,12 +215,15 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       outline: none;
     }
 
-    .affine-database-block-title::placeholder {
-      color: var(--affine-placeholder-color);
-    }
-
     .affine-database-block-title:disabled {
       background-color: transparent;
+    }
+
+    .affine-database-block-title-empty::before {
+      content: 'Database';
+      color: var(--affine-placeholder-color);
+      position: absolute;
+      opacity: 0.5;
     }
 
     .affine-database-block-footer {
@@ -261,21 +263,26 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
   @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
   addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
-  get columns(): TagSchema[] {
+  private _vEditor: VEditor | null = null;
+
+  @query('.affine-database-block-title')
+  private _container!: HTMLDivElement;
+
+  get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
-      this.model.page.getTagSchema(id)
-    ) as TagSchema[];
+      this.model.page.getColumnSchema(id)
+    ) as ColumnSchema[];
   }
 
   private _addRow = () => {
     this.model.page.captureSync();
-    this.model.page.addBlockByFlavour('affine:paragraph', {}, this.model.id);
+    this.model.page.addBlock('affine:paragraph', {}, this.model.id);
   };
 
-  private _addColumn = (columnType: TagSchema['type']) => {
+  private _addColumn = (columnType: ColumnSchema['type']) => {
     this.model.page.captureSync();
-    const renderer = getTagSchemaRenderer(columnType);
-    const schema: Omit<TagSchema, 'id'> = {
+    const renderer = getColumnSchemaRenderer(columnType);
+    const schema: Omit<ColumnSchema, 'id'> = {
       type: columnType,
       name: 'new column',
       internalProperty: {
@@ -285,23 +292,34 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       },
       property: renderer.propertyCreator(),
     };
-    const id = this.model.page.setTagSchema(schema);
+    const id = this.model.page.setColumnSchema(schema);
     this.model.page.updateBlock(this.model, {
       columns: [...this.model.columns, id],
     });
   };
 
+  private _initTitleVEditor() {
+    this._vEditor = new VEditor(this.model.title.yText);
+    this._vEditor.mount(this._container);
+    this._vEditor.setReadonly(this.model.page.readonly);
+
+    // for title placeholder
+    this.model.title.yText.observe(() => {
+      this.requestUpdate();
+    });
+
+    // after the database structure is created
+    requestAnimationFrame(() => {
+      this._vEditor?.focusEnd();
+    });
+  }
+
   firstUpdated() {
+    this._initTitleVEditor();
+
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
-
-  private _onTitleInput = (e: InputEvent) => {
-    const value = (e.target as HTMLInputElement).value;
-    this.model.page.updateBlock(this.model, {
-      title: value,
-    });
-  };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
@@ -312,15 +330,12 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       FIRST_LINE_TEXT_WIDTH +
       ADD_COLUMN_BUTTON_WIDTH;
 
+    const isEmpty = !this.model.title || !this.model.title.length;
+
     return html`
-      <div>
-        <input
-          class="affine-database-block-title"
-          data-block-is-title="true"
-          .value=${this.model.title}
-          placeholder="Database"
-          @input=${this._onTitleInput}
-        />
+      <div class="affine-database-block-title ${
+        isEmpty ? 'affine-database-block-title-empty' : ''
+      }" data-block-is-title="true">
       </div>
       <div class="affine-database-block">
         <div

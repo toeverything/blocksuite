@@ -1,17 +1,15 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
-  getBlockElementByModel,
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
@@ -82,15 +80,9 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
-  private _select(model: ListBlockModel) {
-    const { selection } = getDefaultPageBlock(model);
-    const blockElement = getBlockElementByModel(model);
-    assertExists(
-      blockElement,
-      'Failed to select list, blockElement not found!'
-    );
-
-    selection.setSelectedBlocks([blockElement]);
+  private _select() {
+    const { selection } = getDefaultPageBlock(this.model);
+    selection?.selectOneBlock(this);
   }
 
   private _onClickIcon = (e: MouseEvent) => {
@@ -105,7 +97,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       this.host.page.updateBlock(this.model, checkedPropObj);
       return;
     }
-    this._select(this.model);
+    this._select();
   };
 
   firstUpdated() {

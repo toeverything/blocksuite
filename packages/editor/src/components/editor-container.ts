@@ -5,14 +5,13 @@ import {
   type PageBlockModel,
 } from '@blocksuite/blocks';
 import {
-  ContentParser,
   NonShadowLitElement,
   type SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
@@ -33,8 +32,6 @@ export class EditorContainer extends NonShadowLitElement {
   @state()
   private showGrid = false;
 
-  contentParser!: ContentParser;
-
   get model() {
     return [this.page.root, this.page.surface] as [
       PageBlockModel | null,
@@ -52,19 +49,15 @@ export class EditorContainer extends NonShadowLitElement {
       : null;
   }
 
-  @query('.affine-block-placeholder-input')
-  private _placeholderInput!: HTMLInputElement;
-
   private _disposables = new DisposableGroup();
 
-  override firstUpdated() {
+  firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
   }
 
-  override connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
-    this.contentParser = new ContentParser(this.page);
 
     // Question: Why do we prevent this?
     this._disposables.addFromEvent(window, 'keydown', e => {
@@ -127,11 +120,9 @@ export class EditorContainer extends NonShadowLitElement {
         }
       })
     );
-
-    this._placeholderInput?.focus();
   }
 
-  public async createBlockHub() {
+  async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
       await new Promise(res => this.page.slots.rootAdded.once(res));
@@ -139,7 +130,7 @@ export class EditorContainer extends NonShadowLitElement {
     return createBlockHub(this, this.page);
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
     this._disposables.dispose();
@@ -160,7 +151,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .pageModel=${this.pageBlockModel}
+        .model=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .showGrid=${this.showGrid}
@@ -187,6 +178,7 @@ export class EditorContainer extends NonShadowLitElement {
           height: 100%;
           position: relative;
           overflow: hidden;
+          font-family: var(--affine-font-family);
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

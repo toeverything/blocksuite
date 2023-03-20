@@ -1,4 +1,4 @@
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { Workspace } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 
@@ -44,7 +44,7 @@ export const createManagerState = (
   defaultWorkspace: Workspace
 ): ManagerState => {
   bindWorkspaceWithPages(defaultWorkspace);
-  defaultWorkspace.register(builtInSchemas);
+  defaultWorkspace.register(AffineSchemas);
   return {
     workspaces: [defaultWorkspace],
   };
@@ -60,7 +60,7 @@ export const createManagerActions: BlockSuiteActionsCreator<
 > = set => ({
   addWorkspace: (workspace: Workspace) => {
     bindWorkspaceWithPages(workspace);
-    workspace.register(builtInSchemas);
+    workspace.register(AffineSchemas);
     set(state => ({
       workspaces: [...state.workspaces, workspace],
     }));

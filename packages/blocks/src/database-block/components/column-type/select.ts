@@ -5,11 +5,11 @@ import { html, literal } from 'lit/static-html.js';
 
 import {
   DatabaseCellLitElement,
-  defineTagSchemaRenderer,
+  defineColumnSchemaRenderer,
 } from '../../register.js';
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellLitElement {
+class SelectCell extends DatabaseCellLitElement<string> {
   static styles = css`
     :host {
       width: 100%;
@@ -19,12 +19,12 @@ class SelectCell extends DatabaseCellLitElement {
 
   static tag = literal`affine-database-select-cell`;
   override render() {
-    return html` <div>${this.tag?.value}</div> `;
+    return html` <div>${this.column?.value}</div> `;
   }
 }
 
 @customElement('affine-database-select-cell-editing')
-class SelectCellEditing extends DatabaseCellLitElement {
+class SelectCellEditing extends DatabaseCellLitElement<string> {
   value: string | undefined = undefined;
 
   static styles = css`
@@ -37,7 +37,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-select-cell-editing`;
 
   protected firstUpdated() {
-    this.style.width = `${this.column.internalProperty.width}px`;
+    this.style.width = `${this.columnSchema.internalProperty.width}px`;
   }
 
   connectedCallback() {
@@ -59,7 +59,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
   }
 
   override render() {
-    const selection = this.column.property.selection as string[];
+    const selection = this.columnSchema.property.selection as string[];
     return html`
       <div>
         <input
@@ -100,16 +100,16 @@ class SelectCellEditing extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellLitElement {
+class SelectColumnPropertyEditing extends DatabaseCellLitElement<string> {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
-export const SelectTagSchemaRenderer = defineTagSchemaRenderer(
+export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
   'select',
   () => ({
     selection: [] as string[],
   }),
-  () => [] as string[],
+  () => null as string | null,
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,

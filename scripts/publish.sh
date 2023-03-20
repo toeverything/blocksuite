@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  # "docs" # NOT PUBLISHED
   "editor"
   "global"
   "phasor"

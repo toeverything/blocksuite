@@ -411,7 +411,7 @@ const matches: Match[] = [
       const index = parent.children.indexOf(model);
       page.deleteBlock(model);
 
-      const codeId = page.addBlockByFlavour(
+      const codeId = page.addBlock(
         'affine:code',
         { language: getCodeLanguage(match?.[1] || '') || 'JavaScript' },
         parent,

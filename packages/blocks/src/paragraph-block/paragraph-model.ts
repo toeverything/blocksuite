@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const ParagraphBlockModelSchema = defineBlockSchema(
+export const ParagraphBlockSchema = defineBlockSchema(
   'affine:paragraph',
   internal => ({
     type: 'text' as ParagraphType,
@@ -13,6 +13,4 @@ export const ParagraphBlockModelSchema = defineBlockSchema(
   }
 );
 
-export type ParagraphBlockModel = SchemaToModel<
-  typeof ParagraphBlockModelSchema
->;
+export type ParagraphBlockModel = SchemaToModel<typeof ParagraphBlockSchema>;

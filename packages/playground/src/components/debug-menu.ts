@@ -16,8 +16,10 @@ import {
   createEvent,
   getCurrentBlockRange,
   NonShadowLitElement,
+  SelectionUtils,
   updateBlockType,
 } from '@blocksuite/blocks';
+import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import {
   CSSColorProperties,
@@ -32,6 +34,8 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
+import { createViewer } from './doc-inspector';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -56,6 +60,9 @@ export class DebugMenu extends NonShadowLitElement {
 
   @property()
   editor!: EditorContainer;
+
+  @property()
+  contentParser!: ContentParser;
 
   @state()
   private _connected = true;
@@ -86,10 +93,6 @@ export class DebugMenu extends NonShadowLitElement {
 
   get page() {
     return this.editor.page;
-  }
-
-  get contentParser() {
-    return this.editor.contentParser;
   }
 
   createRenderRoot() {
@@ -139,7 +142,7 @@ export class DebugMenu extends NonShadowLitElement {
     assertExists(parent);
     this.page.captureSync();
     this.page.deleteBlock(startModel);
-    this.page.addBlockByFlavour('affine:code', blockProps, parent, index);
+    this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _convertToParagraph(e: PointerEvent, type: string) {
@@ -172,12 +175,8 @@ export class DebugMenu extends NonShadowLitElement {
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const frameId = this.page.addBlockByFlavour(
-      'affine:frame',
-      { xywh },
-      pageId
-    );
-    this.page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
+    this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
   private _switchShowGrid() {
@@ -194,6 +193,10 @@ export class DebugMenu extends NonShadowLitElement {
 
   private _exportYDoc() {
     this.workspace.exportYDoc();
+  }
+
+  private async _inspect() {
+    await createViewer(this.workspace.doc.toJSON());
   }
 
   private _shareUrl() {
@@ -315,7 +318,10 @@ export class DebugMenu extends NonShadowLitElement {
                 size="small"
                 content="Undo"
                 .disabled=${!this._canUndo}
-                @click=${() => this.page.undo()}
+                @click=${() => {
+                  SelectionUtils.clearSelection(this.page);
+                  this.page.undo();
+                }}
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -326,7 +332,10 @@ export class DebugMenu extends NonShadowLitElement {
                 size="small"
                 content="Redo"
                 .disabled=${!this._canRedo}
-                @click=${() => this.page.redo()}
+                @click=${() => {
+                  SelectionUtils.clearSelection(this.page);
+                  this.page.redo();
+                }}
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -436,6 +445,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 

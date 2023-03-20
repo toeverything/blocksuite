@@ -7,10 +7,10 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../../__internal__/index.js';
+import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')

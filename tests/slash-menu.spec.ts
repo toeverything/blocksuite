@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 import {
   pressBackspace,
   pressEnter,
+  SHORT_KEY,
   type,
   withPressKey,
 } from 'utils/actions/keyboard.js';
@@ -21,20 +22,37 @@ import {
 import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
+  // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
+  test.describe.configure({ mode: 'serial' });
+
   let page: Page;
   let paragraphId: string;
   let slashMenu: Locator;
 
-  test.beforeEach(async ({ browser }) => {
+  test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
     await enterPlaygroundRoom(page);
     const id = await initEmptyParagraphState(page);
     paragraphId = id.paragraphId;
     slashMenu = page.locator(`.slash-menu`);
+  });
 
+  test.beforeEach(async () => {
     await focusRichText(page);
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
+  });
+
+  test.afterEach(async () => {
+    // Close the slash menu
+    if (await slashMenu.isVisible()) {
+      // Click outside
+      await page.mouse.click(0, 50);
+    }
+    await focusRichText(page);
+    await waitNextFrame(page);
+    // Clear input
+    await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
   });
 
   test('slash menu should hide after click away', async () => {
@@ -162,7 +180,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(21);
+  await expect(slashItems).toHaveCount(25);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -207,7 +225,8 @@ test('should clean slash string after soft enter', async ({ page }) => {
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
-  await page.keyboard.press('Shift+Enter');
+  await page.keyboard.press('Shift+Enter', { delay: 50 });
+  await waitNextFrame(page);
   await type(page, '/copy');
   await pressEnter(page);
 
@@ -233,7 +252,12 @@ test('slash menu supports fuzzy query', async ({ page }) => {
 
   const slashItems = slashMenu.locator('format-bar-button');
   await type(page, 'c');
-  await expect(slashItems).toHaveText(['Code Block', 'Copy', 'Duplicate']);
+  await expect(slashItems).toHaveText([
+    'Code Block',
+    'Italic',
+    'Copy',
+    'Duplicate',
+  ]);
   await type(page, 'b');
   await expect(slashItems).toHaveText(['Code Block']);
 });
@@ -251,11 +275,12 @@ test.describe('slash menu with code block', () => {
 
     const codeBlock = page.getByTestId('Code Block');
     await codeBlock.click();
-    await codeBlock.waitFor({ state: 'hidden' });
+    await expect(slashMenu).toBeHidden();
 
-    await waitNextFrame(page);
-    await type(page, 'const a = 10;');
-    await assertRichTexts(page, ['const a = 10;']);
+    await page.waitForTimeout(500);
+    await type(page, 'let a');
+    await page.waitForTimeout(500);
+    await assertRichTexts(page, ['let a']);
   });
 
   test('should focus on code blocks created by the slash menu', async ({
@@ -272,10 +297,11 @@ test.describe('slash menu with code block', () => {
 
     const codeBlock = page.getByTestId('Code Block');
     await codeBlock.click();
-    await codeBlock.waitFor({ state: 'hidden' });
+    await expect(slashMenu).toBeHidden();
 
-    await waitNextFrame(page);
+    await page.waitForTimeout(500);
     await type(page, '111');
+    await page.waitForTimeout(500);
     await assertRichTexts(page, ['111000']);
   });
 });
@@ -292,7 +318,7 @@ test.describe('slash menu with date & time', () => {
 
     const todayBlock = page.getByTestId('Today');
     await todayBlock.click();
-    await todayBlock.waitFor({ state: 'hidden' });
+    await expect(slashMenu).toBeHidden();
 
     const date = new Date();
     const strTime = date.toISOString().split('T')[0];
@@ -311,7 +337,7 @@ test.describe('slash menu with date & time', () => {
 
     const todayBlock = page.getByTestId('Tomorrow');
     await todayBlock.click();
-    await todayBlock.waitFor({ state: 'hidden' });
+    await expect(slashMenu).toBeHidden();
 
     const date = new Date();
     date.setDate(date.getDate() + 1);
@@ -331,12 +357,72 @@ test.describe('slash menu with date & time', () => {
 
     const todayBlock = page.getByTestId('Yesterday');
     await todayBlock.click();
-    await todayBlock.waitFor({ state: 'hidden' });
+    await expect(slashMenu).toBeHidden();
 
     const date = new Date();
     date.setDate(date.getDate() - 1);
     const strTime = date.toISOString().split('T')[0];
 
     await assertRichTexts(page, [strTime]);
+  });
+});
+
+test.describe('slash menu with style', () => {
+  test('should style text line works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, 'hello/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+    const bold = page.getByTestId('Bold');
+    await bold.click();
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        bold={true}
+        insert="hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+      paragraphId
+    );
+  });
+
+  test('should style empty line works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+    const bold = page.getByTestId('Bold');
+    await bold.click();
+    await page.waitForTimeout(50);
+    await type(page, 'hello');
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        bold={true}
+        insert="hello"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+      paragraphId
+    );
   });
 });

@@ -11,7 +11,11 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -23,7 +27,7 @@ import {
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
-// import { formatConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/const.js';
 import {
   onModelTextUpdated,
   updateBlockType,
@@ -64,7 +68,7 @@ const dividerItem: SlashItem = {
       return;
     }
     const index = parent.children.indexOf(model);
-    page.addBlockByFlavour('affine:divider', {}, parent, index + 1);
+    page.addBlock('affine:divider', {}, parent, index + 1);
   },
 };
 
@@ -101,26 +105,33 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       dividerItem,
     ],
   },
-  // TODO https://github.com/toeverything/blocksuite/issues/1184
-  // {
-  //   name: 'Style',
-  //   items: formatConfig
-  //     .filter(i => !['Link', 'Code'].includes(i.name))
-  //     .map(({ name, icon, id }, idx) => ({
-  //       name,
-  //       icon,
-  //       divider: idx === 0,
-  //       action: ({ model }) => {
-  //         if (!model.text) {
-  //           return;
-  //         }
-  //         const len = model.text.length;
-  //         model.text.format(0, len, {
-  //           [id]: true,
-  //         });
-  //       },
-  //     })),
-  // },
+  {
+    name: 'Style',
+    items: formatConfig
+      .filter(i => !['Link', 'Code'].includes(i.name))
+      .map(({ name, icon, id }, idx) => ({
+        name,
+        icon,
+        divider: idx === 0,
+        action: ({ model }) => {
+          if (!model.text) {
+            return;
+          }
+          const len = model.text.length;
+          if (!len) {
+            const vEditor = getVirgoByModel(model);
+            assertExists(vEditor, "Can't set style mark! vEditor not found");
+            vEditor.setMarks({
+              [id]: true,
+            });
+            return;
+          }
+          model.text.format(0, len, {
+            [id]: true,
+          });
+        },
+      })),
+  },
   {
     name: 'List',
     items: paragraphConfig
@@ -240,7 +251,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlockByFlavour(
+          page.addBlock(
             model.flavour,
             {
               type: model.type,

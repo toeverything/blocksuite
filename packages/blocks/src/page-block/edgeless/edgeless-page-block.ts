@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 import './toolbar/edgeless-toolbar.js';
-import './view-control-bar.js';
 import './components/edgeless-selected-rect.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
@@ -16,7 +15,9 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
+  BrushSize,
   hotkey,
+  HOTKEY_SCOPE,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -44,7 +45,7 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { getCursorMode, isTopLevelBlock } from './utils.js';
+import { bindEdgelessHotkey, getCursorMode, isTopLevelBlock } from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -102,7 +103,7 @@ export class EdgelessPageBlockComponent
   page!: Page;
 
   @property()
-  pageModel!: PageBlockModel;
+  model!: PageBlockModel;
 
   @property()
   surfaceModel!: SurfaceBlockModel;
@@ -143,16 +144,40 @@ export class EdgelessPageBlockComponent
   private _frameResizeObserver = new FrameResizeObserver();
 
   private _bindHotkeys() {
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindEdgelessHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
+    bindEdgelessHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
+    bindEdgelessHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
+    bindEdgelessHotkey('v', () => this._setMouseMode({ type: 'default' }));
+    bindEdgelessHotkey('h', () =>
+      this._setMouseMode({ type: 'pan', panning: false })
+    );
+    bindEdgelessHotkey('t', () => this._setMouseMode({ type: 'text' }));
+    bindEdgelessHotkey('p', () =>
+      this._setMouseMode({
+        type: 'brush',
+        color: '#000',
+        lineWidth: BrushSize.Thin,
+      })
+    );
+    bindEdgelessHotkey('s', () =>
+      this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
+    );
+
+    hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
     bindCommonHotkey(this.page);
 
     return () => {
-      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+      hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
       removeCommonHotKey();
     };
+  }
+
+  private _setMouseMode(mode: MouseMode) {
+    if (this._selection.isActive) {
+      return;
+    }
+    this.slots.mouseModeUpdated.emit(mode);
   }
 
   private _handleBackspace = (e: KeyboardEvent) => {
@@ -212,7 +237,7 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-    const frame = this.pageModel.children[0] as FrameBlockModel;
+    const frame = this.model.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
     this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
@@ -238,7 +263,7 @@ export class EdgelessPageBlockComponent
 
   private _initSlotEffects() {
     // TODO: listen to new children
-    // this.pageModel.children.forEach(frame => {
+    // this.model.children.forEach(frame => {
     //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
     // });
     const { _disposables, slots } = this;
@@ -252,7 +277,12 @@ export class EdgelessPageBlockComponent
       })
     );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
-    _disposables.add(slots.selectionUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.selectionUpdated.on(state => {
+        this._selection.currentController.setBlockSelectionState(state);
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.mouseModeUpdated.on(mouseMode => {
@@ -289,16 +319,11 @@ export class EdgelessPageBlockComponent
         });
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
-        this.setBlockSelectionState({
+        slots.selectionUpdated.emit({
           ...this._selection.blockSelectionState,
         });
-        slots.selectionUpdated.emit(this._selection.blockSelectionState);
       })
     );
-  }
-
-  setBlockSelectionState(state: EdgelessSelectionState) {
-    this._selection.currentController.setBlockSelectionState(state);
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -346,14 +371,14 @@ export class EdgelessPageBlockComponent
       this._selection.refreshRemoteSelection();
     });
 
-    this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { viewport } = this.surface;
     const { _selection, page } = this;
     const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.pageModel,
+      this.model,
       this,
       this.surface.viewport,
       active ? selected[0].id : null
@@ -369,8 +394,7 @@ export class EdgelessPageBlockComponent
     const translateY = -viewportY * zoom;
 
     const gridStyle = {
-      backgroundImage:
-        'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
+      backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
     };
     const defaultStyle = {};
     const style = this.showGrid ? gridStyle : defaultStyle;
@@ -420,14 +444,11 @@ export class EdgelessPageBlockComponent
         ? html`
             <edgeless-toolbar
               .mouseMode=${this.mouseMode}
+              .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>
           `
         : nothing}
-      <edgeless-view-control-bar
-        .edgeless=${this}
-        .zoom=${zoom}
-      ></edgeless-view-control-bar>
     `;
   }
 }

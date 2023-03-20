@@ -5,6 +5,7 @@ import * as Y from 'yjs';
 
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
+import type { BrushProps } from './elements/brush/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -72,28 +73,47 @@ export class SurfaceManager {
   addBrushElement(
     bound: IBound,
     points: number[][] = [],
-    props: {
+    props?: {
       color?: Color;
       lineWidth?: number;
-    } = {}
+    }
   ): string {
     const id = nanoid(10);
     const element = new BrushElement(id);
 
     setXYWH(element, bound);
     element.points = points;
-    element.color = props.color ?? '#000000';
-    element.lineWidth = props.lineWidth ?? 4;
+
+    if (props) {
+      BrushElement.updateProps(element, props);
+    }
 
     return this._addElement(element);
   }
 
-  updateBrushElement(id: string, bound: IBound, points: number[][]) {
+  updateBrushElementPoints(id: string, bound: IBound, points: number[][]) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
       yElement.set('points', JSON.stringify(points));
       yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+    });
+  }
+
+  updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
+    this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      const ElementCtor = ElementCtors[element.type];
+      assertExists(ElementCtor);
+
+      const props = ElementCtor.getProps(element, rawProps);
+
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      for (const [key, value] of Object.entries(props)) {
+        yElement.set(key, value);
+      }
     });
   }
 
@@ -245,22 +265,27 @@ export class SurfaceManager {
         const element = this._elements.get(id);
         assertExists(element);
 
-        if (key === 'xywh') {
-          const xywh = yElement.get(key) as string;
-          const [x, y, w, h] = deserializeXYWH(xywh);
-
-          // refresh grid manager
-          this._renderer.removeElement(element);
-          setXYWH(element, { x, y, w, h });
-          this._renderer.addElement(element);
+        this._renderer.removeElement(element);
+        switch (key) {
+          case 'xywh': {
+            const xywh = yElement.get(key) as string;
+            const [x, y, w, h] = deserializeXYWH(xywh);
+            setXYWH(element, { x, y, w, h });
+            break;
+          }
+          case 'points': {
+            const points: number[][] = JSON.parse(yElement.get(key) as string);
+            (element as BrushElement).points = points;
+            break;
+          }
+          default: {
+            const v = yElement.get(key);
+            // FIXME: update element prop
+            // @ts-expect-error should be fixed
+            element[key] = v;
+          }
         }
-
-        if (key === 'points') {
-          const points: number[][] = JSON.parse(yElement.get(key) as string);
-          this._renderer.removeElement(element);
-          (element as BrushElement).points = points;
-          this._renderer.addElement(element);
-        }
+        this._renderer.addElement(element);
       }
     });
   }

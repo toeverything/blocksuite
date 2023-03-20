@@ -94,7 +94,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._draggingTopLeftPoint = newTopLeft;
     this._draggingPathPoints = points.map(([x, y]) => [x - deltaX, y - deltaY]);
 
-    this._surface.updateBrushElement(
+    this._surface.updateBrushElementPoints(
       this._draggingElementId,
       {
         x: this._draggingTopLeftPoint[0],

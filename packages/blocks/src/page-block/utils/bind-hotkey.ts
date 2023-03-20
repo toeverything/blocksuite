@@ -7,15 +7,20 @@ import {
 import type { Page } from '@blocksuite/store';
 
 import {
+  blockRangeToNativeRange,
   focusBlockByModel,
+  getVirgoByModel,
   hotkey,
+  isMultiBlockRange,
   isPageMode,
+  isPrintableKeyEvent,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
+  clearSelection,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -72,6 +77,44 @@ export function bindCommonHotkey(page: Page) {
     page.redo();
   });
 
+  // Fixes: https://github.com/toeverything/blocksuite/issues/200
+  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
+  // that have pop-up for selecting local characters.
+  // So we could just hook on the keydown event and detect whether user input a new character.
+  hotkey.addListener(HOTKEYS.ANY_KEY, e => {
+    if (!isPrintableKeyEvent(e) || page.readonly) return;
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange || blockRange.type === 'Block') return;
+
+    const range = blockRangeToNativeRange(blockRange);
+    if (!range || !isMultiBlockRange(range)) return;
+    deleteModelsByRange(page);
+
+    // handle user input
+    if (
+      !blockRange ||
+      blockRange.models.length === 0 ||
+      blockRange.type !== 'Native'
+    ) {
+      return;
+    }
+    const startBlock = blockRange.models[0];
+    const vEditor = getVirgoByModel(startBlock);
+    if (vEditor) {
+      vEditor.insertText(
+        {
+          index: blockRange.startOffset,
+          length: 0,
+        },
+        e.key
+      );
+      vEditor.setVRange({
+        index: blockRange.startOffset + 1,
+        length: 0,
+      });
+    }
+  });
+
   // !!!
   // Don't forget to remove hotkeys at `removeCommonHotKey`
 }
@@ -84,6 +127,7 @@ export function removeCommonHotKey() {
       .filter((i): i is string => !!i),
     HOTKEYS.UNDO,
     HOTKEYS.REDO,
+    HOTKEYS.ANY_KEY,
   ]);
 }
 
@@ -129,7 +173,7 @@ export function handleUp(
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock && isPageMode(page)) {
-      focusTitle();
+      focusTitle(page);
       return;
     }
 
@@ -315,7 +359,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       const index = parentModel?.children.indexOf(endModel);
       assertExists(index);
       assertExists(parentModel);
-      const id = page.addBlockByFlavour(
+      const id = page.addBlock(
         'affine:paragraph',
         { type: 'text' },
         parentModel,
@@ -411,15 +455,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
 
-function clearSelection(page: Page) {
-  if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
-}
 export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([

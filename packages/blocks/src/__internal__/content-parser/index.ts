@@ -1,4 +1,4 @@
-import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
+import type { PageBlockModel } from '@blocksuite/blocks';
 import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -6,7 +6,7 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import { getFileFromClipboard } from '../clipboard/utils.js';
-import { getService, getServiceOrRegister } from '../service.js';
+import { getServiceOrRegister } from '../service.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
@@ -155,7 +155,7 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
-    const service = getService(insertBlockModel.flavour);
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
   }
@@ -205,7 +205,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
-    const service = (await getServiceOrRegister(model.flavour)) as BaseService;
+    const service = await getServiceOrRegister(model.flavour);
 
     return service.block2html(model, {
       childText: children.join(''),
@@ -230,7 +230,6 @@ export class ContentParser {
 
     const service = await getServiceOrRegister(model.flavour);
 
-    // @ts-ignore
     return service.block2Text(model, {
       childText: children.join(''),
       begin: selectedBlock.startPos,

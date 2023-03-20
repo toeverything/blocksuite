@@ -1,4 +1,5 @@
 import type { Color, StrokeStyle } from '../../consts.js';
+import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
@@ -22,6 +23,11 @@ export class ShapeElement extends BaseElement {
   hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     return hitTest(x, y, this, options);
+  }
+
+  render(ctx: CanvasRenderingContext2D) {
+    const { render } = ShapeMethodsMap[this.shapeType];
+    render(ctx, this);
   }
 
   serialize(): SerializedShapeProps {
@@ -49,7 +55,7 @@ export class ShapeElement extends BaseElement {
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     setXYWH(element, { x, y, w, h });
 
-    const { id, type, xywh, ...props } = data as SerializedShapeProps;
+    const props = ShapeElement.getProps(element, data);
     ShapeElement.updateProps(element, props);
 
     return element;
@@ -59,8 +65,16 @@ export class ShapeElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    const { render } = ShapeMethodsMap[this.shapeType];
-    render(ctx, this);
+  static getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
+    return simplePick(rawProps, [
+      'shapeType',
+      'index',
+      'radius',
+      'filled',
+      'fillColor',
+      'strokeColor',
+      'strokeWidth',
+      'strokeStyle',
+    ]);
   }
 }

@@ -17,7 +17,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "lit": "^2.6.1",
-    "yjs": "^13.5.48"
+    "yjs": "^13.5.50"
   },
   "peerDependencies": {
     "lit": "^2",
@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "scroll-into-view-if-needed": "^3.0.6",
-    "zod": "^3.20.6"
+    "zod": "^3.21.4"
   }
 }

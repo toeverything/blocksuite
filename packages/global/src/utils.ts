@@ -73,6 +73,7 @@ export const isNonTextBlock = <
 ) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
+  | unknown
   | void
   | null
   | undefined

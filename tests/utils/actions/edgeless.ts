@@ -36,11 +36,12 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-export type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 
 export function locatorEdgelessToolButton(
   page: Page,
-  mode: MouseMode,
+  type: ToolType,
   innerContainer = true
 ) {
   const text = {
@@ -49,10 +50,15 @@ export function locatorEdgelessToolButton(
     brush: 'Pen',
     pan: 'Hand',
     text: 'Text',
-  }[mode];
-  const button = page.locator('edgeless-tool-icon-button').filter({
-    hasText: text,
-  });
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
+  const button = page
+    .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
 
   return innerContainer ? button.locator('.icon-container') : button;
 }
@@ -112,16 +118,12 @@ export async function getEdgelessSelectedRect(page: Page) {
 }
 
 export async function decreaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .first();
+  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
   await btn.click();
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .nth(1);
+  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
   await btn.click();
 }
 
@@ -224,4 +226,48 @@ export async function activeFrameInEdgeless(page: Page, frameId: string) {
 export async function selectFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
   await page.mouse.click(bound.x, bound.y);
+}
+
+export async function updateExistedBrushElementSize(
+  page: Page,
+  size: 'thin' | 'thick'
+) {
+  const text = {
+    thin: 'Thin',
+    thick: 'Thick',
+  }[size];
+
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  await btn.click();
+}
+
+export async function openComponentToolbarMoreMenu(page: Page) {
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: 'More',
+    });
+
+  await btn.click();
+}
+
+export async function clickComponentToolbarMoreMenuButton(
+  page: Page,
+  button: 'delete'
+) {
+  const text = {
+    delete: 'Delete',
+  }[button];
+
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-more-button')
+    .locator('.action-item')
+    .filter({ hasText: text });
+
+  await btn.click();
 }

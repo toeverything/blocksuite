@@ -2,15 +2,20 @@ import type { ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type {
+  BlockServiceInstanceByKey,
+  ServiceFlavour,
+} from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
-export interface IService {
-  onLoad?: () => Promise<void>;
+export interface BlockTransformContext {
+  childText?: string;
+  begin?: number;
+  end?: number;
 }
 
 /** Common context interface definition for block models. */
@@ -21,7 +26,7 @@ export interface IService {
 export interface BlockHostContext {
   getService: <Key extends ServiceFlavour>(
     flavour: Key
-  ) => BlockServiceInstance[Key];
+  ) => BlockServiceInstanceByKey<Key>;
 }
 
 export interface BlockHost extends BlockHostContext {
@@ -60,10 +65,15 @@ export type ShapeMouseMode = {
   color: `#${string}`;
 };
 
+export enum BrushSize {
+  Thin = 4,
+  Thick = 16,
+}
+
 export type BrushMouseMode = {
   type: 'brush';
   color: `#${string}`;
-  lineWidth: number;
+  lineWidth: BrushSize;
 };
 
 export type PanMouseMode = {

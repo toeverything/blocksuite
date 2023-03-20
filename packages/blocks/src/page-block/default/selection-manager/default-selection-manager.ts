@@ -1,15 +1,17 @@
 import '../../../components/drag-handle.js';
 
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
-
-import type { Point } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
+  getBlockElementsByElement,
+  getBlockElementsExcludeSubtrees,
+  getBlockElementsIncludeSubtrees,
+  getClosestBlockElementByPoint,
   getCurrentNativeRange,
   getDefaultPageBlock,
+  getModelByBlockElement,
+  getRectByBlockElement,
+  getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   initMouseEventHandlers,
@@ -17,15 +19,21 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
+  isImage,
   isInsidePageTitle,
+  Point,
   Rect,
   type SelectionEvent,
-} from '../../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+} from '@blocksuite/store';
+
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import type {
-  EmbedBlockComponent,
-  ImageBlockComponent,
-} from '../../../embed-block/index.js';
+import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -34,23 +42,14 @@ import {
 import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
-  EmbedEditingState,
 } from '../default-page-block.js';
-import {
-  getAllowSelectedBlocks,
-  getBlockEditingStateByPosition,
-} from '../utils.js';
+import type { EditingState } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
-  clearSubtree,
-  filterSelectedBlockByIndex,
-  filterSelectedBlockByIndexAndBound,
-  filterSelectedBlockWithoutSubtree,
-  findBlocksWithSubtree,
-  getBlockWithIndexByElement,
+  filterBlocksExcludeSubtrees,
   setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
@@ -98,14 +97,6 @@ export class DefaultSelectionManager {
         this._onSelectionChangeWithoutDebounce
       )
     );
-  }
-
-  /**
-   * This array contains the blocks allowed to be selected by selection manager.
-   * Non-content blocks like `affine:frame` and blocks inside `affine:database` will be discarded.
-   */
-  private get _selectableBlocks(): BaseBlockModel[] {
-    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -173,6 +164,7 @@ export class DefaultSelectionManager {
       if (selectedType === 'Caret') return;
       showFormatQuickBar({
         page: this.page,
+        container: this._container,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {
@@ -195,6 +187,7 @@ export class DefaultSelectionManager {
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
+        container: this._container,
         direction,
         anchorEl: {
           // After update block type, the block selection will be cleared and refreshed.
@@ -226,17 +219,26 @@ export class DefaultSelectionManager {
       }
     });
 
-    const clickBlockInfo = getBlockEditingStateByPosition(
-      this._selectableBlocks,
-      e.raw.pageX,
-      e.raw.pageY
+    let clickBlockInfo = null;
+
+    const element = getClosestBlockElementByPoint(
+      new Point(e.raw.clientX, e.raw.clientY),
+      this._container.innerRect
     );
 
+    if (element) {
+      clickBlockInfo = {
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
+        element: element as BlockComponentElement,
+      };
+    }
+
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model, index } = clickBlockInfo;
+      const { model, element } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
-      this.state.focusedBlockIndex = index;
+      this.state.focusedBlock = element;
     }
 
     if (
@@ -256,11 +258,11 @@ export class DefaultSelectionManager {
         this.state.selectedEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this.slots.embedRectsUpdated.emit([clickBlockInfo.position]);
+        this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
         this.state.type = 'block';
         this.state.selectedBlocks.push(this.state.activeComponent);
-        this.slots.selectedRectsUpdated.emit([clickBlockInfo.position]);
+        this.slots.selectedRectsUpdated.emit([clickBlockInfo.rect]);
       }
       return;
     }
@@ -283,6 +285,7 @@ export class DefaultSelectionManager {
     // Show format quick bar when double click on text
     showFormatQuickBar({
       page: this.page,
+      container: this._container,
       direction,
       anchorEl: {
         getBoundingClientRect: () => {
@@ -297,28 +300,49 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    this.state.refreshBlockRectCache();
-    const hoverEditingState = getBlockEditingStateByPosition(
-      this._selectableBlocks,
-      e.raw.clientX,
-      e.raw.clientY
-    );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
-    this._container.components.dragHandle?.onContainerMouseMove(e);
+    const point = new Point(e.raw.clientX, e.raw.clientY);
+    let hoverEditingState = null;
 
-    if (hoverEditingState?.model.type === 'image') {
-      const { position } = hoverEditingState;
-      // when image size is too large, the option popup should show inside
-      if (position.width > 680) {
-        hoverEditingState.position.x = hoverEditingState.position.right - 50;
-      } else {
-        hoverEditingState.position.x = hoverEditingState.position.right + 10;
-      }
-      this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-    } else {
-      this.slots.embedEditingStateUpdated.emit(null);
+    const element = getClosestBlockElementByPoint(
+      point.clone(),
+      this._container.innerRect
+    );
+
+    if (element) {
+      hoverEditingState = {
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
+      };
     }
+
+    this._container.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
+
+    if (hoverEditingState) {
+      const { model, rect } = hoverEditingState;
+
+      if (model.type === 'image') {
+        const tempRect = Rect.fromDOMRect(rect);
+        const isLarge = rect.width > 680;
+        tempRect.right += isLarge ? 0 : 60;
+
+        if (tempRect.isPointIn(point)) {
+          // when image size is too large, the option popup should show inside
+          rect.x = rect.right + (isLarge ? -50 : 10);
+        } else {
+          hoverEditingState = null;
+        }
+      } else {
+        hoverEditingState = null;
+      }
+    }
+
+    this.slots.embedEditingStateUpdated.emit(hoverEditingState);
   };
 
   // TODO: Keep selecting blocks?
@@ -360,6 +384,7 @@ export class DefaultSelectionManager {
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
+      container: this._container,
       direction,
       anchorEl: {
         getBoundingClientRect: () => {
@@ -395,8 +420,8 @@ export class DefaultSelectionManager {
   }
 
   updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
-    if (this.state.focusedBlockIndex !== -1) {
-      this.state.focusedBlockIndex = -1;
+    if (this.state.focusedBlock !== null) {
+      this.state.focusedBlock = null;
     }
     const rect = Rect.fromPoints(
       draggingArea.start,
@@ -408,15 +433,17 @@ export class DefaultSelectionManager {
 
   updateViewport() {
     const { viewportElement } = this._container;
+    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
+      viewportElement;
     const { top, left } = viewportElement.getBoundingClientRect();
     this.state.viewport = {
       top,
       left,
-      scrollTop: viewportElement.scrollTop,
-      scrollLeft: viewportElement.scrollLeft,
-      scrollHeight: viewportElement.scrollHeight,
-      clientHeight: viewportElement.clientHeight,
-      clientWidth: viewportElement.clientWidth,
+      clientHeight,
+      clientWidth,
+      scrollHeight,
+      scrollLeft,
+      scrollTop,
     };
   }
 
@@ -446,24 +473,20 @@ export class DefaultSelectionManager {
   }
 
   refreshSelectedBlocksRects() {
-    this.state.refreshBlockRectCache();
-
-    const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
+    const { focusedBlock, selectedBlocks } = this.state;
 
     if (selectedBlocks.length === 0) return;
 
-    const firstBlock = selectedBlocks[0];
-
     // just refresh selected blocks
-    if (focusedBlockIndex === -1) {
-      const rects = clearSubtree(selectedBlocks, firstBlock).map(
-        block => blockCache.get(block) as DOMRect
+    if (focusedBlock === null) {
+      const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
+        getRectByBlockElement
       );
       this.slots.selectedRectsUpdated.emit(rects);
     } else {
-      // only current focused-block
+      // only current focused block element
       this.slots.selectedRectsUpdated.emit([
-        blockCache.get(firstBlock) as DOMRect,
+        getRectByBlockElement(focusedBlock),
       ]);
     }
   }
@@ -475,49 +498,70 @@ export class DefaultSelectionManager {
     this.refreshSelectedBlocksRects();
   }
 
-  refreshEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
+  refreshEmbedRects(hoverEditingState: EditingState | null = null) {
     const { activeComponent, selectedEmbeds } = this.state;
     if (activeComponent && selectedEmbeds.length) {
-      const image = activeComponent as ImageBlockComponent;
-      if (image.model.type === 'image') {
-        const rect = image.resizeImg.getBoundingClientRect();
+      const rect = getSelectedStateRectByBlockElement(activeComponent);
+      const embedRects = [
+        new DOMRect(rect.left, rect.top, rect.width, rect.height),
+      ];
 
-        // updates editing
-        if (hoverEditingState) {
-          const { model, position } = hoverEditingState;
-          if (model === image.model) {
-            position.y = rect.y;
-          }
-        }
-
-        this.slots.embedRectsUpdated.emit([rect]);
+      // updates editing
+      if (hoverEditingState && isImage(activeComponent)) {
+        // when image size is too large, the option popup should show inside
+        rect.x = rect.right + (rect.width > 680 ? -50 : 10);
+        hoverEditingState.rect = rect;
       }
+
+      this.slots.embedRectsUpdated.emit(embedRects);
     }
   }
 
-  // Called on clicking on drag-handle button
-  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+  selectOneBlock(element: Element | null, rect?: DOMRect) {
+    // clear selection first
+    this.clear();
     // rich-text should be unfocused
     this.state.blur();
+    this.state.type = 'block';
+    this.state.focusedBlock = element as BlockComponentElement;
 
-    this.state.focusedBlockIndex = index;
+    if (!element) return;
 
-    const { blockCache, focusedBlockIndex } = this.state;
-
-    if (focusedBlockIndex === -1) {
-      return;
+    if (!rect) {
+      rect = getRectByBlockElement(this.state.focusedBlock);
     }
 
-    this.state.type = 'block';
-    this.state.refreshBlockRectCache();
+    // find subtrees of focused block ement
+    const selectedBlocks = getBlockElementsIncludeSubtrees([element]);
 
-    const selectedBlocks = filterSelectedBlockByIndex(
-      blockCache,
-      focusedBlockIndex
+    // only current focused block element
+    setSelectedBlocks(
+      this.state,
+      this.slots,
+      selectedBlocks as BlockComponentElement[],
+      [rect]
+    );
+  }
+
+  selectAllBlocks() {
+    // clear selection first
+    this.clear();
+    this.state.type = 'block';
+    this.state.focusedBlock = null;
+
+    const selectedBlocks = getBlockElementsByElement(this._container);
+
+    // clear subtrees
+    const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
+      getRectByBlockElement
     );
 
-    // only current focused-block
-    setSelectedBlocks(this.state, this.slots, selectedBlocks, [boundRect]);
+    setSelectedBlocks(
+      this.state,
+      this.slots,
+      selectedBlocks as BlockComponentElement[],
+      rects
+    );
   }
 
   selectBlocksByDraggingArea(
@@ -529,8 +573,9 @@ export class DefaultSelectionManager {
     if (isScrolling) {
       this.state.refreshBlockRectCache();
     }
+
     const { scrollLeft, scrollTop, left, top } = viewport;
-    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+    const blocks = filterBlocksExcludeSubtrees(
       blockCache,
       draggingArea,
       // subtracting the left/top of the container is required.
@@ -539,70 +584,29 @@ export class DefaultSelectionManager {
         x: scrollLeft - left,
       }
     );
-    const rects = selectedBlocksWithoutSubtrees.map(
-      ({ block }) => blockCache.get(block) as DOMRect
+    const [selectedBlocks, rects] = blocks.reduce<[Element[], DOMRect[]]>(
+      (data, { block }) => {
+        data[0].push(...getBlockElementsIncludeSubtrees([block as Element]));
+        data[1].push(getRectByBlockElement(block as Element));
+        return data;
+      },
+      [[], []]
     );
 
     setSelectedBlocks(
       this.state,
       this.slots,
-      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+      selectedBlocks as BlockComponentElement[],
       rects
     );
-  }
-
-  // Called on `CMD-A`
-  selectBlocksByRect(hitRect: DOMRect) {
-    this.state.refreshBlockRectCache();
-    const {
-      blockCache,
-      focusedBlockIndex,
-      selectedBlocks: prevSelectedBlocks,
-    } = this.state;
-    const selectedBlocks = filterSelectedBlockByIndexAndBound(
-      blockCache,
-      focusedBlockIndex,
-      hitRect
-    );
-
-    if (blockCache.size === prevSelectedBlocks.length) {
-      return;
-    }
-
-    if (selectedBlocks.length === 0) {
-      return;
-    }
-
-    // clear selection first
-    this.clear();
-    this.state.type = 'block';
-
-    const firstBlock = selectedBlocks[0];
-
-    if (focusedBlockIndex === -1) {
-      // SELECT_ALL
-      const rects = clearSubtree(selectedBlocks, firstBlock).map(
-        block => blockCache.get(block) as DOMRect
-      );
-      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
-    } else {
-      const rects = [blockCache.get(firstBlock) as DOMRect];
-      // only current focused-block
-      setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
-    }
   }
 
   setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
     setSelectedBlocks(this.state, this.slots, selectedBlocks);
   }
 
-  setFocusedBlockIndexByElement(blockElement: Element) {
-    const result = getBlockWithIndexByElement(this.state, blockElement);
-    if (result) {
-      this.state.focusedBlockIndex = result.index;
-    } else {
-      this.state.focusedBlockIndex = -1;
-    }
+  setFocusedBlock(blockElement: Element) {
+    this.state.focusedBlock = blockElement as BlockComponentElement;
   }
 
   dispose() {

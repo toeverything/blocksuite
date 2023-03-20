@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { EditorContainer } from '../../packages/editor/src/components/editor-container.js';
+import type { ContentParser } from '../../packages/blocks/src/content-parser.js';
+import type { EditorContainer } from '../../packages/editor/src/index.js';
 import type {} from '../../packages/playground/src/components/debug-menu.js';
 import type { DebugMenu } from '../../packages/playground/src/components/debug-menu.js';
 import type {
@@ -20,6 +21,7 @@ declare global {
       editor: typeof import('../../packages/editor/src/index.js');
     };
     workspace: Workspace;
+    ContentParser: typeof ContentParser;
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;
     debugMenu: DebugMenu;

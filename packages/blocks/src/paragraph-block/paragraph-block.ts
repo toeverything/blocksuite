@@ -9,11 +9,11 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
   isPageMode,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 function TipsPlaceholder(model: BaseBlockModel) {
