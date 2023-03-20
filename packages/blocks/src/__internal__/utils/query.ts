@@ -577,6 +577,13 @@ function isDatabase({ tagName }: Element) {
 }
 
 /**
+ * Returns `true` if element is edgeless block child.
+ */
+export function isEdgelessBlockChild({ classList }: Element) {
+  return classList.contains('affine-edgeless-block-child');
+}
+
+/**
  * Returns the closest block element by a point in the rect.
  *
  * ```
@@ -610,12 +617,12 @@ export function getClosestBlockElementByPoint(
   if (rect) {
     point.x = Math.min(
       Math.max(point.x, rect.left) + PADDING_LEFT - 1,
-      rect.right - 1
+      rect.right - PADDING_LEFT - 1
     );
   }
 
   // find block element
-  element = find(document.elementsFromPoint(point.x, point.y));
+  element = _findBlockElement(document.elementsFromPoint(point.x, point.y));
 
   // Horizontal direction: for nested structures
   if (element) {
@@ -656,7 +663,7 @@ export function getClosestBlockElementByPoint(
     n *= -1;
 
     // find block element
-    element = find(document.elementsFromPoint(point.x, point.y));
+    element = _findBlockElement(document.elementsFromPoint(point.x, point.y));
 
     if (element) {
       bounds = getRectByBlockElement(element);
@@ -778,7 +785,7 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function find(elements: Element[]) {
+function _findBlockElement(elements: Element[]) {
   const len = elements.length;
   let element = null;
   let i = 0;
@@ -810,4 +817,14 @@ export function queryCurrentMode(): 'light' | 'dark' {
   } else {
     return 'light';
   }
+}
+
+/**
+ * Get hovering frame with given a point in edgeless mode.
+ */
+export function getHoveringFrame(point: Point) {
+  return (
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
+    null
+  );
 }
