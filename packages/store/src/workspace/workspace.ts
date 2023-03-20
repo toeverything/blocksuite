@@ -261,7 +261,7 @@ export class Workspace {
   inlineSuggestProvider?: InlineSuggestProvider;
 
   constructor(options: StoreOptions) {
-    this.inlineSuggestProvider = options.inlineSuggestProvider;
+    this.inlineSuggestProvider = options.experimentalInlineSuggestProvider;
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
     if (options.blobOptionsGetter) {
