@@ -28,19 +28,15 @@ export class InlineSuggestionController implements ReactiveController {
 
   host: LitElement;
 
-  private __suggestionState = {
+  private _suggestionState = {
     show: false,
     position: { x: 0, y: 0 },
     loading: false,
     text: '',
   };
 
-  private get _suggestionState() {
-    return this.__suggestionState;
-  }
-
-  private set _suggestionState(v: typeof this.__suggestionState) {
-    this.__suggestionState = v;
+  private _setSuggestionState(newState: Partial<typeof this._suggestionState>) {
+    this._suggestionState = { ...this._suggestionState, ...newState };
     // TODO diff to optimize
     this.host.requestUpdate();
   }
@@ -106,11 +102,10 @@ export class InlineSuggestionController implements ReactiveController {
         assertExists(text);
         if (this._suggestionState.loading) return;
         const position = this._updatePosition();
-        this._suggestionState = {
-          ...this._suggestionState,
+        this._setSuggestionState({
           position,
           loading: true,
-        };
+        });
 
         const pageBlock = this.model.page.root;
         assertExists(pageBlock);
@@ -130,43 +125,40 @@ export class InlineSuggestionController implements ReactiveController {
             // Focus has already moved to another block
             !this._suggestionState.loading
           ) {
-            this._suggestionState = {
+            this._setSuggestionState({
               ...this._suggestionState,
               show: false,
               loading: false,
-            };
+            });
             return;
           }
           // Wait for native range to be updated
           requestAnimationFrame(() => {
             const position = this._updatePosition();
-            this._suggestionState = {
-              ...this._suggestionState,
+            this._setSuggestionState({
               show: true,
               text: suggestion,
               loading: false,
               position,
-            };
+            });
           });
         } catch (error) {
           console.error('Failed to get inline suggest', error);
-          this._suggestionState = {
-            ...this._suggestionState,
+          this._setSuggestionState({
             show: false,
             loading: false,
-          };
+          });
         }
       })
     );
   };
 
   readonly onFocusOut = (e: FocusEvent) => {
-    this._suggestionState = {
-      ...this._suggestionState,
+    this._setSuggestionState({
       show: false,
       loading: false,
       text: '',
-    };
+    });
     // We should not observe text change when focus out
     this._disposableGroup.dispose();
     this._disposableGroup = new DisposableGroup();
@@ -178,10 +170,9 @@ export class InlineSuggestionController implements ReactiveController {
       if (e.key !== 'Tab') {
         requestAnimationFrame(() => {
           const position = this._updatePosition();
-          this._suggestionState = {
-            ...this._suggestionState,
+          this._setSuggestionState({
             position,
-          };
+          });
         });
       }
       return;
@@ -196,7 +187,7 @@ export class InlineSuggestionController implements ReactiveController {
       index: vRange.index + suggestion.length,
       length: 0,
     });
-    this._suggestionState = { ...this._suggestionState, text: '' };
+    this._setSuggestionState({ text: '' });
 
     e.stopPropagation();
     e.preventDefault();
