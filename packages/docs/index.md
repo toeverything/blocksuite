@@ -15,10 +15,10 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/?init
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: 📝 Block-Based Editing
+    details: BlockSuite breaks down rich content into discrete <code>contenteditable</code> blocks, avoiding pitfalls using traditional monolith rich text container.
+  - title: 🧬 CRDT-Driven State Management
+    details: By leveraging CRDT technology, BlockSuite supports zero-cost time travel, real-time collaboration, and pluggable persistence backends right out of the box.
+  - title: 🎨 Framework Agnostic Rendering
+    details: BlockSuite offers Web Components and hybrid canvas-based renderers, facilitating the creation of diverse collaborative applications.
 ---

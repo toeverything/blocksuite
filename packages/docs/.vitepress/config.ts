@@ -31,6 +31,10 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/toeverything/blocksuite' },
       { icon: 'twitter', link: 'https://twitter.com/AffineDev' },
     ],
+
+    footer: {
+      copyright: 'Copyright © 2022-present Toeverything',
+    },
   },
   head: [
     [
