@@ -21,8 +21,9 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+  subpageIds: string[];
 
-  [key: string]: string | number | boolean;
+  [key: string]: string | number | boolean | undefined | (string | number)[];
 }
 
 type WorkspaceMetaState = {
@@ -112,17 +113,17 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
-  removePage(id: string) {
+  removePageMeta(id: string) {
     // you cannot delete a page if there's no page
     assertExists(this.pages);
-    const pages = this.pages.toJSON() as PageMeta[];
-    const index = pages.findIndex((page: PageMeta) => id === page.id);
-
+    const pageMetas = this.pages.toJSON() as PageMeta[];
+    const index = pageMetas.findIndex((page: PageMeta) => id === page.id);
+    if (index === -1) {
+      return;
+    }
     this.doc.transact(() => {
       assertExists(this.pages);
-      if (index !== -1) {
-        this.pages.delete(index, 1);
-      }
+      this.pages.delete(index, 1);
     });
   }
 
@@ -350,8 +351,7 @@ export class Workspace {
       pageId = 'space:' + pageId;
     }
 
-    const page = this._pages.get(pageId) ?? null;
-    return page;
+    return this._pages.get(pageId) ?? null;
   }
 
   private _initBlobStorage() {
@@ -402,16 +402,35 @@ export class Workspace {
     });
   }
 
-  createPage(pageId: string) {
+  createPage(pageId: string, parentId?: string) {
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
+    }
+    if (parentId && !this._hasPage(parentId)) {
+      throw new Error('parent page not found');
     }
 
     this.meta.addPageMeta({
       id: pageId,
       title: '',
       createDate: +new Date(),
+      subpageIds: [],
     });
+
+    if (parentId) {
+      const parentPage = this.getPage(parentId) as Page;
+      const parentPageMeta = this.meta.getPageMeta(parentId);
+      const subpageIds = [...parentPageMeta.subpageIds, pageId];
+      this.setPageMeta(parentId, {
+        subpageIds,
+      });
+
+      parentPage.slots.subpageUpdated.emit({
+        type: 'add',
+        id: pageId,
+        subpageIds,
+      });
+    }
 
     return this.getPage(pageId) as Page;
   }
@@ -422,11 +441,32 @@ export class Workspace {
   }
 
   removePage(pageId: string) {
+    const pageMeta = this.meta.getPageMeta(pageId);
+    const parentId = this.meta.pageMetas.find(meta =>
+      meta.subpageIds.includes(pageId)
+    )?.id;
+
+    if (parentId) {
+      const parentPageMeta = this.meta.getPageMeta(parentId);
+      const parentPage = this.getPage(parentId) as Page;
+      const subpageIds = parentPageMeta.subpageIds.filter(
+        (subpageId: string) => subpageId !== pageMeta.id
+      );
+      this.setPageMeta(parentPage.id, {
+        subpageIds,
+      });
+      parentPage.slots.subpageUpdated.emit({
+        type: 'delete',
+        id: pageId,
+        subpageIds,
+      });
+    }
+
     const page = this.getPage(pageId);
     if (!page) return;
 
     page.dispose();
-    this.meta.removePage(pageId);
+    this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
   }
 

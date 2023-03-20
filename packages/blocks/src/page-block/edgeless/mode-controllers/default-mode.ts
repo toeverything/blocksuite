@@ -1,19 +1,25 @@
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
-import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
-
 import type {
+  BlockComponentElement,
   DefaultMouseMode,
   SelectionEvent,
   TopLevelBlockModel,
-} from '../../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
 import {
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
   isEmpty,
   noop,
+  Point,
   resetNativeSelection,
-} from '../../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
+
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import {
   calcCurrentSelectionPosition,
@@ -186,6 +192,25 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
   }
 
+  /** Update drag handle by closest block elements */
+  private _updateDragHandle(e: SelectionEvent) {
+    const point = new Point(e.raw.clientX, e.raw.clientY);
+    point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
+    let hoverEditingState = null;
+    const element = getClosestBlockElementByPoint(point);
+    if (element) {
+      hoverEditingState = {
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+        rect: getSelectedStateRectByBlockElement(element),
+      };
+    }
+    this._edgeless.components.dragHandle?.onContainerMouseMove(
+      e,
+      hoverEditingState
+    );
+  }
+
   onContainerClick(e: SelectionEvent) {
     this._tryDeleteEmptyBlocks();
 
@@ -299,7 +324,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseMove(e: SelectionEvent) {
-    noop();
+    this._updateDragHandle(e);
   }
 
   onContainerMouseOut(_: SelectionEvent) {

@@ -1,3 +1,4 @@
+import type { EditingState } from '@blocksuite/blocks/std';
 import {
   CaptionIcon,
   CopyIcon,
@@ -12,7 +13,6 @@ import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultSelectionSlots } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
-import type { EditingState } from './utils.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function DraggingArea(rect: DOMRect | null) {

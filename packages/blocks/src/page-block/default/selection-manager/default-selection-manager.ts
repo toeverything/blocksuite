@@ -2,6 +2,7 @@ import '../../../components/drag-handle.js';
 
 import {
   type BlockComponentElement,
+  type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
@@ -43,7 +44,6 @@ import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
 } from '../default-page-block.js';
-import type { EditingState } from '../utils.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';

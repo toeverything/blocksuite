@@ -1,16 +1,18 @@
+import {
+  handleNativeRangeAtPoint,
+  noop,
+  type SelectionEvent,
+  type TextMouseMode,
+} from '@blocksuite/blocks/std';
 import { serializeXYWH } from '@blocksuite/phasor';
 
-import type {
-  SelectionEvent,
-  TextMouseMode,
-} from '../../../__internal__/index.js';
-import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
+import {
+  DEFAULT_FRAME_HEIGHT,
+  DEFAULT_FRAME_OFFSET_X,
+  DEFAULT_FRAME_OFFSET_Y,
+  DEFAULT_FRAME_WIDTH,
+} from '../utils.js';
 import { MouseModeController } from './index.js';
-
-const DEFAULT_FRAME_WIDTH = 448;
-const DEFAULT_FRAME_HEIGHT = 72;
-const DEFAULT_FRAME_OFFSET_X = 30;
-const DEFAULT_FRAME_OFFSET_Y = 40;
 
 export class TextModeController extends MouseModeController<TextMouseMode> {
   readonly mouseMode = <TextMouseMode>{
