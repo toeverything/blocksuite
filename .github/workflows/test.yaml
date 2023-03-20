@@ -25,7 +25,6 @@ on:
 jobs:
   e2e-test:
     name: Playground E2E test
-    needs: check-changes
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
