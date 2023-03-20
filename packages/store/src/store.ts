@@ -59,7 +59,7 @@ export interface SSROptions {
 export type InlineSuggestionProvider = (context: {
   title: string;
   text: string;
-}) => Promise<string>; // | Promise<ReadableStream<string>>;
+}) => string | Promise<string>; // | Promise<ReadableStream<string>>;
 
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags

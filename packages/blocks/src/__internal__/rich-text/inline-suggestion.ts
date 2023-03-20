@@ -90,7 +90,7 @@ export class InlineSuggestionController implements ReactiveController {
 
   readonly onFocusIn = (e: FocusEvent) => {
     const inlineSuggestProvider = this.provider;
-    assertExists(inlineSuggestProvider);
+    if (!inlineSuggestProvider) return;
     assertExists(this.model);
 
     const editor = this.vEditor;
