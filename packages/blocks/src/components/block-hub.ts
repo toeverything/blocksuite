@@ -735,8 +735,12 @@ export class BlockHub extends NonShadowLitElement {
   private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    this._indicator.cursorPosition = null;
-    this._indicator.targetRect = null;
+    this._lastModelState = null;
+
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
+    }
   };
 
   private _onDrop = (e: DragEvent) => {
