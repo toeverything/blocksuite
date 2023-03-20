@@ -7,13 +7,15 @@ export class EdgelessClipboard implements Clipboard {
   constructor(page: Page) {
     this._page = page;
   }
-  public initEvent(page: Page = this._page) {
+
+  init(page: Page = this._page) {
     this._page = page;
     document.body.addEventListener('cut', this._onCut);
     document.body.addEventListener('copy', this._onCopy);
     document.body.addEventListener('paste', this._onPaste);
   }
-  public disposeEvent() {
+
+  public dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
     document.body.removeEventListener('paste', this._onPaste);

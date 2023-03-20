@@ -435,7 +435,7 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     this._initSlotEffects();
     this._initDragHandle();
-    this.clipboard.initEvent(this.page);
+    this.clipboard.init(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
@@ -457,7 +457,7 @@ export class EdgelessPageBlockComponent
   }
 
   disconnectedCallback() {
-    this.clipboard.disposeEvent();
+    this.clipboard.dispose();
     super.disconnectedCallback();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
