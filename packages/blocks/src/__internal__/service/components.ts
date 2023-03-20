@@ -23,7 +23,21 @@ export function BlockElement(
   edgeless = false
 ) {
   switch (model.flavour) {
-    case 'affine:paragraph':
+    case 'affine:paragraph': {
+      const rowHost = { ...host };
+      const parentModel = model.page.getParent(model);
+      if (parentModel?.flavour === 'affine:database') {
+        rowHost.flavour = 'affine:database';
+      }
+      return html`
+        <${model.tag}
+          .model=${model}
+          .host=${rowHost}
+          class="affine-block-element"
+          ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
+        ></${model.tag}>
+      `;
+    }
     case 'affine:list':
     case 'affine:frame':
     case 'affine:divider':
@@ -37,6 +51,7 @@ export function BlockElement(
           ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
         ></${model.tag}>
       `;
+
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
     case 'affine:surface':
