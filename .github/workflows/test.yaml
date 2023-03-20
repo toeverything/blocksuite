@@ -20,6 +20,7 @@ jobs:
       - name: Check changes
         id: check_changes
         run: |
+          git fetch origin ${{ github.base_ref }}
           git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} > changed_files.txt
           if grep -qvE '^(packages/docs/)|^README\.md$'; then
             echo "run_tests=true"
