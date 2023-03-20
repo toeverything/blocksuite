@@ -251,7 +251,6 @@ export class VEditor<
         await line.updateComplete;
       })
     );
-    this.rootElement.focus();
 
     this.slots.updated.emit();
   };
