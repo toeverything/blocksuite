@@ -1,4 +1,16 @@
-import type { EditingState } from '@blocksuite/blocks/std';
+import type {
+  BlockComponentElement,
+  EditingState,
+  IPoint,
+} from '@blocksuite/blocks/std';
+import {
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  getRectByBlockElement,
+  NonShadowLitElement,
+  noop,
+  Point,
+} from '@blocksuite/blocks/std';
 import {
   BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
@@ -27,15 +39,6 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockComponentElement, IPoint } from '../__internal__/index.js';
-import {
-  getClosestBlockElementByPoint,
-  getModelByBlockElement,
-  getRectByBlockElement,
-  NonShadowLitElement,
-  Point,
-} from '../__internal__/index.js';
-import type { DefaultSelectionSlots } from '../index.js';
 import type { DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
@@ -448,7 +451,7 @@ export class BlockHub extends NonShadowLitElement {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  slots!: DefaultSelectionSlots;
+  public onDragStarted: () => void;
 
   @state()
   private _expanded = false;
@@ -517,6 +520,7 @@ export class BlockHub extends NonShadowLitElement {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
+    this.onDragStarted = noop;
     this._onDropCallback = options.onDropCallback;
   }
 
@@ -664,7 +668,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this.slots.selectedRectsUpdated.emit([]);
+    this.onDragStarted();
   };
 
   private _onMouseDown = (e: MouseEvent) => {

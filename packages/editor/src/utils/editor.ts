@@ -82,9 +82,10 @@ export const createBlockHub: (
   if (editor.mode === 'page') {
     const defaultPageBlock = editor.querySelector('affine-default-page');
     assertExists(defaultPageBlock);
-    blockHub.slots = defaultPageBlock.slots;
     blockHub.getAllowedBlocks = () =>
       getAllowSelectedBlocks(defaultPageBlock.model);
+    blockHub.onDragStarted = () =>
+      defaultPageBlock.slots.selectedRectsUpdated.emit([]);
   } else {
     const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
     assertExists(edgelessPageBlock);
