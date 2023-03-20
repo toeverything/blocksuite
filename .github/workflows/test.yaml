@@ -98,12 +98,15 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
+        if: ${{ needs.check_changes.outputs.run_tests == 'true' }}
         run: pnpm install --frozen-lockfile
 
       - name: Run unit test
+        if: ${{ needs.check_changes.outputs.run_tests == 'true' }}
         run: pnpm test:unit:coverage
 
       - name: Upload unit test coverage results
+        if: ${{ needs.check_changes.outputs.run_tests == 'true' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -111,3 +114,7 @@ jobs:
           flags: unittest
           name: blocksuite
           fail_ci_if_error: true
+
+      - name: Skipping tests
+        if: ${{ needs.check_changes.outputs.run_tests == 'false' }}
+        run: echo "Tests skipped due to changes in ignored paths"
