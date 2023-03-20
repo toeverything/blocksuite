@@ -139,6 +139,9 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
         databaseModel.children,
         child => child.id,
         (child, idx) => {
+          const databaseHost = Object.assign(host, {
+            flavour: 'affine:database',
+          });
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
               <div
@@ -147,7 +150,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
                   maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
                 })}
               >
-                ${BlockElementWithService(child, host, () => {
+                ${BlockElementWithService(child, databaseHost, () => {
                   databaseBlock.requestUpdate();
                 })}
               </div>
