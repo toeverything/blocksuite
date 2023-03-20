@@ -426,3 +426,20 @@ test.describe('slash menu with style', () => {
     );
   });
 });
+
+test('should insert database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '/');
+  const todayBlock = page.getByTestId('Table View');
+  await todayBlock.click();
+
+  const database = page.locator('affine-database');
+  expect(database).toBeVisible();
+  const tagColumn = page.locator('.affine-database-block-column').nth(1);
+  expect(await tagColumn.innerText()).toBe('Tag');
+  const defaultRows = page.locator('.affine-database-block-row');
+  expect(await defaultRows.count()).toBe(3);
+});

@@ -374,14 +374,16 @@ export class SlashMenu extends LitElement {
     });
 
     const btnItems = this._filterItems.map(
-      ({ name, icon, divider }, index) => html`<div
+      ({ name, icon, divider, disabled = false }, index) => html`<div
           class="slash-item-divider"
           ?hidden=${!divider || !!this._searchString.length}
         ></div>
         <format-bar-button
+          ?disabled=${disabled}
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
-          ?hover=${!this._leftPanelActivated &&
+          ?hover=${!disabled &&
+          !this._leftPanelActivated &&
           this._activatedItemIndex === index}
           text="${name}"
           data-testid="${name}"
