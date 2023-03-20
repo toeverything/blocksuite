@@ -86,7 +86,7 @@ export function createKeyboardBindings(
         }
         // End of feature flag
 
-        if (matchFlavours(model, ['affine:code'] as const)) {
+        if (matchFlavours(model, ['affine:code'])) {
           return ALLOW_DEFAULT;
         }
         // if (context.format['code'] === true) {

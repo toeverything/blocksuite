@@ -45,7 +45,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const getProps = ():
     | ['affine:list', Partial<BlockModelProps['affine:list']>]
     | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
-    const shouldInheritFlavour = matchFlavours(model, ['affine:list'] as const);
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
     if (shouldInheritFlavour) {
       return [model.flavour, { type: model.type }];
     }
@@ -59,14 +59,11 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
       page.addBlock(flavour, blockProps, model, 0);
 
   // 4. If the target block is a numbered list, update the prefix of next siblings
-  if (
-    matchFlavours(model, ['affine:list'] as const) &&
-    model.type === 'numbered'
-  ) {
+  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
     let next = nextSibling;
     while (
       next &&
-      matchFlavours(next, ['affine:list'] as const) &&
+      matchFlavours(next, ['affine:list']) &&
       model.type === 'numbered'
     ) {
       page.updateBlock(next, {});
@@ -107,10 +104,7 @@ export function handleBlockSplit(
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (
-    matchFlavours(model, ['affine:list'] as const) &&
-    model.children.length > 0
-  ) {
+  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
     newParent = model;
     newBlockIndex = 0;
   }
@@ -175,14 +169,11 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   });
 
   // 4. If the target block is a numbered list, update the prefix of next siblings
-  if (
-    matchFlavours(model, ['affine:list'] as const) &&
-    model.type === 'numbered'
-  ) {
+  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
     let next = nextSibling;
     while (
       next &&
-      matchFlavours(next, ['affine:list'] as const) &&
+      matchFlavours(next, ['affine:list']) &&
       model.type === 'numbered'
     ) {
       page.updateBlock(next, {});
@@ -237,14 +228,11 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
     });
 
     // 4. If the target block is a numbered list, update the prefix of next siblings
-    if (
-      matchFlavours(model, ['affine:list'] as const) &&
-      model.type === 'numbered'
-    ) {
+    if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
       let next = nextSibling;
       while (
         next &&
-        matchFlavours(next, ['affine:list'] as const) &&
+        matchFlavours(next, ['affine:list']) &&
         model.type === 'numbered'
       ) {
         page.updateBlock(next, {});
@@ -282,7 +270,7 @@ export function handleUnindent(
   capture = true
 ) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
+  if (!parent || matchFlavours(parent, ['affine:frame'])) {
     // Topmost, do nothing
     return;
   }
@@ -320,14 +308,11 @@ export function handleUnindent(
 
   // 5. If the target block is a numbered list, update the prefix of next siblings
   const nextSibling = page.getNextSibling(model);
-  if (
-    matchFlavours(model, ['affine:list'] as const) &&
-    model.type === 'numbered'
-  ) {
+  if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
     let next = nextSibling;
     while (
       next &&
-      matchFlavours(next, ['affine:list'] as const) &&
+      matchFlavours(next, ['affine:list']) &&
       model.type === 'numbered'
     ) {
       page.updateBlock(next, {});
@@ -342,7 +327,7 @@ export function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a code block,
   // select the code block itself
-  if (matchFlavours(model, ['affine:code'] as const)) {
+  if (matchFlavours(model, ['affine:code'])) {
     focusBlockByModel(model);
     return;
   }
@@ -353,7 +338,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  if (matchFlavours(model, ['affine:list'] as const)) {
+  if (matchFlavours(model, ['affine:list'])) {
     const parent = page.getParent(model);
     if (!parent) return;
 
@@ -372,7 +357,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (matchFlavours(model, ['affine:paragraph'] as const)) {
+  if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
       // Try to switch to normal text
       page.captureSync();
@@ -381,14 +366,14 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     }
 
     const parent = page.getParent(model);
-    if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
+    if (!parent || matchFlavours(parent, ['affine:frame'])) {
       const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
         : null;
       if (
         previousSiblingParent &&
-        matchFlavours(previousSiblingParent, ['affine:database'] as const)
+        matchFlavours(previousSiblingParent, ['affine:database'])
       ) {
         focusBlockByModel(previousSiblingParent, 'end');
         // We can not delete block if the block has content
@@ -398,10 +383,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         }
       } else if (
         previousSibling &&
-        matchFlavours(previousSibling, [
-          'affine:paragraph',
-          'affine:list',
-        ] as const)
+        matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
       ) {
         page.captureSync();
         const preTextLength = previousSibling.text?.length || 0;
@@ -420,7 +402,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           'affine:embed',
           'affine:divider',
           'affine:code',
-        ] as const)
+        ])
       ) {
         focusBlockByModel(previousSibling);
         // We can not delete block if the block has content

@@ -280,7 +280,7 @@ export function getCombinedFormat(
   // Skip code block or empty block
   const startModel = blockRange.models[0];
   if (
-    !matchFlavours(startModel, ['affine:code'] as const) &&
+    !matchFlavours(startModel, ['affine:code']) &&
     startModel.text &&
     startModel.text.length
   ) {
@@ -295,7 +295,7 @@ export function getCombinedFormat(
   // End block
   const endModel = blockRange.models[blockRange.models.length - 1];
   if (
-    !matchFlavours(endModel, ['affine:code'] as const) &&
+    !matchFlavours(endModel, ['affine:code']) &&
     endModel.text &&
     endModel.text.length
   ) {
@@ -310,7 +310,7 @@ export function getCombinedFormat(
   // Between blocks
   blockRange.models
     .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code'] as const))
+    .filter(model => !matchFlavours(model, ['affine:code']))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
       const vEditor = getVirgoByModel(model);
@@ -363,7 +363,7 @@ function formatBlockRange(
 
   // edge case 2: same model
   if (blockRange.models.length === 1) {
-    if (matchFlavours(startModel, ['affine:code'] as const)) return;
+    if (matchFlavours(startModel, ['affine:code'])) return;
     const vEditor = getVirgoByModel(startModel);
     vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
@@ -375,13 +375,13 @@ function formatBlockRange(
   }
   // common case
   // format start model
-  if (!matchFlavours(startModel, ['affine:code'] as const)) {
+  if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
       [key]: format[key] ? null : true,
     });
   }
   // format end model
-  if (!matchFlavours(endModel, ['affine:code'] as const)) {
+  if (!matchFlavours(endModel, ['affine:code'])) {
     endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
   // format between models
@@ -466,7 +466,7 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
-      // if (matchFlavours(model, ['affine:shape'] as const)) return;
+      // if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

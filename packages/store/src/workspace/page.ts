@@ -794,7 +794,7 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    if (matchFlavours(model, ['affine:page'] as const)) {
+    if (matchFlavours(model, ['affine:page'])) {
       model.columns = yBlock.get('ext:columns') as Y.Map<Y.Map<unknown>>;
       model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
 

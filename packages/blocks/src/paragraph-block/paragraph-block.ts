@@ -17,7 +17,7 @@ import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 function TipsPlaceholder(model: BaseBlockModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) {
+  if (!matchFlavours(model, ['affine:paragraph'])) {
     throw new Error("TipsPlaceholder can't be used for this model");
   }
   if (model.type === 'text') {

@@ -43,21 +43,12 @@ type BlockModelKey = keyof BlockModels;
 type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-export function matchFlavours<Key extends Readonly<Array<string>>>(
+export function matchFlavours<const Key extends readonly string[]>(
   model: BaseBlockModel,
   expected: Key
 ): model is Flavours<Writeable<Key>> {
   return expected.includes(model.flavour);
 }
-// export function matchFlavours<
-//   Key extends keyof BlockModels &
-//     string = keyof BlockModels & string
-// >(
-//   model: { flavour: Key },
-//   expected: readonly Key[]
-// ): model is BlockModels[Key] {
-//   return expected.includes(model.flavour as Key);
-// }
 
 export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:database',
