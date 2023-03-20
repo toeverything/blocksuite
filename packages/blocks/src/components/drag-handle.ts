@@ -227,7 +227,7 @@ export class DragHandle extends LitElement {
       }
       const rect = modelState.rect;
       this.style.display = 'block';
-      this.style.height = `${rect.height}px`;
+      this.style.height = `${rect.height / this._scale}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = '0';
       this.style.top = '0';
@@ -248,7 +248,7 @@ export class DragHandle extends LitElement {
 
       const top = this._calcDragHandleY(
         event.raw.clientY,
-        yOffset,
+        rect.top,
         rect.height,
         this._scale
       );
@@ -362,10 +362,9 @@ export class DragHandle extends LitElement {
       return;
     }
     const { rect } = this._handleAnchorState;
-    const yOffset = rect.top - this._container.getBoundingClientRect().top;
     const top = this._calcDragHandleY(
       e.clientY,
-      yOffset,
+      rect.top,
       rect.height,
       this._scale
     );
