@@ -21,9 +21,6 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
-
-  parentId?: string;
-
   subPageIds: string[];
 
   [key: string]: string | number | boolean | undefined | (string | number)[];
@@ -417,7 +414,6 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
-      parentId,
       subPageIds: [],
     });
 
@@ -429,7 +425,7 @@ export class Workspace {
         subPageIds,
       });
 
-      parentPage.slots.subPageUpdated.emit({
+      parentPage.slots.subPageUpdate.emit({
         type: 'add',
         id: pageId,
         subPageIds,
@@ -446,7 +442,10 @@ export class Workspace {
 
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
-    const parentId = pageMeta.parentId;
+    const parentId = this.meta.pageMetas.find(meta =>
+      meta.subPageIds.includes(pageId)
+    ).id;
+
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
       const parentPage = this.getPage(parentId) as Page;
@@ -456,7 +455,7 @@ export class Workspace {
       this.setPageMeta(parentPage.id, {
         subPageIds,
       });
-      parentPage.slots.subPageUpdated.emit({
+      parentPage.slots.subPageUpdate.emit({
         type: 'delete',
         id: pageId,
         subPageIds,
@@ -469,25 +468,6 @@ export class Workspace {
     page.dispose();
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
-  }
-
-  movePage(pageId: string, newQueue: string[]) {
-    const pageMeta = this.meta.getPageMeta(pageId);
-
-    if (newQueue.findIndex(id => !pageMeta.subPageIds.includes(id)) !== -1) {
-      throw Error('Some sub page id is not included in the original queue.');
-    }
-    const page = this.getPage(pageId) as Page;
-
-    this.setPageMeta(pageMeta.id, {
-      subPageIds: newQueue,
-    });
-
-    page.slots.subPageUpdated.emit({
-      type: 'move',
-      id: pageId,
-      subPageIds: newQueue,
-    });
   }
 
   search(query: QueryContent) {
