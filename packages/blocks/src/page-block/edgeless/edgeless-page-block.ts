@@ -406,7 +406,7 @@ export class EdgelessPageBlockComponent
       },
       this.page.root.id
     );
-    this.page.moveBlocksToParent(blocks, frameId);
+    this.page.moveBlocks(blocks, this.page.getBlockById(frameId));
 
     requestAnimationFrame(() => {
       const element = this.page.root?.children.find(b => b.id === frameId);

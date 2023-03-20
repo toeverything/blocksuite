@@ -466,57 +466,23 @@ export class Page extends Space<FlatBlockMap> {
     this.updateBlock(model, props);
   }
 
+  /** Moves blocks into new parent model. */
   @debug('CRUD')
   moveBlocks(
     blocks: BaseBlockModel[],
-    targetModel: BaseBlockModel,
-    top = true
+    parentModel: BaseBlockModel | null,
+    state?: {
+      model: BaseBlockModel;
+      after: boolean;
+    }
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
 
-    const firstBlock = blocks[0];
-    const currentParentModel = this.getParent(firstBlock);
-
-    // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParentModel)) {
-      console.error('the blocks must have the same parent');
-    }
-
-    const nextParentModel = this.getParent(targetModel);
-    if (currentParentModel === null || nextParentModel === null) {
-      throw new Error('cannot find parent model');
-    }
-
-    this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
-      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
-      yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
-      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
-      const nextIdx = yChildrenB
-        .toArray()
-        .findIndex(id => id === targetModel.id);
-
-      const ids = blocks.map(block => block.id);
-      if (top) {
-        yChildrenB.insert(nextIdx, ids);
-      } else {
-        yChildrenB.insert(nextIdx + 1, ids);
-      }
-    });
-    currentParentModel.propsUpdated.emit();
-    nextParentModel.propsUpdated.emit();
-  }
-
-  @debug('CRUD')
-  moveBlocksToParent(blocks: BaseBlockModel[], parentId: string) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
+    if (!parentModel) {
+      throw new Error('missing parent model');
     }
 
     const firstBlock = blocks[0];
@@ -531,11 +497,6 @@ export class Page extends Space<FlatBlockMap> {
       console.error('the blocks must have the same parent');
     }
 
-    const parentModel = this.getBlockById(parentId);
-    if (parentModel === null) {
-      throw new Error('cannot find parent model by id');
-    }
-
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
@@ -545,7 +506,17 @@ export class Page extends Space<FlatBlockMap> {
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
 
       const ids = blocks.map(block => block.id);
-      yChildrenB.push(ids);
+
+      if (state) {
+        const { model, after } = state;
+        let nextIdx = yChildrenB.toArray().findIndex(id => id === model.id);
+        if (after) {
+          nextIdx += 1;
+        }
+        yChildrenB.insert(nextIdx, ids);
+      } else {
+        yChildrenB.push(ids);
+      }
     });
     currentParentModel.propsUpdated.emit();
     parentModel.propsUpdated.emit();

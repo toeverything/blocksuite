@@ -187,10 +187,14 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         }
         const distanceToTop = Math.abs(rect.top - point.y);
         const distanceToBottom = Math.abs(rect.bottom - point.y);
+
         page.moveBlocks(
           blocks.map(b => b.model),
-          model,
-          distanceToTop < distanceToBottom
+          page.getParent(model),
+          {
+            model,
+            after: distanceToTop >= distanceToBottom,
+          }
         );
       } else {
         // blank area
