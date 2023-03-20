@@ -32,4 +32,15 @@ export default defineConfig({
       { icon: 'twitter', link: 'https://twitter.com/AffineDev' },
     ],
   },
+  head: [
+    [
+      'link',
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '32x32',
+        href: 'https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg',
+      },
+    ],
+  ],
 });
