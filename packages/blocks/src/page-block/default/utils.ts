@@ -507,8 +507,11 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 
       const distanceToTop = Math.abs(rect.top - p.y);
       const distanceToBottom = Math.abs(rect.bottom - p.y);
+      const parent = page.getParent(model);
+      assertExists(parent);
       page.moveBlocks(
         blocks.map(b => b.model),
+        parent,
         model,
         distanceToTop < distanceToBottom
       );
