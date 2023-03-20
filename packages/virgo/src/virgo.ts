@@ -252,6 +252,8 @@ export class VEditor<
       })
     );
 
+    this._rootElement.focus();
+
     this.slots.updated.emit();
   };
 
