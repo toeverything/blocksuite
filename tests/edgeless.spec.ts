@@ -321,6 +321,8 @@ test('add empty Text', async ({ page }) => {
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);
   await pressEnter(page);
+  // should wait for virgo update and resizeObserver callback
+  await page.waitForTimeout(50);
 
   // assert add text success
   await page.mouse.move(30, 40);
