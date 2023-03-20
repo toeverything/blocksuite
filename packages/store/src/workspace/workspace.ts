@@ -21,7 +21,7 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
-  subPageIds: string[];
+  subpageIds: string[];
 
   [key: string]: string | number | boolean | undefined | (string | number)[];
 }
@@ -414,21 +414,21 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
-      subPageIds: [],
+      subpageIds: [],
     });
 
     if (parentId) {
       const parentPage = this.getPage(parentId) as Page;
       const parentPageMeta = this.meta.getPageMeta(parentId);
-      const subPageIds = [...parentPageMeta.subPageIds, pageId];
+      const subpageIds = [...parentPageMeta.subpageIds, pageId];
       this.setPageMeta(parentId, {
-        subPageIds,
+        subpageIds,
       });
 
-      parentPage.slots.subPageUpdate.emit({
+      parentPage.slots.subpageUpdated.emit({
         type: 'add',
         id: pageId,
-        subPageIds,
+        subpageIds,
       });
     }
 
@@ -443,22 +443,22 @@ export class Workspace {
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
     const parentId = this.meta.pageMetas.find(meta =>
-      meta.subPageIds.includes(pageId)
+      meta.subpageIds.includes(pageId)
     )?.id;
 
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
       const parentPage = this.getPage(parentId) as Page;
-      const subPageIds = parentPageMeta.subPageIds.filter(
-        (subPageId: string) => subPageId !== pageMeta.id
+      const subpageIds = parentPageMeta.subpageIds.filter(
+        (subpageId: string) => subpageId !== pageMeta.id
       );
       this.setPageMeta(parentPage.id, {
-        subPageIds,
+        subpageIds,
       });
-      parentPage.slots.subPageUpdate.emit({
+      parentPage.slots.subpageUpdated.emit({
         type: 'delete',
         id: pageId,
-        subPageIds,
+        subpageIds,
       });
     }
 

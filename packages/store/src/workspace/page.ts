@@ -71,10 +71,10 @@ export class Page extends Space<FlatBlockMap> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
-    subPageUpdate: new Slot<{
+    subpageUpdated: new Slot<{
       type: 'add' | 'delete';
       id: string;
-      subPageIds: string[];
+      subpageIds: string[];
     }>(),
   };
 
