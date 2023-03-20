@@ -1,7 +1,7 @@
 // https://vitepress.dev/guide/custom-theme
 import { h } from 'vue';
 import Theme from 'vitepress/theme';
-import Image from './image.vue';
+import Logo from './logo.vue';
 import './style.css';
 
 export default {
@@ -9,7 +9,7 @@ export default {
   Layout: () => {
     return h(Theme.Layout, null, {
       // https://vitepress.dev/guide/extending-default-theme#layout-slots
-      'home-hero-image': () => h(Image),
+      'home-hero-image': () => h(Logo),
     });
   },
   enhanceApp({ app, router, siteData }) {

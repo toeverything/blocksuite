@@ -1,4 +1,4 @@
-<div id="editor-example" style="height: 300px; border: 1px solid black;"/>
+<div id="editor-example" style="height: 300px"/>
 
 <script>
 import '@blocksuite/editor/themes/affine.css';
@@ -25,9 +25,7 @@ async function main() {
   // Init editor with the page store
   const editor = new EditorContainer();
   editor.page = page;
-  setTimeout(() => {
-    document.querySelector('#editor-example').appendChild(editor);
-  }, 0);
+  document.querySelector('#editor-example').appendChild(editor);
 }
 
 if (typeof window !== 'undefined') {
@@ -35,7 +33,7 @@ if (typeof window !== 'undefined') {
 }
 </script>
 
-```tsx
+```ts
 import '@blocksuite/blocks';
 import { Workspace, Page } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks/models';
