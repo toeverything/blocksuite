@@ -56,7 +56,7 @@ export interface SSROptions {
 }
 
 // TODO Support ReadableStream
-export type InlineSuggestProvider = (context: {
+export type InlineSuggestionProvider = (context: {
   title: string;
   text: string;
 }) => Promise<string>; // | Promise<ReadableStream<string>>;
@@ -70,7 +70,7 @@ export interface StoreOptions<
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
   blobOptionsGetter?: BlobOptionsGetter;
-  experimentalInlineSuggestProvider?: InlineSuggestProvider;
+  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
 }
 
 const flagsPreset = {

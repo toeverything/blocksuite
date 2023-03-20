@@ -1,4 +1,7 @@
-import type { BaseBlockModel, InlineSuggestProvider } from '@blocksuite/store';
+import type {
+  BaseBlockModel,
+  InlineSuggestionProvider,
+} from '@blocksuite/store';
 import {
   assertExists,
   DisposableGroup,
@@ -9,9 +12,9 @@ import { css, html, type LitElement, type ReactiveController } from 'lit';
 import { getCurrentNativeRange } from '../utils/selection.js';
 import type { AffineVEditor } from './virgo/types.js';
 
-export class InlineSuggestController implements ReactiveController {
+export class InlineSuggestionController implements ReactiveController {
   static styles = css`
-    .inline-suggest {
+    .inline-suggestion {
       display: flex;
       align-items: center;
       gap: 4px;
@@ -25,19 +28,19 @@ export class InlineSuggestController implements ReactiveController {
 
   host: LitElement;
 
-  private __suggestState = {
+  private __suggestionState = {
     show: false,
     position: { x: 0, y: 0 },
     loading: false,
     text: '',
   };
 
-  private get _suggestState() {
-    return this.__suggestState;
+  private get _suggestionState() {
+    return this.__suggestionState;
   }
 
-  private set _suggestState(v: typeof this.__suggestState) {
-    this.__suggestState = v;
+  private set _suggestionState(v: typeof this.__suggestionState) {
+    this.__suggestionState = v;
     // TODO diff to optimize
     this.host.requestUpdate();
   }
@@ -46,7 +49,7 @@ export class InlineSuggestController implements ReactiveController {
 
   private model?: BaseBlockModel;
   private vEditor?: AffineVEditor;
-  private provider?: InlineSuggestProvider;
+  private provider?: InlineSuggestionProvider;
 
   constructor(host: LitElement) {
     host.addController(this);
@@ -68,7 +71,7 @@ export class InlineSuggestController implements ReactiveController {
   }: {
     model: BaseBlockModel;
     vEditor: AffineVEditor;
-    provider: InlineSuggestProvider;
+    provider: InlineSuggestionProvider;
   }) {
     this.provider = provider;
     this.model = model;
@@ -101,10 +104,10 @@ export class InlineSuggestController implements ReactiveController {
         }
         const text = this.model.text;
         assertExists(text);
-        if (this._suggestState.loading) return;
+        if (this._suggestionState.loading) return;
         const position = this._updatePosition();
-        this._suggestState = {
-          ...this._suggestState,
+        this._suggestionState = {
+          ...this._suggestionState,
           position,
           loading: true,
         };
@@ -117,7 +120,7 @@ export class InlineSuggestController implements ReactiveController {
         const textStr = text.toString();
         const title = pageBlock.title.toString();
         try {
-          const suggest = await inlineSuggestProvider({
+          const suggestion = await inlineSuggestProvider({
             title,
             text: textStr,
           });
@@ -125,10 +128,10 @@ export class InlineSuggestController implements ReactiveController {
             // User has already typed something
             textStr !== text.toString() ||
             // Focus has already moved to another block
-            !this._suggestState.loading
+            !this._suggestionState.loading
           ) {
-            this._suggestState = {
-              ...this._suggestState,
+            this._suggestionState = {
+              ...this._suggestionState,
               show: false,
               loading: false,
             };
@@ -137,18 +140,18 @@ export class InlineSuggestController implements ReactiveController {
           // Wait for native range to be updated
           requestAnimationFrame(() => {
             const position = this._updatePosition();
-            this._suggestState = {
-              ...this._suggestState,
+            this._suggestionState = {
+              ...this._suggestionState,
               show: true,
-              text: suggest,
+              text: suggestion,
               loading: false,
               position,
             };
           });
         } catch (error) {
           console.error('Failed to get inline suggest', error);
-          this._suggestState = {
-            ...this._suggestState,
+          this._suggestionState = {
+            ...this._suggestionState,
             show: false,
             loading: false,
           };
@@ -158,8 +161,8 @@ export class InlineSuggestController implements ReactiveController {
   };
 
   readonly onFocusOut = (e: FocusEvent) => {
-    this._suggestState = {
-      ...this._suggestState,
+    this._suggestionState = {
+      ...this._suggestionState,
       show: false,
       loading: false,
       text: '',
@@ -170,13 +173,13 @@ export class InlineSuggestController implements ReactiveController {
   };
 
   readonly onKeyDown = (e: KeyboardEvent) => {
-    if (!this._suggestState.show) return;
+    if (!this._suggestionState.show) return;
     if (e.isComposing || e.key !== 'Tab') {
       if (e.key !== 'Tab') {
         requestAnimationFrame(() => {
           const position = this._updatePosition();
-          this._suggestState = {
-            ...this._suggestState,
+          this._suggestionState = {
+            ...this._suggestionState,
             position,
           };
         });
@@ -187,25 +190,28 @@ export class InlineSuggestController implements ReactiveController {
     assertExists(editor);
     const vRange = editor.getVRange();
     if (!vRange) return;
-    const suggest = this._suggestState.text;
-    editor.insertText(vRange, suggest);
+    const suggestion = this._suggestionState.text;
+    editor.insertText(vRange, suggestion);
     editor.setVRange({
-      index: vRange.index + suggest.length,
+      index: vRange.index + suggestion.length,
       length: 0,
     });
-    this._suggestState = { ...this._suggestState, text: '' };
+    this._suggestionState = { ...this._suggestionState, text: '' };
 
     e.stopPropagation();
     e.preventDefault();
   };
 
   render() {
-    if (!this._suggestState.show || !this._suggestState.text) return html``;
-    const text = this._suggestState.loading ? '...' : this._suggestState.text;
-    const position = this._suggestState.position;
+    if (!this._suggestionState.show || !this._suggestionState.text)
+      return html``;
+    const text = this._suggestionState.loading
+      ? '...'
+      : this._suggestionState.text;
+    const position = this._suggestionState.position;
 
     return html`<div
-      class="inline-suggest"
+      class="inline-suggestion"
       style="transform: translateY(${position.y}px); text-indent: ${position.x +
       2}px; margin-bottom: ${position.y}px;"
     >

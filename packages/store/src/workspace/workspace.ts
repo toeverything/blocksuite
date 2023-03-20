@@ -13,7 +13,7 @@ import {
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
 import {
-  type InlineSuggestProvider,
+  type InlineSuggestionProvider,
   Store,
   type StoreOptions,
 } from '../store.js';
@@ -258,10 +258,11 @@ export class Workspace {
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
   flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
-  inlineSuggestProvider?: InlineSuggestProvider;
+  inlineSuggestionProvider?: InlineSuggestionProvider;
 
   constructor(options: StoreOptions) {
-    this.inlineSuggestProvider = options.experimentalInlineSuggestProvider;
+    this.inlineSuggestionProvider =
+      options.experimentalInlineSuggestionProvider;
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
     if (options.blobOptionsGetter) {

@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import { type BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { InlineSuggestController } from './inline-suggest.js';
+import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
 import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
@@ -28,7 +28,7 @@ export class RichText extends NonShadowLitElement {
       scroll-margin-bottom: 30px;
     }
 
-    ${InlineSuggestController.styles}
+    ${InlineSuggestionController.styles}
   `;
 
   @query('.affine-rich-text')
@@ -54,8 +54,8 @@ export class RichText extends NonShadowLitElement {
     return this._vEditor;
   }
 
-  private _inlineSuggestController: InlineSuggestController =
-    new InlineSuggestController(this);
+  private _inlineSuggestController: InlineSuggestionController =
+    new InlineSuggestionController(this);
 
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
@@ -138,11 +138,11 @@ export class RichText extends NonShadowLitElement {
     });
 
     this._vEditor.setReadonly(this.model.page.readonly);
-    const inlineSuggestProvider =
-      this.model.page.workspace.inlineSuggestProvider;
-    if (inlineSuggestProvider) {
+    const inlineSuggestionProvider =
+      this.model.page.workspace.inlineSuggestionProvider;
+    if (inlineSuggestionProvider) {
       this._inlineSuggestController.init({
-        provider: inlineSuggestProvider,
+        provider: inlineSuggestionProvider,
         model: this.model,
         vEditor: this._vEditor,
       });
