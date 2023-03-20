@@ -13,7 +13,7 @@ import {
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
-export class pageBlockClipboard implements Clipboard {
+export class PageClipboard implements Clipboard {
   _page!: Page;
 
   initEvent(page: Page) {

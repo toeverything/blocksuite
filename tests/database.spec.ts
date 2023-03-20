@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  focusRichText,
   initDatabaseColumn,
   initDatabaseRow,
   initEmptyDatabaseState,
@@ -157,4 +158,16 @@ test('should rich-text column support soft enter', async ({ page }) => {
 
   await pressShiftEnter(page);
   await assertDatabaseCellRichTexts(page, cellSelector, '12\n3');
+});
+
+test('should hide placeholder of paragraph in database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
+
+  await focusRichText(page);
+  const tipsPlaceholder = page.locator('.tips-placeholder');
+  expect(await tipsPlaceholder.count()).toEqual(0);
 });
