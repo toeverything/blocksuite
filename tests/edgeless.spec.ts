@@ -322,7 +322,7 @@ test('add empty Text', async ({ page }) => {
   await waitForVirgoStateUpdated(page);
   await pressEnter(page);
   // should wait for virgo update and resizeObserver callback
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 
   // assert add text success
   await page.mouse.move(30, 40);
