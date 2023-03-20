@@ -139,9 +139,10 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
         databaseModel.children,
         child => child.id,
         (child, idx) => {
-          const databaseHost = Object.assign(host, {
-            flavour: 'affine:database',
-          });
+          const databaseHost = { ...host, flavour: 'affine:database' };
+          // Note that the prototype will be lost here, causing `host.page` to not be found
+          // So, we restore its prototype manually
+          Object.setPrototypeOf(databaseHost, Object.getPrototypeOf(host));
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
               <div
