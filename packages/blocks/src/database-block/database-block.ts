@@ -100,7 +100,6 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
 
 function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
   const databaseModel = databaseBlock.model;
-  const host = databaseBlock.host;
   assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
 
   return html`
@@ -139,10 +138,6 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
         databaseModel.children,
         child => child.id,
         (child, idx) => {
-          const databaseHost = { ...host, flavour: 'affine:database' };
-          // Note that the prototype will be lost here, causing `host.page` to not be found
-          // So, we restore its prototype manually
-          Object.setPrototypeOf(databaseHost, Object.getPrototypeOf(host));
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
               <div
@@ -151,7 +146,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
                   maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
                 })}
               >
-                ${BlockElementWithService(child, databaseHost, () => {
+                ${BlockElementWithService(child, databaseBlock, () => {
                   databaseBlock.requestUpdate();
                 })}
               </div>
@@ -174,7 +169,21 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
 }
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends NonShadowLitElement {
+export class DatabaseBlockComponent
+  extends NonShadowLitElement
+  implements BlockHost
+{
+  flavour = 'affine:database' as const;
+  get page() {
+    return this.host.page;
+  }
+  get clipboard() {
+    return this.host.clipboard;
+  }
+  get getService() {
+    return this.host.getService;
+  }
+
   static styles = css`
     affine-database {
       position: relative;

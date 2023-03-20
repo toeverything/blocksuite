@@ -20,7 +20,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
+import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -120,7 +120,7 @@ export class DefaultPageBlockComponent
 
   flavour = 'affine:page' as const;
 
-  clipboard = new pageBlockClipboard();
+  clipboard = new PageClipboard();
 
   selection!: DefaultSelectionManager;
 
