@@ -193,6 +193,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         'input',
       ]);
     }
+
+    this._editor.rootElement.focus();
   };
 
   private _onBeforeInput = (event: InputEvent) => {
@@ -347,5 +349,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         });
       }
     }
+
+    this._editor.rootElement.focus();
   };
 }
