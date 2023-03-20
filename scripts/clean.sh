@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  "docs"
   "editor"
   "global"
   "phasor"

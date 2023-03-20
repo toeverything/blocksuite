@@ -2,9 +2,9 @@
 
 <p align="center">
   <picture style="width: 500px">
-    <source media="(prefers-color-scheme: light)" srcset="assets/logo-and-name-h.svg" />
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-and-name-h-white.svg" />
-    <img src="assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h-white.svg" />
+    <img src="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
   </picture>
 </p>
 

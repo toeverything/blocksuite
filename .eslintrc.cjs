@@ -2,6 +2,7 @@
 // ALL_PACKAGES
 const allPackages = [
   'blocks',
+  'docs',
   'editor',
   'global',
   'phasor',

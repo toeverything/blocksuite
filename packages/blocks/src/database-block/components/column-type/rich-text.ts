@@ -1,3 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
+import type { Y } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -61,7 +64,7 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellLitElement {
+class TextCell extends DatabaseCellLitElement<Y.Text> {
   static styles = css`
     :host {
       width: 100%;
@@ -97,9 +100,19 @@ class TextCell extends DatabaseCellLitElement {
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
-    if (!this.vEditor) {
+    if (!this.vEditor) return;
+    if (event.key === 'Enter') {
+      if (event.shiftKey) {
+        // soft enter
+        this._onSoftEnter();
+      } else {
+        // exit editing
+        this.rowHost.setEditing(false);
+      }
+      event.preventDefault();
       return;
     }
+
     const vEditor = this.vEditor;
 
     switch (event.key) {
@@ -148,6 +161,23 @@ class TextCell extends DatabaseCellLitElement {
     }
   };
 
+  private _onSoftEnter = () => {
+    if (this.column && this.vEditor) {
+      const vRange = this.vEditor.getVRange();
+      assertExists(vRange);
+
+      const page = this.databaseModel.page;
+      page.captureSync();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const text = new Text(this.column.value as any);
+      text.replace(vRange.index, length, '\n');
+      this.vEditor.setVRange({
+        index: vRange.index + 1,
+        length: 0,
+      });
+    }
+  };
+
   protected update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (this.column && !this.vEditor) {
@@ -190,9 +220,10 @@ class TextCell extends DatabaseCellLitElement {
 }
 
 @customElement('affine-database-rich-text-column-property-editing')
-class TextColumnPropertyEditing extends DatabaseCellLitElement {
+class TextColumnPropertyEditing extends DatabaseCellLitElement<Y.Text> {
   static tag = literal`affine-database-rich-text-column-property-editing`;
 }
+
 export const RichTextColumnSchemaRenderer = defineColumnSchemaRenderer(
   'rich-text',
   () => ({}),

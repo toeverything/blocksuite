@@ -10,6 +10,7 @@ on:
       - '**.md'
       - 'scripts/**'
       - 'packages/react/examples/**'
+      - 'packages/docs/**'
   pull_request:
     branches:
       - master
@@ -19,6 +20,7 @@ on:
       - '**.md'
       - 'scripts/**'
       - 'packages/react/examples/**'
+      - 'packages/docs/**'
 
 jobs:
   e2e-test:

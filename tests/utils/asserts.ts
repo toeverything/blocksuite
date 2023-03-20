@@ -660,3 +660,18 @@ export async function assertEdgelessNonSelectedRect(page: Page) {
   const rect = page.locator('edgeless-selected-rect');
   await expect(rect).toBeHidden();
 }
+
+export async function assertDatabaseCellRichTexts(
+  page: Page,
+  selector: string,
+  texts: string
+) {
+  const actualTexts = await page.evaluate(selector => {
+    const richText = document
+      .querySelector<RichText>(selector)
+      ?.shadowRoot?.querySelector<RichText>('affine-database-rich-text-cell');
+    if (!richText) throw new Error('Missing database rich text cell');
+    return richText.vEditor.yText.toString();
+  }, selector);
+  expect(actualTexts).toEqual(texts);
+}
