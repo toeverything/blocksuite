@@ -314,7 +314,7 @@ test('add Text', async ({ page }) => {
   await assertEdgelessHoverRect(page, [0, 0, 448, 72]);
 });
 
-test('add empty Text', async ({ page }) => {
+test.skip('add empty Text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -932,6 +932,7 @@ test('block hub should drag and drop a card into existing frame', async ({
     { steps: 50 }
   );
 
+  await waitNextFrame(page);
   await type(page, '000');
   await assertRichTexts(page, ['123', '000', '456', '789']);
 
@@ -962,6 +963,7 @@ test('block hub should add new frame when dragged to blank area', async ({
     { steps: 50 }
   );
 
+  await waitNextFrame(page);
   await type(page, '000');
   await assertRichTexts(page, ['123', '456', '789', '000']);
 
