@@ -49,25 +49,25 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: pnpm install --frozen-lockfile
 
       - name: Install playwright browsers
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: npx playwright install chromium
 
       - name: Run playwright test
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           COVERAGE: true
 
       - name: Collect code coverage report
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: pnpm exec nyc report -t .nyc_output --reporter=lcov
 
       - name: Upload E2E test coverage results
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -85,7 +85,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Skipping tests
-        if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
         run: echo "Tests skipped due to changes in ignored paths"
 
   unit-test:
@@ -103,15 +103,15 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: pnpm install --frozen-lockfile
 
       - name: Run unit test
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         run: pnpm test:unit:coverage
 
       - name: Upload unit test coverage results
-        if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'true' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -121,5 +121,5 @@ jobs:
           fail_ci_if_error: true
 
       - name: Skipping tests
-        if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
+        # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
         run: echo "Tests skipped due to changes in ignored paths"
