@@ -184,7 +184,10 @@ test('should the single-select mode work correctly', async ({ page }) => {
   const selectInput = page.locator('.select-input');
   await selectInput.click();
   await type(page, '2');
-  await pressEnter(page);
+  const selectOptionNew = page.locator(
+    '.select-option-container .select-option-new'
+  );
+  await selectOptionNew.click();
   expect(await selectCell.innerText()).toBe('2');
 
   await cell.click();
