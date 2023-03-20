@@ -6,9 +6,7 @@ import {
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
-import {
-  Point
-} from '@blocksuite/blocks/std';
+import { Point } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
