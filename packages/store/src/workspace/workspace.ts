@@ -70,7 +70,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
   }
 
   get pageMetas() {
-    return this._proxy.pages?.toJSON() ?? ([] as PageMeta[]);
+    return (this._proxy.pages?.toJSON() as PageMeta[]) ?? ([] as PageMeta[]);
   }
 
   getPageMeta(id: string) {
@@ -420,6 +420,7 @@ export class Workspace {
     if (parentId) {
       const parentPage = this.getPage(parentId) as Page;
       const parentPageMeta = this.meta.getPageMeta(parentId);
+      assertExists(parentPageMeta);
       const subpageIds = [...parentPageMeta.subpageIds, pageId];
       this.setPageMeta(parentId, {
         subpageIds,
@@ -442,12 +443,14 @@ export class Workspace {
 
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
+    assertExists(pageMeta);
     const parentId = this.meta.pageMetas.find(meta =>
       meta.subpageIds.includes(pageId)
     )?.id;
 
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
+      assertExists(parentPageMeta);
       const parentPage = this.getPage(parentId) as Page;
       const subpageIds = parentPageMeta.subpageIds.filter(
         (subpageId: string) => subpageId !== pageMeta.id
