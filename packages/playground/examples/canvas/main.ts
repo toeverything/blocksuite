@@ -83,6 +83,37 @@ function addShapeElements(surface: SurfaceManager) {
   });
 }
 
+function addConnectorElements(surface: SurfaceManager) {
+  surface.addConnectorElement(
+    new Bound(500, 0, 100, 100),
+    [0, 0, 30, 0, 30, 50, 60, 50, 60, 100, 100, 100]
+  );
+
+  // right
+  surface.addConnectorElement(new Bound(500, 120, 100, 10), [0, 0, 100, 0]);
+
+  // left
+  surface.addConnectorElement(new Bound(500, 260, 100, 10), [100, 0, 0, 0]);
+
+  // top
+  surface.addConnectorElement(new Bound(480, 140, 10, 100), [0, 100, 0, 0]);
+
+  // bottom
+  surface.addConnectorElement(new Bound(620, 140, 10, 100), [0, 0, 0, 100]);
+
+  // right-bottom
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [0, 0, 100, 100]);
+
+  // left-top
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [100, 100, 0, 0]);
+
+  // left-bottom
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [100, 0, 0, 100]);
+
+  // right-top
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [0, 100, 100, 0]);
+}
+
 function main() {
   const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
@@ -96,6 +127,7 @@ function main() {
 
   addBrushElements(surface);
   addShapeElements(surface);
+  addConnectorElements(surface);
 
   // Uncomment to batch load mock data
   // initMockData(surface, 100, 1000, 1000);

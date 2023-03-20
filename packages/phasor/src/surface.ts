@@ -9,6 +9,7 @@ import type { BrushProps } from './elements/brush/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
+  ConnectorElement,
   DebugElement,
   ElementCtors,
   type PhasorElement,
@@ -88,6 +89,16 @@ export class SurfaceManager {
     if (props) {
       BrushElement.updateProps(element, props);
     }
+
+    return this._addElement(element);
+  }
+
+  addConnectorElement(bound: IBound, controllers: number[]) {
+    const id = nanoid(10);
+    const element = new ConnectorElement(id);
+
+    setXYWH(element, bound);
+    element.controllers = controllers;
 
     return this._addElement(element);
   }
