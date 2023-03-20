@@ -444,7 +444,7 @@ export class Workspace {
     const pageMeta = this.meta.getPageMeta(pageId);
     const parentId = this.meta.pageMetas.find(meta =>
       meta.subPageIds.includes(pageId)
-    ).id;
+    )?.id;
 
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
