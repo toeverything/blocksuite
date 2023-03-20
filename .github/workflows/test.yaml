@@ -84,9 +84,9 @@ jobs:
           path: ./test-results
           if-no-files-found: ignore
 
-      - name: Skipping tests
-        # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
-        run: echo "Tests skipped due to changes in ignored paths"
+      # - name: Skipping tests
+      #   # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
+      #   run: echo "Tests skipped due to changes in ignored paths"
 
   unit-test:
     name: Unit test
@@ -120,6 +120,6 @@ jobs:
           name: blocksuite
           fail_ci_if_error: true
 
-      - name: Skipping tests
-        # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
-        run: echo "Tests skipped due to changes in ignored paths"
+      # - name: Skipping tests
+      #   # if: ${{ needs.check-changes.outputs.run_tests == 'false' }}
+      #   run: echo "Tests skipped due to changes in ignored paths"
