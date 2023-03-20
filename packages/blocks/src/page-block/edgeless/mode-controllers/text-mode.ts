@@ -1,37 +1,13 @@
-import {
-  handleNativeRangeAtPoint,
-  noop,
-  type SelectionEvent,
-  type TextMouseMode,
-} from '@blocksuite/blocks/std';
+import type { SelectionEvent, TextMouseMode } from '@blocksuite/blocks/std';
+import { handleNativeRangeAtPoint, noop } from '@blocksuite/blocks/std';
 import { serializeXYWH } from '@blocksuite/phasor';
 
-<<<<<<< HEAD
 import {
   DEFAULT_FRAME_HEIGHT,
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
   DEFAULT_FRAME_WIDTH,
 } from '../utils.js';
-||||||| parent of 19a75e18 (chore: move addFrame to edgeless-page-block)
-import type {
-  SelectionEvent,
-  TextMouseMode,
-} from '../../../__internal__/index.js';
-import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
-=======
-import type {
-  SelectionEvent,
-  TextMouseMode,
-} from '../../../__internal__/index.js';
-import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
-import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_OFFSET_X,
-  DEFAULT_FRAME_OFFSET_Y,
-  DEFAULT_FRAME_WIDTH,
-} from '../utils.js';
->>>>>>> 19a75e18 (chore: move addFrame to edgeless-page-block)
 import { MouseModeController } from './index.js';
 
 export class TextModeController extends MouseModeController<TextMouseMode> {

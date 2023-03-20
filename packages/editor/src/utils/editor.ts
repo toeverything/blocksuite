@@ -66,9 +66,9 @@ export const createBlockHub: (
 
       // Creates new frame block.
       if (!end) {
-        const ids = edgelessPageBlock.addFrame(
-          new Point(e.clientX, e.clientY),
-          blocks
+        const ids = edgelessPageBlock.addNewFrame(
+          blocks,
+          new Point(e.clientX, e.clientY)
         );
         if (ids.length) {
           asyncFocusRichText(page, ids[0]);

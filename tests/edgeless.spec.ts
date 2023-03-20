@@ -859,6 +859,7 @@ test('drag handle should work inside one frame', async ({ page }) => {
   await switchEditorMode(page);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '5');
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
@@ -881,9 +882,11 @@ test('drag handle should work across multiple frames', async ({ page }) => {
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
   await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
   await dragHandleFromBlockToBlockBottomById(page, '7', '4');
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '000', '789', '123']);
 });
@@ -901,6 +904,7 @@ test('drag handle should add new frame when dragged outside frame', async ({
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 

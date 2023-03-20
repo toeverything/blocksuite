@@ -20,6 +20,7 @@ import {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import {
+  assertExists,
   type BaseBlockModel,
   DisposableGroup,
   type Page,
@@ -422,17 +423,13 @@ export class EdgelessPageBlockComponent
     });
   }
 
-  setBlockSelectionState(state: EdgelessSelectionState) {
-    this._selection.currentController.setBlockSelectionState(state);
-  }
-
   /**
-   * Adds a new frame with the given point and blocks.
-   * @param point Point
+   * Adds a new frame with the given blocks and point.
    * @param blocks Array<Partial<BaseBlockModel>>
+   * @param point Point
    * @returns string[]
    */
-  addFrame(point: Point, blocks: Array<Partial<BaseBlockModel>>) {
+  addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     if (!this.page.root) return [];
     this.page.captureSync();
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
