@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  check_changes:
+  check-changes:
     runs-on: ubuntu-latest
     outputs:
       run_tests: ${{ steps.check-changes.outputs.run_tests }}
