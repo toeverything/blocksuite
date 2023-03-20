@@ -2,6 +2,7 @@
 import {
   asyncFocusRichText,
   type BlockHost,
+  type EditingState,
   hotkey,
   Rect,
   type SelectionPosition,
@@ -34,11 +35,7 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
-import {
-  createDragHandle,
-  type EditingState,
-  getAllowSelectedBlocks,
-} from './utils.js';
+import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;

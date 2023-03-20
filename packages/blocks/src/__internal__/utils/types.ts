@@ -8,6 +8,7 @@ import type {
 } from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
@@ -16,6 +17,12 @@ export interface BlockTransformContext {
   childText?: string;
   begin?: number;
   end?: number;
+}
+
+export interface EditingState {
+  element: BlockComponentElement;
+  model: BaseBlockModel;
+  rect: DOMRect;
 }
 
 /** Common context interface definition for block models. */
