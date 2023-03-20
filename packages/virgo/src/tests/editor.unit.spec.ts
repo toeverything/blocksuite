@@ -457,3 +457,16 @@ test('incorrect format value `false`', () => {
     },
   ]);
 });
+
+test('yText should not contain \r', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  yText.insert(0, 'aaa\r');
+
+  expect(yText.toString()).toEqual('aaa\r');
+  expect(() => {
+    const virgo = new VEditor(yText);
+  }).toThrow(
+    'yText must not contain \r because it will break the range synclization'
+  );
+});
