@@ -204,7 +204,6 @@ export class LinkPopover extends LitElement {
 
   private _onKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
       this._onConfirm();
     }
     if (!this.linkInput) {

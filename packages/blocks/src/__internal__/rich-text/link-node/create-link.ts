@@ -75,9 +75,5 @@ export function createLink(page: Page) {
 
     page.captureSync();
     vEditor.formatText(vRange, { link });
-    vEditor.setVRange({
-      index: vRange.index + vRange.length,
-      length: 0,
-    });
   });
 }
