@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { ZERO_WIDTH_SPACE } from '../constant.js';
+import type { VEditor } from '../virgo.js';
 import {
   enterVirgoPlayground,
   focusVirgoRichText,
@@ -752,4 +753,34 @@ test('getLine', async ({ page }) => {
   expect(offset5).toEqual(0);
   expect(line6).toEqual('ghi');
   expect(offset6).toEqual(3);
+});
+
+test('yText should not contain \r', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  await page.waitForTimeout(50);
+  const message = await page.evaluate(() => {
+    const richText = document
+      .querySelector('test-page')
+      ?.querySelector('virgo-test-rich-text');
+
+    if (!richText) {
+      throw new Error('Cannot find virgo-test-rich-text');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const editor = (richText as any).vEditor as VEditor;
+
+    try {
+      editor.insertText({ index: 0, length: 0 }, 'abc\r');
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (e as any).message;
+    }
+  });
+
+  expect(message).toBe(
+    'yText must not contain \r because it will break the range synclization'
+  );
 });
