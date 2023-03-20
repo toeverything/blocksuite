@@ -347,5 +347,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         });
       }
     }
+
+    this._editor.rootElement.focus();
   };
 }
