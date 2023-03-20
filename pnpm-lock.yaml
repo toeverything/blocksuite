@@ -175,9 +175,9 @@ importers:
     dependencies:
       '@blocksuite/global': link:../global
       fractional-indexing: 3.2.0
-      nanoid: 4.0.1
       perfect-freehand: 1.2.0
     devDependencies:
+      nanoid: 4.0.1
       yjs: 13.5.50
 
   packages/playground:
@@ -5936,7 +5936,6 @@ packages:
     resolution: {integrity: sha512-udKGtCCUafD3nQtJg9wBhRP3KMbPglUsgV5JVsXhvyBs/oefqb4sqMEhKBBgqZncYowu58p1prsZQBYvAj/Gww==}
     engines: {node: ^14 || ^16 || >=18}
     hasBin: true
-    dev: false
 
   /natural-compare-lite/1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}

@@ -14,10 +14,12 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "yjs": "^13.5.50"
+    "yjs": "^13.5.50",
+    "nanoid": "^4.0.1"
   },
   "peerDependencies": {
-    "yjs": "^13"
+    "yjs": "^13",
+    "nanoid": "^4"
   },
   "exports": {
     "./src/*": "./src/*.ts",
@@ -35,7 +37,6 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "fractional-indexing": "^3.2.0",
-    "nanoid": "^4.0.1",
     "perfect-freehand": "^1.2.0"
   }
 }
