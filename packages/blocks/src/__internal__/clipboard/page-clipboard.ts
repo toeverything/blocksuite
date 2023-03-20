@@ -16,14 +16,14 @@ import {
 export class PageClipboard implements Clipboard {
   _page!: Page;
 
-  initEvent(page: Page) {
+  init(page: Page) {
     this._page = page;
     document.body.addEventListener('cut', this._onCut);
     document.body.addEventListener('copy', this._onCopy);
     document.body.addEventListener('paste', this._onPaste);
   }
 
-  disposeEvent() {
+  dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
     document.body.removeEventListener('paste', this._onPaste);
