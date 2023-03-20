@@ -72,7 +72,7 @@ describe.concurrent('basic', () => {
         pages: [
           {
             id: 'page0',
-            subPageIds: [],
+            subpageIds: [],
             title: '',
           },
         ],

@@ -39,7 +39,7 @@ export const defaultStore: SerializedStore = {
     pages: [
       {
         id: 'page0',
-        subPageIds: [],
+        subpageIds: [],
         title: '',
       },
     ],
