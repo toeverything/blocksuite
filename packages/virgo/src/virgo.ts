@@ -246,6 +246,8 @@ export class VEditor<
     });
 
     this._rootElement.replaceChildren(...lines);
+    this._rootElement.focus();
+
     await Promise.all(
       lines.map(async line => {
         await line.updateComplete;
