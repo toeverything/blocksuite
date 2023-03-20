@@ -447,6 +447,12 @@ export class Page extends Space<FlatBlockMap> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
+
+      if (flavour === 'affine:page') {
+        this.workspace.setPageMeta(this.id, {
+          title: blockProps.title?.toString(),
+        });
+      }
     });
 
     this.slots.blockUpdated.emit({
