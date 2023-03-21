@@ -99,12 +99,17 @@ export type TextMouseMode = {
   type: 'text';
 };
 
+export type ConnectorMouseMode = {
+  type: 'connector';
+};
+
 export type MouseMode =
   | DefaultMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode;
+  | TextMouseMode
+  | ConnectorMouseMode;
 
 export type SerializedBlock = {
   flavour: string;

@@ -10,6 +10,7 @@ import type { Page } from '@blocksuite/store';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
+import { ConnectorModeController } from './mode-controllers/connector-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
@@ -100,6 +101,7 @@ export class EdgelessSelectionManager {
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
       text: new TextModeController(this._container),
+      connector: new ConnectorModeController(this._container),
     };
 
     this._initMouseAndWheelEvents();

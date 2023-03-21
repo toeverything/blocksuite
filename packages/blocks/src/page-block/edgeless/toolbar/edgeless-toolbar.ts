@@ -169,10 +169,9 @@ export class EdgelessToolbar extends LitElement {
           ${ImageIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
           .tooltip=${'Connector'}
-          .active=${false}
-          @tool.click=${() => console.log('Connector')}
+          .active=${type === 'connector'}
+          @tool.click=${() => this._setMouseMode({ type: 'connector' })}
         >
           ${ConnectorIcon}
         </edgeless-tool-icon-button>

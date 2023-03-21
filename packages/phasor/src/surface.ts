@@ -112,6 +112,15 @@ export class SurfaceManager {
     });
   }
 
+  updateConnectorElement(id: string, bound: IBound, controllers: number[]) {
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      yElement.set('controllers', JSON.stringify(controllers));
+      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+    });
+  }
+
   updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
     this._transact(() => {
       const element = this._elements.get(id);
@@ -343,6 +352,13 @@ export class SurfaceManager {
           case 'points': {
             const points: number[][] = JSON.parse(yElement.get(key) as string);
             (element as BrushElement).points = points;
+            break;
+          }
+          case 'controllers': {
+            const controllers: number[] = JSON.parse(
+              yElement.get(key) as string
+            );
+            (element as ConnectorElement).controllers = controllers;
             break;
           }
           default: {
