@@ -8,8 +8,10 @@ import type {
 import {
   doesInSamePath,
   getClosestBlockElementByPoint,
+  getHoveringFrame,
   hotkey,
   HOTKEY_SCOPE,
+  Rect,
 } from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
@@ -217,7 +219,10 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       return null;
     },
     getClosestBlockElement(point: Point) {
-      return getClosestBlockElementByPoint(point);
+      if (pageBlock.mouseMode.type !== 'default') return null;
+      const hoveringFrame = getHoveringFrame(point);
+      if (!hoveringFrame) return null;
+      return getClosestBlockElementByPoint(point, Rect.fromDOM(hoveringFrame));
     },
   });
 }

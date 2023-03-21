@@ -200,11 +200,13 @@ export class EdgelessSelectionManager {
 
     let hovered: Selectable | null = surface.pickTop(modelX, modelY);
 
+    // Phasor Element
     if (hovered) {
       if (this.mouseMode.type === 'default') {
         this._container.components.dragHandle?.hide();
       }
     } else {
+      // Frame Element
       hovered = pickTopBlock(frames, modelX, modelY);
     }
 

@@ -71,8 +71,11 @@ export class EditorContainer extends NonShadowLitElement {
       }
       const pageModel = this.pageBlockModel;
       if (!pageModel) return;
-      const pageBlock = getDefaultPageBlock(pageModel);
-      pageBlock.selection.clear();
+
+      if (this.mode === 'page') {
+        const pageBlock = getDefaultPageBlock(pageModel);
+        pageBlock.selection.clear();
+      }
 
       const selection = getSelection();
       if (!selection || selection.isCollapsed || !checkEditorElementActive()) {
