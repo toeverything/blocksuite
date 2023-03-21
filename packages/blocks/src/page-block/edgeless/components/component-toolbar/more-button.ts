@@ -47,6 +47,7 @@ export class EdgelessMoreButton extends LitElement {
       display: block;
       fill: none;
       stroke: currentColor;
+      color: var(--affine-text-color);
     }
 
     .more-actions-container {
