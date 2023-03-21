@@ -482,14 +482,14 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    this.clipboard.initEvent(this.page);
+    this.clipboard.init(this.page);
 
     this._initDragHandle();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.disposeEvent();
+    this.clipboard.dispose();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
 
