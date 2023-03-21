@@ -3,6 +3,7 @@ import {
   BlockHub,
   getAllowSelectedBlocks,
   getEdgelessPage,
+  getServiceOrRegister,
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
@@ -50,6 +51,13 @@ export const createBlockHub: (
           blocks,
           distanceToTop < distanceToBottom ? 'before' : 'after'
         );
+
+        // database init basic structure
+        if (props.flavour === 'affine:database') {
+          const service = await getServiceOrRegister(props.flavour);
+          service.initDatabaseBlock(page, model, ids[0]);
+        }
+
         if (ids.length) {
           asyncFocusRichText(page, ids[0]);
         }
