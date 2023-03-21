@@ -7,7 +7,7 @@ import {
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
-import { Point } from '@blocksuite/blocks/std';
+import { getHoveringFrame, Point, Rect } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -85,21 +85,46 @@ export const createBlockHub: (
 
       tryUpdateFrameSize(page, edgelessPageBlock.surface.viewport.zoom);
     },
-  });
+    onDragStarted: () => {
+      if (editor.mode === 'page') {
+        const defaultPageBlock = editor.querySelector('affine-default-page');
+        assertExists(defaultPageBlock);
+        defaultPageBlock.slots.selectedRectsUpdated.emit([]);
+      }
+    },
+    getAllowedBlocks: () => {
+      if (editor.mode === 'page') {
+        const defaultPageBlock = editor.querySelector('affine-default-page');
+        assertExists(defaultPageBlock);
+        return getAllowSelectedBlocks(defaultPageBlock.model);
+      } else {
+        const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
+        assertExists(edgelessPageBlock);
+        return getAllowSelectedBlocks(edgelessPageBlock.model);
+      }
+    },
+    getHoveringFrameState: (point: Point) => {
+      const state = {
+        rect: null,
+        scale: 1,
+      } as { rect: Rect | null; scale: number };
 
-  if (editor.mode === 'page') {
-    const defaultPageBlock = editor.querySelector('affine-default-page');
-    assertExists(defaultPageBlock);
-    blockHub.getAllowedBlocks = () =>
-      getAllowSelectedBlocks(defaultPageBlock.model);
-    blockHub.onDragStarted = () =>
-      defaultPageBlock.slots.selectedRectsUpdated.emit([]);
-  } else {
-    const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
-    assertExists(edgelessPageBlock);
-    blockHub.getAllowedBlocks = () =>
-      getAllowSelectedBlocks(edgelessPageBlock.model);
-  }
+      if (editor.mode === 'page') {
+        const defaultPageBlock = editor.querySelector('affine-default-page');
+        assertExists(defaultPageBlock);
+        state.rect = defaultPageBlock.innerRect;
+      } else {
+        const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
+        assertExists(edgelessPageBlock);
+        state.scale = edgelessPageBlock.surface.viewport.zoom;
+        const hoveringFrame = getHoveringFrame(point);
+        if (hoveringFrame) {
+          state.rect = Rect.fromDOM(hoveringFrame);
+        }
+      }
+      return state;
+    },
+  });
 
   return blockHub;
 };

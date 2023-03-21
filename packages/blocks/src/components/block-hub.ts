@@ -2,6 +2,7 @@ import type {
   BlockComponentElement,
   EditingState,
   IPoint,
+  Rect,
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
@@ -453,6 +454,12 @@ export class BlockHub extends NonShadowLitElement {
   @property()
   public onDragStarted: () => void;
 
+  @property()
+  public getHoveringFrameState: (point: Point) => {
+    rect: Rect | null;
+    scale: number;
+  };
+
   @state()
   private _expanded = false;
 
@@ -507,6 +514,12 @@ export class BlockHub extends NonShadowLitElement {
   constructor(options: {
     mouseRoot: HTMLElement;
     enableDatabase: boolean;
+    getAllowedBlocks: () => BaseBlockModel[];
+    getHoveringFrameState: (point: Point) => {
+      rect: Rect | null;
+      scale: number;
+    };
+    onDragStarted: () => void;
     onDropCallback: (
       e: DragEvent,
       lastModelState: EditingState | null,
@@ -516,11 +529,9 @@ export class BlockHub extends NonShadowLitElement {
     super();
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
-    this.getAllowedBlocks = () => {
-      console.warn('you may forget to set `getAllowedBlocks`');
-      return [];
-    };
-    this.onDragStarted = noop;
+    this.onDragStarted = options.onDragStarted;
+    this.getAllowedBlocks = options.getAllowedBlocks;
+    this.getHoveringFrameState = options.getHoveringFrameState;
     this._onDropCallback = options.onDropCallback;
   }
 
@@ -703,10 +714,17 @@ export class BlockHub extends NonShadowLitElement {
       y,
     };
 
-    const element = getClosestBlockElementByPoint(new Point(x, y));
+    const point = new Point(x, y);
+    const { rect: frameRect, scale } = this.getHoveringFrameState(
+      point.clone()
+    );
+    let element = null;
+    if (frameRect) {
+      element = getClosestBlockElementByPoint(point, frameRect, scale);
+    }
+
     let rect = null;
     let lastModelState = null;
-
     if (element) {
       rect = getRectByBlockElement(element);
       lastModelState = {

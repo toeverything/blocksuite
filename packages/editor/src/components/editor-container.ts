@@ -1,12 +1,12 @@
+import type {
+  MouseMode,
+  PageBlockModel,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  type MouseMode,
-  type PageBlockModel,
-} from '@blocksuite/blocks';
-import {
   NonShadowLitElement,
-  type SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
