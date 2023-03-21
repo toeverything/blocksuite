@@ -373,7 +373,12 @@ export class SlashMenu extends LitElement {
         : null,
     });
 
-    const btnItems = this._filterItems.map(
+    const filterItems = this.model.page.awarenessStore.getFlag(
+      'enable_database'
+    )
+      ? this._filterItems
+      : this._filterItems.filter(item => item.name !== 'Database');
+    const btnItems = filterItems.map(
       ({ name, icon, divider, disabled = false }, index) => html`<div
           class="slash-item-divider"
           ?hidden=${!divider || !!this._searchString.length}
