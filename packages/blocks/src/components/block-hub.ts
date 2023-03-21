@@ -9,7 +9,6 @@ import {
   getModelByBlockElement,
   getRectByBlockElement,
   NonShadowLitElement,
-  noop,
   Point,
 } from '@blocksuite/blocks/std';
 import {

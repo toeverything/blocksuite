@@ -613,7 +613,7 @@ export function isEdgelessBlockChild({ classList }: Element) {
  */
 export function getClosestBlockElementByPoint(
   point: Point,
-  rect: Rect | null,
+  rect: Rect | null = null,
   scale = 1
 ): Element | null {
   const { y } = point;
