@@ -509,7 +509,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       }
       page.captureSync();
 
-      let shouldMove = true;
+      let shouldInsert = true;
       if (matchFlavours(model, ['affine:database'])) {
         if ((model as DatabaseBlockModel).children.length === 0) {
           const bounds = element
@@ -519,8 +519,8 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
             bounds &&
             Rect.fromDOMRect(bounds).isPointIn(new Point(point.x, point.y))
           ) {
-            shouldMove = false;
-            page.moveBlocksToParent(
+            shouldInsert = false;
+            page.moveBlocks(
               blocks.map(b => b.model),
               model
             );
@@ -528,7 +528,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         }
       }
 
-      if (shouldMove) {
+      if (shouldInsert) {
         const distanceToTop = Math.abs(rect.top - point.y);
         const distanceToBottom = Math.abs(rect.bottom - point.y);
         const parent = page.getParent(model);
