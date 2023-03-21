@@ -9,7 +9,6 @@ import type { Page } from '@blocksuite/store';
 import {
   blockRangeToNativeRange,
   focusBlockByModel,
-  getVirgoByModel,
   hotkey,
   isMultiBlockRange,
   isPageMode,
