@@ -253,6 +253,8 @@ export class VEditor<
       })
     );
 
+    this.rootElement.focus();
+
     this.slots.updated.emit();
   };
 
@@ -944,8 +946,6 @@ export class VEditor<
       assertExists(this._rootElement);
 
       this._renderDeltas();
-
-      this.rootElement.focus();
     });
   };
 

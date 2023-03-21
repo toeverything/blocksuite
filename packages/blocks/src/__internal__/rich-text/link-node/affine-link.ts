@@ -6,7 +6,11 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
+import {
+  getModelByElement,
+  NonShadowLitElement,
+  resetNativeSelection,
+} from '../../utils/index.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
 function affineLinkStyles(
@@ -99,6 +103,8 @@ export class AffineLink extends NonShadowLitElement {
       this._isHovering = true;
     }
 
+    resetNativeSelection(null);
+
     const model = getModelByElement(this);
     if (model.page.readonly) return;
 
@@ -174,6 +180,11 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
+        // workaround to prevent virgo auto focus
+        vEditor.setReadonly(true);
+        setTimeout(() => {
+          vEditor.setReadonly(false);
+        });
       } else {
         page.captureSync();
         vEditor.formatText(
@@ -183,6 +194,11 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
+        // workaround to prevent virgo auto focus
+        vEditor.setReadonly(true);
+        setTimeout(() => {
+          vEditor.setReadonly(false);
+        });
       }
     } else {
       page.captureSync();
@@ -198,6 +214,11 @@ export class AffineLink extends NonShadowLitElement {
           mode: 'replace',
         }
       );
+      // workaround to prevent virgo auto focus
+      vEditor.setReadonly(true);
+      setTimeout(() => {
+        vEditor.setReadonly(false);
+      });
     }
   }
 

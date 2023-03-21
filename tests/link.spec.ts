@@ -60,6 +60,10 @@ test('basic link', async ({ page }) => {
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopoverLocator).toBeVisible();
+  // workaround to make tab key work as expected
+  await editLinkPopoverLocator.click({
+    position: { x: 5, y: 5 },
+  });
   await page.keyboard.press('Tab');
   await type(page, text2);
   await page.keyboard.press('Tab');
