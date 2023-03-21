@@ -1,3 +1,4 @@
+import { onModelTextUpdated } from '@blocksuite/blocks';
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { VEditor, VText } from '@blocksuite/virgo';
@@ -180,10 +181,10 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-        // workaround to prevent virgo auto focus
-        vEditor.setReadonly(true);
-        setTimeout(() => {
-          vEditor.setReadonly(false);
+
+        // prevent virgo auto focus
+        onModelTextUpdated(model, richText => {
+          richText.vEditor?.rootElement.blur();
         });
       } else {
         page.captureSync();
@@ -194,10 +195,10 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-        // workaround to prevent virgo auto focus
-        vEditor.setReadonly(true);
-        setTimeout(() => {
-          vEditor.setReadonly(false);
+
+        // prevent virgo auto focus
+        onModelTextUpdated(model, richText => {
+          richText.vEditor?.rootElement.blur();
         });
       }
     } else {
@@ -214,10 +215,10 @@ export class AffineLink extends NonShadowLitElement {
           mode: 'replace',
         }
       );
-      // workaround to prevent virgo auto focus
-      vEditor.setReadonly(true);
-      setTimeout(() => {
-        vEditor.setReadonly(false);
+
+      // prevent virgo auto focus
+      onModelTextUpdated(model, richText => {
+        richText.vEditor?.rootElement.blur();
       });
     }
   }
