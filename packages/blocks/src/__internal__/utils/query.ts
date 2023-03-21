@@ -622,7 +622,7 @@ export function getClosestBlockElementByPoint(
   }
 
   // find block element
-  element = _findBlockElement(document.elementsFromPoint(point.x, point.y));
+  element = findBlockElement(document.elementsFromPoint(point.x, point.y));
 
   // Horizontal direction: for nested structures
   if (element) {
@@ -663,7 +663,7 @@ export function getClosestBlockElementByPoint(
     n *= -1;
 
     // find block element
-    element = _findBlockElement(document.elementsFromPoint(point.x, point.y));
+    element = findBlockElement(document.elementsFromPoint(point.x, point.y));
 
     if (element) {
       bounds = getRectByBlockElement(element);
@@ -785,7 +785,7 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function _findBlockElement(elements: Element[]) {
+function findBlockElement(elements: Element[]) {
   const len = elements.length;
   let element = null;
   let i = 0;
