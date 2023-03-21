@@ -165,11 +165,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   private _wrap = false;
 
-  get highlight() {
-    const service = this.host.getService(this.model.flavour);
-    return service.hljs.default.highlight;
-  }
-
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
