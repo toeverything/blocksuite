@@ -14,6 +14,9 @@ export const enum SelectMode {
   Single = 'single',
 }
 
+/** select input max length */
+const INPUT_MAX_LENGTH = 10;
+
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement<string[]> {
   static styles = css`
@@ -159,8 +162,11 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   };
 
   private _onAddSelection = (selectedValue: string[]) => {
-    const value = this._inputValue.trim();
+    let value = this._inputValue.trim();
     if (value === '') return;
+    if (value.length > INPUT_MAX_LENGTH) {
+      value = value.slice(0, INPUT_MAX_LENGTH);
+    }
 
     this.rowHost.updateColumnProperty(property => {
       const selection = property.selection as string[];
@@ -209,6 +215,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
           <input
             class="select-input"
             placeholder="Search for an option..."
+            maxlength=${INPUT_MAX_LENGTH}
             @input=${this._onSelectSearchInput}
             @keydown=${(event: KeyboardEvent) =>
               this._onSelectOrAdd(event, selectedValue)}
