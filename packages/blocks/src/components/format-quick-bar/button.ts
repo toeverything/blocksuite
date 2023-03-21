@@ -13,6 +13,7 @@ export class FormatBarButton extends IconButton {
       height: var(--button-height);
       fill: var(--affine-icon-color);
       white-space: nowrap;
+      user-select: none;
     }
   `;
 

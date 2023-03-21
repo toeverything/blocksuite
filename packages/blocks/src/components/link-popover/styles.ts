@@ -20,6 +20,7 @@ export const editLinkStyle = css`
       'link-area btn';
     justify-items: center;
     align-items: center;
+    user-select: none;
   }
 
   .affine-edit-text-area {

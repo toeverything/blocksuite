@@ -85,6 +85,7 @@ export class DragHandle extends LitElement {
     :host {
       overflow: hidden;
       width: ${DRAG_HANDLE_WIDTH + 8}px;
+      user-select: none;
     }
 
     .affine-drag-handle-line {
