@@ -717,6 +717,8 @@ export class VEditor<
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    this.rootElement.focus();
+
     this.slots.rangeUpdated.emit(newRange);
   };
 
