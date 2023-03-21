@@ -1,13 +1,12 @@
+import type {
+  MouseMode,
+  SelectionEvent,
+  TopLevelBlockModel,
+} from '@blocksuite/blocks/std';
+import { initMouseEventHandlers, noop } from '@blocksuite/blocks/std';
 import type { PhasorElement } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
-import {
-  initMouseEventHandlers,
-  type MouseMode,
-  noop,
-  type SelectionEvent,
-  type TopLevelBlockModel,
-} from '../../__internal__/index.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
@@ -199,8 +198,18 @@ export class EdgelessSelectionManager {
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
-    const hovered =
-      surface.pickTop(modelX, modelY) ?? pickTopBlock(frames, modelX, modelY);
+    let hovered: Selectable | null = surface.pickTop(modelX, modelY);
+
+    // Phasor Element
+    if (hovered) {
+      if (this.mouseMode.type === 'default') {
+        this._container.components.dragHandle?.hide();
+      }
+    } else {
+      // Frame Element
+      hovered = pickTopBlock(frames, modelX, modelY);
+    }
+
     if (!hovered) {
       return null;
     }

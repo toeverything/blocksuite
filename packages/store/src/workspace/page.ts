@@ -71,6 +71,11 @@ export class Page extends Space<FlatBlockMap> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    subpageUpdated: new Slot<{
+      type: 'add' | 'delete';
+      id: string;
+      subpageIds: string[];
+    }>(),
   };
 
   constructor(
@@ -442,6 +447,12 @@ export class Page extends Space<FlatBlockMap> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
+
+      if (flavour === 'affine:page') {
+        this.workspace.setPageMeta(this.id, {
+          title: blockProps.title?.toString(),
+        });
+      }
     });
 
     this.slots.blockUpdated.emit({
@@ -464,8 +475,9 @@ export class Page extends Space<FlatBlockMap> {
   @debug('CRUD')
   moveBlocks(
     blocks: BaseBlockModel[],
-    targetModel: BaseBlockModel,
-    top = true
+    newParent: BaseBlockModel,
+    newSibling: BaseBlockModel | null = null,
+    insertBeforeSibling = true
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -473,38 +485,39 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     const firstBlock = blocks[0];
-    const currentParentModel = this.getParent(firstBlock);
+    const currentParent = this.getParent(firstBlock);
 
     // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParentModel)) {
+    if (blocks.some(block => this.getParent(block) !== currentParent)) {
       console.error('the blocks must have the same parent');
     }
 
-    const nextParentModel = this.getParent(targetModel);
-    if (currentParentModel === null || nextParentModel === null) {
-      throw new Error('cannot find parent model');
+    if (currentParent === null || newParent === null) {
+      throw new Error("Can't find parent model");
     }
 
     this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
+      const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
       const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
       yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
+      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
-      const nextIdx = yChildrenB
-        .toArray()
-        .findIndex(id => id === targetModel.id);
+
+      let nextIdx = 0;
+      if (newSibling) {
+        nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
+      }
 
       const ids = blocks.map(block => block.id);
-      if (top) {
+      if (insertBeforeSibling) {
         yChildrenB.insert(nextIdx, ids);
       } else {
         yChildrenB.insert(nextIdx + 1, ids);
       }
     });
-    currentParentModel.propsUpdated.emit();
-    nextParentModel.propsUpdated.emit();
+    currentParent.propsUpdated.emit();
+    newParent.propsUpdated.emit();
   }
 
   @debug('CRUD')
@@ -570,8 +583,7 @@ export class Page extends Space<FlatBlockMap> {
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
-      return ids;
+      return this.addBlocksByFlavour(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
@@ -810,8 +822,9 @@ export class Page extends Space<FlatBlockMap> {
             this._handleYBlockAdd(visited, id);
           }
 
-          const child = this._blockMap.get(id) as BaseBlockModel;
-          model.children[index as number] = child;
+          model.children[index as number] = this._blockMap.get(
+            id
+          ) as BaseBlockModel;
         }
       });
     }

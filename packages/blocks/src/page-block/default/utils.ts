@@ -1,6 +1,7 @@
 import {
   type BlockComponentElement,
   doesInSamePath,
+  type EditingState,
   getBlockById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
@@ -21,12 +22,6 @@ import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-
-export interface EditingState {
-  element: BlockComponentElement;
-  model: BaseBlockModel;
-  rect: DOMRect;
-}
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -501,7 +496,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(p, blocks, { rect, model }): void {
+    onDropCallback(p, blocks, editingState): void {
+      if (!editingState) return;
+      const { rect, model } = editingState;
       const page = defaultPageBlock.page;
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
@@ -510,8 +507,11 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 
       const distanceToTop = Math.abs(rect.top - p.y);
       const distanceToBottom = Math.abs(rect.bottom - p.y);
+      const parent = page.getParent(model);
+      assertExists(parent);
       page.moveBlocks(
         blocks.map(b => b.model),
+        parent,
         model,
         distanceToTop < distanceToBottom
       );

@@ -14,11 +14,6 @@ import type { RichText } from '../rich-text/rich-text.js';
 import type { Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
 
-const AFFINE_DATABASE = 'AFFINE-DATABASE';
-const AFFINE_DEFAULT_PAGE = 'AFFINE-DEFAULT-PAGE';
-const AFFINE_EMBED = 'AFFINE-EMBED';
-const AFFINE_FRAME = 'AFFINE-FRAME';
-const AFFINE_IMAGE = 'AFFINE-IMAGE';
 const ATTR_SELECTOR = `[${ATTR}]`;
 
 // margin-top: calc(var(--affine-paragraph-space) + 24px);
@@ -526,10 +521,24 @@ export function hasBlockId(element: Element) {
 }
 
 /**
+ * Returns `true` if element is default page.
+ */
+export function isDefaultPage({ tagName }: Element) {
+  return tagName === 'AFFINE-DEFAULT-PAGE';
+}
+
+/**
+ * Returns `true` if element is edgeless page.
+ */
+export function isEdgelessPage({ tagName }: Element) {
+  return tagName === 'AFFINE-EDGELESS-PAGE';
+}
+
+/**
  * Returns `true` if element is page or frame.
  */
-export function isPageOrFrame({ tagName }: Element) {
-  return tagName === AFFINE_DEFAULT_PAGE || tagName === AFFINE_FRAME;
+export function isPageOrFrame(element: Element) {
+  return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
 }
 
 /**
@@ -543,21 +552,35 @@ export function isBlock(element: Element) {
  * Returns `true` if element is image.
  */
 export function isImage({ tagName }: Element) {
-  return tagName === AFFINE_IMAGE;
+  return tagName === 'AFFINE-IMAGE';
+}
+
+/**
+ * Returns `true` if element is embed.
+ */
+function isFrame({ tagName }: Element) {
+  return tagName === 'AFFINE-FRAME';
 }
 
 /**
  * Returns `true` if element is embed.
  */
 function isEmbed({ tagName }: Element) {
-  return tagName === AFFINE_EMBED;
+  return tagName === 'AFFINE-EMBED';
 }
 
 /**
  * Returns `true` if element is codeblock.
  */
 function isDatabase({ tagName }: Element) {
-  return tagName === AFFINE_DATABASE;
+  return tagName === 'AFFINE-DATABASE';
+}
+
+/**
+ * Returns `true` if element is edgeless block child.
+ */
+export function isEdgelessBlockChild({ classList }: Element) {
+  return classList.contains('affine-edgeless-block-child');
 }
 
 /**
@@ -594,12 +617,12 @@ export function getClosestBlockElementByPoint(
   if (rect) {
     point.x = Math.min(
       Math.max(point.x, rect.left) + PADDING_LEFT - 1,
-      rect.right - 1
+      rect.right - PADDING_LEFT - 1
     );
   }
 
   // find block element
-  element = find(document.elementsFromPoint(point.x, point.y));
+  element = findBlockElement(document.elementsFromPoint(point.x, point.y));
 
   // Horizontal direction: for nested structures
   if (element) {
@@ -640,7 +663,7 @@ export function getClosestBlockElementByPoint(
     n *= -1;
 
     // find block element
-    element = find(document.elementsFromPoint(point.x, point.y));
+    element = findBlockElement(document.elementsFromPoint(point.x, point.y));
 
     if (element) {
       bounds = getRectByBlockElement(element);
@@ -762,7 +785,7 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function find(elements: Element[]) {
+function findBlockElement(elements: Element[]) {
   const len = elements.length;
   let element = null;
   let i = 0;
@@ -794,4 +817,14 @@ export function queryCurrentMode(): 'light' | 'dark' {
   } else {
     return 'light';
   }
+}
+
+/**
+ * Get hovering frame with given a point in edgeless mode.
+ */
+export function getHoveringFrame(point: Point) {
+  return (
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
+    null
+  );
 }

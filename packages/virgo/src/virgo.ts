@@ -284,6 +284,12 @@ export class VEditor<
       throw new Error('yText must be attached to a Y.Doc');
     }
 
+    if (yText.toString().includes('\r')) {
+      throw new Error(
+        'yText must not contain \r because it will break the range synclization'
+      );
+    }
+
     this._yText = yText;
 
     this.slots = {
@@ -944,6 +950,12 @@ export class VEditor<
   }
 
   private _onYTextChange = () => {
+    if (this.yText.toString().includes('\r')) {
+      throw new Error(
+        'yText must not contain \r because it will break the range synclization'
+      );
+    }
+
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
