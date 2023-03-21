@@ -218,6 +218,38 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     ],
   },
   {
+    name: 'Database',
+    items: [
+      {
+        name: 'Table View',
+        icon: DatabaseTableViewIcon,
+        divider: true,
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          const id = page.addBlock(
+            'affine:database',
+            {},
+            page.getParent(model),
+            index
+          );
+          const service = await getServiceOrRegister('affine:database');
+          service.initDatabaseBlock(page, model, id, false);
+        },
+      },
+      {
+        name: 'Kanban View',
+        // TODO: change icon
+        icon: DatabaseTableViewIcon,
+        disabled: true,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        action: ({ model }) => {},
+      },
+    ],
+  },
+  {
     name: 'Actions',
     items: [
       {
@@ -273,38 +305,6 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         action: ({ page, model }) => {
           page.deleteBlock(model);
         },
-      },
-    ],
-  },
-  {
-    name: 'Database',
-    items: [
-      {
-        name: 'Table View',
-        icon: DatabaseTableViewIcon,
-        divider: true,
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
-
-          const id = page.addBlock(
-            'affine:database',
-            {},
-            page.getParent(model),
-            index
-          );
-          const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(page, model, id, false);
-        },
-      },
-      {
-        name: 'Kanban View',
-        // TODO: change icon
-        icon: DatabaseTableViewIcon,
-        disabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        action: ({ model }) => {},
       },
     ],
   },
