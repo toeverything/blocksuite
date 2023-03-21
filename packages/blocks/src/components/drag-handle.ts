@@ -1,5 +1,6 @@
 import {
   type BlockComponentElement,
+  type EditingState,
   getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
   getRectByBlockElement,
@@ -18,8 +19,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import type { EditingState } from '../page-block/default/utils.js';
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
@@ -40,7 +39,6 @@ export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
       position: fixed;
-      height: 3px;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
@@ -58,6 +56,9 @@ export class DragIndicator extends LitElement {
   @property()
   cursorPosition: IPoint | null = null;
 
+  @property()
+  scale = 1;
+
   override render() {
     if (!this.targetRect || !this.cursorPosition) {
       return null;
@@ -67,7 +68,8 @@ export class DragIndicator extends LitElement {
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
     const style = styleMap({
-      width: `${rect.width + 10}px`,
+      width: `${rect.width}px`,
+      height: `${3 * this.scale}px`,
       transform: `translate(${rect.left}px, ${offsetY}px)`,
     });
     return html` <div class="affine-drag-indicator" style=${style}></div> `;
@@ -102,7 +104,7 @@ export class DragHandle extends LitElement {
       justify-content: center;
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
-      background-color: var(--affine-page-background);
+      /* background-color: var(--affine-page-background); */
       pointer-events: auto;
     }
 
@@ -117,7 +119,7 @@ export class DragHandle extends LitElement {
     onDropCallback: (
       point: IPoint,
       dragged: BlockComponentElement[],
-      lastModelState: EditingState
+      lastModelState: EditingState | null
     ) => void;
     setSelectedBlocks: (
       selectedBlocks: EditingState | BlockComponentElement[] | null
@@ -157,7 +159,7 @@ export class DragHandle extends LitElement {
   public onDropCallback: (
     point: IPoint,
     draggingBlockElements: BlockComponentElement[],
-    lastModelState: EditingState
+    lastModelState: EditingState | null
   ) => void;
 
   @property()
@@ -180,6 +182,7 @@ export class DragHandle extends LitElement {
 
   private _draggingElements: BlockComponentElement[] | null = null;
 
+  private _scale = 1;
   private _currentClientX = 0;
   private _currentClientY = 0;
 
@@ -227,7 +230,7 @@ export class DragHandle extends LitElement {
       }
       const rect = modelState.rect;
       this.style.display = 'block';
-      this.style.height = `${rect.height}px`;
+      this.style.height = `${rect.height / this._scale}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = '0';
       this.style.top = '0';
@@ -236,26 +239,23 @@ export class DragHandle extends LitElement {
       const xOffset =
         rect.left -
         containerRect.left -
-        DRAG_HANDLE_WIDTH -
-        DRAG_HANDLE_OFFSET_LEFT;
+        (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
 
       const yOffset = rect.top - containerRect.top;
 
-      this.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+      this.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(${this._scale})`;
       this.style.opacity = `${(
         1 -
         (event.raw.clientX - rect.left) / rect.width
       ).toFixed(2)}`;
 
-      const handleYOffset = Math.max(
-        0,
-        Math.min(
-          event.raw.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
-          rect.height - DRAG_HANDLE_HEIGHT
-        )
+      const top = this._calcDragHandleY(
+        event.raw.clientY,
+        rect.top,
+        rect.height,
+        this._scale
       );
-
-      this._dragHandle.style.transform = `translateY(${handleYOffset}px)`;
+      this._dragHandle.style.transform = `translateY(${top}px)`;
 
       if (this._handleAnchorDisposable) {
         this._handleAnchorDisposable.dispose();
@@ -295,6 +295,13 @@ export class DragHandle extends LitElement {
 
   setPointerEvents(value: 'auto' | 'none') {
     this.style.pointerEvents = value;
+  }
+
+  setScale(value = 1) {
+    this._scale = value;
+    if (this._indicator) {
+      this._indicator.scale = value;
+    }
   }
 
   firstUpdated() {
@@ -361,18 +368,34 @@ export class DragHandle extends LitElement {
       return;
     }
     const { rect } = this._handleAnchorState;
-    const top = Math.max(
-      0,
-      Math.min(
-        e.clientY - rect.top - DRAG_HANDLE_HEIGHT / 2,
-        rect.height - DRAG_HANDLE_HEIGHT - 6
-      )
+    const top = this._calcDragHandleY(
+      e.clientY,
+      rect.top,
+      rect.height,
+      this._scale
     );
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
 
     e.stopPropagation();
+  }
+
+  private _calcDragHandleY(
+    clientY: number,
+    yOffset: number,
+    height: number,
+    scale: number
+  ) {
+    return (
+      Math.max(
+        0,
+        Math.min(
+          clientY - yOffset - (DRAG_HANDLE_HEIGHT * scale) / 2,
+          height - DRAG_HANDLE_HEIGHT
+        )
+      ) / scale
+    );
   }
 
   // fixme: handle multiple blocks case
@@ -481,29 +504,37 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    const element = this._getClosestBlockElement(new Point(x, y));
-
-    if (element) {
-      const rect = getRectByBlockElement(element);
-      this._lastDroppingTarget = {
-        rect,
-        element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
-      };
-      this._indicator.targetRect = rect;
-    }
-
     this._indicator.cursorPosition = {
       x,
       y,
     };
+
+    const element = this._getClosestBlockElement(new Point(x, y));
+    let rect = null;
+    let lastModelState = null;
+
+    if (element) {
+      rect = getRectByBlockElement(element);
+      lastModelState = {
+        rect,
+        element: element as BlockComponentElement,
+        model: getModelByBlockElement(element),
+      };
+    }
+
+    this._lastDroppingTarget = lastModelState;
+    this._indicator.targetRect = rect;
   };
 
   private _onDragEnd = (e: DragEvent) => {
-    if (!this._lastDroppingTarget) {
-      // may drop to the same block position
+    const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
+
+    // `Esc`
+    if (dropEffect === 'none') {
+      this.hide();
       return;
     }
+
     assertExists(this._draggingElements);
 
     this._clickedBlock = null;
@@ -526,6 +557,10 @@ export class DragHandle extends LitElement {
   render() {
     return html`
       <style>
+        :host {
+          transform-origin: 0 0;
+        }
+
         :host(:hover) > .affine-drag-handle-line {
           opacity: 1;
         }

@@ -1,3 +1,4 @@
+import type { EditingState } from '@blocksuite/blocks/std';
 import {
   BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
@@ -35,7 +36,6 @@ import {
   Point,
 } from '../__internal__/index.js';
 import type { DefaultSelectionSlots } from '../index.js';
-import type { EditingState } from '../page-block/default/utils.js';
 import type { DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 

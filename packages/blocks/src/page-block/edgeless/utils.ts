@@ -1,3 +1,18 @@
+import type {
+  BlockComponentElement,
+  EditingState,
+  MouseMode,
+  Point,
+  TopLevelBlockModel,
+} from '@blocksuite/blocks/std';
+import {
+  doesInSamePath,
+  getClosestBlockElementByPoint,
+  getHoveringFrame,
+  hotkey,
+  HOTKEY_SCOPE,
+  Rect,
+} from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
@@ -6,19 +21,24 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/store';
 import type { KeyHandler } from 'hotkeys-js';
 
-import type {
-  MouseMode,
-  TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import { hotkey, HOTKEY_SCOPE } from '../../__internal__/index.js';
 import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
-import type { EdgelessContainer } from './edgeless-page-block.js';
+import { DragHandle } from '../../components/index.js';
+import type {
+  EdgelessContainer,
+  EdgelessPageBlockComponent,
+} from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export const FRAME_MIN_WIDTH = 200;
 export const FRAME_MIN_HEIGHT = 20;
+
+export const DEFAULT_FRAME_WIDTH = 448;
+export const DEFAULT_FRAME_HEIGHT = 72;
+export const DEFAULT_FRAME_OFFSET_X = 30;
+export const DEFAULT_FRAME_OFFSET_Y = 40;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -150,5 +170,59 @@ export function bindEdgelessHotkey(
   hotkey.addListener(key, listener, {
     scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
     ...options,
+  });
+}
+
+export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
+  return new DragHandle({
+    // Drag handle should be at the same level with EditorContainer
+    container: pageBlock.mouseRoot as HTMLElement,
+    onDropCallback(point, blocks, editingState) {
+      const page = pageBlock.page;
+      if (editingState) {
+        page.captureSync();
+        const { rect, model } = editingState;
+        if (
+          blocks.length === 1 &&
+          doesInSamePath(page, model, blocks[0].model)
+        ) {
+          return;
+        }
+        const distanceToTop = Math.abs(rect.top - point.y);
+        const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const parent = page.getParent(model);
+        assertExists(parent);
+        page.moveBlocks(
+          blocks.map(b => b.model),
+          parent,
+          model,
+          distanceToTop < distanceToBottom
+        );
+      } else {
+        // blank area
+        page.captureSync();
+        pageBlock.moveBlocksToNewFrame(
+          blocks.map(b => b.model),
+          point
+        );
+      }
+    },
+    setSelectedBlocks(
+      selectedBlocks: EditingState | BlockComponentElement[] | null
+    ) {
+      return;
+    },
+    getSelectedBlocks() {
+      return [];
+    },
+    getFocusedBlock() {
+      return null;
+    },
+    getClosestBlockElement(point: Point) {
+      if (pageBlock.mouseMode.type !== 'default') return null;
+      const hoveringFrame = getHoveringFrame(point);
+      if (!hoveringFrame) return null;
+      return getClosestBlockElementByPoint(point, Rect.fromDOM(hoveringFrame));
+    },
   });
 }

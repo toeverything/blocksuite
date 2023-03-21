@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  focusRichText,
   initDatabaseColumn,
   initDatabaseRow,
   initEmptyDatabaseState,
@@ -219,4 +220,16 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   expect(await selectCell.count()).toBe(2);
   expect(await selectCell.nth(0).innerText()).toBe('1');
   expect(await selectCell.nth(1).innerText()).toBe('2');
+});
+
+test('should hide placeholder of paragraph in database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
+
+  await focusRichText(page);
+  const tipsPlaceholder = page.locator('.tips-placeholder');
+  expect(await tipsPlaceholder.count()).toEqual(0);
 });

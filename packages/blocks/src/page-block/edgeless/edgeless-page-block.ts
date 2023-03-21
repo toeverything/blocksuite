@@ -2,28 +2,37 @@
 import './toolbar/edgeless-toolbar.js';
 import './components/edgeless-selected-rect.js';
 
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import { SurfaceManager } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-
-import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   type BlockHost,
   BrushSize,
   hotkey,
   HOTKEY_SCOPE,
+  type IPoint,
   resetNativeSelection,
   type TopLevelBlockModel,
-} from '../../__internal__/index.js';
+} from '@blocksuite/blocks/std';
+import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+  SurfaceManager,
+} from '@blocksuite/phasor';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  Slot,
+} from '@blocksuite/store';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type {
+  DragHandle,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
@@ -45,7 +54,16 @@ import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { bindEdgelessHotkey, getCursorMode, isTopLevelBlock } from './utils.js';
+import {
+  bindEdgelessHotkey,
+  createDragHandle,
+  DEFAULT_FRAME_HEIGHT,
+  DEFAULT_FRAME_OFFSET_X,
+  DEFAULT_FRAME_OFFSET_Y,
+  DEFAULT_FRAME_WIDTH,
+  getCursorMode,
+  isTopLevelBlock,
+} from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -95,6 +113,16 @@ export class EdgelessPageBlockComponent
   `;
 
   flavour = 'edgeless' as const;
+
+  /**
+   * Shared components
+   */
+  components = {
+    dragHandle: <DragHandle | null>null,
+  };
+
+  @property()
+  mouseRoot!: HTMLElement;
 
   @property()
   showGrid = false;
@@ -261,6 +289,36 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+    };
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.slots.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
   private _initSlotEffects() {
     // TODO: listen to new children
     // this.model.children.forEach(frame => {
@@ -269,10 +327,12 @@ export class EdgelessPageBlockComponent
     const { _disposables, slots } = this;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this.style.setProperty(
-          '--affine-zoom',
-          `${this.surface.viewport.zoom}`
-        );
+        const prevZoom = this.style.getPropertyValue('--affine-zoom');
+        const newZoom = this.surface.viewport.zoom;
+        if (!prevZoom || +prevZoom !== newZoom) {
+          this.style.setProperty('--affine-zoom', `${newZoom}`);
+          this.components.dragHandle?.setScale(newZoom);
+        }
         this.requestUpdate();
       })
     );
@@ -286,6 +346,9 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.mouseModeUpdated.on(mouseMode => {
+        if (mouseMode.type !== 'default') {
+          this.components.dragHandle?.hide();
+        }
         this.mouseMode = mouseMode;
       })
     );
@@ -326,6 +389,38 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  /** Moves selected blocks into a new frame at the given point. */
+  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: IPoint) {
+    if (!this.page.root) return;
+    this.page.captureSync();
+    const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    const frameId = this.page.addBlock(
+      'affine:frame',
+      {
+        xywh: serializeXYWH(
+          x - DEFAULT_FRAME_OFFSET_X,
+          y - DEFAULT_FRAME_OFFSET_Y,
+          DEFAULT_FRAME_WIDTH,
+          DEFAULT_FRAME_HEIGHT
+        ),
+      },
+      this.page.root.id
+    );
+    const frame = this.page.getBlockById(frameId) as FrameBlockModel;
+    this.page.moveBlocks(blocks, frame, null);
+
+    requestAnimationFrame(() => {
+      const element = this.page.root?.children.find(b => b.id === frameId);
+      if (element) {
+        const selectionState = {
+          selected: [element],
+          active: true,
+        } as EdgelessSelectionState;
+        this.slots.selectionUpdated.emit(selectionState);
+      }
+    });
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
@@ -339,7 +434,8 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     this._initSlotEffects();
-    this.clipboard.initEvent(this.page);
+    this._initDragHandle();
+    this.clipboard.init(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
@@ -361,9 +457,10 @@ export class EdgelessPageBlockComponent
   }
 
   disconnectedCallback() {
-    this.clipboard.disposeEvent();
+    this.clipboard.dispose();
     super.disconnectedCallback();
     this._disposables.dispose();
+    this.components.dragHandle?.remove();
   }
 
   render() {

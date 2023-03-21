@@ -2,6 +2,7 @@
 import {
   asyncFocusRichText,
   type BlockHost,
+  type EditingState,
   hotkey,
   Rect,
   type SelectionPosition,
@@ -19,7 +20,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { pageBlockClipboard } from '../../__internal__/clipboard/index.js';
+import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -34,11 +35,7 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
-import {
-  createDragHandle,
-  type EditingState,
-  getAllowSelectedBlocks,
-} from './utils.js';
+import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
@@ -123,7 +120,7 @@ export class DefaultPageBlockComponent
 
   flavour = 'affine:page' as const;
 
-  clipboard = new pageBlockClipboard();
+  clipboard = new PageClipboard();
 
   selection!: DefaultSelectionManager;
 
@@ -485,14 +482,14 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    this.clipboard.initEvent(this.page);
+    this.clipboard.init(this.page);
 
     this._initDragHandle();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.disposeEvent();
+    this.clipboard.dispose();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
 
