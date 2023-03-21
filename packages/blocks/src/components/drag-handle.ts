@@ -1,18 +1,21 @@
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
+import type {
+  BlockComponentElement,
+  EditingState,
+  IPoint,
+  SelectionEvent,
+} from '@blocksuite/blocks/std';
 import {
-  type BlockComponentElement,
-  type EditingState,
   getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
   Rect,
-  type SelectionEvent,
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
 import {
   assertExists,
-  type Disposable,
   DisposableGroup,
   isFirefox,
   matchFlavours,
