@@ -1,8 +1,6 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import type {
   BlockComponentElement,
   EditingState,
-  IPoint,
   SelectionEvent,
 } from '@blocksuite/blocks/std';
 import {
@@ -10,7 +8,6 @@ import {
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-  Rect,
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
@@ -129,6 +126,7 @@ export class DragHandle extends LitElement {
       overflow: hidden;
       width: ${DRAG_HANDLE_WIDTH + 8}px;
       transform-origin: 0 0;
+      pointer-events: none;
       user-select: none;
     }
 
@@ -406,9 +404,14 @@ export class DragHandle extends LitElement {
       this._currentClientY = e.clientY;
     }
 
+    if (this._stopPropagation) {
+      e.stopPropagation();
+    }
+
     if (!this._handleAnchorState) {
       return;
     }
+
     const { rect } = this._handleAnchorState;
     const top = this._calcDragHandleY(
       e.clientY,
@@ -419,10 +422,6 @@ export class DragHandle extends LitElement {
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
-
-    if (this._stopPropagation) {
-      e.stopPropagation();
-    }
   }
 
   private _calcDragHandleY(
@@ -519,18 +518,15 @@ export class DragHandle extends LitElement {
     e.stopPropagation();
   };
 
-  private _onMouseUp = (_: MouseEvent) => {
-    this._removeDragPreview();
-  };
-
   private _onMouseDown = (e: MouseEvent) => {
     this._stopPropagation = true;
     e.stopPropagation();
   };
 
   private _onMouseUp = (e: MouseEvent) => {
-    this._stopPropagation = false;
     e.stopPropagation();
+    this._stopPropagation = false;
+    this._removeDragPreview();
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
@@ -603,24 +599,35 @@ export class DragHandle extends LitElement {
     let lastModelState = null;
 
     if (element) {
-      rect = getRectByBlockElement(element);
       const model = getModelByBlockElement(element);
+      rect = getRectByBlockElement(element);
+
+      if (
+        matchFlavours(model, ['affine:database']) &&
+        (model as BaseBlockModel).empty()
+      ) {
+        const bounds = element
+          .querySelector('.affine-database-block')
+          ?.getBoundingClientRect();
+        if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
+          const headerBounds = element
+            .querySelector('.affine-database-block-header')
+            ?.getBoundingClientRect();
+          assertExists(headerBounds);
+          rect = new DOMRect(
+            headerBounds.left,
+            headerBounds.bottom + 1,
+            rect.width,
+            1
+          );
+        }
+      }
+
       lastModelState = {
         rect,
         model,
         element: element as BlockComponentElement,
       };
-      if (
-        matchFlavours(model, ['affine:database']) &&
-        (model as DatabaseBlockModel).children.length === 0
-      ) {
-        const bounds = element
-          .querySelector('.affine-database-block-footer')
-          ?.getBoundingClientRect();
-        if (bounds && Rect.fromDOMRect(bounds).isPointIn(point)) {
-          rect = new DOMRect(bounds.x, bounds.y, rect.width, 1);
-        }
-      }
     }
 
     this._lastDroppingTarget = lastModelState;
@@ -629,6 +636,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragEnd = (e: DragEvent) => {
+    this._stopPropagation = false;
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
     this._removeDragPreview();
@@ -652,7 +660,6 @@ export class DragHandle extends LitElement {
       this._lastDroppingTarget
     );
 
-    this._stopPropagation = false;
     this.hide();
   };
 

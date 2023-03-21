@@ -11,6 +11,7 @@ import {
   getHoveringFrame,
   Rect,
 } from '@blocksuite/blocks/std';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
@@ -19,7 +20,7 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
@@ -170,25 +171,43 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       const page = pageBlock.page;
       if (editingState) {
         page.captureSync();
-        const { rect, model } = editingState;
+        const { rect, model, element } = editingState;
         if (
           blocks.length === 1 &&
           doesInSamePath(page, model, blocks[0].model)
         ) {
           return;
         }
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
-        const parent = page.getParent(model);
-        assertExists(parent);
-        page.moveBlocks(
-          blocks.map(b => b.model),
-          parent,
-          model,
-          distanceToTop < distanceToBottom
-        );
 
-        pageBlock.setSelectionByBlockId(parent.id, true);
+        let shouldInsert = true;
+        if (matchFlavours(model, ['affine:database'])) {
+          if ((model as BaseBlockModel).empty()) {
+            const bounds = element
+              .querySelector('.affine-database-block')
+              ?.getBoundingClientRect();
+            if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
+              shouldInsert = false;
+              page.moveBlocks(
+                blocks.map(b => b.model),
+                model
+              );
+            }
+          }
+        }
+
+        if (shouldInsert) {
+          const distanceToTop = Math.abs(rect.top - point.y);
+          const distanceToBottom = Math.abs(rect.bottom - point.y);
+          const parent = page.getParent(model);
+          assertExists(parent);
+          page.moveBlocks(
+            blocks.map(b => b.model),
+            parent,
+            model,
+            distanceToTop < distanceToBottom
+          );
+          pageBlock.setSelectionByBlockId(parent.id, true);
+        }
       } else {
         // blank area
         page.captureSync();

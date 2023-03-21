@@ -1,16 +1,14 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import type {
   BlockComponentElement,
   EditingState,
   OpenBlockInfo,
+  Point,
 } from '@blocksuite/blocks/std';
 import {
   doesInSamePath,
   getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
-  Point,
-  Rect,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -511,14 +509,11 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 
       let shouldInsert = true;
       if (matchFlavours(model, ['affine:database'])) {
-        if ((model as DatabaseBlockModel).children.length === 0) {
+        if ((model as BaseBlockModel).empty()) {
           const bounds = element
             .querySelector('.affine-database-block')
             ?.getBoundingClientRect();
-          if (
-            bounds &&
-            Rect.fromDOMRect(bounds).isPointIn(new Point(point.x, point.y))
-          ) {
+          if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
             shouldInsert = false;
             page.moveBlocks(
               blocks.map(b => b.model),
