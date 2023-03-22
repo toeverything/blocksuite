@@ -413,7 +413,7 @@ const matches: Match[] = [
 
       const codeId = page.addBlock(
         'affine:code',
-        { language: getCodeLanguage(match?.[1] || '') || 'JavaScript' },
+        { language: getCodeLanguage(match?.[1] || '') || 'Plain Text' },
         parent,
         index
       );

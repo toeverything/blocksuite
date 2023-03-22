@@ -186,7 +186,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
-  prop:language="JavaScript"
+  prop:language="Plain Text"
 />`,
     codeBlockId
   );
@@ -295,7 +295,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
 <affine:page>
   <affine:frame>
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use
 "
     />
@@ -339,12 +339,12 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 <affine:page>
   <affine:frame>
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use
 "
     />
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use"
     />
   </affine:frame>

@@ -949,7 +949,7 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:frame>
   <affine:code
-    prop:language="JavaScript"
+    prop:language="Plain Text"
     prop:text="123\n456\n789"
   />
 </affine:frame>`,
