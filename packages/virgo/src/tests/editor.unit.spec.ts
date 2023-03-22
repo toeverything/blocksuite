@@ -171,6 +171,38 @@ test('getDeltasByVRange', () => {
   expect(
     virgo.getDeltasByVRange({
       index: 3,
+      length: 0,
+    })
+  ).toEqual([
+    [
+      {
+        insert: 'aaa',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        index: 0,
+        length: 3,
+      },
+    ],
+    [
+      {
+        insert: 'bbb',
+        attributes: {
+          italic: true,
+        },
+      },
+      {
+        index: 3,
+        length: 3,
+      },
+    ],
+  ]);
+
+  expect(
+    virgo.getDeltasByVRange({
+      index: 3,
       length: 1,
     })
   ).toEqual([
