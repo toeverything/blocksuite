@@ -85,7 +85,7 @@ const flagsPreset = {
   enable_database: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
-  enable_bi_directional_link: false,
+  enable_linked_page: false,
 
   readonly: {},
 } satisfies BlockSuiteFlags;
