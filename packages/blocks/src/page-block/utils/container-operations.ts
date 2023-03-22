@@ -338,32 +338,16 @@ function formatBlockRange(
 ) {
   const { startOffset, endOffset } = blockRange;
   const startModel = blockRange.models[0];
-
+  const endModel = blockRange.models[blockRange.models.length - 1];
   // edge case 1: collapsed range
-  if (
-    blockRange.models.length === 1 &&
-    startOffset === endOffset &&
-    blockRange.type === 'Native'
-  ) {
+  if (blockRange.models.length === 1 && startOffset === endOffset) {
+    // Collapsed range
+
     const vEditor = getVirgoByModel(startModel);
     if (!vEditor) return;
     vEditor.setMarks({
       ...vEditor.marks,
       [key]: vEditor.marks && vEditor.marks[key] ? null : true,
-    });
-    let vRange = vEditor.getVRange();
-    const dispose = vEditor.slots.vRangeUpdated.on(([r, t]) => {
-      if (
-        vRange &&
-        r &&
-        ((t === 'native' && r.index === vRange.index) ||
-          (t !== 'native' && r.index === vRange.index + 1))
-      ) {
-        vRange = r;
-      } else {
-        vEditor.resetMarks();
-        dispose.dispose();
-      }
     });
 
     return;
@@ -371,7 +355,7 @@ function formatBlockRange(
   const format = getCombinedFormat(blockRange);
 
   // edge case 2: same model
-  if (blockRange.models.length === 1 && blockRange.type === 'Native') {
+  if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
     const vEditor = getVirgoByModel(startModel);
     vEditor?.slots.updated.once(() => {
@@ -382,23 +366,24 @@ function formatBlockRange(
     });
     return;
   }
-
-  // model-level range
+  // common case
+  // format start model
+  if (!matchFlavours(startModel, ['affine:code'] as const)) {
+    startModel.text?.format(startOffset, startModel.text.length - startOffset, {
+      [key]: format[key] ? null : true,
+    });
+  }
+  // format end model
+  if (!matchFlavours(endModel, ['affine:code'] as const)) {
+    endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
+  }
+  // format between models
   blockRange.models
+    .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
       model.text?.format(0, model.text.length, {
         [key]: format[key] ? null : true,
-      });
-      const vEditor = getVirgoByModel(model);
-      if (!vEditor) return;
-      vEditor.setMarks({
-        ...vEditor.marks,
-        [key]: vEditor.marks && vEditor.marks[key] ? null : true,
-      });
-
-      onModelTextUpdated(model, () => {
-        vEditor.rootElement.blur();
       });
     });
 

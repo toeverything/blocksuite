@@ -481,12 +481,6 @@ export class VEditor<
    *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
    * ```
    *
-   * `getDeltasByVRange({ index: 3, length: 0 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
-   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
-   * ```
-   *
    * `getDeltasByVRange({ index: 3, length: 1 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
@@ -564,6 +558,21 @@ export class VEditor<
 
   setMarks(marks: TextAttributes): void {
     this._marks = this._parseSchema(marks) ?? null;
+
+    let vRange = this.getVRange();
+    const dispose = this.slots.vRangeUpdated.on(([r, t]) => {
+      if (
+        vRange &&
+        r &&
+        ((t === 'native' && r.index === vRange.index) ||
+          (t !== 'native' && r.index === vRange.index + 1))
+      ) {
+        vRange = r;
+      } else {
+        this.resetMarks();
+        dispose.dispose();
+      }
+    });
   }
 
   resetMarks(): void {

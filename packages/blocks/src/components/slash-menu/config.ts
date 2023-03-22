@@ -121,12 +121,12 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return;
           }
           const len = model.text.length;
-          const vEditor = getVirgoByModel(model);
-          assertExists(vEditor, "Can't set style mark! vEditor not found");
-          vEditor.setMarks({
-            [id]: true,
-          });
           if (!len) {
+            const vEditor = getVirgoByModel(model);
+            assertExists(vEditor, "Can't set style mark! vEditor not found");
+            vEditor.setMarks({
+              [id]: true,
+            });
             return;
           }
           model.text.format(0, len, {
