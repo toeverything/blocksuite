@@ -69,13 +69,6 @@ export class EdgelessShapeToolButton extends LitElement {
     super.firstUpdated(changedProperties);
   }
 
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseMode')) {
-      this._shapeMenuPopper?.hide();
-    }
-    super.updated(changedProperties);
-  }
-
   disconnectedCallback() {
     this._disposables?.dispose();
     super.disconnectedCallback();
@@ -90,7 +83,14 @@ export class EdgelessShapeToolButton extends LitElement {
         .tooltip=${getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         .testId=${'shape'}
-        @tool.click=${() => this._toggleShapeMenu()}
+        @tool.click=${() => {
+          this._setMouseMode({
+            type: 'shape',
+            shape: 'rect',
+            color: '#000000',
+          });
+          this._toggleShapeMenu();
+        }}
       >
         ${ShapeIcon}
       </edgeless-tool-icon-button>
