@@ -129,7 +129,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-  await initDatabaseDynamicRowWithData(page, '1');
+  await initDatabaseDynamicRowWithData(page, '1', true);
 
   // click outside
   await page.mouse.click(200, 200);
@@ -143,7 +143,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page, 'rich-text');
-  await initDatabaseDynamicRowWithData(page, '123');
+  await initDatabaseDynamicRowWithData(page, '123', true);
 
   const cellSelector = '[data-row-id="4"][data-column-id="3"]';
   await pressArrowLeft(page);
