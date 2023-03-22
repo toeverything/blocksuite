@@ -21,16 +21,10 @@ export class SlashMenu extends LitElement {
   static styles = styles;
 
   @property()
-  left: string | null = null;
-
-  @property()
-  top: string | null = null;
+  transform: string | null = null;
 
   @property()
   maxHeight: number | null = null;
-
-  @property()
-  position: 'top' | 'bottom' = 'bottom';
 
   @property()
   model!: BaseBlockModel;
@@ -357,14 +351,9 @@ export class SlashMenu extends LitElement {
     const MAX_HEIGHT = 344;
     const showCategory = !this._searchString.length;
 
-    const containerStyles = styleMap({
-      left: this.left,
-      top: this.top,
-    });
-
     const slashMenuStyles = styleMap({
-      top: this.position === 'bottom' ? '100%' : null,
-      bottom: this.position !== 'bottom' ? '100%' : null,
+      visibility: this.transform ? null : 'hidden',
+      transform: this.transform,
       maxHeight: this.maxHeight
         ? `${Math.min(
             this.maxHeight,
@@ -405,7 +394,7 @@ export class SlashMenu extends LitElement {
         </format-bar-button>`
     );
 
-    return html`<div class="slash-menu-container" style="${containerStyles}">
+    return html`<div class="slash-menu-container">
       <div
         class="overlay-mask"
         @click="${() => this.abortController.abort()}"
@@ -415,11 +404,5 @@ export class SlashMenu extends LitElement {
         <div class="slash-item-container">${btnItems}</div>
       </div>
     </div>`;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'slash-menu': SlashMenu;
   }
 }
