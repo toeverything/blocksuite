@@ -344,10 +344,29 @@ function formatBlockRange(
     // Collapsed range
 
     const vEditor = getVirgoByModel(startModel);
-    if (!vEditor) return;
+    const delta = vEditor?.getDeltaByRangeIndex(startOffset);
+    if (!vEditor || !delta) return;
     vEditor.setMarks({
       ...vEditor.marks,
-      [key]: vEditor.marks && vEditor.marks[key] ? null : true,
+      [key]:
+        (vEditor.marks && vEditor.marks[key]) ||
+        (delta.attributes && delta.attributes[key])
+          ? null
+          : true,
+    });
+    let vRange = vEditor.getVRange();
+    const dispose = vEditor.slots.vRangeUpdated.on(([r, t]) => {
+      if (
+        vRange &&
+        r &&
+        ((t === 'native' && r.index === vRange.index) ||
+          (t !== 'native' && r.index === vRange.index + 1))
+      ) {
+        vRange = r;
+      } else {
+        vEditor.resetMarks();
+        dispose.dispose();
+      }
     });
 
     return;

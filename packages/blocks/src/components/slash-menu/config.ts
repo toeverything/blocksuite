@@ -127,6 +127,20 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             vEditor.setMarks({
               [id]: true,
             });
+            let vRange = vEditor.getVRange();
+            const dispose = vEditor.slots.vRangeUpdated.on(([r, t]) => {
+              if (
+                vRange &&
+                r &&
+                ((t === 'native' && r.index === vRange.index) ||
+                  (t !== 'native' && r.index === vRange.index + 1))
+              ) {
+                vRange = r;
+              } else {
+                vEditor.resetMarks();
+                dispose.dispose();
+              }
+            });
             return;
           }
           model.text.format(0, len, {

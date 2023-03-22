@@ -557,22 +557,7 @@ export class VEditor<
   }
 
   setMarks(marks: TextAttributes): void {
-    this._marks = this._parseSchema(marks) ?? null;
-
-    let vRange = this.getVRange();
-    const dispose = this.slots.vRangeUpdated.on(([r, t]) => {
-      if (
-        vRange &&
-        r &&
-        ((t === 'native' && r.index === vRange.index) ||
-          (t !== 'native' && r.index === vRange.index + 1))
-      ) {
-        vRange = r;
-      } else {
-        this.resetMarks();
-        dispose.dispose();
-      }
-    });
+    this._marks = marks;
   }
 
   resetMarks(): void {
@@ -617,7 +602,7 @@ export class VEditor<
     attributes: TextAttributes = {} as TextAttributes
   ): void {
     if (this._marks) {
-      attributes = { ...this._marks, ...attributes };
+      attributes = { ...attributes, ...this._marks };
     }
     const normalizedAttributes = this._parseSchema(attributes);
 

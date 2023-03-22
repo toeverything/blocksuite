@@ -193,7 +193,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, '***test*** ');
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });
   await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
+  await assertTextFormat(page, 0, 6, { bold: true, italic: true });
   await undoByKeyboard(page);
   await assertRichTexts(page, ['***test*** ']);
   await undoByKeyboard(page);
@@ -203,7 +203,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, '**test** ');
   await assertTextFormat(page, 0, 0, { bold: true });
   await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
+  await assertTextFormat(page, 0, 6, { bold: true });
   await undoByClick(page);
   await assertRichTexts(page, ['**test** ']);
   await undoByClick(page);
@@ -213,7 +213,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, '*test* ');
   await assertTextFormat(page, 0, 0, { italic: true });
   await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
+  await assertTextFormat(page, 0, 6, { italic: true });
   await undoByClick(page);
   await assertRichTexts(page, ['*test* ']);
   await undoByClick(page);
@@ -223,7 +223,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, '~~test~~ ');
   await assertTextFormat(page, 0, 0, { strike: true });
   await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
+  await assertTextFormat(page, 0, 6, { strike: true });
   await undoByClick(page);
   await waitNextFrame(page);
   await assertRichTexts(page, ['~~test~~ ']);
@@ -234,7 +234,7 @@ test('markdown inline-text', async ({ page }) => {
   await type(page, '~test~ ');
   await assertTextFormat(page, 0, 0, { underline: true });
   await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
+  await assertTextFormat(page, 0, 6, { underline: true });
   await undoByClick(page);
   await assertRichTexts(page, ['~test~ ']);
   await undoByClick(page);

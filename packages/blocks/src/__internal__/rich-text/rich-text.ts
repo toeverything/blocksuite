@@ -88,20 +88,24 @@ export class RichText extends NonShadowLitElement {
         }
 
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (
-          deltas.length === 1 &&
-          vRange.index !== 0 &&
-          vRange.index !== vEditor.yText.length &&
-          e.data &&
-          e.data !== '\n'
-        ) {
-          const attributes = deltas[0][0].attributes;
-          vEditor.insertText(vRange, e.data, attributes);
-          vEditor.setVRange({
-            index: vRange.index + 1,
-            length: 0,
-          });
-          return true;
+        if (e.data && e.data !== '\n') {
+          if (
+            deltas.length > 1 ||
+            (deltas.length === 1 && vRange.index !== 0)
+          ) {
+            const attributes = deltas[0][0].attributes;
+            if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+              delete attributes?.link;
+              delete attributes?.code;
+            }
+
+            vEditor.insertText(vRange, e.data, attributes);
+            vEditor.setVRange({
+              index: vRange.index + 1,
+              length: 0,
+            });
+            return true;
+          }
         }
 
         return false;
