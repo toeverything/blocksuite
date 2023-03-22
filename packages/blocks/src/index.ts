@@ -10,7 +10,6 @@ import './__internal__/rich-text/link-node/index.js';
 import './embed-block/index.js';
 import './embed-block/image/index.js';
 import './surface-block/index.js';
-import './components/slash-menu/index.js';
 import './database-block/index.js';
 
 export * from './__internal__/rich-text/rich-text-operations.js';
