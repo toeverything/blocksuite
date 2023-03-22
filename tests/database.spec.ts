@@ -154,6 +154,68 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await assertDatabaseCellRichTexts(page, cellSelector, '12\n3');
 });
 
+test('should the single-select mode work correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  // single select mode
+  await initDatabaseColumn(page, 'select');
+  await initDatabaseRow(page);
+
+  const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
+  await cell.click();
+  await cell.click();
+  await type(page, '1');
+  await pressEnter(page);
+
+  const selectCell = page.locator('affine-database-select-cell span');
+  expect(await selectCell.innerText()).toBe('1');
+
+  await cell.click();
+  const selectOption = page.locator('.select-option-container .select-option');
+  expect(await selectOption.count()).toBe(1);
+  expect(await selectOption.innerText()).toBe('1');
+
+  const selectInput = page.locator('.select-input');
+  await selectInput.click();
+  await type(page, '2');
+  const selectOptionNew = page.locator(
+    '.select-option-container .select-option-new'
+  );
+  await selectOptionNew.click();
+  expect(await selectCell.innerText()).toBe('2');
+
+  await cell.click();
+  expect(await selectOption.count()).toBe(2);
+  expect(await selectOption.nth(1).innerText()).toBe('2');
+});
+
+test('should the multi-select mode work correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  // multi select mode
+  await initDatabaseColumn(page, 'multi-select');
+  await initDatabaseRow(page);
+
+  const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
+  await cell.click();
+  await cell.click();
+  await type(page, '1');
+  await pressEnter(page);
+
+  await cell.click();
+  const selectInput = page.locator('.select-input');
+  await selectInput.click();
+  await type(page, '2');
+  await pressEnter(page);
+
+  const selectCell = page.locator('affine-database-select-cell span');
+  expect(await selectCell.count()).toBe(2);
+  expect(await selectCell.nth(0).innerText()).toBe('1');
+  expect(await selectCell.nth(1).innerText()).toBe('2');
+});
+
 test('should hide placeholder of paragraph in database', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
