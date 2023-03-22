@@ -277,6 +277,49 @@ export async function initDatabaseRow(page: Page) {
   await columnAddBtn.click();
 }
 
+export async function initDatabaseRowWithData(page: Page, data: string) {
+  await initDatabaseRow(page);
+
+  const lastRow = page.locator('.affine-database-block-row').last();
+  const cell = lastRow.locator('affine-paragraph');
+  await cell.click();
+  await type(page, data);
+}
+
+export async function initDatabaseDynamicRowWithData(
+  page: Page,
+  data: string,
+  addRow = false,
+  index = 0
+) {
+  if (addRow) {
+    await initDatabaseRow(page);
+  }
+  const lastRow = page.locator('.affine-database-block-row').last();
+  const cell = lastRow.locator('affine-database-cell-container').nth(index);
+  await cell.click();
+  await cell.click();
+  await type(page, data);
+}
+
+export async function getDatabaseMouse(page: Page) {
+  const databaseRect = await getBoundingClientRect(page, 'affine-database');
+  return {
+    mouseOver: async () => {
+      await page.mouse.move(databaseRect.x, databaseRect.y);
+    },
+    mouseLeave: async () => {
+      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
+    },
+  };
+}
+
+export async function focusDatabaseSearch(page: Page) {
+  const searchIcon = page.locator('.affine-database-search-input-icon');
+  await searchIcon.click();
+  return searchIcon;
+}
+
 export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
