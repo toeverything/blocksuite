@@ -215,6 +215,9 @@ export class VEditor<
       // filter out undefined values
       Object.entries(attributesResult.data).filter(([k, v]) => v)
     ) as TextAttributes;
+    if (!Object.keys(attributes).length) {
+      return undefined;
+    }
     return attributes;
   };
 
