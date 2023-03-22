@@ -125,7 +125,7 @@ export class LangList extends NonShadowLitElement {
     this.selectedLanguage = language;
     this.dispatchEvent(
       createEvent('selected-language-changed', {
-        language: this.selectedLanguage ?? 'JavaScript',
+        language: this.selectedLanguage ?? 'Plain Text',
       })
     );
   }
@@ -156,7 +156,7 @@ export class LangList extends NonShadowLitElement {
           />
         </div>
         <div class="lang-list-button-container">
-          ${filteredLanguages.map(
+          ${['Plain Text', ...filteredLanguages].map(
             language => html`
               <icon-button
                 width="100%"

@@ -425,7 +425,7 @@ export class HtmlParser {
     // <pre><code class="language-typescript">code content</code></pre>
     const content = element.firstChild?.textContent || '';
     const language =
-      element.children[0]?.getAttribute('class')?.split('-')[1] || 'JavaScript';
+      element.children[0]?.getAttribute('class')?.split('-')[1] || 'Plain Text';
     return [
       {
         flavour: 'affine:code',
