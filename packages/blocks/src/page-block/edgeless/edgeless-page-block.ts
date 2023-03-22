@@ -19,6 +19,7 @@ import {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import {
+  assertExists,
   type BaseBlockModel,
   DisposableGroup,
   type Page,
@@ -419,6 +420,27 @@ export class EdgelessPageBlockComponent
         this.slots.selectionUpdated.emit(selectionState);
       }
     });
+  }
+
+  /**
+   * Set selection state to closest frameBlock in DOM by giving blockId.
+   * Not supports surface elements.
+   **/
+  setSelectionByBlockId(blockId: string, active = true) {
+    const frame = document
+      .querySelector(`[${BLOCK_ID_ATTR}="${blockId}"]`)
+      ?.closest('affine-frame');
+
+    if (frame) {
+      const frameId = frame?.getAttribute(BLOCK_ID_ATTR);
+      assertExists(frameId);
+      const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+      assertExists(frameBlock);
+      this.slots.selectionUpdated.emit({
+        selected: [frameBlock as TopLevelBlockModel],
+        active,
+      });
+    }
   }
 
   update(changedProperties: Map<string, unknown>) {
