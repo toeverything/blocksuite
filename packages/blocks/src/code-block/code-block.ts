@@ -83,6 +83,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
       visibility: visible;
     }
 
+    .affine-code-block-container > .lang-list-wrapper > .lang-button {
+      min-width: 101px;
+    }
+
     .affine-code-block-container.selected {
       background-color: var(--affine-selected-color);
     }
@@ -354,8 +358,9 @@ export class CodeBlockComponent extends NonShadowLitElement {
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
       <icon-button
+        class="lang-button"
         data-testid="lang-button"
-        width="101px"
+        width="auto"
         height="24px"
         ?hover=${this._showLangList}
         ?disabled=${this.readonly}
