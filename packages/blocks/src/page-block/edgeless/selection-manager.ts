@@ -202,6 +202,7 @@ export class EdgelessSelectionManager {
     const hovered: Selectable | null =
       surface.pickTop(modelX, modelY) || pickTopBlock(frames, modelX, modelY);
 
+    // See https://github.com/toeverything/blocksuite/issues/1812
     if (
       // if not frame block
       !isTopLevelBlock(hovered) ||
