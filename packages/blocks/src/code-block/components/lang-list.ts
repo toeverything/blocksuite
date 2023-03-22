@@ -98,9 +98,9 @@ export class LangList extends NonShadowLitElement {
   @property()
   delay = 150;
 
-  static languages = codeLanguages.map(
-    lang => lang.toUpperCase()[0] + lang.slice(1)
-  );
+  static languages = codeLanguages
+    .map(lang => lang.toUpperCase()[0] + lang.slice(1))
+    .concat(['Plain Text']);
 
   override async connectedCallback() {
     await super.connectedCallback();
@@ -156,7 +156,7 @@ export class LangList extends NonShadowLitElement {
           />
         </div>
         <div class="lang-list-button-container">
-          ${['Plain Text', ...filteredLanguages].map(
+          ${filteredLanguages.map(
             language => html`
               <icon-button
                 width="100%"
