@@ -19,6 +19,7 @@ import {
   getSelectionBoxBound,
   getXYWH,
   initWheelEventHandlers,
+  isTopLevelBlock,
   pickTopBlock,
 } from './utils.js';
 
@@ -198,16 +199,20 @@ export class EdgelessSelectionManager {
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
-    let hovered: Selectable | null = surface.pickTop(modelX, modelY);
+    const hovered: Selectable | null =
+      surface.pickTop(modelX, modelY) || pickTopBlock(frames, modelX, modelY);
 
-    // Phasor Element
-    if (hovered) {
-      if (this.mouseMode.type === 'default') {
-        this._container.components.dragHandle?.hide();
-      }
-    } else {
-      // Frame Element
-      hovered = pickTopBlock(frames, modelX, modelY);
+    if (
+      // if not frame block
+      !isTopLevelBlock(hovered) ||
+      // if in other mouse mode
+      this.mouseMode.type !== 'default' ||
+      // if current selection is not active
+      !this.blockSelectionState.active ||
+      // if current selected block is not the hovered block
+      this.blockSelectionState.selected[0].id !== hovered.id
+    ) {
+      this._container.components.dragHandle?.hide();
     }
 
     if (!hovered) {
