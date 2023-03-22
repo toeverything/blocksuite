@@ -5,9 +5,7 @@ import {
   // Uncomment to batch load mock data
   // initMockData,
 } from '@blocksuite/phasor';
-import { Workspace } from '@blocksuite/store';
-
-const { Y } = Workspace;
+import * as Y from 'yjs';
 
 function testClick(surface: SurfaceManager, e: MouseEvent) {
   const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
