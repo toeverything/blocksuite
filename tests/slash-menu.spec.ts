@@ -180,7 +180,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(25);
+  await expect(slashItems).toHaveCount(27);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -425,4 +425,21 @@ test.describe('slash menu with style', () => {
       paragraphId
     );
   });
+});
+
+test('should insert database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '/');
+  const todayBlock = page.getByTestId('Table View');
+  await todayBlock.click();
+
+  const database = page.locator('affine-database');
+  expect(database).toBeVisible();
+  const tagColumn = page.locator('.affine-database-block-column').nth(1);
+  expect(await tagColumn.innerText()).toBe('Tag');
+  const defaultRows = page.locator('.affine-database-block-row');
+  expect(await defaultRows.count()).toBe(3);
 });
