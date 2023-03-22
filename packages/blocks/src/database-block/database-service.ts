@@ -42,7 +42,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         selection: [],
       },
       name: 'Tag',
-      type: 'select',
+      type: 'multi-select',
     });
     const blockModel = page.getBlockById(databaseId);
     assertExists(blockModel);

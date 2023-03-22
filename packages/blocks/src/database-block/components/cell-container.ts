@@ -26,7 +26,7 @@ export class DatabaseCellContainer
   private _isEditing = false;
 
   setValue(value: unknown) {
-    if (value) {
+    if (value !== undefined) {
       setTimeout(() => {
         this.databaseModel.page.captureSync();
         this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
