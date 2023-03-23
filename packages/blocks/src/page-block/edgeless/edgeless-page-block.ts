@@ -148,6 +148,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
+  @query('.affine-block-children-container.edgeless')
+  private _affineBlockChildrenContainer!: HTMLDivElement;
+
   clipboard = new EdgelessClipboard(this.page);
 
   slots: EdgelessSelectionSlots = {
@@ -387,6 +390,23 @@ export class EdgelessPageBlockComponent
           ...this._selection.blockSelectionState,
         });
       })
+    );
+
+    // When focused, Virgo will attempt to automatically scroll into view.
+    _disposables.addFromEvent(
+      this._affineBlockChildrenContainer,
+      'scroll',
+      () => {
+        const { viewport } = this.surface;
+
+        const { scrollLeft, scrollTop } = this._affineBlockChildrenContainer;
+        this._affineBlockChildrenContainer.scrollTo(0, 0);
+
+        const dx = scrollLeft / viewport.zoom;
+        const dy = scrollTop / viewport.zoom;
+        viewport.applyDeltaCenter(dx, dy);
+        this.slots.viewportUpdated.emit();
+      }
     );
   }
 
