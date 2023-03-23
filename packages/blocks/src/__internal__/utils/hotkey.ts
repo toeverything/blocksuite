@@ -60,61 +60,70 @@ function shouldFilterHotkey(event: KeyboardEvent) {
   return false;
 }
 
-export const HOTKEY_SCOPE = {
-  AFFINE_PAGE: 'affine:page',
-  AFFINE_EDGELESS: 'affine:edgeless',
-  OTHER: 'other',
-};
+export enum HOTKEY_SCOPE {
+  AFFINE_PAGE = 'affine:page',
+  AFFINE_EDGELESS = 'affine:edgeless',
+}
 
-// Singleton
+const HOTKEY_DISABLED_SCOPE = 'hotkey_disabled';
+
+/**
+ * Singleton
+ *
+ * When rendering a page or an edgeless view,
+ * `setScope` is called to set a unique scope for each view.
+ * All hotkeys are then bound to this scope.
+ * When a page or an edgeless view is disconnected,
+ * all hotkeys registered during the view's lifetime are destroyed.
+ */
 class HotkeyManager {
   private readonly _hotkeys: typeof hotkeys;
+  private _scope: HOTKEY_SCOPE = HOTKEY_SCOPE.AFFINE_PAGE;
+  private _disabled = false;
 
   constructor() {
     this._hotkeys = hotkeys;
   }
 
-  private _setScope(scope: string): void {
+  get disabled() {
+    return this._disabled;
+  }
+
+  setScope(scope: HOTKEY_SCOPE) {
+    this._scope = scope;
     this._hotkeys.setScope(scope);
+  }
+
+  deleteScope(scope: HOTKEY_SCOPE) {
+    this._hotkeys.deleteScope(scope);
   }
 
   addListener(
     hotkey: string,
     listener: KeyHandler,
     options: {
-      scope?: string;
       keyup?: boolean;
       keydown?: boolean;
     } = {}
   ): void {
-    const scope = options.scope ?? HOTKEY_SCOPE.AFFINE_PAGE;
-    this._hotkeys(hotkey, { ...options, scope }, listener);
+    this._hotkeys(hotkey, { ...options, scope: this._scope }, listener);
   }
 
-  removeListener(
-    hotkey: string | Array<string>,
-    scope: string = HOTKEY_SCOPE.AFFINE_PAGE
-  ): void {
+  removeListener(hotkey: string | Array<string>): void {
     this._hotkeys.unbind(
       (Array.isArray(hotkey) ? hotkey : [hotkey]).join(','),
-      scope
+      this._scope
     );
   }
 
-  setScope(scope: string) {
-    this._hotkeys.setScope(scope);
-  }
-
-  deleteScope(scope: string) {
-    this._hotkeys.deleteScope(scope);
-  }
-
   disableHotkey(): void {
-    this._hotkeys.setScope(HOTKEY_SCOPE.OTHER);
+    this._disabled = true;
+    this._hotkeys.setScope(HOTKEY_DISABLED_SCOPE);
   }
 
   enableHotkey(): void {
-    this._setScope(HOTKEY_SCOPE.AFFINE_PAGE);
+    this._disabled = false;
+    this._hotkeys.setScope(this._scope);
   }
 
   /**

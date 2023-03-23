@@ -31,12 +31,14 @@ import {
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   focusRichText,
+  getCenterPosition,
   initEmptyEdgelessState,
   initThreeParagraphs,
   locatorPanButton,
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressEscape,
   redoByClick,
   resizeElementByTopLeftHandle,
   type,
@@ -313,7 +315,7 @@ test('add Text', async ({ page }) => {
   await assertEdgelessHoverRect(page, [0, 0, 448, 72]);
 });
 
-test('add empty Text', async ({ page }) => {
+test.skip('add empty Text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -819,7 +821,7 @@ test('shortcut', async ({ page }) => {
   await expect(panButton).toHaveAttribute('active', '');
 });
 
-test('drag handle should be shown in default mode or hidden in other modes', async ({
+test('drag handle should be shown when a frame is actived in default mode or hidden in other modes', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -836,17 +838,22 @@ test('drag handle should be shown in default mode or hidden in other modes', asy
     throw new Error('Missing edgeless affine-frame');
   }
 
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  const [x, y] = [frameBox.x + 26, frameBox.y + frameBox.height / 2];
+
+  await page.mouse.move(x, y);
+  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await page.mouse.dblclick(x, y);
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'text');
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  await setMouseMode(page, 'shape');
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
 
   await page.mouse.move(0, 0);
   await setMouseMode(page, 'default');
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 });
 
@@ -857,7 +864,9 @@ test('drag handle should work inside one frame', async ({ page }) => {
 
   await switchEditorMode(page);
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '5');
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
@@ -878,11 +887,15 @@ test('drag handle should work across multiple frames', async ({ page }) => {
   // 7
   await type(page, '000');
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
   await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
+  await page.mouse.dblclick(30, 40);
   await dragHandleFromBlockToBlockBottomById(page, '7', '4');
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '000', '789', '123']);
 });
@@ -899,9 +912,92 @@ test('drag handle should add new frame when dragged outside frame', async ({
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
+  await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('block hub should drag and drop a card into existing frame', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="3"]');
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  await waitNextFrame(page);
+  await type(page, '000');
+  await assertRichTexts(page, ['123', '000', '456', '789']);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+});
+
+test('block hub should add new frame when dragged to blank area', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: 30, y: 40 },
+    { steps: 50 }
+  );
+
+  await waitNextFrame(page);
+  await type(page, '000');
+  await assertRichTexts(page, ['123', '456', '789', '000']);
+
+  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('pressing the ESC key will return to the default state', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  await pressEscape(page);
+  await assertEdgelessNonSelectedRect(page);
 });

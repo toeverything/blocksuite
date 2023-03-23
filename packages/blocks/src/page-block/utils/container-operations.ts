@@ -33,6 +33,7 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import type { BlockSchemas } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
@@ -344,11 +345,17 @@ function formatBlockRange(
     // Collapsed range
 
     const vEditor = getVirgoByModel(startModel);
-    if (!vEditor) return;
+    const delta = vEditor?.getDeltaByRangeIndex(startOffset);
+    if (!vEditor || !delta) return;
     vEditor.setMarks({
       ...vEditor.marks,
-      [key]: vEditor.marks && vEditor.marks[key] ? null : true,
+      [key]:
+        (vEditor.marks && vEditor.marks[key]) ||
+        (delta.attributes && delta.attributes[key])
+          ? null
+          : true,
     });
+    clearMarksOnDiscontinuousInput(vEditor);
 
     return;
   }
@@ -463,11 +470,10 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
-      if (!bound) return;
 
       const [x, y, w, h] = deserializeXYWH(model.xywh);
       const newModelHeight =
-        (bound.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+        bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {

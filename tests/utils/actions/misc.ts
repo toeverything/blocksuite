@@ -491,23 +491,17 @@ export async function setSelection(
       const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
-      const anchorRichTextRange = anchorRichText.vEditor.toDomRange(
-        {
-          index: anchorOffset,
-          length: 0,
-        },
-        false
-      )!;
+      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
+        index: anchorOffset,
+        length: 0,
+      })!;
       const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
-      const focusRichTextRange = focusRichText.vEditor.toDomRange(
-        {
-          index: focusOffset,
-          length: 0,
-        },
-        false
-      )!;
+      const focusRichTextRange = focusRichText.vEditor.toDomRange({
+        index: focusOffset,
+        length: 0,
+      })!;
 
       /* eslint-enable @typescript-eslint/no-non-null-assertion */
       getSelection()?.setBaseAndExtent(
@@ -591,13 +585,10 @@ export async function getIndexCoordinate(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange(
-        {
-          index: vIndex,
-          length: 0,
-        },
-        false
-      );
+      const domRange = richText.vEditor.toDomRange({
+        index: vIndex,
+        length: 0,
+      });
       const pointBound = domRange.getBoundingClientRect();
       return {
         x: pointBound.left + coordOffSet.x,
