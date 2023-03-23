@@ -11,7 +11,7 @@ import {
   uniqPoints,
 } from './layout-util.js';
 
-const getPathFindingData = (
+function getPathFindingData(
   start: {
     box?: number[][];
     origin: number[];
@@ -23,7 +23,7 @@ const getPathFindingData = (
     direction: Direction;
   },
   minDist: number
-) => {
+) {
   // 两个盒子相交
   const isIntersect =
     start.box && end.box ? rectRect(start.box, end.box) : false;
@@ -72,9 +72,9 @@ const getPathFindingData = (
     allPoints: uniqPoints(getIntersectPoints(allPoints)),
     waypoint,
   };
-};
+}
 
-export const createRoute = (
+export function createRoute(
   start: {
     box?: number[][];
     origin: number[];
@@ -86,7 +86,7 @@ export const createRoute = (
     direction: Direction;
   },
   minDist: number
-) => {
+) {
   const { isCovered, isIntersect, startInfo, endInfo, allPoints, waypoint } =
     getPathFindingData(start, end, minDist);
 
@@ -99,7 +99,7 @@ export const createRoute = (
     Boolean
   ) as number[][][];
 
-  // 相交且不是 coverd 并且方向相对才限制路径
+  // 相交且不是 covered 并且方向相对才限制路径
   const costFactor = isIntersect
     ? !isCovered &&
       isOppositeDirection([startInfo.direction, endInfo.direction])
@@ -164,4 +164,4 @@ export const createRoute = (
       },
     ],
   };
-};
+}

@@ -3,9 +3,11 @@ import type { Grid } from './grid0.js';
 import type { PathFindingPointData } from './type.js';
 import { addV, Key, subV } from './util.js';
 
-const cloneDeep = <T>(t: T): T => JSON.parse(JSON.stringify(t));
+export function cloneDeep<T>(t: T): T {
+  return JSON.parse(JSON.stringify(t));
+}
 
-export const extendBox = (box: number[][], d: number) => {
+export function extendBox(box: number[][], d: number) {
   const result = box.map(item => [...item]);
 
   result[0] = addV(result[0], [-d, -d]);
@@ -14,18 +16,18 @@ export const extendBox = (box: number[][], d: number) => {
   result[3] = addV(result[3], [-d, d]);
 
   return result;
-};
+}
 
-export const inView = (point: number[], box: number[][]) => {
+export function inView(point: number[], box: number[][]) {
   return (
     point[0] >= box[0][0] &&
     point[0] <= box[1][0] &&
     point[1] >= box[0][1] &&
     point[1] <= box[2][1]
   );
-};
+}
 
-export const uniqPoints = (points: number[][]) => {
+export function uniqPoints(points: number[][]) {
   const map = new Map<string, true>();
   const result: number[][] = [];
 
@@ -38,9 +40,9 @@ export const uniqPoints = (points: number[][]) => {
   });
 
   return result;
-};
+}
 
-export const getIntersectPoints = (points: number[][]) => {
+export function getIntersectPoints(points: number[][]) {
   const results: number[][] = [];
 
   points.forEach((item, index) => {
@@ -53,13 +55,13 @@ export const getIntersectPoints = (points: number[][]) => {
   });
 
   return results;
-};
+}
 
-export const checkDirectionIsValid = (
+export function checkDirectionIsValid(
   from: number[],
   to: number[],
   direction: Direction
-) => {
+) {
   const d = subV(to, from);
 
   let disabled = false;
@@ -80,7 +82,7 @@ export const checkDirectionIsValid = (
   }
 
   return !disabled;
-};
+}
 
 const moveDeltaConfig = {
   [Direction.LEFT]: [0, -1],
@@ -96,11 +98,11 @@ const oppositeDirectionConfig = {
   [Direction.RIGHT]: Direction.LEFT,
 };
 
-const getOppositeDirection = (dir: Direction) => {
+function getOppositeDirection(dir: Direction) {
   return oppositeDirectionConfig[dir];
-};
+}
 
-export const getMoveDelta = (dir?: Direction, first?: boolean) => {
+export function getMoveDelta(dir?: Direction, first?: boolean) {
   const dirs = Object.keys(moveDeltaConfig) as Direction[];
 
   if (first) {
@@ -114,10 +116,12 @@ export const getMoveDelta = (dir?: Direction, first?: boolean) => {
   dirs.sort((a, b) => (a === dir ? -1 : 1));
 
   return dirs.map(item => moveDeltaConfig[item]);
-};
+}
 
-const isHorizontal = (dir: Direction) =>
-  dir === Direction.LEFT || dir === Direction.RIGHT;
+function isHorizontal(dir: Direction) {
+  return dir === Direction.LEFT || dir === Direction.RIGHT;
+}
+
 export const isOppositeDirection = (dirs: Direction[]) => {
   const list = [
     [Direction.LEFT, Direction.RIGHT],
@@ -182,7 +186,7 @@ export const checkCanFollowWaypoint = (
   return true;
 };
 
-const getPointConstraintsInfo = (
+function getPointConstraintsInfo(
   start: {
     origin: number[];
     direction: Direction;
@@ -191,21 +195,21 @@ const getPointConstraintsInfo = (
     origin: number[];
     direction: Direction;
   }
-): PathFindingPointData[] => {
+): PathFindingPointData[] {
   return [start, end].map(item => ({
     ...item,
     endpoint: item.origin.slice(),
   }));
-};
+}
 
-const checkIsContained = (
+function checkIsContained(
   origin: number[],
   box: number[][] | undefined,
   axis: number[],
   otherBox: number[][] | undefined,
   otherAxis: number[],
   index: number
-) => {
+) {
   // 没边界比较时不需要考虑是否包含
   if (!otherBox) {
     return true;
@@ -226,9 +230,9 @@ const checkIsContained = (
     origin[index] > otherBox[otherAxis[0]][index] &&
     origin[index] < otherBox[otherAxis[1]][index]
   );
-};
+}
 
-export const getBoxConstraintsInfo = (
+export function getBoxConstraintsInfo(
   start: {
     box?: number[][];
     origin: number[];
@@ -243,7 +247,7 @@ export const getBoxConstraintsInfo = (
   isCovered: boolean
 ): Array<
   PathFindingPointData & { boundaryBox?: number[][]; box?: number[][] }
-> => {
+> {
   if (!start.box && !end.box) {
     return getPointConstraintsInfo(start, end);
   }
@@ -379,4 +383,4 @@ export const getBoxConstraintsInfo = (
   );
 
   return list;
-};
+}
