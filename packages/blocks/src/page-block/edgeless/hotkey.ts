@@ -9,8 +9,13 @@ import { isTopLevelBlock } from './utils.js';
 
 function setMouseMode(
   edgeless: EdgelessPageBlockComponent,
-  mouseMode: MouseMode
+  mouseMode: MouseMode,
+  ignoreActiveState = false
 ) {
+  // when editing, should not update mouse mode by shortcut
+  if (!ignoreActiveState && edgeless.selection.isActive) {
+    return;
+  }
   edgeless.slots.mouseModeUpdated.emit(mouseMode);
 }
 
