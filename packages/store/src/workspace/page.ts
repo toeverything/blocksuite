@@ -661,9 +661,11 @@ export class Page extends Space<FlatBlockMap> {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
-    tryMigrate(this.doc);
+    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
+      tryMigrate(this.doc);
+      this._handleVersion();
+    }
 
-    this._handleVersion();
     this._initYBlocks();
 
     const visited = new Set<string>();
