@@ -33,7 +33,7 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import { clearMarksOnDiscontinuousInput } from '../../code-block/utils/virgo-marks.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import type { BlockSchemas } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 

@@ -28,7 +28,7 @@ import {
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../code-block/utils/virgo-marks.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
