@@ -2,7 +2,7 @@
 import { addV, calculateEuclideanDist, subV } from './util.js';
 
 // 见 pathfindingjs
-export const compressPath = (path: number[][]): number[][] => {
+export function compressPath(path: number[][]): number[][] {
   // nothing to compress
   if (path.length < 3) {
     return path;
@@ -62,7 +62,7 @@ export const compressPath = (path: number[][]): number[][] => {
   compressed.push([px, py]);
 
   return compressed;
-};
+}
 
 export function lineLine(
   a1: number[],
@@ -92,7 +92,7 @@ export function lineLine(
   return false;
 }
 
-export const lineRect = (a1: number[], a2: number[], b: number[][]) => {
+export function lineRect(a1: number[], a2: number[], b: number[][]): boolean {
   const [r0, r1, r2, r3] = b;
 
   if (lineLine(a1, a2, r0, r1)) return true;
@@ -100,18 +100,18 @@ export const lineRect = (a1: number[], a2: number[], b: number[][]) => {
   if (lineLine(a1, a2, r2, r3)) return true;
   if (lineLine(a1, a2, r3, r0)) return true;
   return false;
-};
+}
 
-export const rectRect = (r1: number[][], r2: number[][]) => {
+export function rectRect(r1: number[][], r2: number[][]): boolean {
   const l = 4;
 
   return (
     r1.some((_, i) => lineRect(r1[i], r1[(i + 1) % l], r2)) ||
     r2.some((_, i) => lineRect(r2[i], r2[(i + 1) % l], r1))
   );
-};
+}
 
-export const isCollinear = (p: number[], q: number[], t: number[]) => {
+export function isCollinear(p: number[], q: number[], t: number[]): boolean {
   const accuracy = 0;
   // 3点围成的三角形面积
   const area =
@@ -124,9 +124,9 @@ export const isCollinear = (p: number[], q: number[], t: number[]) => {
   const edge = calculateEuclideanDist(p, q);
 
   return Math.abs(area / edge) <= accuracy;
-};
+}
 
-export const getNumberOfInflectionPoints = (path: number[][]) => {
+export function getNumberOfInflectionPoints(path: number[][]): number {
   if (path.length < 3) {
     return 0;
   }
@@ -140,9 +140,9 @@ export const getNumberOfInflectionPoints = (path: number[][]) => {
   }
 
   return count;
-};
+}
 
-export const splitPath = (path: number[][]) => {
+export function splitPath(path: number[][]): number[][][] {
   const result: number[][][] = [];
   let current: number[][] = [];
 
@@ -161,9 +161,9 @@ export const splitPath = (path: number[][]) => {
   result.push(current);
 
   return result.map(item => item.map(v => v.slice()));
-};
+}
 
-export const smoothPath = (path: number[][][], maxRadius: number) => {
+export function smoothPath(path: number[][][], maxRadius: number): string[] {
   const result: string[] = [];
   const cloned = path.map(item => item.map(v => v.slice()));
 
@@ -215,9 +215,12 @@ export const smoothPath = (path: number[][][], maxRadius: number) => {
   );
 
   return result;
-};
+}
 
-export const roundPoint = (p: number[]) => p.map(Math.round);
+export function roundPoint(p: number[]): number[] {
+  return p.map(Math.round);
+}
 
-export const getMidPoint = (p1: number[], p2: number[]) =>
-  addV(p1, p2).map(item => Math.round(item / 2));
+export function getMidPoint(p1: number[], p2: number[]): number[] {
+  return addV(p1, p2).map(item => Math.round(item / 2));
+}

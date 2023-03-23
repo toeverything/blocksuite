@@ -5,7 +5,7 @@ import { checkCanFollowWaypoint } from './layout-util.js';
 import type { PathFindingPointData } from './type.js';
 import { calculateManhattanDist } from './util.js';
 
-export const find = (
+export function find(
   grid: Grid,
   {
     startInfo,
@@ -20,7 +20,7 @@ export const find = (
     isCovered: boolean;
     checkWaypointWalkable: (from: number[], to: number[]) => boolean;
   }
-) => {
+) {
   const followWaypoint =
     waypoint &&
     checkCanFollowWaypoint(
@@ -115,4 +115,4 @@ export const find = (
   target!.path.unshift(startInfo.origin);
 
   return target;
-};
+}
