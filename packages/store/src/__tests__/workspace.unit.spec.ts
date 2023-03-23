@@ -51,7 +51,7 @@ function createTestPage(pageId = defaultPageId, parentId?: string) {
   return workspace.createPage(pageId, parentId);
 }
 
-describe.concurrent('basic', () => {
+describe('basic', () => {
   it('can init workspace', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
@@ -82,14 +82,14 @@ describe.concurrent('basic', () => {
   });
 });
 
-describe.concurrent('pageMeta', () => {
+describe('pageMeta', () => {
   it('can create subpage', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
     const parentPage = workspace.createPage(defaultPageId);
-    workspace.createPage('subpage0', parentPage.id);
-    assert.deepEqual(parentPage.meta.subpageIds, ['subpage0']);
+    const subpage = workspace.createPage('subpage0', parentPage.id);
+    assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 
   it('can shift subpage', () => {
@@ -114,7 +114,7 @@ describe.concurrent('pageMeta', () => {
   });
 });
 
-describe.concurrent('addBlock', () => {
+describe('addBlock', () => {
   it('can add single model', () => {
     const page = createTestPage();
     page.addBlock('affine:page', {
@@ -233,7 +233,7 @@ describe.concurrent('addBlock', () => {
 
     const page0 = workspace.createPage('page0');
     const page1 = workspace.createPage('page1');
-    // @ts-ignore
+    // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
     page0.addBlock('affine:page', {
@@ -305,7 +305,7 @@ describe.concurrent('addBlock', () => {
   });
 });
 
-describe.concurrent('deleteBlock', () => {
+describe('deleteBlock', () => {
   it('can delete single model', () => {
     const page = createTestPage();
 
@@ -369,7 +369,7 @@ describe.concurrent('deleteBlock', () => {
   });
 });
 
-describe.concurrent('getBlock', () => {
+describe('getBlock', () => {
   it('can get block by id', () => {
     const page = createTestPage();
     const root = createRoot(page);
@@ -462,7 +462,7 @@ describe('workspace.exportJSX works', () => {
   });
 });
 
-describe.concurrent('workspace.search works', () => {
+describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
