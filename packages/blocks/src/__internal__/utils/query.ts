@@ -36,15 +36,6 @@ interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
-export function getBlockById<T extends ElementTagName>(
-  id: string,
-  container: Element = document.body
-) {
-  return container.querySelector<T>(
-    `[${ATTR}="${id}"]` as T
-  ) as BlockComponentElement | null;
-}
-
 /**
  * @deprecated Use `page.getParent` instead
  */
@@ -52,7 +43,7 @@ export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  const currentBlock = getBlockById(id, ele);
+  const currentBlock = getBlockElementById(id, ele);
   return (
     (currentBlock?.parentElement?.closest<T>(
       ATTR_SELECTOR as T

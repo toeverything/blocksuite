@@ -2,7 +2,7 @@ import {
   type BlockComponentElement,
   doesInSamePath,
   type EditingState,
-  getBlockById,
+  getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   type OpenBlockInfo,
@@ -30,9 +30,9 @@ function hasOptionBar(block: BaseBlockModel) {
 }
 
 function getBlockWithOptionBarRect(
-  hoverDom: HTMLElement,
+  hoverDom: Element,
   block: BaseBlockModel
-): HTMLElement {
+): Element {
   if (hoverDom.hasAttribute(BLOCK_SERVICE_LOADING_ATTR)) {
     return hoverDom;
   }
@@ -209,7 +209,7 @@ function binarySearchBlockEditingState(
                   return {
                     rect: result.blockRect,
                     model: result.block,
-                    element: result.hoverDom,
+                    element: result.hoverDom as BlockComponentElement,
                   };
                 } else {
                   depth--;
@@ -231,7 +231,7 @@ function binarySearchBlockEditingState(
       return {
         rect: blockRect,
         model: block,
-        element: hoverDom,
+        element: hoverDom as BlockComponentElement,
       };
     }
 
@@ -282,7 +282,7 @@ const offscreen = document.createElement(
 
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
-  let hoverDom = getBlockById(block.id);
+  let hoverDom = getBlockElementById(block.id);
 
   // Give an empty position (xywh=0,0,0,0) for invisible blocks.
   // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
@@ -523,7 +523,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         // block may change its flavour after moved.
         defaultPageBlock.selection.setSelectedBlocks(
           blocks
-            .map(b => getBlockById(b.model.id))
+            .map(b => getBlockElementById(b.model.id))
             .filter((b): b is BlockComponentElement => !!b)
         );
       });
