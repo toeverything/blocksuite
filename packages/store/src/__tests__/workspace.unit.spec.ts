@@ -83,13 +83,13 @@ describe.concurrent('basic', () => {
 });
 
 describe.concurrent('pageMeta', () => {
-  it.only('can create subpage', () => {
+  it('can create subpage', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
     const parentPage = workspace.createPage(defaultPageId);
-    const subpage = workspace.createPage('subpage0', parentPage.id);
-    assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
+    workspace.createPage('subpage0', parentPage.id);
+    assert.deepEqual(parentPage.meta.subpageIds, ['subpage0']);
   });
 
   it('can shift subpage', () => {
