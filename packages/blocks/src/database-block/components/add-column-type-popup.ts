@@ -18,7 +18,6 @@ export class DatabaseAddColumnTypePopup extends LitElement {
       display: flex;
       flex-direction: column;
       height: 100%;
-      border-left: 1px solid rgb(233, 233, 231);
       background-color: var(--affine-page-background);
     }
 
