@@ -168,14 +168,25 @@ export class Store {
   /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
-  exportJSX(id = '0') {
+  exportJSX(pageId: string, blockId?: string) {
     const json = serializeYDoc(this.doc) as unknown as SerializedStore;
-    if (!('space:page0' in json)) {
-      throw new Error("Failed to convert to JSX: 'space:page0' not found");
+    const prefixedPageId = pageId.startsWith('space:')
+      ? pageId
+      : `space:${pageId}`;
+    const pageJson = json[prefixedPageId];
+    if (!pageJson) {
+      throw new Error(`Page ${pageId} doesn't exist`);
     }
-    if (!json['space:page0'][id]) {
+    if (!blockId) {
+      const pageBlockId = Object.keys(pageJson).at(0);
+      if (!pageBlockId) {
+        throw new Error("Page doesn't have any block");
+      }
+      blockId = pageBlockId;
+    }
+    if (!pageJson[blockId]) {
       return null;
     }
-    return yDocToJSXNode(json['space:page0'], id);
+    return yDocToJSXNode(pageJson, blockId);
   }
 }
