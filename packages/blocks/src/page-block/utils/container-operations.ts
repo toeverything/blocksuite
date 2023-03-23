@@ -463,11 +463,10 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
-      if (!bound) return;
 
       const [x, y, w, h] = deserializeXYWH(model.xywh);
       const newModelHeight =
-        (bound.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+        bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {

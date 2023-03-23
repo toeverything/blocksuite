@@ -224,7 +224,11 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       if (pageBlock.mouseMode.type !== 'default') return null;
       const hoveringFrame = getHoveringFrame(point);
       if (!hoveringFrame) return null;
-      return getClosestBlockElementByPoint(point, Rect.fromDOM(hoveringFrame));
+      return getClosestBlockElementByPoint(
+        point,
+        Rect.fromDOM(hoveringFrame),
+        pageBlock.surface.viewport.zoom
+      );
     },
   });
 }
