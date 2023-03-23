@@ -685,7 +685,7 @@ export function getClosestBlockElementByPoint(
 }
 
 /**
- * Returns the closest block element by element.
+ * Returns the closest block element by element that does not contain the page element and frame element.
  */
 export function getClosestBlockElementByElement(element: Element | null) {
   if (!element) return null;
