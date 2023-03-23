@@ -819,7 +819,7 @@ test('shortcut', async ({ page }) => {
   await expect(panButton).toHaveAttribute('active', '');
 });
 
-test('drag handle should be shown in default mode or hidden in other modes', async ({
+test('drag handle should be shown when a frame is actived in default mode or hidden in other modes', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -836,17 +836,22 @@ test('drag handle should be shown in default mode or hidden in other modes', asy
     throw new Error('Missing edgeless affine-frame');
   }
 
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  const [x, y] = [frameBox.x + 26, frameBox.y + frameBox.height / 2];
+
+  await page.mouse.move(x, y);
+  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await page.mouse.dblclick(x, y);
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'text');
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  await setMouseMode(page, 'shape');
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
 
   await page.mouse.move(0, 0);
   await setMouseMode(page, 'default');
-  await page.mouse.move(frameBox.x + 24, frameBox.y + 24);
+  await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 });
 
@@ -857,6 +862,7 @@ test('drag handle should work inside one frame', async ({ page }) => {
 
   await switchEditorMode(page);
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '5');
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
@@ -878,10 +884,12 @@ test('drag handle should work across multiple frames', async ({ page }) => {
   // 7
   await type(page, '000');
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
+  await page.mouse.dblclick(30, 40);
   await dragHandleFromBlockToBlockBottomById(page, '7', '4');
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '000', '789', '123']);
@@ -899,6 +907,7 @@ test('drag handle should add new frame when dragged outside frame', async ({
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);

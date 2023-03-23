@@ -198,6 +198,8 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           model,
           distanceToTop < distanceToBottom
         );
+
+        pageBlock.setSelectionByBlockId(parent.id, true);
       } else {
         // blank area
         page.captureSync();
