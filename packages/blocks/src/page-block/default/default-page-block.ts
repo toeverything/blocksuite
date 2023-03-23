@@ -4,6 +4,7 @@ import {
   type BlockHost,
   type EditingState,
   hotkey,
+  HOTKEY_SCOPE,
   Rect,
   type SelectionPosition,
 } from '@blocksuite/blocks/std';
@@ -464,6 +465,9 @@ export class DefaultPageBlockComponent
 
   firstUpdated() {
     const { page, selection } = this;
+
+    hotkey.setScope(HOTKEY_SCOPE.AFFINE_PAGE);
+    this._disposables.add(() => hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_PAGE));
 
     bindHotkeys(page, selection);
     hotkey.enableHotkey();

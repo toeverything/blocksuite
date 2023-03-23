@@ -9,8 +9,6 @@ import {
   doesInSamePath,
   getClosestBlockElementByPoint,
   getHoveringFrame,
-  hotkey,
-  HOTKEY_SCOPE,
   Rect,
 } from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
@@ -22,7 +20,6 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
-import type { KeyHandler } from 'hotkeys-js';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
@@ -157,20 +154,6 @@ export function getCursorMode(mouseMode: MouseMode) {
     default:
       return 'default';
   }
-}
-
-export function bindEdgelessHotkey(
-  key: string,
-  listener: KeyHandler,
-  options: {
-    keyup?: boolean;
-    keydown?: boolean;
-  } = {}
-) {
-  hotkey.addListener(key, listener, {
-    scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
-    ...options,
-  });
 }
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {

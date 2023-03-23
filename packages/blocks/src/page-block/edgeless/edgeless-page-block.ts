@@ -5,15 +5,12 @@ import './components/edgeless-selected-rect.js';
 import {
   almostEqual,
   type BlockHost,
-  BrushSize,
-  hotkey,
-  HOTKEY_SCOPE,
   type IPoint,
   type Point,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -41,30 +38,25 @@ import type {
 } from '../../index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
-  bindCommonHotkey,
   EDGELESS_BLOCK_CHILD_PADDING,
-  handleDown,
-  handleUp,
-  removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
+import { bindEdgelessHotkeys } from './hotkey.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
 import {
-  bindEdgelessHotkey,
   createDragHandle,
   DEFAULT_FRAME_HEIGHT,
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
   DEFAULT_FRAME_WIDTH,
   getCursorMode,
-  isTopLevelBlock,
 } from './utils.js';
 
 export interface EdgelessSelectionSlots {
@@ -165,99 +157,12 @@ export class EdgelessPageBlockComponent
 
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
-
-  // When user enters pan mode by pressing space,
-  // we should revert to the last mouse mode once user releases the key.
-  private _shouldRevertMode = false;
-  private _lastMode: MouseMode | null = null;
+  // FIXME: Many parts of code assume that the `selection` is used in page mode
+  getSelection() {
+    return this._selection;
+  }
 
   private _frameResizeObserver = new FrameResizeObserver();
-
-  private _bindHotkeys() {
-    bindEdgelessHotkey(HOTKEYS.BACKSPACE, this._handleBackspace);
-    bindEdgelessHotkey(HOTKEYS.UP, e => handleUp(e, this.page));
-    bindEdgelessHotkey(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    bindEdgelessHotkey(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
-    bindEdgelessHotkey('v', () => this._setMouseMode({ type: 'default' }));
-    bindEdgelessHotkey('h', () =>
-      this._setMouseMode({ type: 'pan', panning: false })
-    );
-    bindEdgelessHotkey('t', () => this._setMouseMode({ type: 'text' }));
-    bindEdgelessHotkey('p', () =>
-      this._setMouseMode({
-        type: 'brush',
-        color: '#000',
-        lineWidth: BrushSize.Thin,
-      })
-    );
-    bindEdgelessHotkey('s', () =>
-      this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
-    );
-    // issue #1814
-    bindEdgelessHotkey('Esc', () => {
-      this._setMouseMode({ type: 'default' });
-      this.slots.selectionUpdated.emit({ selected: [], active: false });
-    });
-
-    hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
-    bindCommonHotkey(this.page);
-
-    return () => {
-      hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
-      removeCommonHotKey();
-    };
-  }
-
-  private _setMouseMode(mode: MouseMode) {
-    if (this._selection.isActive) {
-      return;
-    }
-    this.slots.mouseModeUpdated.emit(mode);
-  }
-
-  private _handleBackspace = (e: KeyboardEvent) => {
-    const { selected } = this._selection.blockSelectionState;
-    selected.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = this.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 frame
-        if (children.length > 1) {
-          this.page.deleteBlock(element);
-        }
-      } else {
-        this.surface.removeElement(element.id);
-      }
-    });
-    this._selection.currentController.clearSelection();
-    this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
-  };
-
-  private _handleSpace = (event: KeyboardEvent) => {
-    const { mouseMode, blockSelectionState } = this._selection;
-    if (event.type === 'keydown') {
-      if (mouseMode.type === 'pan') {
-        return;
-      }
-
-      // when user is editing, shouldn't enter pan mode
-      if (mouseMode.type === 'default' && blockSelectionState.active) {
-        return;
-      }
-
-      this.mouseMode = { type: 'pan', panning: false };
-      this._shouldRevertMode = true;
-      this._lastMode = mouseMode;
-    }
-    if (event.type === 'keyup') {
-      if (
-        mouseMode.type === 'pan' &&
-        this._shouldRevertMode &&
-        this._lastMode
-      ) {
-        this.mouseMode = this._lastMode;
-      }
-    }
-  };
 
   private _clearSelection() {
     requestAnimationFrame(() => {
@@ -368,7 +273,7 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(this._selection);
     _disposables.add(this.surface);
-    _disposables.add(this._bindHotkeys());
+    _disposables.add(bindEdgelessHotkeys(this));
 
     _disposables.add(this._frameResizeObserver);
     _disposables.add(
