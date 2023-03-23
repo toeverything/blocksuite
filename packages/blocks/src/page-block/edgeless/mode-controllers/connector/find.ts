@@ -1,9 +1,26 @@
-import { AStar } from './a-star.js';
-import { getNumberOfInflectionPoints } from './geometry.js';
+import { runAStar } from './a-star.js';
+import { getTuringPointsCount } from './geometry.js';
 import type { Grid } from './grid0.js';
 import { checkCanFollowWaypoint } from './layout-util.js';
 import type { PathFindingPointData } from './type.js';
 import { calculateManhattanDist } from './util.js';
+
+function calculateHeuristic(
+  current: number[],
+  grid: Grid,
+  endInfo: PathFindingPointData,
+  followWaypoint: boolean,
+  waypoint?: number[]
+) {
+  const h1 = calculateManhattanDist(
+    current,
+    grid.getGridPoint(endInfo.endpoint)
+  );
+
+  if (!followWaypoint) return h1;
+
+  return h1 + calculateManhattanDist(current, grid.getGridPoint(waypoint!));
+}
 
 export function find(
   grid: Grid,
@@ -12,46 +29,38 @@ export function find(
     endInfo,
     waypoint,
     isCovered,
-    checkWaypointWalkable,
+    waypointWalkableGetter,
   }: {
     startInfo: PathFindingPointData;
     endInfo: PathFindingPointData;
     waypoint?: number[];
     isCovered: boolean;
-    checkWaypointWalkable: (from: number[], to: number[]) => boolean;
+    waypointWalkableGetter: (from: number[], to: number[]) => boolean;
   }
 ) {
-  const followWaypoint =
+  const followWaypoint = !!(
     waypoint &&
     checkCanFollowWaypoint(
       startInfo,
       endInfo,
       waypoint,
       grid,
-      checkWaypointWalkable
-    );
+      waypointWalkableGetter
+    )
+  );
 
-  const heuristic = (current: number[], grid: Grid) => {
-    const h1 = calculateManhattanDist(
-      current,
-      grid.getGridPoint(endInfo.endpoint)
-    );
-
-    if (!followWaypoint) {
-      return h1;
-    }
-
-    return h1 + calculateManhattanDist(current, grid.getGridPoint(waypoint!));
+  const heuristicGetter = (current: number[], grid: Grid) => {
+    return calculateHeuristic(current, grid, endInfo, followWaypoint, waypoint);
   };
 
   if (isCovered) {
-    const temp = AStar(
+    const temp = runAStar(
       grid,
       startInfo.endpoint,
       endInfo.endpoint,
       startInfo.direction,
       endInfo.direction,
-      heuristic
+      heuristicGetter
     );
     temp.path.push(endInfo.origin);
     temp.path.unshift(startInfo.origin);
@@ -61,13 +70,13 @@ export function find(
 
   const result = [0, 1, 2, 4]
     .map(index =>
-      AStar(
+      runAStar(
         grid,
         startInfo.endpoint,
         endInfo.endpoint,
         startInfo.direction,
         endInfo.direction,
-        heuristic,
+        heuristicGetter,
         index
       )
     )
@@ -83,12 +92,13 @@ export function find(
     completedPath.push(endInfo.origin);
     completedPath.unshift(startInfo.origin);
 
-    const d1 = getNumberOfInflectionPoints(item.path);
-    const d2 = getNumberOfInflectionPoints(completedPath);
+    const d1 = getTuringPointsCount(item.path);
+    const d2 = getTuringPointsCount(completedPath);
 
     /**
-     * 1. 拐点数都相同时取最小的 G
-     * 2. 先取不包含起始点的最小拐点数，再判断包含了起始点的最小拐点数
+     * 1. When the number of turing points are the same, take the one with smallest G.
+     * 2. Take the smallest number of turing points without the starting point first,
+     * and then test the smallest number of turning points that includes the starting point.
      */
     if (
       d1 < min1 ||

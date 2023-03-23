@@ -1,5 +1,5 @@
 import { ICompareable } from './heap.js';
-import { Key } from './util.js';
+import { createKey } from './util.js';
 
 export class Point extends ICompareable {
   /** G stands for the cost from start to current point */
@@ -17,7 +17,7 @@ export class Point extends ICompareable {
     this.H = 0;
     this.parent = parent;
     this.xy = xy;
-    this.key = Key(xy);
+    this.key = createKey(xy);
   }
 
   /** F stands for the sum of G and H */

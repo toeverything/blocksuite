@@ -1,7 +1,8 @@
 /* eslint-disable prefer-const */
-import { addV, calculateEuclideanDist, subV } from './util.js';
+import { add, sub } from './util.js';
 
-// 见 pathfindingjs
+// Credits to PathFinding.js
+// https://github.com/qiao/PathFinding.js
 export function compressPath(path: number[][]): number[][] {
   // nothing to compress
   if (path.length < 3) {
@@ -64,7 +65,7 @@ export function compressPath(path: number[][]): number[][] {
   return compressed;
 }
 
-export function lineLine(
+export function lineLineIntersected(
   a1: number[],
   a2: number[],
   b1: number[],
@@ -92,41 +93,36 @@ export function lineLine(
   return false;
 }
 
-export function lineRect(a1: number[], a2: number[], b: number[][]): boolean {
+export function lineRectIntersected(
+  a1: number[],
+  a2: number[],
+  b: number[][]
+): boolean {
   const [r0, r1, r2, r3] = b;
 
-  if (lineLine(a1, a2, r0, r1)) return true;
-  if (lineLine(a1, a2, r1, r2)) return true;
-  if (lineLine(a1, a2, r2, r3)) return true;
-  if (lineLine(a1, a2, r3, r0)) return true;
+  if (lineLineIntersected(a1, a2, r0, r1)) return true;
+  if (lineLineIntersected(a1, a2, r1, r2)) return true;
+  if (lineLineIntersected(a1, a2, r2, r3)) return true;
+  if (lineLineIntersected(a1, a2, r3, r0)) return true;
   return false;
 }
 
-export function rectRect(r1: number[][], r2: number[][]): boolean {
+export function rectRectIntersected(r1: number[][], r2: number[][]): boolean {
   const l = 4;
 
   return (
-    r1.some((_, i) => lineRect(r1[i], r1[(i + 1) % l], r2)) ||
-    r2.some((_, i) => lineRect(r2[i], r2[(i + 1) % l], r1))
+    r1.some((_, i) => lineRectIntersected(r1[i], r1[(i + 1) % l], r2)) ||
+    r2.some((_, i) => lineRectIntersected(r2[i], r2[(i + 1) % l], r1))
   );
 }
 
-export function isCollinear(p: number[], q: number[], t: number[]): boolean {
-  const accuracy = 0;
-  // 3点围成的三角形面积
-  const area =
-    p[0] * q[1] -
-    p[1] * q[0] +
-    q[0] * t[1] -
-    q[1] * t[0] +
-    t[0] * p[1] -
-    t[1] * p[0];
-  const edge = calculateEuclideanDist(p, q);
-
-  return Math.abs(area / edge) <= accuracy;
+export function isCollinear(p1: number[], p2: number[], p3: number[]): boolean {
+  const crossProduct =
+    (p2[0] - p1[0]) * (p3[1] - p1[1]) - (p2[1] - p1[1]) * (p3[0] - p1[0]);
+  return crossProduct === 0;
 }
 
-export function getNumberOfInflectionPoints(path: number[][]): number {
+export function getTuringPointsCount(path: number[][]): number {
   if (path.length < 3) {
     return 0;
   }
@@ -176,7 +172,7 @@ export function smoothPath(path: number[][][], maxRadius: number): string[] {
     const currentPoint = current[current.length - 1];
     const nextPoint = next[0];
 
-    const d = subV(originCurrent[originCurrent.length - 2], originNext[1]);
+    const d = sub(originCurrent[originCurrent.length - 2], originNext[1]);
     const radius = Math.min(
       maxRadius,
       ...d.map(item => (Math.abs(item) - 2) / 2)
@@ -184,8 +180,8 @@ export function smoothPath(path: number[][][], maxRadius: number): string[] {
 
     const base = originCurrent[originCurrent.length - 1];
 
-    const d1 = subV(base, originCurrent[originCurrent.length - 2]);
-    const d2 = subV(originNext[0], originNext[1]);
+    const d1 = sub(base, originCurrent[originCurrent.length - 2]);
+    const d2 = sub(originNext[0], originNext[1]);
 
     [
       [currentPoint, d1],
@@ -222,5 +218,5 @@ export function roundPoint(p: number[]): number[] {
 }
 
 export function getMidPoint(p1: number[], p2: number[]): number[] {
-  return addV(p1, p2).map(item => Math.round(item / 2));
+  return add(p1, p2).map(item => Math.round(item / 2));
 }

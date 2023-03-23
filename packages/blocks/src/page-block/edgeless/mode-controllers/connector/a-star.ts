@@ -4,14 +4,14 @@ import type { Grid } from './grid0.js';
 import { Heap } from './heap.js';
 import { checkDirectionIsValid, getMoveDelta } from './layout-util.js';
 import { Point } from './point.js';
-import { addV, subV } from './util.js';
+import { add, sub } from './util.js';
 
 const heap = new Heap<Point>();
 const marked = new Map<string, Point>();
 const openMap = new Map<string, Point>();
 
 function getDirection(from: number[], to: number[]) {
-  const v = subV(to, from);
+  const v = sub(to, from);
 
   if (v[0] === 0) {
     return v[1] > 0 ? Direction.BOTTOM : Direction.TOP;
@@ -20,13 +20,13 @@ function getDirection(from: number[], to: number[]) {
   return v[0] > 0 ? Direction.RIGHT : Direction.LEFT;
 }
 
-export function AStar(
+export function runAStar(
   grid: Grid,
   start: number[],
   end: number[],
   startDirection: Direction,
   endDirection: Direction,
-  heuristic: (current: number[], grid: Grid) => number,
+  heuristicGetter: (current: number[], grid: Grid) => number,
   index?: number
 ) {
   const startCoord = grid.getGridPoint(start);
@@ -81,7 +81,7 @@ export function AStar(
     isFirst = false;
 
     neighbors.forEach(([dx, dy]) => {
-      const currentXY = addV(xy, [dx, dy]);
+      const currentXY = add(xy, [dx, dy]);
       const point = new Point(currentXY);
 
       if (!marked.has(point.key) && grid.isWalkable(xy, currentXY)) {
@@ -93,7 +93,7 @@ export function AStar(
         const turned = lastDir !== null && lastDir !== dir;
 
         point.G = minPoint.G + grid.getCost(currentXY) + (turned ? 0.02 : 0);
-        point.H = heuristic(currentXY, grid);
+        point.H = heuristicGetter(currentXY, grid);
 
         if (!previous) {
           point.setParent(minPoint);

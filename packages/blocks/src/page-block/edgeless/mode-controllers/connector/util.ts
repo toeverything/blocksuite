@@ -1,21 +1,16 @@
-export function subV(v1: number[], v2: number[]): number[] {
-  return v1.map((item, index) => item - v2[index]);
+export function sub(v1: number[], v2: number[]): number[] {
+  return [v1[0] - v2[0], v1[1] - v2[1]];
 }
 
-export function addV(v1: number[], v2: number[]): number[] {
-  return v1.map((item, index) => item + v2[index]);
-}
-
-export function calculateEuclideanDist(p1: number[], p2: number[]): number {
-  return Math.hypot(...subV(p2, p1).map(Math.abs));
+export function add(v1: number[], v2: number[]): number[] {
+  return [v1[0] + v2[0], v1[1] + v2[1]];
 }
 
 export function calculateManhattanDist(p1: number[], p2: number[]): number {
-  const d = subV(p2, p1).map(Math.abs);
-  return d[0] + d[1];
+  return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
 }
 
-export function Key(p: number[]): string {
+export function createKey(p: number[]): string {
   return p.join(':');
 }
 

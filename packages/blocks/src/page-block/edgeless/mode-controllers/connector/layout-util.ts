@@ -1,7 +1,7 @@
 import { Direction } from './constants.js';
 import type { Grid } from './grid0.js';
 import type { PathFindingPointData } from './type.js';
-import { addV, Key, subV } from './util.js';
+import { add, createKey, sub } from './util.js';
 
 export function cloneDeep<T>(t: T): T {
   return JSON.parse(JSON.stringify(t));
@@ -10,10 +10,10 @@ export function cloneDeep<T>(t: T): T {
 export function extendBox(box: number[][], d: number) {
   const result = box.map(item => [...item]);
 
-  result[0] = addV(result[0], [-d, -d]);
-  result[1] = addV(result[1], [d, -d]);
-  result[2] = addV(result[2], [d, d]);
-  result[3] = addV(result[3], [-d, d]);
+  result[0] = add(result[0], [-d, -d]);
+  result[1] = add(result[1], [d, -d]);
+  result[2] = add(result[2], [d, d]);
+  result[3] = add(result[3], [-d, d]);
 
   return result;
 }
@@ -27,12 +27,12 @@ export function inView(point: number[], box: number[][]) {
   );
 }
 
-export function uniqPoints(points: number[][]) {
+export function uniquePoints(points: number[][]) {
   const map = new Map<string, true>();
   const result: number[][] = [];
 
   points.forEach(item => {
-    const k = Key(item);
+    const k = createKey(item);
     if (!map.has(k)) {
       result.push(item);
       map.set(k, true);
@@ -62,7 +62,7 @@ export function checkDirectionIsValid(
   to: number[],
   direction: Direction
 ) {
-  const d = subV(to, from);
+  const d = sub(to, from);
 
   let disabled = false;
 
