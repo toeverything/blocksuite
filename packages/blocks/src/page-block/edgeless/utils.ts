@@ -20,7 +20,6 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
-import type { KeyHandler } from 'hotkeys-js';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
