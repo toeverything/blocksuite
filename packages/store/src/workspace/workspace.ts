@@ -84,7 +84,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
   addPageMeta(page: PageMeta, index?: number) {
     this.doc.transact(() => {
       const pages: Y.Array<unknown> = this.pages ?? new Y.Array();
-      const yPage = this.transformObjectToYMap(page);
+      const yPage = this._transformObjectToYMap(page);
       if (index === undefined) {
         pages.push([yPage]);
       } else {
@@ -94,14 +94,6 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
         this._ySpace.set('pages', pages);
       }
     });
-  }
-
-  transformObjectToYMap(obj: Record<string, unknown>) {
-    const yMap = new Y.Map();
-    Object.entries(obj).forEach(([key, value]) => {
-      yMap.set(key, value);
-    });
-    return yMap;
   }
 
   setPageMeta(id: string, props: Partial<PageMeta>) {
@@ -128,7 +120,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
 
     if (index === -1) return;
 
-    const yPage = this.transformObjectToYMap(pageMetas[index]);
+    const yPage = this._transformObjectToYMap(pageMetas[index]);
 
     this.doc.transact(() => {
       assertExists(this.pages);
@@ -260,6 +252,14 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
       }
     });
   };
+
+  private _transformObjectToYMap(obj: Record<string, unknown>) {
+    const yMap = new Y.Map();
+    Object.entries(obj).forEach(([key, value]) => {
+      yMap.set(key, value);
+    });
+    return yMap;
+  }
 }
 
 export class Workspace {
