@@ -432,7 +432,8 @@ export class DatabaseBlockComponent
   }
 
   private _onSearch = (event: InputEvent) => {
-    const inputValue = (event.target as HTMLInputElement).value.trim();
+    const el = event.target as HTMLInputElement;
+    const inputValue = el.value.trim();
     this._searchState = SearchState.Searching;
     if (inputValue === '') {
       this._searchState = SearchState.SearchInput;
@@ -450,6 +451,10 @@ export class DatabaseBlockComponent
     this._filteredRowIds = this.model.children
       .filter(child => existRowIds.includes(child.id))
       .map(child => child.id);
+
+    // When deleting the search content, the rich-text in the database row will automatically get the focus,
+    // causing the search box to blur. So, here we manually make it focus.
+    requestAnimationFrame(() => el.focus());
   };
 
   private _onSearchKeydown = (event: KeyboardEvent) => {
