@@ -16,12 +16,13 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = { name: string; value: string; disabled: boolean };
 const ACTIONS: Action[] = [
-  { name: 'Copy', value: 'copy', disabled: true },
-  { name: 'Paste', value: 'paste', disabled: true },
-  { name: 'Duplicate', value: 'duplicate', disabled: true },
-  { name: 'Bring to front', value: 'bring to front', disabled: true },
-  { name: 'Send to back', value: 'send to back', disabled: true },
-  { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
+  // FIXME: should implement these function
+  // { name: 'Copy', value: 'copy', disabled: true },
+  // { name: 'Paste', value: 'paste', disabled: true },
+  // { name: 'Duplicate', value: 'duplicate', disabled: true },
+  // { name: 'Bring to front', value: 'bring to front', disabled: true },
+  // { name: 'Send to back', value: 'send to back', disabled: true },
+  // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
   { name: 'Delete', value: 'delete', disabled: false },
 ];
 
@@ -47,6 +48,7 @@ export class EdgelessMoreButton extends LitElement {
       display: block;
       fill: none;
       stroke: currentColor;
+      color: var(--affine-text-color);
     }
 
     .more-actions-container {

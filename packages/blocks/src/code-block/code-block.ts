@@ -83,6 +83,10 @@ export class CodeBlockComponent extends NonShadowLitElement {
       visibility: visible;
     }
 
+    .affine-code-block-container > .lang-list-wrapper > .lang-button {
+      min-width: 101px;
+    }
+
     .affine-code-block-container.selected {
       background-color: var(--affine-selected-color);
     }
@@ -165,11 +169,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   private _wrap = false;
 
-  get highlight() {
-    const service = this.host.getService(this.model.flavour);
-    return service.hljs.default.highlight;
-  }
-
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
@@ -189,12 +188,12 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
-  private async _startHighlight(langs: Lang[]) {
+  private async _startHighlight(lang: Lang) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? 'github-dark' : 'github-light',
       themes: ['github-light', 'github-dark'],
-      langs,
+      langs: [lang],
       paths: {
         // TODO: use local path
         wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
@@ -290,11 +289,16 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   protected firstUpdated() {
+    if (this.model.language === 'Plain Text') {
+      this._highlighter = null;
+      return;
+    }
+
     const lang = codeLanguages.find(
       lang => lang === this.model.language.toLowerCase()
     );
     if (lang) {
-      this._startHighlight([lang]);
+      this._startHighlight(lang);
     } else {
       this._highlighter = null;
     }
@@ -324,7 +328,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
             });
           }
         } else {
-          this._startHighlight([lang]);
+          this._startHighlight(lang);
         }
       } else {
         this._highlighter = null;
@@ -354,8 +358,9 @@ export class CodeBlockComponent extends NonShadowLitElement {
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
       <icon-button
+        class="lang-button"
         data-testid="lang-button"
-        width="101px"
+        width="auto"
         height="24px"
         ?hover=${this._showLangList}
         ?disabled=${this.readonly}

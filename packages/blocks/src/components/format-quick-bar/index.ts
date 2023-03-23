@@ -1,5 +1,4 @@
 import './button.js';
-import './format-bar-node.js';
 
 import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
@@ -13,7 +12,7 @@ import {
   calcSafeCoordinate,
   type DragDirection,
 } from '../../page-block/utils/position.js';
-import type { FormatQuickBar } from './format-bar-node.js';
+import { FormatQuickBar } from './format-bar-node.js';
 
 let formatQuickBarInstance: FormatQuickBar | null = null;
 
@@ -58,7 +57,7 @@ export const showFormatQuickBar = async ({
     return;
   }
 
-  const formatQuickBar = document.createElement('format-quick-bar');
+  const formatQuickBar = new FormatQuickBar();
   formatQuickBar.page = page;
   formatQuickBar.models = blockRange.models;
   formatQuickBar.abortController = abortController;

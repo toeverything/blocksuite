@@ -5,7 +5,7 @@ export const CodeBlockSchema = defineBlockSchema(
   'affine:code',
   internal => ({
     text: internal.Text(),
-    language: 'JavaScript',
+    language: 'Plain Text',
   }),
   {
     version: 1,

@@ -59,6 +59,7 @@ export interface SSROptions {
 export type InlineSuggestionProvider = (context: {
   title: string;
   text: string;
+  abortSignal: AbortSignal;
 }) => string | Promise<string>; // | Promise<ReadableStream<string>>;
 
 export interface StoreOptions<

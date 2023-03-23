@@ -245,6 +245,8 @@ export function calcSafeCoordinate({
 /**
  * Used to compare the space available
  * at the top and bottom of an element within a container.
+ *
+ * Please give preference to {@link getPopperPosition}
  */
 export function compareTopAndBottomSpace(
   obj: { getBoundingClientRect: () => DOMRect },
@@ -261,5 +263,60 @@ export function compareTopAndBottomSpace(
     placement: topOrBottom,
     // the height is the available space.
     height: (topOrBottom === 'top' ? topSpace : bottomSpace) - gap,
+  };
+}
+
+/**
+ * Get the position of the popper element with flip.
+ */
+export function getPopperPosition(
+  popper: {
+    getBoundingClientRect: () => DOMRect;
+  },
+  reference: {
+    getBoundingClientRect: () => DOMRect;
+  },
+  { gap = 12, offsetY = 5 }: { gap?: number; offsetY?: number } = {}
+) {
+  const { placement, height } = compareTopAndBottomSpace(
+    reference,
+    document.body,
+    gap + offsetY
+  );
+
+  const referenceRect = reference.getBoundingClientRect();
+  const positioningPoint = {
+    x: referenceRect.x,
+    y: referenceRect.y + (placement === 'bottom' ? referenceRect.height : 0),
+  };
+
+  // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
+  const boundaryRect = document.body.getBoundingClientRect();
+  // Note: the popperRect.height maybe incorrect
+  // because we are calculated its correct height
+  const popperRect = popper.getBoundingClientRect();
+
+  const safeCoordinate = calcSafeCoordinate({
+    positioningPoint,
+    objRect: popperRect,
+    boundaryRect,
+    offsetY: placement === 'bottom' ? offsetY : -offsetY,
+  });
+
+  return {
+    placement,
+    /**
+     * The height is the available space height.
+     *
+     * Note: it's a max height, not the real height,
+     * because sometimes the popper's height is smaller than the available space.
+     */
+    height,
+    x: `${safeCoordinate.x}px`,
+    y:
+      placement === 'bottom'
+        ? `${safeCoordinate.y}px`
+        : // We need to use `calc(-100%)` since the height of popper maybe incorrect
+          `calc(${safeCoordinate.y}px - 100%)`,
   };
 }

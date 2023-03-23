@@ -32,6 +32,7 @@ export class EdgelessChangeShapeButton extends LitElement {
       display: block;
       fill: none;
       stroke: currentColor;
+      color: var(--affine-text-color);
     }
 
     edgeless-shape-menu {

@@ -31,7 +31,7 @@ export function createLink(page: Page) {
   if (format.link) {
     page.captureSync();
     vEditor.formatText(vRange, { link: null });
-    // vEditor.setVRange(vRange);
+    vEditor.setVRange(vRange);
     // recreate link
     // setTimeout(() => {
     //   createLink(page);
@@ -75,5 +75,6 @@ export function createLink(page: Page) {
 
     page.captureSync();
     vEditor.formatText(vRange, { link });
+    vEditor.setVRange(vRange);
   });
 }

@@ -9,7 +9,6 @@ import type { Page } from '@blocksuite/store';
 import {
   blockRangeToNativeRange,
   focusBlockByModel,
-  getVirgoByModel,
   hotkey,
   isMultiBlockRange,
   isPageMode,
@@ -89,30 +88,6 @@ export function bindCommonHotkey(page: Page) {
     const range = blockRangeToNativeRange(blockRange);
     if (!range || !isMultiBlockRange(range)) return;
     deleteModelsByRange(page);
-
-    // handle user input
-    if (
-      !blockRange ||
-      blockRange.models.length === 0 ||
-      blockRange.type !== 'Native'
-    ) {
-      return;
-    }
-    const startBlock = blockRange.models[0];
-    const vEditor = getVirgoByModel(startBlock);
-    if (vEditor) {
-      vEditor.insertText(
-        {
-          index: blockRange.startOffset,
-          length: 0,
-        },
-        e.key
-      );
-      vEditor.setVRange({
-        index: blockRange.startOffset + 1,
-        length: 0,
-      });
-    }
   });
 
   // !!!
@@ -354,6 +329,8 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       return;
     }
     if (blockRange.type === 'Block') {
+      e.preventDefault();
+
       const endModel = blockRange.models[blockRange.models.length - 1];
       const parentModel = page.getParent(endModel);
       const index = parentModel?.children.indexOf(endModel);
@@ -365,6 +342,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
         parentModel,
         index + 1
       );
+
       asyncFocusRichText(page, id);
       selection.clear();
       return;

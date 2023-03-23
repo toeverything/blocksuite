@@ -1,5 +1,6 @@
 import {
   CopyIcon,
+  DatabaseTableViewIcon,
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
@@ -19,6 +20,7 @@ import {
 import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   getCurrentNativeRange,
@@ -38,6 +40,7 @@ export type SlashItem = {
   name: string;
   icon: TemplateResult<1>;
   divider?: boolean;
+  disabled?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
 
@@ -211,6 +214,38 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const strTime = hours + ':' + min + ' ' + amOrPm;
           insertContent(model, strTime);
         },
+      },
+    ],
+  },
+  {
+    name: 'Database',
+    items: [
+      {
+        name: 'Table View',
+        icon: DatabaseTableViewIcon,
+        divider: true,
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          const id = page.addBlock(
+            'affine:database',
+            {},
+            page.getParent(model),
+            index
+          );
+          const service = await getServiceOrRegister('affine:database');
+          service.initDatabaseBlock(page, model, id, false);
+        },
+      },
+      {
+        name: 'Kanban View',
+        // TODO: change icon
+        icon: DatabaseTableViewIcon,
+        disabled: true,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        action: ({ model }) => {},
       },
     ],
   },
