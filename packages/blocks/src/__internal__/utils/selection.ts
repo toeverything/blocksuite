@@ -246,7 +246,7 @@ export function clearSelection(page: Page) {
   if (!page.root) return;
   const defaultPageBlock = getDefaultPageBlock(page.root);
 
-  if ('clear' in defaultPageBlock.selection) {
+  if ('selection' in defaultPageBlock) {
     // this is not EdgelessPageBlockComponent
     defaultPageBlock.selection.clear();
   }

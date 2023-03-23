@@ -13,7 +13,7 @@ function setMouseMode(
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
-  if (!ignoreActiveState && edgeless.selection.isActive) {
+  if (!ignoreActiveState && edgeless.getSelection().isActive) {
     return;
   }
   edgeless.slots.mouseModeUpdated.emit(mouseMode);
@@ -27,7 +27,7 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { mouseMode, blockSelectionState } = edgeless.selection;
+      const { mouseMode, blockSelectionState } = edgeless.getSelection();
       if (event.type === 'keydown') {
         if (mouseMode.type === 'pan') {
           return;
@@ -57,7 +57,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
 
   hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
-    const { selected } = edgeless.selection.blockSelectionState;
+    const { selected } = edgeless.getSelection().blockSelectionState;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
@@ -69,9 +69,9 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
         edgeless.surface.removeElement(element.id);
       }
     });
-    edgeless.selection.currentController.clearSelection();
+    edgeless.getSelection().currentController.clearSelection();
     edgeless.slots.selectionUpdated.emit(
-      edgeless.selection.blockSelectionState
+      edgeless.getSelection().blockSelectionState
     );
   });
   hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page));

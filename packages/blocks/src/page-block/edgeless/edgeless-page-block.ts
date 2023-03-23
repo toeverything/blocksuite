@@ -157,7 +157,8 @@ export class EdgelessPageBlockComponent
 
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
-  get selection() {
+  // FIXME: Many parts of code assume that the `selection` is used in page mode
+  getSelection() {
     return this._selection;
   }
 
