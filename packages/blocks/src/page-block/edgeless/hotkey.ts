@@ -1,7 +1,7 @@
-import type { MouseMode } from '@blocksuite/blocks/std.js';
 import { HOTKEYS } from '@blocksuite/global/config';
 
 import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
+import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
 import { bindCommonHotkey, handleDown, handleUp } from '../utils/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
