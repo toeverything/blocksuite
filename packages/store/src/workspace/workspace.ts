@@ -283,7 +283,7 @@ export class Workspace {
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
   flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
-  inlineSuggestionProvider?: InlineSuggestionProvider;
+  readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
   constructor(options: StoreOptions) {
     this.inlineSuggestionProvider =
@@ -361,6 +361,10 @@ export class Workspace {
 
   get doc() {
     return this._store.doc;
+  }
+
+  get idGenerator() {
+    return this._store.idGenerator;
   }
 
   register(blockSchema: z.infer<typeof BlockSchema>[]) {
