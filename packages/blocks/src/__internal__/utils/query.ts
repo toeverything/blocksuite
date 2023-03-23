@@ -496,6 +496,15 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isInsideDatabaseTitle(element: unknown): boolean {
+  const titleElement = document.querySelector(
+    '[data-block-is-database-title="true"]'
+  );
+  if (!titleElement) return false;
+
+  return titleElement.contains(element as Node);
+}
+
 export function isCaptionElement(node: unknown): node is HTMLInputElement {
   if (!(node instanceof Element)) {
     return false;

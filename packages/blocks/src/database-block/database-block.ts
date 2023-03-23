@@ -350,7 +350,7 @@ export class DatabaseBlockComponent
     return html`
       <div class="affine-database-block-title ${
         isEmpty ? 'affine-database-block-title-empty' : ''
-      }" data-block-is-title="true">
+      }" data-block-is-database-title="true">
       </div>
       <div class="affine-database-block">
         <div
