@@ -9,8 +9,6 @@ import {
   doesInSamePath,
   getClosestBlockElementByPoint,
   getHoveringFrame,
-  hotkey,
-  HOTKEY_SCOPE,
   Rect,
 } from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
@@ -157,20 +155,6 @@ export function getCursorMode(mouseMode: MouseMode) {
     default:
       return 'default';
   }
-}
-
-export function bindEdgelessHotkey(
-  key: string,
-  listener: KeyHandler,
-  options: {
-    keyup?: boolean;
-    keydown?: boolean;
-  } = {}
-) {
-  hotkey.addListener(key, listener, {
-    scope: HOTKEY_SCOPE.AFFINE_EDGELESS,
-    ...options,
-  });
 }
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
