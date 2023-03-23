@@ -27,6 +27,10 @@ export const BlockSchemas = [
   DividerBlockSchema,
 ];
 
+const defaultPageId = 'page0';
+const spaceId = `space:${defaultPageId}`;
+const spaceMetaId = 'space:meta';
+
 function serialize(page: Page) {
   return page.doc.toJSON();
 }
@@ -41,16 +45,11 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage() {
+function createTestPage(pageId = defaultPageId, parentId?: string) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  const page = workspace.createPage('page0');
-  return page;
+  return workspace.createPage(pageId, parentId);
 }
-
-const defaultPageId = 'page0';
-const spaceId = `space:${defaultPageId}`;
-const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
   it('can init workspace', () => {
@@ -80,6 +79,38 @@ describe.concurrent('basic', () => {
       },
       [spaceId]: {},
     });
+  });
+});
+
+describe.concurrent('pageMeta', () => {
+  it.only('can create subpage', () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const parentPage = workspace.createPage(defaultPageId);
+    const subpage = workspace.createPage('subpage0', parentPage.id);
+    assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
+  });
+
+  it('can shift subpage', () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const page0 = workspace.createPage('page0');
+    const page1 = workspace.createPage('page1');
+    const page2 = workspace.createPage('page2');
+
+    assert.deepEqual(
+      workspace.meta.pageMetas.map(m => m.id),
+      ['page0', 'page1', 'page2']
+    );
+
+    workspace.shiftPage(page1.id, 0);
+
+    assert.deepEqual(
+      workspace.meta.pageMetas.map(m => m.id),
+      ['page1', 'page0', 'page2']
+    );
   });
 });
 
