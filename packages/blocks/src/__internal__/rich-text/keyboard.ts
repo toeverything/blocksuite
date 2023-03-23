@@ -92,21 +92,11 @@ export function createKeyboardBindings(
         // if (context.format['code'] === true) {
         //   return ALLOW_DEFAULT;
         // }
-
-        // we need to insert text before show menu, because the Text node will be
-        // expired if we insert text after show menu because of the rerender
-        this.vEditor.insertText(range, context.event.key);
-        this.vEditor.setVRange({
-          index: range.index + 1,
-          length: 0,
-        });
-
         this.vEditor.slots.rangeUpdated.once(() => {
           const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
-
-        return PREVENT_DEFAULT;
+        return ALLOW_DEFAULT;
       },
     },
     ...createBracketAutoCompleteBindings(model),
