@@ -615,13 +615,13 @@ export function getClosestBlockElementByPoint(
   point: Point,
   state: {
     rect?: Rect;
-    container?: BlockComponentElement | Element;
+    container?: Element;
   } | null = null,
   scale = 1
 ): Element | null {
   const { y } = point;
 
-  let container = null;
+  let container;
   let element = null;
   let bounds = null;
   let childBounds = null;
@@ -809,7 +809,7 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function findBlockElement(elements: Element[], parent: Element | null = null) {
+function findBlockElement(elements: Element[], parent?: Element) {
   const len = elements.length;
   let element = null;
   let i = 0;
