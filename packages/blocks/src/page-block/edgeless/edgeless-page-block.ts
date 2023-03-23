@@ -193,6 +193,11 @@ export class EdgelessPageBlockComponent
     bindEdgelessHotkey('s', () =>
       this._setMouseMode({ type: 'shape', shape: 'rect', color: '#000000' })
     );
+    // issue #1814
+    bindEdgelessHotkey('Esc', () => {
+      this._setMouseMode({ type: 'default' });
+      this.slots.selectionUpdated.emit({ selected: [], active: false });
+    });
 
     hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
     bindCommonHotkey(this.page);
@@ -342,6 +347,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       slots.selectionUpdated.on(state => {
         this._selection.currentController.setBlockSelectionState(state);
+        this._clearSelection();
         this.requestUpdate();
       })
     );
