@@ -253,10 +253,12 @@ export class VEditor<
       })
     );
 
-    this.rootElement.focus();
+    this.rootElement.focus({ preventScroll: true });
 
     this.slots.updated.emit();
   };
+
+  shouldScrollIntoView = true;
 
   slots: {
     mounted: Slot;
@@ -557,22 +559,7 @@ export class VEditor<
   }
 
   setMarks(marks: TextAttributes): void {
-    this._marks = this._parseSchema(marks) ?? null;
-
-    let vRange = this.getVRange();
-    const dispose = this.slots.vRangeUpdated.on(([r, t]) => {
-      if (
-        vRange &&
-        r &&
-        ((t === 'native' && r.index === vRange.index) ||
-          (t !== 'native' && r.index === vRange.index + 1))
-      ) {
-        vRange = r;
-      } else {
-        this.resetMarks();
-        dispose.dispose();
-      }
-    });
+    this._marks = marks;
   }
 
   resetMarks(): void {
@@ -617,7 +604,7 @@ export class VEditor<
     attributes: TextAttributes = {} as TextAttributes
   ): void {
     if (this._marks) {
-      attributes = { ...this._marks, ...attributes };
+      attributes = { ...attributes, ...this._marks };
     }
     const normalizedAttributes = this._parseSchema(attributes);
 
@@ -723,13 +710,23 @@ export class VEditor<
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    if (this.shouldScrollIntoView) {
+      let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
+      while (!(lineElement instanceof VirgoLine)) {
+        lineElement = lineElement?.parentElement ?? null;
+      }
+      lineElement?.scrollIntoView({
+        block: 'nearest',
+      });
+    }
+
     this.slots.rangeUpdated.emit(newRange);
   };
 
   /**
    * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(vRange: VRange, shouldScrollIntoView = true): Range | null {
+  toDomRange(vRange: VRange): Range | null {
     assertExists(this._rootElement);
     const lineElements = Array.from(
       this._rootElement.querySelectorAll('v-line')
@@ -778,16 +775,6 @@ export class VEditor<
     const range = document.createRange();
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
-
-    if (shouldScrollIntoView) {
-      let lineElement: HTMLElement | null = focusText.parentElement;
-      while (!(lineElement instanceof VirgoLine)) {
-        lineElement = lineElement?.parentElement ?? null;
-      }
-      lineElement?.scrollIntoView({
-        block: 'nearest',
-      });
-    }
 
     return range;
   }

@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import { type BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+import { setUpVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
@@ -60,6 +61,7 @@ export class RichText extends NonShadowLitElement {
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
+    setUpVirgoScroll(this.model.page, this._vEditor);
     if (this.codeBlockGetHighlighterOptions) {
       this._vEditor.setAttributesSchema(z.object({}));
       this._vEditor.setAttributesRenderer(
@@ -88,20 +90,24 @@ export class RichText extends NonShadowLitElement {
         }
 
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (
-          deltas.length === 1 &&
-          vRange.index !== 0 &&
-          vRange.index !== vEditor.yText.length &&
-          e.data &&
-          e.data !== '\n'
-        ) {
-          const attributes = deltas[0][0].attributes;
-          vEditor.insertText(vRange, e.data, attributes);
-          vEditor.setVRange({
-            index: vRange.index + 1,
-            length: 0,
-          });
-          return true;
+        if (e.data && e.data !== '\n') {
+          if (
+            deltas.length > 1 ||
+            (deltas.length === 1 && vRange.index !== 0)
+          ) {
+            const attributes = deltas[0][0].attributes;
+            if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+              delete attributes?.link;
+              delete attributes?.code;
+            }
+
+            vEditor.insertText(vRange, e.data, attributes);
+            vEditor.setVRange({
+              index: vRange.index + 1,
+              length: 0,
+            });
+            return true;
+          }
         }
 
         return false;
@@ -115,20 +121,17 @@ export class RichText extends NonShadowLitElement {
           return false;
         }
 
-        const index = vRange.index;
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (
-          index >= 0 &&
-          data &&
-          data !== '\n' &&
-          deltas.length === 1 &&
-          vRange.index !== 0 &&
-          vRange.index !== vEditor.yText.length
-        ) {
+        if (vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
+          if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+            delete attributes?.link;
+            delete attributes?.code;
+          }
+
           vEditor.insertText(vRange, data, attributes);
           vEditor.setVRange({
-            index: index + data.length,
+            index: vRange.index + data.length,
             length: 0,
           });
           return true;

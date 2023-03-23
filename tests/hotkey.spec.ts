@@ -399,10 +399,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         />
         <text
           bold={true}
-          insert="fff"
-        />
-        <text
-          insert="ggg"
+          insert="fffggg"
         />
       </>
     }
@@ -413,6 +410,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   );
 
   await setVirgoSelection(page, 3, 0);
+  await waitNextFrame(page);
   await type(page, 'hhh');
 
   await assertStoreMatchJSX(
@@ -443,10 +441,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         />
         <text
           bold={true}
-          insert="fff"
-        />
-        <text
-          insert="ggg"
+          insert="fffggg"
         />
       </>
     }
