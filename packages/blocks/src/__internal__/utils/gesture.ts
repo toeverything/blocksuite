@@ -1,7 +1,7 @@
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
-import { debounce } from './std.js';
+import { debounce, IS_IOS, IS_MAC } from './std.js';
 
 export interface IPoint {
   x: number;
@@ -203,6 +203,10 @@ export function initMouseEventHandlers(
     );
   };
 
+  /**
+   * TODO merge to `selectionChangeHandler`
+   * @deprecated use `selectionChangeHandler` instead
+   */
   const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
@@ -212,7 +216,7 @@ export function initMouseEventHandlers(
     onSelectionChangeWithDebounce(e as Event);
   }, 300);
 
-  const selectionChangeHandlerWithoutDebounce = (e: Event) => {
+  const selectionChangeHandler = (e: Event) => {
     onSelectionChangeWithoutDebounce(e);
   };
 
@@ -224,10 +228,7 @@ export function initMouseEventHandlers(
     'selectionchange',
     selectionChangeHandlerWithDebounce
   );
-  document.addEventListener(
-    'selectionchange',
-    selectionChangeHandlerWithoutDebounce
-  );
+  document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
@@ -238,10 +239,16 @@ export function initMouseEventHandlers(
       'selectionchange',
       selectionChangeHandlerWithDebounce
     );
-    document.removeEventListener(
-      'selectionchange',
-      selectionChangeHandlerWithoutDebounce
-    );
+    document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
+}
+
+export function isPinchEvent(e: WheelEvent) {
+  // two finger pinches on touch pad, ctrlKey is always true.
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
+  if (IS_IOS || IS_MAC) {
+    return e.ctrlKey || e.metaKey;
+  }
+  return e.ctrlKey;
 }

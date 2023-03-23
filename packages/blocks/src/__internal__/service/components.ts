@@ -37,6 +37,7 @@ export function BlockElement(
           ${unsafeStatic(BLOCK_ID_ATTR)}=${model.id}
         ></${model.tag}>
       `;
+
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
     case 'affine:surface':

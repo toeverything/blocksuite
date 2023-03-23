@@ -14,6 +14,7 @@ import {
   focusTitle,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
+  getRichTextBoundingBox,
   getSelectedTextByVirgo,
   getVirgoSelectionIndex,
   getVirgoSelectionText,
@@ -57,34 +58,19 @@ test('click on blank area', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 }; // deepscan-disable-line NULL_POINTER
-  });
-  await page.mouse.click(above123.x, above123.y);
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left, y: box123.top + 5 };
+  await page.mouse.click(inside123.x, inside123.y);
   await assertSelection(page, 0, 0, 0);
 
-  const above456 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 };
-  });
-  await page.mouse.click(above456.x, above456.y);
+  const box456 = await getRichTextBoundingBox(page, '3');
+  const inside456 = { x: box456.left, y: box456.top + 5 };
+  await page.mouse.click(inside456.x, inside456.y);
   await assertSelection(page, 1, 0, 0);
 
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.bottom - 5 };
-  });
-  await page.mouse.click(below789.x, below789.y);
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.left, y: box789.bottom - 5 };
+  await page.mouse.click(inside789.x, inside789.y);
   await assertSelection(page, 2, 0, 0);
 });
 
@@ -94,24 +80,14 @@ test('native range delete', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await dragBetweenCoords(page, inside123, inside789);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -131,24 +107,14 @@ test('native range input', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await dragBetweenCoords(page, inside123, inside789);
   await page.keyboard.press('a');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['a']);
@@ -160,24 +126,14 @@ test('native range selection backwards', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 2 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 2 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const bottomRight789 = { x: box789.right, y: box789.bottom };
 
   // from bottom to top
-  await dragBetweenCoords(page, bottomRight789, topLeft123);
+  await dragBetweenCoords(page, bottomRight789, above123);
   await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -198,21 +154,11 @@ test('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
   await resetHistory(page);
 
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 10 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 10 };
 
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 10, y: bbox.bottom + 10 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right - 10, y: box789.bottom + 10 };
 
   await dragBetweenCoords(page, below789, above123);
   await pressBackspace(page);
@@ -355,13 +301,10 @@ test('double click choose words', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
-  const helloPosition = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const rect = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: rect.left + 2, y: rect.top + 8 };
-  });
+
+  const hello = await getRichTextBoundingBox(page, '2');
+  const helloPosition = { x: hello.x + 2, y: hello.y + 8 };
+
   await page.mouse.dblclick(helloPosition.x, helloPosition.y);
   const text = await page.evaluate(() => {
     let text = '';
@@ -518,24 +461,14 @@ test('select text in the same line with dragging rightward and press enter creat
   await assertRichTexts(page, ['123', '456', '789']);
   // blur the editor
   await page.mouse.click(0, 0);
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left - 20, y: bbox.top - 20 };
-  });
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right + 30, y: bbox.bottom + 50 };
-  });
 
-  await dragBetweenCoords(page, below789, above123, {
-    steps: 50,
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left - 20, y: box123.top - 20 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right + 30, y: box789.bottom + 50 };
+
+  await dragBetweenCoords(page, below789, above123, { steps: 50 });
   await page.keyboard.press('Enter', { delay: 50 });
   await type(page, 'abc');
   await assertRichTexts(page, ['123', '456', '789', 'abc']);
@@ -1007,24 +940,15 @@ test('should indent native multi-selection block', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  const topLeft456 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box456 = await getRichTextBoundingBox(page, '3');
+  const inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft456, bottomRight789);
+  await dragBetweenCoords(page, inside456, inside789);
 
   await page.keyboard.press('Tab');
 
@@ -2057,12 +1981,7 @@ test('undo should clear block selection', async ({ page }) => {
   await type(page, 'world');
   await pressEnter(page);
 
-  const rect = await page
-    .locator('[data-block-id="2"] .virgo-editor')
-    .boundingBox();
-  if (!rect) {
-    throw new Error();
-  }
+  const rect = await getRichTextBoundingBox(page, '2');
   await dragBetweenCoords(
     page,
     { x: rect.x - 5, y: rect.y - 5 },

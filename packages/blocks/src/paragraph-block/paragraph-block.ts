@@ -238,9 +238,15 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
+    // hide placeholder in database
+    const tipsPlaceholderTemplate =
+      this.host.flavour === 'affine:database'
+        ? ''
+        : this._tipsPlaceholderTemplate;
+
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._tipsPlaceholderTemplate}
+        ${tipsPlaceholderTemplate}
         <rich-text
           .host=${this.host}
           .model=${this.model}

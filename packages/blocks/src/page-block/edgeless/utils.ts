@@ -8,8 +8,10 @@ import type {
 import {
   doesInSamePath,
   getClosestBlockElementByPoint,
+  getHoveringFrame,
   hotkey,
   HOTKEY_SCOPE,
+  Rect,
 } from '@blocksuite/blocks/std';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
@@ -19,9 +21,10 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/store';
 import type { KeyHandler } from 'hotkeys-js';
 
-import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
+import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
 import type {
   EdgelessContainer,
@@ -92,7 +95,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
 
     const { viewport } = container.surface;
     // pan
-    if (!e[SHORTKEY]) {
+    if (!isPinchEvent(e)) {
       const dx = e.deltaX / viewport.zoom;
       const dy = e.deltaY / viewport.zoom;
       viewport.applyDeltaCenter(dx, dy);
@@ -187,11 +190,16 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         }
         const distanceToTop = Math.abs(rect.top - point.y);
         const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const parent = page.getParent(model);
+        assertExists(parent);
         page.moveBlocks(
           blocks.map(b => b.model),
+          parent,
           model,
           distanceToTop < distanceToBottom
         );
+
+        pageBlock.setSelectionByBlockId(parent.id, true);
       } else {
         // blank area
         page.captureSync();
@@ -213,7 +221,10 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       return null;
     },
     getClosestBlockElement(point: Point) {
-      return getClosestBlockElementByPoint(point);
+      if (pageBlock.mouseMode.type !== 'default') return null;
+      const hoveringFrame = getHoveringFrame(point);
+      if (!hoveringFrame) return null;
+      return getClosestBlockElementByPoint(point, Rect.fromDOM(hoveringFrame));
     },
   });
 }

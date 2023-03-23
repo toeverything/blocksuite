@@ -1,3 +1,4 @@
+import { onModelTextUpdated } from '@blocksuite/blocks';
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { VEditor, VText } from '@blocksuite/virgo';
@@ -6,7 +7,11 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
+import {
+  getModelByElement,
+  NonShadowLitElement,
+  resetNativeSelection,
+} from '../../utils/index.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
 function affineLinkStyles(
@@ -99,6 +104,8 @@ export class AffineLink extends NonShadowLitElement {
       this._isHovering = true;
     }
 
+    resetNativeSelection(null);
+
     const model = getModelByElement(this);
     if (model.page.readonly) return;
 
@@ -174,6 +181,11 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
+
+        // prevent virgo auto focus
+        onModelTextUpdated(model, richText => {
+          richText.vEditor?.rootElement.blur();
+        });
       } else {
         page.captureSync();
         vEditor.formatText(
@@ -183,6 +195,11 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
+
+        // prevent virgo auto focus
+        onModelTextUpdated(model, richText => {
+          richText.vEditor?.rootElement.blur();
+        });
       }
     } else {
       page.captureSync();
@@ -198,6 +215,11 @@ export class AffineLink extends NonShadowLitElement {
           mode: 'replace',
         }
       );
+
+      // prevent virgo auto focus
+      onModelTextUpdated(model, richText => {
+        richText.vEditor?.rootElement.blur();
+      });
     }
   }
 

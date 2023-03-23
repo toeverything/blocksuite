@@ -267,6 +267,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await redoByClick(page);
   await assertTextFormat(page, 0, 0, { strike: true });
 
+  await waitNextFrame(page);
   // the format should be removed after trigger the hotkey again
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, {});

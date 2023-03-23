@@ -12,7 +12,11 @@ import {
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import { Space } from '../space.js';
-import { Store, type StoreOptions } from '../store.js';
+import {
+  type InlineSuggestionProvider,
+  Store,
+  type StoreOptions,
+} from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
 import { Indexer, type QueryContent } from './search.js';
@@ -70,7 +74,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
   }
 
   get pageMetas() {
-    return this._proxy.pages?.toJSON() ?? ([] as PageMeta[]);
+    return (this._proxy.pages?.toJSON() as PageMeta[]) ?? ([] as PageMeta[]);
   }
 
   getPageMeta(id: string) {
@@ -278,7 +282,11 @@ export class Workspace {
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
   flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
+  inlineSuggestionProvider?: InlineSuggestionProvider;
+
   constructor(options: StoreOptions) {
+    this.inlineSuggestionProvider =
+      options.experimentalInlineSuggestionProvider;
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
     if (options.blobOptionsGetter) {
@@ -444,8 +452,10 @@ export class Workspace {
     if (parentId) {
       const parentPage = this.getPage(parentId) as Page;
       const parentPageMeta = this.meta.getPageMeta(parentId);
+      assertExists(parentPageMeta);
       // Compatibility process: the old data not has `subpageIds`, it should be an empty array
       const subpageIds = [...(parentPageMeta.subpageIds ?? []), pageId];
+
       this.setPageMeta(parentId, {
         subpageIds,
       });
@@ -471,6 +481,7 @@ export class Workspace {
 
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
+    assertExists(pageMeta);
     const parentId = this.meta.pageMetas.find(meta =>
       meta.subpageIds.includes(pageId)
     )?.id;
@@ -483,6 +494,7 @@ export class Workspace {
 
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
+      assertExists(parentPageMeta);
       const parentPage = this.getPage(parentId) as Page;
       const subpageIds = parentPageMeta.subpageIds.filter(
         (subpageId: string) => subpageId !== pageMeta.id

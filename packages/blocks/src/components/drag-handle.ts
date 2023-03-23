@@ -39,7 +39,6 @@ export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
       position: fixed;
-      height: 3px;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
@@ -57,6 +56,9 @@ export class DragIndicator extends LitElement {
   @property()
   cursorPosition: IPoint | null = null;
 
+  @property()
+  scale = 1;
+
   override render() {
     if (!this.targetRect || !this.cursorPosition) {
       return null;
@@ -67,6 +69,7 @@ export class DragIndicator extends LitElement {
     const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
     const style = styleMap({
       width: `${rect.width}px`,
+      height: `${3 * this.scale}px`,
       transform: `translate(${rect.left}px, ${offsetY}px)`,
     });
     return html` <div class="affine-drag-indicator" style=${style}></div> `;
@@ -227,7 +230,7 @@ export class DragHandle extends LitElement {
       }
       const rect = modelState.rect;
       this.style.display = 'block';
-      this.style.height = `${rect.height}px`;
+      this.style.height = `${rect.height / this._scale}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = '0';
       this.style.top = '0';
@@ -248,7 +251,7 @@ export class DragHandle extends LitElement {
 
       const top = this._calcDragHandleY(
         event.raw.clientY,
-        yOffset,
+        rect.top,
         rect.height,
         this._scale
       );
@@ -296,6 +299,9 @@ export class DragHandle extends LitElement {
 
   setScale(value = 1) {
     this._scale = value;
+    if (this._indicator) {
+      this._indicator.scale = value;
+    }
   }
 
   firstUpdated() {
@@ -362,10 +368,9 @@ export class DragHandle extends LitElement {
       return;
     }
     const { rect } = this._handleAnchorState;
-    const yOffset = rect.top - this._container.getBoundingClientRect().top;
     const top = this._calcDragHandleY(
       e.clientY,
-      yOffset,
+      rect.top,
       rect.height,
       this._scale
     );
@@ -386,7 +391,7 @@ export class DragHandle extends LitElement {
       Math.max(
         0,
         Math.min(
-          clientY - yOffset - DRAG_HANDLE_HEIGHT / 2,
+          clientY - yOffset - (DRAG_HANDLE_HEIGHT * scale) / 2,
           height - DRAG_HANDLE_HEIGHT
         )
       ) / scale

@@ -40,6 +40,7 @@ export class EdgelessChangeBrushButton extends LitElement {
       justify-content: center;
       fill: none;
       stroke: currentColor;
+      color: var(--affine-text-color);
     }
 
     menu-divider {

@@ -205,15 +205,15 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const firstModel = newModels[0];
-  const lastModel = newModels.at(-1);
-  if (savedBlockRange) {
-    onModelTextUpdated(firstModel, () => {
+  const allTextUpdated = savedBlockRange?.models.map(
+    model => new Promise(resolve => onModelTextUpdated(model, resolve))
+  );
+  if (allTextUpdated && savedBlockRange) {
+    Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
     });
-  } else {
-    if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
+
   return newModels;
 }
 

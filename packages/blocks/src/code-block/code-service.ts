@@ -14,13 +14,6 @@ import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hljs: any;
-  onLoad = async () => {
-    // @ts-ignore
-    this.hljs = await import('highlight.js');
-  };
-
   setLang(model: CodeBlockModel, lang: string) {
     model.page.updateBlock(model, { language: lang });
   }

@@ -22,7 +22,6 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@popperjs/core": "^2.11.6",
-    "highlight.js": "^11.7.0",
     "hotkeys-js": "^3.10.1",
     "lit": "^2.6.1",
     "marked": "^4.2.12",

@@ -194,10 +194,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: SelectionEvent) {
-    const point = new Point(e.raw.clientX, e.raw.clientY);
-    point.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1;
-    let hoverEditingState = null;
+    const {
+      raw: { clientX, clientY },
+    } = e;
+    const point = new Point(
+      clientX + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
+      clientY
+    );
     const element = getClosestBlockElementByPoint(point);
+    let hoverEditingState = null;
     if (element) {
       hoverEditingState = {
         element: element as BlockComponentElement,
