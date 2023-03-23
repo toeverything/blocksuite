@@ -10,7 +10,7 @@ const heap = new Heap<Point>();
 const marked = new Map<string, Point>();
 const openMap = new Map<string, Point>();
 
-const getDirection = (from: number[], to: number[]) => {
+function getDirection(from: number[], to: number[]) {
   const v = subV(to, from);
 
   if (v[0] === 0) {
@@ -18,7 +18,7 @@ const getDirection = (from: number[], to: number[]) => {
   }
 
   return v[0] > 0 ? Direction.RIGHT : Direction.LEFT;
-};
+}
 
 export function AStar(
   grid: Grid,
