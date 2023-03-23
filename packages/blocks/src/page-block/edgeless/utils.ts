@@ -209,7 +209,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       if (!hoveringFrame) return null;
       return getClosestBlockElementByPoint(
         point,
-        Rect.fromDOM(hoveringFrame),
+        { container: hoveringFrame, rect: Rect.fromDOM(hoveringFrame) },
         pageBlock.surface.viewport.zoom
       );
     },

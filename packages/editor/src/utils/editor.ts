@@ -105,9 +105,8 @@ export const createBlockHub: (
     },
     getHoveringFrameState: (point: Point) => {
       const state = {
-        rect: null,
         scale: 1,
-      } as { rect: Rect | null; scale: number };
+      } as { container?: Element; rect?: Rect; scale: number };
 
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
@@ -117,9 +116,10 @@ export const createBlockHub: (
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
         state.scale = edgelessPageBlock.surface.viewport.zoom;
-        const hoveringFrame = getHoveringFrame(point);
-        if (hoveringFrame) {
-          state.rect = Rect.fromDOM(hoveringFrame);
+        const container = getHoveringFrame(point);
+        if (container) {
+          state.rect = Rect.fromDOM(container);
+          state.container = container;
         }
       }
       return state;
