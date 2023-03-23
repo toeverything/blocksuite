@@ -26,10 +26,7 @@ import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
-/**
- * Page Database Data
- */
-type PageDatabaseData = {
+type SerializedNestedColumns = {
   // row
   [key: string]: {
     // column
@@ -37,13 +34,15 @@ type PageDatabaseData = {
   };
 };
 
+type ColumnValues = string[];
+
 /**
- * Page Database Data cache
- * ```ts
- * { rowId: [columnValue1, columnValue2] }
+ * Containing all the rows and column values inside the database block.
+ * ```
+ * { rowId: ColumnValues }
  * ```
  */
-type RowData = Record<string, string[]>;
+type DatabaseMap = Record<string, ColumnValues>;
 
 const enum SearchState {
   /** show search input */
@@ -463,30 +462,30 @@ export class DatabaseBlockComponent
     this._disposables.dispose();
   }
 
-  private _getRowKeyValues() {
-    // database paragraphs data (first column)
-    const rowKeyValues = this.model.children.reduce((acc, child) => {
-      return {
-        ...acc,
-        [child.id]: [child.text?.toString() ?? ''],
-      };
-    }, {} as RowData);
+  private _getDatabaseMap() {
+    const databaseMap: DatabaseMap = {};
+    for (const child of this.model.children) {
+      // The first value is the text context of the row block
+      databaseMap[child.id] = [child.text?.toString() ?? ''];
+    }
 
-    // columns data
-    const databaseData = this.model.page.columns.toJSON() as PageDatabaseData;
-    const databaseRowIds = Array.from(this.model.childMap.keys());
-    databaseRowIds.forEach(key => {
-      const columns = databaseData[key];
-      // database column may has no value
-      if (!columns) return;
+    const nestedColumns =
+      this.model.page.columns.toJSON() as SerializedNestedColumns;
+    const rowIds = this.model.children.map(child => child.id);
 
-      const columnData = Object.keys(columns).map(
-        key => columns[key].value + ''
+    rowIds.forEach(blockId => {
+      // The map containing all columns related to this row (block)
+      const columnMap = nestedColumns[blockId];
+      if (!columnMap) return;
+
+      // Flatten the columnMap into a list of values
+      const columnValues = Object.keys(columnMap).map(
+        key => columnMap[key].value + ''
       );
-      rowKeyValues[key].push(...columnData);
+      databaseMap[blockId].push(...columnValues);
     });
 
-    return rowKeyValues;
+    return databaseMap;
   }
 
   private _onSearch = (event: InputEvent) => {
@@ -497,17 +496,17 @@ export class DatabaseBlockComponent
       this._searchState = SearchState.SearchInput;
     }
 
-    const rowKeyValues = this._getRowKeyValues();
-    const existRowIds = Object.keys(rowKeyValues).filter(key => {
+    const databaseMap = this._getDatabaseMap();
+    const existingRowIds = Object.keys(databaseMap).filter(key => {
       return (
-        rowKeyValues[key].findIndex(item =>
+        databaseMap[key].findIndex(item =>
           item.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())
         ) > -1
       );
     });
 
     this._filteredRowIds = this.model.children
-      .filter(child => existRowIds.includes(child.id))
+      .filter(child => existingRowIds.includes(child.id))
       .map(child => child.id);
 
     // When deleting the search content, the rich-text in the database row will automatically get the focus,
