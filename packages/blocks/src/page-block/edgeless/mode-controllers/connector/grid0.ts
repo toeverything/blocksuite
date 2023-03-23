@@ -77,7 +77,7 @@ export class Grid {
     return this.pointMap[point[0]][point[1]];
   }
 
-  getWalkable(current: number[], next: number[]) {
+  isWalkable(current: number[], next: number[]) {
     const { getWalkable } = this.params || {};
 
     return (

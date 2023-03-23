@@ -2,12 +2,13 @@ import { ICompareable } from './heap.js';
 import { Key } from './util.js';
 
 export class Point extends ICompareable {
-  public G: number;
-  public H: number;
-  public parent: Point | null;
-  public xy: number[];
-  public key: string;
-  public F: number;
+  /** G stands for the cost from start to current point */
+  G: number;
+  /** H stands for the cost from current point to end point */
+  H: number;
+  parent: Point | null;
+  xy: number[];
+  key: string;
 
   constructor(xy: number[], G = 0, parent: Point | null = null) {
     super();
@@ -17,21 +18,15 @@ export class Point extends ICompareable {
     this.parent = parent;
     this.xy = xy;
     this.key = Key(xy);
-    this.F = G;
+  }
+
+  /** F stands for the sum of G and H */
+  get F() {
+    return this.G + this.H;
   }
 
   setParent(parent: Point) {
     this.parent = parent;
-  }
-
-  setG(G: number) {
-    this.G = G;
-    this.F = this.H + this.G;
-  }
-
-  setH(H: number) {
-    this.H = H;
-    this.F = this.H + this.G;
   }
 
   compare(other: Point) {

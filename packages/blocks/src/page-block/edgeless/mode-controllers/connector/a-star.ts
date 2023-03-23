@@ -33,43 +33,43 @@ export function AStar(
   const endCoord = grid.getGridPoint(end);
 
   // 为了保证经过凸起 start end 在计算完成后加入
-  const startP = new Point(startCoord);
-  const endP = new Point(endCoord);
+  const startPoint = new Point(startCoord);
+  const endPoint = new Point(endCoord);
   const path: number[][] = [];
 
   let isFirst = true;
   let G = 0;
 
-  heap.add(startP);
-  openMap.set(startP.key, startP);
+  heap.add(startPoint);
+  openMap.set(startPoint.key, startPoint);
 
   while (openMap.size) {
-    const minP = heap.peek();
-    const xy = minP.xy;
+    const minPoint = heap.peek();
+    const xy = minPoint.xy;
 
     heap.remove();
-    openMap.delete(minP.key);
+    openMap.delete(minPoint.key);
 
-    if (minP.key === endP.key) {
+    if (minPoint.key === endPoint.key) {
       if (
-        minP.parent &&
-        !checkDirectionIsValid(minP.parent.xy, xy, endDirection)
+        minPoint.parent &&
+        !checkDirectionIsValid(minPoint.parent.xy, xy, endDirection)
       ) {
         continue;
       }
-      let tmp: Point | null = minP;
+      let tmp: Point | null = minPoint;
 
       while (tmp) {
         path.unshift(grid.getRealPoint(tmp.xy));
         tmp = tmp.parent;
       }
 
-      G = minP.G;
+      G = minPoint.G;
 
       break;
     }
 
-    marked.set(minP.key, minP);
+    marked.set(minPoint.key, minPoint);
 
     const move = getMoveDelta(startDirection, isFirst);
     const neighbors =
@@ -82,28 +82,27 @@ export function AStar(
 
     neighbors.forEach(([dx, dy]) => {
       const currentXY = addV(xy, [dx, dy]);
-      const p = new Point(currentXY);
+      const point = new Point(currentXY);
 
-      if (!marked.has(p.key) && grid.getWalkable(xy, currentXY)) {
-        const previous = openMap.get(p.key);
+      if (!marked.has(point.key) && grid.isWalkable(xy, currentXY)) {
+        const previous = openMap.get(point.key);
         const dir = getDirection(xy, currentXY);
-        const lastDir = minP.parent ? getDirection(minP.parent.xy, xy) : null;
+        const lastDir = minPoint.parent
+          ? getDirection(minPoint.parent.xy, xy)
+          : null;
         const turned = lastDir !== null && lastDir !== dir;
 
-        const G = minP.G + grid.getCost(currentXY) + (turned ? 0.02 : 0);
-        const H = heuristic(currentXY, grid);
-
-        p.setG(G);
-        p.setH(H);
+        point.G = minPoint.G + grid.getCost(currentXY) + (turned ? 0.02 : 0);
+        point.H = heuristic(currentXY, grid);
 
         if (!previous) {
-          p.setParent(minP);
+          point.setParent(minPoint);
 
-          heap.add(p);
-          openMap.set(p.key, p);
-        } else if (p.G < previous.G) {
-          previous.setG(G);
-          previous.setParent(minP);
+          heap.add(point);
+          openMap.set(point.key, point);
+        } else if (point.G < previous.G) {
+          previous.G = G;
+          previous.setParent(minPoint);
         }
       }
     });
