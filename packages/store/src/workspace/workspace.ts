@@ -126,7 +126,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
     const pageMetas = (this.pages ?? new Y.Array()).toJSON() as PageMeta[];
     const index = pageMetas.findIndex((page: PageMeta) => pageId === page.id);
 
-    if (index !== -1) return;
+    if (index === -1) return;
 
     const yPage = this.transformObjectToYMap(pageMetas[index]);
 
