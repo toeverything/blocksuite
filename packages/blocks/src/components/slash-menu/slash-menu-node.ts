@@ -44,7 +44,7 @@ export class SlashMenu extends LitElement {
   @state()
   private _hide = false;
 
-  readonly abortController = new AbortController();
+  abortController = new AbortController();
 
   /**
    * Does not include the slash character
