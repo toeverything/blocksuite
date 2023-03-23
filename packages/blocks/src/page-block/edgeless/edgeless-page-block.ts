@@ -6,9 +6,9 @@ import {
   almostEqual,
   type BlockHost,
   BrushSize,
+  getClosestFrameBlockElementById,
   hotkey,
   HOTKEY_SCOPE,
-  type IPoint,
   type Point,
   resetNativeSelection,
   type TopLevelBlockModel,
@@ -391,12 +391,9 @@ export class EdgelessPageBlockComponent
     );
   }
 
-  /** Moves selected blocks into a new frame at the given point. */
-  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: IPoint) {
-    if (!this.page.root) return;
-    this.page.captureSync();
+  private _addFrameWithPoint(point: Point) {
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
-    const frameId = this.page.addBlock(
+    return this.page.addBlock(
       'affine:frame',
       {
         xywh: serializeXYWH(
@@ -406,21 +403,28 @@ export class EdgelessPageBlockComponent
           DEFAULT_FRAME_HEIGHT
         ),
       },
-      this.page.root.id
+      this.page.root?.id
     );
-    const frame = this.page.getBlockById(frameId) as FrameBlockModel;
-    this.page.moveBlocks(blocks, frame, null);
+  }
 
-    requestAnimationFrame(() => {
-      const element = this.page.root?.children.find(b => b.id === frameId);
-      if (element) {
-        const selectionState = {
-          selected: [element],
-          active: true,
-        } as EdgelessSelectionState;
-        this.slots.selectionUpdated.emit(selectionState);
-      }
+  private _setSelectionByFrameId(frameId: string, active = true) {
+    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+    assertExists(frameBlock);
+    this.slots.selectionUpdated.emit({
+      selected: [frameBlock as TopLevelBlockModel],
+      active,
     });
+  }
+
+  /** Moves selected blocks into a new frame at the given point. */
+  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point) {
+    this.page.captureSync();
+    const frameId = this._addFrameWithPoint(point);
+    this.page.moveBlocks(
+      blocks,
+      this.page.getBlockById(frameId) as FrameBlockModel
+    );
+    this._setSelectionByFrameId(frameId);
   }
 
   /**
@@ -430,21 +434,8 @@ export class EdgelessPageBlockComponent
    * @returns string[]
    */
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
-    if (!this.page.root) return [];
     this.page.captureSync();
-    const [x, y] = this.surface.toModelCoord(point.x, point.y);
-    const frameId = this.page.addBlock(
-      'affine:frame',
-      {
-        xywh: serializeXYWH(
-          x - DEFAULT_FRAME_OFFSET_X,
-          y - DEFAULT_FRAME_OFFSET_Y,
-          DEFAULT_FRAME_WIDTH,
-          DEFAULT_FRAME_HEIGHT
-        ),
-      },
-      this.page.root.id
-    );
+    const frameId = this._addFrameWithPoint(point);
     const ids = this.page.addBlocksByFlavour(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
@@ -455,18 +446,7 @@ export class EdgelessPageBlockComponent
       }),
       frameId
     );
-
-    requestAnimationFrame(() => {
-      const element = this.page.root?.children.find(b => b.id === frameId);
-      if (element) {
-        const selectionState = {
-          selected: [element],
-          active: true,
-        } as EdgelessSelectionState;
-        this.slots.selectionUpdated.emit(selectionState);
-      }
-    });
-
+    this._setSelectionByFrameId(frameId);
     return ids;
   }
 
@@ -475,20 +455,15 @@ export class EdgelessPageBlockComponent
    * Not supports surface elements.
    */
   setSelectionByBlockId(blockId: string, active = true) {
-    const frame = document
-      .querySelector(`[${BLOCK_ID_ATTR}="${blockId}"]`)
-      ?.closest('affine-frame');
+    const frame = getClosestFrameBlockElementById(blockId, this.mouseRoot);
+    if (!frame) return;
 
-    if (frame) {
-      const frameId = frame?.getAttribute(BLOCK_ID_ATTR);
-      assertExists(frameId);
-      const frameBlock = this.page.root?.children.find(b => b.id === frameId);
-      assertExists(frameBlock);
-      this.slots.selectionUpdated.emit({
-        selected: [frameBlock as TopLevelBlockModel],
-        active,
-      });
-    }
+    const frameId = frame?.getAttribute(BLOCK_ID_ATTR);
+    assertExists(frameId);
+
+    requestAnimationFrame(() => {
+      this._setSelectionByFrameId(frameId, active);
+    });
   }
 
   update(changedProperties: Map<string, unknown>) {

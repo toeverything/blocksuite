@@ -1,7 +1,6 @@
 import type {
   BlockComponentElement,
   EditingState,
-  IPoint,
   Rect,
 } from '@blocksuite/blocks/std';
 import {
@@ -495,7 +494,7 @@ export class BlockHub extends NonShadowLitElement {
   private readonly _onDropCallback: (
     e: DragEvent,
     lastModelState: EditingState | null,
-    point: IPoint
+    point: Point
   ) => Promise<void>;
 
   private _currentClientX = 0;
@@ -522,7 +521,7 @@ export class BlockHub extends NonShadowLitElement {
     onDropCallback: (
       e: DragEvent,
       lastModelState: EditingState | null,
-      point: IPoint
+      point: Point
     ) => Promise<void>;
   }) {
     super();
@@ -708,10 +707,7 @@ export class BlockHub extends NonShadowLitElement {
       return;
     }
 
-    this._indicator.cursorPosition = {
-      x,
-      y,
-    };
+    this._indicator.cursorPosition = new Point(x, y);
 
     const point = new Point(x, y);
     const { rect: frameRect, scale } = this.getHoveringFrameState(
@@ -768,10 +764,7 @@ export class BlockHub extends NonShadowLitElement {
       e,
       this._lastModelState,
       // `drag.clientY` !== `dragend.clientY` in chrome.
-      this._indicator?.cursorPosition ?? {
-        x: e.clientX,
-        y: e.clientY,
-      }
+      this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY)
     );
   };
 

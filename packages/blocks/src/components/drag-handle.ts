@@ -4,7 +4,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getModelByBlockElement,
   getRectByBlockElement,
-  type IPoint,
   Point,
   type SelectionEvent,
 } from '@blocksuite/blocks/std';
@@ -54,7 +53,7 @@ export class DragIndicator extends LitElement {
   targetRect: DOMRect | null = null;
 
   @property()
-  cursorPosition: IPoint | null = null;
+  cursorPosition: Point | null = null;
 
   @property()
   scale = 1;
@@ -117,7 +116,7 @@ export class DragHandle extends LitElement {
   constructor(options: {
     container: HTMLElement;
     onDropCallback: (
-      point: IPoint,
+      point: Point,
       dragged: BlockComponentElement[],
       lastModelState: EditingState | null
     ) => void;
@@ -157,7 +156,7 @@ export class DragHandle extends LitElement {
 
   @property()
   public onDropCallback: (
-    point: IPoint,
+    point: Point,
     draggingBlockElements: BlockComponentElement[],
     lastModelState: EditingState | null
   ) => void;
@@ -504,10 +503,7 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    this._indicator.cursorPosition = {
-      x,
-      y,
-    };
+    this._indicator.cursorPosition = new Point(x, y);
 
     const element = this._getClosestBlockElement(new Point(x, y));
     let rect = null;
@@ -540,10 +536,7 @@ export class DragHandle extends LitElement {
     this._clickedBlock = null;
     // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
-      this._indicator?.cursorPosition ?? {
-        x: e.clientX,
-        y: e.clientY,
-      },
+      this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY),
       // Must clear subtrees!
       getBlockElementsExcludeSubtrees(
         this._draggingElements

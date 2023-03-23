@@ -735,6 +735,29 @@ export function getBlockElementsByElement(
 }
 
 /**
+ * Returns the block element by id with the parent.
+ */
+export function getBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  return parent.querySelector(`[${ATTR}="${id}"]`);
+}
+
+/**
+ * Returns the closest frame block element by id with the parent.
+ */
+export function getClosestFrameBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  const element = getBlockElementById(id, parent);
+  if (!element) return null;
+  if (isFrame(element)) return element;
+  return element.closest('affine-frame');
+}
+
+/**
  * Returns rect of the block element.
  *
  * Compatible with Safari!
