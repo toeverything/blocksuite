@@ -28,6 +28,7 @@ import {
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
@@ -127,6 +128,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             vEditor.setMarks({
               [id]: true,
             });
+            clearMarksOnDiscontinuousInput(vEditor);
             return;
           }
           model.text.format(0, len, {
