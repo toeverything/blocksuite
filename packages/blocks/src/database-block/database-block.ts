@@ -25,7 +25,21 @@ import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
-const ADD_COLUMN_BUTTON_WIDTH = 33;
+const ADD_COLUMN_BUTTON_WIDTH = 40;
+
+/** column tag color poll */
+// const columnTagColors = [
+//   '#F5F5F5',
+//   '#E3E2E0',
+//   '#FFE1E1',
+//   '#FFEACA',
+//   '#FFF4D8',
+//   '#DFF4E8',
+//   '#DFF4F3',
+//   '#E1EFFF',
+//   '#F3F0FF',
+//   '#FCE8FF',
+// ];
 
 let once = true;
 if (once) {
@@ -43,7 +57,9 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
           minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
           maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
         })}
-      ></div>
+      >
+        Title
+      </div>
       ${repeat(
         block.columns,
         column => column.id,
@@ -112,11 +128,19 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
       .affine-database-block-column {
         display: flex;
         align-items: center;
-        transition: background 20ms ease-in 0s;
+        width: 145px;
+        height: 40px;
+        padding: 8px;
+        border-right: 1px solid var(--affine-border-color);
       }
 
       .affine-database-block-column:hover {
-        background: rgba(55, 53, 47, 0.08);
+        background: linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.04),
+            rgba(0, 0, 0, 0.04)
+          ),
+          #ffffff;
       }
 
       .affine-database-block-rows {
@@ -128,9 +152,25 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
 
       .affine-database-block-row {
         width: 100%;
+        height: 44px;
         display: flex;
         flex-direction: row;
-        border-top: 1px solid rgb(238, 238, 237);
+        border-bottom: 1px solid var(--affine-border-color);
+      }
+      .affine-database-block-row:nth-of-type(1) {
+        border-top: 1px solid var(--affine-border-color);
+      }
+
+      .affine-database-block-row-cell {
+        display: flex;
+        align-item: center;
+        width: 145px;
+        height: 44px;
+        padding: 0 8px;
+        border-right: 1px solid var(--affine-border-color);
+      }
+      .affine-database-block-row-cell > affine-paragraph {
+        height: 100%;
       }
     </style>
     <div class="affine-database-block-rows">
@@ -141,6 +181,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
               <div
+                class="affine-database-block-row-cell"
                 style=${styleMap({
                   minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
                   maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
@@ -193,8 +234,7 @@ export class DatabaseBlockComponent
       position: relative;
       width: 100%;
       overflow-x: scroll;
-      border-top: 1px solid rgb(238, 238, 237);
-      border-bottom: 1px solid rgb(238, 238, 237);
+      border-top: 1.5px solid var(--affine-border-color);
     }
 
     .affine-database-block-tag-circle {
@@ -212,16 +252,32 @@ export class DatabaseBlockComponent
       cursor: pointer;
     }
 
+    .affine-database-block-title-container {
+      display: flex;
+      align-items: center;
+      height: 44px;
+    }
+
     .affine-database-block-title {
       position: sticky;
-      width: 100%;
-      min-height: 1em;
-      height: 40px;
-      font-size: 22px;
-      font-weight: 700;
-      border: 0;
+      width: 300px;
+      height: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #424149;
       font-family: inherit;
-      color: inherit;
+      overflow: hidden;
+      cursor: text;
+    }
+
+    .affine-database-block-title [data-virgo-text='true'] {
+      display: inline-block;
+      width: 300px;
+      max-width: 300px;
+      white-space: nowrap !important;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .affine-database-block-title:focus {
@@ -240,30 +296,31 @@ export class DatabaseBlockComponent
     }
 
     .affine-database-block-footer {
-      border-top: 1px solid rgb(238, 238, 237);
+      display: flex;
+      width: 100%;
+      height: 42px;
+      background-color: rgba(0, 0, 0, 0.04);
     }
 
     .affine-database-block-add-row {
-      user-select: none;
-      transition: background 20ms ease-in 0s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      height: 32px;
-      width: 100%;
-      padding-left: 8px;
-      font-size: 14px;
-      line-height: 20px;
-      border-top: 1px solid rgb(233, 233, 231);
-    }
-
-    .affine-database-block-add-column-button {
-      width: ${ADD_COLUMN_BUTTON_WIDTH}px;
-      height: ${ADD_COLUMN_BUTTON_WIDTH}px;
-
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .affine-database-block-add-column-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
     }
   `;
 
@@ -346,9 +403,11 @@ export class DatabaseBlockComponent
     const isEmpty = !this.model.title || !this.model.title.length;
 
     return html`
-      <div class="affine-database-block-title ${
-        isEmpty ? 'affine-database-block-title-empty' : ''
-      }" data-block-is-title="true">
+      <div class="affine-database-block-title-container">
+        <div class="affine-database-block-title ${
+          isEmpty ? 'affine-database-block-title-empty' : ''
+        }" data-block-is-title="true">
+        </div>
       </div>
       <div class="affine-database-block">
         <div
@@ -360,11 +419,10 @@ export class DatabaseBlockComponent
           ${DatabaseHeader(this)} ${DataBaseRowContainer(this)}
           <div class="affine-database-block-footer">
             <div class="affine-database-block-add-row"
-                 data-test-id="affine-database-add-row-button"
-                 role="button"
-                 @click=${this._addRow}>
-              + New
-            </div>
+              data-test-id="affine-database-add-row-button"
+              role="button"
+              @click=${this._addRow}
+            >New Record</div>
           </div>
         </div>
       </div>
