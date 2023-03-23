@@ -1,7 +1,7 @@
 import { Direction } from './constants.js';
 import { add, createKey, sub } from './geometry-utils.js';
 import type { Grid } from './grid.js';
-import type { PathFindingPointData } from './type.js';
+import type { PathFindingPointData, RouteEndpoint } from './types.js';
 
 export function cloneDeep<T>(t: T): T {
   return JSON.parse(JSON.stringify(t));
@@ -102,11 +102,11 @@ function getOppositeDirection(dir: Direction) {
   return oppositeDirectionConfig[dir];
 }
 
-export function getMoveDelta(dir?: Direction, first?: boolean) {
+export function getMoveDelta(dir: Direction, first: boolean) {
   const dirs = Object.keys(moveDeltaConfig) as Direction[];
 
   if (first) {
-    const current = dirs.filter(item => item !== getOppositeDirection(dir!));
+    const current = dirs.filter(item => item !== getOppositeDirection(dir));
 
     current.sort(a => (a === dir ? -1 : 1));
 
@@ -232,44 +232,39 @@ function checkIsContained(
   );
 }
 
-export function getBoxConstraintsInfo(
-  start: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
-  end: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
+type BoxConstraint = PathFindingPointData & {
+  boundaryBox?: number[][];
+  originBoundaryBox?: number[][];
+  box?: number[][];
+};
+
+export function getBoxConstraints(
+  start: RouteEndpoint,
+  end: RouteEndpoint,
   minDist: number,
   isCovered: boolean
-): Array<
-  PathFindingPointData & { boundaryBox?: number[][]; box?: number[][] }
-> {
+): BoxConstraint[] {
   if (!start.box && !end.box) {
     return getPointConstraintsInfo(start, end);
   }
 
   const list = [start, end].map(item => {
-    return Object.assign(
-      {
-        ...cloneDeep(item),
-        endpoint: cloneDeep(item.origin),
-      },
-      item.box
-        ? {
-            boundaryBox: extendBox(item.box!, minDist),
-            originBoundaryBox: extendBox(item.box!, minDist),
-          }
-        : {}
-    );
+    const newItem: BoxConstraint = {
+      ...cloneDeep(item),
+      endpoint: cloneDeep(item.origin),
+    };
+
+    if (item.box) {
+      newItem.boundaryBox = extendBox(item.box, minDist);
+      newItem.originBoundaryBox = extendBox(item.box, minDist);
+    }
+
+    return newItem;
   }) as Array<
     PathFindingPointData & {
-      boundaryBox?: number[][];
-      box?: number[][];
-      originBoundaryBox?: number[][];
+      boundaryBox: number[][];
+      box: number[][];
+      originBoundaryBox: number[][];
     }
   >;
 
@@ -341,18 +336,18 @@ export function getBoxConstraintsInfo(
         const dist = other.box
           ? other.box[otherAxis[0]][index] - base[index]
           : other.origin[index] - base[index];
-        // 点在其它何盒子直接相连 不需要考虑
+        // If point directly connected to another box, no need to consider
         const d = dist > 0 ? 1 : -1;
         const pointDist = Math.abs(dist) / 2;
 
         const shouldAdjust = d === currentD && Math.abs(dist) < minDist * 2;
-        // 方向是当前方向时且另外一个盒子存在，那么包含才需要调整 padding
+        // Padding only needs to be adjusted if the direction is the current direction and another box exists
         const needContained = contained;
 
         /**
-         * 方向相对
-         * 比如 [ ] - [ ]
-         *     current => other
+         * Direction relative
+         * For example, [ ] - [ ]
+         *          current => other
          * [ ] current
          *  |
          * [ ] other
@@ -366,9 +361,10 @@ export function getBoxConstraintsInfo(
 
           if (other.box) {
             otherAxis.forEach(a => {
-              // 对于被比较的盒子 距离增加相反
-              other.boundaryBox![a][index] =
-                other.box![a][index] + currentD * pointDist * -1;
+              // Distance increases oppositely for the compared box
+              // FIXME: null check
+              other.boundaryBox[a][index] =
+                other.box[a][index] + currentD * pointDist * -1;
             });
           }
 

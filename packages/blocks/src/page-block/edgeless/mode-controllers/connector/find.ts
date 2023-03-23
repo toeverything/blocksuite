@@ -5,7 +5,7 @@ import {
 } from './geometry-utils.js';
 import type { Grid } from './grid.js';
 import { checkCanFollowWaypoint } from './layout-utils.js';
-import type { PathFindingPointData } from './type.js';
+import type { PathFindingPointData } from './types.js';
 
 function calculateHeuristic(
   current: number[],
@@ -21,6 +21,7 @@ function calculateHeuristic(
 
   if (!followWaypoint) return h1;
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return h1 + calculateManhattanDist(current, grid.getGridPoint(waypoint!));
 }
 
@@ -105,6 +106,7 @@ export function find(
     if (
       d1 < min1 ||
       (d1 === min1 && d2 < min2) ||
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (d1 === min1 && d2 === min2 && item.G < target!.G)
     ) {
       min1 = d1;
@@ -123,8 +125,8 @@ export function find(
     console.warn('Path not found');
   }
 
-  target!.path.push(endInfo.origin);
-  target!.path.unshift(startInfo.origin);
+  target.path.push(endInfo.origin);
+  target.path.unshift(startInfo.origin);
 
   return target;
 }

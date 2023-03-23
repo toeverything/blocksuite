@@ -1,4 +1,3 @@
-import type { Direction } from './constants.js';
 import { find } from './find.js';
 import {
   getMidPoint,
@@ -8,24 +7,17 @@ import {
 import { Grid } from './grid.js';
 import {
   extendBox,
-  getBoxConstraintsInfo,
+  getBoxConstraints,
   getIntersectPoints,
   inView,
   isOppositeDirection,
   uniquePoints,
 } from './layout-utils.js';
+import type { RouteEndpoint } from './types.js';
 
 function getPathFindingData(
-  start: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
-  end: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
+  start: RouteEndpoint,
+  end: RouteEndpoint,
   minDist: number
 ) {
   // Two boxes intersect
@@ -38,57 +30,52 @@ function getPathFindingData(
 
   // Start and end are both covered by another box
   const isCovered = testBoxs.every(([p, box]) => inView(p, box));
-  const [startInfo, endInfo] = getBoxConstraintsInfo(
+  const [startConstraint, endConstraint] = getBoxConstraints(
     start,
     end,
     minDist,
     isCovered
   );
 
-  const midPoint = getMidPoint(startInfo.endpoint, endInfo.endpoint);
+  const midPoint = getMidPoint(
+    startConstraint.endpoint,
+    endConstraint.endpoint
+  );
   const middlePoints = [
-    [startInfo.endpoint[0], midPoint[1]],
-    [endInfo.endpoint[0], midPoint[1]],
-    [midPoint[0], startInfo.endpoint[1]],
-    [midPoint[0], endInfo.endpoint[1]],
+    [startConstraint.endpoint[0], midPoint[1]],
+    [endConstraint.endpoint[0], midPoint[1]],
+    [midPoint[0], startConstraint.endpoint[1]],
+    [midPoint[0], endConstraint.endpoint[1]],
     midPoint,
   ];
 
   const waypoint = midPoint;
   const allPoints: number[][] = [
-    startInfo.endpoint,
-    endInfo.endpoint,
+    startConstraint.endpoint,
+    endConstraint.endpoint,
     ...middlePoints,
   ];
 
   if (!isCovered) {
     allPoints.push(
-      ...(startInfo.boundaryBox ?? []),
-      ...(endInfo.boundaryBox ?? [])
+      ...(startConstraint.boundaryBox ?? []),
+      ...(endConstraint.boundaryBox ?? [])
     );
   }
 
   return {
     isIntersected,
     isCovered,
-    startInfo,
-    endInfo,
+    startInfo: startConstraint,
+    endInfo: endConstraint,
     allPoints: uniquePoints(getIntersectPoints(allPoints)),
     waypoint,
   };
 }
 
-export function createRoute(
-  start: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
-  end: {
-    box?: number[][];
-    origin: number[];
-    direction: Direction;
-  },
+export function createConnectorRoute(
+  start: RouteEndpoint,
+  end: RouteEndpoint,
   minDist: number
 ) {
   const { isCovered, isIntersected, startInfo, endInfo, allPoints, waypoint } =
@@ -99,7 +86,7 @@ export function createRoute(
     endInfo.boundaryBox && extendBox(endInfo.boundaryBox, -1),
   ].filter(Boolean) as number[][][];
 
-  const checkedInnerBoxs = [startInfo.box, endInfo.box].filter(
+  const checkedInnerBoxes = [startInfo.box, endInfo.box].filter(
     Boolean
   ) as number[][][];
 
@@ -115,18 +102,14 @@ export function createRoute(
 
   const grid = new Grid(allPoints, {
     getCost(p, basic) {
-      const t = [0, 1].reduce((total, index) => {
-        // The cost of walking inside is higher
-        if (checkedInnerBoxs[index] && inView(p, checkedInnerBoxs[index])) {
-          return total + 2;
+      let t = 0;
+      for (let i = 0; i < 2; i++) {
+        if (checkedInnerBoxes[i] && inView(p, checkedInnerBoxes[i])) {
+          t += 2;
+        } else if (checkedBoxs[i] && inView(p, checkedBoxs[i])) {
+          t += 1;
         }
-
-        if (checkedBoxs[index] && inView(p, checkedBoxs[index])) {
-          return total + 1;
-        }
-
-        return total;
-      }, 0);
+      }
 
       return basic + t * costFactor;
     },
@@ -156,9 +139,9 @@ export function createRoute(
   });
 
   return {
-    path: result,
+    path: result.path,
     points: result.grid.points,
-    boxs: [
+    boxes: [
       {
         fill: 'red',
         box: startInfo.boundaryBox,

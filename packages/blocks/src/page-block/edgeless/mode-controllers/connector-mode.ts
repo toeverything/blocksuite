@@ -13,7 +13,7 @@ import { noop } from '../../../__internal__/index.js';
 import type { SelectionArea } from '../selection-manager.js';
 import { getXYWH, pickTopBlock } from '../utils.js';
 import { Direction } from './connector/constants.js';
-import { createRoute } from './connector/route.js';
+import { createConnectorRoute } from './connector/route.js';
 import { MouseModeController } from './index.js';
 
 function findDirection(x: number, y: number, bound: Bound) {
@@ -147,8 +147,8 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       w: startBox[1][0] - startBox[0][0],
       h: startBox[2][1] - startBox[1][1],
     };
-    const sDirection = findDirection(startX, startY, startBound);
-    const sAnchor = getAnchorPoint(startBound, sDirection);
+    const startDirection = findDirection(startX, startY, startBound);
+    const startAnchor = getAnchorPoint(startBound, startDirection);
 
     const [endX, endY] = viewport.toModelCoord(e.x, e.y);
     const end = this._pick(e.x, e.y);
@@ -174,29 +174,29 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       w: endBox[1][0] - endBox[0][0],
       h: endBox[2][1] - endBox[1][1],
     };
-    const eDirection = findDirection(endX, endY, endBound);
-    const eAnchor = getAnchorPoint(endBound, eDirection);
+    const endDirection = findDirection(endX, endY, endBound);
+    const endAnchor = getAnchorPoint(endBound, endDirection);
 
-    const d = createRoute(
+    const connectorRoute = createConnectorRoute(
       {
         box: startBox,
-        direction: sDirection,
-        origin: sAnchor,
+        direction: startDirection,
+        origin: startAnchor,
       },
       {
         box: endBox,
-        direction: eDirection,
-        origin: eAnchor,
+        direction: endDirection,
+        origin: endAnchor,
       },
       20
     );
 
-    const b = getBrushBoundFromPoints(d.path.path, 0);
-    const controllers = [...d.path.path.flat()].map((v, index) => {
-      return index % 2 ? v - b.y : v - b.x;
+    const bound = getBrushBoundFromPoints(connectorRoute.path, 0);
+    const controllers = [...connectorRoute.path.flat()].map((v, index) => {
+      return index % 2 ? v - bound.y : v - bound.x;
     });
 
-    this._surface.updateConnectorElement(id, b, controllers);
+    this._surface.updateConnectorElement(id, bound, controllers);
     this._edgeless.slots.surfaceUpdated.emit();
   }
 

@@ -1,3 +1,6 @@
+// FIXME: use strict null check
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 export abstract class ICompareable {
   abstract compare(other: ICompareable): number;
 }
@@ -14,21 +17,21 @@ export class Heap<D extends ICompareable> {
   }
 
   remove() {
-    this.swap(1, this.heap.length - 1);
+    this._swap(1, this.heap.length - 1);
     this.heap.pop();
-    this.sink(1);
+    this._sink(1);
   }
 
   add(item: D) {
     this.heap.push(item);
-    this.swim();
+    this._swim();
   }
 
   clear() {
     this.heap = [null];
   }
 
-  private sink(index: number) {
+  private _sink(index: number) {
     const len = this.heap.length - 1;
     let j = 0;
 
@@ -40,7 +43,7 @@ export class Heap<D extends ICompareable> {
       }
 
       if (this.heap[index]!.compare(this.heap[j]!) > 0) {
-        this.swap(index, j);
+        this._swap(index, j);
         index = j;
       } else {
         break;
@@ -48,7 +51,7 @@ export class Heap<D extends ICompareable> {
     }
   }
 
-  private swim() {
+  private _swim() {
     let index = this.heap.length - 1;
     let mid = 0;
 
@@ -56,7 +59,7 @@ export class Heap<D extends ICompareable> {
       mid = index >> 1;
 
       if (this.heap[index]!.compare(this.heap[mid]!) < 0) {
-        this.swap(index, mid);
+        this._swap(index, mid);
         index = mid;
       } else {
         break;
@@ -64,7 +67,7 @@ export class Heap<D extends ICompareable> {
     }
   }
 
-  private swap(i: number, j: number) {
+  private _swap(i: number, j: number) {
     const t = this.heap[i];
 
     this.heap[i] = this.heap[j];
