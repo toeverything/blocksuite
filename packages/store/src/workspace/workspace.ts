@@ -114,6 +114,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
+  /** Adjust the index of a page inside the pageMetss list */
   shiftPageMeta(pageId: string, newIndex: number) {
     const pageMetas = (this.pages ?? new Y.Array()).toJSON() as PageMeta[];
     const index = pageMetas.findIndex((page: PageMeta) => pageId === page.id);
@@ -475,7 +476,7 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
-  movePage(pageId: string, newIndex: number) {
+  shiftPage(pageId: string, newIndex: number) {
     this.meta.shiftPageMeta(pageId, newIndex);
   }
 
