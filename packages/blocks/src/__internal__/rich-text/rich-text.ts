@@ -119,20 +119,17 @@ export class RichText extends NonShadowLitElement {
           return false;
         }
 
-        const index = vRange.index;
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (
-          index >= 0 &&
-          data &&
-          data !== '\n' &&
-          deltas.length === 1 &&
-          vRange.index !== 0 &&
-          vRange.index !== vEditor.yText.length
-        ) {
+        if (vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
+          if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+            delete attributes?.link;
+            delete attributes?.code;
+          }
+
           vEditor.insertText(vRange, data, attributes);
           vEditor.setVRange({
-            index: index + data.length,
+            index: vRange.index + data.length,
             length: 0,
           });
           return true;

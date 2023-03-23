@@ -33,6 +33,7 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
+import { clearMarksOnDiscontinuousInput } from '../../code-block/utils/virgo-marks.js';
 import type { BlockSchemas } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
@@ -354,20 +355,7 @@ function formatBlockRange(
           ? null
           : true,
     });
-    let vRange = vEditor.getVRange();
-    const dispose = vEditor.slots.vRangeUpdated.on(([r, t]) => {
-      if (
-        vRange &&
-        r &&
-        ((t === 'native' && r.index === vRange.index) ||
-          (t !== 'native' && r.index === vRange.index + 1))
-      ) {
-        vRange = r;
-      } else {
-        vEditor.resetMarks();
-        dispose.dispose();
-      }
-    });
+    clearMarksOnDiscontinuousInput(vEditor);
 
     return;
   }
