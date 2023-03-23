@@ -78,12 +78,9 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
   }
 
   addPageMeta(page: PageMeta, index?: number) {
-    const yPage = new Y.Map();
     this.doc.transact(() => {
       const pages: Y.Array<unknown> = this.pages ?? new Y.Array();
-      Object.entries(page).forEach(([key, value]) => {
-        yPage.set(key, value);
-      });
+      const yPage = this.transformObjectToYMap(page);
       if (index === undefined) {
         pages.push([yPage]);
       } else {
@@ -93,6 +90,14 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
         this._ySpace.set('pages', pages);
       }
     });
+  }
+
+  transformObjectToYMap(obj: Record<string, unknown>) {
+    const yMap = new Y.Map();
+    Object.entries(obj).forEach(([key, value]) => {
+      yMap.set(key, value);
+    });
+    return yMap;
   }
 
   setPageMeta(id: string, props: Partial<PageMeta>) {
@@ -110,6 +115,25 @@ class WorkspaceMeta extends Space<WorkspaceMetaState> {
       Object.entries(props).forEach(([key, value]) => {
         yPage.set(key, value);
       });
+    });
+  }
+
+  movePageMeta(pageId: string, newIndex: number) {
+    const pageMetas = (this.pages ?? new Y.Array()).toJSON() as PageMeta[];
+    const index = pageMetas.findIndex((page: PageMeta) => pageId === page.id);
+
+    if (index !== -1) return;
+
+    const yPage = this.transformObjectToYMap(pageMetas[index]);
+
+    this.doc.transact(() => {
+      assertExists(this.pages);
+      this.pages.delete(index, 1);
+      if (newIndex > this.pages.length) {
+        this.pages.push([yPage]);
+      } else {
+        this.pages.insert(newIndex, [yPage]);
+      }
     });
   }
 
@@ -420,7 +444,8 @@ export class Workspace {
     if (parentId) {
       const parentPage = this.getPage(parentId) as Page;
       const parentPageMeta = this.meta.getPageMeta(parentId);
-      const subpageIds = [...parentPageMeta.subpageIds, pageId];
+      // Compatibility process: the old data not has `subpageIds`, it should be an empty array
+      const subpageIds = [...(parentPageMeta.subpageIds ?? []), pageId];
       this.setPageMeta(parentId, {
         subpageIds,
       });
@@ -440,11 +465,21 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
+  movePage(pageId: string, newIndex: number) {
+    this.meta.movePageMeta(pageId, newIndex);
+  }
+
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
     const parentId = this.meta.pageMetas.find(meta =>
       meta.subpageIds.includes(pageId)
     )?.id;
+
+    if (pageMeta.subpageIds?.length) {
+      pageMeta.subpageIds.forEach((subpageId: string) => {
+        this.removePage(subpageId);
+      });
+    }
 
     if (parentId) {
       const parentPageMeta = this.meta.getPageMeta(parentId);
