@@ -92,6 +92,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener('s', () =>
     setMouseMode(edgeless, { type: 'shape', shape: 'rect', color: '#000000' })
   );
+
+  // issue #1814
   hotkey.addListener('esc', () => {
     edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
     setMouseMode(edgeless, { type: 'default' }, true);
