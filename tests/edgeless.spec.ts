@@ -38,6 +38,7 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressEscape,
   redoByClick,
   resizeElementByTopLeftHandle,
   type,
@@ -981,4 +982,22 @@ test('block hub should add new frame when dragged to blank area', async ({
   await assertRichTexts(page, ['123', '456', '789', '000']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('pressing the ESC key will return to the default state', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  await pressEscape(page);
+  await assertEdgelessNonSelectedRect(page);
 });
