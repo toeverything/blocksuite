@@ -1,8 +1,9 @@
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { ALLOW_DEFAULT } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
+import { showLinkedPagePopover } from '../../components/linked-page/index.js';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
@@ -67,6 +68,24 @@ export function createKeyboardBindings(
 
   const keyboardBindings: KeyboardBindings = {
     ...blockKeyBinding,
+
+    linkedPage: {
+      // TODO support `@`
+      key: '[',
+      prefix: /[^[]\[$/,
+      handler(range, context) {
+        const flag = page.awarenessStore.getFlag('enable_linked_page');
+        if (!flag) return ALLOW_DEFAULT;
+        if (matchFlavours(model, ['affine:code'] as const)) {
+          return ALLOW_DEFAULT;
+        }
+        this.vEditor.slots.rangeUpdated.once(() => {
+          const curRange = getCurrentNativeRange();
+          showLinkedPagePopover({ model, range: curRange });
+        });
+        return ALLOW_DEFAULT;
+      },
+    },
 
     slash: {
       key: [
