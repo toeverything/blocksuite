@@ -1,5 +1,24 @@
 /* eslint-disable prefer-const */
-import { add, sub } from './util.js';
+
+export function sub(v1: number[], v2: number[]): number[] {
+  return [v1[0] - v2[0], v1[1] - v2[1]];
+}
+
+export function add(v1: number[], v2: number[]): number[] {
+  return [v1[0] + v2[0], v1[1] + v2[1]];
+}
+
+export function calculateManhattanDist(p1: number[], p2: number[]): number {
+  return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
+}
+
+export function createKey(p: number[]): string {
+  return p.join(':');
+}
+
+export function getXYDFromKey(key: string): number[] {
+  return key.split(':').map(Number);
+}
 
 // Credits to PathFinding.js
 // https://github.com/qiao/PathFinding.js
@@ -65,29 +84,24 @@ export function compressPath(path: number[][]): number[][] {
   return compressed;
 }
 
-export function lineLineIntersected(
+function lineLineIntersected(
   a1: number[],
   a2: number[],
   b1: number[],
   b2: number[]
-) {
-  // b1->b2向量 与 a1->b1向量的向量积
-  const ua_t =
+): boolean {
+  const uaT =
     (b2[0] - b1[0]) * (a1[1] - b1[1]) - (b2[1] - b1[1]) * (a1[0] - b1[0]);
-  // a1->a2向量 与 a1->b1向量的向量积
-  const ub_t =
+  const ubT =
     (a2[0] - a1[0]) * (a1[1] - b1[1]) - (a2[1] - a1[1]) * (a1[0] - b1[0]);
-  // a1->a2向量 与 b1->b2向量的向量积
-  const u_b =
+  const uB =
     (b2[1] - b1[1]) * (a2[0] - a1[0]) - (b2[0] - b1[0]) * (a2[1] - a1[1]);
-  // u_b == 0时，角度为0或者180 平行或者共线不属于相交
-  if (u_b !== 0) {
-    const ua = ua_t / u_b;
-    const ub = ub_t / u_b;
 
-    if (0 <= ua && ua <= 1 && 0 <= ub && ub <= 1) {
-      return true;
-    }
+  if (uB !== 0) {
+    const ua = uaT / uB;
+    const ub = ubT / uB;
+
+    if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) return true;
   }
 
   return false;

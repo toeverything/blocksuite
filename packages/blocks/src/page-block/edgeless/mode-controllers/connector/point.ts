@@ -1,5 +1,5 @@
+import { createKey } from './geometry-utils.js';
 import { ICompareable } from './heap.js';
-import { createKey } from './util.js';
 
 export class Point extends ICompareable {
   /** G stands for the cost from start to current point */

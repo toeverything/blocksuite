@@ -4,8 +4,8 @@ import {
   getMidPoint,
   lineRectIntersected,
   rectRectIntersected,
-} from './geometry.js';
-import { Grid } from './grid0.js';
+} from './geometry-utils.js';
+import { Grid } from './grid.js';
 import {
   extendBox,
   getBoxConstraintsInfo,
@@ -13,7 +13,7 @@ import {
   inView,
   isOppositeDirection,
   uniquePoints,
-} from './layout-util.js';
+} from './layout-utils.js';
 
 function getPathFindingData(
   start: {

@@ -1,9 +1,11 @@
 import { runAStar } from './a-star.js';
-import { getTuringPointsCount } from './geometry.js';
-import type { Grid } from './grid0.js';
-import { checkCanFollowWaypoint } from './layout-util.js';
+import {
+  calculateManhattanDist,
+  getTuringPointsCount,
+} from './geometry-utils.js';
+import type { Grid } from './grid.js';
+import { checkCanFollowWaypoint } from './layout-utils.js';
 import type { PathFindingPointData } from './type.js';
-import { calculateManhattanDist } from './util.js';
 
 function calculateHeuristic(
   current: number[],

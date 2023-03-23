@@ -1,10 +1,9 @@
 import { Direction } from './constants.js';
-import { compressPath } from './geometry.js';
-import type { Grid } from './grid0.js';
+import { add, compressPath, sub } from './geometry-utils.js';
+import type { Grid } from './grid.js';
 import { Heap } from './heap.js';
-import { checkDirectionIsValid, getMoveDelta } from './layout-util.js';
+import { checkDirectionIsValid, getMoveDelta } from './layout-utils.js';
 import { Point } from './point.js';
-import { add, sub } from './util.js';
 
 const heap = new Heap<Point>();
 const marked = new Map<string, Point>();

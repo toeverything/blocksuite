@@ -1,7 +1,7 @@
 import { Direction } from './constants.js';
-import type { Grid } from './grid0.js';
+import { add, createKey, sub } from './geometry-utils.js';
+import type { Grid } from './grid.js';
 import type { PathFindingPointData } from './type.js';
-import { add, createKey, sub } from './util.js';
 
 export function cloneDeep<T>(t: T): T {
   return JSON.parse(JSON.stringify(t));
