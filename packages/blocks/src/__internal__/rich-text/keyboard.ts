@@ -6,9 +6,11 @@ import type { VRange } from '@blocksuite/virgo';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
-import { SHORTKEY } from '../utils/shortcut.js';
+import { IS_IOS, IS_MAC } from '../utils/std.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import type { AffineVEditor } from './virgo/types.js';
+
+const SHORTKEY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
 // Type definitions is ported from quill
 // https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46

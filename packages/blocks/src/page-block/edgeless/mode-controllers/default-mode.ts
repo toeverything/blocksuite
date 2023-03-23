@@ -10,7 +10,6 @@ import {
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
-  isEmpty,
   noop,
   Point,
   resetNativeSelection,
@@ -180,7 +179,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
+    const emptyBlocks = this._blocks.filter(b => !b.children.length);
     // always keep at least one frame block
     if (emptyBlocks.length === this._blocks.length) {
       emptyBlocks.shift();

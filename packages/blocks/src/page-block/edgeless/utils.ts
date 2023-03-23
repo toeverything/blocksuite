@@ -24,7 +24,7 @@ import {
 import { assertExists } from '@blocksuite/store';
 import type { KeyHandler } from 'hotkeys-js';
 
-import { SHORTKEY } from '../../__internal__/utils/shortcut.js';
+import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
 import type {
   EdgelessContainer,
@@ -95,7 +95,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
 
     const { viewport } = container.surface;
     // pan
-    if (!e[SHORTKEY]) {
+    if (!isPinchEvent(e)) {
       const dx = e.deltaX / viewport.zoom;
       const dy = e.deltaY / viewport.zoom;
       viewport.applyDeltaCenter(dx, dy);
@@ -198,6 +198,8 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           model,
           distanceToTop < distanceToBottom
         );
+
+        pageBlock.setSelectionByBlockId(parent.id, true);
       } else {
         // blank area
         page.captureSync();
@@ -222,7 +224,11 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       if (pageBlock.mouseMode.type !== 'default') return null;
       const hoveringFrame = getHoveringFrame(point);
       if (!hoveringFrame) return null;
-      return getClosestBlockElementByPoint(point, Rect.fromDOM(hoveringFrame));
+      return getClosestBlockElementByPoint(
+        point,
+        Rect.fromDOM(hoveringFrame),
+        pageBlock.surface.viewport.zoom
+      );
     },
   });
 }

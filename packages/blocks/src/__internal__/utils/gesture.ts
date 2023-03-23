@@ -1,7 +1,7 @@
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
-import { debounce } from './std.js';
+import { debounce, IS_IOS, IS_MAC } from './std.js';
 
 export interface IPoint {
   x: number;
@@ -242,4 +242,13 @@ export function initMouseEventHandlers(
     document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
+}
+
+export function isPinchEvent(e: WheelEvent) {
+  // two finger pinches on touch pad, ctrlKey is always true.
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
+  if (IS_IOS || IS_MAC) {
+    return e.ctrlKey || e.metaKey;
+  }
+  return e.ctrlKey;
 }

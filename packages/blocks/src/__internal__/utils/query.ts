@@ -189,6 +189,15 @@ export function getDefaultPage(page: Page) {
   return pageComponent;
 }
 
+/**
+ * If it's not in the edgeless mode, it will return `null` directly.
+ */
+export function getEdgelessPage(page: Page) {
+  const editor = getEditorContainer(page);
+  const pageComponent = editor.querySelector('affine-edgeless-page');
+  return pageComponent;
+}
+
 export function getEditorContainer(page: Page) {
   assertExists(
     page.root,
@@ -535,7 +544,7 @@ export function isEdgelessPage({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is page or frame.
+ * Returns `true` if element is default/edgeless page or frame.
  */
 export function isPageOrFrame(element: Element) {
   return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
@@ -556,7 +565,7 @@ export function isImage({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is embed.
+ * Returns `true` if element is frame.
  */
 function isFrame({ tagName }: Element) {
   return tagName === 'AFFINE-FRAME';
@@ -604,7 +613,8 @@ export function isEdgelessBlockChild({ classList }: Element) {
  */
 export function getClosestBlockElementByPoint(
   point: Point,
-  rect?: Rect
+  rect: Rect | null = null,
+  scale = 1
 ): Element | null {
   const { y } = point;
 
@@ -616,8 +626,8 @@ export function getClosestBlockElementByPoint(
 
   if (rect) {
     point.x = Math.min(
-      Math.max(point.x, rect.left) + PADDING_LEFT - 1,
-      rect.right - PADDING_LEFT - 1
+      Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+      rect.right - PADDING_LEFT * scale - 1
     );
   }
 

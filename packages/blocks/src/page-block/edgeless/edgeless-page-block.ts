@@ -9,6 +9,7 @@ import {
   hotkey,
   HOTKEY_SCOPE,
   type IPoint,
+  type Point,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
@@ -19,6 +20,7 @@ import {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import {
+  assertExists,
   type BaseBlockModel,
   DisposableGroup,
   type Page,
@@ -419,6 +421,74 @@ export class EdgelessPageBlockComponent
         this.slots.selectionUpdated.emit(selectionState);
       }
     });
+  }
+
+  /**
+   * Adds a new frame with the given blocks and point.
+   * @param blocks Array<Partial<BaseBlockModel>>
+   * @param point Point
+   * @returns string[]
+   */
+  addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
+    if (!this.page.root) return [];
+    this.page.captureSync();
+    const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    const frameId = this.page.addBlock(
+      'affine:frame',
+      {
+        xywh: serializeXYWH(
+          x - DEFAULT_FRAME_OFFSET_X,
+          y - DEFAULT_FRAME_OFFSET_Y,
+          DEFAULT_FRAME_WIDTH,
+          DEFAULT_FRAME_HEIGHT
+        ),
+      },
+      this.page.root.id
+    );
+    const ids = this.page.addBlocksByFlavour(
+      blocks.map(({ flavour, ...blockProps }) => {
+        assertExists(flavour);
+        return {
+          flavour,
+          blockProps,
+        };
+      }),
+      frameId
+    );
+
+    requestAnimationFrame(() => {
+      const element = this.page.root?.children.find(b => b.id === frameId);
+      if (element) {
+        const selectionState = {
+          selected: [element],
+          active: true,
+        } as EdgelessSelectionState;
+        this.slots.selectionUpdated.emit(selectionState);
+      }
+    });
+
+    return ids;
+  }
+
+  /*
+   * Set selection state to closest frameBlock in DOM by giving blockId.
+   * Not supports surface elements.
+   */
+  setSelectionByBlockId(blockId: string, active = true) {
+    const frame = document
+      .querySelector(`[${BLOCK_ID_ATTR}="${blockId}"]`)
+      ?.closest('affine-frame');
+
+    if (frame) {
+      const frameId = frame?.getAttribute(BLOCK_ID_ATTR);
+      assertExists(frameId);
+      const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+      assertExists(frameBlock);
+      this.slots.selectionUpdated.emit({
+        selected: [frameBlock as TopLevelBlockModel],
+        active,
+      });
+    }
   }
 
   update(changedProperties: Map<string, unknown>) {

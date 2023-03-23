@@ -1,9 +1,5 @@
-import {
-  handleNativeRangeAtPoint,
-  noop,
-  type SelectionEvent,
-  type TextMouseMode,
-} from '@blocksuite/blocks/std';
+import type { SelectionEvent, TextMouseMode } from '@blocksuite/blocks/std';
+import { handleNativeRangeAtPoint, noop } from '@blocksuite/blocks/std';
 import { serializeXYWH } from '@blocksuite/phasor';
 
 import {
