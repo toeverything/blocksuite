@@ -253,10 +253,12 @@ export class VEditor<
       })
     );
 
-    this.rootElement.focus();
+    this.rootElement.focus({ preventScroll: true });
 
     this.slots.updated.emit();
   };
+
+  shouldScrollIntoView = true;
 
   slots: {
     mounted: Slot;
@@ -723,13 +725,23 @@ export class VEditor<
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    if (this.shouldScrollIntoView) {
+      let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
+      while (!(lineElement instanceof VirgoLine)) {
+        lineElement = lineElement?.parentElement ?? null;
+      }
+      lineElement?.scrollIntoView({
+        block: 'nearest',
+      });
+    }
+
     this.slots.rangeUpdated.emit(newRange);
   };
 
   /**
    * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(vRange: VRange, shouldScrollIntoView = true): Range | null {
+  toDomRange(vRange: VRange): Range | null {
     assertExists(this._rootElement);
     const lineElements = Array.from(
       this._rootElement.querySelectorAll('v-line')
@@ -778,16 +790,6 @@ export class VEditor<
     const range = document.createRange();
     range.setStart(anchorText, anchorOffset);
     range.setEnd(focusText, focusOffset);
-
-    if (shouldScrollIntoView) {
-      let lineElement: HTMLElement | null = focusText.parentElement;
-      while (!(lineElement instanceof VirgoLine)) {
-        lineElement = lineElement?.parentElement ?? null;
-      }
-      lineElement?.scrollIntoView({
-        block: 'nearest',
-      });
-    }
 
     return range;
   }
