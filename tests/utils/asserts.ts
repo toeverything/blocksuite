@@ -677,6 +677,11 @@ export async function assertDatabaseCellRichTexts(
   expect(actualTexts).toEqual(texts);
 }
 
+export async function assertDatabaseTitleText(page: Page, text: string) {
+  const dbTitle = page.locator('[data-block-is-database-title="true"]');
+  expect(await dbTitle.textContent()).toEqual(text);
+}
+
 export async function assertSelectionInFrame(page: Page, frameId: string) {
   const closestFrameId = await page.evaluate(() => {
     const selection = window.getSelection();

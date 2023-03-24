@@ -3,6 +3,8 @@ import hotkeys from 'hotkeys-js';
 
 import {
   isCaptionElement,
+  isDatabaseInput,
+  isInsideDatabaseTitle,
   isInsidePageTitle,
   isInsideRichText,
 } from './query.js';
@@ -41,6 +43,13 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     }
     // undo/redo should work in page title
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
+      return false;
+    }
+    // undo/redo should work in database title or cell container
+    if (
+      (isInsideDatabaseTitle(event.target) || isDatabaseInput(event.target)) &&
+      isUndoRedo(event)
+    ) {
       return false;
     }
     // Some event dispatch from body

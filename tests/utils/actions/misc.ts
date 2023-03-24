@@ -320,6 +320,11 @@ export async function focusDatabaseSearch(page: Page) {
   return searchIcon;
 }
 
+export async function focusDatabaseTitle(page: Page) {
+  const dbTitle = page.locator('[data-block-is-database-title="true"]');
+  await dbTitle.click();
+}
+
 export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
