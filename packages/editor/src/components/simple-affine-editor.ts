@@ -16,21 +16,20 @@ import { EditorContainer } from './editor-container.js';
 @customElement('simple-affine-editor')
 export class SimpleAffineEditor extends NonShadowLitElement {
   readonly workspace: Workspace;
-  page: Page;
+  readonly page: Page;
 
   constructor() {
     super();
 
     this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
-    const page = this.workspace.createPage('page0');
-    this.page = page;
+    this.page = this.workspace.createPage('page0');
 
-    const pageBlockId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    const pageBlockId = this.page.addBlock('affine:page');
+    const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);
+    this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  connectedCallback(): void {
+  connectedCallback() {
     const editor = new EditorContainer();
     editor.page = this.page;
     this.appendChild(editor);
