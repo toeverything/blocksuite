@@ -25,6 +25,9 @@ export class EditorContainer extends NonShadowLitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
+  autoFocus = true;
+
+  @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
@@ -54,6 +57,14 @@ export class EditorContainer extends NonShadowLitElement {
   firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
+
+    if (!this.autoFocus) {
+      setTimeout(() => {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      });
+    }
   }
 
   connectedCallback() {
