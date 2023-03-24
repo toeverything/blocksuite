@@ -349,6 +349,10 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 }
 
 export function getVirgoByModel(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Not support database model since it's may be have multiple Virgo instances.
+    throw new Error('Cannot get virgo by database model!');
+  }
   const richText = getRichTextByModel(model);
   if (!richText) return null;
   return richText.vEditor;

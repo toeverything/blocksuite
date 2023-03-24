@@ -40,7 +40,6 @@ function affineLinkStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -74,6 +73,7 @@ export class AffineLink extends NonShadowLitElement {
 
   static styles = css`
     a {
+      white-space: nowrap;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
       text-decoration: none;
@@ -88,6 +88,10 @@ export class AffineLink extends NonShadowLitElement {
 
     a:hover [data-virgo-text='true'] {
       text-decoration: underline;
+    }
+
+    a > v-text {
+      white-space: pre-wrap;
     }
   `;
 
