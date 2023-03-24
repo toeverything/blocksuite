@@ -87,9 +87,8 @@ export function createKeyboardBindings(
           if (event.key === '[') {
             // Convert to `@`
             this.vEditor.deleteText({ index: range.index - 1, length: 2 });
-            this.vEditor.insertText(range, '@');
+            this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');
             this.vEditor.setVRange({ index: range.index, length: 0 });
-
             this.vEditor.slots.rangeUpdated.once(() => {
               const curRange = getCurrentNativeRange();
               showLinkedPagePopover({ model, range: curRange });
