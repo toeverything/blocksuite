@@ -64,19 +64,14 @@ export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
-  activeModelId: string | null
+  active: boolean
 ) {
   return html`
     ${repeat(
       model.children,
       child => child.id,
       child =>
-        EdgelessBlockChild(
-          child as FrameBlockModel,
-          host,
-          viewport,
-          activeModelId === child.id
-        )
+        EdgelessBlockChild(child as FrameBlockModel, host, viewport, active)
     )}
   `;
 }

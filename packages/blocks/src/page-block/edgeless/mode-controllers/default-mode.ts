@@ -106,7 +106,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       if (currentSelected[0] === selected) {
         this._setSelectionState([selected], true);
       } else {
-        this._setSelectionState([selected], false);
+        // issue #1809
+        // If the previously selected element is a frameBlock and is in an active state,
+        // then the currently clicked frameBlock should also be in an active state when selected.
+        const active =
+          isTopLevelBlock(currentSelected[0]) &&
+          this._blockSelectionState.active;
+        this._setSelectionState([selected], active);
       }
       handleNativeRangeClick(this._page, e);
     }
