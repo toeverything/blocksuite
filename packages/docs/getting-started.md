@@ -25,6 +25,7 @@ async function main() {
   const { SimpleAffineEditor } = await import('@blocksuite/editor');
   const container = document.getElementById('editor-example');
   const editor = new SimpleAffineEditor();
+  editor.autofocus = false
   container.appendChild(editor);
 }
 
@@ -37,7 +38,7 @@ Or equivalently, you can also use the declarative style:
 
 ```html
 <body>
-  <simple-affine-editor autofocus="true"></simple-affine-editor>
+  <simple-affine-editor></simple-affine-editor>
   <script type="module">
     import '@blocksuite/editor';
     import '@blocksuite/editor/themes/affine.css';
