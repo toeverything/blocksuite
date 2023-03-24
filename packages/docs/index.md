@@ -2,6 +2,9 @@
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
+title: BlockSuite
+titleTemplate: The Block-Based Collaborative Framework
+
 hero:
   name: 'BlockSuite'
   text: 'The Block-Based Collaborative Framework'
