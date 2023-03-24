@@ -36,15 +36,6 @@ interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
-export function getBlockById<T extends ElementTagName>(
-  id: string,
-  container: Element = document.body
-) {
-  return container.querySelector<T>(
-    `[${ATTR}="${id}"]` as T
-  ) as BlockComponentElement | null;
-}
-
 /**
  * @deprecated Use `page.getParent` instead
  */
@@ -52,7 +43,7 @@ export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  const currentBlock = getBlockById(id, ele);
+  const currentBlock = getBlockElementById(id, ele);
   return (
     (currentBlock?.parentElement?.closest<T>(
       ATTR_SELECTOR as T
@@ -708,7 +699,7 @@ export function getClosestBlockElementByPoint(
 }
 
 /**
- * Returns the closest block element by element.
+ * Returns the closest block element by element that does not contain the page element and frame element.
  */
 export function getClosestBlockElementByElement(element: Element | null) {
   if (!element) return null;
@@ -746,6 +737,29 @@ export function getBlockElementsByElement(
   element: BlockComponentElement | Document | Element = document
 ) {
   return Array.from(element.querySelectorAll(ATTR_SELECTOR)).filter(isBlock);
+}
+
+/**
+ * Returns the block element by id with the parent.
+ */
+export function getBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  return parent.querySelector(`[${ATTR}="${id}"]`);
+}
+
+/**
+ * Returns the closest frame block element by id with the parent.
+ */
+export function getClosestFrameBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  const element = getBlockElementById(id, parent);
+  if (!element) return null;
+  if (isFrame(element)) return element;
+  return element.closest('affine-frame');
 }
 
 /**
