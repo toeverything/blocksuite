@@ -70,16 +70,32 @@ export function createKeyboardBindings(
     ...blockKeyBinding,
 
     linkedPage: {
-      // TODO support `@`
-      key: '[',
-      prefix: /[^[]\[$/,
-      handler(range, context) {
+      key: ['[', '@'],
+      shiftKey: null,
+      handler(range, { event, prefix }) {
+        if (event.key === '[' && !prefix.endsWith('[')) {
+          // not end with `[[`
+          return ALLOW_DEFAULT;
+        }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
         if (!flag) return ALLOW_DEFAULT;
         if (matchFlavours(model, ['affine:code'] as const)) {
           return ALLOW_DEFAULT;
         }
+
         this.vEditor.slots.rangeUpdated.once(() => {
+          if (event.key === '[') {
+            // Convert to `@`
+            this.vEditor.deleteText({ index: range.index - 1, length: 2 });
+            this.vEditor.insertText(range, '@');
+            this.vEditor.setVRange({ index: range.index, length: 0 });
+
+            this.vEditor.slots.rangeUpdated.once(() => {
+              const curRange = getCurrentNativeRange();
+              showLinkedPagePopover({ model, range: curRange });
+            });
+            return;
+          }
           const curRange = getCurrentNativeRange();
           showLinkedPagePopover({ model, range: curRange });
         });
