@@ -676,3 +676,12 @@ export async function assertDatabaseCellRichTexts(
   }, selector);
   expect(actualTexts).toEqual(texts);
 }
+
+export async function assertSelectionInFrame(page: Page, frameId: string) {
+  const closestFrameId = await page.evaluate(() => {
+    const selection = window.getSelection();
+    const frame = selection?.anchorNode?.parentElement?.closest('affine-frame');
+    return frame?.getAttribute('data-block-id');
+  });
+  expect(closestFrameId).toEqual(frameId);
+}

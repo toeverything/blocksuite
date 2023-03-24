@@ -12,6 +12,7 @@ export const styles = css`
 
   .slash-menu-container {
     z-index: var(--affine-z-index-popover);
+    user-select: none;
   }
 
   .slash-menu {

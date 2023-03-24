@@ -29,6 +29,7 @@ export class EdgelessComponentToolbar extends LitElement {
   static styles = css`
     :host {
       display: block;
+      user-select: none;
     }
 
     .container {

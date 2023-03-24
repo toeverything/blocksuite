@@ -35,6 +35,7 @@ export class EdgelessSelectedRect extends LitElement {
   static styles = css`
     :host {
       display: block;
+      user-select: none;
     }
 
     edgeless-component-toolbar {

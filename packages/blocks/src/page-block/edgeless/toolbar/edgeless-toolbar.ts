@@ -36,6 +36,7 @@ export class EdgelessToolbar extends LitElement {
       display: flex;
       justify-content: center;
       transform: translateX(-50%);
+      user-select: none;
     }
 
     .edgeless-toolbar-container {

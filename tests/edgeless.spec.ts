@@ -10,6 +10,7 @@ import {
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
+  getFrameBoundBoxInEdgeless,
   getFrameRect,
   increaseZoomLevel,
   locatorEdgelessToolButton,
@@ -38,6 +39,7 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressEscape,
   redoByClick,
   resizeElementByTopLeftHandle,
   type,
@@ -56,6 +58,7 @@ import {
   assertRichTexts,
   assertSameColor,
   assertSelection,
+  assertSelectionInFrame,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -981,4 +984,50 @@ test('block hub should add new frame when dragged to blank area', async ({
   await assertRichTexts(page, ['123', '456', '789', '000']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('pressing the ESC key will return to the default state', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  await pressEscape(page);
+  await assertEdgelessNonSelectedRect(page);
+});
+
+test('when the selection is always a frame, it should remain in an active state', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+
+  await switchEditorMode(page);
+  const bound = await getFrameBoundBoxInEdgeless(page, ids.frameId);
+
+  await setMouseMode(page, 'text');
+
+  const newFrameX = bound.x;
+  const newFrameY = bound.y + bound.height + 100;
+  // add text
+  await page.mouse.click(newFrameX, newFrameY);
+  await waitForVirgoStateUpdated(page);
+  await page.keyboard.type('hello');
+  await pressEnter(page);
+  // should wait for virgo update and resizeObserver callback
+  await waitNextFrame(page);
+  // assert add text success
+  await assertEdgelessSelectedRect(page, [84, 412, 448, 104]);
+
+  await page.mouse.click(bound.x + 10, bound.y + 10);
+  await assertSelectionInFrame(page, ids.frameId);
 });

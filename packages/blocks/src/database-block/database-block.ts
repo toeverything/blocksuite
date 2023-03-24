@@ -2,12 +2,13 @@
 import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
-import type { ColumnSchema } from '@blocksuite/global/database';
-import { assertEquals } from '@blocksuite/global/utils';
+import { SearchIcon } from '@blocksuite/global/config';
+import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import { assertEquals, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
@@ -25,8 +26,49 @@ import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
+type SerializedNestedColumns = {
+  // row
+  [key: string]: {
+    // column
+    [key: string]: BlockColumn;
+  };
+};
+
+type ColumnValues = string[];
+
+/**
+ * Containing all the rows and column values inside the database block.
+ * ```
+ * { rowId: ColumnValues }
+ * ```
+ */
+type DatabaseMap = Record<string, ColumnValues>;
+
+const enum SearchState {
+  /** show search input */
+  SearchInput = 'input',
+  /** show search icon */
+  SearchIcon = 'icon',
+  /** searching */
+  Searching = 'searching',
+}
+
 const FIRST_LINE_TEXT_WIDTH = 200;
-const ADD_COLUMN_BUTTON_WIDTH = 33;
+const ADD_COLUMN_BUTTON_WIDTH = 40;
+
+/** column tag color poll */
+// const columnTagColors = [
+//   '#F5F5F5',
+//   '#E3E2E0',
+//   '#FFE1E1',
+//   '#FFEACA',
+//   '#FFF4D8',
+//   '#DFF4E8',
+//   '#DFF4F3',
+//   '#E1EFFF',
+//   '#F3F0FF',
+//   '#FCE8FF',
+// ];
 
 let once = true;
 if (once) {
@@ -44,7 +86,9 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
           minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
           maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
         })}
-      ></div>
+      >
+        Title
+      </div>
       ${repeat(
         block.columns,
         column => column.id,
@@ -99,9 +143,20 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
   `;
 }
 
-function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
+function DataBaseRowContainer(
+  databaseBlock: DatabaseBlockComponent,
+  filteredRowIds: string[],
+  searchState: SearchState
+) {
   const databaseModel = databaseBlock.model;
   assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
+
+  const filteredChildren =
+    searchState === SearchState.Searching
+      ? databaseModel.children.filter(
+          child => filteredRowIds.indexOf(child.id) > -1
+        )
+      : databaseModel.children;
 
   return html`
     <style>
@@ -113,11 +168,19 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
       .affine-database-block-column {
         display: flex;
         align-items: center;
-        transition: background 20ms ease-in 0s;
+        width: 145px;
+        height: 40px;
+        padding: 8px;
+        border-right: 1px solid var(--affine-border-color);
       }
 
       .affine-database-block-column:hover {
-        background: rgba(55, 53, 47, 0.08);
+        background: linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.04),
+            rgba(0, 0, 0, 0.04)
+          ),
+          #ffffff;
       }
 
       .affine-database-block-rows {
@@ -129,19 +192,36 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
 
       .affine-database-block-row {
         width: 100%;
+        height: 44px;
         display: flex;
         flex-direction: row;
-        border-top: 1px solid rgb(238, 238, 237);
+        border-bottom: 1px solid var(--affine-border-color);
+      }
+      .affine-database-block-row:nth-of-type(1) {
+        border-top: 1px solid var(--affine-border-color);
+      }
+
+      .affine-database-block-row-cell {
+        display: flex;
+        align-item: center;
+        width: 145px;
+        height: 44px;
+        padding: 0 8px;
+        border-right: 1px solid var(--affine-border-color);
+      }
+      .affine-database-block-row-cell > affine-paragraph {
+        height: 100%;
       }
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
-        databaseModel.children,
+        filteredChildren,
         child => child.id,
         (child, idx) => {
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
               <div
+                class="affine-database-block-row-cell"
                 style=${styleMap({
                   minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
                   maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
@@ -190,12 +270,54 @@ export class DatabaseBlockComponent
       position: relative;
     }
 
+    .affine-database-block-title-container {
+      display: flex;
+    }
+
+    .affine-database-toolbar {
+      display: flex;
+      align-items: center;
+    }
+
+    .affine-database-toolbar-item {
+      margin: 0 5px;
+    }
+
+    .affine-database-toolbar-item.search {
+      display: flex;
+      align-items: center;
+    }
+    .affine-database-search-input-icon {
+      display: inline-flex;
+    }
+    .affine-database-search-input-icon svg {
+      width: 14px;
+    }
+
+    .affine-database-search-input {
+      height: 32px;
+      min-width: 80px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-sm);
+      box-sizing: border-box;
+      color: inherit;
+      background: transparent;
+    }
+    .affine-database-search-input:focus {
+      outline: none;
+    }
+    .affine-database-search-input::placeholder {
+      color: #888a9e;
+      font-size: var(--affine-font-sm);
+    }
+
     .affine-database-block {
       position: relative;
       width: 100%;
       overflow-x: scroll;
-      border-top: 1px solid rgb(238, 238, 237);
-      border-bottom: 1px solid rgb(238, 238, 237);
+      border-top: 1.5px solid var(--affine-border-color);
     }
 
     .affine-database-block-tag-circle {
@@ -213,16 +335,33 @@ export class DatabaseBlockComponent
       cursor: pointer;
     }
 
+    .affine-database-block-title-container {
+      display: flex;
+      align-items: center;
+      height: 44px;
+    }
+
     .affine-database-block-title {
+      flex: 1;
       position: sticky;
-      width: 100%;
-      min-height: 1em;
-      height: 40px;
-      font-size: 22px;
-      font-weight: 700;
-      border: 0;
+      width: 300px;
+      height: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #424149;
       font-family: inherit;
-      color: inherit;
+      overflow: hidden;
+      cursor: text;
+    }
+
+    .affine-database-block-title [data-virgo-text='true'] {
+      display: inline-block;
+      width: 300px;
+      max-width: 300px;
+      white-space: nowrap !important;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .affine-database-block-title:focus {
@@ -241,30 +380,31 @@ export class DatabaseBlockComponent
     }
 
     .affine-database-block-footer {
-      border-top: 1px solid rgb(238, 238, 237);
+      display: flex;
+      width: 100%;
+      height: 42px;
+      background-color: rgba(0, 0, 0, 0.04);
     }
 
     .affine-database-block-add-row {
-      user-select: none;
-      transition: background 20ms ease-in 0s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      height: 32px;
-      width: 100%;
-      padding-left: 8px;
-      font-size: 14px;
-      line-height: 20px;
-      border-top: 1px solid rgb(233, 233, 231);
-    }
-
-    .affine-database-block-add-column-button {
-      width: ${ADD_COLUMN_BUTTON_WIDTH}px;
-      height: ${ADD_COLUMN_BUTTON_WIDTH}px;
-
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .affine-database-block-add-column-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
     }
   `;
 
@@ -277,10 +417,23 @@ export class DatabaseBlockComponent
   @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
   addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
-  private _vEditor: VEditor | null = null;
-
   @query('.affine-database-block-title')
   private _container!: HTMLDivElement;
+
+  @query('.affine-database-search-input')
+  private _searchInput!: HTMLInputElement;
+
+  @state()
+  private _searchState: SearchState = SearchState.SearchIcon;
+
+  @state()
+  private _filteredRowIds: string[] = [];
+
+  @state()
+  private _hoverState = false;
+
+  private _vEditor: VEditor | null = null;
+  private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
@@ -288,7 +441,135 @@ export class DatabaseBlockComponent
     ) as ColumnSchema[];
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    const disposables = this._disposables;
+
+    disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
+    disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
+    disposables.addFromEvent(this, 'click', this._onClick);
+  }
+
+  firstUpdated() {
+    this._initTitleVEditor();
+
+    this.model.propsUpdated.on(() => this.requestUpdate());
+    this.model.childrenUpdated.on(() => this.requestUpdate());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
+  private _getDatabaseMap() {
+    const databaseMap: DatabaseMap = {};
+    for (const child of this.model.children) {
+      // The first value is the text context of the row block
+      databaseMap[child.id] = [child.text?.toString() ?? ''];
+    }
+
+    const nestedColumns =
+      this.model.page.columns.toJSON() as SerializedNestedColumns;
+    const rowIds = this.model.children.map(child => child.id);
+
+    rowIds.forEach(blockId => {
+      // The map containing all columns related to this row (block)
+      const columnMap = nestedColumns[blockId];
+      if (!columnMap) return;
+
+      // Flatten the columnMap into a list of values
+      const columnValues = Object.keys(columnMap).map(
+        key => columnMap[key].value + ''
+      );
+      databaseMap[blockId].push(...columnValues);
+    });
+
+    return databaseMap;
+  }
+
+  private _onSearch = (event: InputEvent) => {
+    const el = event.target as HTMLInputElement;
+    const inputValue = el.value.trim();
+    this._searchState = SearchState.Searching;
+    if (inputValue === '') {
+      this._searchState = SearchState.SearchInput;
+    }
+
+    const databaseMap = this._getDatabaseMap();
+    const existingRowIds = Object.keys(databaseMap).filter(key => {
+      return (
+        databaseMap[key].findIndex(item =>
+          item.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())
+        ) > -1
+      );
+    });
+
+    this._filteredRowIds = this.model.children
+      .filter(child => existingRowIds.includes(child.id))
+      .map(child => child.id);
+
+    // When deleting the search content, the rich-text in the database row will automatically get the focus,
+    // causing the search box to blur. So, here we manually make it focus.
+    requestAnimationFrame(() => el.focus());
+  };
+
+  private _onSearchKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      this._resetSearchStatus();
+    }
+  };
+
+  private _resetSearchStatus = () => {
+    this._searchInput.value = '';
+    this._filteredRowIds = [];
+    this._searchState = SearchState.SearchIcon;
+  };
+
+  private _onShowSearch = () => {
+    this._searchState = SearchState.SearchInput;
+    setTimeout(() => {
+      this._searchInput.focus();
+      onClickOutside(
+        this._searchInput,
+        () => {
+          if (this._searchState !== SearchState.Searching) {
+            this._searchState = SearchState.SearchIcon;
+          }
+        },
+        'mousedown'
+      );
+    });
+  };
+
+  private _onMouseOver = () => {
+    this._hoverState = true;
+  };
+
+  private _onMouseLeave = () => {
+    if (this._searchState === SearchState.SearchIcon) {
+      this._hoverState = false;
+    }
+  };
+
+  private _onClick = () => {
+    setTimeout(() => {
+      onClickOutside(
+        this,
+        () => {
+          if (this._searchState !== SearchState.Searching) {
+            this._hoverState = false;
+          }
+        },
+        'mousedown'
+      );
+    });
+  };
+
   private _addRow = () => {
+    this._searchState = SearchState.SearchIcon;
+    this._hoverState = false;
+
     this.model.page.captureSync();
     this.model.page.addBlock('affine:paragraph', {}, this.model.id);
   };
@@ -329,12 +610,35 @@ export class DatabaseBlockComponent
     });
   }
 
-  firstUpdated() {
-    this._initTitleVEditor();
+  private _renderToolbar = () => {
+    if (!this._hoverState) return html``;
 
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
-  }
+    const searchTool =
+      this._searchState !== SearchState.SearchIcon
+        ? html`<div class="search-input-container">
+            <input
+              placeholder="Search..."
+              class="affine-database-search-input"
+              @input=${this._onSearch}
+              @keydown=${this._onSearchKeydown}
+            />
+            <span class="close-icon" @click=${this._resetSearchStatus}>x</span>
+          </div>`
+        : html`
+            <span
+              class="affine-database-search-input-icon"
+              @click=${this._onShowSearch}
+            >
+              ${SearchIcon}
+            </span>
+          `;
+
+    return html`<div class="affine-database-toolbar">
+      <div class="affine-database-toolbar-item">+ Add Record</div>
+      <div class="affine-database-toolbar-item search">${searchTool}</div>
+      <div class="affine-database-toolbar-item">...</div>
+    </div>`;
+  };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
@@ -348,34 +652,43 @@ export class DatabaseBlockComponent
     const isEmpty = !this.model.title || !this.model.title.length;
 
     return html`
-      <div class="affine-database-block-title ${
-        isEmpty ? 'affine-database-block-title-empty' : ''
-      }" data-block-is-database-title="true">
-      </div>
-      <div class="affine-database-block">
-        <div
-          class="affine-database-block-container"
-          style=${styleMap({
-            width: `${totalWidth}px`,
-          })}
-        >
-          ${DatabaseHeader(this)} ${DataBaseRowContainer(this)}
-          <div class="affine-database-block-footer">
-            <div class="affine-database-block-add-row"
-                 data-test-id="affine-database-add-row-button"
-                 role="button"
-                 @click=${this._addRow}>
-              + New
+      <div class="affine-database-block-container">
+        <div class="affine-database-block-title-container">
+          <div class="affine-database-block-title ${
+            isEmpty ? 'affine-database-block-title-empty' : ''
+          }" data-block-is-database-title="true">
+          </div>
+          ${this._renderToolbar()}
+        </div>
+        <div class="affine-database-block">
+          <div
+            class="affine-database-block-container"
+            style=${styleMap({
+              width: `${totalWidth}px`,
+            })}
+          >
+            ${DatabaseHeader(this)}
+            ${DataBaseRowContainer(
+              this,
+              this._filteredRowIds,
+              this._searchState
+            )}
+            <div class="affine-database-block-footer">
+              <div class="affine-database-block-add-row"
+                  data-test-id="affine-database-add-row-button"
+                  role="button"
+                  @click=${this._addRow}>
+                + New
+              </div>
             </div>
           </div>
         </div>
+        <${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}
+          .onSelectType=${this._addColumn}
+        ></${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}>
       </div>
-      <${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}
-        .onSelectType=${this._addColumn}
-      ></${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}>
     `;
   }
-  /* eslint-enable lit/binding-positions, lit/no-invalid-html */
 }
 
 declare global {

@@ -1,7 +1,6 @@
 import type {
   BlockComponentElement,
   EditingState,
-  IPoint,
   Rect,
 } from '@blocksuite/blocks/std';
 import {
@@ -46,6 +45,7 @@ const styles = css`
   affine-block-hub {
     position: absolute;
     z-index: 1;
+    user-select: none;
   }
 
   .affine-block-hub-container {
@@ -455,7 +455,8 @@ export class BlockHub extends NonShadowLitElement {
 
   @property()
   public getHoveringFrameState: (point: Point) => {
-    rect: Rect | null;
+    container?: Element;
+    rect?: Rect;
     scale: number;
   };
 
@@ -495,7 +496,7 @@ export class BlockHub extends NonShadowLitElement {
   private readonly _onDropCallback: (
     e: DragEvent,
     lastModelState: EditingState | null,
-    point: IPoint
+    point: Point
   ) => Promise<void>;
 
   private _currentClientX = 0;
@@ -515,14 +516,15 @@ export class BlockHub extends NonShadowLitElement {
     enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringFrameState: (point: Point) => {
-      rect: Rect | null;
+      container?: Element;
+      rect?: Rect;
       scale: number;
     };
     onDragStarted: () => void;
     onDropCallback: (
       e: DragEvent,
       lastModelState: EditingState | null,
-      point: IPoint
+      point: Point
     ) => Promise<void>;
   }) {
     super();
@@ -708,33 +710,34 @@ export class BlockHub extends NonShadowLitElement {
       return;
     }
 
-    this._indicator.cursorPosition = {
-      x,
-      y,
-    };
+    this._indicator.cursorPosition = new Point(x, y);
 
     const point = new Point(x, y);
-    const { rect: frameRect, scale } = this.getHoveringFrameState(
+    const { container, rect, scale } = this.getHoveringFrameState(
       point.clone()
     );
     let element = null;
-    if (frameRect) {
-      element = getClosestBlockElementByPoint(point, frameRect, scale);
+    if (rect) {
+      element = getClosestBlockElementByPoint(
+        point,
+        { container, rect },
+        scale
+      );
     }
 
-    let rect = null;
+    let targetRect = null;
     let lastModelState = null;
     if (element) {
-      rect = getRectByBlockElement(element);
+      targetRect = getRectByBlockElement(element);
       lastModelState = {
-        rect,
+        rect: targetRect,
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
       };
     }
 
     this._lastModelState = lastModelState;
-    this._indicator.targetRect = rect;
+    this._indicator.targetRect = targetRect;
   };
 
   private _onDragOver = (e: DragEvent) => {
@@ -768,10 +771,7 @@ export class BlockHub extends NonShadowLitElement {
       e,
       this._lastModelState,
       // `drag.clientY` !== `dragend.clientY` in chrome.
-      this._indicator?.cursorPosition ?? {
-        x: e.clientX,
-        y: e.clientY,
-      }
+      this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY)
     );
   };
 

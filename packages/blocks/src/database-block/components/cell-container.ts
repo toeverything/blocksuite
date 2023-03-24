@@ -19,6 +19,8 @@ export class DatabaseCellContainer
     :host {
       display: flex;
       align-items: center;
+      padding: 10px 8px;
+      border-right: 1px solid var(--affine-border-color);
     }
   `;
 

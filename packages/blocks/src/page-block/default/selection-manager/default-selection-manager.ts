@@ -223,7 +223,9 @@ export class DefaultSelectionManager {
 
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
-      this._container.innerRect
+      {
+        rect: this._container.innerRect,
+      }
     );
 
     if (element) {
@@ -305,10 +307,9 @@ export class DefaultSelectionManager {
     const point = new Point(e.raw.clientX, e.raw.clientY);
     let hoverEditingState = null;
 
-    const element = getClosestBlockElementByPoint(
-      point.clone(),
-      this._container.innerRect
-    );
+    const element = getClosestBlockElementByPoint(point.clone(), {
+      rect: this._container.innerRect,
+    });
 
     if (element) {
       hoverEditingState = {

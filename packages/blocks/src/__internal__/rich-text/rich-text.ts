@@ -122,7 +122,7 @@ export class RichText extends NonShadowLitElement {
         }
 
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (vRange.index >= 0 && data && data !== '\n') {
+        if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
           if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
             delete attributes?.link;
