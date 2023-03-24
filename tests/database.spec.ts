@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusDatabaseSearch,
+  focusDatabaseTitle,
   focusRichText,
   getDatabaseMouse,
   initDatabaseColumn,
@@ -14,15 +15,18 @@ import {
   pressBackspace,
   pressEnter,
   pressShiftEnter,
+  redoByKeyboard,
   SHORT_KEY,
   type,
   undoByClick,
+  undoByKeyboard,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockCount,
   assertBlockProps,
   assertDatabaseCellRichTexts,
+  assertDatabaseTitleText,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -285,4 +289,28 @@ test('should database search work', async ({ page }) => {
   await closeIcon.click();
   expect(searchIcon).toBeVisible();
   expect(await rows.count()).toBe(3);
+});
+
+test('should database title and rich-text support undo/redo', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page, 'rich-text');
+  await initDatabaseDynamicRowWithData(page, '123', true);
+
+  await undoByKeyboard(page);
+  const cellSelector = '[data-row-id="4"][data-column-id="3"]';
+  await assertDatabaseCellRichTexts(page, cellSelector, '');
+  await redoByKeyboard(page);
+  await assertDatabaseCellRichTexts(page, cellSelector, '123');
+
+  await focusDatabaseTitle(page);
+  await type(page, 'abc');
+  await assertDatabaseTitleText(page, 'Database 1abc');
+  await undoByKeyboard(page);
+  await assertDatabaseTitleText(page, 'Database 1');
+  await redoByKeyboard(page);
+  await assertDatabaseTitleText(page, 'Database 1abc');
 });
