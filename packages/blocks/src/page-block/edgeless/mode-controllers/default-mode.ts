@@ -1,10 +1,7 @@
-import type {
-  BlockComponentElement,
-  DefaultMouseMode,
-  SelectionEvent,
-  TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
 import {
+  type BlockComponentElement,
+  type DefaultMouseMode,
+  getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getSelectedStateRectByBlockElement,
@@ -12,10 +9,12 @@ import {
   handleNativeRangeDragMove,
   noop,
   Point,
+  Rect,
   resetNativeSelection,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
@@ -193,14 +192,23 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: SelectionEvent) {
+    const block = this._blockSelectionState.selected[0];
+    if (!block || !isTopLevelBlock(block)) return;
+    const frameBlockElement = getBlockElementByModel(block);
+    assertExists(frameBlockElement);
+
     const {
       raw: { clientX, clientY },
     } = e;
-    const point = new Point(
-      clientX + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT - 1,
-      clientY
+    const point = new Point(clientX, clientY);
+    const element = getClosestBlockElementByPoint(
+      point,
+      {
+        container: frameBlockElement,
+        rect: Rect.fromDOM(frameBlockElement),
+      },
+      this._edgeless.surface.viewport.zoom
     );
-    const element = getClosestBlockElementByPoint(point);
     let hoverEditingState = null;
     if (element) {
       hoverEditingState = {
@@ -208,11 +216,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         model: getModelByBlockElement(element),
         rect: getSelectedStateRectByBlockElement(element),
       };
+      this._edgeless.components.dragHandle?.onContainerMouseMove(
+        e,
+        hoverEditingState
+      );
     }
-    this._edgeless.components.dragHandle?.onContainerMouseMove(
-      e,
-      hoverEditingState
-    );
   }
 
   onContainerClick(e: SelectionEvent) {

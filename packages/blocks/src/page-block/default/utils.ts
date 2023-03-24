@@ -548,7 +548,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     //   defaultPageBlock.selection.clear();
     // },
     getClosestBlockElement(point: Point) {
-      return getClosestBlockElementByPoint(point, defaultPageBlock.innerRect);
+      return getClosestBlockElementByPoint(point, {
+        rect: defaultPageBlock.innerRect,
+      });
     },
   });
 }

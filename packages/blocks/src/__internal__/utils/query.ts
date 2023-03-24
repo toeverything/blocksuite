@@ -604,26 +604,37 @@ export function isEdgelessBlockChild({ classList }: Element) {
  */
 export function getClosestBlockElementByPoint(
   point: Point,
-  rect: Rect | null = null,
+  state: {
+    rect?: Rect;
+    container?: Element;
+  } | null = null,
   scale = 1
 ): Element | null {
   const { y } = point;
 
+  let container;
   let element = null;
   let bounds = null;
   let childBounds = null;
   let diff = 0;
   let n = 1;
 
-  if (rect) {
-    point.x = Math.min(
-      Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-      rect.right - PADDING_LEFT * scale - 1
-    );
+  if (state) {
+    container = state.container;
+    const rect = state.rect || container?.getBoundingClientRect();
+    if (rect) {
+      point.x = Math.min(
+        Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+        rect.right - PADDING_LEFT * scale - 1
+      );
+    }
   }
 
   // find block element
-  element = findBlockElement(document.elementsFromPoint(point.x, point.y));
+  element = findBlockElement(
+    document.elementsFromPoint(point.x, point.y),
+    container
+  );
 
   // Horizontal direction: for nested structures
   if (element) {
@@ -664,7 +675,10 @@ export function getClosestBlockElementByPoint(
     n *= -1;
 
     // find block element
-    element = findBlockElement(document.elementsFromPoint(point.x, point.y));
+    element = findBlockElement(
+      document.elementsFromPoint(point.x, point.y),
+      container
+    );
 
     if (element) {
       bounds = getRectByBlockElement(element);
@@ -809,21 +823,22 @@ export function getBlockElementsIncludeSubtrees(elements: Element[]) {
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function findBlockElement(elements: Element[]) {
+function findBlockElement(elements: Element[], parent?: Element) {
   const len = elements.length;
   let element = null;
   let i = 0;
   while (i < len) {
     element = elements[i];
+    i++;
+    // if parent does not contain element, it's ignored
+    if (parent && !contains(parent, element)) continue;
     if (hasBlockId(element) && isBlock(element)) return element;
     if (isEmbed(element)) {
-      i++;
       if (i < len && hasBlockId(elements[i]) && isBlock(elements[i])) {
         return elements[i];
       }
       return getClosestBlockElementByElement(element);
     }
-    i++;
   }
   return null;
 }

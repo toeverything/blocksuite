@@ -428,7 +428,6 @@ export class Workspace {
 
     this.meta.pageMetaRemoved.on(id => {
       const page = this.getPage(id) as Page;
-      page.dispose();
       this._store.removeSpace(page);
       this.slots.pageRemoved.emit(id);
       // TODO remove page from indexer

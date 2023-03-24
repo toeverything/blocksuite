@@ -27,6 +27,10 @@ export const BlockSchemas = [
   DividerBlockSchema,
 ];
 
+const defaultPageId = 'page0';
+const spaceId = `space:${defaultPageId}`;
+const spaceMetaId = 'space:meta';
+
 function serialize(page: Page) {
   return page.doc.toJSON();
 }
@@ -41,18 +45,13 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage() {
+function createTestPage(pageId = defaultPageId, parentId?: string) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  const page = workspace.createPage('page0');
-  return page;
+  return workspace.createPage(pageId, parentId);
 }
 
-const defaultPageId = 'page0';
-const spaceId = `space:${defaultPageId}`;
-const spaceMetaId = 'space:meta';
-
-describe.concurrent('basic', () => {
+describe('basic', () => {
   it('can init workspace', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
@@ -83,7 +82,39 @@ describe.concurrent('basic', () => {
   });
 });
 
-describe.concurrent('addBlock', () => {
+describe('pageMeta', () => {
+  it('can create subpage', () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const parentPage = workspace.createPage(defaultPageId);
+    const subpage = workspace.createPage('subpage0', parentPage.id);
+    assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
+  });
+
+  it('can shift subpage', () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const page0 = workspace.createPage('page0');
+    const page1 = workspace.createPage('page1');
+    const page2 = workspace.createPage('page2');
+
+    assert.deepEqual(
+      workspace.meta.pageMetas.map(m => m.id),
+      ['page0', 'page1', 'page2']
+    );
+
+    workspace.shiftPage(page1.id, 0);
+
+    assert.deepEqual(
+      workspace.meta.pageMetas.map(m => m.id),
+      ['page1', 'page0', 'page2']
+    );
+  });
+});
+
+describe('addBlock', () => {
   it('can add single model', () => {
     const page = createTestPage();
     page.addBlock('affine:page', {
@@ -202,7 +233,7 @@ describe.concurrent('addBlock', () => {
 
     const page0 = workspace.createPage('page0');
     const page1 = workspace.createPage('page1');
-    // @ts-ignore
+    // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
     page0.addBlock('affine:page', {
@@ -274,7 +305,7 @@ describe.concurrent('addBlock', () => {
   });
 });
 
-describe.concurrent('deleteBlock', () => {
+describe('deleteBlock', () => {
   it('can delete single model', () => {
     const page = createTestPage();
 
@@ -338,7 +369,7 @@ describe.concurrent('deleteBlock', () => {
   });
 });
 
-describe.concurrent('getBlock', () => {
+describe('getBlock', () => {
   it('can get block by id', () => {
     const page = createTestPage();
     const root = createRoot(page);
@@ -431,7 +462,7 @@ describe('workspace.exportJSX works', () => {
   });
 });
 
-describe.concurrent('workspace.search works', () => {
+describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);

@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  lang: 'en-US',
   title: 'BlockSuite',
   description: 'The Block-Based Collaborative Framework',
   themeConfig: {
@@ -12,18 +13,58 @@ export default defineConfig({
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
       { text: 'Docs', link: '/introduction' },
-      { text: 'API', link: '' },
-      // { text: 'API', link: '/api-examples' }, // Vitepress demo
-      { text: 'Examples', link: '' },
+      { text: '🚧 API', link: '' },
+      { text: '🚧 Examples', link: '' },
     ],
 
     sidebar: [
       {
-        text: 'BlockSuite Documentation',
+        text: 'Introduction',
+        items: [{ text: 'Introduction', link: '/introduction' }],
+      },
+      {
+        text: 'Using BlockSuite',
         items: [
-          { text: 'Introduction', link: '/introduction' },
+          { text: 'Getting Started', link: '/getting-started' },
+          {
+            text: '🚧 Fundamental Concepts',
+            link: '',
+            items: [
+              { text: '🚧 Workspaces and Pages', link: '' },
+              { text: '🚧 Flavoured Blocks', link: '' },
+            ],
+          },
+          { text: '🚧 Collaboration and Data Persistence', link: '' },
+          { text: '🚧 Defining Your Block', link: '' },
+          { text: '🚧 Building Your Framework', link: '' },
           { text: 'Editor Example', link: '/editor-example' },
           // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
+        ],
+      },
+      {
+        text: 'Architecture In-Depth',
+        items: [
+          { text: '🚧 Unidirectional Data Flow', link: '' },
+          {
+            text: '🚧 Common Patterns',
+            items: [
+              { text: '🚧 Controlled Components', link: '' },
+              { text: '🚧 Rich Text Orchestration', link: '' },
+              { text: '🚧 Container Blocks', link: '' },
+            ],
+          },
+        ],
+      },
+      {
+        text: '🚧 API Reference',
+        items: [],
+      },
+      {
+        text: 'Developing BlockSuite',
+        items: [
+          { text: '🚧 Building the Packages', link: '' },
+          { text: '🚧 Making Contributions', link: '' },
+          { text: '🚧 Testing', link: '' },
         ],
       },
     ],

@@ -2,9 +2,13 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  focusDatabaseSearch,
   focusRichText,
+  getDatabaseMouse,
   initDatabaseColumn,
+  initDatabaseDynamicRowWithData,
   initDatabaseRow,
+  initDatabaseRowWithData,
   initEmptyDatabaseState,
   pressArrowLeft,
   pressBackspace,
@@ -125,12 +129,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-  await initDatabaseRow(page);
-
-  const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
-  await cell.click();
-  await cell.click();
-  await type(page, '1');
+  await initDatabaseDynamicRowWithData(page, '1', true);
 
   // click outside
   await page.mouse.click(200, 200);
@@ -144,14 +143,9 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page, 'rich-text');
-  await initDatabaseRow(page);
+  await initDatabaseDynamicRowWithData(page, '123', true);
 
   const cellSelector = '[data-row-id="4"][data-column-id="3"]';
-  const cell = page.locator(cellSelector);
-  await cell.click();
-  await cell.click();
-  await type(page, '123');
-
   await pressArrowLeft(page);
   await pressEnter(page);
   await assertDatabaseCellRichTexts(page, cellSelector, '123');
@@ -232,4 +226,63 @@ test('should hide placeholder of paragraph in database', async ({ page }) => {
   await focusRichText(page);
   const tipsPlaceholder = page.locator('.tips-placeholder');
   expect(await tipsPlaceholder.count()).toEqual(0);
+});
+
+test('should show or hide database toolbar', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  const db = await getDatabaseMouse(page);
+  await db.mouseOver();
+  const toolbar = page.locator('.affine-database-toolbar');
+  await expect(toolbar).toBeVisible();
+  await db.mouseLeave();
+  await expect(toolbar).toBeHidden();
+
+  await db.mouseOver();
+  const searchIcon = await focusDatabaseSearch(page);
+  await db.mouseLeave();
+  await expect(toolbar).toBeVisible();
+
+  // click outside
+  const pageTitle = page.locator('.affine-default-page-block-title');
+  await pageTitle.click();
+  await expect(toolbar).toBeHidden();
+
+  await db.mouseOver();
+  await searchIcon.click();
+  await type(page, '1');
+  await pageTitle.click();
+  await expect(toolbar).toBeVisible();
+});
+
+test('should database search work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRowWithData(page, 'text1');
+  await initDatabaseDynamicRowWithData(page, '123', false);
+  await initDatabaseRowWithData(page, 'text2');
+  await initDatabaseDynamicRowWithData(page, '', false);
+  await initDatabaseRowWithData(page, 'text3');
+  await initDatabaseDynamicRowWithData(page, '26', false);
+
+  // search for '2'
+  const searchIcon = await focusDatabaseSearch(page);
+  await type(page, '2');
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
+
+  // search for '23'
+  await type(page, '3');
+  expect(await rows.count()).toBe(1);
+  const cell = page.locator('affine-database-number-cell > span');
+  expect(await cell.innerText()).toBe('123');
+
+  // clear search input
+  const closeIcon = page.locator('.close-icon');
+  await closeIcon.click();
+  expect(searchIcon).toBeVisible();
+  expect(await rows.count()).toBe(3);
 });
