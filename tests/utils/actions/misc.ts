@@ -7,7 +7,13 @@ import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
-import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
+import {
+  pressEnter,
+  pressSpace,
+  pressTab,
+  SHORT_KEY,
+  type,
+} from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
@@ -358,7 +364,7 @@ export async function initThreeParagraphs(page: Page) {
 export async function initThreeLists(page: Page) {
   await focusRichText(page);
   await type(page, '-');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await type(page, '123');
   await pressEnter(page);
   await type(page, '456');
@@ -370,7 +376,7 @@ export async function initThreeLists(page: Page) {
 export async function insertThreeLevelLists(page: Page, i = 0) {
   await focusRichText(page, i);
   await type(page, '-');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await type(page, '123');
   await pressEnter(page);
   await pressTab(page);
@@ -385,11 +391,11 @@ export async function initThreeDividers(page: Page) {
   await type(page, '123');
   await pressEnter(page);
   await type(page, '---');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await type(page, '---');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await type(page, '---');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await type(page, '123');
 }
 
@@ -664,4 +670,28 @@ export async function shamefullyBlurActiveElement(page: Page) {
  */
 export async function waitForVirgoStateUpdated(page: Page) {
   await page.waitForTimeout(50);
+}
+
+export async function initImageState(page: Page) {
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    const clipData = {
+      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
+    };
+    const e = new ClipboardEvent('paste', {
+      clipboardData: new DataTransfer(),
+    });
+    Object.defineProperty(e, 'target', {
+      writable: false,
+      value: document.body,
+    });
+    Object.entries(clipData).forEach(([key, value]) => {
+      e.clipboardData?.setData(key, value);
+    });
+    document.body.dispatchEvent(e);
+  });
+
+  // due to pasting img calls fetch, so we need timeout for downloading finished.
+  await page.waitForTimeout(500);
 }

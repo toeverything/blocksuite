@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeEmbed,
   activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
@@ -20,6 +21,7 @@ import {
   getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  initImageState,
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
@@ -2046,7 +2048,9 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await expect(rects).toHaveCount(1);
 });
 
-test('should blur rich-text first when block selection', async ({ page }) => {
+test('should blur rich-text first on starting block selection', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -2062,4 +2066,97 @@ test('should blur rich-text first when block selection', async ({ page }) => {
   );
 
   await expect(page.locator('*:focus')).toHaveCount(0);
+});
+
+test('should not show option menu of image on block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await activeEmbed(page);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(1);
+
+  await pressEnter(page);
+  await type(page, '123');
+
+  const imageRect = await page.locator('affine-image').boundingBox();
+  const richTextRect = await page.locator('rich-text').boundingBox();
+  if (!imageRect || !richTextRect) {
+    throw new Error();
+  }
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: richTextRect.x + richTextRect.width + 1,
+      y: richTextRect.y + richTextRect.height + 1,
+    },
+    {
+      x: imageRect.x + imageRect.width - 1,
+      y: imageRect.y + imageRect.height - 1,
+    }
+  );
+
+  await page.waitForTimeout(50);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(0);
+  await expect(
+    page.locator('.affine-page-selected-rects-container > *')
+  ).toHaveCount(2);
+});
+
+test('should not show option menu of image on native selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await activeEmbed(page);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(1);
+
+  await pressEnter(page);
+  await type(page, '123');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 1],
+    [0, 0],
+    { x: 0, y: 0 },
+    { x: -40, y: 0 }
+  );
+
+  await page.waitForTimeout(50);
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 1],
+    [0, 0],
+    { x: 0, y: 0 },
+    { x: -40, y: -100 }
+  );
+
+  await page.waitForTimeout(50);
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123');
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(0);
 });

@@ -27,6 +27,7 @@ export interface SelectionEvent extends IPoint {
     alt: boolean;
   };
   button?: number;
+  dragging: boolean;
 }
 
 function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
@@ -65,6 +66,7 @@ function toSelectionEvent(
       alt: e.altKey,
     },
     button: e.button,
+    dragging: !!last,
   };
   if (last) {
     delta.x = offsetX - last.x;
@@ -155,12 +157,15 @@ export function initMouseEventHandlers(
     }
 
     if (isDragging) {
-      onContainerDragMove(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      const current = toSelectionEvent(
+        e,
+        getBoundingClientRect,
+        startX,
+        startY,
+        last
       );
-      onContainerMouseMove(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
+      onContainerDragMove(current);
+      onContainerMouseMove(current);
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
   };

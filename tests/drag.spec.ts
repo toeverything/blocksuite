@@ -528,7 +528,9 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   );
 });
 
-test('should blur rich-text first when block selection', async ({ page }) => {
+test('should blur rich-text first on starting block selection', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
