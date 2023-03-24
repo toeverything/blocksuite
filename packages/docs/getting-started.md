@@ -37,7 +37,7 @@ Or equivalently, you can also use the declarative style:
 
 ```html
 <body>
-  <simple-affine-editor></simple-affine-editor>
+  <simple-affine-editor autofocus="true"></simple-affine-editor>
   <script type="module">
     import '@blocksuite/editor';
     import '@blocksuite/editor/themes/affine.css';

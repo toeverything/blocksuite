@@ -25,7 +25,7 @@ export class EditorContainer extends NonShadowLitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  autoFocus = true;
+  autofocus = true;
 
   @property()
   mouseMode: MouseMode = {
@@ -58,7 +58,7 @@ export class EditorContainer extends NonShadowLitElement {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
 
-    if (!this.autoFocus) {
+    if (!this.autofocus) {
       setTimeout(() => {
         if (document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();

@@ -2,7 +2,7 @@ import { NonShadowLitElement } from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
 
@@ -18,6 +18,9 @@ export class SimpleAffineEditor extends NonShadowLitElement {
   readonly workspace: Workspace;
   readonly page: Page;
 
+  @property({ type: Boolean })
+  autofocus = true;
+
   constructor() {
     super();
 
@@ -32,6 +35,7 @@ export class SimpleAffineEditor extends NonShadowLitElement {
   connectedCallback() {
     const editor = new EditorContainer();
     editor.page = this.page;
+    editor.autofocus = this.autofocus;
     this.appendChild(editor);
   }
 }
