@@ -203,6 +203,44 @@ export const DatabaseTableViewIcon = html`<svg
   />
 </svg>`;
 
+export const DatabaseKanbanViewIcon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      x="6"
+      y="8"
+      width="4.5"
+      height="8"
+      rx="0.4"
+      stroke="#77757D"
+      stroke-width="1.5"
+    />
+    <rect
+      x="13.5"
+      y="8"
+      width="4.5"
+      height="6"
+      rx="0.4"
+      stroke="#77757D"
+      stroke-width="1.5"
+    />
+    <rect
+      x="3"
+      y="5"
+      width="18"
+      height="14"
+      rx="2"
+      stroke="#77757D"
+      stroke-width="1.5"
+    />
+  </svg>
+`;
+
 export const TodoIcon = html`<svg
   width="20"
   height="20"
@@ -949,6 +987,25 @@ export const MoreHorizontalIcon = html`
     />
     <path
       d="M19 10.5C18.1716 10.5 17.5 11.1716 17.5 12C17.5 12.8284 18.1716 13.5 19 13.5C19.8284 13.5 20.5 12.8284 20.5 12C20.5 11.1716 19.8284 10.5 19 10.5Z"
+      fill="#77757D"
+    />
+  </svg>
+`;
+
+// database icon
+
+export const DatabaseSearchIcon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M11 3.75C6.99594 3.75 3.75 6.99594 3.75 11C3.75 15.0041 6.99594 18.25 11 18.25C13.0026 18.25 14.8156 17.4381 16.1276 16.1254L16.1287 16.1243C17.4393 14.8125 18.25 13.0008 18.25 11C18.25 6.99594 15.0041 3.75 11 3.75ZM17.6965 16.6324C18.9779 15.1104 19.75 13.1453 19.75 11C19.75 6.16751 15.8325 2.25 11 2.25C6.16751 2.25 2.25 6.16751 2.25 11C2.25 15.8325 6.16751 19.75 11 19.75C13.1471 19.75 15.1136 18.9767 16.6361 17.6933L20.4694 21.5301C20.7622 21.8231 21.2371 21.8233 21.5301 21.5306C21.8231 21.2378 21.8233 20.7629 21.5306 20.4699L17.6965 16.6324Z"
       fill="#77757D"
     />
   </svg>

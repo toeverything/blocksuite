@@ -1,5 +1,6 @@
 import {
   CopyIcon,
+  DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
   DividerIcon,
@@ -243,8 +244,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Kanban View',
-        // TODO: change icon
-        icon: DatabaseTableViewIcon,
+        icon: DatabaseKanbanViewIcon,
         disabled: true,
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         action: ({ model }) => {},
