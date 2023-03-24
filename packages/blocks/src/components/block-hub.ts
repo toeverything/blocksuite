@@ -45,6 +45,7 @@ const styles = css`
   affine-block-hub {
     position: absolute;
     z-index: 1;
+    user-select: none;
   }
 
   .affine-block-hub-container {

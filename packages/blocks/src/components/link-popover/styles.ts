@@ -20,6 +20,8 @@ export const editLinkStyle = css`
       'link-area btn';
     justify-items: center;
     align-items: center;
+    /* breaks 'basic link' test in chromium */
+    /* user-select: none; */
   }
 
   .affine-edit-text-area {
@@ -32,6 +34,7 @@ export const editLinkStyle = css`
     grid-template-areas: 'text span text-input';
     justify-items: center;
     align-items: center;
+    user-select: none;
   }
 
   .affine-edit-link-area {
@@ -67,6 +70,7 @@ export const editLinkStyle = css`
 
   .affine-confirm-button {
     grid-area: btn;
+    user-select: none;
     fill: var(--affine-primary-color);
   }
   .affine-confirm-button[disabled],

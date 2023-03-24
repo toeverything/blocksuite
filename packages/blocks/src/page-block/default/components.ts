@@ -48,6 +48,7 @@ export function EmbedSelectedRectsContainer(
         position: absolute;
         display: block;
         border: 2px solid var(--affine-primary-color);
+        user-select: none;
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
