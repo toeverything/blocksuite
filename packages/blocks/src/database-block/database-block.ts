@@ -324,6 +324,7 @@ export class DatabaseBlockComponent
       align-items: center;
       gap: 26px;
     }
+    .affine-database-toolbar-search svg,
     .affine-database-toolbar svg {
       width: 16px;
       height: 16px;
@@ -358,6 +359,9 @@ export class DatabaseBlockComponent
     .search-input-container {
       display: flex;
       align-items: center;
+    }
+    .affine-database-search-input-icon {
+      display: inline-flex;
     }
     .affine-database-search-input {
       flex: 1;
@@ -662,7 +666,7 @@ export class DatabaseBlockComponent
 
   private _renderToolbar = () => {
     if (!this._hoverState)
-      return html`<div class="affine-database-toolbar">
+      return html`<div class="affine-database-toolbar-search">
         ${DatabaseSearchIcon}
       </div>`;
 
@@ -674,7 +678,9 @@ export class DatabaseBlockComponent
           : ''}"
         @click=${this._onShowSearch}
       >
-        ${DatabaseSearchIcon}
+        <div class="affine-database-search-input-icon">
+          ${DatabaseSearchIcon}
+        </div>
         <div class="search-input-container">
           <input
             placeholder="Search..."
