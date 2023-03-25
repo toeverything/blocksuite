@@ -8,8 +8,11 @@ import {
 import { assertTextContain } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-// Fixes: https://github.com/toeverything/blocksuite/issues/995
 test('prohibit creating divider within quote', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/995',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

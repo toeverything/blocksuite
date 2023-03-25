@@ -219,8 +219,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems).toHaveCount(2);
 });
 
-// https://github.com/toeverything/blocksuite/issues/1126
 test('should clean slash string after soft enter', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1126',
+  });
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);

@@ -21,6 +21,12 @@ import {
 } from './selection.js';
 
 /**
+ * The {@link BlockRange} is designed to make consistency between the browser-native range and the block range.
+ *
+ * It's different from {@link VRange} since the user can select multiple blocks at a time, and {@link VRange} can't handle range cross blocks.
+ */
+
+/**
  * Use {@link getCurrentBlockRange} to get current block range.
  *
  * You can use {@link nativeRangeToBlockRange} and {@link blockRangeToNativeRange} convert between native range and block range.

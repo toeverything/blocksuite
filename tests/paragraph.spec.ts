@@ -50,6 +50,10 @@ test('init paragraph by page title enter at last', async ({ page }) => {
   await assertRichTexts(page, ['world', '']);
 
   //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1007',
+  });
   await page.keyboard.press('ArrowLeft');
   await focusTitle(page);
   await pressEnter(page);
