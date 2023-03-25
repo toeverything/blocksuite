@@ -151,6 +151,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
 
     .select-option {
+      position: relative;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -158,7 +159,12 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       padding: 4px;
       border-radius: 4px;
       margin-bottom: 4px;
+    }
+    .select-option:hover {
       background: rgba(0, 0, 0, 0.04);
+    }
+    .select-option:hover .select-option-icon {
+      display: flex;
     }
     .select-option-text-container {
       flex: 1;
@@ -173,13 +179,16 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       outline: none;
     }
     .select-option-icon {
-      display: flex;
+      display: none;
       justify-content: center;
       align-items: center;
       width: 28px;
       height: 28px;
-      background: rgba(0, 0, 0, 0.04);
       border-radius: 3px;
+      cursor: pointer;
+    }
+    .select-option-icon:hover {
+      background: rgba(0, 0, 0, 0.04);
     }
   `;
   static tag = literal`affine-database-select-cell-editing`;
