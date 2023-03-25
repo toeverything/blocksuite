@@ -68,6 +68,8 @@ function toggleStyle(
 class TextCell extends DatabaseCellLitElement<Y.Text> {
   static styles = css`
     :host {
+      display: flex;
+      align-items: center;
       width: 100%;
       height: 100%;
     }
@@ -213,7 +215,6 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
       <style>
         .rich-text-container {
           width: 100%;
-          height: 100%;
           outline: none;
         }
       </style>

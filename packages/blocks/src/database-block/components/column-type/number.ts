@@ -11,8 +11,11 @@ import {
 class NumberCell extends DatabaseCellLitElement<number> {
   static styles = css`
     :host {
+      display: flex;
+      align-items: center;
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
     }
   `;
 
@@ -28,7 +31,27 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
   static styles = css`
     :host {
       width: 100%;
-      height: 100%;
+    }
+
+    .affine-database-number {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      font-size: 16px;
+      color: var(--affine-text-color);
+      font-family: var(--affine-font-family);
+      outline: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+    .affine-database-number:focus-visible {
+      outline-offset: 0px;
+    }
+    .affine-database-number::-webkit-outer-spin-button,
+    .affine-database-number::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
   `;
 
@@ -48,6 +71,7 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
   protected render() {
     return html`
       <input
+        class="affine-database-number"
         @input=${(event: Event) => {
           this.value = (event.target as HTMLInputElement).valueAsNumber;
         }}

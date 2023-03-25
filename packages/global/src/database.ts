@@ -1,6 +1,6 @@
 export interface RowHost<Value = unknown> extends HTMLElement {
   setEditing(isEditing: boolean): void;
-
+  setHeight(height: number): void;
   setValue(value: Value): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>

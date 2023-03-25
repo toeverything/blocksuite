@@ -1,3 +1,4 @@
+import { MoreHorizontalIcon, PlusIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -21,19 +22,27 @@ const INPUT_MAX_LENGTH = 10;
 class SelectCell extends DatabaseCellLitElement<string[]> {
   static styles = css`
     :host {
-      width: 100%;
+      display: flex;
+      align-items: center;
+      width: calc(100% + 8px);
+      height: 100%;
+      margin: -2px -4px;
+    }
+    .affine-database-select-cell-container * {
+      box-sizing: border-box;
     }
     .affine-database-select-cell-container {
       display: flex;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 6px;
       width: 100%;
-      min-height: 32px;
     }
     .affine-database-select-cell-container .select-selected {
-      padding: 5px;
-      margin: 3px;
-      font-size: 14px;
-      line-height: 1;
+      height: 28px;
+      padding: 2px 10px;
+      border-radius: 4px;
+      background: #f3f0ff;
     }
   `;
 
@@ -65,37 +74,112 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
     }
+    .affine-database-select-cell-select {
+      font-size: var(--affine-font-sm);
+    }
+    .affine-database-select-cell-select * {
+      box-sizing: border-box;
+    }
     .select-input-container {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
+      gap: 6px;
+      min-height: 44px;
+      width: 345px;
+      padding: 10px 8px;
+      background: rgba(0, 0, 0, 0.04);
     }
     .select-input {
-      flex: 1;
-      height: 32px;
-      min-width: 80px;
+      flex: 1 1 0%;
+      height: 24px;
       border: none;
-      border-radius: 10px;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      box-sizing: border-box;
       color: inherit;
       background: transparent;
+      line-height: 24px;
     }
     .select-input:focus {
       outline: none;
     }
     .select-input::placeholder {
       color: #888a9e;
-      font-size: var(--affine-font-sm);
+    }
+    .select-option-container {
+      padding: 8px;
     }
     .select-option-container-header {
-      font-size: 12px;
+      padding: 8px 0px;
+      color: rgba(0, 0, 0, 0.6);
     }
     .select-input-container .select-selected {
-      padding: 5px;
-      margin: 3px;
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+      padding: 2px 10px;
+      gap: 10px;
+      height: 28px;
+      background: #f3f0ff;
+      border-radius: 4px;
+    }
+
+    .select-option-new {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 36px;
+      padding: 4px;
+      gap: 5px;
+      border-radius: 4px;
+      background: rgba(84, 56, 255, 0.04);
+    }
+    .select-option-new-text {
+      height: 28px;
+      padding: 2px 10px;
+      border-radius: 4px;
+      background: #ffe1e1;
+    }
+    .select-option-new-icon {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 28px;
+      color: #424149;
+    }
+    .select-option-new-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .select-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 36px;
+      padding: 4px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .select-option-text-container {
+      flex: 1;
+    }
+    .select-option-text {
+      display: none;
+      display: inline-block;
+      height: 100%;
+      padding: 2px 10px;
+      background: #fce8ff;
+      border-radius: 4px;
+      outline: none;
+    }
+    .select-option-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 28px;
+      height: 28px;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 3px;
     }
   `;
   static tag = literal`affine-database-select-cell-editing`;
@@ -111,7 +195,8 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   }
 
   protected firstUpdated() {
-    this.style.width = `${this.columnSchema.internalProperty.width}px`;
+    // this.style.width = `${this.columnSchema.internalProperty.width}px`;
+    this.style.width = `${345}px`;
   }
 
   connectedCallback() {
@@ -126,7 +211,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       },
       this,
       {
-        placement: 'bottom',
+        placement: 'bottom-start',
         strategy: 'fixed',
       }
     );
@@ -139,7 +224,6 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
 
   private _onSelectSearchInput = (event: KeyboardEvent) => {
     const value = (event.target as HTMLInputElement).value;
-    if (value.trim() === '') return;
     this._inputValue = value;
   };
 
@@ -158,6 +242,10 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
         : [...selectedValue, this.value];
       this.rowHost.setValue(newValue);
       this.rowHost.setEditing(false);
+
+      if (!this.isSingleMode && newValue.length > 1) {
+        this.calcRowHostHeight();
+      }
     }
   };
 
@@ -182,6 +270,24 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     const newValue = this.isSingleMode ? [value] : [...selectedValue, value];
     this.rowHost.setValue(newValue);
     this.rowHost.setEditing(false);
+
+    if (!this.isSingleMode && newValue.length > 1) {
+      this.calcRowHostHeight();
+    }
+  };
+
+  private calcRowHostHeight = () => {
+    setTimeout(() => {
+      const shadowRoot =
+        this.rowHost.shadowRoot?.children[0].shadowRoot?.children[0].shadowRoot;
+      const selectCell = shadowRoot?.querySelector(
+        '.affine-database-select-cell-container'
+      );
+      if (selectCell) {
+        const { height } = selectCell.getBoundingClientRect();
+        this.rowHost.setHeight(height);
+      }
+    });
   };
 
   override render() {
@@ -214,7 +320,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
           })}
           <input
             class="select-input"
-            placeholder="Search for an option..."
+            placeholder="Type here..."
             maxlength=${INPUT_MAX_LENGTH}
             @input=${this._onSelectSearchInput}
             @keydown=${(event: KeyboardEvent) =>
@@ -223,26 +329,32 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
         </div>
         <div class="select-option-container">
           <div class="select-option-container-header">
-            Select an option or create one
+            Select tag or create one
           </div>
-          ${filteredSelection.map(select => {
-            return html`
-              <div
-                class="select-option"
-                @click=${() => this._onSelect(selectedValue, select)}
-              >
-                ${select}
-              </div>
-            `;
-          })}
           ${showCreateTip
             ? html`<div
                 class="select-option-new"
                 @click=${this._onAddSelection}
               >
-                Create <span>${this._inputValue}</span>
+                <div class="select-option-new-icon">Create ${PlusIcon}</div>
+                <span class="select-option-new-text">${this._inputValue}</span>
               </div>`
             : html``}
+          ${filteredSelection.map(select => {
+            return html`
+              <div class="select-option">
+                <div
+                  class="select-option-text-container"
+                  @click=${() => this._onSelect(selectedValue, select)}
+                >
+                  <span class="select-option-text" contenteditable=${false}
+                    >${select}</span
+                  >
+                </div>
+                <div class="select-option-icon">${MoreHorizontalIcon}</div>
+              </div>
+            `;
+          })}
         </div>
       </div>
     `;

@@ -196,7 +196,7 @@ function DataBaseRowContainer(
 
       .affine-database-block-row {
         width: 100%;
-        height: 44px;
+        min-height: 44px;
         display: flex;
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
@@ -207,14 +207,14 @@ function DataBaseRowContainer(
 
       .affine-database-block-row-cell {
         display: flex;
-        align-item: center;
+        align-items: center;
         width: 145px;
-        height: 44px;
+        min-height: 44px;
         padding: 0 8px;
         border-right: 1px solid var(--affine-border-color);
       }
-      .affine-database-block-row-cell > affine-paragraph {
-        height: 100%;
+      .affine-database-block-row-cell > affine-paragraph > .text {
+        margin-top: unset;
       }
     </style>
     <div class="affine-database-block-rows">

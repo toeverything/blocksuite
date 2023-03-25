@@ -1,3 +1,4 @@
+import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
@@ -9,6 +10,11 @@ import { SelectMode } from './select.js';
 
 @customElement('affine-database-multi-select-cell')
 class MultiSelectCell extends DatabaseCellLitElement<string[]> {
+  static styles = css`
+    :host {
+      width: 100%;
+    }
+  `;
   static tag = literal`affine-database-multi-select-cell`;
   override render() {
     return html`
