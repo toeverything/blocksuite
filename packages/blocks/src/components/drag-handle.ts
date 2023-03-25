@@ -15,7 +15,7 @@ import {
   isFirefox,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement, svg } from 'lit';
+import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -75,6 +75,44 @@ export class DragIndicator extends LitElement {
   }
 }
 
+@customElement('affine-drag-mirror')
+export class DragMirror extends LitElement {
+  @property()
+  offset = { x: 0, y: 0 };
+
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    return html` <style>
+      affine-drag-mirror {
+        height: auto;
+        display: block;
+        position: absolute;
+        box-sizing: border-box;
+        overflow: hidden;
+        font-family: var(--affine-font-family);
+        font-size: var(--affine-font-base);
+        line-height: var(--affine-line-height);
+        color: var(--affine-edgeless-text-color);
+        font-weight: 400;
+        top: 0;
+        left: 0;
+        opacity: 0.843;
+        cursor: none;
+        user-select: none;
+        pointer-events: none;
+        /* caret-color: transparent; */
+      }
+
+      affine-drag-mirror > .affine-block-element:first-child > *:first-child {
+        margin-top: 0;
+      }
+    </style>`;
+  }
+}
+
 const DRAG_HANDLE_HEIGHT = 16; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
@@ -84,6 +122,7 @@ export class DragHandle extends LitElement {
     :host {
       overflow: hidden;
       width: ${DRAG_HANDLE_WIDTH + 8}px;
+      transform-origin: 0 0;
       user-select: none;
     }
 
@@ -199,7 +238,7 @@ export class DragHandle extends LitElement {
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
   private _clickedBlock: BlockComponentElement | null = null;
-  private _dragImage: HTMLElement | null = null;
+  private _dragMirror: DragMirror | null = null;
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
@@ -286,11 +325,6 @@ export class DragHandle extends LitElement {
     });
 
     this._draggingElements = [];
-
-    if (this._dragImage) {
-      this._dragImage.style.opacity = '1';
-      this._dragImage = null;
-    }
   }
 
   setPointerEvents(value: 'auto' | 'none') {
@@ -343,6 +377,7 @@ export class DragHandle extends LitElement {
     // drag handle
     disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
     disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
+    disposables.addFromEvent(this._dragHandle, 'mouseup', this._onMouseUp);
     disposables.addFromEvent(this._dragHandle, 'dragstart', this._onDragStart);
     disposables.addFromEvent(this._dragHandle, 'drag', this._onDrag);
     disposables.addFromEvent(this._dragHandle, 'dragend', this._onDragEnd);
@@ -398,6 +433,43 @@ export class DragHandle extends LitElement {
     );
   }
 
+  private _createDragMirror(
+    e: DragEvent,
+    draggingBlockElements: BlockComponentElement[]
+  ) {
+    const containerRect = this._container.getBoundingClientRect();
+    const rect = draggingBlockElements[0].getBoundingClientRect();
+
+    const dragMirror = new DragMirror();
+    dragMirror.offset.x = rect.left - containerRect.left - e.clientX;
+    dragMirror.offset.y = rect.top - containerRect.top - e.clientY;
+    dragMirror.style.width = `${rect.width}px`;
+    dragMirror.style.transform = `translate(${
+      rect.left - containerRect.left
+    }px, ${rect.top - containerRect.top}px)`;
+
+    draggingBlockElements.forEach(e => {
+      const c = document.createElement('div');
+      c.classList.add('affine-block-element');
+      render(e.render(), c);
+      dragMirror.appendChild(c);
+    });
+
+    this._container.appendChild(dragMirror);
+    this._dragMirror = dragMirror;
+
+    requestAnimationFrame(() => {
+      dragMirror.querySelector('rich-text')?.vEditor?.rootElement.blur();
+    });
+  }
+
+  private _removeDragMirror() {
+    if (this._dragMirror) {
+      this._dragMirror.remove();
+      this._dragMirror = null;
+    }
+  }
+
   // fixme: handle multiple blocks case
   private _onResize = (_: UIEvent) => {
     if (!this._getClosestBlockElement) return;
@@ -436,6 +508,10 @@ export class DragHandle extends LitElement {
     e.stopPropagation();
   };
 
+  private _onMouseUp = (e: MouseEvent) => {
+    this._removeDragMirror();
+  };
+
   private _onMouseDown = (e: MouseEvent) => {
     e.stopPropagation();
   };
@@ -453,9 +529,9 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    this._clickedBlock = this._handleAnchorState.element;
-
     e.dataTransfer.effectAllowed = 'move';
+
+    this._clickedBlock = this._handleAnchorState.element;
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
@@ -471,14 +547,7 @@ export class DragHandle extends LitElement {
       ? selectedBlocks
       : [this._handleAnchorState.element];
 
-    this._dragImage =
-      (draggingBlockElements.length > 1
-        ? this._container.querySelector('.affine-page-selected-rects-container')
-        : draggingBlockElements[0]) ?? this._handleAnchorState.element;
-
-    this._dragImage.style.opacity = '0.99';
-    e.dataTransfer.setDragImage(this._dragImage, 0, 0);
-
+    this._createDragMirror(e, draggingBlockElements);
     this._draggingElements = draggingBlockElements;
   };
 
@@ -504,6 +573,13 @@ export class DragHandle extends LitElement {
       return;
     }
 
+    if (this._dragMirror && e.screenX && e.screenY) {
+      const { x: offsetX, y: offsetY } = this._dragMirror.offset;
+      this._dragMirror.style.transform = `translate(${x + offsetX}px, ${
+        y + offsetY
+      }px)`;
+    }
+
     this._indicator.cursorPosition = new Point(x, y);
 
     const element = this._getClosestBlockElement(new Point(x, y));
@@ -525,6 +601,8 @@ export class DragHandle extends LitElement {
 
   private _onDragEnd = (e: DragEvent) => {
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
+
+    this._removeDragMirror();
 
     // `Esc`
     if (dropEffect === 'none') {
@@ -551,10 +629,6 @@ export class DragHandle extends LitElement {
   render() {
     return html`
       <style>
-        :host {
-          transform-origin: 0 0;
-        }
-
         :host(:hover) > .affine-drag-handle-line {
           opacity: 1;
         }
@@ -566,10 +640,6 @@ export class DragHandle extends LitElement {
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
           /* padding-top: 5px !important; FIXME */
-        }
-
-        .affine-drag-handle {
-          position: absolute;
         }
       </style>
       <div class="affine-drag-handle-line"></div>
@@ -615,5 +685,6 @@ declare global {
   interface HTMLElementTagNameMap {
     'affine-drag-handle': DragHandle;
     'affine-drag-indicator': DragIndicator;
+    'affine-drag-mirror': DragMirror;
   }
 }
