@@ -18,7 +18,11 @@ export async function json2block(
   // After deleteModelsByRange, selected block is must only, and selection is must caret
   const firstBlock = pastedBlocks[0];
   const lastBlock = pastedBlocks[pastedBlocks.length - 1];
-  const isFocusedBlockEmpty = !focusedBlockModel.text?.length;
+  const isFocusedBlockEmpty =
+    !focusedBlockModel.text?.length &&
+    !['bulleted', 'numbered', 'todo'].includes(
+      focusedBlockModel.type as string
+    );
   const shouldMergeFirstBlock =
     !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
   const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;
