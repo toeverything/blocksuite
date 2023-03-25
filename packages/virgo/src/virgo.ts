@@ -253,6 +253,7 @@ export class VEditor<
       })
     );
 
+    //FIXME: wait for render refactor
     this.rootElement.focus({ preventScroll: true });
 
     this.slots.updated.emit();
@@ -709,6 +710,9 @@ export class VEditor<
     }
     selection.removeAllRanges();
     selection.addRange(newRange);
+
+    //TODO: wait for render refactor
+    // this.rootElement.focus({ preventScroll: true});
 
     if (this.shouldScrollIntoView) {
       let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
