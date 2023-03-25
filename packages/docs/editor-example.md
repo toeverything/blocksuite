@@ -24,7 +24,10 @@ async function main() {
   // Init editor with the page store
   const editor = new EditorContainer();
   editor.page = page;
-  document.querySelector('#editor-example').appendChild(editor);
+  const node = document.querySelector('#editor-example');
+  node.innerHTML = '';
+
+  node.appendChild(editor);
 }
 
 if (typeof window !== 'undefined') {

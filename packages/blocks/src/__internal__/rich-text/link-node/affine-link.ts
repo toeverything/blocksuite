@@ -182,7 +182,7 @@ export class AffineLink extends NonShadowLitElement {
           { link }
         );
 
-        // prevent virgo auto focus
+        //FIXME: prevent virgo auto focus
         onModelTextUpdated(model, richText => {
           richText.vEditor?.rootElement.blur();
         });
@@ -196,7 +196,7 @@ export class AffineLink extends NonShadowLitElement {
           { link }
         );
 
-        // prevent virgo auto focus
+        //FIXME: prevent virgo auto focus
         onModelTextUpdated(model, richText => {
           richText.vEditor?.rootElement.blur();
         });
@@ -216,7 +216,7 @@ export class AffineLink extends NonShadowLitElement {
         }
       );
 
-      // prevent virgo auto focus
+      //FIXME: prevent virgo auto focus
       onModelTextUpdated(model, richText => {
         richText.vEditor?.rootElement.blur();
       });
