@@ -24,11 +24,8 @@ async function main() {
   // Init editor with the page store
   const editor = new EditorContainer();
   editor.page = page;
-  // remove existing children, don't use innerHTML
-  const node = document.querySelector('#editor-example')
-  while (node.firstChild) {
-    node.removeChild(node.firstChild);
-  }
+  const node = document.querySelector('#editor-example');
+  node.innerHTML = '';
 
   node.appendChild(editor);
 }
