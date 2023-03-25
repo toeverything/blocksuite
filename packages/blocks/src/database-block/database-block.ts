@@ -2,7 +2,11 @@
 import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
-import { SearchIcon } from '@blocksuite/global/config';
+import {
+  DatabaseSearchIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
@@ -272,73 +276,9 @@ export class DatabaseBlockComponent
 
     .affine-database-block-title-container {
       display: flex;
-    }
-
-    .affine-database-toolbar {
-      display: flex;
-      align-items: center;
-    }
-
-    .affine-database-toolbar-item {
-      margin: 0 5px;
-    }
-
-    .affine-database-toolbar-item.search {
-      display: flex;
-      align-items: center;
-    }
-    .affine-database-search-input-icon {
-      display: inline-flex;
-    }
-    .affine-database-search-input-icon svg {
-      width: 14px;
-    }
-
-    .affine-database-search-input {
-      height: 32px;
-      min-width: 80px;
-      border: none;
-      border-radius: 10px;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      box-sizing: border-box;
-      color: inherit;
-      background: transparent;
-    }
-    .affine-database-search-input:focus {
-      outline: none;
-    }
-    .affine-database-search-input::placeholder {
-      color: #888a9e;
-      font-size: var(--affine-font-sm);
-    }
-
-    .affine-database-block {
-      position: relative;
-      width: 100%;
-      overflow-x: scroll;
-      border-top: 1.5px solid var(--affine-border-color);
-    }
-
-    .affine-database-block-tag-circle {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .affine-database-block-tag {
-      display: inline-flex;
-      border-radius: 11px;
-      align-items: center;
-      padding: 0 8px;
-      cursor: pointer;
-    }
-
-    .affine-database-block-title-container {
-      display: flex;
       align-items: center;
       height: 44px;
+      margin: 12px 0px;
     }
 
     .affine-database-block-title {
@@ -379,6 +319,110 @@ export class DatabaseBlockComponent
       opacity: 0.5;
     }
 
+    .affine-database-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+    .affine-database-toolbar-search svg,
+    .affine-database-toolbar svg {
+      width: 16px;
+      height: 16px;
+    }
+    .affine-database-toolbar-item {
+      display: flex;
+      align-items: center;
+    }
+    .affine-database-toolbar-item.search {
+      overflow: hidden;
+    }
+    .affine-database-search-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 138px;
+      height: 32px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0);
+      transform: translate(110px, 0px);
+      transition: all 0.3s ease;
+    }
+    .affine-database-search-container > svg {
+      min-width: 16px;
+      min-height: 16px;
+    }
+    .search-container-expand {
+      transform: translate(0px, 0px);
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    .search-input-container {
+      display: flex;
+      align-items: center;
+    }
+    .affine-database-search-input-icon {
+      display: inline-flex;
+    }
+    .affine-database-search-input {
+      flex: 1;
+      height: 16px;
+      width: 80px;
+      border: none;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-sm);
+      box-sizing: border-box;
+      color: inherit;
+      background: transparent;
+    }
+    .affine-database-search-input:focus {
+      outline: none;
+    }
+    .affine-database-search-input::placeholder {
+      color: #888a9e;
+      font-size: var(--affine-font-sm);
+    }
+
+    .affine-database-toolbar-item.new-record {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 120px;
+      height: 32px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
+        0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.04),
+          rgba(0, 0, 0, 0.04)
+        ),
+        #ffffff;
+    }
+
+    .affine-database-block-table {
+      position: relative;
+      width: 100%;
+      overflow-x: scroll;
+      border-top: 1.5px solid var(--affine-border-color);
+    }
+
+    .affine-database-block-tag-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .affine-database-block-tag {
+      display: inline-flex;
+      border-radius: 11px;
+      align-items: center;
+      padding: 0 8px;
+      cursor: pointer;
+    }
+
     .affine-database-block-footer {
       display: flex;
       width: 100%;
@@ -391,11 +435,16 @@ export class DatabaseBlockComponent
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 4px;
       width: 100%;
       height: 100%;
-      text-align: center;
       cursor: pointer;
       user-select: none;
+      font-size: 14px;
+    }
+    .affine-database-block-add-row svg {
+      width: 16px;
+      height: 16px;
     }
 
     .affine-database-block-add-column-button {
@@ -520,6 +569,11 @@ export class DatabaseBlockComponent
     }
   };
 
+  private _clearSearch = (event: MouseEvent) => {
+    event.stopPropagation();
+    this._resetSearchStatus();
+  };
+
   private _resetSearchStatus = () => {
     this._searchInput.value = '';
     this._filteredRowIds = [];
@@ -611,32 +665,40 @@ export class DatabaseBlockComponent
   }
 
   private _renderToolbar = () => {
-    if (!this._hoverState) return html``;
+    if (!this._hoverState)
+      return html`<div class="affine-database-toolbar-search">
+        ${DatabaseSearchIcon}
+      </div>`;
 
-    const searchTool =
-      this._searchState !== SearchState.SearchIcon
-        ? html`<div class="search-input-container">
-            <input
-              placeholder="Search..."
-              class="affine-database-search-input"
-              @input=${this._onSearch}
-              @keydown=${this._onSearchKeydown}
-            />
-            <span class="close-icon" @click=${this._resetSearchStatus}>x</span>
-          </div>`
-        : html`
-            <span
-              class="affine-database-search-input-icon"
-              @click=${this._onShowSearch}
-            >
-              ${SearchIcon}
-            </span>
-          `;
+    const searchTool = html`
+      <div
+        class="affine-database-search-container ${this._searchState !==
+        SearchState.SearchIcon
+          ? 'search-container-expand'
+          : ''}"
+        @click=${this._onShowSearch}
+      >
+        <div class="affine-database-search-input-icon">
+          ${DatabaseSearchIcon}
+        </div>
+        <div class="search-input-container">
+          <input
+            placeholder="Search..."
+            class="affine-database-search-input"
+            @input=${this._onSearch}
+            @keydown=${this._onSearchKeydown}
+          />
+          <span class="close-icon" @click=${this._clearSearch}>x</span>
+        </div>
+      </div>
+    `;
 
     return html`<div class="affine-database-toolbar">
-      <div class="affine-database-toolbar-item">+ Add Record</div>
       <div class="affine-database-toolbar-item search">${searchTool}</div>
-      <div class="affine-database-toolbar-item">...</div>
+      <div class="affine-database-toolbar-item">${MoreHorizontalIcon}</div>
+      <div class="affine-database-toolbar-item new-record">
+        ${PlusIcon}<span>New Record</span>
+      </div>
     </div>`;
   };
 
@@ -660,9 +722,8 @@ export class DatabaseBlockComponent
           </div>
           ${this._renderToolbar()}
         </div>
-        <div class="affine-database-block">
+        <div class="affine-database-block-table">
           <div
-            class="affine-database-block-container"
             style=${styleMap({
               width: `${totalWidth}px`,
             })}
@@ -675,10 +736,10 @@ export class DatabaseBlockComponent
             )}
             <div class="affine-database-block-footer">
               <div class="affine-database-block-add-row"
-                  data-test-id="affine-database-add-row-button"
-                  role="button"
-                  @click=${this._addRow}>
-                + New
+                data-test-id="affine-database-add-row-button"
+                role="button"
+                @click=${this._addRow}>
+                ${PlusIcon}<span>New Record</span>
               </div>
             </div>
           </div>
