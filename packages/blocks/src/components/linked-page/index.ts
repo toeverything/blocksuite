@@ -143,8 +143,8 @@ class LinkedPagePopover extends LitElement {
     cleanSpecifiedTail(editor, '@' + this.query);
     const vRange = editor.getVRange();
     assertExists(vRange);
-    const LINKED_NODE = '@';
-    editor.insertText(vRange, LINKED_NODE, { linkedPage: { type, pageId } });
+    const REFERENCE_NODE = '@';
+    editor.insertText(vRange, REFERENCE_NODE, { reference: { type, pageId } });
     editor.setVRange({
       index: vRange.index + 1,
       length: 0,

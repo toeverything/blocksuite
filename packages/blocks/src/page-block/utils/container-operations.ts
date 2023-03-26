@@ -335,7 +335,7 @@ export function getCurrentCombinedFormat(page: Page): AffineTextAttributes {
 
 function formatBlockRange(
   blockRange: BlockRange,
-  key: keyof Omit<AffineTextAttributes, 'link'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
   const { startOffset, endOffset } = blockRange;
   const startModel = blockRange.models[0];
@@ -409,7 +409,7 @@ function formatBlockRange(
 
 export function handleFormat(
   page: Page,
-  key: keyof Omit<AffineTextAttributes, 'link'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;

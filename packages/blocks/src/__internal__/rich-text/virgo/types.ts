@@ -3,7 +3,7 @@ import { baseTextAttributes } from '@blocksuite/virgo';
 import { z } from 'zod';
 
 export const affineTextAttributes = baseTextAttributes.extend({
-  linkedPage: z
+  reference: z
     .object({
       type: z.enum(['Subpage', 'LinkedPage']),
       pageId: z.string(),
