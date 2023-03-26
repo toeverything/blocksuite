@@ -7,6 +7,7 @@ import './list-block/index.js';
 import './frame-block/index.js';
 import './divider-block/index.js';
 import './__internal__/rich-text/link-node/index.js';
+import './__internal__/rich-text/reference-node.js';
 import './embed-block/index.js';
 import './embed-block/image/index.js';
 import './surface-block/index.js';
