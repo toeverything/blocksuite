@@ -112,7 +112,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
                 document.body.appendChild(editColumn);
                 requestAnimationFrame(() => {
                   createPopper(event.target as Element, editColumn, {
-                    placement: 'bottom',
+                    placement: 'bottom-start',
                   });
                   onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
                 });

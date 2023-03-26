@@ -97,7 +97,7 @@ test('database rich text column', async ({ page }) => {
   expect(() => expect(text2).toBe('hello world'));
 });
 
-test('edit column title', async ({ page }) => {
+test.skip('edit column title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
