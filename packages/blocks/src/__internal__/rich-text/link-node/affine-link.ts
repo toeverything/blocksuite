@@ -117,7 +117,7 @@ export class AffineLink extends NonShadowLitElement {
    */
   private _updateLink(link?: string, text?: string) {
     const model = getModelByElement(this);
-    const { page: page } = model;
+    const { page } = model;
     const oldStr = this.vText.str;
     const oldTextAttributes = this.textAttributes;
 

@@ -8,6 +8,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import {
   getRichTextByModel,
@@ -115,12 +116,12 @@ class LinkedPagePopover extends LitElement {
     });
 
     this.pageList = this.page.workspace.meta.pageMetas;
-    this.model.page.workspace.slots.pagesUpdated.on(() => {
-      // Update page list
-      this.requestUpdate();
-      // TODO filter by query
-      this.pageList = this.page.workspace.meta.pageMetas;
-    });
+    disposableGroup.add(
+      this.model.page.workspace.slots.pagesUpdated.on(() => {
+        // TODO filter by query
+        this.pageList = this.page.workspace.meta.pageMetas;
+      })
+    );
   }
 
   disconnectedCallback() {
@@ -143,7 +144,6 @@ class LinkedPagePopover extends LitElement {
     cleanSpecifiedTail(editor, '@' + this.query);
     const vRange = editor.getVRange();
     assertExists(vRange);
-    const REFERENCE_NODE = '@';
     editor.insertText(vRange, REFERENCE_NODE, { reference: { type, pageId } });
     editor.setVRange({
       index: vRange.index + 1,
