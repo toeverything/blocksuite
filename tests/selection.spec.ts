@@ -601,8 +601,11 @@ test('selection on heavy page', async ({ page }) => {
   await expect(rects).toHaveCount(5);
 });
 
-// Refs: https://github.com/toeverything/blocksuite/issues/1004
 test('Change title when first content is divider', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1004',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
