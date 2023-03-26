@@ -14,10 +14,7 @@ import {
   getViewportElement,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
-import {
-  isControlledKeyboardEvent,
-  throttle,
-} from '../../__internal__/utils/std.js';
+import { isPrintableKeyEvent, throttle } from '../../__internal__/utils/std.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 
 function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
@@ -93,29 +90,29 @@ class LinkedPagePopover extends LitElement {
     super();
   }
 
-  override connectedCallback(): void {
+  connectedCallback() {
     super.connectedCallback();
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
     // TODO update and dispose
     let query = '';
     const disposableGroup = new DisposableGroup();
-    disposableGroup.addFromEvent(
-      richText,
-      'keydown',
-      e => {
-        if (isControlledKeyboardEvent(e)) {
-          // TODO handle Backspace/Enter/ArrowUp/ArrowDown/...
-          return;
-        }
-        query += e.key;
-        this.updateQuery(query);
-      },
-      {
-        // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-        capture: true,
+    const keyDownListener = (e: KeyboardEvent) => {
+      if (isPrintableKeyEvent(e)) {
+        // TODO handle Backspace/Enter/ArrowUp/ArrowDown/...
+        return;
       }
-    );
+      query += e.key;
+      this.updateQuery(query);
+    };
+    disposableGroup.addFromEvent(richText, 'keydown', keyDownListener, {
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
+      capture: true,
+    });
+    disposableGroup.addFromEvent(this, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
 
     this.pageList = this.page.workspace.meta.pageMetas;
     this.model.page.workspace.slots.pagesUpdated.on(() => {
@@ -126,7 +123,7 @@ class LinkedPagePopover extends LitElement {
     });
   }
 
-  override disconnectedCallback(): void {
+  disconnectedCallback() {
     super.disconnectedCallback();
     // TODO dispose
   }
@@ -146,8 +143,8 @@ class LinkedPagePopover extends LitElement {
     cleanSpecifiedTail(editor, '@' + this.query);
     const vRange = editor.getVRange();
     assertExists(vRange);
-    // TODO insert node
-    editor.insertText(vRange, '@', {});
+    const LINKED_NODE = '@';
+    editor.insertText(vRange, LINKED_NODE, { linkedPage: { type, pageId } });
     editor.setVRange({
       index: vRange.index + 1,
       length: 0,
