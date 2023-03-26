@@ -253,7 +253,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       this.rowHost.setEditing(false);
 
       if (!this.isSingleMode && newValue.length > 1) {
-        this.calcRowHostHeight();
+        this._calcRowHostHeight();
       }
     }
   };
@@ -281,11 +281,11 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     this.rowHost.setEditing(false);
 
     if (!this.isSingleMode && newValue.length > 1) {
-      this.calcRowHostHeight();
+      this._calcRowHostHeight();
     }
   };
 
-  private calcRowHostHeight = () => {
+  private _calcRowHostHeight = () => {
     setTimeout(() => {
       const shadowRoot =
         this.rowHost.shadowRoot?.children[0].shadowRoot?.children[0].shadowRoot;
