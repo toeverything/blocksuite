@@ -4,7 +4,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { VEditor, VText } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
@@ -12,40 +11,8 @@ import {
   NonShadowLitElement,
   resetNativeSelection,
 } from '../../utils/index.js';
+import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
-
-function affineLinkStyles(
-  props: AffineTextAttributes
-): ReturnType<typeof styleMap> {
-  let textDecorations = '';
-  if (props.underline) {
-    textDecorations += 'underline';
-  }
-  if (props.strike) {
-    textDecorations += ' line-through';
-  }
-
-  let inlineCodeStyle = {};
-  if (props.code) {
-    inlineCodeStyle = {
-      'font-family':
-        '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
-      'line-height': 'normal',
-      background: 'rgba(135,131,120,0.15)',
-      color: '#EB5757',
-      'border-radius': '3px',
-      'font-size': '85%',
-      padding: '0.2em 0.4em',
-    };
-  }
-
-  return styleMap({
-    'font-weight': props.bold ? 'bold' : 'normal',
-    'font-style': props.italic ? 'italic' : 'normal',
-    'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
-    ...inlineCodeStyle,
-  });
-}
 
 @customElement('affine-link')
 export class AffineLink extends NonShadowLitElement {
@@ -74,6 +41,7 @@ export class AffineLink extends NonShadowLitElement {
   static styles = css`
     a {
       white-space: nowrap;
+      word-break: break-word;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
       text-decoration: none;
@@ -251,7 +219,7 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   render() {
-    const style = affineLinkStyles(this.textAttributes);
+    const style = affineTextStyles(this.textAttributes);
 
     return html`<a
       href=${this.link}
