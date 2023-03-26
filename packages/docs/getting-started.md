@@ -57,3 +57,5 @@ pnpm i \
   @blocksuite/blocks@nightly \
   @blocksuite/editor@nightly
 ```
+
+In the following chapters, we will continue to demonstrate their usage and the core concepts involved.
