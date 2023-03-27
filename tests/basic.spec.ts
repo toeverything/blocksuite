@@ -80,12 +80,14 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
   await waitDefaultPageLoaded(pageA);
+  await focusTitle(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await waitNextFrame(pageB);
   await waitDefaultPageLoaded(pageB);
+  await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
 
   await type(pageB, ' world');

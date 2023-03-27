@@ -366,7 +366,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
         ?disabled=${this.readonly}
         @click=${this._onClickLangBtn}
       >
-        ${this.model.language} ${ArrowDownIcon}
+        ${this.model.language} ${!this.readonly ? ArrowDownIcon : html``}
       </icon-button>
       ${this._showLangList
         ? html`<lang-list

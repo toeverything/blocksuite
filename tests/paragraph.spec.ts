@@ -42,6 +42,7 @@ test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await pressEnter(page);
   await type(page, 'world');
@@ -65,6 +66,7 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
@@ -79,6 +81,7 @@ test('drag over paragraph title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -95,6 +98,7 @@ test('backspace and arrow on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -121,6 +125,7 @@ test('backspace on line start of the first block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
@@ -658,6 +663,7 @@ test('delete at start of paragraph with content', async ({ page }) => {
 test('get focus from page title enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['']);
 
@@ -671,6 +677,7 @@ test('handling keyup when cursor located in first paragraph', async ({
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  await focusTitle(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['']);
 
@@ -706,6 +713,7 @@ test('press tab in paragraph children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
+  await focusTitle(page);
   await pressEnter(page);
   await type(page, '1');
   await pressEnter(page);

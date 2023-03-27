@@ -254,12 +254,15 @@ export class VEditor<
     );
 
     //FIXME: wait for render refactor
-    this.rootElement.focus({ preventScroll: true });
+    if (this.autofocus) {
+      this.rootElement.focus({ preventScroll: true });
+    }
 
     this.slots.updated.emit();
   };
 
   shouldScrollIntoView = true;
+  autofocus = true;
 
   slots: {
     mounted: Slot;

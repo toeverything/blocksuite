@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import '@rich-data/viewer/theme/base.css';
+
 export async function createViewer(value: Record<string, unknown>) {
   const { createRoot } = await import('react-dom/client');
   const { JsonViewer } = await import('@rich-data/viewer');
