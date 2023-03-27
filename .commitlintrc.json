@@ -27,7 +27,8 @@
         "block-hub",
         "slash-menu",
         "drag-handle",
-        "format-bar"
+        "format-bar",
+        "connector"
       ]
     ]
   }

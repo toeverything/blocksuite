@@ -10,6 +10,7 @@ const allPackages = [
   'react',
   'store',
   'virgo',
+  'connector',
 ];
 
 const createPattern = packageName => [

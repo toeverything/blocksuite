@@ -1,0 +1,32 @@
+{
+  "name": "@blocksuite/connector",
+  "version": "0.5.0-alpha.1",
+  "description": "Connector.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "vitest --run",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "devDependencies": {},
+  "peerDependencies": {},
+  "exports": {
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
+    }
+  },
+  "dependencies": {}
+}

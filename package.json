@@ -11,7 +11,8 @@
     "packages/playground",
     "packages/react",
     "packages/store",
-    "packages/virgo"
+    "packages/virgo",
+    "packages/connector"
   ],
   "private": true,
   "type": "module",
