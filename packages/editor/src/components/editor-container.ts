@@ -25,6 +25,9 @@ export class EditorContainer extends NonShadowLitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
+  autofocus = false;
+
+  @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
@@ -54,6 +57,11 @@ export class EditorContainer extends NonShadowLitElement {
   firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
+
+    const defaultPage = this.querySelector('affine-default-page');
+    if (this.autofocus) {
+      defaultPage?.titleVEditor.focusEnd();
+    }
   }
 
   connectedCallback() {
