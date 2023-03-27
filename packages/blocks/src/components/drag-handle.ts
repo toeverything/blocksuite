@@ -85,7 +85,7 @@ export class DragMirror extends LitElement {
   }
 
   render() {
-    return html` <style>
+    return html`<style>
       affine-drag-mirror {
         height: auto;
         display: block;
