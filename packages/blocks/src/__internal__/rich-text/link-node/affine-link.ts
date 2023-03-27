@@ -6,11 +6,7 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import {
-  getModelByElement,
-  NonShadowLitElement,
-  resetNativeSelection,
-} from '../../utils/index.js';
+import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
 import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
@@ -75,8 +71,6 @@ export class AffineLink extends NonShadowLitElement {
     } else {
       this._isHovering = true;
     }
-
-    resetNativeSelection(null);
 
     const model = getModelByElement(this);
     if (model.page.readonly) return;

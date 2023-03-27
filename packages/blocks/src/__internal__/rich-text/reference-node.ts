@@ -9,7 +9,7 @@ import { getModelByElement, NonShadowLitElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
-export const REFERENCE_NODE = '@';
+export const REFERENCE_NODE = ' ';
 
 @customElement('affine-reference')
 export class AffineReference extends NonShadowLitElement {
@@ -82,18 +82,19 @@ export class AffineReference extends NonShadowLitElement {
     const title = refMeta
       ? refMeta.title
       : // Maybe the page is deleted
-        'Reference not found';
+        'Reference Page Not Found';
     const type = this.textAttributes.reference?.type;
     assertExists(type, 'Failed to get reference type! type is not defined!');
 
+    // TODO fix cursor with white space
+    // TODO update icon
     return html`<span
       class="affine-reference"
-      contenteditable="false"
       style=${style}
       @click=${this._onClick}
-    >
-      ${FontLinkIcon}<span>${title}</span>
-    </span>`;
+      >${FontLinkIcon}<span contenteditable="false">${title}</span>${this
+        .vText}</span
+    >`;
   }
 }
 

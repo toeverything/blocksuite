@@ -99,6 +99,7 @@ export class RichText extends NonShadowLitElement {
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
               delete attributes?.link;
               delete attributes?.code;
+              delete attributes?.reference;
             }
 
             vEditor.insertText(vRange, e.data, attributes);
@@ -127,6 +128,7 @@ export class RichText extends NonShadowLitElement {
           if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
             delete attributes?.link;
             delete attributes?.code;
+            delete attributes?.reference;
           }
 
           vEditor.insertText(vRange, data, attributes);
