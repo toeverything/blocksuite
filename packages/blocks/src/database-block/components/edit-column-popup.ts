@@ -246,7 +246,10 @@ export class EditColumnPopup extends LitElement {
   targetColumnSchema!: ColumnSchema | string;
 
   @property()
-  columnType: 'title' | 'normal' = 'normal';
+  closePopup!: () => void;
+
+  @property()
+  setTitleColumnEditId!: (titleId: string) => void;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -256,7 +259,7 @@ export class EditColumnPopup extends LitElement {
   private _columnTypePopup!: ColumnTypePopup | null;
 
   get isTitleColumn() {
-    return this.columnType === 'title';
+    return typeof this.targetColumnSchema === 'string';
   }
 
   private _onShowColumnType = () => {
@@ -283,6 +286,13 @@ export class EditColumnPopup extends LitElement {
     }
   };
 
+  private _onActionClick = (action: NormalAction, titleId: string) => {
+    if (action.type === 'rename') {
+      this.setTitleColumnEditId(titleId);
+      this.closePopup();
+    }
+  };
+
   private _renderActions = () => {
     const actions = this.isTitleColumn ? titleColumnActions : columnActions;
 
@@ -298,16 +308,24 @@ export class EditColumnPopup extends LitElement {
           ? this._onShowColumnType
           : this._onHideColumnType;
 
+        const titleId =
+          typeof this.targetColumnSchema === 'string'
+            ? '-1'
+            : this.targetColumnSchema.id;
+
         return html`
-          <div class="action ${action.type}" @mouseover=${onMouseOver}>
+          <div
+            class="action ${action.type}"
+            @mouseover=${onMouseOver}
+            @click=${() => this._onActionClick(action, titleId)}
+          >
             <div class="action-content">
               ${action.icon}<span>${action.text}</span>
             </div>
-            ${action.type === 'column-type' ? ArrowDownIcon : ''}
+            ${action.type === 'column-type' ? ArrowDownIcon : html``}
           </div>
         `;
       })}
-      <!-- TODO: refactor rename logic -->
     `;
   };
 
