@@ -136,6 +136,16 @@ async function main() {
     { x: 130, y: 80 },
     { x: 10, y: 50 }
   );
+  await new Promise(res => setTimeout(res, 1000));
+
+  await draw(
+    [
+      { x: 10, y: 10, w: 10, h: 10 },
+      { x: 30, y: 30, w: 10, h: 10 },
+    ],
+    { x: 15, y: 10 },
+    { x: 30, y: 35 }
+  );
 }
 
 main();
