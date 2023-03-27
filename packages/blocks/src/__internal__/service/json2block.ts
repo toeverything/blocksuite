@@ -1,5 +1,5 @@
 import type { BlockModels } from '@blocksuite/global/types';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
@@ -20,9 +20,7 @@ export async function json2block(
   const lastBlock = pastedBlocks[pastedBlocks.length - 1];
   const isFocusedBlockEmpty =
     !focusedBlockModel.text?.length &&
-    !['bulleted', 'numbered', 'todo'].includes(
-      focusedBlockModel.type as string
-    );
+    !matchFlavours(focusedBlockModel, ['affine:list' as const]);
   const shouldMergeFirstBlock =
     !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
   const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;

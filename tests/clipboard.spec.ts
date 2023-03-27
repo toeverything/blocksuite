@@ -474,7 +474,7 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await assertRichTexts(page, ['a', 'b', 'c']);
 });
 
-test('Pasting into empty list should not convert the list into paragraph', async ({
+test('pasting into empty list should not convert the list into paragraph', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
