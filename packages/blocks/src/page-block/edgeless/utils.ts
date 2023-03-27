@@ -103,16 +103,16 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
       const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
       const { centerX, centerY } = viewport;
       const prevZoom = viewport.zoom;
-      viewport.applyDeltaZoom(delta);
 
-      const newZoom = viewport.zoom;
       const rect = container.getBoundingClientRect();
-
       // Perform zooming relative to the mouse position
       const [baseX, baseY] = container.surface.toModelCoord(
         e.clientX - rect.x,
         e.clientY - rect.y
       );
+
+      viewport.applyDeltaZoom(delta);
+      const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
       const offsetY = centerY - baseY;
