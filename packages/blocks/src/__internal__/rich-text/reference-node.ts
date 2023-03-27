@@ -35,9 +35,9 @@ export class AffineReference extends NonShadowLitElement {
   vText: VText = new VText();
 
   @state()
-  refMeta?: PageMeta;
+  private _refMeta?: PageMeta;
 
-  _disposableGroup = new DisposableGroup();
+  private _disposableGroup = new DisposableGroup();
 
   connectedCallback() {
     super.connectedCallback();
@@ -53,13 +53,13 @@ export class AffineReference extends NonShadowLitElement {
       'Failed to get reference! reference is not defined!'
     );
 
-    this.refMeta = model.page.workspace.meta.pageMetas.find(
+    this._refMeta = model.page.workspace.meta.pageMetas.find(
       page => page.id === reference.pageId
     );
 
     this._disposableGroup.add(
       model.page.workspace.slots.pagesUpdated.on(() => {
-        this.refMeta = model.page.workspace.meta.pageMetas.find(
+        this._refMeta = model.page.workspace.meta.pageMetas.find(
           page => page.id === reference.pageId
         );
       })
@@ -73,7 +73,7 @@ export class AffineReference extends NonShadowLitElement {
 
   private _onClick(e: MouseEvent) {
     e.preventDefault();
-    const refMeta = this.refMeta;
+    const refMeta = this._refMeta;
     const model = getModelByElement(this);
     if (!refMeta || refMeta.id === model.page.id) {
       return;
@@ -84,7 +84,7 @@ export class AffineReference extends NonShadowLitElement {
 
   render() {
     // const style = affineTextStyles(this.textAttributes);
-    const refMeta = this.refMeta;
+    const refMeta = this._refMeta;
     const title = refMeta
       ? refMeta.title
       : // Maybe the page is deleted
@@ -94,6 +94,9 @@ export class AffineReference extends NonShadowLitElement {
 
     // TODO fix cursor with white space
     // TODO update icon
+
+    // This node is under contenteditable="true",
+    // so we should not add any extra white space between HTML tags
     return html`<span class="affine-reference" @click=${this._onClick}
       >${FontLinkIcon}<span contenteditable="false">${title}</span>${this
         .vText}</span
