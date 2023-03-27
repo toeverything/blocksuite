@@ -173,60 +173,6 @@ export function splitPath(path: number[][]): number[][][] {
   return result.map(item => item.map(v => v.slice()));
 }
 
-export function smoothPath(path: number[][][], maxRadius: number): string[] {
-  const result: string[] = [];
-  const cloned = path.map(item => item.map(v => v.slice()));
-
-  for (let i = 0; i < cloned.length - 1; i++) {
-    const next = cloned[i + 1];
-    const current = cloned[i];
-    const originCurrent = path[i];
-    const originNext = path[i + 1];
-
-    const currentPoint = current[current.length - 1];
-    const nextPoint = next[0];
-
-    const d = sub(originCurrent[originCurrent.length - 2], originNext[1]);
-    const radius = Math.min(
-      maxRadius,
-      ...d.map(item => (Math.abs(item) - 2) / 2)
-    );
-
-    const base = originCurrent[originCurrent.length - 1];
-
-    const d1 = sub(base, originCurrent[originCurrent.length - 2]);
-    const d2 = sub(originNext[0], originNext[1]);
-
-    [
-      [currentPoint, d1],
-      [nextPoint, d2],
-    ].forEach(([p, di]) => {
-      p[0] -= Math.sign(di[0]) * radius;
-      p[1] -= Math.sign(di[1]) * radius;
-    });
-
-    result.push(
-      `M ${current[0][0]} ${current[0][1]} L ${currentPoint[0]} ${currentPoint[1]}`
-    );
-
-    if (radius > 0) {
-      result.push(
-        `M ${currentPoint[0]} ${currentPoint[1]}  Q ${base[0]} ${base[1]}, ${nextPoint[0]} ${nextPoint[1]}`
-      );
-    }
-  }
-
-  const last = cloned[path.length - 1];
-
-  result.push(
-    `M ${last[0][0]} ${last[0][1]} L ${last[last.length - 1][0]} ${
-      last[last.length - 1][1]
-    }`
-  );
-
-  return result;
-}
-
 export function roundPoint(p: number[]): number[] {
   return p.map(Math.round);
 }
