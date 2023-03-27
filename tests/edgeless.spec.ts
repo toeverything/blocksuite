@@ -120,10 +120,10 @@ test('zoom by mouse', async ({ page }) => {
   const original = [90, 264, 720, 72];
   await assertEdgelessHoverRect(page, original);
 
-  await zoomByMouseWheel(page, 125);
+  await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [180, 273, original[2] * 0.75, original[3] * 0.75];
+  const zoomed = [126, 268, original[2] * 0.9, original[3] * 0.9];
   await assertEdgelessHoverRect(page, zoomed);
 });
 

@@ -273,8 +273,15 @@ export async function clickComponentToolbarMoreMenuButton(
   await btn.click();
 }
 
-export async function zoomByMouseWheel(page: Page, step: number) {
+// stepX/Y may not equal to wheel event delta.
+// Chromium reports deltaX/deltaY scaled by host device scale factor.
+// https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
+export async function zoomByMouseWheel(
+  page: Page,
+  stepX: number,
+  stepY: number
+) {
   await page.keyboard.down(SHORT_KEY);
-  await page.mouse.wheel(0, step);
+  await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
 }
