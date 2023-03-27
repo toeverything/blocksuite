@@ -119,3 +119,35 @@
 .dark .vp-doc .custom-block a {
   transition: color 0.25s;
 }
+
+.dark {
+  --affine-theme-mode: dark;
+  --affine-primary-color: #5438ff;
+  --affine-page-background: #2c2c2c;
+  --affine-popover-background: #1f2021;
+  --affine-hover-background: #3c3c42;
+  --affine-code-background: #505662;
+  --affine-tooltip-background: #0c0a15;
+  --affine-hub-background: #272727;
+  --affine-card-hover-background: #363636;
+  --affine-text-color: #fff;
+  --affine-secondary-text-color: #8e8d91;
+  --affine-edgeless-text-color: #3a4c5c;
+  --affine-link-color: #7d91ff;
+  --affine-link-color2: #0c0a15;
+  --affine-link-visited-color: #505fab;
+  --affine-icon-color: #77757d;
+  --affine-block-handle-color: #c7c3d9;
+  --affine-code-color: #bddbfd;
+  --affine-code-block-background: #36383d;
+  --affine-quote-color: #c6cbd9;
+  --affine-selected-color: rgba(104, 128, 255, 0.1);
+  --affine-placeholder-color: #c7c7c7;
+  --affine-border-color: #3c3a40;
+  --affine-disable-color: #4b4b4b;
+  --affine-tooltip-color: #fff;
+  --affine-line-number-color: #888a9e;
+  --affine-modal-shadow: 0px 4px 24px #161616;
+  --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
+    0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+}
