@@ -13,7 +13,11 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
-import { assertEquals, DisposableGroup } from '@blocksuite/global/utils';
+import {
+  assertEquals,
+  assertExists,
+  DisposableGroup,
+} from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css, type TemplateResult } from 'lit';
@@ -95,10 +99,18 @@ if (once) {
 
 function DatabaseHeader(block: DatabaseBlockComponent) {
   const _onShowEditColumnPopup = (
-    reference: Element,
+    target: Element,
     column: ColumnSchema | string,
     columnType: 'title' | 'normal' = 'normal'
   ) => {
+    const currentEl = target as Element;
+    const reference = currentEl.classList.contains(
+      'affine-database-block-column'
+    )
+      ? target
+      : target.parentElement;
+    assertExists(reference);
+
     const editColumn = new EditColumnPopup();
     editColumn.targetModel = block.model;
     editColumn.targetColumnSchema = column;
