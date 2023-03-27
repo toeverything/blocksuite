@@ -455,12 +455,12 @@ export class DragHandle extends LitElement {
       dragMirror.appendChild(c);
     });
 
-    this._container.appendChild(dragMirror);
-    this._dragMirror = dragMirror;
-
     requestAnimationFrame(() => {
       dragMirror.querySelector('rich-text')?.vEditor?.rootElement.blur();
     });
+
+    this._container.appendChild(dragMirror);
+    this._dragMirror = dragMirror;
   }
 
   private _removeDragMirror() {
@@ -508,7 +508,7 @@ export class DragHandle extends LitElement {
     e.stopPropagation();
   };
 
-  private _onMouseUp = (e: MouseEvent) => {
+  private _onMouseUp = (_: MouseEvent) => {
     this._removeDragMirror();
   };
 
@@ -580,9 +580,8 @@ export class DragHandle extends LitElement {
       }px)`;
     }
 
-    this._indicator.cursorPosition = new Point(x, y);
-
-    const element = this._getClosestBlockElement(new Point(x, y));
+    const point = new Point(x, y);
+    const element = this._getClosestBlockElement(point.clone());
     let rect = null;
     let lastModelState = null;
 
@@ -597,6 +596,7 @@ export class DragHandle extends LitElement {
 
     this._lastDroppingTarget = lastModelState;
     this._indicator.targetRect = rect;
+    this._indicator.cursorPosition = point;
   };
 
   private _onDragEnd = (e: DragEvent) => {
