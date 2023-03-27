@@ -3,15 +3,20 @@ import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
 import {
+  DatabaseMultiSelect,
+  DatabaseNumber,
+  DatabaseProgress,
   DatabaseSearchIcon,
+  DatabaseSelect,
   MoreHorizontalIcon,
   PlusIcon,
+  TextIcon,
 } from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
 import { assertEquals, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
-import { css } from 'lit';
+import { css, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -59,6 +64,14 @@ const enum SearchState {
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 const ADD_COLUMN_BUTTON_WIDTH = 40;
+
+const columnTypeIconMap: Record<string, TemplateResult> = {
+  select: DatabaseSelect,
+  number: DatabaseNumber,
+  progress: DatabaseProgress,
+  'rich-text': TextIcon,
+  'multi-select': DatabaseMultiSelect,
+};
 
 /** column tag color poll */
 // const columnTagColors = [
@@ -115,7 +128,11 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
             'title'
           )}
       >
-        ${block.model.titleColumn}
+        <div class="affine-database-block-column-text">
+          ${TextIcon}${block.model.titleColumn}
+        </div>
+        <!-- TODO: change icon -->
+        <div class="affine-database-block-column-drag">${TextIcon}</div>
       </div>
       ${repeat(
         block.columns,
@@ -132,7 +149,11 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
               @click=${(event: MouseEvent) =>
                 _onShowEditColumnPopup(event.target as Element, column)}
             >
-              ${column.name}
+              <div class="affine-database-block-column-text ${column.type}">
+                ${columnTypeIconMap[column.type]}${column.name}
+              </div>
+              <!-- TODO: change icon -->
+              <div class="affine-database-block-column-drag">${TextIcon}</div>
             </div>
           `;
         }
@@ -191,7 +212,6 @@ function DataBaseRowContainer(
         padding: 8px;
         border-right: 1px solid var(--affine-border-color);
       }
-
       .affine-database-block-column:hover {
         background: linear-gradient(
             0deg,
@@ -199,6 +219,34 @@ function DataBaseRowContainer(
             rgba(0, 0, 0, 0.04)
           ),
           #ffffff;
+      }
+      .affine-database-block-column-text {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--affine-secondary-text-color);
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .affine-database-block-column-text svg {
+        width: 16px;
+        height: 16px;
+        fill: var(--affine-icon-color);
+      }
+      .affine-database-block-column-text.select svg {
+        fill: none;
+      }
+      .affine-database-block-column-drag {
+        display: none;
+        align-items: center;
+      }
+      .affine-database-block-column-drag svg {
+        width: 10px;
+        height: 14px;
+      }
+      .affine-database-block-column:hover .affine-database-block-column-drag {
+        display: flex;
       }
 
       .affine-database-block-rows {
