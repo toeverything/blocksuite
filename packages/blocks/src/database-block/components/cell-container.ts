@@ -10,6 +10,9 @@ import {
 } from '../register.js';
 import { onClickOutside } from '../utils.js';
 
+/** affine-database-cell-container padding */
+const CELL_PADDING = 8;
+
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
   extends DatabaseCellLitElement<unknown>
@@ -19,7 +22,7 @@ export class DatabaseCellContainer
     :host {
       display: flex;
       align-items: center;
-      padding: 10px 8px;
+      padding: 10px ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
   `;
@@ -59,6 +62,10 @@ export class DatabaseCellContainer
       property: newProperty,
     });
   }
+
+  setHeight = (height: number) => {
+    this.style.height = `${height + CELL_PADDING * 2}px`;
+  };
 
   protected firstUpdated() {
     this.databaseModel.propsUpdated.on(() => this.requestUpdate());

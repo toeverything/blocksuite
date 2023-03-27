@@ -268,7 +268,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
 }
 
 export async function initDatabaseColumn(page: Page, columnType = 'number') {
-  const columnAddBtn = page.locator('.affine-database-block-add-column-button');
+  const columnAddBtn = page.locator('.affine-database-add-column-button');
   await columnAddBtn.click();
 
   const columnAddPopup = page.locator('affine-database-add-column-type-popup');
