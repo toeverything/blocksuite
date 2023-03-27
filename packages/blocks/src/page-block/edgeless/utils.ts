@@ -100,7 +100,6 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
     }
     // zoom
     else {
-      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
       const { centerX, centerY } = viewport;
       const prevZoom = viewport.zoom;
 
@@ -111,6 +110,11 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
         e.clientY - rect.y
       );
 
+      // The delta step when using the mouse wheel is greater than 100, resulting in overly fast zooming
+      let delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      if (Math.abs(delta) > 100) {
+        delta = delta / 10;
+      }
       viewport.applyDeltaZoom(delta);
       const newZoom = viewport.zoom;
 
