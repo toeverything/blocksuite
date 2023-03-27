@@ -6,7 +6,6 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { getModelByElement, NonShadowLitElement } from '../utils/index.js';
-import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
@@ -21,6 +20,7 @@ export class AffineReference extends NonShadowLitElement {
       fill: var(--affine-link-color);
       text-decoration: none;
       cursor: pointer;
+      user-select: none;
     }
 
     .affine-reference > span {
@@ -73,11 +73,17 @@ export class AffineReference extends NonShadowLitElement {
 
   private _onClick(e: MouseEvent) {
     e.preventDefault();
+    const refMeta = this.refMeta;
+    const model = getModelByElement(this);
+    if (!refMeta || refMeta.id === model.page.id) {
+      return;
+    }
+    // const targetPageId = refMeta.id;
     // TODO jump to the reference
   }
 
   render() {
-    const style = affineTextStyles(this.textAttributes);
+    // const style = affineTextStyles(this.textAttributes);
     const refMeta = this.refMeta;
     const title = refMeta
       ? refMeta.title
@@ -88,10 +94,7 @@ export class AffineReference extends NonShadowLitElement {
 
     // TODO fix cursor with white space
     // TODO update icon
-    return html`<span
-      class="affine-reference"
-      style=${style}
-      @click=${this._onClick}
+    return html`<span class="affine-reference" @click=${this._onClick}
       >${FontLinkIcon}<span contenteditable="false">${title}</span>${this
         .vText}</span
     >`;

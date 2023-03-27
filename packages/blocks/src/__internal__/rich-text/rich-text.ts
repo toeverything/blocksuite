@@ -14,6 +14,8 @@ import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
 import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 
+const IGNORE_ATTRIBUTES = ['link', 'code', 'reference'] as const;
+
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
   static styles = css`
@@ -97,9 +99,9 @@ export class RichText extends NonShadowLitElement {
           ) {
             const attributes = deltas[0][0].attributes;
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              delete attributes?.link;
-              delete attributes?.code;
-              delete attributes?.reference;
+              IGNORE_ATTRIBUTES.forEach(attr => {
+                delete attributes?.[attr];
+              });
             }
 
             vEditor.insertText(vRange, e.data, attributes);
@@ -126,9 +128,9 @@ export class RichText extends NonShadowLitElement {
         if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
           if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-            delete attributes?.link;
-            delete attributes?.code;
-            delete attributes?.reference;
+            IGNORE_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
           }
 
           vEditor.insertText(vRange, data, attributes);
