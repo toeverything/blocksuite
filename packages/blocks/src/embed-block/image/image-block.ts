@@ -17,6 +17,9 @@ import type { EmbedBlockModel } from '../index.js';
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
   static styles = css`
+    affine-embed {
+      display: block;
+    }
     .affine-image-wrapper {
       padding: 8px;
       width: 100%;

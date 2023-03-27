@@ -103,7 +103,7 @@ export class DragMirror extends LitElement {
         cursor: none;
         user-select: none;
         pointer-events: none;
-        /* caret-color: transparent; */
+        caret-color: transparent;
       }
 
       affine-drag-mirror > .affine-block-element:first-child > *:first-child {
