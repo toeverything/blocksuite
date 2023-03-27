@@ -25,7 +25,7 @@ import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { setUpVirgoAutofocus } from '../../__internal__/utils/virgo.js';
+import { setupVirgoAutofocus } from '../../__internal__/utils/virgo.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -196,7 +196,7 @@ export class DefaultPageBlockComponent
     const title = model.title;
 
     this._titleVEditor = new VEditor(title.yText);
-    setUpVirgoAutofocus(this.page, this._titleVEditor);
+    setupVirgoAutofocus(this.page, this._titleVEditor);
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,

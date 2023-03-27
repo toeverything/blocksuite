@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import { type BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { setUpVirgoAutofocus, setUpVirgoScroll } from '../utils/virgo.js';
+import { setupVirgoAutofocus, setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
@@ -61,8 +61,8 @@ export class RichText extends NonShadowLitElement {
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
-    setUpVirgoScroll(this.model.page, this._vEditor);
-    setUpVirgoAutofocus(this.model.page, this._vEditor);
+    setupVirgoScroll(this.model.page, this._vEditor);
+    setupVirgoAutofocus(this.model.page, this._vEditor);
     if (this.codeBlockGetHighlighterOptions) {
       this._vEditor.setAttributesSchema(z.object({}));
       this._vEditor.setAttributesRenderer(

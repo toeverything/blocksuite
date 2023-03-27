@@ -66,6 +66,7 @@ async function initEmptyEditor(
 
     const editor = document.createElement('editor-container');
     editor.page = page;
+    editor.autofocus = true;
 
     const debugMenu = document.createElement('debug-menu');
     debugMenu.workspace = workspace;

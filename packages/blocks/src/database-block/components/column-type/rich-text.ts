@@ -11,8 +11,8 @@ import type {
   AffineVEditor,
 } from '../../../__internal__/rich-text/virgo/types.js';
 import {
-  setUpVirgoAutofocus,
-  setUpVirgoScroll,
+  setupVirgoAutofocus,
+  setupVirgoScroll,
 } from '../../../__internal__/utils/virgo.js';
 import {
   DatabaseCellLitElement,
@@ -95,8 +95,8 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
         value: yText,
       });
       this.vEditor = new VEditor(yText);
-      setUpVirgoScroll(this.databaseModel.page, this.vEditor);
-      setUpVirgoAutofocus(this.databaseModel.page, this.vEditor);
+      setupVirgoScroll(this.databaseModel.page, this.vEditor);
+      setupVirgoAutofocus(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
@@ -189,8 +189,8 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
     if (this.column && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.column.value as any);
-      setUpVirgoScroll(this.databaseModel.page, this.vEditor);
-      setUpVirgoAutofocus(this.databaseModel.page, this.vEditor);
+      setupVirgoScroll(this.databaseModel.page, this.vEditor);
+      setupVirgoAutofocus(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
