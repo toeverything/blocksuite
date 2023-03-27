@@ -31,7 +31,7 @@ export class Graph {
   private _grid: { rows: number[]; cols: number[] } = { rows: [], cols: [] };
   private _elements: Record<`${number}:${number}`, GraphElement> = {};
 
-  private _stack: GraphElement[] = [];
+  private _debugStack: GraphElement[] = [];
 
   constructor(blocks: Block[], start: Point, end: Point) {
     this._blocks = blocks;
@@ -148,12 +148,16 @@ export class Graph {
       },
     };
     this._elements[key] = created;
-    this._stack.push(created);
+    this._debugStack.push(created);
     return created;
   }
 
   get grid() {
     return this._grid;
+  }
+
+  get debugStack() {
+    return this._debugStack;
   }
 
   getElement(x: number, y: number) {

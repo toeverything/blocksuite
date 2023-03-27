@@ -64,8 +64,8 @@ async function draw(blocks: Block[], start: Point, end: Point) {
   await new Promise(res => setTimeout(res, 100));
 
   /* draw connector path start */
-  const startElement = graph.getElement(start.x, start.y);
-  const endElement = graph.getElement(end.x, end.y);
+  const startElement = graph.getElement(start.x, start.y) as GraphElement;
+  const endElement = graph.getElement(end.x, end.y) as GraphElement;
   const path = search(graph, startElement, endElement);
   console.log('path', { path, startElement, endElement });
 
@@ -82,8 +82,8 @@ async function draw(blocks: Block[], start: Point, end: Point) {
   /* draw connector path end */
 
   /* draw finding process start */
-  for (let i = 0; i < graph._stack.length; i++) {
-    const s = graph._stack[i];
+  for (let i = 0; i < graph.debugStack.length; i++) {
+    const s = graph.debugStack[i];
     await new Promise(res => setTimeout(res, 100));
     const xVal = cols[s.x];
     const yVal = rows[s.y];
