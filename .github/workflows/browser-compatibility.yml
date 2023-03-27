@@ -30,10 +30,27 @@ jobs:
         with:
           repository: ${{ inputs.repo || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
-
       - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
         with:
-          version: 7.9.5
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - uses: actions/setup-node@v3
         with:
@@ -41,7 +58,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build playground
         run: pnpm build:playground
