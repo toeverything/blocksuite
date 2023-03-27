@@ -56,6 +56,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Install playwright browsers
         run: npx playwright install chromium
 

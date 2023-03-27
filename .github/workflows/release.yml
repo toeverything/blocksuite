@@ -38,6 +38,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Try publishing to NPM
         run: ./scripts/publish.sh
         env:
