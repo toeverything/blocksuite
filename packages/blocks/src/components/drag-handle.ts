@@ -448,13 +448,15 @@ export class DragHandle extends LitElement {
       rect.left - containerRect.left
     }px, ${rect.top - containerRect.top}px)`;
 
+    const fragment = document.createDocumentFragment();
     draggingBlockElements.forEach(e => {
       const c = document.createElement('div');
       c.classList.add('affine-block-element');
       render(e.render(), c);
-      dragMirror.appendChild(c);
+      fragment.appendChild(c);
     });
 
+    dragMirror.appendChild(fragment);
     requestAnimationFrame(() => {
       dragMirror.querySelector('rich-text')?.vEditor?.rootElement.blur();
     });
