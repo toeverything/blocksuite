@@ -77,6 +77,9 @@ export class DefaultPageBlockComponent
 
       min-height: calc(100% - 78px);
       padding-bottom: 150px;
+
+      /* Leave a place for drag-handle */
+      padding-left: 24px;
     }
 
     .affine-default-page-block-title {
