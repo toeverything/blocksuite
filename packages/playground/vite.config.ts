@@ -18,7 +18,11 @@ export default defineConfig({
       istanbul({
         cwd: fileURLToPath(new URL('../..', import.meta.url)),
         include: ['packages/**/src/*'],
-        exclude: ['node_modules', 'tests'],
+        exclude: [
+          'node_modules',
+          'tests',
+          fileURLToPath(new URL('.', import.meta.url)),
+        ],
         forceBuildInstrument: true,
       }),
   ],
