@@ -457,12 +457,12 @@ export class DragHandle extends LitElement {
     });
 
     dragMirror.appendChild(fragment);
+    this._dragMirror = dragMirror;
+    this._container.appendChild(dragMirror);
+
     requestAnimationFrame(() => {
       dragMirror.querySelector('rich-text')?.vEditor?.rootElement.blur();
     });
-
-    this._container.appendChild(dragMirror);
-    this._dragMirror = dragMirror;
   }
 
   private _removeDragMirror() {
