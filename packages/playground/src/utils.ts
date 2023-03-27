@@ -156,7 +156,7 @@ export function createWorkspaceOptions(): Pick<
       enable_block_hub: true,
       enable_database: true,
       enable_edgeless_toolbar: true,
-      enable_linked_page: true,
+      enable_linked_page: false,
       readonly: {
         'space:page0': false,
       },
