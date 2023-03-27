@@ -503,10 +503,10 @@ export class VEditor<
    *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
    * ```
    */
-  getDeltasByVRange(vRange: VRange): DeltaEntry[] {
-    const deltas = this.yText.toDelta() as DeltaInsert[];
+  getDeltasByVRange(vRange: VRange): DeltaEntry<TextAttributes>[] {
+    const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
 
-    const result: DeltaEntry[] = [];
+    const result: DeltaEntry<TextAttributes>[] = [];
     let index = 0;
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];

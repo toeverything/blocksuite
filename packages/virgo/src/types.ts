@@ -24,7 +24,9 @@ export type VRangeUpdatedProp = [
   type: 'native' | 'input' | 'other'
 ];
 
-export type DeltaEntry = [delta: DeltaInsert, range: VRange];
+export type DeltaEntry<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+> = [delta: DeltaInsert<TextAttributes>, range: VRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
 export type NativePoint = readonly [node: Node, offset: number];
