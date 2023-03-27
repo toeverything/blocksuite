@@ -120,7 +120,7 @@
   transition: color 0.25s;
 }
 
-[data-theme='dark'] {
+.dark {
   --affine-theme-mode: dark;
   --affine-primary-color: #5438ff;
   --affine-page-background: #2c2c2c;
