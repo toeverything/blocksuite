@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.6.1",
-    "marked": "^4.2.12",
-    "turndown": "^7.1.1"
+    "lit": "^2.7.0",
+    "marked": "^4.3.0",
+    "turndown": "^7.1.2"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",

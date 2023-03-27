@@ -14,12 +14,12 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "yjs": "^13.5.50",
-    "nanoid": "^4.0.1"
+    "nanoid": "^4.0.2",
+    "yjs": "^13.5.51"
   },
   "peerDependencies": {
-    "yjs": "^13",
-    "nanoid": "^4"
+    "nanoid": "^4",
+    "yjs": "^13"
   },
   "exports": {
     "./src/*": "./src/*.ts",
