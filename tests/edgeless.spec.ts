@@ -22,6 +22,7 @@ import {
   setMouseMode,
   switchEditorMode,
   updateExistedBrushElementSize,
+  zoomByMouseWheel,
 } from './utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
@@ -106,6 +107,24 @@ test('can zoom viewport', async ({ page }) => {
   await increaseZoomLevel(page);
   await page.mouse.move(CENTER_X, CENTER_Y);
   await assertEdgelessHoverRect(page, original);
+});
+
+test('zoom by mouse', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await assertFrameXYWH(page, [0, 0, 720, 72]);
+  await page.mouse.move(CENTER_X, CENTER_Y);
+
+  const original = [90, 264, 720, 72];
+  await assertEdgelessHoverRect(page, original);
+
+  await zoomByMouseWheel(page, 125);
+  await page.mouse.move(CENTER_X, CENTER_Y);
+
+  const zoomed = [180, 273, original[2] * 0.75, original[3] * 0.75];
+  await assertEdgelessHoverRect(page, zoomed);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {

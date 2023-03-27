@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
+import { SHORT_KEY } from './keyboard.js';
 
 export async function getFrameRect(
   page: Page,
@@ -270,4 +271,10 @@ export async function clickComponentToolbarMoreMenuButton(
     .filter({ hasText: text });
 
   await btn.click();
+}
+
+export async function zoomByMouseWheel(page: Page, step: number) {
+  await page.keyboard.down(SHORT_KEY);
+  await page.mouse.wheel(0, step);
+  await page.keyboard.up(SHORT_KEY);
 }
