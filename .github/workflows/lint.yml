@@ -73,8 +73,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
-        with:
-          version: 7.9.5
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
