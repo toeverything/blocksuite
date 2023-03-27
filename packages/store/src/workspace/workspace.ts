@@ -548,7 +548,7 @@ export class Workspace {
   /**
    * @internal Only for testing
    */
-  exportJSX(blockId: string, pageId = this.meta.pageMetas.at(0)?.id) {
+  exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
     assertExists(pageId);
     return this._store.exportJSX(pageId, blockId);
   }

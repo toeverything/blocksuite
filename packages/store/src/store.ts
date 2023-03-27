@@ -180,7 +180,7 @@ export class Store {
     if (!blockId) {
       const pageBlockId = Object.keys(pageJson).at(0);
       if (!pageBlockId) {
-        throw new Error("Page doesn't have any block");
+        return null;
       }
       blockId = pageBlockId;
     }
