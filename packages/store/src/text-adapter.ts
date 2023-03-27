@@ -13,26 +13,6 @@ export type DeltaOperation = {
   retain?: number;
 } & OptionalAttributes;
 
-declare module 'yjs' {
-  interface Text {
-    /**
-     * Specific addition used by @blocksuite/store
-     * When set, we know it hasn't been applied to virgo.
-     * When specified, we call this a "controlled operation".
-     *
-     * Consider renaming this to closer indicate this is simply a "controlled operation",
-     * since we may not actually use this information.
-     */
-    meta?:
-      | { split: true }
-      | { join: true }
-      | { format: true }
-      | { delete: true }
-      | { clear: true }
-      | { replace: true };
-  }
-}
-
 export class Text {
   private _yText: Y.Text;
 
@@ -161,7 +141,6 @@ export class Text {
     }
     this._transact(() => {
       this._yText.insert(index, content, attributes);
-      this._yText.meta = { split: true };
     });
   }
 
@@ -181,7 +160,6 @@ export class Text {
           insertTexts[i].attributes as Object | undefined
         );
       }
-      this._yText.meta = { split: true };
     });
   }
 
@@ -194,7 +172,6 @@ export class Text {
       const delta: DeltaOperation[] = yOther.toDelta();
       delta.unshift({ retain: this._yText.length });
       this._yText.applyDelta(delta);
-      this._yText.meta = { join: true };
     });
   }
 
@@ -214,7 +191,6 @@ export class Text {
     }
     this._transact(() => {
       this._yText.format(index, length, format);
-      this._yText.meta = { format: true };
     });
   }
 
@@ -234,7 +210,6 @@ export class Text {
     }
     this._transact(() => {
       this._yText.delete(index, length);
-      this._yText.meta = { delete: true };
     });
   }
 
@@ -258,7 +233,6 @@ export class Text {
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.insert(index, content, attributes);
-      this._yText.meta = { replace: true };
     });
   }
 
@@ -268,7 +242,6 @@ export class Text {
     }
     this._transact(() => {
       this._yText.delete(0, this._yText.length);
-      this._yText.meta = { clear: true };
     });
   }
 
