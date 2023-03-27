@@ -15,10 +15,25 @@ import {
 } from '@blocksuite/global/config';
 import type { ColumnSchema } from '@blocksuite/global/database';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
+
+type ColumnType = {
+  text: string;
+  icon: TemplateResult;
+};
+
+type NormalAction = {
+  type: string;
+  text: string;
+  icon: TemplateResult;
+};
+type Divider = {
+  type: 'divider';
+};
+type ColumnAction = NormalAction | Divider;
 
 const actionStyles = css`
   .action {
@@ -49,7 +64,7 @@ const actionStyles = css`
   }
 `;
 
-const columnTypes = [
+const columnTypes: ColumnType[] = [
   {
     text: 'Text',
     icon: TextIcon,
@@ -72,7 +87,15 @@ const columnTypes = [
   },
 ];
 
-const columnActions = [
+const columnActions: ColumnAction[] = [
+  {
+    type: 'rename',
+    text: 'Rename',
+    icon: PenIcon,
+  },
+  {
+    type: 'divider',
+  },
   {
     type: 'column-type',
     text: 'Column type',
@@ -103,7 +126,32 @@ const columnActions = [
     text: 'Move Right',
     icon: DatabaseMoveRight,
   },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'delete',
+    text: 'Delete column',
+    icon: DeleteIcon,
+  },
 ];
+
+const titleColumnActions: ColumnAction[] = [
+  {
+    type: 'rename',
+    text: 'Rename',
+    icon: PenIcon,
+  },
+  {
+    type: 'insert-right',
+    text: 'Insert right column',
+    icon: DatabaseInsertRight,
+  },
+];
+
+const isDivider = (action: ColumnAction): action is Divider => {
+  return action.type === 'divider';
+};
 
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {
@@ -182,10 +230,10 @@ export class EditColumnPopup extends LitElement {
     }
     .rename,
     .delete,
-    .text {
+    .column-type {
       fill: #77757d;
     }
-    .text > svg {
+    .column-type > svg {
       transform: rotate(-90deg);
     }
     ${actionStyles}
@@ -195,15 +243,21 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  targetColumnSchema!: ColumnSchema;
+  targetColumnSchema!: ColumnSchema | string;
+
+  @property()
+  columnType: 'title' | 'normal' = 'normal';
 
   @query('input')
   titleInput!: HTMLInputElement;
 
   @query('.affine-database-edit-column-popup')
   private _container!: HTMLDivElement;
-
   private _columnTypePopup!: ColumnTypePopup | null;
+
+  get isTitleColumn() {
+    return this.columnType === 'title';
+  }
 
   private _onShowColumnType = () => {
     if (this._columnTypePopup) return;
@@ -229,41 +283,38 @@ export class EditColumnPopup extends LitElement {
     }
   };
 
+  private _renderActions = () => {
+    const actions = this.isTitleColumn ? titleColumnActions : columnActions;
+
+    return html`
+      ${actions.map(action => {
+        if (isDivider(action)) {
+          return html`<div class="action-divider"></div>`;
+        }
+
+        const onMouseOver = this.isTitleColumn
+          ? undefined
+          : action.type === 'column-type'
+          ? this._onShowColumnType
+          : this._onHideColumnType;
+
+        return html`
+          <div class="action ${action.type}" @mouseover=${onMouseOver}>
+            <div class="action-content">
+              ${action.icon}<span>${action.text}</span>
+            </div>
+            ${action.type === 'column-type' ? ArrowDownIcon : ''}
+          </div>
+        `;
+      })}
+      <!-- TODO: refactor rename logic -->
+    `;
+  };
+
   protected render() {
     return html`
       <div class="affine-database-edit-column-popup">
-        <div class="action rename">
-          <div class="action-content">${PenIcon}<span>Rename</span></div>
-        </div>
-        <div class="action-divider"></div>
-        ${columnActions.map(action => {
-          if (action.type === 'column-type') {
-            return html`
-              <div class="action text" @mouseover=${this._onShowColumnType}>
-                <div class="action-content">
-                  ${TextIcon}<span>Column type</span>
-                </div>
-                ${ArrowDownIcon}
-              </div>
-            `;
-          }
-
-          return html`
-            <div class="action" @mouseover=${this._onHideColumnType}>
-              <div class="action-content">
-                ${action.icon}<span>${action.text}</span>
-              </div>
-            </div>
-          `;
-        })}
-
-        <div class="action-divider"></div>
-        <div class="action delete">
-          <div class="action-content">
-            ${DeleteIcon}<span>Delete column</span>
-          </div>
-        </div>
-        <!-- TODO: refactor rename logic -->
+        ${this._renderActions()}
       </div>
     `;
   }

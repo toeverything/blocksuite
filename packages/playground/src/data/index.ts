@@ -172,6 +172,7 @@ export const database: InitFn = (workspace: Workspace) => {
     'affine:database',
     {
       columns: [col1, col2, col3],
+      titleColumn: 'Title',
     },
     frameId
   );

@@ -14,6 +14,7 @@ export const DatabaseBlockSchema = defineBlockSchema(
     title: internal.Text(),
     columns: [] as ColumnSchema['id'][],
     mode: DatabaseBlockDisplayMode.Database,
+    titleColumn: '',
   }),
   {
     version: 1,

@@ -81,6 +81,24 @@ if (once) {
 }
 
 function DatabaseHeader(block: DatabaseBlockComponent) {
+  const _onShowEditColumnPopup = (
+    reference: Element,
+    column: ColumnSchema | string,
+    columnType: 'title' | 'normal' = 'normal'
+  ) => {
+    const editColumn = new EditColumnPopup();
+    editColumn.targetModel = block.model;
+    editColumn.targetColumnSchema = column;
+    editColumn.columnType = columnType;
+    document.body.appendChild(editColumn);
+    requestAnimationFrame(() => {
+      createPopper(reference, editColumn, {
+        placement: 'bottom-start',
+      });
+      onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
+    });
+  };
+
   return html`
     <div class="affine-database-block-header">
       <div
@@ -90,8 +108,14 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
           minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
           maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
         })}
+        @click=${(event: MouseEvent) =>
+          _onShowEditColumnPopup(
+            event.target as Element,
+            block.model.titleColumn,
+            'title'
+          )}
       >
-        Title
+        ${block.model.titleColumn}
       </div>
       ${repeat(
         block.columns,
@@ -105,18 +129,8 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
                 minWidth: `${column.internalProperty.width}px`,
                 maxWidth: `${column.internalProperty.width}px`,
               })}
-              @click=${(event: MouseEvent) => {
-                const editColumn = new EditColumnPopup();
-                editColumn.targetModel = block.model;
-                editColumn.targetColumnSchema = column;
-                document.body.appendChild(editColumn);
-                requestAnimationFrame(() => {
-                  createPopper(event.target as Element, editColumn, {
-                    placement: 'bottom-start',
-                  });
-                  onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
-                });
-              }}
+              @click=${(event: MouseEvent) =>
+                _onShowEditColumnPopup(event.target as Element, column)}
             >
               ${column.name}
             </div>
