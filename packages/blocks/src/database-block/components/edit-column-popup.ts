@@ -33,9 +33,9 @@ type NormalAction = {
 type Divider = {
   type: 'divider';
 };
-type ColumnAction = NormalAction | Divider;
+export type ColumnAction = NormalAction | Divider;
 
-const actionStyles = css`
+export const actionStyles = css`
   .action {
     display: flex;
     justify-content: space-between;
@@ -58,7 +58,7 @@ const actionStyles = css`
     height: 20px;
   }
   .action-divider {
-    height: 1px;
+    height: 0.5px;
     background: #e3e2e4;
     margin: 8px 0;
   }
@@ -149,7 +149,7 @@ const titleColumnActions: ColumnAction[] = [
   },
 ];
 
-const isDivider = (action: ColumnAction): action is Divider => {
+export const isDivider = (action: ColumnAction): action is Divider => {
   return action.type === 'divider';
 };
 

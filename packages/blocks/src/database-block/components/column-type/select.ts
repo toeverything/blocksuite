@@ -1,6 +1,12 @@
-import { MoreHorizontalIcon, PlusIcon } from '@blocksuite/global/config';
+import {
+  DeleteIcon,
+  MoreHorizontalIcon,
+  PenIcon,
+  PlusIcon,
+} from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
-import { css } from 'lit';
+import { css, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
@@ -9,11 +15,33 @@ import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
 } from '../../register.js';
+import { onClickOutside } from '../../utils.js';
+import {
+  actionStyles,
+  type ColumnAction,
+  isDivider,
+} from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
   Single = 'single',
 }
+
+const tagActions: ColumnAction[] = [
+  {
+    type: 'rename',
+    text: 'Rename',
+    icon: PenIcon,
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'delete',
+    text: 'Delete',
+    icon: DeleteIcon,
+  },
+];
 
 /** select input max length */
 const INPUT_MAX_LENGTH = 10;
@@ -64,6 +92,63 @@ class SelectCell extends DatabaseCellLitElement<string[]> {
   }
 }
 
+@customElement('affine-database-select-action')
+class SelectAction extends LitElement {
+  static styles = css`
+    :host {
+      z-index: 11;
+    }
+    .affine-database-select-action {
+      width: 200px;
+      padding: 8px;
+      border: 1px solid #e3e2e4;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
+        inset 0px 0px 0px 0.5px #e3e3e4;
+    }
+    ${actionStyles}
+    .action {
+      color: #424149;
+    }
+    .action svg {
+      width: 20px;
+      height: 20px;
+    }
+    .rename,
+    .delete {
+      fill: #77757d;
+    }
+  `;
+
+  @property()
+  index!: number;
+
+  @property()
+  onAction!: (type: string, index: number) => void;
+
+  render() {
+    return html`
+      <div class="affine-database-select-action">
+        ${tagActions.map(action => {
+          if (isDivider(action))
+            return html`<div class="action-divider"></div>`;
+
+          return html`
+            <div
+              class="action ${action.type}"
+              @click=${() => this.onAction(action.type, this.index)}
+            >
+              <div class="action-content">
+                ${action.icon}<span>${action.text}</span>
+              </div>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+}
 @customElement('affine-database-select-cell-editing')
 class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   value: string | undefined = undefined;
@@ -151,7 +236,6 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
 
     .select-option {
-      position: relative;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -189,6 +273,9 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
     .select-option-icon:hover {
       background: rgba(0, 0, 0, 0.04);
+    }
+    .select-option-icon svg {
+      pointer-events: none;
     }
   `;
   static tag = literal`affine-database-select-cell-editing`;
@@ -299,6 +386,45 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     });
   };
 
+  private _onSelectAction = (type: string, index: number) => {
+    // TODO
+  };
+
+  private _showSelectAction = (index: number) => {
+    const selectOption = this.shadowRoot
+      ?.querySelectorAll('.select-option')
+      .item(index);
+    assertExists(selectOption);
+
+    const action = new SelectAction();
+    action.onAction = this._onSelectAction;
+    action.index = index;
+    selectOption.appendChild(action);
+
+    createPopper(
+      {
+        getBoundingClientRect: () => {
+          const optionIcon = selectOption.querySelector('.select-option-icon');
+          assertExists(optionIcon);
+          const { height } = action.getBoundingClientRect();
+          const rect = optionIcon.getBoundingClientRect();
+          rect.y = rect.y + height + 36;
+          rect.x = rect.x + 33;
+          return rect;
+        },
+      },
+      action,
+      {
+        placement: 'bottom-end',
+      }
+    );
+    onClickOutside(
+      selectOption as HTMLElement,
+      () => action.remove(),
+      'mousedown'
+    );
+  };
+
   override render() {
     const selection = this.columnSchema.property.selection as string[];
     const filteredSelection = selection.filter(item => {
@@ -349,7 +475,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                 <span class="select-option-new-text">${this._inputValue}</span>
               </div>`
             : html``}
-          ${filteredSelection.map(select => {
+          ${filteredSelection.map((select, index) => {
             return html`
               <div class="select-option">
                 <div
@@ -360,7 +486,12 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                     >${select}</span
                   >
                 </div>
-                <div class="select-option-icon">${MoreHorizontalIcon}</div>
+                <div
+                  class="select-option-icon"
+                  @click=${() => this._showSelectAction(index)}
+                >
+                  ${MoreHorizontalIcon}
+                </div>
               </div>
             `;
           })}
