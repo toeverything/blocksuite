@@ -20,6 +20,35 @@ import type { Selectable, SelectionArea } from '../selection-manager.js';
 import { getXYWH, pickTopBlock } from '../utils.js';
 import { MouseModeController } from './index.js';
 
+function getPointByDirection(
+  { x, y, w, h }: Rectangle,
+  direction: 'top' | 'right' | 'bottom' | 'left'
+) {
+  switch (direction) {
+    case 'top': {
+      return { x: x + w / 2, y };
+    }
+    case 'right': {
+      return { x: x + w, y: y + h / 2 };
+    }
+    case 'bottom': {
+      return { x: x + w / 2, y: y + h };
+    }
+    case 'left': {
+      return { x, y: y + h / 2 };
+    }
+  }
+}
+
+function getPoint(x: number, y: number, rect?: Rectangle | null) {
+  if (!rect) {
+    return { x, y };
+  }
+  const direction = rect.relativeDirection(x, y);
+  const point = getPointByDirection(rect, direction);
+  return point;
+}
+
 export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
   readonly mouseMode = <ConnectorMouseMode>{
     type: 'connector',
@@ -29,6 +58,9 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
   protected _draggingArea: SelectionArea | null = null;
   private _draggingStartElement: Selectable | null = null;
+  private _draggingStartRect: Rectangle | null = null;
+  // must assign value when dragging start
+  private _draggingStartPoint!: { x: number; y: number };
 
   private _pickBy(
     x: number,
@@ -73,11 +105,21 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       e.y,
       ele => ele.id !== id && ele.type !== 'connector'
     );
+    this._draggingStartRect = this._draggingStartElement
+      ? new Rectangle(...deserializeXYWH(getXYWH(this._draggingStartElement)))
+      : null;
+
+    this._draggingStartPoint = getPoint(
+      modelX,
+      modelY,
+      this._draggingStartRect
+    );
 
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
     };
+
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
@@ -93,17 +135,10 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     const id = this._draggingElementId;
 
-    const [startX, startY] = viewport.toModelCoord(
-      this._draggingArea.start.x,
-      this._draggingArea.start.y
-    );
-    const start = this._draggingStartElement;
-    const startRect =
-      start && start.id !== id
-        ? new Rectangle(...deserializeXYWH(getXYWH(start)))
-        : null;
+    const startX = this._draggingStartPoint.x;
+    const startY = this._draggingStartPoint.y;
 
-    const [endX, endY] = viewport.toModelCoord(e.x, e.y);
+    const [endModelX, endModelY] = viewport.toModelCoord(e.x, e.y);
     const end = this._pickBy(
       e.x,
       e.y,
@@ -114,8 +149,10 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
         ? new Rectangle(...deserializeXYWH(getXYWH(end)))
         : null;
 
+    const { x: endX, y: endY } = getPoint(endModelX, endModelY, endRect);
+
     const graphCollection = createGraph(
-      [startRect, endRect].filter(r => !!r) as Rectangle[],
+      [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],
       [
         { x: startX, y: startY },
         { x: endX, y: endY },
