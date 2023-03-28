@@ -30,7 +30,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid, Utils, type Workspace } from '@blocksuite/store';
-import type { SlDropdown } from '@shoelace-style/shoelace';
+import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
@@ -554,8 +554,21 @@ function getTabGroupTemplate({
           html`<sl-tab
             slot="nav"
             panel="${page.id}"
+            ?active=${page.id === editor.page.id}
             ?closable=${pageList.length > 1}
-            @sl-close=${() => {
+            @sl-close=${(e: CustomEvent) => {
+              const tab = e.target;
+              // Show other tab if the tab is currently active
+              if (tab && (tab as SlTab).active) {
+                const tabGroup =
+                  document.querySelector<SlTabGroup>('.tabs-closable');
+                if (!tabGroup) throw new Error('tab group not found');
+                const otherPage = workspace.meta.pageMetas.find(
+                  metaPage => page.id !== metaPage.id
+                );
+                if (!otherPage) throw new Error('no other page found');
+                tabGroup.show(otherPage.id);
+              }
               workspace.removePage(page.id);
             }}
             >${page.title}</sl-tab
