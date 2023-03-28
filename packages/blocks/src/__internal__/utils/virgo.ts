@@ -1,7 +1,7 @@
 import type { Page } from '@blocksuite/store';
 import type { VEditor } from '@blocksuite/virgo';
 
-import { getEditorContainer, isPageMode } from './query.js';
+import { isPageMode } from './query.js';
 
 // When the user selects a range, check if it matches the previous selection.
 // If it does, apply the marks from the previous selection.
