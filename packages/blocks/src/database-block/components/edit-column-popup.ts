@@ -14,6 +14,7 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { ColumnSchema } from '@blocksuite/global/database';
+import { ColumnInsertPosition } from '@blocksuite/global/database';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -152,11 +153,6 @@ const titleColumnActions: ColumnAction[] = [
 export const isDivider = (action: ColumnAction): action is Divider => {
   return action.type === 'divider';
 };
-
-export const enum ColumnInsertPosition {
-  Left = 'left',
-  Right = 'right',
-}
 
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {

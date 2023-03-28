@@ -13,6 +13,7 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import { ColumnInsertPosition } from '@blocksuite/global/database';
 import {
   assertEquals,
   assertExists,
@@ -34,10 +35,7 @@ import {
   setupVirgoScroll,
 } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import {
-  ColumnInsertPosition,
-  EditColumnPopup,
-} from './components/edit-column-popup.js';
+import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
