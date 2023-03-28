@@ -45,6 +45,29 @@ export class Rectangle {
   contains(x: number, y: number) {
     return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
   }
+
+  relativeDirection(x: number, y: number): 'left' | 'top' | 'right' | 'bottom' {
+    const c = {
+      left: Math.abs(x - this.x),
+      right: Math.abs(x - this.x - this.w),
+      top: Math.abs(y - this.y),
+      bottom: Math.abs(y - this.y - this.h),
+    };
+    let min: number;
+    let d = 'top';
+    Object.entries(c).forEach(([k, v]) => {
+      if (min === undefined) {
+        min = v;
+        d = k;
+      } else {
+        if (v < min) {
+          min = v;
+          d = k;
+        }
+      }
+    });
+    return d as 'left' | 'top' | 'right' | 'bottom';
+  }
 }
 
 interface Rulers {
@@ -65,21 +88,25 @@ function createRulers(
     columns.add(rect.maxX);
     rows.add(rect.minY);
     rows.add(rect.maxY);
-
-    const inflatedRect = rect.inflate(margin[0], margin[1]);
-    columns.add(inflatedRect.minX);
-    columns.add(inflatedRect.maxX);
-    rows.add(inflatedRect.minY);
-    rows.add(inflatedRect.maxY);
   });
 
   points.forEach(p => {
     columns.add(p.x);
     rows.add(p.y);
   });
+  const sortedColumns = [...columns.values()].sort((a, b) => a - b);
+  const sortedRows = [...rows.values()].sort((a, b) => a - b);
   return {
-    columns: [...columns.values()].sort((a, b) => a - b),
-    rows: [...rows.values()].sort((a, b) => a - b),
+    columns: [
+      sortedColumns[0] - margin[0],
+      ...sortedColumns,
+      sortedColumns[sortedColumns.length - 1] + margin[0],
+    ],
+    rows: [
+      sortedRows[0] - margin[1],
+      ...sortedRows,
+      sortedRows[sortedRows.length - 1] + margin[1],
+    ],
   };
 }
 
@@ -90,14 +117,21 @@ function createNodes(
 ): Point[] {
   const results: Point[] = [];
   const cache: Set<string> = new Set();
+  const gridX: Set<number> = new Set();
+  const gridY: Set<number> = new Set();
 
-  function addPoint(x: number, y: number) {
+  function addPoint(x: number, y: number, force = false) {
+    if (!force && rectangles.find(r => r.contains(x, y))) {
+      return;
+    }
     const p = { x, y };
     const key = `${x}:${y}`;
     if (cache.has(key)) {
       return;
     }
     cache.add(key);
+    gridX.add(x);
+    gridY.add(y);
     results.push(p);
   }
 
@@ -109,50 +143,83 @@ function createNodes(
 
       const currentX = columns[j];
       const currentY = rows[i];
-      const isInRectangle = rectangles.find(r =>
-        r.contains(currentX, currentY)
-      );
-      if (isInRectangle) {
-        continue;
-      }
       addPoint(currentX, currentY);
 
       const nextX = isColumnEdge ? undefined : columns[j + 1];
       const nextY = isRowEdge ? undefined : rows[i + 1];
 
       if (nextX) {
-        const isNextPoint = points.find(p => p.x === nextX && p.y === currentY);
-        const isNextInRectangle = rectangles.find(r =>
-          r.contains(nextX, currentY)
-        );
-        if (isNextPoint || !isNextInRectangle) {
-          // top
-          addPoint((currentX + nextX) / 2, currentY);
-        }
+        addPoint((currentX + nextX) / 2, currentY);
       }
       if (nextY) {
-        const isNextPoint = points.find(p => p.x === currentX && p.y === nextY);
-        const isNextInRectangle = rectangles.find(r =>
-          r.contains(currentX, nextY)
-        );
-        if (isNextPoint || !isNextInRectangle) {
-          // left
-          addPoint(currentX, (currentY + nextY) / 2);
-        }
+        addPoint(currentX, (currentY + nextY) / 2);
       }
       if (nextX && nextY) {
-        const isNextInRectangle = rectangles.find(r =>
-          r.contains(nextX, nextY)
-        );
-        if (!isNextInRectangle) {
-          // center
-          addPoint((currentX + nextX) / 2, (currentY + nextY) / 2);
-        }
+        addPoint((currentX + nextX) / 2, (currentY + nextY) / 2);
       }
     }
   }
 
-  return results.concat(points);
+  const sortedGridX = [...gridX.values()].sort((a, b) => a - b);
+  const sortedGridY = [...gridY.values()].sort((a, b) => a - b);
+  points.forEach(p => {
+    const rect = rectangles.find(r => r.contains(p.x, p.y));
+    if (rect) {
+      const direction = rect.relativeDirection(p.x, p.y);
+      switch (direction) {
+        case 'left': {
+          let index = sortedGridX.indexOf(p.x);
+          while (index > -1) {
+            const columnsValue = sortedGridX[index];
+            if (cache.has(`${columnsValue}:${p.y}`)) {
+              break;
+            }
+            addPoint(columnsValue, p.y, true);
+            index--;
+          }
+          break;
+        }
+        case 'top': {
+          let index = sortedGridY.indexOf(p.y);
+          while (index > -1) {
+            const rowsValue = sortedGridY[index];
+            if (cache.has(`${p.x}:${rowsValue}`)) {
+              break;
+            }
+            addPoint(p.x, rowsValue, true);
+            index--;
+          }
+          break;
+        }
+        case 'right': {
+          let index = sortedGridX.indexOf(p.x);
+          while (index < sortedGridX.length) {
+            const columnsValue = sortedGridX[index];
+            if (cache.has(`${columnsValue}:${p.y}`)) {
+              break;
+            }
+            addPoint(columnsValue, p.y, true);
+            index++;
+          }
+          break;
+        }
+        case 'bottom': {
+          let index = sortedGridY.indexOf(p.y);
+          while (index < sortedGridY.length) {
+            const rowsValue = sortedGridY[index];
+            if (cache.has(`${p.x}:${rowsValue}`)) {
+              break;
+            }
+            addPoint(p.x, rowsValue, true);
+            index++;
+          }
+          break;
+        }
+      }
+    }
+  });
+
+  return results;
 }
 
 interface GraphNode {
@@ -256,6 +323,8 @@ export interface CreateGraphReturned {
   rectangles: Rectangle[];
   points: Point[];
 
+  inflatedRectangles: Rectangle[];
+
   rulers: Rulers;
   nodes: Point[];
   graph: Graph;
@@ -266,8 +335,37 @@ export function createGraph(
   points: Point[],
   margin = [10, 10]
 ): CreateGraphReturned {
-  const rulers = createRulers(rectangles, points, margin);
-  const nodes = createNodes(rulers, rectangles, points);
+  const inflatedRects = rectangles.map(r => r.inflate(margin[0], margin[1]));
+  const rulers = createRulers(inflatedRects, points, margin);
+  const nodes = createNodes(rulers, inflatedRects, points);
   const graph = new Graph(nodes);
-  return { rectangles, points, rulers, nodes, graph };
+  return {
+    rectangles,
+    points,
+    inflatedRectangles: inflatedRects,
+    rulers,
+    nodes,
+    graph,
+  };
+}
+
+export function simplifyPath(points: Point[]) {
+  if (points.length <= 2) {
+    return points;
+  }
+  const path = [points[0]];
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const cur = points[i];
+    const next = points[i + 1];
+    if (
+      (prev.x === cur.x && cur.x === next?.x) ||
+      (prev.y === cur.y && cur.y === next?.y)
+    ) {
+      // nothing
+    } else {
+      path.push(cur);
+    }
+  }
+  return path;
 }
