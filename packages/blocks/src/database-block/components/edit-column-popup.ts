@@ -251,6 +251,9 @@ export class EditColumnPopup extends LitElement {
   @property()
   setTitleColumnEditId!: (titleId: string) => void;
 
+  @property()
+  insertColumn!: (position: 'right' | 'left') => void;
+
   @query('input')
   titleInput!: HTMLInputElement;
 
@@ -290,6 +293,16 @@ export class EditColumnPopup extends LitElement {
     if (action.type === 'rename') {
       this.setTitleColumnEditId(titleId);
       this.closePopup();
+      return;
+    }
+    if (action.type === 'insert-right' || action.type === 'insert-left') {
+      if (action.type === 'insert-right') {
+        this.insertColumn('right');
+      } else {
+        this.insertColumn('left');
+      }
+      this.closePopup();
+      return;
     }
   };
 
