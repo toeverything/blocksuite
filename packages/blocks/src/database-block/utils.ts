@@ -1,6 +1,11 @@
-const isVisible = (elem: HTMLElement) =>
-  !!elem &&
-  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+// source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+function isVisible(elem: HTMLElement) {
+  return (
+    !!elem &&
+    !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length)
+  );
+}
+
 export function onClickOutside(
   element: HTMLElement,
   callback: (element: HTMLElement) => void,

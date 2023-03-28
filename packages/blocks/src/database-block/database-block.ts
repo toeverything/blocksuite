@@ -251,9 +251,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     };
     document.body.appendChild(editColumn);
     requestAnimationFrame(() => {
-      createPopper(reference, editColumn, {
-        placement: 'bottom-start',
-      });
+      createPopper(reference, editColumn, { placement: 'bottom-start' });
       onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
     });
   };
