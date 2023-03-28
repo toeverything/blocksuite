@@ -11,6 +11,8 @@ import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
   createEvent,
@@ -90,6 +92,9 @@ export class DebugMenu extends NonShadowLitElement {
 
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
+
+  @state()
+  private _showTabMenu = false;
 
   get page() {
     return this.editor.page;
@@ -287,6 +292,8 @@ export class DebugMenu extends NonShadowLitElement {
         }
 
         .default-toolbar {
+          display: flex;
+          gap: 5px;
           padding: 8px;
           width: 100%;
           min-width: 390px;
@@ -446,6 +453,11 @@ export class DebugMenu extends NonShadowLitElement {
                 Toggle CSS Debug Menu
               </sl-menu-item>
               <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
+              <sl-menu-item
+                @click=${() => (this._showTabMenu = !this._showTabMenu)}
+              >
+                Toggle Tab Menu
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -468,6 +480,13 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
+          ${this._showTabMenu
+            ? getTabGroupTemplate({
+                workspace: this.workspace,
+                editor: this.editor,
+                requestUpdate: () => this.requestUpdate(),
+              })
+            : null}
         </div>
 
         <div
@@ -488,6 +507,60 @@ export class DebugMenu extends NonShadowLitElement {
       </div>
     `;
   }
+}
+
+function getTabGroupTemplate({
+  workspace,
+  editor,
+  requestUpdate,
+}: {
+  workspace: Workspace;
+  editor: EditorContainer;
+  requestUpdate: () => void;
+}) {
+  workspace.slots.pagesUpdated.on(requestUpdate);
+  const pageList = workspace.meta.pageMetas;
+
+  const createPage = () => {
+    const pageName = 'Untitled';
+    // TODO use id generator
+    // const id = workspace.idGenerator();
+    const id = nanoid();
+    const newPage = workspace.createPage(id);
+    const pageBlockId = newPage.addBlock('affine:page', {
+      title: new newPage.Text(pageName),
+    });
+    newPage.addBlock('affine:surface', {}, null);
+    newPage.addBlock('affine:frame', {}, pageBlockId);
+  };
+
+  return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
+      <sl-button size="small" content="new page" @click=${createPage}>
+        <sl-icon name="file-earmark-plus" label="new page"></sl-icon>
+      </sl-button>
+    </sl-tooltip>
+    <sl-tab-group
+      class="tabs-closable"
+      style="display: flex; overflow: hidden;"
+      @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+        const otherPage = workspace.getPage(e.detail.name);
+        if (!otherPage) throw new Error('page not found');
+        editor.page = otherPage;
+      }}
+    >
+      ${pageList.map(
+        page =>
+          html`<sl-tab
+            slot="nav"
+            panel="${page.id}"
+            ?closable=${pageList.length > 1}
+            @sl-close=${() => {
+              workspace.removePage(page.id);
+            }}
+            >${page.title}</sl-tab
+          >`
+      )}
+    </sl-tab-group>`;
 }
 
 declare global {
