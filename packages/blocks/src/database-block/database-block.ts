@@ -140,6 +140,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       display: flex;
       align-items: center;
       gap: 4px;
+      max-width: 173px;
       color: var(--affine-secondary-text-color);
       font-size: 14px;
       font-weight: 600;
@@ -151,6 +152,12 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     }
     .affine-database-column-text.select svg {
       fill: none;
+    }
+    .affine-database-column-text-input {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .affine-database-column-input {
       width: 100%;
@@ -233,9 +240,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     if (this._editingColumnId) return;
 
     const currentEl = target as Element;
-    const reference = currentEl.classList.contains(
-      'affine-database-block-column'
-    )
+    const reference = currentEl.classList.contains('affine-database-column')
       ? target
       : target.parentElement;
     assertExists(reference);
@@ -315,7 +320,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         >
           <div class="affine-database-column-text">
             ${TextIcon}
-            <div>
+            <div class="affine-database-column-text-input">
               ${this._editingColumnId === '-1'
                 ? html`<input
                     class="affine-database-column-input"
@@ -349,7 +354,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
               >
                 <div class="affine-database-column-text ${column.type}">
                   ${columnTypeIconMap[column.type]}
-                  <div>
+                  <div class="affine-database-column-text-input">
                     ${this._editingColumnId === column.id
                       ? html`<input
                           class="affine-database-column-input"
