@@ -68,6 +68,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
   // redo
   await redoByKeyboard(page);
+  await waitNextFrame(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
   // the format should be removed after trigger the hotkey again

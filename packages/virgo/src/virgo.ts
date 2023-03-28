@@ -253,16 +253,10 @@ export class VEditor<
       })
     );
 
-    //FIXME: wait for render refactor
-    if (this.autofocus) {
-      this.rootElement.focus({ preventScroll: true });
-    }
-
     this.slots.updated.emit();
   };
 
   shouldScrollIntoView = true;
-  autofocus = true;
 
   slots: {
     mounted: Slot;
@@ -714,9 +708,6 @@ export class VEditor<
     selection.removeAllRanges();
     selection.addRange(newRange);
 
-    //TODO: wait for render refactor
-    // this.rootElement.focus({ preventScroll: true});
-
     if (this.shouldScrollIntoView) {
       let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
       while (!(lineElement instanceof VirgoLine)) {
@@ -961,9 +952,6 @@ export class VEditor<
     if (origin === 'native') {
       return;
     }
-
-    // avoid cursor jumping to beginning in a moment
-    this._rootElement?.blur();
 
     const fn = () => {
       if (newVRange) {

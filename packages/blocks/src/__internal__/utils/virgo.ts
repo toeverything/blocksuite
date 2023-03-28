@@ -28,9 +28,3 @@ export function setupVirgoScroll(page: Page, vEditor: VEditor): void {
   const editorContainer = getEditorContainer(page) as any;
   vEditor.shouldScrollIntoView = editorContainer.mode === 'page';
 }
-
-export function setupVirgoAutofocus(page: Page, vEditor: VEditor): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const editorContainer = getEditorContainer(page) as any;
-  vEditor.autofocus = editorContainer.autofocus;
-}
