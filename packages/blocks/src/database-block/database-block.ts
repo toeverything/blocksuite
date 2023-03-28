@@ -13,6 +13,7 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import { ColumnInsertPosition } from '@blocksuite/global/database';
 import {
   assertEquals,
   assertExists,
@@ -31,10 +32,7 @@ import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import {
-  ColumnInsertPosition,
-  EditColumnPopup,
-} from './components/edit-column-popup.js';
+import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
@@ -250,9 +248,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     };
     document.body.appendChild(editColumn);
     requestAnimationFrame(() => {
-      createPopper(reference, editColumn, {
-        placement: 'bottom-start',
-      });
+      createPopper(reference, editColumn, { placement: 'bottom-start' });
       onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
     });
   };

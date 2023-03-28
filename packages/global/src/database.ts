@@ -54,3 +54,8 @@ export type BlockColumn<Schema extends ColumnSchema = ColumnSchema> = {
     ? Value
     : never;
 };
+
+export const enum ColumnInsertPosition {
+  Left = 'left',
+  Right = 'right',
+}
