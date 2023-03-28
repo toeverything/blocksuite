@@ -29,10 +29,7 @@ import { html } from 'lit/static-html.js';
 import { type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
-import {
-  setupVirgoAutofocus,
-  setupVirgoScroll,
-} from '../__internal__/utils/virgo.js';
+import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import {
   ColumnInsertPosition,
@@ -876,7 +873,6 @@ export class DatabaseBlockComponent
   private _initTitleVEditor() {
     this._vEditor = new VEditor(this.model.title.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
-    setupVirgoAutofocus(this.model.page, this._vEditor);
     this._vEditor.mount(this._container);
     this._vEditor.setReadonly(this.model.page.readonly);
 

@@ -19,7 +19,7 @@
 
 ---
 
-🧱 BlockSuite (_pronounced "block sweet"_) is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+BlockSuite (_pronounced "block sweet"_) is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
 - 👉 [Try BlockSuite-based AFFiNE online](https://app.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
@@ -154,6 +154,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Frame block
   - ⚛️ Shape element
   - ⚛️ Handwriting element
+  - 🚧 Shape connector
   - 🚧 Grouping
 - Playground
   - ✅ Multiplayer collaboration
@@ -164,6 +165,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
   - ✅ React hooks integration
+  - 🚧 Dynamic component registration
   - 📌 Dynamic block registration
 
 Icons above correspond to the following meanings:
