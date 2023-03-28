@@ -1,4 +1,3 @@
-import { onModelTextUpdated } from '@blocksuite/blocks';
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { VEditor, VText } from '@blocksuite/virgo';
