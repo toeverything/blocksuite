@@ -166,11 +166,62 @@ export interface CreateGraphReturned {
   graph: Graph;
 }
 
+function isManuelGenerateNodes(rectangles: Rectangle[], points: Point[]) {
+  if (!rectangles.length) {
+    return true;
+  }
+  if (
+    rectangles.length === 1 &&
+    ((points[0].x <= rectangles[0].x && points[1].x <= rectangles[0].x) ||
+      (points[0].x >= rectangles[0].maxX &&
+        points[1].x >= rectangles[0].maxX) ||
+      (points[0].y <= rectangles[0].y && points[1].y <= rectangles[0].y) ||
+      (points[0].y >= rectangles[0].maxY && points[1].y >= rectangles[0].maxY))
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function createGraph(
   rectangles: Rectangle[],
   points: Point[],
   margin = [10, 10]
 ): CreateGraphReturned {
+  if (isManuelGenerateNodes(rectangles, points)) {
+    const isVertical =
+      rectangles.length === 1 &&
+      ((points[0].y <= rectangles[0].y && points[1].y <= rectangles[0].y) ||
+        (points[0].y >= rectangles[0].maxY &&
+          points[1].y >= rectangles[0].maxY));
+
+    const edgeCenters = isVertical
+      ? [
+          { x: points[0].x, y: (points[0].y + points[1].y) / 2 },
+          { x: points[1].x, y: (points[0].y + points[1].y) / 2 },
+        ]
+      : [
+          { x: (points[0].x + points[1].x) / 2, y: points[0].y },
+          { x: (points[0].x + points[1].x) / 2, y: points[1].y },
+        ];
+    const nodes = [
+      ...points,
+      ...edgeCenters,
+      {
+        x: (points[0].x + points[1].x) / 2,
+        y: (points[0].y + points[1].y) / 2,
+      },
+    ];
+    const graph = new Graph(nodes);
+    return {
+      rectangles,
+      points,
+      inflatedRectangles: [],
+      rulers: { rows: [], columns: [] },
+      nodes,
+      graph,
+    };
+  }
   const inflatedRects = rectangles.map(r => r.inflate(margin[0], margin[1]));
   const rulers = createRulers(inflatedRects, points, margin);
   const nodes = createNodes(rulers, inflatedRects, points);
