@@ -56,7 +56,7 @@
     "@commitlint/cli": "^17.4.4",
     "@commitlint/config-conventional": "^17.4.4",
     "@open-wc/dev-server-hmr": "^0.1.4",
-    "@playwright/test": "1.33.0-alpha-mar-27-2023",
+    "@playwright/test": "1.33.0-alpha-mar-28-2023",
     "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
