@@ -153,6 +153,11 @@ export const isDivider = (action: ColumnAction): action is Divider => {
   return action.type === 'divider';
 };
 
+export const enum ColumnInsertPosition {
+  Left = 'left',
+  Right = 'right',
+}
+
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {
   static styles = css`
@@ -252,7 +257,7 @@ export class EditColumnPopup extends LitElement {
   setTitleColumnEditId!: (titleId: string) => void;
 
   @property()
-  insertColumn!: (position: 'right' | 'left') => void;
+  insertColumn!: (position: ColumnInsertPosition) => void;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -297,9 +302,9 @@ export class EditColumnPopup extends LitElement {
     }
     if (action.type === 'insert-right' || action.type === 'insert-left') {
       if (action.type === 'insert-right') {
-        this.insertColumn('right');
+        this.insertColumn(ColumnInsertPosition.Right);
       } else {
-        this.insertColumn('left');
+        this.insertColumn(ColumnInsertPosition.Left);
       }
       this.closePopup();
       return;

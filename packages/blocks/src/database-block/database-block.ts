@@ -34,7 +34,10 @@ import {
   setupVirgoScroll,
 } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import { EditColumnPopup } from './components/edit-column-popup.js';
+import {
+  ColumnInsertPosition,
+  EditColumnPopup,
+} from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
@@ -241,7 +244,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     editColumn.targetModel = this.targetModel;
     editColumn.targetColumnSchema = column;
     editColumn.insertColumn = position => {
-      const insertIdex = position === 'right' ? index : index - 1;
+      const insertIdex =
+        position === ColumnInsertPosition.Right ? index : index - 1;
       this.addColumn(insertIdex);
     };
     editColumn.closePopup = () => {
