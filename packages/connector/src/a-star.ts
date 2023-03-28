@@ -18,7 +18,7 @@ function pathTo(element: GraphElement) {
 }
 
 export function search(
-  graph: Graph,
+  graph: Pick<Graph, 'neighbors'>,
   start: GraphElement,
   end: GraphElement,
   heuristic: HeuristicFunction = manhattan

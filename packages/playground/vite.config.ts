@@ -38,6 +38,10 @@ export default defineConfig({
           __dirname,
           'examples/canvas/connector.html'
         ),
+        'examples/canvas/draft': resolve(
+          __dirname,
+          'examples/canvas/draft.html'
+        ),
         'examples/counter': resolve(__dirname, 'examples/counter/index.html'),
         'examples/workspace': resolve(
           __dirname,
