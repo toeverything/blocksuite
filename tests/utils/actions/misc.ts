@@ -527,20 +527,31 @@ export async function setSelection(
   );
 }
 
-export async function readClipboardText(page: Page) {
-  await page.evaluate(() => {
-    const textarea = document.createElement('textarea');
-    textarea.setAttribute('id', 'textarea-test');
-    document.body.appendChild(textarea);
-  });
-  const textarea = page.locator('#textarea-test');
-  await textarea.focus();
+export async function readClipboardText(
+  page: Page,
+  type: 'input' | 'textarea' = 'input'
+) {
+  const id = 'clipboard-test';
+  const selector = `#${id}`;
+  await page.evaluate(
+    ({ type, id }) => {
+      const input = document.createElement(type);
+      input.setAttribute('id', id);
+      document.body.appendChild(input);
+    },
+    { type, id }
+  );
+  const input = page.locator(selector);
+  await input.focus();
   await page.keyboard.press(`${SHORT_KEY}+v`);
-  const text = await textarea.inputValue();
-  await page.evaluate(() => {
-    const textarea = document.querySelector('#textarea-test');
-    textarea?.remove();
-  });
+  const text = await input.inputValue();
+  await page.evaluate(
+    ({ selector }) => {
+      const input = document.querySelector(selector);
+      input?.remove();
+    },
+    { selector }
+  );
   return text;
 }
 

@@ -779,6 +779,7 @@ test('should cut work multiple line', async ({ page }) => {
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
+  expect(text).toBe('2345678');
   await assertStoreMatchJSX(
     page,
     `
@@ -798,7 +799,6 @@ test('should cut work multiple line', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
-  expect(text).toBe('2345678');
 });
 
 test('should ctrl+enter create new block', async ({ page }) => {
