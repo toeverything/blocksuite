@@ -29,8 +29,7 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Workspace } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
+import { nanoid, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
@@ -120,14 +119,19 @@ export class DebugMenu extends NonShadowLitElement {
     }
   }
 
-  private _convertToList(e: PointerEvent, listType: ListType) {
+  private _updateBlockType(
+    e: PointerEvent,
+    flavour: 'affine:paragraph' | 'affine:list',
+    type: string
+  ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
+
     const blockRange = getCurrentBlockRange(this.page);
     if (!blockRange) {
       return;
     }
-    updateBlockType(blockRange.models, 'affine:list', listType);
+    updateBlockType(blockRange.models, flavour, type);
   }
 
   private _addCodeBlock(e: PointerEvent) {
@@ -148,17 +152,6 @@ export class DebugMenu extends NonShadowLitElement {
     this.page.captureSync();
     this.page.deleteBlock(startModel);
     this.page.addBlock('affine:code', blockProps, parent, index);
-  }
-
-  private _convertToParagraph(e: PointerEvent, type: string) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      return;
-    }
-    updateBlockType(blockRange.models, 'affine:paragraph', type);
   }
 
   private _switchEditorMode() {
@@ -357,66 +350,74 @@ export class DebugMenu extends NonShadowLitElement {
             <sl-menu>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToParagraph(e, 'text')}
+                  this._updateBlockType(e, 'affine:paragraph', 'text')}
               >
                 Text
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h1')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h1')}
               >
                 H1
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h2')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h2')}
               >
                 H2
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h3')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h3')}
               >
                 H3
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h4')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h4')}
               >
                 H4
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h5')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h5')}
               >
                 H5
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h6')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h6')}
               >
                 H6
               </sl-menu-item>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToParagraph(e, 'quote')}
+                  this._updateBlockType(e, 'affine:paragraph', 'quote')}
               >
                 Quote
               </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToList(e, 'bulleted')}
+                  this._updateBlockType(e, 'affine:list', 'bulleted')}
               >
                 Bulleted List
               </sl-menu-item>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToList(e, 'numbered')}
+                  this._updateBlockType(e, 'affine:list', 'numbered')}
               >
                 Numbered List
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:list', 'todo')}
               >
                 Todo List
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:list', 'toggle')}
               >
                 Toggle List
               </sl-menu-item>
