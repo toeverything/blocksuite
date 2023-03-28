@@ -13,8 +13,12 @@ import {
   PenIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import type { ColumnSchema } from '@blocksuite/global/database';
-import { ColumnInsertPosition } from '@blocksuite/global/database';
+import {
+  ColumnInsertPosition,
+  type ColumnSchema,
+  type ColumnSchemaType,
+} from '@blocksuite/global/database';
+import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -22,6 +26,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 
 type ColumnType = {
+  type: ColumnSchemaType;
   text: string;
   icon: TemplateResult;
 };
@@ -57,6 +62,7 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
+    color: #77757d;
   }
   .action-divider {
     height: 0.5px;
@@ -67,22 +73,27 @@ export const actionStyles = css`
 
 const columnTypes: ColumnType[] = [
   {
+    type: 'rich-text',
     text: 'Text',
     icon: TextIcon,
   },
   {
+    type: 'select',
     text: 'Select',
     icon: DatabaseSelect,
   },
   {
+    type: 'multi-select',
     text: 'Multi-select',
     icon: DatabaseMultiSelect,
   },
   {
+    type: 'number',
     text: 'Number',
     icon: DatabaseNumber,
   },
   {
+    type: 'progress',
     text: 'Progress',
     icon: DatabaseProgress,
   },
@@ -154,6 +165,12 @@ export const isDivider = (action: ColumnAction): action is Divider => {
   return action.type === 'divider';
 };
 
+const isTitleColumn = (
+  columnSchema: ColumnSchema | string
+): columnSchema is string => {
+  return typeof columnSchema === 'string';
+};
+
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {
   static styles = css`
@@ -169,6 +186,11 @@ class ColumnTypePopup extends LitElement {
     .action > svg {
       width: 16px;
       height: 16px;
+      fill: #77757d;
+    }
+    /* TODO: svg color */
+    .rich-text {
+      fill: #77757d;
     }
     .column-type {
       padding: 0;
@@ -181,10 +203,18 @@ class ColumnTypePopup extends LitElement {
     }
     .selected {
       color: #5438ff;
-      fill: #5438ff;
       background: rgba(0, 0, 0, 0.02);
     }
+    .selected svg {
+      color: #5438ff;
+    }
+    .selected.rich-text svg {
+      fill: #5438ff;
+    }
   `;
+
+  @property()
+  columnType: ColumnSchemaType | undefined;
 
   render() {
     return html`
@@ -194,11 +224,15 @@ class ColumnTypePopup extends LitElement {
           <!-- TODO: update icon -->
         </div>
         <div class="action-divider"></div>
-        ${columnTypes.map((type, index) => {
+        ${columnTypes.map(column => {
           return html`
-            <div class="action ${index === 0 ? 'selected' : ''}">
+            <div
+              class="action ${column.type} ${column.type === this.columnType
+                ? 'selected'
+                : ''}"
+            >
               <div class="action-content">
-                ${type.icon}<span>${type.text}</span>
+                ${column.icon}<span>${column.text}</span>
               </div>
               ${TextIcon}
             </div>
@@ -246,6 +280,10 @@ export class EditColumnPopup extends LitElement {
   @property()
   targetColumnSchema!: ColumnSchema | string;
 
+  /** base on database column index */
+  @property()
+  columnIndex!: number;
+
   @property()
   closePopup!: () => void;
 
@@ -262,13 +300,12 @@ export class EditColumnPopup extends LitElement {
   private _container!: HTMLDivElement;
   private _columnTypePopup!: ColumnTypePopup | null;
 
-  get isTitleColumn() {
-    return typeof this.targetColumnSchema === 'string';
-  }
-
   private _onShowColumnType = () => {
     if (this._columnTypePopup) return;
     this._columnTypePopup = new ColumnTypePopup();
+    if (!isTitleColumn(this.targetColumnSchema)) {
+      this._columnTypePopup.columnType = this.targetColumnSchema.type;
+    }
     this._container.appendChild(this._columnTypePopup);
     createPopper(this._container, this._columnTypePopup, {
       placement: 'right-start',
@@ -305,10 +342,58 @@ export class EditColumnPopup extends LitElement {
       this.closePopup();
       return;
     }
+
+    if (action.type === 'delete') {
+      this.targetModel.page.captureSync();
+      this.targetModel.page.deleteColumnSchema(titleId);
+      const columns = this.targetModel.columns.filter(id => id !== titleId);
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns,
+      });
+      this.closePopup();
+      return;
+    }
+
+    if (action.type === 'move-left' || action.type === 'move-right') {
+      this.targetModel.page.captureSync();
+      const targetIndex =
+        action.type === 'move-left'
+          ? this.columnIndex - 1
+          : this.columnIndex + 1;
+      const columns = [...this.targetModel.columns];
+      [columns[this.columnIndex], columns[targetIndex]] = [
+        columns[targetIndex],
+        columns[this.columnIndex],
+      ];
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns,
+      });
+      this.closePopup();
+      return;
+    }
+
+    if (action.type === 'duplicate') {
+      this.targetModel.page.captureSync();
+      const currentSchema = this.targetModel.page.getColumnSchema(titleId);
+      assertExists(currentSchema);
+      const { id: copyId, ...nonIdProps } = currentSchema;
+      const schema = { ...nonIdProps };
+      const id = this.targetModel.page.setColumnSchema(schema);
+      const newColumns = [...this.targetModel.columns];
+      newColumns.splice(this.columnIndex + 1, 0, id);
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns: newColumns,
+      });
+      this.targetModel.page.copyBlockColumnById(copyId, id);
+      this.closePopup();
+      return;
+    }
   };
 
   private _renderActions = () => {
-    const actions = this.isTitleColumn ? titleColumnActions : columnActions;
+    const actions = isTitleColumn(this.targetColumnSchema)
+      ? titleColumnActions
+      : columnActions;
 
     return html`
       ${actions.map(action => {
@@ -316,7 +401,11 @@ export class EditColumnPopup extends LitElement {
           return html`<div class="action-divider"></div>`;
         }
 
-        const onMouseOver = this.isTitleColumn
+        if (this.columnIndex === 0 && action.type === 'move-left') {
+          return null;
+        }
+
+        const onMouseOver = isTitleColumn(this.targetColumnSchema)
           ? undefined
           : action.type === 'column-type'
           ? this._onShowColumnType

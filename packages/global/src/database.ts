@@ -25,8 +25,15 @@ export interface SchemaInternalProperty {
 export type ColumnSchemaProperty<Property extends Record<string, unknown>> =
   Property;
 
+export type ColumnSchemaType =
+  | 'rich-text'
+  | 'select'
+  | 'multi-select'
+  | 'number'
+  | 'progress';
+
 export interface ColumnSchema<
-  Type extends string = string,
+  Type extends ColumnSchemaType = ColumnSchemaType,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
 > {

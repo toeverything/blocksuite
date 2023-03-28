@@ -1021,7 +1021,7 @@ export const DatabasePen = html`
   >
     <path
       d="M14 6.20314L5.5 15L4 20L9 18.5L17.7969 10M14 6.20314L15.3595 4.79619C16.4211 3.73461 18.1422 3.7346 19.2038 4.79619C20.2654 5.85777 20.2654 7.57894 19.2038 8.64052L17.7969 10M14 6.20314L17.7969 10"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1039,7 +1039,7 @@ export const DatabaseDelete = html`
   >
     <path
       d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1057,14 +1057,14 @@ export const DatabaseDuplicate = html`
   >
     <path
       d="M8 8H7.2C6.0799 8 5.51984 8 5.09202 8.21799C4.71569 8.40973 4.40973 8.71569 4.21799 9.09202C4 9.51984 4 10.0799 4 11.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H12.8C13.9201 20 14.4802 20 14.908 19.782C15.2843 19.5903 15.5903 19.2843 15.782 18.908C16 18.4802 16 17.9201 16 16.8V16M13 16H16.8C17.9201 16 18.4802 16 18.908 15.782C19.2843 15.5903 19.5903 15.2843 19.782 14.908C20 14.4802 20 13.9201 20 12.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H11.2C10.0799 4 9.51984 4 9.09202 4.21799C8.71569 4.40973 8.40973 4.71569 8.21799 5.09202C8 5.51984 8 6.07989 8 7.2V11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <path
       d="M12 9H14.9C14.9552 9 15 9.04477 15 9.1V12M15 9L8 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1085,18 +1085,18 @@ export const DatabaseInsertLeft = html`
       width="7"
       height="16"
       rx="2"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M4 12L10 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M7 15L7 9"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1116,18 +1116,18 @@ export const DatabaseInsertRight = html`
       height="16"
       rx="2"
       transform="matrix(-1 0 0 1 11 4)"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M20 12L14 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M17 15L17 9"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1144,7 +1144,7 @@ export const DatabaseMoveLeft = html`
   >
     <path
       d="M4 4V20M8 12H20M8 12L12 8M8 12L12 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1162,7 +1162,7 @@ export const DatabaseMoveRight = html`
   >
     <path
       d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1180,37 +1180,37 @@ export const DatabaseMultiSelect = html`
   >
     <path
       d="M4 5L6.42929 7.42929C6.46834 7.46834 6.53166 7.46834 6.57071 7.42929L9 5"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M4 11L6.42929 13.4293C6.46834 13.4683 6.53166 13.4683 6.57071 13.4293L9 11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M4 17L6.42929 19.4293C6.46834 19.4683 6.53166 19.4683 6.57071 19.4293L9 17"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 6L20 6"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 12L20 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 18L20 18"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1227,25 +1227,25 @@ export const DatabaseNumber = html`
   >
     <path
       d="M18.5 4L12.5 20"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 4L6 20"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M20 8.5H5.5"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M19 15L4 15"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1260,10 +1260,10 @@ export const DatabaseSelect = html`
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle cx="12" cy="12" r="9" stroke="#77757D" stroke-width="1.5" />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
     <path
       d="M8 11L11.9293 14.9293C11.9683 14.9683 12.0317 14.9683 12.0707 14.9293L16 11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1284,30 +1284,30 @@ export const DatabaseProgress = html`
       width="18"
       height="10"
       rx="3"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M15 5V19"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 10L12 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M9 10L9 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M6 10L6 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
