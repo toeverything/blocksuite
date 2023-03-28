@@ -83,6 +83,7 @@ importers:
 
   packages/blocks:
     specifiers:
+      '@blocksuite/connector': workspace:*
       '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
@@ -98,6 +99,7 @@ importers:
       turndown: ^7.1.1
       zod: ^3.21.4
     dependencies:
+      '@blocksuite/connector': link:../connector
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/virgo': link:../virgo

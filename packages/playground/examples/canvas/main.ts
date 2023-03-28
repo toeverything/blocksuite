@@ -9,8 +9,7 @@ import * as Y from 'yjs';
 
 function testClick(surface: SurfaceManager, e: MouseEvent) {
   const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
-  // @ts-expect-error
-  const elements = surface._pickByPoint(modelX, modelY);
+  const elements = surface.pickByPoint(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
     `picked elements count: ${elements.length}, top element type: ${

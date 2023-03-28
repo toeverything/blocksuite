@@ -95,4 +95,8 @@ export class Graph {
     });
     return n;
   }
+
+  getNode(x: number, y: number) {
+    return this.nodes[`${x}:${y}`];
+  }
 }

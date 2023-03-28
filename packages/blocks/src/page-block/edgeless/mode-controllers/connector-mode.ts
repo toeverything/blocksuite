@@ -1,3 +1,9 @@
+import {
+  createGraph,
+  Rectangle,
+  search,
+  simplifyPath,
+} from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
@@ -10,51 +16,9 @@ import type {
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import type { SelectionArea } from '../selection-manager.js';
+import type { Selectable, SelectionArea } from '../selection-manager.js';
 import { getXYWH, pickTopBlock } from '../utils.js';
-import { Direction } from './connector/constants.js';
-import { createConnectorRoute } from './connector/route.js';
 import { MouseModeController } from './index.js';
-
-function findDirection(x: number, y: number, bound: Bound) {
-  const c = {
-    [Direction.LEFT]: Math.abs(x - bound.x),
-    [Direction.RIGHT]: Math.abs(x - bound.x - bound.w),
-    [Direction.TOP]: Math.abs(y - bound.y),
-    [Direction.BOTTOM]: Math.abs(y - bound.y - bound.h),
-  };
-  let min: number;
-  let d: Direction = Direction.TOP;
-  Object.entries(c).forEach(([k, v]) => {
-    if (min === undefined) {
-      min = v;
-      d = k as Direction;
-    } else {
-      if (v < min) {
-        min = v;
-        d = k as Direction;
-      }
-    }
-  });
-  return d;
-}
-
-function getAnchorPoint(bound: Bound, direction: Direction) {
-  switch (direction) {
-    case Direction.TOP: {
-      return [bound.x + bound.w / 2, bound.y];
-    }
-    case Direction.RIGHT: {
-      return [bound.x + bound.w, bound.y + bound.h / 2];
-    }
-    case Direction.BOTTOM: {
-      return [bound.x + bound.w / 2, bound.y + bound.h];
-    }
-    case Direction.LEFT: {
-      return [bound.x, bound.y + bound.h / 2];
-    }
-  }
-}
 
 export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
   readonly mouseMode = <ConnectorMouseMode>{
@@ -64,13 +28,19 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   private _draggingElementId: string | null = null;
 
   protected _draggingArea: SelectionArea | null = null;
+  private _draggingStartElement: Selectable | null = null;
 
-  private _pick(x: number, y: number) {
+  private _pickBy(
+    x: number,
+    y: number,
+    filter: (element: Selectable) => boolean
+  ) {
     const { surface } = this._edgeless;
     const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-    const selectedShape = surface.pickTop(modelX, modelY);
-    return selectedShape
-      ? selectedShape
+    const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
+
+    return selectedShapes.length
+      ? selectedShapes[selectedShapes.length - 1]
       : pickTopBlock(this._blocks, modelX, modelY);
   }
 
@@ -98,6 +68,12 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     const id = this._surface.addConnectorElement(bound, [0, 0, 1, 1]);
     this._draggingElementId = id;
 
+    this._draggingStartElement = this._pickBy(
+      e.x,
+      e.y,
+      ele => ele.id !== id && ele.type !== 'connector'
+    );
+
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
@@ -121,80 +97,48 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       this._draggingArea.start.x,
       this._draggingArea.start.y
     );
-    const start = this._pick(
-      this._draggingArea.start.x,
-      this._draggingArea.start.y
-    );
-    const [sx, sy, sw, sh] =
-      start && start.id !== id ? deserializeXYWH(getXYWH(start)) : [0, 0, 0, 0];
-    const startBox =
+    const start = this._draggingStartElement;
+    const startRect =
       start && start.id !== id
-        ? [
-            [sx, sy],
-            [sx + sw, sy],
-            [sx + sw, sy + sh],
-            [sx, sy + sh],
-          ]
-        : [
-            [startX - 10, startY - 10],
-            [startX + 10, startY - 10],
-            [startX + 10, startY + 10],
-            [startX - 10, startY + 10],
-          ];
-    const startBound = {
-      x: startBox[0][0],
-      y: startBox[0][1],
-      w: startBox[1][0] - startBox[0][0],
-      h: startBox[2][1] - startBox[1][1],
-    };
-    const startDirection = findDirection(startX, startY, startBound);
-    const startAnchor = getAnchorPoint(startBound, startDirection);
+        ? new Rectangle(...deserializeXYWH(getXYWH(start)))
+        : null;
 
     const [endX, endY] = viewport.toModelCoord(e.x, e.y);
-    const end = this._pick(e.x, e.y);
-    const [ex, ey, ew, eh] =
-      end && end.id !== id ? deserializeXYWH(getXYWH(end)) : [0, 0, 0, 0];
-    const endBox =
-      end && end.id !== id
-        ? [
-            [ex, ey],
-            [ex + ew, ey],
-            [ex + ew, ey + eh],
-            [ex, ey + eh],
-          ]
-        : [
-            [endX - 10, endY - 10],
-            [endX + 10, endY - 10],
-            [endX + 10, endY + 10],
-            [endX - 10, endY + 10],
-          ];
-    const endBound = {
-      x: endBox[0][0],
-      y: endBox[0][1],
-      w: endBox[1][0] - endBox[0][0],
-      h: endBox[2][1] - endBox[1][1],
-    };
-    const endDirection = findDirection(endX, endY, endBound);
-    const endAnchor = getAnchorPoint(endBound, endDirection);
-
-    const connectorRoute = createConnectorRoute(
-      {
-        box: startBox,
-        direction: startDirection,
-        origin: startAnchor,
-      },
-      {
-        box: endBox,
-        direction: endDirection,
-        origin: endAnchor,
-      },
-      20
+    const end = this._pickBy(
+      e.x,
+      e.y,
+      ele => ele.id !== id && ele.type !== 'connector'
     );
+    const endRect =
+      end && end.id !== id
+        ? new Rectangle(...deserializeXYWH(getXYWH(end)))
+        : null;
 
-    const bound = getBrushBoundFromPoints(connectorRoute.path, 0);
-    const controllers = [...connectorRoute.path.flat()].map((v, index) => {
-      return index % 2 ? v - bound.y : v - bound.x;
-    });
+    const graphCollection = createGraph(
+      [startRect, endRect].filter(r => !!r) as Rectangle[],
+      [
+        { x: startX, y: startY },
+        { x: endX, y: endY },
+      ]
+    );
+    const { graph } = graphCollection;
+    const route = search(
+      graph,
+      graph.getNode(startX, startY),
+      graph.getNode(endX, endY)
+    );
+    const simplifiedRoute = simplifyPath(route);
+
+    const bound = getBrushBoundFromPoints(
+      simplifiedRoute.map(r => [r.x, r.y]),
+      0
+    );
+    const controllers = simplifiedRoute
+      .map(r => [r.x, r.y])
+      .flat()
+      .map((v, index) => {
+        return index % 2 ? v - bound.y : v - bound.x;
+      });
 
     this._surface.updateConnectorElement(id, bound, controllers);
     this._edgeless.slots.surfaceUpdated.emit();

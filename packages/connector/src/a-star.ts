@@ -15,6 +15,7 @@ function pathTo(element: GraphNode) {
     path.unshift(curr);
     curr = curr.parent;
   }
+  path.unshift(curr);
   return path;
 }
 
