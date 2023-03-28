@@ -1,5 +1,6 @@
-import type { Graph, GraphElement, Point } from './graph.js';
+import type { Graph, GraphNode } from './graph.js';
 import { BinaryHeap } from './heap.js';
+import type { Point } from './util.js';
 
 type HeuristicFunction = (start: Point, end: Point) => number;
 
@@ -7,7 +8,7 @@ function manhattan(start: Point, end: Point) {
   return Math.abs(start.x - end.x) + Math.abs(start.y - end.y);
 }
 
-function pathTo(element: GraphElement) {
+function pathTo(element: GraphNode) {
   let curr = element;
   const path = [];
   while (curr.parent) {
@@ -19,11 +20,11 @@ function pathTo(element: GraphElement) {
 
 export function search(
   graph: Pick<Graph, 'neighbors'>,
-  start: GraphElement,
-  end: GraphElement,
+  start: GraphNode,
+  end: GraphNode,
   heuristic: HeuristicFunction = manhattan
 ) {
-  const openHeap = new BinaryHeap<GraphElement>(element => element.f);
+  const openHeap = new BinaryHeap<GraphNode>(element => element.f);
 
   start.h = heuristic(start, end);
 

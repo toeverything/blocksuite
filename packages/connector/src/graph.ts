@@ -1,20 +1,10 @@
-export interface Block {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+import type { Point } from './util.js';
 
-export interface Point {
+export interface GraphNode {
   x: number;
   y: number;
-}
-
-export interface GraphElement {
-  x: number;
-  y: number;
-  parent: GraphElement | null;
-  cost(fromElement: GraphElement): number;
+  parent: GraphNode | null;
+  cost(fromElement: GraphNode): number;
 
   f: number;
   h: number;
@@ -24,160 +14,85 @@ export interface GraphElement {
 }
 
 export class Graph {
-  private _blocks: Block[] = [];
-  private _start: Point;
-  private _end: Point;
+  nodes: Record<string, GraphNode> = {};
+  edges: Record<string, Set<string>> = {};
+  connections: Array<GraphNode[]> = [];
 
-  private _grid: { rows: number[]; cols: number[] } = { rows: [], cols: [] };
-  private _elements: Record<`${number}:${number}`, GraphElement> = {};
-
-  private _debugStack: GraphElement[] = [];
-
-  constructor(blocks: Block[], start: Point, end: Point) {
-    this._blocks = blocks;
-    this._start = start;
-    this._end = end;
-
-    this._init();
+  constructor(points: Point[]) {
+    this._init(points);
   }
 
-  private _init() {
-    const cols: Set<number> = new Set();
-    const rows: Set<number> = new Set();
+  private _init(points: Point[]) {
+    const xs = new Set<number>();
+    const ys = new Set<number>();
 
-    this._blocks.forEach(block => {
-      const { x, y, w, h } = block;
-      cols.add(x);
-      cols.add(x + w);
-      rows.add(y);
-      rows.add(y + h);
+    points.forEach(p => {
+      const node = {
+        x: p.x,
+        y: p.y,
+        parent: null,
+        cost: (fromElement: GraphNode) => {
+          const basic =
+            Math.abs(p.x - fromElement.x) + Math.abs(p.y - fromElement.y);
+          // direction changed
+          let turn = false;
+          if (fromElement.parent) {
+            if (
+              (fromElement.x === fromElement.parent.x &&
+                fromElement.x !== p.x) ||
+              (fromElement.y === fromElement.parent.y && fromElement.y !== p.y)
+            ) {
+              turn = true;
+            }
+          }
+          return basic + (turn ? 10 : 0);
+        },
+        f: 0,
+        h: 0,
+        g: 0,
+      };
+      xs.add(p.x);
+      ys.add(p.y);
+      const key = `${p.x}:${p.y}`;
+      this.nodes[key] = node;
+      this.edges[key] = new Set();
     });
 
-    cols.add(this._start.x);
-    rows.add(this._start.y);
+    const gridX = [...xs.values()].sort((a, b) => a - b);
+    const gridY = [...ys.values()].sort((a, b) => a - b);
 
-    cols.add(this._end.x);
-    rows.add(this._end.y);
-
-    this._grid = {
-      rows: [...rows.values()].sort((a, b) => a - b),
-      cols: [...cols.values()].sort((a, b) => a - b),
-    };
-  }
-
-  private _getOrCreateElement(x: number, y: number): GraphElement | null {
-    if (
-      x < 0 ||
-      y < 0 ||
-      x >= this._grid.cols.length ||
-      y >= this._grid.rows.length
-    ) {
-      return null;
-    }
-    const key = `${x}:${y}` as const;
-    const ele = this._elements[key];
-    if (ele) {
-      return ele;
-    }
-    const createdX = x;
-    const createdY = y;
-    const created = {
-      x,
-      y,
-      parent: null,
-      f: 0,
-      h: 0,
-      g: 0,
-      cost: (fromElement: GraphElement) => {
-        const foundIntersection = this._blocks.find(block => {
-          const { x, y, w, h } = block;
-          const currentX = this._grid.cols[createdX];
-          const currentY = this._grid.rows[createdY];
-          const fromX = this._grid.cols[fromElement.x];
-          const fromY = this._grid.rows[fromElement.y];
-
-          // current point in blocks
-          if (
-            currentX > x &&
-            currentX < x + w &&
-            currentY > y &&
-            currentY < y + h
-          ) {
-            return true;
-          }
-
-          // from point in blocks
-          if (fromX > x && fromX < x + w && fromY > y && fromY < y + h) {
-            return true;
-          }
-
-          // line through
-          if (fromX === currentX && fromX > x && fromX < x + w) {
-            if (
-              (fromY === y && currentY === y + h) ||
-              (fromY === y + h && currentY === y)
-            ) {
-              return true;
-            }
-          }
-          if (fromY === currentY && fromY > y && fromY < y + h) {
-            if (
-              (fromX === x && currentX === x + w) ||
-              (fromX === x + w && currentX === x)
-            ) {
-              return true;
-            }
-          }
-          return false;
-        });
-
-        // direction changed
-        let turn = 0;
-        if (fromElement.parent) {
-          if (
-            (fromElement.x === fromElement.parent.x &&
-              fromElement.x !== createdX) ||
-            (fromElement.y === fromElement.parent.y &&
-              fromElement.y !== createdY)
-          ) {
-            turn = 1;
+    for (let i = 0; i < gridX.length; i++) {
+      for (let j = 0; j < gridY.length; j++) {
+        const key = `${gridX[i]}:${gridY[j]}`;
+        if (!this.nodes[key]) {
+          continue;
+        }
+        if (j > 0) {
+          const k = `${gridX[i]}:${gridY[j - 1]}`;
+          if (this.nodes[k]) {
+            this.edges[key].add(k);
+            this.edges[k].add(key);
+            this.connections.push([this.nodes[key], this.nodes[k]]);
           }
         }
-
-        return 1 + turn + (foundIntersection ? 10 : 0);
-      },
-    };
-    this._elements[key] = created;
-    this._debugStack.push(created);
-    return created;
+        if (i > 0) {
+          const k = `${gridX[i - 1]}:${gridY[j]}`;
+          if (this.nodes[k]) {
+            this.edges[key].add(k);
+            this.edges[k].add(key);
+            this.connections.push([this.nodes[key], this.nodes[k]]);
+          }
+        }
+      }
+    }
   }
 
-  get grid() {
-    return this._grid;
-  }
-
-  get debugStack() {
-    return this._debugStack;
-  }
-
-  getElement(x: number, y: number) {
-    const { cols, rows } = this._grid;
-    const xPos = cols.indexOf(x);
-    const yPos = rows.indexOf(y);
-    return this._getOrCreateElement(xPos, yPos);
-  }
-
-  neighbors(element: GraphElement): GraphElement[] {
-    const { x, y } = element;
-    return [
-      // Left
-      this._getOrCreateElement(x - 1, y),
-      // Right
-      this._getOrCreateElement(x + 1, y),
-      // Down
-      this._getOrCreateElement(x, y + 1),
-      // Top
-      this._getOrCreateElement(x, y - 1),
-    ].filter(ele => !!ele) as GraphElement[];
+  neighbors(node: GraphNode) {
+    const key = `${node.x}:${node.y}`;
+    const n: GraphNode[] = [];
+    this.edges[key].forEach(k => {
+      n.push(this.nodes[k]);
+    });
+    return n;
   }
 }

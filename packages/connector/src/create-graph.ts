@@ -1,74 +1,6 @@
-interface Point {
-  x: number;
-  y: number;
-}
-
-export class Rectangle {
-  readonly id = Math.random().toString(16).slice(2);
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-
-  constructor(x: number, y: number, w: number, h: number) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-
-  get minX() {
-    return this.x;
-  }
-
-  get maxX() {
-    return this.x + this.w;
-  }
-
-  get minY() {
-    return this.y;
-  }
-
-  get maxY() {
-    return this.y + this.h;
-  }
-
-  inflate(horizontal: number, vertical: number) {
-    return new Rectangle(
-      this.x - horizontal,
-      this.y - vertical,
-      this.w + horizontal * 2,
-      this.h + vertical * 2
-    );
-  }
-
-  contains(x: number, y: number) {
-    return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
-  }
-
-  relativeDirection(x: number, y: number): 'left' | 'top' | 'right' | 'bottom' {
-    const c = {
-      left: Math.abs(x - this.x),
-      right: Math.abs(x - this.x - this.w),
-      top: Math.abs(y - this.y),
-      bottom: Math.abs(y - this.y - this.h),
-    };
-    let min: number;
-    let d = 'top';
-    Object.entries(c).forEach(([k, v]) => {
-      if (min === undefined) {
-        min = v;
-        d = k;
-      } else {
-        if (v < min) {
-          min = v;
-          d = k;
-        }
-      }
-    });
-    return d as 'left' | 'top' | 'right' | 'bottom';
-  }
-}
+import { Graph } from './graph.js';
+import type { Rectangle } from './rectangle.js';
+import type { Point } from './util.js';
 
 interface Rulers {
   columns: number[];
@@ -160,6 +92,7 @@ function createNodes(
     }
   }
 
+  // If the point lies within the rectangle, it should be forcibly included.
   const sortedGridX = [...gridX.values()].sort((a, b) => a - b);
   const sortedGridY = [...gridY.values()].sort((a, b) => a - b);
   points.forEach(p => {
@@ -222,103 +155,6 @@ function createNodes(
   return results;
 }
 
-interface GraphNode {
-  x: number;
-  y: number;
-  parent: GraphNode | null;
-  cost(fromElement: GraphNode): number;
-
-  f: number;
-  h: number;
-  g: number;
-  closed?: boolean;
-  visited?: boolean;
-}
-
-class Graph {
-  nodes: Record<string, GraphNode> = {};
-  edges: Record<string, Set<string>> = {};
-  connections: Array<GraphNode[]> = [];
-
-  constructor(points: Point[]) {
-    this._init(points);
-  }
-
-  private _init(points: Point[]) {
-    const xs = new Set<number>();
-    const ys = new Set<number>();
-
-    points.forEach(p => {
-      const node = {
-        x: p.x,
-        y: p.y,
-        parent: null,
-        cost: (fromElement: GraphNode) => {
-          const basic =
-            Math.abs(p.x - fromElement.x) + Math.abs(p.y - fromElement.y);
-          // direction changed
-          let turn = false;
-          if (fromElement.parent) {
-            if (
-              (fromElement.x === fromElement.parent.x &&
-                fromElement.x !== p.x) ||
-              (fromElement.y === fromElement.parent.y && fromElement.y !== p.y)
-            ) {
-              turn = true;
-            }
-          }
-          return basic + (turn ? 10 : 0);
-        },
-        f: 0,
-        h: 0,
-        g: 0,
-      };
-      xs.add(p.x);
-      ys.add(p.y);
-      const key = `${p.x}:${p.y}`;
-      this.nodes[key] = node;
-      this.edges[key] = new Set();
-    });
-
-    const gridX = [...xs.values()].sort((a, b) => a - b);
-    const gridY = [...ys.values()].sort((a, b) => a - b);
-
-    for (let i = 0; i < gridX.length; i++) {
-      for (let j = 0; j < gridY.length; j++) {
-        const key = `${gridX[i]}:${gridY[j]}`;
-        if (!this.nodes[key]) {
-          continue;
-        }
-        if (j > 0) {
-          const k = `${gridX[i]}:${gridY[j - 1]}`;
-          if (this.nodes[k]) {
-            this.edges[key].add(k);
-            this.edges[k].add(key);
-            this.connections.push([this.nodes[key], this.nodes[k]]);
-          }
-        }
-        if (i > 0) {
-          const k = `${gridX[i - 1]}:${gridY[j]}`;
-          if (this.nodes[k]) {
-            this.edges[key].add(k);
-            this.edges[k].add(key);
-            this.connections.push([this.nodes[key], this.nodes[k]]);
-          }
-        }
-      }
-    }
-  }
-
-  neighbors(node: GraphNode) {
-    const key = `${node.x}:${node.y}`;
-    const n: GraphNode[] = [];
-    this.edges[key].forEach(k => {
-      n.push(this.nodes[k]);
-    });
-    return n;
-  }
-}
-
 export interface CreateGraphReturned {
   rectangles: Rectangle[];
   points: Point[];
@@ -347,25 +183,4 @@ export function createGraph(
     nodes,
     graph,
   };
-}
-
-export function simplifyPath(points: Point[]) {
-  if (points.length <= 2) {
-    return points;
-  }
-  const path = [points[0]];
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const cur = points[i];
-    const next = points[i + 1];
-    if (
-      (prev.x === cur.x && cur.x === next?.x) ||
-      (prev.y === cur.y && cur.y === next?.y)
-    ) {
-      // nothing
-    } else {
-      path.push(cur);
-    }
-  }
-  return path;
 }
