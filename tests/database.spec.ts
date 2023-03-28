@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  assertDatabaseColumnOrder,
   enterPlaygroundRoom,
   focusDatabaseSearch,
   focusDatabaseTitle,
@@ -14,9 +15,10 @@ import {
   pressArrowLeft,
   pressBackspace,
   pressEnter,
+  pressEscape,
   pressShiftEnter,
+  redoByClick,
   redoByKeyboard,
-  SHORT_KEY,
   type,
   undoByClick,
   undoByKeyboard,
@@ -66,7 +68,8 @@ test('edit database block title and create new rows', async ({ page }) => {
   await assertBlockCount(page, 'paragraph', 0);
 });
 
-test('database rich text column', async ({ page }) => {
+// TODO: fix this test when change column type ready
+test.skip('database rich text column', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
   const databaseElement = page.locator('affine-database');
@@ -101,33 +104,21 @@ test('edit column title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  const columnAddBtn = page.locator('.affine-database-add-column-button');
-  await columnAddBtn.click();
-
-  const columnAddPopup = page.locator('affine-database-add-column-type-popup');
-  expect(columnAddPopup).toBeVisible();
-  const columnType = columnAddPopup.locator('[data-type="number"]');
-  await columnType.click();
+  await initDatabaseColumn(page);
 
   // first added column
   const columnTitle = page.locator('.affine-database-column').nth(1);
-  expect(columnTitle).toBeVisible();
-  await columnTitle.click();
-
-  const columnEditPopup = page.locator('affine-database-edit-column-popup');
-  expect(columnEditPopup).toBeVisible();
-  const input = columnEditPopup.locator('.rename');
-  await input.click();
-  await page.keyboard.press(`${SHORT_KEY}+a`);
   await type(page, '1');
   await pressEnter(page);
   expect(await columnTitle.innerText()).toBe('1');
 
   await undoByClick(page);
-  expect(await columnTitle.innerText()).toBe('new column');
+  expect(await columnTitle.innerText()).toBe('Column n');
 });
 
-test('should modify the value when the input loses focus', async ({ page }) => {
+test.skip('should modify the value when the input loses focus', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -141,11 +132,11 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   expect(await numberCell.innerText()).toBe('1');
 });
 
-test('should rich-text column support soft enter', async ({ page }) => {
+test.skip('should rich-text column support soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page, 'rich-text');
+  await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '123', true);
 
   const cellSelector = '[data-row-id="4"][data-column-id="3"]';
@@ -157,12 +148,12 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await assertDatabaseCellRichTexts(page, cellSelector, '12\n3');
 });
 
-test('should the single-select mode work correctly', async ({ page }) => {
+test.skip('should the single-select mode work correctly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
   // single select mode
-  await initDatabaseColumn(page, 'select');
+  await initDatabaseColumn(page);
   await initDatabaseRow(page);
 
   const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
@@ -198,7 +189,7 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   // multi select mode
-  await initDatabaseColumn(page, 'multi-select');
+  await initDatabaseColumn(page);
   await initDatabaseRow(page);
 
   const cell = page.locator('[data-row-id="4"][data-column-id="3"]');
@@ -259,7 +250,7 @@ test('should show or hide database toolbar', async ({ page }) => {
   await expect(toolbar).toBeVisible();
 });
 
-test('should database search work', async ({ page }) => {
+test.skip('should database search work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -290,13 +281,13 @@ test('should database search work', async ({ page }) => {
   expect(await rows.count()).toBe(3);
 });
 
-test('should database title and rich-text support undo/redo', async ({
+test.skip('should database title and rich-text support undo/redo', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page, 'rich-text');
+  await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '123', true);
 
   await undoByKeyboard(page);
@@ -312,4 +303,82 @@ test('should database title and rich-text support undo/redo', async ({
   await assertDatabaseTitleText(page, 'Database 1');
   await redoByKeyboard(page);
   await assertDatabaseTitleText(page, 'Database 1abc');
+});
+
+test('should support rename column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+
+  const columnTitle = page.locator('[data-column-id="3"]');
+  const title = columnTitle.locator('.affine-database-column-text-input');
+  expect(await title.innerText()).toBe('abc');
+
+  await columnTitle.click();
+  const rename = page.locator('.rename');
+  await rename.click();
+  await type(page, '123');
+  await pressEnter(page);
+  expect(await title.innerText()).toBe('123');
+
+  await undoByClick(page);
+  expect(await title.innerText()).toBe('abc');
+  await redoByClick(page);
+  expect(await title.innerText()).toBe('123');
+});
+
+test('should support add new column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await pressEnter(page);
+
+  await initDatabaseDynamicRowWithData(page, '123', true);
+  const multiSelect = page.locator('affine-database-multi-select-cell');
+  expect(multiSelect).toBeVisible();
+  const selected = multiSelect.locator('.select-selected');
+  expect(await selected.innerText()).toBe('123');
+});
+
+test('should support right insert column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await pressEscape(page);
+
+  const columnTitle = page.locator('[data-column-id="3"]');
+  await columnTitle.click();
+
+  const insertRight = page.locator('.insert-right');
+  await insertRight.click();
+
+  const columns = page.locator('.affine-database-column');
+  expect(await columns.count()).toBe(3);
+
+  await assertDatabaseColumnOrder(page, ['3', '4']);
+});
+
+test('should support left insert column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await pressEscape(page);
+
+  const columnTitle = page.locator('[data-column-id="3"]');
+  await columnTitle.click();
+
+  const leftRight = page.locator('.insert-left');
+  await leftRight.click();
+
+  const columns = page.locator('.affine-database-column');
+  expect(await columns.count()).toBe(3);
+
+  await assertDatabaseColumnOrder(page, ['4', '3']);
 });

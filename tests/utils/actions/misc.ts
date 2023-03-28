@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
@@ -258,6 +259,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       'affine:database',
       {
         title: new page.Text('Database 1'),
+        titleColumn: 'Title',
       },
       frameId
     );
@@ -267,14 +269,9 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
-export async function initDatabaseColumn(page: Page, columnType = 'number') {
+export async function initDatabaseColumn(page: Page) {
   const columnAddBtn = page.locator('.affine-database-add-column-button');
   await columnAddBtn.click();
-
-  const columnAddPopup = page.locator('affine-database-add-column-type-popup');
-  expect(columnAddPopup).toBeVisible();
-  const columnTypeItem = columnAddPopup.locator(`[data-type="${columnType}"]`);
-  await columnTypeItem.click();
 }
 
 export async function initDatabaseRow(page: Page) {
@@ -307,6 +304,7 @@ export async function initDatabaseDynamicRowWithData(
   await cell.click();
   await cell.click();
   await type(page, data);
+  await pressEnter(page);
 }
 
 export async function getDatabaseMouse(page: Page) {
@@ -330,6 +328,14 @@ export async function focusDatabaseSearch(page: Page) {
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();
+}
+
+export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
+  const columns = await page.evaluate(async () => {
+    const database = window.page?.getBlockById('2') as DatabaseBlockModel;
+    return database.columns;
+  });
+  expect(columns).toEqual(order);
 }
 
 export async function initEmptyCodeBlockState(page: Page) {
