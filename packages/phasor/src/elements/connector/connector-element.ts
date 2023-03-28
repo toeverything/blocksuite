@@ -4,6 +4,10 @@ import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import type { SerializedConnectorProps } from './types.js';
 
+/* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
+const kRect = 1 - 0.5522847498;
+const RADIUS = 10;
+
 function drawArrow(
   path: Path2D,
   [startX, startY]: number[],
@@ -44,9 +48,121 @@ export class ConnectorElement extends BaseElement {
 
     const path = new Path2D();
     path.moveTo(this.controllers[0], this.controllers[1]);
-    for (let i = 2; i < this.controllers.length; i = i + 2) {
-      path.lineTo(this.controllers[i], this.controllers[i + 1]);
+    let lastX = this.controllers[0];
+    let lastY = this.controllers[1];
+    for (let i = 2; i < this.controllers.length - 2; i = i + 2) {
+      const currentX = this.controllers[i];
+      const currentY = this.controllers[i + 1];
+      const nextX = this.controllers[i + 2];
+      const nextY = this.controllers[i + 3];
+
+      const minX = Math.min(lastX, nextX);
+      const minY = Math.min(lastY, nextY);
+      const maxX = Math.max(lastX, nextX);
+      const maxY = Math.max(lastY, nextY);
+      const radius = Math.min(RADIUS, (maxX - minX) / 2, (maxY - minY) / 2);
+
+      // current is right-bottom conner
+      if (currentX === maxX && currentY === maxY) {
+        if (lastX === currentX) {
+          path.lineTo(currentX, currentY - radius);
+          path.bezierCurveTo(
+            currentX,
+            currentY - kRect * radius,
+            currentX - kRect * radius,
+            currentY,
+            currentX - radius,
+            currentY
+          );
+        } else {
+          path.lineTo(currentX - radius, currentY);
+          path.bezierCurveTo(
+            currentX - kRect * radius,
+            currentY,
+            currentX,
+            currentY - kRect * radius,
+            currentX,
+            currentY - radius
+          );
+        }
+      }
+      // current is left-bottom conner
+      else if (currentX === minX && currentY === maxY) {
+        if (lastX === currentX) {
+          path.lineTo(currentX, currentY - radius);
+          path.bezierCurveTo(
+            currentX,
+            currentY - kRect * radius,
+            currentX + kRect * radius,
+            currentY,
+            currentX + radius,
+            currentY
+          );
+        } else {
+          path.lineTo(currentX + radius, currentY);
+          path.bezierCurveTo(
+            currentX + kRect * radius,
+            currentY,
+            currentX,
+            currentY - kRect * radius,
+            currentX,
+            currentY - radius
+          );
+        }
+      }
+      // current is left-top conner
+      else if (currentX === minX && currentY === minY) {
+        if (lastX === currentX) {
+          path.lineTo(currentX, currentY + radius);
+          path.bezierCurveTo(
+            currentX,
+            currentY + kRect * radius,
+            currentX + kRect * radius,
+            currentY,
+            currentX + radius,
+            currentY
+          );
+        } else {
+          path.lineTo(currentX + radius, currentY);
+          path.bezierCurveTo(
+            currentX + kRect * radius,
+            currentY,
+            currentX,
+            currentY + kRect * radius,
+            currentX,
+            currentY + radius
+          );
+        }
+      }
+      // current is right-top conner
+      else if (currentX === maxX && currentY === minY) {
+        if (lastX === currentX) {
+          path.lineTo(currentX, currentY + radius);
+          path.bezierCurveTo(
+            currentX,
+            currentY + kRect * radius,
+            currentX - kRect * radius,
+            currentY,
+            currentX - radius,
+            currentY
+          );
+        } else {
+          path.lineTo(currentX - radius, currentY);
+          path.bezierCurveTo(
+            currentX - kRect * radius,
+            currentY,
+            currentX,
+            currentY + kRect * radius,
+            currentX,
+            currentY + radius
+          );
+        }
+      }
+
+      lastX = currentX;
+      lastY = currentY;
     }
+    path.lineTo(...(this.controllers.slice(-2) as [number, number]));
 
     drawArrow(path, this.controllers.slice(-4, -2), this.controllers.slice(-2));
 
