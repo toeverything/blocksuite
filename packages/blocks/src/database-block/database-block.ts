@@ -13,6 +13,7 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import { ColumnInsertPosition } from '@blocksuite/global/database';
 import {
   assertEquals,
   assertExists,
@@ -24,14 +25,12 @@ import { css, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { html, unsafeStatic } from 'lit/static-html.js';
+import { html } from 'lit/static-html.js';
 
 import { type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
-import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
-import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
@@ -182,14 +181,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     .affine-database-column:hover .affine-database-column-drag {
       visibility: visible;
     }
-    .affine-database-add-column-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-    }
   `;
 
   @property()
@@ -199,7 +190,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   columns!: ColumnSchema[];
 
   @property()
-  addColumnTypePopup!: DatabaseAddColumnTypePopup;
+  addColumn!: (index: number) => string;
 
   @state()
   private _editingColumnId = '';
@@ -207,7 +198,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   @query('.affine-database-column-input')
   private _titleColumnInput!: HTMLInputElement;
 
-  private _setEditingColumnId = (id: string) => {
+  setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
   };
 
@@ -219,11 +210,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     ) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
-      this._titleColumnInput.setSelectionRange(length, length);
+      this._titleColumnInput.setSelectionRange(0, length);
       onClickOutside(
         this._titleColumnInput,
         () => {
-          this._setEditingColumnId('');
+          this.setEditingColumnId('');
         },
         'mousedown'
       );
@@ -232,7 +223,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   private _onShowEditColumnPopup = (
     target: Element,
-    column: ColumnSchema | string
+    column: ColumnSchema | string,
+    index: number
   ) => {
     if (this._editingColumnId) return;
 
@@ -243,17 +235,20 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     assertExists(reference);
 
     const editColumn = new EditColumnPopup();
-    editColumn.setTitleColumnEditId = this._setEditingColumnId;
+    editColumn.setTitleColumnEditId = this.setEditingColumnId;
     editColumn.targetModel = this.targetModel;
     editColumn.targetColumnSchema = column;
+    editColumn.insertColumn = position => {
+      const insertIdex =
+        position === ColumnInsertPosition.Right ? index : index - 1;
+      this.addColumn(insertIdex);
+    };
     editColumn.closePopup = () => {
       editColumn.remove();
     };
     document.body.appendChild(editColumn);
     requestAnimationFrame(() => {
-      createPopper(reference, editColumn, {
-        placement: 'bottom-start',
-      });
+      createPopper(reference, editColumn, { placement: 'bottom-start' });
       onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
     });
   };
@@ -274,11 +269,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         assertExists(column);
         this._onUpdateNormalColumn(name, column);
       }
-      this._setEditingColumnId('');
+      this.setEditingColumnId('');
       return;
     }
     if (event.key === 'Escape') {
-      this._setEditingColumnId('');
+      this.setEditingColumnId('');
       return;
     }
   };
@@ -312,7 +307,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
           @click=${(event: MouseEvent) =>
             this._onShowEditColumnPopup(
               event.target as Element,
-              this.targetModel.titleColumn
+              this.targetModel.titleColumn,
+              0
             )}
         >
           <div class="affine-database-column-text">
@@ -334,7 +330,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         ${repeat(
           this.columns,
           column => column.id,
-          column => {
+          (column, index) => {
             return html`
               <div
                 class="affine-database-column  ${this._editingColumnId ===
@@ -347,7 +343,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
                   maxWidth: `${column.internalProperty.width}px`,
                 })}
                 @click=${(event: MouseEvent) =>
-                  this._onShowEditColumnPopup(event.target as Element, column)}
+                  this._onShowEditColumnPopup(
+                    event.target as Element,
+                    column,
+                    index + 1
+                  )}
               >
                 <div class="affine-database-column-text ${column.type}">
                   ${columnTypeIconMap[column.type]}
@@ -368,26 +368,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
             `;
           }
         )}
-        <div
-          class="affine-database-add-column-button"
-          data-test-id="affine-database-add-column-button"
-          @click=${() => {
-            this.addColumnTypePopup.show = true;
-          }}
-        >
-          <svg
-            viewBox="0 0 16 16"
-            style=${styleMap({
-              width: '12px',
-              height: '100%',
-              fill: 'var(--affine-text-color)',
-            })}
-          >
-            <path
-              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
-            ></path>
-          </svg>
-        </div>
       </div>
     `;
   }
@@ -674,6 +654,18 @@ export class DatabaseBlockComponent
       width: 16px;
       height: 16px;
     }
+
+    .affine-database-add-column-button {
+      position: absolute;
+      top: 58px;
+      right: -40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
   `;
 
   @property()
@@ -682,14 +674,14 @@ export class DatabaseBlockComponent
   @property()
   host!: BlockHost;
 
-  @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
-  addColumnTypePopup!: DatabaseAddColumnTypePopup;
-
   @query('.affine-database-block-title')
   private _container!: HTMLDivElement;
 
   @query('.affine-database-search-input')
   private _searchInput!: HTMLInputElement;
+
+  @query('affine-database-column-header')
+  private _columnHeaderComponent!: DatabaseColumnHeader;
 
   @state()
   private _searchState: SearchState = SearchState.SearchIcon;
@@ -847,12 +839,14 @@ export class DatabaseBlockComponent
     this.model.page.addBlock('affine:paragraph', {}, this.model.id);
   };
 
-  private _addColumn = (columnType: ColumnSchema['type']) => {
+  private _addColumn = (index: number) => {
     this.model.page.captureSync();
-    const renderer = getColumnSchemaRenderer(columnType);
+    const defaultColumnType = 'multi-select';
+    const renderer = getColumnSchemaRenderer(defaultColumnType);
     const schema: Omit<ColumnSchema, 'id'> = {
-      type: columnType,
-      name: 'new column',
+      type: defaultColumnType,
+      // TODO: change to dynamic number
+      name: 'Column n',
       internalProperty: {
         width: 200,
         hide: false,
@@ -861,8 +855,14 @@ export class DatabaseBlockComponent
       property: renderer.propertyCreator(),
     };
     const id = this.model.page.setColumnSchema(schema);
+    const newColumns = [...this.model.columns];
+    newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
-      columns: [...this.model.columns, id],
+      columns: newColumns,
+    });
+
+    requestAnimationFrame(() => {
+      this._columnHeaderComponent.setEditingColumnId(id);
     });
   };
 
@@ -935,10 +935,12 @@ export class DatabaseBlockComponent
     return html`
       <div class="affine-database-block-container">
         <div class="affine-database-block-title-container">
-          <div class="affine-database-block-title ${
-            isEmpty ? 'affine-database-block-title-empty' : ''
-          }" data-block-is-database-title="true">
-          </div>
+          <div
+            class="affine-database-block-title ${isEmpty
+              ? 'affine-database-block-title-empty'
+              : ''}"
+            data-block-is-database-title="true"
+          ></div>
           ${this._renderToolbar()}
         </div>
         <div class="affine-database-block-table">
@@ -950,7 +952,7 @@ export class DatabaseBlockComponent
             <affine-database-column-header
               .columns=${this.columns}
               .targetModel=${this.model}
-              .addColumnTypePopup=${this.addColumnTypePopup}
+              .addColumn=${this._addColumn}
             ></affine-database-column-header>
             ${DataBaseRowContainer(
               this,
@@ -958,18 +960,36 @@ export class DatabaseBlockComponent
               this._searchState
             )}
             <div class="affine-database-block-footer">
-              <div class="affine-database-block-add-row"
+              <div
+                class="affine-database-block-add-row"
                 data-test-id="affine-database-add-row-button"
                 role="button"
-                @click=${this._addRow}>
+                @click=${this._addRow}
+              >
                 ${PlusIcon}<span>New Record</span>
               </div>
             </div>
           </div>
         </div>
-        <${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}
-          .onSelectType=${this._addColumn}
-        ></${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}>
+
+        <div
+          class="affine-database-add-column-button"
+          data-test-id="affine-database-add-column-button"
+          @click=${() => this._addColumn(this.columns.length)}
+        >
+          <svg
+            viewBox="0 0 16 16"
+            style=${styleMap({
+              width: '12px',
+              height: '100%',
+              fill: 'var(--affine-text-color)',
+            })}
+          >
+            <path
+              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+            ></path>
+          </svg>
+        </div>
       </div>
     `;
   }
