@@ -263,7 +263,8 @@ export function generatePath(
   endRect: Rectangle | null,
   startPoint: ConnectorPoint,
   endPoint: ConnectorPoint,
-  originControllers: Controller[]
+  originControllers: Controller[],
+  fixed?: 'start' | 'end'
 ) {
   let customizedStart = Infinity;
   let customizedEnd = -1;
@@ -283,11 +284,25 @@ export function generatePath(
     const part2StartPoint = originControllers[customizedEnd];
     const part2 = route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
 
-    const finalPath = simplifyPath([
-      ...part0.slice(0, -1),
-      ...part1,
-      ...part2.slice(1),
-    ]);
+    let finalPath: Controller[];
+    if (fixed === 'start') {
+      finalPath = simplifyPath([
+        ...originControllers.slice(0, customizedEnd + 1),
+        ...part2.slice(1),
+      ]);
+    } else if (fixed === 'end') {
+      finalPath = simplifyPath([
+        ...part0.slice(0, -1),
+        ...originControllers.slice(customizedStart),
+      ]);
+    } else {
+      finalPath = simplifyPath([
+        ...part0.slice(0, -1),
+        ...part1,
+        ...part2.slice(1),
+      ]);
+    }
+
     return finalPath;
   }
 

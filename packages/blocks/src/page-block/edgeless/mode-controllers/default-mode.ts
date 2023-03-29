@@ -16,7 +16,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { Rectangle } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PhasorElement, XYWH } from '@blocksuite/phasor';
+import type { ConnectorElement, PhasorElement, XYWH } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
@@ -48,6 +48,32 @@ enum DragType {
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
+}
+
+function isConnectorAndBindingsAllSelected(
+  connector: ConnectorElement,
+  selected: Selectable[]
+) {
+  const connectorSelected = selected.find(s => s.id === connector.id);
+  if (!connectorSelected) {
+    return false;
+  }
+  const { startElement, endElement } = connector;
+  const startSelected = selected.find(s => s.id === startElement?.id);
+  const endSelected = selected.find(s => s.id === endElement?.id);
+  if (!startElement && !endElement) {
+    return true;
+  }
+  if (!startElement && endSelected) {
+    return true;
+  }
+  if (!endElement && startSelected) {
+    return true;
+  }
+  if (startSelected && endSelected) {
+    return true;
+  }
+  return false;
 }
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
@@ -139,7 +165,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     if (
       selected.type !== 'connector' ||
-      (!selected.startElement && !selected.endElement)
+      (selected.type === 'connector' &&
+        isConnectorAndBindingsAllSelected(
+          selected,
+          this._blockSelectionState.selected
+        ))
     ) {
       surface.setElementBound(selected.id, {
         x: boundX,
@@ -153,6 +183,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       const bindingElements = surface.getBindingElements(selected.id);
       bindingElements.forEach(bindingElement => {
         if (bindingElement.type === 'connector') {
+          if (
+            isConnectorAndBindingsAllSelected(
+              bindingElement,
+              this._blockSelectionState.selected
+            )
+          ) {
+            return;
+          }
           const { startElement, endElement, id, x, y, controllers } =
             bindingElement;
           const originStart = startElement?.id
@@ -187,7 +225,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             originEndRect,
             originStartPoint,
             originEndPoint,
-            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y }))
+            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+            startElement?.id === selected.id
+              ? 'end'
+              : endElement?.id === selected.id
+              ? 'start'
+              : undefined
           );
           const bound = getBrushBoundFromPoints(
             routes.map(r => [r.x, r.y]),

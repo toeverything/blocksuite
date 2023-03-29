@@ -1,4 +1,4 @@
-import { Rectangle } from '@blocksuite/connector';
+import { Rectangle, simplifyPath } from '@blocksuite/connector';
 import type {
   ConnectorElement,
   Controller,
@@ -86,14 +86,16 @@ function capMousedown(
             originEndRect,
             newPoint,
             originEndPoint,
-            originControllers
+            originControllers,
+            'end'
           )
         : generatePath(
             originStartRect,
             newRect,
             originStartPoint,
             newPoint,
-            originControllers
+            originControllers,
+            'start'
           );
     const bound = getBrushBoundFromPoints(
       routes.map(r => [r.x, r.y]),
@@ -222,11 +224,13 @@ function centerControllerMousedown(
       0
     );
 
-    const newControllers = absoluteControllers.map(c => ({
-      ...c,
-      x: c.x - bound.x,
-      y: c.y - bound.y,
-    }));
+    const newControllers = simplifyPath(
+      absoluteControllers.map(c => ({
+        ...c,
+        x: c.x - bound.x,
+        y: c.y - bound.y,
+      }))
+    );
     surface.updateConnectorElement(element.id, bound, newControllers);
 
     requestUpdate();
