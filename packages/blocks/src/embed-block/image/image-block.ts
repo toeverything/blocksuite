@@ -17,7 +17,7 @@ import type { EmbedBlockModel } from '../index.js';
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
   static styles = css`
-    affine-embed {
+    .affine-embed {
       display: block;
     }
     .affine-image-wrapper {
@@ -250,7 +250,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <affine-embed .model=${this.model}>
+      <affine-embed class="affine-embed" .model=${this.model}>
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
             ${img}
