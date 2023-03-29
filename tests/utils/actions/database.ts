@@ -31,7 +31,7 @@ export async function switchColumnType(
 
   if (isDefault) {
     const typeMenu = page.locator('.action.multi-select');
-    await expect(typeMenu).toHaveClass(['action multi-select selected']);
+    await expect(typeMenu).toHaveClass([' action multi-select selected ']);
   }
 
   const typeMenu = page.locator(
