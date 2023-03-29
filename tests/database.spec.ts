@@ -404,6 +404,13 @@ test('should support move column right', async ({ page }) => {
 
   await doColumnAction(page, '3', 'move-right');
   await assertDatabaseColumnOrder(page, ['5', '3']);
+
+  await undoByClick(page);
+  const titleRow = page.locator('.affine-database-column-header');
+  const columnTitle = titleRow.locator('[data-column-id="5"]');
+  await columnTitle.click();
+  const moveLeft = page.locator('.move-right');
+  expect(await moveLeft.count()).toBe(0);
 });
 
 test('should support move column left', async ({ page }) => {
