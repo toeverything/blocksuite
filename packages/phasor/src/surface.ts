@@ -29,6 +29,7 @@ export class SurfaceManager {
   private _renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, PhasorElement>();
+  private _bindings = new Map<string, Set<string>>();
   private _lastIndex = 'a0';
 
   constructor(yContainer: Y.Map<unknown>) {
@@ -133,6 +134,14 @@ export class SurfaceManager {
         yElement.set(key, value);
       }
     });
+    if (properties.startElement) {
+      this._addBinding(properties.startElement.id, id);
+      this._addBinding(id, properties.startElement.id);
+    }
+    if (properties.endElement) {
+      this._addBinding(properties.endElement.id, id);
+      this._addBinding(id, properties.endElement.id);
+    }
   }
 
   updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
@@ -270,6 +279,23 @@ export class SurfaceManager {
     });
   }
 
+  getBindingElements(id: string) {
+    const bindingIds = this._bindings.get(id);
+    if (!bindingIds?.size) {
+      return [];
+    }
+    return [...bindingIds.values()]
+      .map(bindingId => this.pickById(bindingId))
+      .filter(e => !!e) as PhasorElement[];
+  }
+
+  private _addBinding(id0: string, id1: string) {
+    if (!this._bindings.has(id0)) {
+      this._bindings.set(id0, new Set());
+    }
+    this._bindings.get(id0)?.add(id1);
+  }
+
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
@@ -283,6 +309,17 @@ export class SurfaceManager {
 
     if (element.index > this._lastIndex) {
       this._lastIndex = element.index;
+    }
+
+    if (element.type === 'connector') {
+      if (element.startElement) {
+        this._addBinding(element.startElement.id, element.id);
+        this._addBinding(element.id, element.startElement.id);
+      }
+      if (element.endElement) {
+        this._addBinding(element.endElement.id, element.id);
+        this._addBinding(element.id, element.endElement.id);
+      }
     }
   }
 

@@ -90,14 +90,14 @@ function mousedown(
 
     if (position === 'start') {
       surface.updateConnectorElement(element.id, bound, controllers, {
-        startElement: newRect
-          ? { id: newRect.id, direction: startDirection }
+        startElement: picked
+          ? { id: picked.id, direction: startDirection }
           : undefined,
       });
     } else {
       surface.updateConnectorElement(element.id, bound, controllers, {
-        endElement: newRect
-          ? { id: newRect.id, direction: startDirection }
+        endElement: picked
+          ? { id: picked.id, direction: startDirection }
           : undefined,
       });
     }

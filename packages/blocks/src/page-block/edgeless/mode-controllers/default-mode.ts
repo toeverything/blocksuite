@@ -14,8 +14,10 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
+import { Rectangle, route } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
+import type { PhasorElement, XYWH } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints, SurfaceElement } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
@@ -33,6 +35,7 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils.js';
+import { getPointByDirection } from './connector-mode.js';
 import { MouseModeController } from './index.js';
 
 enum DragType {
@@ -119,24 +122,83 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
   }
 
-  private _handleSurfaceDragMove(selected: SurfaceElement, e: SelectionEvent) {
+  private _handleSurfaceDragMove(selected: PhasorElement, e: SelectionEvent) {
     if (!this._lock) {
       this._lock = true;
       this._page.captureSync();
     }
-    const { zoom } = this._edgeless.surface.viewport;
+    const { surface } = this._edgeless;
+    const { zoom } = surface.viewport;
     const deltaX = this._dragLastPos.x - e.x;
     const deltaY = this._dragLastPos.y - e.y;
     const boundX = selected.x - deltaX / zoom;
     const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
     const boundH = selected.h;
-    this._edgeless.surface.setElementBound(selected.id, {
-      x: boundX,
-      y: boundY,
-      w: boundW,
-      h: boundH,
-    });
+
+    if (
+      selected.type !== 'connector' ||
+      (!selected.startElement && !selected.endElement)
+    ) {
+      surface.setElementBound(selected.id, {
+        x: boundX,
+        y: boundY,
+        w: boundW,
+        h: boundH,
+      });
+    }
+
+    if (selected.type !== 'connector') {
+      const bindingElements = surface.getBindingElements(selected.id);
+      bindingElements.forEach(bindingElement => {
+        if (bindingElement.type === 'connector') {
+          const { startElement, endElement, id, x, y, w, h, controllers } =
+            bindingElement;
+          const originStart = startElement?.id
+            ? surface.pickById(startElement.id)
+            : null;
+          const originStartRect = originStart
+            ? new Rectangle(...deserializeXYWH(getXYWH(originStart)))
+            : null;
+          const originStartPoint =
+            originStartRect && startElement
+              ? getPointByDirection(originStartRect, startElement.direction)
+              : {
+                  x: x + controllers[0],
+                  y: y + controllers[1],
+                };
+
+          const originEnd = endElement?.id
+            ? surface.pickById(endElement.id)
+            : null;
+          const originEndRect = originEnd
+            ? new Rectangle(...deserializeXYWH(getXYWH(originEnd)))
+            : null;
+          const originEndPoint =
+            originEndRect && endElement
+              ? getPointByDirection(originEndRect, endElement.direction)
+              : {
+                  x: x + controllers[controllers.length - 2],
+                  y: y + controllers[controllers.length - 1],
+                };
+          const routes = route(
+            [originStartRect, originEndRect].filter(r => !!r) as Rectangle[],
+            [originStartPoint, originEndPoint]
+          );
+          const bound = getBrushBoundFromPoints(
+            routes.map(r => [r.x, r.y]),
+            0
+          );
+          const newControllers = routes
+            .map(r => [r.x, r.y])
+            .flat()
+            .map((v, index) => {
+              return index % 2 ? v - bound.y : v - bound.x;
+            });
+          surface.updateConnectorElement(id, bound, newControllers);
+        }
+      });
+    }
   }
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {

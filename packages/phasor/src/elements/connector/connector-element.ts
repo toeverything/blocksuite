@@ -1,6 +1,7 @@
+import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
-import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
+import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import type { AttachedElement, SerializedConnectorProps } from './types.js';
 
@@ -230,5 +231,25 @@ export class ConnectorElement extends BaseElement {
     ]);
 
     return props;
+  }
+
+  static getBoundProps(
+    element: BaseElement,
+    bound: IBound
+  ): Record<string, string> {
+    const elementH = Math.max(element.h, 1);
+    const elementW = Math.max(element.w, 1);
+    const boundH = Math.max(bound.h, 1);
+    const boundW = Math.max(bound.w, 1);
+    const controllers = (element as ConnectorElement).controllers.map(
+      (v, index) => {
+        return index % 2 ? boundH * (v / elementH) : boundW * (v / elementW);
+      }
+    );
+
+    return {
+      xywh: serializeXYWH(bound.x, bound.y, boundW, boundH),
+      controllers: JSON.stringify(controllers),
+    };
   }
 }
