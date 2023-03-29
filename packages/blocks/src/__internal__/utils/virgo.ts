@@ -1,7 +1,7 @@
 import type { Page } from '@blocksuite/store';
 import type { VEditor } from '@blocksuite/virgo';
 
-import { getEditorContainer } from './query.js';
+import { isPageMode } from './query.js';
 
 // When the user selects a range, check if it matches the previous selection.
 // If it does, apply the marks from the previous selection.
@@ -24,7 +24,5 @@ export function clearMarksOnDiscontinuousInput(vEditor: VEditor): void {
 }
 
 export function setupVirgoScroll(page: Page, vEditor: VEditor): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const editorContainer = getEditorContainer(page) as any;
-  vEditor.shouldScrollIntoView = editorContainer.mode === 'page';
+  vEditor.shouldScrollIntoView = isPageMode(page);
 }

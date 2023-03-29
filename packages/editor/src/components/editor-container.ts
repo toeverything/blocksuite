@@ -13,6 +13,7 @@ import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
@@ -152,24 +153,30 @@ export class EditorContainer extends NonShadowLitElement {
   render() {
     if (!this.model || !this.pageBlockModel) return null;
 
-    const pageContainer = html`
-      <affine-default-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.pageBlockModel}
-      ></affine-default-page>
-    `;
+    const pageContainer = keyed(
+      'page-' + this.pageBlockModel.id,
+      html`
+        <affine-default-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+        ></affine-default-page>
+      `
+    );
 
-    const edgelessContainer = html`
-      <affine-edgeless-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.pageBlockModel}
-        .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
-        .mouseMode=${this.mouseMode}
-        .showGrid=${this.showGrid}
-      ></affine-edgeless-page>
-    `;
+    const edgelessContainer = keyed(
+      'edgeless-' + this.pageBlockModel.id,
+      html`
+        <affine-edgeless-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+          .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
+          .mouseMode=${this.mouseMode}
+          .showGrid=${this.showGrid}
+        ></affine-edgeless-page>
+      `
+    );
 
     const remoteSelectionContainer = html`
       <remote-selection .page=${this.page}></remote-selection>

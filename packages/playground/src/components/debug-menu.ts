@@ -11,6 +11,8 @@ import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
   createEvent,
@@ -27,9 +29,8 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Workspace } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
-import type { SlDropdown } from '@shoelace-style/shoelace';
+import { nanoid, Utils, type Workspace } from '@blocksuite/store';
+import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
@@ -91,6 +92,9 @@ export class DebugMenu extends NonShadowLitElement {
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
 
+  @state()
+  private _showTabMenu = false;
+
   get page() {
     return this.editor.page;
   }
@@ -115,14 +119,19 @@ export class DebugMenu extends NonShadowLitElement {
     }
   }
 
-  private _convertToList(e: PointerEvent, listType: ListType) {
+  private _updateBlockType(
+    e: PointerEvent,
+    flavour: 'affine:paragraph' | 'affine:list',
+    type: string
+  ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
+
     const blockRange = getCurrentBlockRange(this.page);
     if (!blockRange) {
       return;
     }
-    updateBlockType(blockRange.models, 'affine:list', listType);
+    updateBlockType(blockRange.models, flavour, type);
   }
 
   private _addCodeBlock(e: PointerEvent) {
@@ -143,17 +152,6 @@ export class DebugMenu extends NonShadowLitElement {
     this.page.captureSync();
     this.page.deleteBlock(startModel);
     this.page.addBlock('affine:code', blockProps, parent, index);
-  }
-
-  private _convertToParagraph(e: PointerEvent, type: string) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      return;
-    }
-    updateBlockType(blockRange.models, 'affine:paragraph', type);
   }
 
   private _switchEditorMode() {
@@ -287,6 +285,8 @@ export class DebugMenu extends NonShadowLitElement {
         }
 
         .default-toolbar {
+          display: flex;
+          gap: 5px;
           padding: 8px;
           width: 100%;
           min-width: 390px;
@@ -350,66 +350,74 @@ export class DebugMenu extends NonShadowLitElement {
             <sl-menu>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToParagraph(e, 'text')}
+                  this._updateBlockType(e, 'affine:paragraph', 'text')}
               >
                 Text
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h1')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h1')}
               >
                 H1
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h2')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h2')}
               >
                 H2
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h3')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h3')}
               >
                 H3
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h4')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h4')}
               >
                 H4
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h5')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h5')}
               >
                 H5
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h6')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:paragraph', 'h6')}
               >
                 H6
               </sl-menu-item>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToParagraph(e, 'quote')}
+                  this._updateBlockType(e, 'affine:paragraph', 'quote')}
               >
                 Quote
               </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToList(e, 'bulleted')}
+                  this._updateBlockType(e, 'affine:list', 'bulleted')}
               >
                 Bulleted List
               </sl-menu-item>
               <sl-menu-item
                 @click=${(e: PointerEvent) =>
-                  this._convertToList(e, 'numbered')}
+                  this._updateBlockType(e, 'affine:list', 'numbered')}
               >
                 Numbered List
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:list', 'todo')}
               >
                 Todo List
               </sl-menu-item>
               <sl-menu-item
-                @click=${(e: PointerEvent) => this._convertToList(e, 'toggle')}
+                @click=${(e: PointerEvent) =>
+                  this._updateBlockType(e, 'affine:list', 'toggle')}
               >
                 Toggle List
               </sl-menu-item>
@@ -446,6 +454,11 @@ export class DebugMenu extends NonShadowLitElement {
                 Toggle CSS Debug Menu
               </sl-menu-item>
               <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
+              <sl-menu-item
+                @click=${() => (this._showTabMenu = !this._showTabMenu)}
+              >
+                Toggle Tab Menu
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -468,6 +481,13 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
+          ${this._showTabMenu
+            ? getTabGroupTemplate({
+                workspace: this.workspace,
+                editor: this.editor,
+                requestUpdate: () => this.requestUpdate(),
+              })
+            : null}
         </div>
 
         <div
@@ -488,6 +508,77 @@ export class DebugMenu extends NonShadowLitElement {
       </div>
     `;
   }
+}
+
+function createPage(workspace: Workspace) {
+  const pageName = 'Untitled';
+  // TODO use id generator
+  // const id = workspace.idGenerator();
+  const id = nanoid();
+  const newPage = workspace.createPage(id);
+  const pageBlockId = newPage.addBlock('affine:page', {
+    title: new newPage.Text(pageName),
+  });
+  newPage.addBlock('affine:surface', {}, null);
+  newPage.addBlock('affine:frame', {}, pageBlockId);
+}
+
+function getTabGroupTemplate({
+  workspace,
+  editor,
+  requestUpdate,
+}: {
+  workspace: Workspace;
+  editor: EditorContainer;
+  requestUpdate: () => void;
+}) {
+  workspace.slots.pagesUpdated.on(requestUpdate);
+  const pageList = workspace.meta.pageMetas;
+
+  return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
+      <sl-button
+        size="small"
+        content="new page"
+        @click=${() => createPage(workspace)}
+      >
+        <sl-icon name="file-earmark-plus" label="new page"></sl-icon>
+      </sl-button>
+    </sl-tooltip>
+    <sl-tab-group
+      class="tabs-closable"
+      style="display: flex; overflow: hidden;"
+      @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+        const otherPage = workspace.getPage(e.detail.name);
+        if (!otherPage) throw new Error('page not found');
+        editor.page = otherPage;
+      }}
+    >
+      ${pageList.map(
+        page =>
+          html`<sl-tab
+            slot="nav"
+            panel="${page.id}"
+            ?active=${page.id === editor.page.id}
+            ?closable=${pageList.length > 1}
+            @sl-close=${(e: CustomEvent) => {
+              const tab = e.target;
+              // Show other tab if the tab is currently active
+              if (tab && (tab as SlTab).active) {
+                const tabGroup =
+                  document.querySelector<SlTabGroup>('.tabs-closable');
+                if (!tabGroup) throw new Error('tab group not found');
+                const otherPage = workspace.meta.pageMetas.find(
+                  metaPage => page.id !== metaPage.id
+                );
+                if (!otherPage) throw new Error('no other page found');
+                tabGroup.show(otherPage.id);
+              }
+              workspace.removePage(page.id);
+            }}
+            >${page.title}</sl-tab
+          >`
+      )}
+    </sl-tab-group>`;
 }
 
 declare global {
