@@ -3,7 +3,7 @@
 ## How to use
 
 ```
-import { createGraph, search, Rectangle, simplifyPath } from '@blocksuite/connector';
+import { createGraph, route, Rectangle, simplifyPath } from '@blocksuite/connector';
 
 const rects = [
   new Rectangle(30, 30, 200, 200),
@@ -17,7 +17,7 @@ const points = [
 
 const { graph } = createGraph(rects, points);
 
-const path = search(
+const path = route(
   graph,
   graph.get(points[0].x, points[0].y),
   graph.get(points[1].x, points[1].y)
@@ -27,6 +27,10 @@ console.log('path', path);
 const simplifiedPath = simplifyPath(path);
 console.log('simplified path', simplifiedPath);
 ```
+
+## Example
+
+See `packages/playground/examples/canvas/connector.html`
 
 ## Info
 
