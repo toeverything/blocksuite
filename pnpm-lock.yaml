@@ -267,10 +267,10 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       '@rich-data/json-plugin':
-        specifier: ^3.0.0-20230329010830-10f12e5
+        specifier: ^3.0.0-20230329005843-d296129
         version: 3.0.0-20230329010830-10f12e5(@rich-data/viewer@3.0.0-20230329010830-10f12e5)(react-dom@18.2.0)(react@18.2.0)
       '@rich-data/viewer':
-        specifier: ^3.0.0-20230329010830-10f12e5
+        specifier: ^3.0.0-20230329005843-d296129
         version: 3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
