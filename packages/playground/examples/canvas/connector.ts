@@ -1,9 +1,9 @@
 import { throttle } from '@blocksuite/blocks';
 import type { CreateGraphReturned, Point } from '@blocksuite/connector';
 import {
+  aStarRoute,
   createGraph,
   Rectangle,
-  route,
   simplifyPath,
 } from '@blocksuite/connector';
 
@@ -108,9 +108,9 @@ function createRenderer(options: CreateGraphReturned) {
     },
     renderPath() {
       ctx.save();
-      const start = graph.nodes[`${points[0].x}:${points[0].y}`];
-      const end = graph.nodes[`${points[1].x}:${points[1].y}`];
-      const path = route(graph, start, end);
+      const start = graph.getNode(points[0]);
+      const end = graph.getNode(points[1]);
+      const path = aStarRoute(graph, start, end);
       console.log(path, simplifyPath(path));
       const path2d = new Path2D();
       path2d.moveTo(...normalizePoint(start.x, start.y));

@@ -6,6 +6,7 @@ import * as Y from 'yjs';
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
+import type { ConnectorProperties } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -93,12 +94,17 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
-  addConnectorElement(bound: IBound, controllers: number[]) {
+  addConnectorElement(
+    bound: IBound,
+    controllers: number[],
+    properties: ConnectorProperties = {}
+  ) {
     const id = nanoid(10);
     const element = new ConnectorElement(id);
 
     setXYWH(element, bound);
     element.controllers = controllers;
+    ConnectorElement.updateProps(element, properties);
 
     return this._addElement(element);
   }
@@ -112,12 +118,20 @@ export class SurfaceManager {
     });
   }
 
-  updateConnectorElement(id: string, bound: IBound, controllers: number[]) {
+  updateConnectorElement(
+    id: string,
+    bound: IBound,
+    controllers: number[],
+    properties: ConnectorProperties = {}
+  ) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
       yElement.set('controllers', JSON.stringify(controllers));
       yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+      for (const [key, value] of Object.entries(properties)) {
+        yElement.set(key, value);
+      }
     });
   }
 
@@ -170,6 +184,10 @@ export class SurfaceManager {
 
   toViewCoord(modelX: number, modelY: number): [number, number] {
     return this._renderer.toViewCoord(modelX, modelY);
+  }
+
+  pickById(id: string) {
+    return this._elements.get(id);
   }
 
   pickByPoint(x: number, y: number, options?: HitTestOptions): PhasorElement[] {

@@ -3,7 +3,7 @@
 ## How to use
 
 ```
-import { createGraph, route, Rectangle, simplifyPath } from '@blocksuite/connector';
+import { route, Rectangle } from '@blocksuite/connector';
 
 const rects = [
   new Rectangle(30, 30, 200, 200),
@@ -15,17 +15,11 @@ const points = [
   { x: 160, y: 200 }
 ]
 
-const { graph } = createGraph(rects, points);
-
 const path = route(
-  graph,
-  graph.get(points[0].x, points[0].y),
-  graph.get(points[1].x, points[1].y)
+  rects,
+  points
 )
 console.log('path', path);
-
-const simplifiedPath = simplifyPath(path);
-console.log('simplified path', simplifiedPath);
 ```
 
 ## Example

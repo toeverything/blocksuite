@@ -2,7 +2,7 @@ import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
-import type { SerializedConnectorProps } from './types.js';
+import type { AttachedElement, SerializedConnectorProps } from './types.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -34,10 +34,12 @@ export class ConnectorElement extends BaseElement {
   w = 0;
   h = 0;
 
-  lineWidth = 4;
+  lineWidth = 2;
   // relative to element x,y.
   // [x0, y0, x1, y1, x2, y2...]
   controllers: number[] = [];
+  startElement?: AttachedElement;
+  endElement?: AttachedElement;
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
@@ -183,6 +185,9 @@ export class ConnectorElement extends BaseElement {
       color: this.color,
       lineWidth: this.lineWidth,
 
+      startElement: this.startElement,
+      endElement: this.endElement,
+
       controllers: JSON.stringify(this.controllers),
     };
   }
@@ -193,12 +198,14 @@ export class ConnectorElement extends BaseElement {
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     setXYWH(element, { x, y, w, h });
 
-    const { controllers } = ConnectorElement.getProps(
+    const { controllers, startElement, endElement } = ConnectorElement.getProps(
       element,
       data
     ) as SerializedConnectorProps;
     ConnectorElement.updateProps(element, {
       controllers: controllers?.length ? JSON.parse(controllers) : [],
+      startElement,
+      endElement,
     });
 
     return element;
@@ -218,6 +225,8 @@ export class ConnectorElement extends BaseElement {
       'lineWidth',
       'xywh',
       'controllers',
+      'startElement',
+      'endElement',
     ]);
 
     return props;

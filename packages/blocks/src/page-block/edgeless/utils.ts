@@ -12,8 +12,12 @@ import {
   isInEmptyDatabaseByPoint,
   Rect,
 } from '@blocksuite/blocks/std';
-import { assertExists } from '@blocksuite/global/utils';
-import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
+import type {
+  Bound,
+  PhasorElement,
+  SurfaceManager,
+  SurfaceViewport,
+} from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
@@ -21,6 +25,8 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import type { Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
@@ -227,4 +233,23 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       );
     },
   });
+}
+
+export function pickBy(
+  surface: SurfaceManager,
+  page: Page,
+  x: number,
+  y: number,
+  filter: (element: Selectable) => boolean
+) {
+  const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
+  const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
+
+  return selectedShapes.length
+    ? selectedShapes[selectedShapes.length - 1]
+    : pickTopBlock(
+        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        modelX,
+        modelY
+      );
 }

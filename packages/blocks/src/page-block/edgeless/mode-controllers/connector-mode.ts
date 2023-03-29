@@ -1,10 +1,6 @@
-import {
-  createGraph,
-  Rectangle,
-  route,
-  simplifyPath,
-} from '@blocksuite/connector';
+import { Rectangle, route } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
+import type { AttachedElementDirection } from '@blocksuite/phasor';
 import {
   Bound,
   deserializeXYWH,
@@ -17,12 +13,12 @@ import type {
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import type { Selectable, SelectionArea } from '../selection-manager.js';
-import { getXYWH, pickTopBlock } from '../utils.js';
+import { getXYWH, pickBy } from '../utils.js';
 import { MouseModeController } from './index.js';
 
-function getPointByDirection(
+export function getPointByDirection(
   { x, y, w, h }: Rectangle,
-  direction: 'top' | 'right' | 'bottom' | 'left'
+  direction: AttachedElementDirection
 ) {
   switch (direction) {
     case 'top': {
@@ -40,13 +36,13 @@ function getPointByDirection(
   }
 }
 
-function getPoint(x: number, y: number, rect?: Rectangle | null) {
+export function getPoint(x: number, y: number, rect?: Rectangle | null) {
   if (!rect) {
-    return { x, y };
+    return { point: { x, y }, direction: 'left' as const };
   }
   const direction = rect.relativeDirection(x, y);
   const point = getPointByDirection(rect, direction);
-  return point;
+  return { point, direction };
 }
 
 export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
@@ -68,12 +64,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     filter: (element: Selectable) => boolean
   ) {
     const { surface } = this._edgeless;
-    const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-    const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
-
-    return selectedShapes.length
-      ? selectedShapes[selectedShapes.length - 1]
-      : pickTopBlock(this._blocks, modelX, modelY);
+    return pickBy(surface, this._page, x, y, filter);
   }
 
   onContainerClick(e: SelectionEvent): void {
@@ -96,24 +87,34 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     // create a block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const bound = new Bound(modelX, modelY, 1, 1);
-    const id = this._surface.addConnectorElement(bound, [0, 0, 1, 1]);
-    this._draggingElementId = id;
 
     this._draggingStartElement = this._pickBy(
       e.x,
       e.y,
-      ele => ele.id !== id && ele.type !== 'connector'
+      ele => ele.type !== 'connector'
     );
     this._draggingStartRect = this._draggingStartElement
       ? new Rectangle(...deserializeXYWH(getXYWH(this._draggingStartElement)))
       : null;
 
-    this._draggingStartPoint = getPoint(
+    const { point: startPoint, direction: startDirection } = getPoint(
       modelX,
       modelY,
       this._draggingStartRect
     );
+
+    this._draggingStartPoint = startPoint;
+
+    const bound = new Bound(modelX, modelY, 1, 1);
+    const id = this._surface.addConnectorElement(bound, [0, 0, 1, 1], {
+      startElement: this._draggingStartElement
+        ? {
+            id: this._draggingStartElement.id,
+            direction: startDirection,
+          }
+        : undefined,
+    });
+    this._draggingElementId = id;
 
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -149,35 +150,33 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
         ? new Rectangle(...deserializeXYWH(getXYWH(end)))
         : null;
 
-    const { x: endX, y: endY } = getPoint(endModelX, endModelY, endRect);
+    const {
+      point: { x: endX, y: endY },
+      direction: endDirection,
+    } = getPoint(endModelX, endModelY, endRect);
 
-    const graphCollection = createGraph(
+    const routes = route(
       [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],
       [
         { x: startX, y: startY },
         { x: endX, y: endY },
       ]
     );
-    const { graph } = graphCollection;
-    const routed = route(
-      graph,
-      graph.getNode(startX, startY),
-      graph.getNode(endX, endY)
-    );
-    const simplifiedRoute = simplifyPath(routed);
 
     const bound = getBrushBoundFromPoints(
-      simplifiedRoute.map(r => [r.x, r.y]),
+      routes.map(r => [r.x, r.y]),
       0
     );
-    const controllers = simplifiedRoute
+    const controllers = routes
       .map(r => [r.x, r.y])
       .flat()
       .map((v, index) => {
         return index % 2 ? v - bound.y : v - bound.x;
       });
 
-    this._surface.updateConnectorElement(id, bound, controllers);
+    this._surface.updateConnectorElement(id, bound, controllers, {
+      endElement: end ? { id: end.id, direction: endDirection } : undefined,
+    });
     this._edgeless.slots.surfaceUpdated.emit();
   }
 

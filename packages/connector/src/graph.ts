@@ -96,7 +96,7 @@ export class Graph {
     return n;
   }
 
-  getNode(x: number, y: number) {
+  getNode({ x, y }: Point) {
     return this.nodes[`${x}:${y}`];
   }
 }

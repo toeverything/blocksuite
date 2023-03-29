@@ -19,7 +19,7 @@ function pathTo(element: GraphNode) {
   return path;
 }
 
-export function route(
+export function aStarRoute(
   graph: Pick<Graph, 'neighbors'>,
   start: GraphNode,
   end: GraphNode,
