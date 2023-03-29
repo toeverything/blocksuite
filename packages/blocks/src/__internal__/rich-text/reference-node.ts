@@ -5,7 +5,12 @@ import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { getModelByElement, NonShadowLitElement } from '../utils/index.js';
+import {
+  getEditorContainer,
+  getModelByElement,
+  NonShadowLitElement,
+} from '../utils/index.js';
+import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
@@ -81,24 +86,48 @@ export class AffineReference extends NonShadowLitElement {
     }
     // const targetPageId = refMeta.id;
     // TODO jump to the reference
+    const editor = getEditorContainer(model.page);
+    editor.page = model.page.workspace.getPage(refMeta.id);
   }
 
   render() {
     // const style = affineTextStyles(this.textAttributes);
     const refMeta = this._refMeta;
-    const title = refMeta
-      ? refMeta.title
-      : // Maybe the page is deleted
-        'Referenced Page Not Found';
-    const type = this.delta.attributes?.reference?.type;
+    const isDisabled = !refMeta;
+    const title = isDisabled
+      ? // Maybe the page is deleted
+        'Linked page is deleted'
+      : refMeta.title;
+    const attributes = this.delta.attributes;
+    assertExists(attributes, 'Failed to get attributes!');
+    const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
+    const style = affineTextStyles(attributes);
 
     // TODO update icon
 
+    // Sine reference title should not be edit by user,
+    // we set it into the `::before` pseudo element.
+    //
+    // There are some issues if you try to turn off the `contenteditable` attribute in the title node:
+    //   - the cursor may invisible when trying to move across the reference node using the keyboard
+    //
+    // see also [HTML contenteditable with non-editable islands](https://stackoverflow.com/questions/14615551/html-contenteditable-with-non-editable-islands)
+    //
+    // The virgo will skip the zero-width space when calculating the cursor position,
+    // so we use a other zero-width symbol to make the cursor work correctly.
+
     // This node is under contenteditable="true",
     // so we should not add any extra white space between HTML tags
-    return html`<span class="affine-reference" @click=${this._onClick}
-      >${FontLinkIcon}<span class="affine-reference-title" data-title=${title}
+
+    return html`<span
+      class="affine-reference"
+      style=${style}
+      @click=${this._onClick}
+      >${FontLinkIcon}<span
+        class="affine-reference-title"
+        data-title=${title}
+        data-virgo-text="true"
         >${this.delta.insert}</span
       ></span
     >`;
