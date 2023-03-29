@@ -1,4 +1,4 @@
-import { type DeltaInsert,ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
