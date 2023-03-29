@@ -4,6 +4,7 @@ export type { Color, StrokeStyle } from './consts.js';
 export type {
   AttachedElement,
   AttachedElementDirection,
+  Controller,
 } from './elements/connector/types.js';
 export * from './elements/index.js';
 export type { SurfaceViewport } from './renderer.js';

@@ -1,9 +1,14 @@
-import { Rectangle, route } from '@blocksuite/connector';
-import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
+import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
+import type {
+  ConnectorElement,
+  Controller,
+  SurfaceManager,
+} from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,7 +17,7 @@ import {
 } from '../mode-controllers/connector-mode.js';
 import { getXYWH, pickBy } from '../utils.js';
 
-function mousedown(
+function capMousedown(
   event: MouseEvent,
   surface: SurfaceManager,
   page: Page,
@@ -116,6 +121,112 @@ function mousedown(
   document.addEventListener('mouseup', mouseup);
 }
 
+type Handle = {
+  x: number;
+  y: number;
+  position: number;
+  isVertical: boolean;
+};
+
+function getControllerHandles(controllers: Controller[]) {
+  const handles: Handle[] = [];
+
+  for (let i = 0; i < controllers.length - 1; i++) {
+    const current = controllers[i];
+    const next = controllers[i + 1];
+    const isVertical = current.x === next.x;
+    const handle = isVertical
+      ? {
+          x: current.x,
+          y: (current.y + next.y) / 2,
+          position: i,
+          isVertical,
+        }
+      : {
+          x: (current.x + next.x) / 2,
+          y: current.y,
+          position: i,
+          isVertical,
+        };
+    handles.push(handle);
+  }
+
+  return handles;
+}
+
+function centerControllerMousedown(
+  event: MouseEvent,
+  surface: SurfaceManager,
+  page: Page,
+  element: ConnectorElement,
+  handle: Handle,
+  requestUpdate: () => void
+) {
+  const startX = event.clientX;
+  const startY = event.clientY;
+  const { controllers, x, y } = element;
+
+  const mousemove = (mouseMoveEvent: MouseEvent) => {
+    const { isVertical, position } = handle;
+    const { zoom } = surface.viewport;
+
+    const absoluteControllers = controllers.map(c => ({
+      ...c,
+      x: c.x + x,
+      y: c.y + y,
+    }));
+
+    const deltaX = isVertical ? mouseMoveEvent.clientX - startX : 0;
+    const deltaY = isVertical ? 0 : mouseMoveEvent.clientY - startY;
+
+    const point0 = absoluteControllers[position];
+    const newPoint0 = {
+      x: point0.x + deltaX / zoom,
+      y: point0.y + deltaY / zoom,
+      customized: true,
+    };
+    const point1 = absoluteControllers[position + 1];
+    const newPoint1 = {
+      x: point1.x + deltaX / zoom,
+      y: point1.y + deltaY / zoom,
+      customized: true,
+    };
+
+    if (position === 0) {
+      // start
+      absoluteControllers.splice(position + 1, 0, newPoint0);
+      absoluteControllers[position + 2] = newPoint1;
+    } else if (position === absoluteControllers.length - 2) {
+      // end
+      absoluteControllers[position] = newPoint0;
+      absoluteControllers.splice(position + 1, 0, newPoint1);
+    } else {
+      absoluteControllers[position] = newPoint0;
+      absoluteControllers[position + 1] = newPoint1;
+    }
+
+    const bound = getBrushBoundFromPoints(
+      absoluteControllers.map(r => [r.x, r.y]),
+      0
+    );
+
+    const newControllers = absoluteControllers.map(c => ({
+      ...c,
+      x: c.x - bound.x,
+      y: c.y - bound.y,
+    }));
+    surface.updateConnectorElement(element.id, bound, newControllers);
+
+    requestUpdate();
+  };
+  const mouseup = (mouseUpEvent: MouseEvent) => {
+    document.removeEventListener('mousemove', mousemove);
+    document.removeEventListener('mouseup', mouseup);
+  };
+  document.addEventListener('mousemove', mousemove);
+  document.addEventListener('mouseup', mouseup);
+}
+
 export function SingleConnectorHandles(
   element: ConnectorElement,
   surface: SurfaceManager,
@@ -123,6 +234,7 @@ export function SingleConnectorHandles(
   requestUpdate: () => void
 ) {
   const { controllers } = element;
+  const controllerHandles = getControllerHandles(controllers);
   const start = {
     position: 'absolute',
     left: `${controllers[0].x}px`,
@@ -135,7 +247,7 @@ export function SingleConnectorHandles(
   };
   return html`
     <style>
-      .line-cap-controller {
+      .line-controller {
         position: absolute;
         width: 9px;
         height: 9px;
@@ -150,18 +262,43 @@ export function SingleConnectorHandles(
       }
     </style>
     <div
-      class="line-cap-controller"
+      class="line-controller"
       style=${styleMap(start)}
       @mousedown=${(e: MouseEvent) => {
-        mousedown(e, surface, page, element, 'start', requestUpdate);
+        capMousedown(e, surface, page, element, 'start', requestUpdate);
       }}
     ></div>
     <div
-      class="line-cap-controller"
+      class="line-controller"
       style=${styleMap(end)}
       @mousedown=${(e: MouseEvent) => {
-        mousedown(e, surface, page, element, 'end', requestUpdate);
+        capMousedown(e, surface, page, element, 'end', requestUpdate);
       }}
     ></div>
+    ${repeat(
+      controllerHandles,
+      c => Math.random(),
+      c => {
+        const style = {
+          left: `${c.x}px`,
+          top: `${c.y}px`,
+          cursor: c.isVertical ? 'col-resize' : 'row-resize',
+        };
+        return html`<div
+          class="line-controller"
+          style=${styleMap(style)}
+          @mousedown=${(e: MouseEvent) => {
+            centerControllerMousedown(
+              e,
+              surface,
+              page,
+              element,
+              c,
+              requestUpdate
+            );
+          }}
+        ></div>`;
+      }
+    )}
   `;
 }
