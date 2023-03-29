@@ -270,6 +270,51 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
+  updateSelectedColumnValue(
+    rowId: BaseBlockModel['id'],
+    columnId: ColumnSchema['id'],
+    oldValue: string,
+    value: string
+  ) {
+    this.transact(() => {
+      const columns = this.columns.get(rowId);
+      assertExists(columns);
+      const cell = columns.get(columnId) as Y.Map<string[]> | undefined;
+      if (!cell) return;
+
+      const selected = cell.get('value') as string[];
+      const newSelected = [...selected];
+      const index = newSelected.indexOf(oldValue);
+      newSelected[index] = value;
+
+      const columnMap = new Y.Map();
+      columnMap.set('schemaId', columnId);
+      columnMap.set('value', newSelected);
+      columns.set(columnId, columnMap);
+    });
+  }
+
+  deleteSelectedColumnValue(
+    rowId: BaseBlockModel['id'],
+    columnId: ColumnSchema['id'],
+    value: string
+  ) {
+    this.transact(() => {
+      const columns = this.columns.get(rowId);
+      assertExists(columns);
+      const cell = columns.get(columnId) as Y.Map<string[]> | undefined;
+      if (!cell) return;
+
+      const selected = cell.get('value') as string[];
+      const newSelected = selected.filter(item => item !== value);
+
+      const columnMap = new Y.Map();
+      columnMap.set('schemaId', columnId);
+      columnMap.set('value', newSelected);
+      columns.set(columnId, columnMap);
+    });
+  }
+
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }

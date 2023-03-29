@@ -7,10 +7,12 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
+import type { DatabaseBlockModel } from '../../database-model.js';
 import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
@@ -45,6 +47,114 @@ const tagActions: ColumnAction[] = [
 
 /** select input max length */
 const INPUT_MAX_LENGTH = 10;
+
+@customElement('affine-database-select-option-text')
+class SelectOptionText extends LitElement {
+  static styles = css`
+    :host {
+      height: 100%;
+      padding: 2px 10px;
+      background: #fce8ff;
+      border-radius: 4px;
+    }
+    .select-option-text {
+      position: relative;
+      display: inline-flex;
+      width: fit-content;
+      font-family: 'Avenir Next';
+    }
+    .text-input {
+      display: none;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      padding: 0px;
+      border: none;
+      color: var(--affine-text-color);
+      background: transparent;
+      font-family: 'Avenir Next';
+      font-size: 14px;
+    }
+    .text-input:focus {
+      outline: none;
+    }
+    .editing .text-content {
+      visibility: hidden;
+    }
+    .editing .text-input {
+      display: block;
+    }
+  `;
+
+  @property()
+  databaseModel!: DatabaseBlockModel;
+
+  @property()
+  selectText!: string;
+
+  @property()
+  editing!: boolean;
+
+  @query('.text-input')
+  private _textInput!: HTMLInputElement;
+
+  @state()
+  private _textInputValue = '';
+
+  private _onInput = (e: InputEvent) => {
+    const input = e.target as HTMLInputElement;
+    const value = input.value;
+    if (value.length <= INPUT_MAX_LENGTH) {
+      this._textInputValue = value;
+    }
+  };
+
+  private _onKeyDown = (e: KeyboardEvent) => {
+    const input = e.target as HTMLInputElement;
+    const value = input.value;
+    if (value.length >= INPUT_MAX_LENGTH) {
+      e.preventDefault();
+    }
+  };
+
+  getSelectionValue() {
+    return this._textInputValue;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._textInputValue = this.selectText;
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+    if (changedProperties.has('editing') && this.editing) {
+      requestAnimationFrame(() => {
+        const input = this._textInput;
+        const length = input.value.length;
+        input.focus();
+        input.setSelectionRange(length, length);
+      });
+    }
+  }
+
+  render() {
+    return html`<div
+      class="select-option-text ${this.editing ? 'editing' : ''}"
+    >
+      <span class="text-content">${this._textInputValue}</span>
+      <input
+        class="text-input"
+        value=${this._textInputValue}
+        @input=${this._onInput}
+        @keydown=${this._onKeyDown}
+        maxlength=${INPUT_MAX_LENGTH}
+      />
+    </div>`;
+  }
+}
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement<string[]> {
@@ -137,7 +247,7 @@ class SelectAction extends LitElement {
           return html`
             <div
               class="action ${action.type}"
-              @click=${() => this.onAction(action.type, this.index)}
+              @mousedown=${() => this.onAction(action.type, this.index)}
             >
               <div class="action-content">
                 ${action.icon}<span>${action.text}</span>
@@ -253,15 +363,6 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     .select-option-text-container {
       flex: 1;
     }
-    .select-option-text {
-      display: none;
-      display: inline-block;
-      height: 100%;
-      padding: 2px 10px;
-      background: #fce8ff;
-      border-radius: 4px;
-      outline: none;
-    }
     .select-option-icon {
       display: none;
       justify-content: center;
@@ -277,6 +378,13 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     .select-option-icon svg {
       pointer-events: none;
     }
+    .editing {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .editing .select-option-icon {
+      display: flex;
+      background: rgba(0, 0, 0, 0.08);
+    }
   `;
   static tag = literal`affine-database-select-cell-editing`;
 
@@ -285,6 +393,12 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
 
   @state()
   private _inputValue = '';
+
+  @state()
+  private _editingIndex = -1;
+
+  @query('.select-option-container')
+  private _selectOptionContainer!: HTMLDivElement;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
@@ -330,6 +444,8 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   };
 
   private _onSelect = (selectedValue: string[], select: string) => {
+    // when editing, do not select
+    if (this._editingIndex !== -1) return;
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
     if (!isSelected) {
@@ -387,7 +503,27 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   };
 
   private _onSelectAction = (type: string, index: number) => {
-    // TODO
+    if (type === 'rename') {
+      this._editingIndex = index;
+      return;
+    }
+
+    if (type === 'delete') {
+      const selection = [...(this.columnSchema.property.selection as string[])];
+      this.databaseModel.page.setColumnSchema({
+        ...this.columnSchema,
+        property: {
+          selection: selection.filter((_, i) => i !== index),
+        },
+      });
+      const value = selection[index];
+      this.databaseModel.page.deleteSelectedColumnValue(
+        this.rowModel.id,
+        this.columnSchema.id,
+        value
+      );
+      return;
+    }
   };
 
   private _showSelectAction = (index: number) => {
@@ -423,6 +559,31 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       () => action.remove(),
       'mousedown'
     );
+  };
+
+  private _onSaveSelectionName = (index: number) => {
+    const selectOption = this._selectOptionContainer
+      .querySelectorAll('affine-database-select-option-text')
+      .item(index) as SelectOptionText;
+
+    const value = selectOption.getSelectionValue();
+    const selection = [...(this.columnSchema.property.selection as string[])];
+    const oldValue = selection[index];
+    selection[index] = value;
+    this.databaseModel.page.setColumnSchema({
+      ...this.columnSchema,
+      property: {
+        selection,
+      },
+    });
+    this.databaseModel.page.updateSelectedColumnValue(
+      this.rowModel.id,
+      this.columnSchema.id,
+      oldValue,
+      value
+    );
+
+    this._editingIndex = -1;
   };
 
   override render() {
@@ -475,26 +636,34 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                 <span class="select-option-new-text">${this._inputValue}</span>
               </div>`
             : html``}
-          ${filteredSelection.map((select, index) => {
-            return html`
-              <div class="select-option">
-                <div
-                  class="select-option-text-container"
-                  @click=${() => this._onSelect(selectedValue, select)}
-                >
-                  <span class="select-option-text" contenteditable=${false}
-                    >${select}</span
+          ${repeat(
+            filteredSelection,
+            item => item,
+            (select, index) => {
+              const isEditing = index === this._editingIndex;
+              const onOptionIconClick = isEditing
+                ? () => this._onSaveSelectionName(index)
+                : () => this._showSelectAction(index);
+              return html`
+                <div class="select-option ${isEditing ? 'editing' : ''}">
+                  <div
+                    class="select-option-text-container"
+                    @click=${() => this._onSelect(selectedValue, select)}
                   >
+                    <affine-database-select-option-text
+                      .databaseModel=${this.databaseModel}
+                      .selectText=${select}
+                      .editing=${index === this._editingIndex}
+                    ></affine-database-select-option-text>
+                  </div>
+                  <div class="select-option-icon" @click=${onOptionIconClick}>
+                    <!-- TODO: change icon -->
+                    ${isEditing ? PenIcon : MoreHorizontalIcon}
+                  </div>
                 </div>
-                <div
-                  class="select-option-icon"
-                  @click=${() => this._showSelectAction(index)}
-                >
-                  ${MoreHorizontalIcon}
-                </div>
-              </div>
-            `;
-          })}
+              `;
+            }
+          )}
         </div>
       </div>
     `;
