@@ -22,7 +22,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
 import { getColumnSchemaRenderer } from '../register.js';
@@ -247,15 +246,13 @@ class ColumnTypePopup extends LitElement {
             }
           };
 
-          const className = classMap({
-            action: true,
-            [column.type]: true,
-            selected: selected,
-            disabled: isProgress,
-          });
-
           return html`
-            <div class=${className} @click=${onChangeColumnType}>
+            <div
+              class="action ${column.type} ${selected
+                ? 'selected'
+                : ''} ${isProgress ? 'disabled' : ''}"
+              @click=${onChangeColumnType}
+            >
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>
               </div>

@@ -1,5 +1,7 @@
 import type { ColumnSchemaType } from '@blocksuite/global/database';
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+
+import { assertClassName } from '../asserts.js';
 
 export async function doColumnAction(
   page: Page,
@@ -30,8 +32,11 @@ export async function switchColumnType(
   page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 
   if (isDefault) {
-    const typeMenu = page.locator('.action.multi-select');
-    await expect(typeMenu).toHaveClass([' action multi-select selected ']);
+    await assertClassName(
+      page,
+      '.action.multi-select',
+      /action multi-select selected/
+    );
   }
 
   const typeMenu = page.locator(
