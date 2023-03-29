@@ -1,3 +1,4 @@
+import type { Page } from '@blocksuite/store';
 import {
   assertExists,
   type BaseBlockModel,
@@ -33,6 +34,15 @@ function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
     index: idx,
     length: 0,
   });
+}
+
+function initDefaultBlocks(page: Page, pageName: string) {
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new page.Text(pageName),
+  });
+  page.addBlock('affine:surface', {}, null);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  page.addBlock('affine:paragraph', {}, frameId);
 }
 
 const DEFAULT_PAGE_NAME = 'Untitled';
@@ -129,26 +139,24 @@ export class LinkedPagePopover extends LitElement {
     });
   }
 
-  private _onCreatePage() {
+  private _createPage() {
     const pageName = this._query || DEFAULT_PAGE_NAME;
     const workspace = this._page.workspace;
     const id = workspace.idGenerator();
-    const newPage = this._page.workspace.createPage(id);
-    newPage.addBlock('affine:page', {
-      title: new newPage.Text(pageName),
-    });
-    this._insertLinkedNode('LinkedPage', newPage.id);
+    const page = this._page.workspace.createPage(id);
+
+    initDefaultBlocks(page, pageName);
+    this._insertLinkedNode('LinkedPage', page.id);
   }
 
-  private _onCreateSubpage() {
+  private _createSubpage() {
     const pageName = this._query || DEFAULT_PAGE_NAME;
     const workspace = this._page.workspace;
     const id = workspace.idGenerator();
-    const newPage = this._page.workspace.createPage(id, this._page.id);
-    newPage.addBlock('affine:page', {
-      title: new newPage.Text(pageName),
-    });
-    this._insertLinkedNode('Subpage', newPage.id);
+    const page = this._page.workspace.createPage(id, this._page.id);
+
+    initDefaultBlocks(page, pageName);
+    this._insertLinkedNode('Subpage', page.id);
   }
 
   render() {
@@ -177,10 +185,10 @@ export class LinkedPagePopover extends LitElement {
       ${pageList}
       <div class="divider"></div>
       <div>New page</div>
-      <icon-button width="280px" height="32px" @click=${this._onCreatePage}
+      <icon-button width="280px" height="32px" @click=${this._createPage}
         >Create "${pageName}" page</icon-button
       >
-      <icon-button width="280px" height="32px" @click=${this._onCreateSubpage}
+      <icon-button width="280px" height="32px" @click=${this._createSubpage}
         >Create "${pageName}" subpage</icon-button
       >
     </div>`;
