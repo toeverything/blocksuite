@@ -1,7 +1,7 @@
 import {
   createGraph,
   Rectangle,
-  search,
+  route,
   simplifyPath,
 } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
@@ -159,12 +159,12 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       ]
     );
     const { graph } = graphCollection;
-    const route = search(
+    const routed = route(
       graph,
       graph.getNode(startX, startY),
       graph.getNode(endX, endY)
     );
-    const simplifiedRoute = simplifyPath(route);
+    const simplifiedRoute = simplifyPath(routed);
 
     const bound = getBrushBoundFromPoints(
       simplifiedRoute.map(r => [r.x, r.y]),

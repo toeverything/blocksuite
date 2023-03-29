@@ -3,7 +3,7 @@ import type { CreateGraphReturned } from '@blocksuite/connector';
 import {
   createGraph,
   Rectangle,
-  search,
+  route,
   simplifyPath,
 } from '@blocksuite/connector';
 
@@ -110,7 +110,7 @@ function createRenderer(options: CreateGraphReturned) {
       ctx.save();
       const start = graph.nodes[`${points[0].x}:${points[0].y}`];
       const end = graph.nodes[`${points[1].x}:${points[1].y}`];
-      const path = search(graph, start, end);
+      const path = route(graph, start, end);
       console.log(path, simplifyPath(path));
       const path2d = new Path2D();
       path2d.moveTo(...normalizePoint(start.x, start.y));
