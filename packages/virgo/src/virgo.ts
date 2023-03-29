@@ -625,13 +625,19 @@ export class VEditor<
     return this._vRange;
   }
 
-  getFormat(vRange: VRange): TextAttributes {
+  getFormat(vRange: VRange, loose = false): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange).filter(
       ([delta, position]) =>
         position.index + position.length > vRange.index &&
         position.index <= vRange.index + vRange.length
     );
     const maybeAttributesArray = deltas.map(([delta]) => delta.attributes);
+    if (loose) {
+      return maybeAttributesArray.reduce(
+        (acc, cur) => ({ ...acc, ...cur }),
+        {}
+      ) as TextAttributes;
+    }
     if (
       !maybeAttributesArray.length ||
       // some text does not have any attributes
