@@ -266,9 +266,12 @@ importers:
       '@lit-labs/react':
         specifier: ^1.1.1
         version: 1.1.1
+      '@rich-data/json-plugin':
+        specifier: '=3.0.0-20230329005550-7c8caf3'
+        version: 3.0.0-20230329005550-7c8caf3(@rich-data/viewer@3.0.0-20230329005550-7c8caf3)(react-dom@18.2.0)(react@18.2.0)
       '@rich-data/viewer':
-        specifier: ^2.15.6
-        version: 2.15.6(react-dom@18.2.0)(react@18.2.0)
+        specifier: '=3.0.0-20230329005550-7c8caf3'
+        version: 3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
@@ -2332,19 +2335,30 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@rich-data/viewer@2.15.6(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tRIMaMJgjc5MQAE4YbAwxUblDvmMPDy994CLcEQeQEbp5aho8a2nVpfGG0f1IATpBeE7qzH4TYxSKgbk5U+8Qg==}
+  /@rich-data/json-plugin@3.0.0-20230329005550-7c8caf3(@rich-data/viewer@3.0.0-20230329005550-7c8caf3)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-bIRrDgPUjRR0/nAf3K7GlnTIkJ/sfFpQLDupRY0S/gb0Jl8tL6jwu0bbmkEsc3msK3RXHVzq1EMkxfQJD0d1AQ==}
     peerDependencies:
-      react: ^17 || ^18
-      react-dom: ^17 || ^18
+      '@rich-data/viewer': ^3.0.0-20230329005550-7c8caf3
+      react: ^18
+      react-dom: ^18
     dependencies:
+      '@rich-data/viewer': 3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0)
+      '@tabler/icons-react': 2.12.0(react@18.2.0)
       clsx: 1.2.1
-      copy-to-clipboard: 3.3.3
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      zustand: 4.3.6(react@18.2.0)
-    transitivePeerDependencies:
-      - immer
+    dev: false
+
+  /@rich-data/viewer@3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Ib+28zvYlaHFjJ5nk+WKcuAf1Xl200nnulz6mV9ESWOrY5ikx2hsWL5ASGVzt1SO9pZ6HalTCZ8YOOMvV7fHXg==}
+    peerDependencies:
+      react: ^18
+      react-dom: ^18
+    dependencies:
+      clsx: 1.2.1
+      jotai: 2.0.3(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@rushstack/eslint-patch@1.2.0:
@@ -2388,6 +2402,20 @@ packages:
     resolution: {integrity: sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==}
     dependencies:
       tslib: 2.5.0
+    dev: false
+
+  /@tabler/icons-react@2.12.0(react@18.2.0):
+    resolution: {integrity: sha512-5O26fB0sigZ9UaDnMTPsht8clU6KYyClvTwhLPud0ZjeTnOMzGhe2Yx5qvfhDkCBNQqz+hIV8kBUe7fvNGv1Ng==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@tabler/icons': 2.12.0
+      prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
+  /@tabler/icons@2.12.0:
+    resolution: {integrity: sha512-PiYD2zUOewNAtfJKU9tBZfyv3NeFlTlUe5LSGTTplvBcM0iuHrNVnd30+HIcUGJQhi3Uf0Ng9FRi/kPqm/q6ZA==}
     dev: false
 
   /@tsconfig/node10@1.0.9:
@@ -3563,12 +3591,6 @@ packages:
       depd: 2.0.0
       keygrip: 1.1.0
     dev: true
-
-  /copy-to-clipboard@3.3.3:
-    resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
-    dependencies:
-      toggle-selection: 1.0.6
-    dev: false
 
   /cosmiconfig-typescript-loader@4.3.0(@types/node@18.15.3)(cosmiconfig@8.1.0)(ts-node@10.9.1)(typescript@4.9.5):
     resolution: {integrity: sha512-NTxV1MFfZDLPiBMjxbHRwSh5LaLcPMwNdCutmnHJCKoVnlvldPWlllonKwrsRJ5pYZBIBGRWWU2tfvzxgeSW5Q==}
@@ -5158,6 +5180,18 @@ packages:
       istanbul-lib-report: 3.0.0
     dev: true
 
+  /jotai@2.0.3(react@18.2.0):
+    resolution: {integrity: sha512-MMjhSPAL3RoeZD9WbObufRT2quThEAEknHHridf2ma8Ml7ZVQmUiHk0ssdbR3F0h3kcwhYqSGJ59OjhPge7RRg==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /js-levenshtein-esm@1.2.0:
     resolution: {integrity: sha512-fzreKVq1eD7eGcQr7MtRpQH94f8gIfhdrc7yeih38xh684TNMK9v5aAu2wxfIRMk/GpAJRrzcirMAPIaSDaByQ==}
     dev: true
@@ -5873,7 +5907,6 @@ packages:
   /object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /object-inspect@1.12.3:
     resolution: {integrity: sha512-geUvdk7c+eizMNUDkRpW1wJwgfOiOeHbxBR/hLXK1aT6zmVSO0jsQcs7fj6MGw89jC/cjGfLcNOrtMYtGqm81g==}
@@ -6255,7 +6288,6 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
-    dev: true
 
   /punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
@@ -6296,7 +6328,6 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
-    dev: true
 
   /react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
@@ -6967,10 +6998,6 @@ packages:
     dependencies:
       is-number: 7.0.0
     dev: true
-
-  /toggle-selection@1.0.6:
-    resolution: {integrity: sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==}
-    dev: false
 
   /toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
