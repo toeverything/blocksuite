@@ -267,11 +267,11 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       '@rich-data/json-plugin':
-        specifier: '=3.0.0-20230329005550-7c8caf3'
-        version: 3.0.0-20230329005550-7c8caf3(@rich-data/viewer@3.0.0-20230329005550-7c8caf3)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^3.0.0-20230329010830-10f12e5
+        version: 3.0.0-20230329010830-10f12e5(@rich-data/viewer@3.0.0-20230329010830-10f12e5)(react-dom@18.2.0)(react@18.2.0)
       '@rich-data/viewer':
-        specifier: '=3.0.0-20230329005550-7c8caf3'
-        version: 3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^3.0.0-20230329010830-10f12e5
+        version: 3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
@@ -2335,22 +2335,22 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@rich-data/json-plugin@3.0.0-20230329005550-7c8caf3(@rich-data/viewer@3.0.0-20230329005550-7c8caf3)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-bIRrDgPUjRR0/nAf3K7GlnTIkJ/sfFpQLDupRY0S/gb0Jl8tL6jwu0bbmkEsc3msK3RXHVzq1EMkxfQJD0d1AQ==}
+  /@rich-data/json-plugin@3.0.0-20230329010830-10f12e5(@rich-data/viewer@3.0.0-20230329010830-10f12e5)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-5+Y0sx0o8dk0RelU2zX7s6D47rGHDezquYM4CHRoNZvjNfJOLK3LoYVc8U3Wq0VK6Eq3zV1PWHjvZyFP7MxWjQ==}
     peerDependencies:
-      '@rich-data/viewer': ^3.0.0-20230329005550-7c8caf3
+      '@rich-data/viewer': ^3.0.0-20230329010830-10f12e5
       react: ^18
       react-dom: ^18
     dependencies:
-      '@rich-data/viewer': 3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0)
+      '@rich-data/viewer': 3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0)
       '@tabler/icons-react': 2.12.0(react@18.2.0)
       clsx: 1.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@rich-data/viewer@3.0.0-20230329005550-7c8caf3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Ib+28zvYlaHFjJ5nk+WKcuAf1Xl200nnulz6mV9ESWOrY5ikx2hsWL5ASGVzt1SO9pZ6HalTCZ8YOOMvV7fHXg==}
+  /@rich-data/viewer@3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-tpm6peOBGBcu4o633/1foqzsMTmH0cP4U84sF6neYEK8JPhDnChQqQDjuOssKi3FET15GKe0li6IAV1L5BhJZw==}
     peerDependencies:
       react: ^18
       react-dom: ^18
