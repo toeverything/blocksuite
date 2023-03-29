@@ -38,7 +38,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + BaseService.deltaLeaf2Html(item);
+      return html + BaseService.deltaLeaf2Html(block, item);
     }, '');
     return `${text}${childText}`;
   }
@@ -79,7 +79,10 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return json2block(focusedBlockModel, pastedBlocks, range);
   }
 
-  private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+  private static deltaLeaf2Html(
+    block: BaseBlockModel,
+    deltaLeaf: DeltaOperation
+  ) {
     let text: string = deltaLeaf.insert;
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
@@ -102,6 +105,18 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     }
     if (attributes.link) {
       text = `<a href="${attributes.link}">${text}</a>`;
+    }
+    if (attributes.reference) {
+      const refPageId = attributes.reference.pageId;
+      const workspace = block.page.workspace;
+      const pageMeta = workspace.meta.pageMetas.find(
+        page => page.id === refPageId
+      );
+      const host = window.location.origin;
+      // maybe should use public link at here?
+      const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
+      const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
+      text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
   }
