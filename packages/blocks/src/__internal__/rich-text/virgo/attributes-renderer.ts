@@ -17,6 +17,13 @@ export const attributesRenderer: AttributesRenderer<AffineTextAttributes> = (
     ></affine-link>`;
   }
 
+  if (attributes?.reference) {
+    return html`<affine-reference
+      .vText=${vText}
+      .textAttributes=${attributes}
+    ></affine-reference>`;
+  }
+
   if (attributes) {
     return html`<affine-text
       .vText=${vText}

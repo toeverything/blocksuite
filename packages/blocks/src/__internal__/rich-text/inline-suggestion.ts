@@ -8,7 +8,13 @@ import {
   matchFlavours,
 } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
-import { css, html, type LitElement, type ReactiveController } from 'lit';
+import {
+  css,
+  html,
+  type LitElement,
+  nothing,
+  type ReactiveController,
+} from 'lit';
 
 import { debounce } from '../utils/index.js';
 import { getCurrentNativeRange } from '../utils/selection.js';
@@ -212,12 +218,12 @@ export class InlineSuggestionController implements ReactiveController {
   };
 
   render() {
-    if (!this._suggestionState.show) return html``;
+    if (!this._suggestionState.show) return nothing;
     const text = this._suggestionState.loading
       ? '...'
       : this._suggestionState.text;
     const position = this._suggestionState.position;
-    if (!text) return html``;
+    if (!text) return nothing;
     return html`<div
       class="inline-suggestion"
       style="text-indent: ${position.x + 2}px;"

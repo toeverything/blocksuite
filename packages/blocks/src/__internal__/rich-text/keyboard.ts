@@ -1,8 +1,9 @@
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { ALLOW_DEFAULT } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
+import { showLinkedPagePopover } from '../../components/linked-page/index.js';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
@@ -68,6 +69,39 @@ export function createKeyboardBindings(
   const keyboardBindings: KeyboardBindings = {
     ...blockKeyBinding,
 
+    linkedPage: {
+      key: ['[', '@'],
+      shiftKey: null,
+      handler(range, { event, prefix }) {
+        if (event.key === '[' && !prefix.endsWith('[')) {
+          // not end with `[[`
+          return ALLOW_DEFAULT;
+        }
+        const flag = page.awarenessStore.getFlag('enable_linked_page');
+        if (!flag) return ALLOW_DEFAULT;
+        if (matchFlavours(model, ['affine:code'] as const)) {
+          return ALLOW_DEFAULT;
+        }
+
+        this.vEditor.slots.rangeUpdated.once(() => {
+          if (event.key === '[') {
+            // Convert to `@`
+            this.vEditor.deleteText({ index: range.index - 1, length: 2 });
+            this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');
+            this.vEditor.setVRange({ index: range.index, length: 0 });
+            this.vEditor.slots.rangeUpdated.once(() => {
+              const curRange = getCurrentNativeRange();
+              showLinkedPagePopover({ model, range: curRange });
+            });
+            return;
+          }
+          const curRange = getCurrentNativeRange();
+          showLinkedPagePopover({ model, range: curRange });
+        });
+        return ALLOW_DEFAULT;
+      },
+    },
+
     slash: {
       key: [
         '/',
@@ -92,21 +126,11 @@ export function createKeyboardBindings(
         // if (context.format['code'] === true) {
         //   return ALLOW_DEFAULT;
         // }
-
-        // we need to insert text before show menu, because the Text node will be
-        // expired if we insert text after show menu because of the rerender
-        this.vEditor.insertText(range, context.event.key);
-        this.vEditor.setVRange({
-          index: range.index + 1,
-          length: 0,
-        });
-
         this.vEditor.slots.rangeUpdated.once(() => {
           const curRange = getCurrentNativeRange();
           showSlashMenu({ model, range: curRange });
         });
-
-        return PREVENT_DEFAULT;
+        return ALLOW_DEFAULT;
       },
     },
     ...createBracketAutoCompleteBindings(model),

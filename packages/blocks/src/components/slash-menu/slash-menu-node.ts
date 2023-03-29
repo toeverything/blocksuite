@@ -29,9 +29,6 @@ export class SlashMenu extends LitElement {
   @property()
   model!: BaseBlockModel;
 
-  @property()
-  abortController = new AbortController();
-
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
@@ -46,6 +43,8 @@ export class SlashMenu extends LitElement {
 
   @state()
   private _hide = false;
+
+  abortController = new AbortController();
 
   /**
    * Does not include the slash character

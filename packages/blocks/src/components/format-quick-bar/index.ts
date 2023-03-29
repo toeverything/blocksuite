@@ -4,7 +4,7 @@ import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
-import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
+import { getViewportElement } from '../../__internal__/utils/query.js';
 import { throttle } from '../../__internal__/utils/std.js';
 import { onModelElementUpdated } from '../../page-block/index.js';
 import {
@@ -104,9 +104,7 @@ export const showFormatQuickBar = async ({
   if (!page.root) {
     throw new Error("Failed to get page's root element");
   }
-  const pageBlock = getDefaultPageBlock(page.root);
-  const scrollContainer = pageBlock.viewportElement;
-
+  const scrollContainer = getViewportElement(page);
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
     scrollContainer.addEventListener('scroll', updatePos, { passive: true });
