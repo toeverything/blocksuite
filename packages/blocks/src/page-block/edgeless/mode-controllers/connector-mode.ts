@@ -176,6 +176,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     );
     const controllers = routes.map(v => {
       return {
+        ...v,
         x: v.x - bound.x,
         y: v.y - bound.y,
       };

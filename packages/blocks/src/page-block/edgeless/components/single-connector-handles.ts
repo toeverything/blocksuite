@@ -1,4 +1,4 @@
-import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
+import { Rectangle } from '@blocksuite/connector';
 import type {
   ConnectorElement,
   Controller,
@@ -15,7 +15,7 @@ import {
   getPoint,
   getPointByDirection,
 } from '../mode-controllers/connector-mode.js';
-import { getXYWH, pickBy } from '../utils.js';
+import { generatePath, getXYWH, pickBy } from '../utils.js';
 
 function capMousedown(
   event: MouseEvent,
@@ -25,6 +25,11 @@ function capMousedown(
   position: 'start' | 'end',
   requestUpdate: () => void
 ) {
+  const originControllers = element.controllers.map(c => ({
+    ...c,
+    x: c.x + element.x,
+    y: c.y + element.y,
+  }));
   const mousemove = (mouseMoveEvent: MouseEvent) => {
     const { x, y } = mouseMoveEvent;
     const [modelX, modelY] = surface.toModelCoord(x, y);
@@ -76,20 +81,27 @@ function capMousedown(
 
     const routes =
       position === 'start'
-        ? route([newRect, originEndRect].filter(r => !!r) as Rectangle[], [
+        ? generatePath(
+            newRect,
+            originEndRect,
             newPoint,
             originEndPoint,
-          ])
-        : route([originStartRect, newRect].filter(r => !!r) as Rectangle[], [
+            originControllers
+          )
+        : generatePath(
+            originStartRect,
+            newRect,
             originStartPoint,
             newPoint,
-          ]);
+            originControllers
+          );
     const bound = getBrushBoundFromPoints(
       routes.map(r => [r.x, r.y]),
       0
     );
     const controllers = routes.map(v => {
       return {
+        ...v,
         x: v.x - bound.x,
         y: v.y - bound.y,
       };

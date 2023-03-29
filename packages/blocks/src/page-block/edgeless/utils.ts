@@ -12,8 +12,12 @@ import {
   isInEmptyDatabaseByPoint,
   Rect,
 } from '@blocksuite/blocks/std';
+import type { Point as ConnectorPoint, Rectangle } from '@blocksuite/connector';
+import { simplifyPath } from '@blocksuite/connector';
+import { route } from '@blocksuite/connector';
 import type {
   Bound,
+  Controller,
   PhasorElement,
   SurfaceManager,
   SurfaceViewport,
@@ -252,4 +256,43 @@ export function pickBy(
         modelX,
         modelY
       );
+}
+
+export function generatePath(
+  startRect: Rectangle | null,
+  endRect: Rectangle | null,
+  startPoint: ConnectorPoint,
+  endPoint: ConnectorPoint,
+  originControllers: Controller[]
+) {
+  let customizedStart = Infinity;
+  let customizedEnd = -1;
+  originControllers.forEach((c, index) => {
+    if (c.customized) {
+      customizedStart = Math.min(customizedStart, index);
+      customizedEnd = Math.max(customizedEnd, index);
+    }
+  });
+  if (customizedEnd > -1) {
+    const part0EndPoint = originControllers[customizedStart];
+    const part0 = route(startRect ? [startRect] : [], [
+      startPoint,
+      part0EndPoint,
+    ]);
+    const part1 = originControllers.slice(customizedStart, customizedEnd + 1);
+    const part2StartPoint = originControllers[customizedEnd];
+    const part2 = route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
+
+    const finalPath = simplifyPath([
+      ...part0.slice(0, -1),
+      ...part1,
+      ...part2.slice(1),
+    ]);
+    return finalPath;
+  }
+
+  return route([startRect, endRect].filter(r => !!r) as Rectangle[], [
+    startPoint,
+    endPoint,
+  ]);
 }

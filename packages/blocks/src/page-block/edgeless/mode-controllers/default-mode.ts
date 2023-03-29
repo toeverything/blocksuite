@@ -14,7 +14,7 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import { Rectangle, route } from '@blocksuite/connector';
+import { Rectangle } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PhasorElement, XYWH } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
@@ -29,6 +29,7 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
+  generatePath,
   getXYWH,
   isPhasorElement,
   isTopLevelBlock,
@@ -181,9 +182,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
                   x: x + controllers[controllers.length - 1].x,
                   y: y + controllers[controllers.length - 1].y,
                 };
-          const routes = route(
-            [originStartRect, originEndRect].filter(r => !!r) as Rectangle[],
-            [originStartPoint, originEndPoint]
+          const routes = generatePath(
+            originStartRect,
+            originEndRect,
+            originStartPoint,
+            originEndPoint,
+            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y }))
           );
           const bound = getBrushBoundFromPoints(
             routes.map(r => [r.x, r.y]),
@@ -191,6 +195,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           );
           const newControllers = routes.map(v => {
             return {
+              ...v,
               x: v.x - bound.x,
               y: v.y - bound.y,
             };
