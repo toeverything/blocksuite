@@ -80,6 +80,7 @@ export class DefaultPageBlockComponent
 
       /* Leave a place for drag-handle */
       padding-left: 24px;
+      padding-right: 24px;
     }
 
     .affine-default-page-block-title {
