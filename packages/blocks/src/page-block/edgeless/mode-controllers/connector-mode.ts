@@ -106,14 +106,21 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     this._draggingStartPoint = startPoint;
 
     const bound = new Bound(modelX, modelY, 1, 1);
-    const id = this._surface.addConnectorElement(bound, [0, 0, 1, 1], {
-      startElement: this._draggingStartElement
-        ? {
-            id: this._draggingStartElement.id,
-            direction: startDirection,
-          }
-        : undefined,
-    });
+    const id = this._surface.addConnectorElement(
+      bound,
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
+      ],
+      {
+        startElement: this._draggingStartElement
+          ? {
+              id: this._draggingStartElement.id,
+              direction: startDirection,
+            }
+          : undefined,
+      }
+    );
     this._draggingElementId = id;
 
     this._draggingArea = {
@@ -167,12 +174,12 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       routes.map(r => [r.x, r.y]),
       0
     );
-    const controllers = routes
-      .map(r => [r.x, r.y])
-      .flat()
-      .map((v, index) => {
-        return index % 2 ? v - bound.y : v - bound.x;
-      });
+    const controllers = routes.map(v => {
+      return {
+        x: v.x - bound.x,
+        y: v.y - bound.y,
+      };
+    });
 
     this._surface.updateConnectorElement(id, bound, controllers, {
       endElement: end ? { id: end.id, direction: endDirection } : undefined,

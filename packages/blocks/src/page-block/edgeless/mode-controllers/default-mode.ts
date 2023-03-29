@@ -164,8 +164,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             originStartRect && startElement
               ? getPointByDirection(originStartRect, startElement.direction)
               : {
-                  x: x + controllers[0],
-                  y: y + controllers[1],
+                  x: x + controllers[0].x,
+                  y: y + controllers[0].y,
                 };
 
           const originEnd = endElement?.id
@@ -178,8 +178,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             originEndRect && endElement
               ? getPointByDirection(originEndRect, endElement.direction)
               : {
-                  x: x + controllers[controllers.length - 2],
-                  y: y + controllers[controllers.length - 1],
+                  x: x + controllers[controllers.length - 1].x,
+                  y: y + controllers[controllers.length - 1].y,
                 };
           const routes = route(
             [originStartRect, originEndRect].filter(r => !!r) as Rectangle[],
@@ -189,12 +189,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             routes.map(r => [r.x, r.y]),
             0
           );
-          const newControllers = routes
-            .map(r => [r.x, r.y])
-            .flat()
-            .map((v, index) => {
-              return index % 2 ? v - bound.y : v - bound.x;
-            });
+          const newControllers = routes.map(v => {
+            return {
+              x: v.x - bound.x,
+              y: v.y - bound.y,
+            };
+          });
           surface.updateConnectorElement(id, bound, newControllers);
         }
       });

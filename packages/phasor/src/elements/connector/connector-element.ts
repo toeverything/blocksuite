@@ -3,7 +3,11 @@ import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
-import type { AttachedElement, SerializedConnectorProps } from './types.js';
+import type {
+  AttachedElement,
+  Controller,
+  SerializedConnectorProps,
+} from './types.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -38,7 +42,7 @@ export class ConnectorElement extends BaseElement {
   lineWidth = 2;
   // relative to element x,y.
   // [x0, y0, x1, y1, x2, y2...]
-  controllers: number[] = [];
+  controllers: Controller[] = [];
   startElement?: AttachedElement;
   endElement?: AttachedElement;
 
@@ -50,14 +54,14 @@ export class ConnectorElement extends BaseElement {
     ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
 
     const path = new Path2D();
-    path.moveTo(this.controllers[0], this.controllers[1]);
-    let lastX = this.controllers[0];
-    let lastY = this.controllers[1];
-    for (let i = 2; i < this.controllers.length - 2; i = i + 2) {
-      const currentX = this.controllers[i];
-      const currentY = this.controllers[i + 1];
-      const nextX = this.controllers[i + 2];
-      const nextY = this.controllers[i + 3];
+    path.moveTo(this.controllers[0].x, this.controllers[0].y);
+    let lastX = this.controllers[0].x;
+    let lastY = this.controllers[0].y;
+    for (let i = 1; i < this.controllers.length - 1; i = i + 1) {
+      const currentX = this.controllers[i].x;
+      const currentY = this.controllers[i].y;
+      const nextX = this.controllers[i + 1].x;
+      const nextY = this.controllers[i + 1].y;
 
       const minX = Math.min(lastX, nextX);
       const minY = Math.min(lastY, nextY);
@@ -165,9 +169,11 @@ export class ConnectorElement extends BaseElement {
       lastX = currentX;
       lastY = currentY;
     }
-    path.lineTo(...(this.controllers.slice(-2) as [number, number]));
+    const end = this.controllers[this.controllers.length - 1];
+    path.lineTo(end.x, end.y);
 
-    drawArrow(path, this.controllers.slice(-4, -2), this.controllers.slice(-2));
+    const secondToLast = this.controllers[this.controllers.length - 2];
+    drawArrow(path, [secondToLast.x, secondToLast.y], [end.x, end.y]);
 
     ctx.strokeStyle = this.color;
     ctx.lineWidth = this.lineWidth;
@@ -241,11 +247,13 @@ export class ConnectorElement extends BaseElement {
     const elementW = Math.max(element.w, 1);
     const boundH = Math.max(bound.h, 1);
     const boundW = Math.max(bound.w, 1);
-    const controllers = (element as ConnectorElement).controllers.map(
-      (v, index) => {
-        return index % 2 ? boundH * (v / elementH) : boundW * (v / elementW);
-      }
-    );
+    const controllers = (element as ConnectorElement).controllers.map(v => {
+      return {
+        ...v,
+        x: boundW * (v.x / elementW),
+        y: boundH * (v.y / elementH),
+      };
+    });
 
     return {
       xywh: serializeXYWH(bound.x, bound.y, boundW, boundH),

@@ -34,8 +34,8 @@ function mousedown(
       originStartRect && startElement
         ? getPointByDirection(originStartRect, startElement.direction)
         : {
-            x: element.x + element.controllers[0],
-            y: element.y + element.controllers[1],
+            x: element.x + element.controllers[0].x,
+            y: element.y + element.controllers[0].y,
           };
 
     const originEnd = endElement?.id ? surface.pickById(endElement.id) : null;
@@ -46,8 +46,10 @@ function mousedown(
       originEndRect && endElement
         ? getPointByDirection(originEndRect, endElement.direction)
         : {
-            x: element.x + element.controllers[element.controllers.length - 2],
-            y: element.y + element.controllers[element.controllers.length - 1],
+            x:
+              element.x + element.controllers[element.controllers.length - 1].x,
+            y:
+              element.y + element.controllers[element.controllers.length - 1].y,
           };
 
     const picked = pickBy(
@@ -81,12 +83,12 @@ function mousedown(
       routes.map(r => [r.x, r.y]),
       0
     );
-    const controllers = routes
-      .map(r => [r.x, r.y])
-      .flat()
-      .map((v, index) => {
-        return index % 2 ? v - bound.y : v - bound.x;
-      });
+    const controllers = routes.map(v => {
+      return {
+        x: v.x - bound.x,
+        y: v.y - bound.y,
+      };
+    });
 
     if (position === 'start') {
       surface.updateConnectorElement(element.id, bound, controllers, {
@@ -123,13 +125,13 @@ export function SingleConnectorHandles(
   const { controllers } = element;
   const start = {
     position: 'absolute',
-    left: `${controllers[0]}px`,
-    top: `${controllers[1]}px`,
+    left: `${controllers[0].x}px`,
+    top: `${controllers[0].y}px`,
   };
   const end = {
     position: 'absolute',
-    left: `${controllers[controllers.length - 2]}px`,
-    top: `${controllers[controllers.length - 1]}px`,
+    left: `${controllers[controllers.length - 1].x}px`,
+    top: `${controllers[controllers.length - 1].y}px`,
   };
   return html`
     <style>

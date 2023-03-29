@@ -6,7 +6,10 @@ import * as Y from 'yjs';
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
-import type { ConnectorProperties } from './elements/connector/types.js';
+import type {
+  ConnectorProperties,
+  Controller,
+} from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -97,7 +100,7 @@ export class SurfaceManager {
 
   addConnectorElement(
     bound: IBound,
-    controllers: number[],
+    controllers: Controller[],
     properties: ConnectorProperties = {}
   ) {
     const id = nanoid(10);
@@ -122,7 +125,7 @@ export class SurfaceManager {
   updateConnectorElement(
     id: string,
     bound: IBound,
-    controllers: number[],
+    controllers: Controller[],
     properties: ConnectorProperties = {}
   ) {
     this._transact(() => {
@@ -406,7 +409,7 @@ export class SurfaceManager {
             break;
           }
           case 'controllers': {
-            const controllers: number[] = JSON.parse(
+            const controllers: Controller[] = JSON.parse(
               yElement.get(key) as string
             );
             (element as ConnectorElement).controllers = controllers;
