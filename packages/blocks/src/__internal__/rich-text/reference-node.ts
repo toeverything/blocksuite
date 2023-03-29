@@ -37,7 +37,7 @@ export class AffineReference extends NonShadowLitElement {
   @state()
   private _refMeta?: PageMeta;
 
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   connectedCallback() {
     super.connectedCallback();
@@ -48,16 +48,13 @@ export class AffineReference extends NonShadowLitElement {
     }
     const model = getModelByElement(this);
     const reference = this.textAttributes?.reference;
-    assertExists(
-      reference,
-      'Failed to get reference! reference is not defined!'
-    );
+    assertExists(reference, 'Unable to get reference!');
 
     this._refMeta = model.page.workspace.meta.pageMetas.find(
       page => page.id === reference.pageId
     );
 
-    this._disposableGroup.add(
+    this._disposables.add(
       model.page.workspace.slots.pagesUpdated.on(() => {
         this._refMeta = model.page.workspace.meta.pageMetas.find(
           page => page.id === reference.pageId
@@ -68,7 +65,7 @@ export class AffineReference extends NonShadowLitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   private _onClick(e: MouseEvent) {
@@ -88,9 +85,9 @@ export class AffineReference extends NonShadowLitElement {
     const title = refMeta
       ? refMeta.title
       : // Maybe the page is deleted
-        'Reference Page Not Found';
+        'Referenced Page Not Found';
     const type = this.textAttributes.reference?.type;
-    assertExists(type, 'Failed to get reference type! type is not defined!');
+    assertExists(type, 'Unable to get reference type!');
 
     // TODO fix cursor with white space
     // TODO update icon
