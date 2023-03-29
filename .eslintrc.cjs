@@ -60,6 +60,7 @@ module.exports = {
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
+    'packages/connector/dist/*',
   ],
   overrides: [
     {
