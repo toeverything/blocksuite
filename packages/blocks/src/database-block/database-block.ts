@@ -12,8 +12,11 @@ import {
   PlusIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
-import { ColumnInsertPosition } from '@blocksuite/global/database';
+import {
+  type BlockColumn,
+  ColumnInsertPosition,
+  type ColumnSchema,
+} from '@blocksuite/global/database';
 import {
   assertEquals,
   assertExists,
@@ -238,13 +241,14 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     editColumn.setTitleColumnEditId = this.setEditingColumnId;
     editColumn.targetModel = this.targetModel;
     editColumn.targetColumnSchema = column;
+    editColumn.columnIndex = index - 1;
+    editColumn.closePopup = () => {
+      editColumn.remove();
+    };
     editColumn.insertColumn = position => {
       const insertIdex =
         position === ColumnInsertPosition.Right ? index : index - 1;
       this.addColumn(insertIdex);
-    };
-    editColumn.closePopup = () => {
-      editColumn.remove();
     };
     document.body.appendChild(editColumn);
     requestAnimationFrame(() => {

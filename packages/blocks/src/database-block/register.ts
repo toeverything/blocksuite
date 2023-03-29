@@ -1,6 +1,7 @@
 import type {
   BlockColumn,
   ColumnSchema,
+  ColumnSchemaType,
   RowHost,
 } from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
@@ -26,7 +27,7 @@ export abstract class DatabaseCellLitElement<Value> extends LitElement {
 }
 
 export interface ColumnSchemaRenderer<
-  Type extends string = string,
+  Type extends ColumnSchemaType = ColumnSchemaType,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
 > {
@@ -57,7 +58,7 @@ export interface ColumnUIComponents<
 }
 
 export function defineColumnSchemaRenderer<
-  Type extends string,
+  Type extends ColumnSchemaType,
   Property extends Record<string, unknown>,
   Value
 >(

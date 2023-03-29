@@ -252,6 +252,24 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
+  deleteColumnSchema(id: ColumnSchema['id']) {
+    this.transact(() => this.columnSchema.delete(id));
+  }
+
+  copyBlockColumnById(copyId: ColumnSchema['id'], toId: ColumnSchema['id']) {
+    this.transact(() => {
+      this.columns.forEach(column => {
+        const copyColumn = column.get(copyId) as Y.Map<unknown>;
+        if (copyColumn) {
+          const columnMap = new Y.Map();
+          columnMap.set('schemaId', toId);
+          columnMap.set('value', copyColumn.get('value'));
+          column.set(toId, columnMap);
+        }
+      });
+    });
+  }
+
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }

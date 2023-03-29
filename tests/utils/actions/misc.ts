@@ -10,6 +10,7 @@ import type { RichText } from '../../../packages/playground/examples/virgo/test-
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
   pressEnter,
+  pressEscape,
   pressSpace,
   pressTab,
   SHORT_KEY,
@@ -269,9 +270,16 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
-export async function initDatabaseColumn(page: Page) {
+export async function initDatabaseColumn(page: Page, title = '') {
   const columnAddBtn = page.locator('.affine-database-add-column-button');
   await columnAddBtn.click();
+
+  if (title) {
+    await type(page, title);
+    await pressEnter(page);
+  } else {
+    await pressEscape(page);
+  }
 }
 
 export async function initDatabaseRow(page: Page) {
