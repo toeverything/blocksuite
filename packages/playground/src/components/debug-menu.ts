@@ -510,6 +510,19 @@ export class DebugMenu extends NonShadowLitElement {
   }
 }
 
+function createPage(workspace: Workspace) {
+  const pageName = 'Untitled';
+  // TODO use id generator
+  // const id = workspace.idGenerator();
+  const id = nanoid();
+  const newPage = workspace.createPage(id);
+  const pageBlockId = newPage.addBlock('affine:page', {
+    title: new newPage.Text(pageName),
+  });
+  newPage.addBlock('affine:surface', {}, null);
+  newPage.addBlock('affine:frame', {}, pageBlockId);
+}
+
 function getTabGroupTemplate({
   workspace,
   editor,
@@ -522,21 +535,12 @@ function getTabGroupTemplate({
   workspace.slots.pagesUpdated.on(requestUpdate);
   const pageList = workspace.meta.pageMetas;
 
-  const createPage = () => {
-    const pageName = 'Untitled';
-    // TODO use id generator
-    // const id = workspace.idGenerator();
-    const id = nanoid();
-    const newPage = workspace.createPage(id);
-    const pageBlockId = newPage.addBlock('affine:page', {
-      title: new newPage.Text(pageName),
-    });
-    newPage.addBlock('affine:surface', {}, null);
-    newPage.addBlock('affine:frame', {}, pageBlockId);
-  };
-
   return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
-      <sl-button size="small" content="new page" @click=${createPage}>
+      <sl-button
+        size="small"
+        content="new page"
+        @click=${() => createPage(workspace)}
+      >
         <sl-icon name="file-earmark-plus" label="new page"></sl-icon>
       </sl-button>
     </sl-tooltip>
