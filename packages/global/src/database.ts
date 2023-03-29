@@ -1,6 +1,6 @@
 export interface RowHost<Value = unknown> extends HTMLElement {
   setEditing(isEditing: boolean): void;
-
+  setHeight(height: number): void;
   setValue(value: Value): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
@@ -25,8 +25,15 @@ export interface SchemaInternalProperty {
 export type ColumnSchemaProperty<Property extends Record<string, unknown>> =
   Property;
 
+export type ColumnSchemaType =
+  | 'rich-text'
+  | 'select'
+  | 'multi-select'
+  | 'number'
+  | 'progress';
+
 export interface ColumnSchema<
-  Type extends string = string,
+  Type extends ColumnSchemaType = ColumnSchemaType,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
 > {
@@ -54,3 +61,8 @@ export type BlockColumn<Schema extends ColumnSchema = ColumnSchema> = {
     ? Value
     : never;
 };
+
+export const enum ColumnInsertPosition {
+  Left = 'left',
+  Right = 'right',
+}

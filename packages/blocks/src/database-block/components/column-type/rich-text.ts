@@ -10,7 +10,7 @@ import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../../__internal__/rich-text/virgo/types.js';
-import { setUpVirgoScroll } from '../../../__internal__/utils/virgo.js';
+import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
 import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
@@ -68,6 +68,8 @@ function toggleStyle(
 class TextCell extends DatabaseCellLitElement<Y.Text> {
   static styles = css`
     :host {
+      display: flex;
+      align-items: center;
       width: 100%;
       height: 100%;
     }
@@ -92,7 +94,7 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
         value: yText,
       });
       this.vEditor = new VEditor(yText);
-      setUpVirgoScroll(this.databaseModel.page, this.vEditor);
+      setupVirgoScroll(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
@@ -185,7 +187,7 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
     if (this.column && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.column.value as any);
-      setUpVirgoScroll(this.databaseModel.page, this.vEditor);
+      setupVirgoScroll(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
@@ -213,7 +215,6 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
       <style>
         .rich-text-container {
           width: 100%;
-          height: 100%;
           outline: none;
         }
       </style>

@@ -157,6 +157,7 @@ const styles = css`
     margin: 16px 0 20px 12px;
     color: var(--affine-secondary-text-color);
     font-size: var(--affine-font-base);
+    user-select: none;
   }
 
   .prominent {

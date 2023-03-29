@@ -253,9 +253,6 @@ export class VEditor<
       })
     );
 
-    //FIXME: wait for render refactor
-    this.rootElement.focus({ preventScroll: true });
-
     this.slots.updated.emit();
   };
 
@@ -503,10 +500,10 @@ export class VEditor<
    *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
    * ```
    */
-  getDeltasByVRange(vRange: VRange): DeltaEntry[] {
-    const deltas = this.yText.toDelta() as DeltaInsert[];
+  getDeltasByVRange(vRange: VRange): DeltaEntry<TextAttributes>[] {
+    const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
 
-    const result: DeltaEntry[] = [];
+    const result: DeltaEntry<TextAttributes>[] = [];
     let index = 0;
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
@@ -710,9 +707,6 @@ export class VEditor<
     }
     selection.removeAllRanges();
     selection.addRange(newRange);
-
-    //TODO: wait for render refactor
-    // this.rootElement.focus({ preventScroll: true});
 
     if (this.shouldScrollIntoView) {
       let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
@@ -958,9 +952,6 @@ export class VEditor<
     if (origin === 'native') {
       return;
     }
-
-    // avoid cursor jumping to beginning in a moment
-    this._rootElement?.blur();
 
     const fn = () => {
       if (newVRange) {

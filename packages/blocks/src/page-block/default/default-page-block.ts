@@ -223,7 +223,6 @@ export class DefaultPageBlockComponent
       });
       this.requestUpdate();
     });
-    this._titleVEditor.focusEnd();
     this._titleVEditor.setReadonly(this.page.readonly);
   }
 

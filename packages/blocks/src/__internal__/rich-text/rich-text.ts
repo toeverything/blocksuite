@@ -8,11 +8,13 @@ import { z } from 'zod';
 import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import { type BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { setUpVirgoScroll } from '../utils/virgo.js';
+import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { attributesRenderer } from './virgo/attributes-renderer.js';
 import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
+
+const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
 
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
@@ -61,7 +63,7 @@ export class RichText extends NonShadowLitElement {
   firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
-    setUpVirgoScroll(this.model.page, this._vEditor);
+    setupVirgoScroll(this.model.page, this._vEditor);
     if (this.codeBlockGetHighlighterOptions) {
       this._vEditor.setAttributesSchema(z.object({}));
       this._vEditor.setAttributesRenderer(
@@ -97,8 +99,9 @@ export class RichText extends NonShadowLitElement {
           ) {
             const attributes = deltas[0][0].attributes;
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              delete attributes?.link;
-              delete attributes?.code;
+              IGNORED_ATTRIBUTES.forEach(attr => {
+                delete attributes?.[attr];
+              });
             }
 
             vEditor.insertText(vRange, e.data, attributes);
@@ -125,8 +128,9 @@ export class RichText extends NonShadowLitElement {
         if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
           if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-            delete attributes?.link;
-            delete attributes?.code;
+            IGNORED_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
           }
 
           vEditor.insertText(vRange, data, attributes);

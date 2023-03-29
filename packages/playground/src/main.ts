@@ -39,6 +39,7 @@ function subscribePage(workspace: Workspace) {
 
     const editor = new EditorContainer();
     editor.page = page;
+    editor.autofocus = true;
 
     document.getElementById('app')?.append(editor);
 

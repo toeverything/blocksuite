@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
+import { SHORT_KEY } from './keyboard.js';
 
 export async function getFrameRect(
   page: Page,
@@ -270,4 +271,17 @@ export async function clickComponentToolbarMoreMenuButton(
     .filter({ hasText: text });
 
   await btn.click();
+}
+
+// stepX/Y may not equal to wheel event delta.
+// Chromium reports deltaX/deltaY scaled by host device scale factor.
+// https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
+export async function zoomByMouseWheel(
+  page: Page,
+  stepX: number,
+  stepY: number
+) {
+  await page.keyboard.down(SHORT_KEY);
+  await page.mouse.wheel(stepX, stepY);
+  await page.keyboard.up(SHORT_KEY);
 }
