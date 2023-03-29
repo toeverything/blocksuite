@@ -1,11 +1,21 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@rich-data/viewer/theme/base.css';
+import '@rich-data/viewer/theme/basic.css';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import '@rich-data/json-plugin/theme/basic.css';
 
 export async function createViewer(value: Record<string, unknown>) {
   const { createRoot } = await import('react-dom/client');
-  const { JsonViewer } = await import('@rich-data/viewer');
+  const { createViewerHook } = await import('@rich-data/viewer');
+  const { createJsonPlugins } = await import('@rich-data/json-plugin');
   const inspector = document.getElementById('inspector') as HTMLElement;
+  const { useViewer, Provider } = createViewerHook({
+    plugins: createJsonPlugins(),
+  });
   const root = createRoot(inspector);
+  const App = () => {
+    const { Viewer } = useViewer();
+    return <Viewer value={value} />;
+  };
   root.render(
     <div
       style={{
@@ -19,7 +29,9 @@ export async function createViewer(value: Record<string, unknown>) {
         overflow: 'auto',
       }}
     >
-      <JsonViewer value={value} />
+      <Provider>
+        <App />
+      </Provider>
       <button
         style={{
           position: 'absolute',
