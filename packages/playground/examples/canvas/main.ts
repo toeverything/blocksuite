@@ -83,34 +83,62 @@ function addShapeElements(surface: SurfaceManager) {
 }
 
 function addConnectorElements(surface: SurfaceManager) {
-  surface.addConnectorElement(
-    new Bound(500, 0, 100, 100),
-    [0, 0, 30, 0, 30, 50, 60, 50, 60, 100, 100, 100]
-  );
+  surface.addConnectorElement(new Bound(500, 0, 100, 100), [
+    { x: 0, y: 0 },
+    { x: 30, y: 0 },
+    { x: 30, y: 50 },
+    { x: 60, y: 50 },
+    { x: 60, y: 100 },
+    { x: 100, y: 100 },
+  ]);
 
   // right
-  surface.addConnectorElement(new Bound(500, 120, 100, 10), [0, 0, 100, 0]);
+  surface.addConnectorElement(new Bound(500, 120, 100, 10), [
+    { x: 0, y: 0 },
+    { x: 100, y: 0 },
+  ]);
 
   // left
-  surface.addConnectorElement(new Bound(500, 260, 100, 10), [100, 0, 0, 0]);
+  surface.addConnectorElement(new Bound(500, 260, 100, 10), [
+    { x: 100, y: 0 },
+    { x: 0, y: 0 },
+  ]);
 
   // top
-  surface.addConnectorElement(new Bound(480, 140, 10, 100), [0, 100, 0, 0]);
+  surface.addConnectorElement(new Bound(480, 140, 10, 100), [
+    { x: 0, y: 100 },
+    { x: 0, y: 0 },
+  ]);
 
   // bottom
-  surface.addConnectorElement(new Bound(620, 140, 10, 100), [0, 0, 0, 100]);
+  surface.addConnectorElement(new Bound(620, 140, 10, 100), [
+    { x: 0, y: 0 },
+    { x: 0, y: 100 },
+  ]);
 
   // right-bottom
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [0, 0, 100, 100]);
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
+    { x: 0, y: 0 },
+    { x: 100, y: 100 },
+  ]);
 
   // left-top
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [100, 100, 0, 0]);
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
+    { x: 100, y: 100 },
+    { x: 0, y: 0 },
+  ]);
 
   // left-bottom
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [100, 0, 0, 100]);
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
+    { x: 100, y: 0 },
+    { x: 0, y: 100 },
+  ]);
 
   // right-top
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [0, 100, 100, 0]);
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
+    { x: 0, y: 100 },
+    { x: 100, y: 0 },
+  ]);
 }
 
 function main() {
