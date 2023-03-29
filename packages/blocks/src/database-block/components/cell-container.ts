@@ -30,9 +30,14 @@ export class DatabaseCellContainer
   @state()
   private _isEditing = false;
 
+  private _timerId: number | undefined = undefined;
+
   setValue(value: unknown) {
     if (value !== undefined) {
-      setTimeout(() => {
+      if (this._timerId !== undefined) {
+        window.clearTimeout(this._timerId);
+      }
+      this._timerId = window.setTimeout(() => {
         this.databaseModel.page.captureSync();
         this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
           schemaId: this.columnSchema.id,

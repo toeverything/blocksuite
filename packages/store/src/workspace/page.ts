@@ -270,6 +270,48 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
+  updateBlockColumnsToSelect(id: BaseBlockModel['id']) {
+    this.transact(() => {
+      this.columns.forEach(column => {
+        const targetColumn = column.get(id) as Y.Map<unknown>;
+        if (!targetColumn) return;
+
+        const value = targetColumn.get('value') as string[] | undefined;
+        if (!value) return;
+
+        const columnMap = new Y.Map();
+        columnMap.set('schemaId', id);
+        columnMap.set('value', [value[0]]);
+        column.set(id, columnMap);
+      });
+    });
+  }
+
+  updateBlockColumnsToRichText(id: BaseBlockModel['id']) {
+    this.transact(() => {
+      this.columns.forEach(column => {
+        const targetColumn = column.get(id) as Y.Map<unknown>;
+        if (!targetColumn) return;
+
+        const value = targetColumn.get('value') as number | undefined;
+        if (!value) return;
+
+        const columnMap = new Y.Map();
+        columnMap.set('schemaId', id);
+        columnMap.set('value', new Y.Text(value + ''));
+        column.set(id, columnMap);
+      });
+    });
+  }
+
+  deleteBlockColumns(id: BaseBlockModel['id']) {
+    this.transact(() => {
+      this.columns.forEach(column => {
+        column.delete(id);
+      });
+    });
+  }
+
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }

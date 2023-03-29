@@ -22,7 +22,7 @@ class NumberCell extends DatabaseCellLitElement<number> {
   static tag = literal`affine-database-number-cell`;
 
   render() {
-    return html` <span>${this.column?.value}</span> `;
+    return html` <span class="number">${this.column?.value}</span> `;
   }
 }
 

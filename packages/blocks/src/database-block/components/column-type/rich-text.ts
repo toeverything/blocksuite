@@ -112,6 +112,7 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
       } else {
         // exit editing
         this.rowHost.setEditing(false);
+        this._container.blur();
       }
       event.preventDefault();
       return;

@@ -24,6 +24,7 @@ import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
+import { getColumnSchemaRenderer } from '../register.js';
 
 type ColumnType = {
   type: ColumnSchemaType;
@@ -216,6 +217,12 @@ class ColumnTypePopup extends LitElement {
   @property()
   columnType: ColumnSchemaType | undefined;
 
+  @property()
+  titleId!: string;
+
+  @property()
+  changeColumnType!: (titleId: string, type: ColumnSchemaType) => void;
+
   render() {
     return html`
       <div class="affine-database-column-type-popup">
@@ -225,11 +232,16 @@ class ColumnTypePopup extends LitElement {
         </div>
         <div class="action-divider"></div>
         ${columnTypes.map(column => {
+          const selected = column.type === this.columnType;
+          const onChangeColumnType = () => {
+            if (!selected) {
+              this.changeColumnType(this.titleId, column.type);
+            }
+          };
           return html`
             <div
-              class="action ${column.type} ${column.type === this.columnType
-                ? 'selected'
-                : ''}"
+              class="action ${column.type} ${selected ? 'selected' : ''}"
+              @click=${onChangeColumnType}
             >
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>
@@ -300,9 +312,11 @@ export class EditColumnPopup extends LitElement {
   private _container!: HTMLDivElement;
   private _columnTypePopup!: ColumnTypePopup | null;
 
-  private _onShowColumnType = () => {
+  private _onShowColumnType = (titleId: string) => {
     if (this._columnTypePopup) return;
     this._columnTypePopup = new ColumnTypePopup();
+    this._columnTypePopup.changeColumnType = this._changeColumnType;
+    this._columnTypePopup.titleId = titleId;
     if (!isTitleColumn(this.targetColumnSchema)) {
       this._columnTypePopup.columnType = this.targetColumnSchema.type;
     }
@@ -325,6 +339,45 @@ export class EditColumnPopup extends LitElement {
       this._columnTypePopup?.remove();
       this._columnTypePopup = null;
     }
+  };
+
+  private _updateColumnSchema = (
+    titleId: string,
+    schemaProperties: Partial<ColumnSchema>
+  ) => {
+    const currentSchema = this.targetModel.page.getColumnSchema(titleId);
+    assertExists(currentSchema);
+    const schema = { ...currentSchema, ...schemaProperties };
+    this.targetModel.page.setColumnSchema(schema);
+  };
+
+  private _changeColumnType = (
+    titleId: string,
+    targetType: ColumnSchemaType
+  ) => {
+    if (isTitleColumn(this.targetColumnSchema)) return;
+
+    const currentType = this.targetColumnSchema.type;
+    this.targetModel.page.captureSync();
+    if (currentType === 'select' && targetType === 'multi-select') {
+      this._updateColumnSchema(titleId, { type: targetType });
+    } else if (currentType === 'multi-select' && targetType === 'select') {
+      this._updateColumnSchema(titleId, { type: targetType });
+      this.targetModel.page.updateBlockColumnsToSelect(titleId);
+    } else if (currentType === 'number' && targetType === 'rich-text') {
+      this._updateColumnSchema(titleId, { type: targetType });
+      this.targetModel.page.updateBlockColumnsToRichText(titleId);
+    } else {
+      // incompatible types: clear the value of the column
+      const renderer = getColumnSchemaRenderer(targetType);
+      this._updateColumnSchema(titleId, {
+        type: targetType,
+        property: renderer.propertyCreator(),
+      });
+      this.targetModel.page.deleteBlockColumns(titleId);
+    }
+
+    this.closePopup();
   };
 
   private _onActionClick = (action: NormalAction, titleId: string) => {
@@ -410,16 +463,15 @@ export class EditColumnPopup extends LitElement {
           return null;
         }
 
+        const titleId = isTitleColumn(this.targetColumnSchema)
+          ? '-1'
+          : this.targetColumnSchema.id;
+
         const onMouseOver = isTitleColumn(this.targetColumnSchema)
           ? undefined
           : action.type === 'column-type'
-          ? this._onShowColumnType
+          ? () => this._onShowColumnType(titleId)
           : this._onHideColumnType;
-
-        const titleId =
-          typeof this.targetColumnSchema === 'string'
-            ? '-1'
-            : this.targetColumnSchema.id;
 
         return html`
           <div
