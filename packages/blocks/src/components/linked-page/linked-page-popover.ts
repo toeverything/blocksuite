@@ -71,7 +71,7 @@ export class LinkedPagePopover extends LitElement {
     return this.model.page;
   }
 
-  _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   constructor(
     private model: BaseBlockModel,
@@ -94,17 +94,17 @@ export class LinkedPagePopover extends LitElement {
       query += e.key;
       this._updateQuery(query);
     };
-    this._disposableGroup.addFromEvent(richText, 'keydown', keyDownListener, {
+    this._disposables.addFromEvent(richText, 'keydown', keyDownListener, {
       // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
-    this._disposableGroup.addFromEvent(this, 'mousedown', e => {
+    this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
     });
 
     this._pageList = this._page.workspace.meta.pageMetas;
-    this._disposableGroup.add(
+    this._disposables.add(
       this.model.page.workspace.slots.pagesUpdated.on(() => {
         // TODO filter by query
         this._pageList = this._page.workspace.meta.pageMetas;
@@ -114,7 +114,7 @@ export class LinkedPagePopover extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   updatePosition(position: { height: number; x: string; y: string }) {

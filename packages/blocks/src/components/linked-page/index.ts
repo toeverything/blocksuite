@@ -16,28 +16,24 @@ export function showLinkedPagePopover({
   container?: HTMLElement;
   abortController?: AbortController;
 }) {
-  const disposableGroup = new DisposableGroup();
-  abortController.signal.addEventListener('abort', e => {
-    disposableGroup.dispose();
-  });
+  const disposables = new DisposableGroup();
+  abortController.signal.addEventListener('abort', () => disposables.dispose());
 
   const linkedPage = new LinkedPagePopover(model, abortController);
   // Mount
   container.appendChild(linkedPage);
-  disposableGroup.add(() => {
-    linkedPage.remove();
-  });
+  disposables.add(() => linkedPage.remove());
 
   // Handle position
   const updatePosition = throttle(() => {
     const position = getPopperPosition(linkedPage, range);
     linkedPage.updatePosition(position);
   }, 10);
-  disposableGroup.addFromEvent(window, 'resize', updatePosition);
+  disposables.addFromEvent(window, 'resize', updatePosition);
   const scrollContainer = getViewportElement(model.page);
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
-    disposableGroup.addFromEvent(scrollContainer, 'scroll', updatePosition, {
+    disposables.addFromEvent(scrollContainer, 'scroll', updatePosition, {
       passive: true,
     });
   }
@@ -45,7 +41,7 @@ export function showLinkedPagePopover({
   // Wait for node to be mounted
   setTimeout(updatePosition);
 
-  disposableGroup.addFromEvent(window, 'mousedown', (e: Event) => {
+  disposables.addFromEvent(window, 'mousedown', (e: Event) => {
     if (e.target === linkedPage) return;
     abortController.abort();
   });
