@@ -1,7 +1,7 @@
 import { Rectangle, route } from '@blocksuite/connector';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
-import { AttachedElement, deserializeXYWH } from '@blocksuite/phasor';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';

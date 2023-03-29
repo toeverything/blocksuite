@@ -17,7 +17,7 @@ import {
 import { Rectangle, route } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PhasorElement, XYWH } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints, SurfaceElement } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
@@ -152,7 +152,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       const bindingElements = surface.getBindingElements(selected.id);
       bindingElements.forEach(bindingElement => {
         if (bindingElement.type === 'connector') {
-          const { startElement, endElement, id, x, y, w, h, controllers } =
+          const { startElement, endElement, id, x, y, controllers } =
             bindingElement;
           const originStart = startElement?.id
             ? surface.pickById(startElement.id)
