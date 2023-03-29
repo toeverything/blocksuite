@@ -1,5 +1,5 @@
 import { throttle } from '@blocksuite/blocks';
-import type { CreateGraphReturned } from '@blocksuite/connector';
+import type { CreateGraphReturned, Point } from '@blocksuite/connector';
 import {
   createGraph,
   Rectangle,
@@ -125,7 +125,7 @@ function createRenderer(options: CreateGraphReturned) {
   };
 }
 
-async function _render(rects: Rectangle[], points: { x: number; y: number }[]) {
+async function _render(rects: Rectangle[], points: Point[]) {
   const g = createGraph(rects, points);
   // @ts-expect-error global variable for testing
   window.g = g;
@@ -160,7 +160,7 @@ function getPoints(rects: Rectangle[], directions: Record<string, string>) {
     }
     return null;
   });
-  return points.filter(p => !!p);
+  return points.filter(p => !!p) as Point[];
 }
 
 async function main() {
