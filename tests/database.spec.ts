@@ -24,7 +24,6 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
-  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockCount,

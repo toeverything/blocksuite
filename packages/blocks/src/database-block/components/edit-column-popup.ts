@@ -212,6 +212,12 @@ class ColumnTypePopup extends LitElement {
     .selected.rich-text svg {
       fill: #5438ff;
     }
+    .action.disabled {
+      cursor: not-allowed;
+    }
+    .action.disabled:hover {
+      background: unset;
+    }
   `;
 
   @property()
@@ -232,15 +238,20 @@ class ColumnTypePopup extends LitElement {
         </div>
         <div class="action-divider"></div>
         ${columnTypes.map(column => {
-          const selected = column.type === this.columnType;
+          const isProgress = column.type === 'progress';
+          const selected = column.type === this.columnType && !isProgress;
           const onChangeColumnType = () => {
+            if (isProgress) return;
             if (!selected) {
               this.changeColumnType(this.titleId, column.type);
             }
           };
+
           return html`
             <div
-              class="action ${column.type} ${selected ? 'selected' : ''}"
+              class="action ${column.type} ${selected
+                ? 'selected'
+                : ''} ${isProgress ? 'disabled' : ''}"
               @click=${onChangeColumnType}
             >
               <div class="action-content">
