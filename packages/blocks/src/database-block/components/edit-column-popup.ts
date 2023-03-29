@@ -401,7 +401,12 @@ export class EditColumnPopup extends LitElement {
           return html`<div class="action-divider"></div>`;
         }
 
-        if (this.columnIndex === 0 && action.type === 'move-left') {
+        // boundary
+        if (
+          (this.columnIndex === 0 && action.type === 'move-left') ||
+          (this.columnIndex === this.targetModel.columns.length - 1 &&
+            action.type === 'move-right')
+        ) {
           return null;
         }
 
