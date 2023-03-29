@@ -1,9 +1,11 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { html, render } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import type * as Y from 'yjs';
 import type { z, ZodTypeDef } from 'zod';
 
-import { VirgoElement, VirgoLine } from './components/index.js';
+import { VirgoLine } from './components/index.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
 import { VirgoEventService } from './services/index.js';
 import type {
@@ -111,6 +113,63 @@ export class VEditor<
               text = texts[texts.length - 1];
               textOffset = calculateTextLength(text);
               break;
+            }
+          }
+        } else {
+          const container =
+            node instanceof Element
+              ? node.closest('[data-virgo-root="true"]')
+              : node.parentElement?.closest('[data-virgo-root="true"]');
+          if (container) {
+            const vLines = Array.from(container.querySelectorAll('v-line'));
+            for (let i = 0; i < vLines.length; i++) {
+              if (
+                node.compareDocumentPosition(vLines[i]) ===
+                  Node.DOCUMENT_POSITION_CONTAINED_BY ||
+                node.compareDocumentPosition(vLines[i]) === 20
+              ) {
+                const texts = VEditor.getTextNodesFromElement(vLines[0]);
+                if (texts.length === 0) return null;
+                text = texts[texts.length - 1];
+                textOffset = offset === 0 ? offset : text.length;
+                break;
+              }
+
+              if (
+                i === 0 &&
+                node.compareDocumentPosition(vLines[i]) ===
+                  Node.DOCUMENT_POSITION_FOLLOWING
+              ) {
+                const texts = VEditor.getTextNodesFromElement(vLines[i]);
+                if (texts.length === 0) return null;
+                text = texts[0];
+                textOffset = offset === 0 ? offset : text.length;
+                break;
+              } else if (
+                i === vLines.length - 1 &&
+                node.compareDocumentPosition(vLines[i]) ===
+                  Node.DOCUMENT_POSITION_PRECEDING
+              ) {
+                const texts = VEditor.getTextNodesFromElement(vLines[i]);
+                if (texts.length === 0) return null;
+                text = texts[texts.length - 1];
+                textOffset = calculateTextLength(text);
+                break;
+              }
+
+              if (
+                i < vLines.length - 1 &&
+                node.compareDocumentPosition(vLines[i]) ===
+                  Node.DOCUMENT_POSITION_PRECEDING &&
+                node.compareDocumentPosition(vLines[i + 1]) ===
+                  Node.DOCUMENT_POSITION_FOLLOWING
+              ) {
+                const texts = VEditor.getTextNodesFromElement(vLines[i]);
+                if (texts.length === 0) return null;
+                text = texts[texts.length - 1];
+                textOffset = calculateTextLength(text);
+                break;
+              }
             }
           }
         }
@@ -226,10 +285,9 @@ export class VEditor<
 
     // every chunk is a line
     const lines = chunks.map(chunk => {
-      const virgoLine = new VirgoLine<TextAttributes>();
-
+      const elementTs = [];
       if (chunk.length === 0) {
-        virgoLine.elements.push(new VirgoElement());
+        elementTs.push(html`<v-element></v-element>`);
       } else {
         chunk.forEach(delta => {
           const element = renderElement(
@@ -238,17 +296,25 @@ export class VEditor<
             this._attributesRenderer
           );
 
-          virgoLine.elements.push(element);
+          elementTs.push(element);
         });
       }
 
-      return virgoLine;
+      return html`<v-line .elements=${elementTs}></v-line>`;
     });
 
-    this._rootElement.replaceChildren(...lines);
+    render(
+      repeat(
+        lines.map((line, i) => ({ line, index: i })),
+        entry => entry.index,
+        entry => entry.line
+      ),
+      this._rootElement
+    );
 
+    const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
     await Promise.all(
-      lines.map(async line => {
+      vLines.map(async line => {
         await line.updateComplete;
       })
     );

@@ -1,27 +1,26 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { BaseTextAttributes } from '../utils/index.js';
-import type { VirgoElement } from './virgo-element.js';
-
 @customElement('v-line')
-export class VirgoLine<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
-> extends LitElement {
+export class VirgoLine extends LitElement {
   @property({ attribute: false })
-  elements: VirgoElement<TextAttributes>[] = [];
+  elements: TemplateResult<1>[] = [];
+
+  get vElements() {
+    return Array.from(this.querySelectorAll('v-element'));
+  }
 
   get textLength() {
-    return this.elements.reduce((acc, el) => acc + el.delta.insert.length, 0);
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
 
   get textContent() {
-    return this.elements.reduce((acc, el) => acc + el.delta.insert, '');
+    return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
-    await Promise.all(this.elements.map(el => el.updateComplete));
+    await Promise.all(this.vElements.map(el => el.updateComplete));
     return result;
   }
 
