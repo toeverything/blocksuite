@@ -1,4 +1,3 @@
-import { onModelTextUpdated } from '@blocksuite/blocks';
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { VEditor, VText } from '@blocksuite/virgo';
@@ -185,11 +184,6 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-
-        //FIXME: prevent virgo auto focus
-        onModelTextUpdated(model, richText => {
-          richText.vEditor?.rootElement.blur();
-        });
       } else {
         page.captureSync();
         vEditor.formatText(
@@ -199,11 +193,6 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-
-        //FIXME: prevent virgo auto focus
-        onModelTextUpdated(model, richText => {
-          richText.vEditor?.rootElement.blur();
-        });
       }
     } else {
       page.captureSync();
@@ -219,11 +208,6 @@ export class AffineLink extends NonShadowLitElement {
           mode: 'replace',
         }
       );
-
-      //FIXME: prevent virgo auto focus
-      onModelTextUpdated(model, richText => {
-        richText.vEditor?.rootElement.blur();
-      });
     }
   }
 

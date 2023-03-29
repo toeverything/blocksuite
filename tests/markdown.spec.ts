@@ -38,6 +38,8 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertText(page, '[] ');
   await undoByClick(page);
+  //FIXME: it just failed in playwright
+  await focusRichText(page);
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
@@ -48,6 +50,8 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertText(page, '[ ] ');
   await undoByClick(page);
+  //FIXME: it just failed in playwright
+  await focusRichText(page);
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);

@@ -14,6 +14,7 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import type { ColumnSchema } from '@blocksuite/global/database';
+import { ColumnInsertPosition } from '@blocksuite/global/database';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -251,6 +252,9 @@ export class EditColumnPopup extends LitElement {
   @property()
   setTitleColumnEditId!: (titleId: string) => void;
 
+  @property()
+  insertColumn!: (position: ColumnInsertPosition) => void;
+
   @query('input')
   titleInput!: HTMLInputElement;
 
@@ -290,6 +294,16 @@ export class EditColumnPopup extends LitElement {
     if (action.type === 'rename') {
       this.setTitleColumnEditId(titleId);
       this.closePopup();
+      return;
+    }
+    if (action.type === 'insert-right' || action.type === 'insert-left') {
+      if (action.type === 'insert-right') {
+        this.insertColumn(ColumnInsertPosition.Right);
+      } else {
+        this.insertColumn(ColumnInsertPosition.Left);
+      }
+      this.closePopup();
+      return;
     }
   };
 
