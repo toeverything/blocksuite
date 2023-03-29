@@ -8,6 +8,7 @@ import {
   focusDatabaseTitle,
   focusRichText,
   getDatabaseMouse,
+  getFirstColumnCell,
   initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initDatabaseRow,
@@ -19,6 +20,7 @@ import {
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
+  switchColumnType,
   type,
   undoByClick,
   undoByKeyboard,
@@ -431,4 +433,91 @@ test('should support move column left', async ({ page }) => {
 
   await doColumnAction(page, '5', 'move-left');
   await assertDatabaseColumnOrder(page, ['5', '3']);
+});
+
+test.describe('switch column type', () => {
+  test('switch to number', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123abc', true);
+    await switchColumnType(page, 'number');
+
+    const cell = getFirstColumnCell(page, 'number');
+    expect(await cell.innerText()).toBe('');
+
+    await initDatabaseDynamicRowWithData(page, '123abc');
+    expect(await cell.innerText()).toBe('123');
+  });
+
+  test('switch to rich-text', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123abc', true);
+    await switchColumnType(page, 'rich-text');
+
+    // For now, rich-text will only be initialized on click
+    // Therefore, for the time being, here is to detect whether there is '.rich-text-container'
+    const cell = getFirstColumnCell(page, 'rich-text-container');
+    expect(await cell.count()).toBe(1);
+
+    await initDatabaseDynamicRowWithData(page, '123abc');
+    const cellSelector = '[data-row-id="4"][data-column-id="3"]';
+    await assertDatabaseCellRichTexts(page, cellSelector, '123abc');
+  });
+
+  test('switch between multi-select and select', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await initDatabaseDynamicRowWithData(page, 'abc');
+
+    const cell = getFirstColumnCell(page, 'select-selected');
+    expect(await cell.count()).toBe(2);
+
+    await switchColumnType(page, 'select', '3', true);
+    expect(await cell.count()).toBe(1);
+    expect(await cell.innerText()).toBe('123');
+
+    await initDatabaseDynamicRowWithData(page, 'def');
+    expect(await cell.innerText()).toBe('def');
+
+    await switchColumnType(page, 'multi-select');
+    await initDatabaseDynamicRowWithData(page, '666');
+    expect(await cell.count()).toBe(2);
+    expect(await cell.nth(0).innerText()).toBe('def');
+    expect(await cell.nth(1).innerText()).toBe('666');
+
+    await switchColumnType(page, 'select');
+    expect(await cell.count()).toBe(1);
+    expect(await cell.innerText()).toBe('def');
+
+    await initDatabaseDynamicRowWithData(page, '888');
+    expect(await cell.innerText()).toBe('888');
+  });
+
+  test('switch between number and rich-text', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await switchColumnType(page, 'number');
+
+    await initDatabaseDynamicRowWithData(page, '123abc', true);
+    const cell = getFirstColumnCell(page, 'number');
+    expect(await cell.innerText()).toBe('123');
+
+    await switchColumnType(page, 'rich-text');
+    await initDatabaseDynamicRowWithData(page, 'abc');
+    const cellSelector = '[data-row-id="4"][data-column-id="3"]';
+    await assertDatabaseCellRichTexts(page, cellSelector, '123abc');
+
+    await switchColumnType(page, 'number');
+    expect(await cell.innerText()).toBe('');
+  });
 });
