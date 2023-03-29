@@ -26,6 +26,10 @@ export class AffineReference extends NonShadowLitElement {
     .affine-reference > span {
       white-space: pre-wrap;
     }
+
+    .affine-reference-title::before {
+      content: attr(data-title);
+    }
   `;
 
   @property({ type: Object })
@@ -89,14 +93,14 @@ export class AffineReference extends NonShadowLitElement {
     const type = this.delta.attributes?.reference?.type;
     assertExists(type, 'Unable to get reference type!');
 
-    // TODO fix cursor with white space
     // TODO update icon
 
     // This node is under contenteditable="true",
     // so we should not add any extra white space between HTML tags
     return html`<span class="affine-reference" @click=${this._onClick}
-      >${FontLinkIcon}<span contenteditable="false">${title}</span>${this.delta
-        .insert}</span
+      >${FontLinkIcon}<span class="affine-reference-title" data-title=${title}
+        >${this.delta.insert}</span
+      ></span
     >`;
   }
 }
