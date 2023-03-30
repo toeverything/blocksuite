@@ -62,7 +62,7 @@ test('move drag handle in paragraphs', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '2', '4');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
@@ -72,7 +72,7 @@ test('move drag handle in list', async ({ page }) => {
   await initThreeLists(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '5', '3', false);
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['789', '123', '456']);
 });
 
@@ -102,11 +102,11 @@ test('move drag handle in nested block', async ({ page }) => {
   await assertRichTexts(page, ['1', '2', '21', '22', '23', '3']);
 
   await dragHandleFromBlockToBlockBottomById(page, '5', '7');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['1', '2', '22', '23', '21', '3']);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['2', '22', '23', '21', '3', '1']);
 });
 
@@ -182,7 +182,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   );
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '9');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -237,7 +237,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     true,
     1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
   );
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -293,7 +293,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     true,
     2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
   );
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -354,7 +354,7 @@ test('should sync selected-blocks to session-manager when clicking drag handle',
 
   await focusRichText(page, 1);
 
-  const handle = await page.locator('affine-drag-handle');
+  const handle = page.locator('affine-drag-handle');
   await handle.click();
 
   await page.keyboard.press('Backspace');
@@ -384,7 +384,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertRichTexts(page, ['789', '123', '456']);
 
@@ -539,7 +539,7 @@ test('should blur rich-text first on starting block selection', async ({
   await expect(page.locator('*:focus')).toHaveCount(1);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('*:focus')).toHaveCount(0);
@@ -556,13 +556,52 @@ test('hide drag handle when mouse is hovering over the title', async ({
     page,
     '.affine-frame-block-container'
   );
-  const dragHandle = await page.locator('affine-drag-handle');
+  const dragHandle = page.locator('affine-drag-handle');
   // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
   // when the mouse is over the gap. Therefore, we use rect.y - 20 to make the Y offset greater than the gap between the
   // paragraph blocks.
   await page.mouse.move(rect.x, rect.y - 20, { steps: 2 });
-  expect(await dragHandle.isVisible()).toBe(false);
+  await expect(dragHandle).toBeHidden();
 
   await page.mouse.move(rect.x, rect.y, { steps: 2 });
   expect(await dragHandle.isVisible()).toBe(true);
+  await expect(dragHandle).toBeVisible();
+});
+
+test('should create preview when dragging', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const dragPreview = page.locator('affine-drag-preview');
+  await expect(dragPreview).toHaveCount(0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(2);
+
+  await dragHandleFromBlockToBlockBottomById(
+    page,
+    '2',
+    '4',
+    true,
+    undefined,
+    async () => {
+      await expect(dragPreview).toBeVisible();
+      await expect(dragPreview.locator('.affine-block-element')).toHaveCount(2);
+    }
+  );
 });
