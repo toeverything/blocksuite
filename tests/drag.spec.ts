@@ -568,14 +568,14 @@ test('hide drag handle when mouse is hovering over the title', async ({
   await expect(dragHandle).toBeVisible();
 });
 
-test('should create drag mirror when dragging', async ({ page }) => {
+test('should create preview when dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const dragMirror = page.locator('affine-drag-mirror');
-  await expect(dragMirror).toHaveCount(0);
+  const dragPreview = page.locator('affine-drag-preview');
+  await expect(dragPreview).toHaveCount(0);
 
   await dragBetweenIndices(
     page,
@@ -600,8 +600,8 @@ test('should create drag mirror when dragging', async ({ page }) => {
     true,
     undefined,
     async () => {
-      await expect(dragMirror).toBeVisible();
-      await expect(dragMirror.locator('.affine-block-element')).toHaveCount(2);
+      await expect(dragPreview).toBeVisible();
+      await expect(dragPreview.locator('.affine-block-element')).toHaveCount(2);
     }
   );
 });

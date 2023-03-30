@@ -75,8 +75,8 @@ export class DragIndicator extends LitElement {
   }
 }
 
-@customElement('affine-drag-mirror')
-export class DragMirror extends LitElement {
+@customElement('affine-drag-preview')
+export class DragPreview extends LitElement {
   @property()
   offset = { x: 0, y: 0 };
 
@@ -86,7 +86,7 @@ export class DragMirror extends LitElement {
 
   render() {
     return html`<style>
-      affine-drag-mirror {
+      affine-drag-preview {
         height: auto;
         display: block;
         position: absolute;
@@ -106,7 +106,7 @@ export class DragMirror extends LitElement {
         caret-color: transparent;
       }
 
-      affine-drag-mirror > .affine-block-element:first-child > *:first-child {
+      affine-drag-preview > .affine-block-element:first-child > *:first-child {
         margin-top: 0;
       }
     </style>`;
@@ -238,7 +238,7 @@ export class DragHandle extends LitElement {
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
   private _clickedBlock: BlockComponentElement | null = null;
-  private _dragMirror: DragMirror | null = null;
+  private _dragPreview: DragPreview | null = null;
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
@@ -433,18 +433,18 @@ export class DragHandle extends LitElement {
     );
   }
 
-  private _createDragMirror(
+  private _createDragPreview(
     e: DragEvent,
     draggingBlockElements: BlockComponentElement[]
   ) {
     const containerRect = this._container.getBoundingClientRect();
     const rect = draggingBlockElements[0].getBoundingClientRect();
 
-    const dragMirror = new DragMirror();
-    dragMirror.offset.x = rect.left - containerRect.left - e.clientX;
-    dragMirror.offset.y = rect.top - containerRect.top - e.clientY;
-    dragMirror.style.width = `${rect.width}px`;
-    dragMirror.style.transform = `translate(${
+    const dragPreview = new DragPreview();
+    dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
+    dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
+    dragPreview.style.width = `${rect.width}px`;
+    dragPreview.style.transform = `translate(${
       rect.left - containerRect.left
     }px, ${rect.top - containerRect.top}px)`;
 
@@ -456,19 +456,19 @@ export class DragHandle extends LitElement {
       fragment.appendChild(c);
     });
 
-    dragMirror.appendChild(fragment);
-    this._dragMirror = dragMirror;
-    this._container.appendChild(dragMirror);
+    dragPreview.appendChild(fragment);
+    this._dragPreview = dragPreview;
+    this._container.appendChild(dragPreview);
 
     requestAnimationFrame(() => {
-      dragMirror.querySelector('rich-text')?.vEditor?.rootElement.blur();
+      dragPreview.querySelector('rich-text')?.vEditor?.rootElement.blur();
     });
   }
 
-  private _removeDragMirror() {
-    if (this._dragMirror) {
-      this._dragMirror.remove();
-      this._dragMirror = null;
+  private _removeDragPreview() {
+    if (this._dragPreview) {
+      this._dragPreview.remove();
+      this._dragPreview = null;
     }
   }
 
@@ -511,7 +511,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onMouseUp = (_: MouseEvent) => {
-    this._removeDragMirror();
+    this._removeDragPreview();
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -549,7 +549,7 @@ export class DragHandle extends LitElement {
       ? selectedBlocks
       : [this._handleAnchorState.element];
 
-    this._createDragMirror(e, draggingBlockElements);
+    this._createDragPreview(e, draggingBlockElements);
     this._draggingElements = draggingBlockElements;
   };
 
@@ -575,9 +575,9 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    if (this._dragMirror && e.screenX && e.screenY) {
-      const { x: offsetX, y: offsetY } = this._dragMirror.offset;
-      this._dragMirror.style.transform = `translate(${x + offsetX}px, ${
+    if (this._dragPreview && e.screenX && e.screenY) {
+      const { x: offsetX, y: offsetY } = this._dragPreview.offset;
+      this._dragPreview.style.transform = `translate(${x + offsetX}px, ${
         y + offsetY
       }px)`;
     }
@@ -604,7 +604,7 @@ export class DragHandle extends LitElement {
   private _onDragEnd = (e: DragEvent) => {
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
-    this._removeDragMirror();
+    this._removeDragPreview();
 
     // `Esc`
     if (dropEffect === 'none') {
@@ -687,6 +687,6 @@ declare global {
   interface HTMLElementTagNameMap {
     'affine-drag-handle': DragHandle;
     'affine-drag-indicator': DragIndicator;
-    'affine-drag-mirror': DragMirror;
+    'affine-drag-preview': DragPreview;
   }
 }
