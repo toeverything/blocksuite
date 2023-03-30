@@ -35,7 +35,7 @@ import {
 
 export interface VEditorOptions {
   // it is a option to determine defult `_attributesRenderer`
-  defualtMode: 'rich' | 'pure';
+  defaultMode: 'rich' | 'pure';
 }
 
 export class VEditor<
@@ -347,6 +347,10 @@ export class VEditor<
     return this._rootElement;
   }
 
+  get eventService() {
+    return this._eventService;
+  }
+
   get marks() {
     return this._marks;
   }
@@ -354,7 +358,7 @@ export class VEditor<
   constructor(
     text: VEditor['yText'] | string,
     options: VEditorOptions = {
-      defualtMode: 'rich',
+      defaultMode: 'rich',
     }
   ) {
     let yText: Y.Text;
@@ -378,7 +382,7 @@ export class VEditor<
 
     // we can change default render to pure for making `VEditor` to be a pure string render,
     // you can change schema and renderer again after construction
-    if (options.defualtMode === 'pure') {
+    if (options.defaultMode === 'pure') {
       this._attributesRenderer = delta => {
         const style = styleMap({ 'white-space': 'pre-wrap' });
         return html`<span style=${style}

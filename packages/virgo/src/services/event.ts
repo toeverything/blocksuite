@@ -27,7 +27,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._editor = editor;
   }
 
-  private _defaultHandlers: VirgoEventService<TextAttributes>['_handlers'] = {
+  defaultHandlers: VirgoEventService<TextAttributes>['_handlers'] = {
     paste: (event: ClipboardEvent) => {
       const data = event.clipboardData?.getData('text/plain');
       if (data) {
@@ -85,12 +85,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       this._handlerAbortController = null;
     }
 
-    this._handlers = this._defaultHandlers;
+    this._handlers = this.defaultHandlers;
   };
 
   bindHandlers = (
     handlers: VirgoEventService<TextAttributes>['_handlers'] = this
-      ._defaultHandlers
+      .defaultHandlers
   ) => {
     this._handlers = handlers;
 
