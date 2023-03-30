@@ -27,9 +27,17 @@ export class AffineReference extends NonShadowLitElement {
       word-break: break-word;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
+      border-radius: 2px;
       text-decoration: none;
       cursor: pointer;
       user-select: none;
+    }
+    .affine-reference:hover {
+      background: var(--affine-hover-background);
+    }
+
+    .affine-reference > svg {
+      margin-right: 4px;
     }
 
     .affine-reference > span {
