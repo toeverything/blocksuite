@@ -13,7 +13,7 @@ import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) return;
+  if (!blockRange || blockRange.startOffset === blockRange.endOffset) return;
   if (blockRange.models.length > 1) {
     throw new Error("Can't create link with multiple blocks for now");
   }
