@@ -23,7 +23,7 @@ export class DisposableLitElement extends LitElement {
 }
 
 // see https://lit.dev/docs/composition/mixins/#mixins-in-typescript
-declare class DisposableMixinInterface {
+export declare class DisposableMixinInterface {
   protected _disposables: DisposableGroup;
 }
 
@@ -41,7 +41,7 @@ type Constructor<T = object> = new (...args: any[]) => T;
  * ```ts
  * class MyElement extends DisposableMixin(NonShadowLitElement) {
  *   onClick() {
- *     this.disposableGroup.add(...);
+ *     this._disposables.add(...);
  *   }
  * }
  * ```
