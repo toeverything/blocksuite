@@ -280,33 +280,10 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   updateSelectedColumnValue(
-    rowId: BaseBlockModel['id'],
-    columnId: ColumnSchema['id'],
-    oldValue: string,
-    value: string
-  ) {
-    this.transact(() => {
-      const yColumns = this.yColumns.get(rowId);
-      assertExists(yColumns);
-      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
-      if (!cell) return;
-
-      const selected = cell.get('value') as string[];
-      const newSelected = [...selected];
-      const index = newSelected.indexOf(oldValue);
-      newSelected[index] = value;
-
-      const yColumnMap = new Y.Map();
-      yColumnMap.set('schemaId', columnId);
-      yColumnMap.set('value', newSelected);
-      yColumns.set(columnId, yColumnMap);
-    });
-  }
-
-  deleteSelectedColumnValue(
     rowId: string,
-    columnId: ColumnSchema['id'],
-    value: string
+    columnId: string,
+    oldValue: string,
+    value?: string
   ) {
     this.transact(() => {
       const yColumns = this.yColumns.get(rowId);
@@ -315,7 +292,15 @@ export class Page extends Space<FlatBlockMap> {
       if (!cell) return;
 
       const selected = cell.get('value') as string[];
-      const newSelected = selected.filter(item => item !== value);
+      let newSelected = [...selected];
+      if (value !== undefined) {
+        // rename tag
+        const index = newSelected.indexOf(oldValue);
+        newSelected[index] = value;
+      } else {
+        // delete tag
+        newSelected = selected.filter(item => item !== oldValue);
+      }
 
       const yColumnMap = new Y.Map();
       yColumnMap.set('schemaId', columnId);
@@ -352,7 +337,7 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  deleteBlockColumns(id: BaseBlockModel['id']) {
+  deleteBlockColumns(id: string) {
     this.transact(() => {
       this.yColumns.forEach(yColumn => {
         yColumn.delete(id);

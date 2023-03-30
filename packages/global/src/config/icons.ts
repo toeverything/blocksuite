@@ -1313,3 +1313,19 @@ export const DatabaseProgress = html`
     />
   </svg>
 `;
+
+export const DatabaseDone = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M20.5322 5.97152C20.824 6.26543 20.8224 6.7403 20.5285 7.03217L9.45156 18.0322C9.15909 18.3226 8.68706 18.3226 8.3946 18.0322L3.47152 13.1433C3.17761 12.8514 3.17595 12.3765 3.46783 12.0826C3.7597 11.7887 4.23457 11.7871 4.52848 12.0789L8.92308 16.443L19.4715 5.96783C19.7654 5.67595 20.2403 5.67761 20.5322 5.97152Z"
+    />
+  </svg>
+`;

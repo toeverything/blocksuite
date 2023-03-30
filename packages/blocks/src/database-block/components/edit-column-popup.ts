@@ -1,5 +1,6 @@
 import {
   ArrowDownIcon,
+  DatabaseDone,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -196,7 +197,6 @@ class ColumnTypePopup extends LitElement {
     .action > svg {
       width: 16px;
       height: 16px;
-      fill: #77757d;
     }
     /* TODO: svg color */
     .rich-text {
@@ -265,7 +265,7 @@ class ColumnTypePopup extends LitElement {
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>
               </div>
-              ${TextIcon}
+              ${selected ? DatabaseDone : null}
             </div>
           `;
         })}

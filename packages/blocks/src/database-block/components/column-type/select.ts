@@ -1,10 +1,12 @@
 import {
+  DatabaseDone,
   DeleteIcon,
   MoreHorizontalIcon,
   PenIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { VEditor } from '@blocksuite/virgo/virgo';
 import { createPopper } from '@popperjs/core';
 import { css, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -58,33 +60,11 @@ class SelectOptionText extends LitElement {
       border-radius: 4px;
     }
     .select-option-text {
-      position: relative;
-      display: inline-flex;
-      width: fit-content;
-      font-family: 'Avenir Next';
+      display: inline-block;
+      min-width: 2px;
     }
-    .text-input {
-      display: none;
-      position: absolute;
-      top: 0px;
-      left: 0px;
-      width: 100%;
-      height: 100%;
-      padding: 0px;
-      border: none;
-      color: var(--affine-text-color);
-      background: transparent;
-      font-family: 'Avenir Next';
-      font-size: 14px;
-    }
-    .text-input:focus {
+    .select-option-text:focus {
       outline: none;
-    }
-    .editing .text-content {
-      visibility: hidden;
-    }
-    .editing .text-input {
-      display: block;
     }
   `;
 
@@ -97,62 +77,63 @@ class SelectOptionText extends LitElement {
   @property()
   editing!: boolean;
 
-  @query('.text-input')
-  private _textInput!: HTMLInputElement;
+  @query('.select-option-text')
+  private _container!: HTMLDivElement;
 
-  @state()
-  private _textInputValue = '';
-
-  private _onInput = (e: InputEvent) => {
-    const input = e.target as HTMLInputElement;
-    const value = input.value;
-    if (value.length <= INPUT_MAX_LENGTH) {
-      this._textInputValue = value;
-    }
-  };
-
-  private _onKeyDown = (e: KeyboardEvent) => {
-    const input = e.target as HTMLInputElement;
-    const value = input.value;
-    if (value.length >= INPUT_MAX_LENGTH) {
-      e.preventDefault();
-    }
-  };
-
-  getSelectionValue() {
-    return this._textInputValue;
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this._textInputValue = this.selectText;
-  }
+  private _vEditor!: VEditor;
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('editing') && this.editing) {
-      requestAnimationFrame(() => {
-        const input = this._textInput;
-        const length = input.value.length;
-        input.focus();
-        input.setSelectionRange(length, length);
-      });
+      this._vEditor.focusEnd();
     }
   }
 
+  getSelectionValue() {
+    return this._vEditor.yText.toString();
+  }
+
+  firstUpdated() {
+    this._vEditor = new VEditor(this.selectText, {
+      defaultMode: 'pure',
+    });
+    this._vEditor.mount(this._container);
+    this._vEditor.bindHandlers({
+      virgoInput: this._handleInput,
+      paste: this._handlePaste,
+    });
+  }
+
+  private _handleInput = (event: InputEvent) => {
+    const length = this._vEditor.yText.length;
+    if (length >= INPUT_MAX_LENGTH && event.data) {
+      // prevent input
+      return true;
+    }
+    return false;
+  };
+
+  private _handlePaste = (event: ClipboardEvent) => {
+    const length = this._vEditor.yText.length;
+    const restLength = INPUT_MAX_LENGTH - length;
+    if (restLength <= 0) return;
+
+    const data = event.clipboardData?.getData('text/plain');
+    if (!data) return;
+
+    const vRange = this._vEditor.getVRange();
+    const text = data.length > restLength ? data.slice(0, restLength) : data;
+    if (vRange) {
+      this._vEditor.insertText(vRange, text);
+      this._vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
+    }
+  };
+
   render() {
-    return html`<div
-      class="select-option-text ${this.editing ? 'editing' : ''}"
-    >
-      <span class="text-content">${this._textInputValue}</span>
-      <input
-        class="text-input"
-        value=${this._textInputValue}
-        @input=${this._onInput}
-        @keydown=${this._onKeyDown}
-        maxlength=${INPUT_MAX_LENGTH}
-      />
-    </div>`;
+    return html`<div class="select-option-text"></div>`;
   }
 }
 
@@ -376,6 +357,8 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       background: rgba(0, 0, 0, 0.04);
     }
     .select-option-icon svg {
+      width: 16px;
+      height: 16px;
       pointer-events: none;
     }
     .editing {
@@ -517,7 +500,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
         },
       });
       const value = selection[index];
-      this.databaseModel.page.deleteSelectedColumnValue(
+      this.databaseModel.page.updateSelectedColumnValue(
         this.rowModel.id,
         this.columnSchema.id,
         value
@@ -657,8 +640,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                     ></affine-database-select-option-text>
                   </div>
                   <div class="select-option-icon" @click=${onOptionIconClick}>
-                    <!-- TODO: change icon -->
-                    ${isEditing ? PenIcon : MoreHorizontalIcon}
+                    ${isEditing ? DatabaseDone : MoreHorizontalIcon}
                   </div>
                 </div>
               `;
