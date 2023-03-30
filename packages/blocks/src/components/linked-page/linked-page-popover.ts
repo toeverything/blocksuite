@@ -5,8 +5,8 @@ import {
   DisposableGroup,
   type PageMeta,
 } from '@blocksuite/store';
-import { html, LitElement, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { html, LitElement } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
@@ -15,7 +15,10 @@ import {
   getRichTextByModel,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
-import { isPrintableKeyEvent } from '../../__internal__/utils/std.js';
+import {
+  isControlledKeyboardEvent,
+  isPrintableKeyEvent,
+} from '../../__internal__/utils/std.js';
 import { styles } from './styles.js';
 
 function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
@@ -47,7 +50,100 @@ function initDefaultBlocks(page: Page, pageName: string) {
 
 const DEFAULT_PAGE_NAME = 'Untitled';
 
-@customElement('linked-page-popover')
+const createKeydownObserver = ({
+  target,
+  onUpdateQuery,
+  onMove,
+  onConfirm,
+  ignoreKeys = [],
+  abortController,
+}: {
+  target: HTMLElement;
+  onUpdateQuery: (val: string) => void;
+  onMove: (step: 1 | -1) => void;
+  onConfirm: () => void;
+  onClickAway?: () => void;
+  ignoreKeys?: string[];
+  abortController: AbortController;
+}) => {
+  let query = '';
+  const keyDownListener = (e: KeyboardEvent) => {
+    if (ignoreKeys.includes(e.key)) {
+      return;
+    }
+
+    e.stopPropagation();
+    if (
+      // Abort when press modifier key to avoid weird behavior
+      // e.g. press ctrl + a to select all or press ctrl + v to paste
+      isControlledKeyboardEvent(e) ||
+      e.key === 'Escape'
+    ) {
+      abortController.abort();
+      return;
+    }
+
+    if (!isPrintableKeyEvent(e)) {
+      switch (e.key) {
+        case 'Backspace': {
+          if (!query.length) {
+            abortController.abort();
+          }
+          query = query.slice(0, -1);
+          onUpdateQuery(query);
+          return;
+        }
+        case 'Enter': {
+          if (e.isComposing) {
+            return;
+          }
+          onConfirm();
+          e.preventDefault();
+          return;
+        }
+        case 'Tab': {
+          if (e.shiftKey) {
+            onMove(-1);
+          } else {
+            onMove(1);
+          }
+          e.preventDefault();
+          return;
+        }
+        case 'ArrowUp': {
+          onMove(-1);
+          e.preventDefault();
+          return;
+        }
+        case 'ArrowDown': {
+          onMove(1);
+          e.preventDefault();
+          return;
+        }
+        case 'ArrowLeft':
+        case 'ArrowRight': {
+          abortController.abort();
+          return;
+        }
+        default:
+          // Other control keys
+          return;
+      }
+    }
+    query += e.key;
+    onUpdateQuery(query);
+  };
+
+  target.addEventListener('keydown', keyDownListener, {
+    // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
+    capture: true,
+  });
+  abortController.signal.addEventListener('abort', () => {
+    target.removeEventListener('keydown', keyDownListener, { capture: true });
+  });
+};
+
+@customElement('affine-linked-page-popover')
 export class LinkedPagePopover extends LitElement {
   static styles = styles;
 
@@ -67,6 +163,12 @@ export class LinkedPagePopover extends LitElement {
   @state()
   private _pageList: PageMeta[] = [];
 
+  @state()
+  private _activatedItemIndex = 0;
+
+  @query('.linked-page-popover')
+  linkedPageElement?: Element;
+
   private get _page() {
     return this.model.page;
   }
@@ -84,20 +186,21 @@ export class LinkedPagePopover extends LitElement {
     super.connectedCallback();
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
-    // TODO update and dispose
-    let query = '';
-    const keyDownListener = (e: KeyboardEvent) => {
-      if (isPrintableKeyEvent(e)) {
-        // TODO handle Backspace/Enter/ArrowUp/ArrowDown/...
-        return;
-      }
-      query += e.key;
-      this._updateQuery(query);
-    };
-    this._disposables.addFromEvent(richText, 'keydown', keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-      capture: true,
+
+    createKeydownObserver({
+      target: richText,
+      onUpdateQuery: str => this._updateQuery(str),
+      abortController: this.abortController,
+      onMove: step => {
+        // TODO Take the remainder
+        this._activatedItemIndex += step;
+      },
+      onConfirm: () => {
+        // TODO confirm
+        console.log('confirm', this._activatedItemIndex);
+      },
     });
+    // this._disposables.addFromEvent(richText, 'keydown', keyDownListener);
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -160,13 +263,15 @@ export class LinkedPagePopover extends LitElement {
   }
 
   render() {
-    if (!this._position) return nothing;
-
     const MAX_HEIGHT = 396;
-    const style = styleMap({
-      transform: `translate(${this._position.x}, ${this._position.y})`,
-      maxHeight: `${Math.min(this._position.height, MAX_HEIGHT)}px`,
-    });
+    const style = this._position
+      ? styleMap({
+          transform: `translate(${this._position.x}, ${this._position.y})`,
+          maxHeight: `${Math.min(this._position.height, MAX_HEIGHT)}px`,
+        })
+      : styleMap({
+          visibility: 'hidden',
+        });
 
     const pageList = this._pageList.map(
       page => html`<icon-button
