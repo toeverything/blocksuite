@@ -1,6 +1,6 @@
 import { Graph } from './graph.js';
 import type { Rectangle } from './rectangle.js';
-import type { Point } from './util.js';
+import type { Point } from './simplify-path.js';
 
 interface Rulers {
   columns: number[];

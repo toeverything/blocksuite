@@ -1,6 +1,6 @@
 import type { Graph, GraphNode } from './graph.js';
 import { BinaryHeap } from './heap.js';
-import type { Point } from './util.js';
+import type { Point } from './simplify-path.js';
 
 type HeuristicFunction = (start: Point, end: Point) => number;
 

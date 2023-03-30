@@ -1,4 +1,4 @@
-import type { Point } from './util.js';
+import type { Point } from './simplify-path.js';
 
 export interface GraphNode {
   x: number;
