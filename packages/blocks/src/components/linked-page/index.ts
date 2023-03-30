@@ -1,4 +1,8 @@
-import { type BaseBlockModel, DisposableGroup } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  DisposableGroup,
+} from '@blocksuite/store';
 
 import { getViewportElement } from '../../__internal__/utils/query.js';
 import { throttle } from '../../__internal__/utils/std.js';
@@ -26,7 +30,12 @@ export function showLinkedPagePopover({
 
   // Handle position
   const updatePosition = throttle(() => {
-    const position = getPopperPosition(linkedPage, range);
+    const linkedPageElement = linkedPage.linkedPageElement;
+    assertExists(
+      linkedPageElement,
+      'You should render the linked page node even if no position'
+    );
+    const position = getPopperPosition(linkedPageElement, range);
     linkedPage.updatePosition(position);
   }, 10);
   disposables.addFromEvent(window, 'resize', updatePosition);

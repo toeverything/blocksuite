@@ -278,6 +278,12 @@ export function getPopperPosition(
   },
   { gap = 12, offsetY = 5 }: { gap?: number; offsetY?: number } = {}
 ) {
+  if (!popper) {
+    // foolproof, someone may use element with non-null assertion
+    console.warn(
+      'The popper element is not exist. Popper position maybe incorrect'
+    );
+  }
   const { placement, height } = compareTopAndBottomSpace(
     reference,
     document.body,
@@ -294,7 +300,7 @@ export function getPopperPosition(
   const boundaryRect = document.body.getBoundingClientRect();
   // Note: the popperRect.height maybe incorrect
   // because we are calculated its correct height
-  const popperRect = popper.getBoundingClientRect();
+  const popperRect = popper?.getBoundingClientRect();
 
   const safeCoordinate = calcSafeCoordinate({
     positioningPoint,

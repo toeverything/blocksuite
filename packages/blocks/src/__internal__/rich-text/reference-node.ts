@@ -1,11 +1,20 @@
-import { FontLinkIcon } from '@blocksuite/global/config';
+import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
-import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import {
+  type DeltaInsert,
+  ZERO_WIDTH_NON_JOINER,
+  ZERO_WIDTH_SPACE,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { getModelByElement, NonShadowLitElement } from '../utils/index.js';
+import {
+  getEditorContainer,
+  getModelByElement,
+  NonShadowLitElement,
+} from '../utils/index.js';
+import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
@@ -18,13 +27,25 @@ export class AffineReference extends NonShadowLitElement {
       word-break: break-word;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
+      border-radius: 2px;
       text-decoration: none;
       cursor: pointer;
       user-select: none;
     }
+    .affine-reference:hover {
+      background: var(--affine-hover-background);
+    }
+
+    .affine-reference > svg {
+      margin-right: 4px;
+    }
 
     .affine-reference > span {
       white-space: pre-wrap;
+    }
+
+    .affine-reference-title::before {
+      content: attr(data-title);
     }
   `;
 
@@ -75,28 +96,53 @@ export class AffineReference extends NonShadowLitElement {
     if (!refMeta || refMeta.id === model.page.id) {
       return;
     }
-    // const targetPageId = refMeta.id;
+    const targetPageId = refMeta.id;
     // TODO jump to the reference
+    const editor = getEditorContainer(model.page);
+    // @ts-expect-error
+    editor.page = model.page.workspace.getPage(targetPageId);
   }
 
   render() {
     // const style = affineTextStyles(this.textAttributes);
     const refMeta = this._refMeta;
-    const title = refMeta
-      ? refMeta.title
-      : // Maybe the page is deleted
-        'Referenced Page Not Found';
-    const type = this.delta.attributes?.reference?.type;
+    const isDisabled = !refMeta;
+    const title = isDisabled
+      ? // Maybe the page is deleted
+        'Deleted page'
+      : refMeta.title;
+    const attributes = this.delta.attributes;
+    assertExists(attributes, 'Failed to get attributes!');
+    const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
+    const style = affineTextStyles(attributes);
 
-    // TODO fix cursor with white space
     // TODO update icon
+
+    // Sine reference title should not be edit by user,
+    // we set it into the `::before` pseudo element.
+    //
+    // There are some issues if you try to turn off the `contenteditable` attribute in the title node:
+    //   - the cursor may invisible when trying to move across the reference node using the keyboard
+    //
+    // see also [HTML contenteditable with non-editable islands](https://stackoverflow.com/questions/14615551/html-contenteditable-with-non-editable-islands)
+    //
+    // The virgo will skip the zero-width space when calculating the cursor position,
+    // so we use a other zero-width symbol to make the cursor work correctly.
 
     // This node is under contenteditable="true",
     // so we should not add any extra white space between HTML tags
-    return html`<span class="affine-reference" @click=${this._onClick}
-      >${FontLinkIcon}<span contenteditable="false">${title}</span>${this.delta
-        .insert}</span
+
+    return html`<span
+      class="affine-reference"
+      style=${style}
+      @click=${this._onClick}
+      >${type === 'LinkedPage' ? FontPageSubpageIcon : FontPageIcon}<span
+        class="affine-reference-title"
+        data-title=${title}
+        data-virgo-text="true"
+        >${ZERO_WIDTH_NON_JOINER}</span
+      ></span
     >`;
   }
 }
