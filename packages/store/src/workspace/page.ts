@@ -119,14 +119,13 @@ export class Page extends Space<FlatBlockMap> {
     return this.root.columns as Y.Map<Y.Map<unknown>>;
   }
 
-  get columnJSON(): SerializedNestedColumns {
-    return this.columns.toJSON();
+  protected get columnSchema() {
+    assertExists(this.root?.columnSchema);
+    return this.root.columnSchema as Y.Map<unknown>;
   }
 
-  get columnSchema() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
-    return this.root.columnSchema as Y.Map<unknown>;
+  get columnJSON(): SerializedNestedColumns {
+    return this.columns.toJSON();
   }
 
   get blobs() {
