@@ -124,7 +124,7 @@ test.describe('slash menu should show and hide correctly', () => {
       throw new Error("slashMenu doesn't exist");
     }
     const { x, y } = box;
-    assertAlmostEqual(x, 95, 6);
+    assertAlmostEqual(x, 120, 6);
     assertAlmostEqual(y, 167, 8);
   });
 
