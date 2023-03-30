@@ -57,7 +57,7 @@ function createNodes(
       return;
     }
     const p = { x, y };
-    const key = `${x}:${y}`;
+    const key = Graph.getKey(p);
     if (cache.has(key)) {
       return;
     }
@@ -104,7 +104,8 @@ function createNodes(
           let index = sortedGridX.indexOf(p.x);
           while (index > -1) {
             const columnsValue = sortedGridX[index];
-            if (cache.has(`${columnsValue}:${p.y}`)) {
+            const key = Graph.getKey({ x: columnsValue, y: p.y });
+            if (cache.has(key)) {
               break;
             }
             addPoint(columnsValue, p.y, true);
@@ -116,7 +117,8 @@ function createNodes(
           let index = sortedGridY.indexOf(p.y);
           while (index > -1) {
             const rowsValue = sortedGridY[index];
-            if (cache.has(`${p.x}:${rowsValue}`)) {
+            const key = Graph.getKey({ x: p.x, y: rowsValue });
+            if (cache.has(key)) {
               break;
             }
             addPoint(p.x, rowsValue, true);
@@ -128,7 +130,8 @@ function createNodes(
           let index = sortedGridX.indexOf(p.x);
           while (index < sortedGridX.length) {
             const columnsValue = sortedGridX[index];
-            if (cache.has(`${columnsValue}:${p.y}`)) {
+            const key = Graph.getKey({ x: columnsValue, y: p.y });
+            if (cache.has(key)) {
               break;
             }
             addPoint(columnsValue, p.y, true);
@@ -140,7 +143,8 @@ function createNodes(
           let index = sortedGridY.indexOf(p.y);
           while (index < sortedGridY.length) {
             const rowsValue = sortedGridY[index];
-            if (cache.has(`${p.x}:${rowsValue}`)) {
+            const key = Graph.getKey({ x: p.x, y: rowsValue });
+            if (cache.has(key)) {
               break;
             }
             addPoint(p.x, rowsValue, true);
