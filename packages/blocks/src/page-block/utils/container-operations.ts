@@ -245,9 +245,15 @@ function transformBlock(
  *
  * Used for format quick bar.
  */
-function mergeFormat(formatArr: AffineTextAttributes[]): AffineTextAttributes {
+function mergeFormat(
+  formatArr: AffineTextAttributes[],
+  loose: boolean
+): AffineTextAttributes {
   if (!formatArr.length) {
     return {};
+  }
+  if (loose) {
+    return formatArr.reduce((acc, cur) => ({ ...acc, ...cur }));
   }
   return formatArr.reduce((acc, cur) => {
     const newFormat: AffineTextAttributes = {};
@@ -263,16 +269,27 @@ function mergeFormat(formatArr: AffineTextAttributes[]): AffineTextAttributes {
   });
 }
 
+/**
+ * By default, it is in `strict` mode, which only returns the formats that all the text in the range share.
+ * formats with different values, such as different links, are considered different formats.
+ *
+ * If the `loose` mode is enabled, any format that exists in the range will be returned.
+ * formats with different values will only return the last one.
+ */
 export function getCombinedFormat(
-  blockRange: BlockRange
+  blockRange: BlockRange,
+  loose = false
 ): AffineTextAttributes {
   if (blockRange.models.length === 1) {
     const vEditor = getVirgoByModel(blockRange.models[0]);
     assertExists(vEditor);
-    const format = vEditor.getFormat({
-      index: blockRange.startOffset,
-      length: blockRange.endOffset - blockRange.startOffset,
-    });
+    const format = vEditor.getFormat(
+      {
+        index: blockRange.startOffset,
+        length: blockRange.endOffset - blockRange.startOffset,
+      },
+      loose
+    );
     return format;
   }
   const formatArr = [];
@@ -286,10 +303,13 @@ export function getCombinedFormat(
   ) {
     const vEditor = getVirgoByModel(startModel);
     assertExists(vEditor);
-    const startFormat = vEditor.getFormat({
-      index: blockRange.startOffset,
-      length: vEditor.yText.length - blockRange.startOffset,
-    });
+    const startFormat = vEditor.getFormat(
+      {
+        index: blockRange.startOffset,
+        length: vEditor.yText.length - blockRange.startOffset,
+      },
+      loose
+    );
     formatArr.push(startFormat);
   }
   // End block
@@ -301,10 +321,13 @@ export function getCombinedFormat(
   ) {
     const vEditor = getVirgoByModel(endModel);
     assertExists(vEditor);
-    const endFormat = vEditor.getFormat({
-      index: 0,
-      length: blockRange.endOffset,
-    });
+    const endFormat = vEditor.getFormat(
+      {
+        index: 0,
+        length: blockRange.endOffset,
+      },
+      loose
+    );
     formatArr.push(endFormat);
   }
   // Between blocks
@@ -320,17 +343,20 @@ export function getCombinedFormat(
         length: vEditor.yText.length - 1,
       });
       formatArr.push(format);
-    });
+    }, loose);
 
-  return mergeFormat(formatArr);
+  return mergeFormat(formatArr, loose);
 }
 
-export function getCurrentCombinedFormat(page: Page): AffineTextAttributes {
+export function getCurrentCombinedFormat(
+  page: Page,
+  loose = false
+): AffineTextAttributes {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange || blockRange.models.every(model => !model.text)) {
     return {};
   }
-  return getCombinedFormat(blockRange);
+  return getCombinedFormat(blockRange, loose);
 }
 
 function formatBlockRange(

@@ -1,6 +1,29 @@
-import { html, svg } from 'lit';
+import { html, svg, type TemplateResult } from 'lit';
 
 // Use icons from `@blocksuite/icons`
+
+function fontIcon(svg: TemplateResult<2>) {
+  // Control Icons with Font Size
+  // Set the width and height to be 1em, which will be the font-size of its parent element
+  // See https://css-tricks.com/control-icons-with-font-size/
+  const fontIconStyle = `
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    font-size: inherit;
+    margin-bottom: 0.1em;
+  `;
+
+  return html`<svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    style=${fontIconStyle}
+  >
+    ${svg}
+  </svg>`;
+}
 
 // Paragraph icons
 
@@ -405,26 +428,7 @@ export const LinkIcon = html`<svg
   ${LinkSVG}
 </svg>`;
 
-// Control Icons with Font Size
-// Set the width and height to be 1em, which will be the font-size of its parent element
-// See https://css-tricks.com/control-icons-with-font-size/
-const iconStyle = `
-  width: 1em;
-  height: 1em;
-  vertical-align: middle;
-  font-size: inherit;
-  margin-bottom: 0.1em;
-`;
-
-export const FontLinkIcon = html`<svg
-  width="16"
-  height="16"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
-  style="${iconStyle}"
->
-  ${LinkSVG}
-</svg>`;
+export const FontLinkIcon = fontIcon(LinkSVG);
 
 // Slash menu action icons
 export const CopyIcon = html`<svg
@@ -1329,3 +1333,56 @@ export const DatabaseDone = html`
     />
   </svg>
 `;
+// Linked Page
+
+export const PageIconSVG = svg`
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20.75 18C20.75 19.5188 19.5188 20.75 18 20.75H10C9.58579 20.75 9.25 20.4142 9.25 20C9.25 19.5858 9.58579 19.25 10 19.25L18 19.25C18.6904 19.25 19.25 18.6904 19.25 18L19.25 4C19.25 3.58579 19.5858 3.25 20 3.25C20.4142 3.25 20.75 3.58579 20.75 4L20.75 18Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 9C8.25 8.0335 9.0335 7.25 10 7.25H14C14.9665 7.25 15.75 8.0335 15.75 9V11C15.75 11.9665 14.9665 12.75 14 12.75H10C9.0335 12.75 8.25 11.9665 8.25 11V9ZM10 8.75C9.86193 8.75 9.75 8.86193 9.75 9V11C9.75 11.1381 9.86193 11.25 10 11.25H14C14.1381 11.25 14.25 11.1381 14.25 11V9C14.25 8.86193 14.1381 8.75 14 8.75H10Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 16C8.25 15.5858 8.58579 15.25 9 15.25H15C15.4142 15.25 15.75 15.5858 15.75 16C15.75 16.4142 15.4142 16.75 15 16.75H9C8.58579 16.75 8.25 16.4142 8.25 16Z"
+  />
+`;
+
+export const PageSubpageSVG = svg`<path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20 10.75C19.5858 10.75 19.25 10.4142 19.25 10V4C19.25 3.58579 19.5858 3.25 20 3.25C20.4142 3.25 20.75 3.58579 20.75 4V10C20.75 10.4142 20.4142 10.75 20 10.75Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 9C8.25 8.0335 9.0335 7.25 10 7.25H14C14.9665 7.25 15.75 8.0335 15.75 9V11C15.75 11.9665 14.9665 12.75 14 12.75H10C9.0335 12.75 8.25 11.9665 8.25 11V9ZM10 8.75C9.86193 8.75 9.75 8.86193 9.75 9V11C9.75 11.1381 9.86193 11.25 10 11.25H14C14.1381 11.25 14.25 11.1381 14.25 11V9C14.25 8.86193 14.1381 8.75 14 8.75H10Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 16C8.25 15.5858 8.58579 15.25 9 15.25H12C12.4142 15.25 12.75 15.5858 12.75 16C12.75 16.4142 12.4142 16.75 12 16.75H9C8.58579 16.75 8.25 16.4142 8.25 16Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M18 14.75C17.5858 14.75 17.25 14.4142 17.25 14C17.25 13.5858 17.5858 13.25 18 13.25H20.9C20.9174 13.25 20.9346 13.2505 20.9517 13.2515C21.1594 13.2382 21.3716 13.3109 21.5303 13.4697C21.6891 13.6284 21.7618 13.8406 21.7485 14.0483C21.7495 14.0654 21.75 14.0826 21.75 14.1V17C21.75 17.4142 21.4142 17.75 21 17.75C20.5858 17.75 20.25 17.4142 20.25 17V15.8107L14.5303 21.5303C14.2374 21.8232 13.7626 21.8232 13.4697 21.5303C13.1768 21.2374 13.1768 20.7626 13.4697 20.4697L19.1893 14.75H18Z"
+  />`;
+
+export const FontPageIcon = fontIcon(PageIconSVG);
+export const FontPageSubpageIcon = fontIcon(PageSubpageSVG);

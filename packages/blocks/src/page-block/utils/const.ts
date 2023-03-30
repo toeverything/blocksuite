@@ -10,7 +10,10 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { handleFormat } from '../../page-block/utils/index.js';
+import {
+  getCurrentCombinedFormat,
+  handleFormat,
+} from '../../page-block/utils/index.js';
 
 type ActionProps = {
   page: Page;
@@ -85,7 +88,11 @@ export const formatConfig = [
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) =>
-      models.length === 1 && noneCodeBlockSelected(models),
+      models.length === 1 &&
+      noneCodeBlockSelected(models) &&
+      // can't create link when selection includes reference node
+      // XXX get loose format at here is not a good practice
+      !getCurrentCombinedFormat(models[0].page, true).reference,
     action: ({ page, abortController, format }: ActionProps) => {
       createLink(page);
       if (format && abortController && !('link' in format)) {
