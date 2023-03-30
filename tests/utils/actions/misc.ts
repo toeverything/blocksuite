@@ -361,9 +361,12 @@ export async function initEmptyCodeBlockState(page: Page) {
 }
 
 export async function focusRichText(page: Page, i = 0) {
-  await page.mouse.move(0, 0);
-  const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  await locator.click();
+  await page.evaluate(i => {
+    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+
+    richTexts[i].vEditor?.focusEnd();
+  }, i);
+  await waitNextFrame(page);
 }
 
 export async function initThreeParagraphs(page: Page) {
