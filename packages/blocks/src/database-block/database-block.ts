@@ -198,10 +198,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
-    if (
-      changedProperties.has('_editingColumnId') &&
-      this._editingColumnId !== ''
-    ) {
+    if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
