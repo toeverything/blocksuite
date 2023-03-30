@@ -22,7 +22,7 @@ class NumberCell extends DatabaseCellLitElement<number> {
   static tag = literal`affine-database-number-cell`;
 
   render() {
-    return html` <span>${this.column?.value}</span> `;
+    return html` <span class="number">${this.column?.value}</span> `;
   }
 }
 
@@ -62,7 +62,6 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
       if (event.key === 'Enter' && this.value) {
-        this.rowHost.setValue(this.value);
         this.rowHost.setEditing(false);
       }
     });
