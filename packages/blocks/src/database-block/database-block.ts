@@ -13,7 +13,6 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import {
-  type BlockColumn,
   ColumnInsertPosition,
   type ColumnSchema,
 } from '@blocksuite/global/database';
@@ -40,14 +39,6 @@ import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
-
-type SerializedNestedColumns = {
-  // row
-  [key: string]: {
-    // column
-    [key: string]: BlockColumn;
-  };
-};
 
 type ColumnValues = string[];
 
@@ -207,10 +198,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
-    if (
-      changedProperties.has('_editingColumnId') &&
-      this._editingColumnId !== ''
-    ) {
+    if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
@@ -733,8 +721,7 @@ export class DatabaseBlockComponent
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const nestedColumns =
-      this.model.page.columns.toJSON() as SerializedNestedColumns;
+    const nestedColumns = this.model.page.columnJSON;
     const rowIds = this.model.children.map(child => child.id);
 
     rowIds.forEach(blockId => {

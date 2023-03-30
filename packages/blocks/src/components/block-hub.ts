@@ -52,9 +52,7 @@ const styles = css`
     width: 274px;
     position: absolute;
     right: calc(100% + 8px);
-    top: calc(50%);
     overflow-y: unset;
-    transform: translateY(-50%);
     display: none;
     justify-content: center;
     fill: var(--affine-icon-color);

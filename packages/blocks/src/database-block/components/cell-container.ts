@@ -31,15 +31,13 @@ export class DatabaseCellContainer
   private _isEditing = false;
 
   setValue(value: unknown) {
-    if (value !== undefined) {
-      setTimeout(() => {
-        this.databaseModel.page.captureSync();
-        this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
-          schemaId: this.columnSchema.id,
-          value,
-        });
+    queueMicrotask(() => {
+      this.databaseModel.page.captureSync();
+      this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
+        schemaId: this.columnSchema.id,
+        value,
       });
-    }
+    });
   }
 
   setEditing = (isEditing: boolean) => {

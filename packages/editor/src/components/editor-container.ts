@@ -59,12 +59,14 @@ export class EditorContainer extends NonShadowLitElement {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
 
-    setTimeout(() => {
-      const defaultPage = this.querySelector('affine-default-page');
-      if (this.autofocus) {
-        defaultPage?.titleVEditor.focusEnd();
-      }
-    });
+    if (this.mode === 'page') {
+      setTimeout(() => {
+        const defaultPage = this.querySelector('affine-default-page');
+        if (this.autofocus) {
+          defaultPage?.titleVEditor.focusEnd();
+        }
+      });
+    }
   }
 
   connectedCallback() {

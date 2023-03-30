@@ -23,6 +23,14 @@ import type { PageMeta, Workspace } from './workspace.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
+type SerializedNestedColumns = {
+  // row
+  [key: string]: {
+    // column
+    [key: string]: BlockColumn;
+  };
+};
+
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockProps = Record<string, any> & {
@@ -106,16 +114,18 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get columns() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
+  protected get yColumns() {
+    assertExists(this.root?.columns);
     return this.root.columns as Y.Map<Y.Map<unknown>>;
   }
 
-  get columnSchema() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
+  protected get yColumnSchema() {
+    assertExists(this.root?.columnSchema);
     return this.root.columnSchema as Y.Map<unknown>;
+  }
+
+  get columnJSON(): SerializedNestedColumns {
+    return this.yColumns.toJSON();
   }
 
   get blobs() {
@@ -206,22 +216,22 @@ export class Page extends Space<FlatBlockMap> {
     id: BaseBlockModel['id'],
     column: Column
   ) {
-    const already = this.columns.has(id);
-    let columns: Y.Map<unknown>;
-    if (!already) {
-      columns = new Y.Map();
+    const hasColumn = this.yColumns.has(id);
+    let yColumns: Y.Map<unknown>;
+    if (!hasColumn) {
+      yColumns = new Y.Map();
     } else {
-      columns = this.columns.get(id) as Y.Map<unknown>;
+      yColumns = this.yColumns.get(id) as Y.Map<unknown>;
     }
     this.transact(() => {
-      if (!already) {
-        this.columns.set(id, columns);
+      if (!hasColumn) {
+        this.yColumns.set(id, yColumns);
       }
       // Related issue: https://github.com/yjs/yjs/issues/255
-      const columnMap = new Y.Map();
-      columnMap.set('schemaId', column.schemaId);
-      columnMap.set('value', column.value);
-      columns.set(column.schemaId, columnMap);
+      const yColumnMap = new Y.Map();
+      yColumnMap.set('schemaId', column.schemaId);
+      yColumnMap.set('value', column.value);
+      yColumns.set(column.schemaId, yColumnMap);
     });
   }
 
@@ -229,36 +239,35 @@ export class Page extends Space<FlatBlockMap> {
     model: BaseBlockModel,
     schema: ColumnSchema
   ): BlockColumn | null {
-    const columns = this.columns.get(model.id);
-    const columnMap = (columns?.get(schema.id) as Y.Map<unknown>) ?? null;
-    if (!columnMap) {
-      return null;
-    }
+    const yColumns = this.yColumns.get(model.id);
+    const yColumnMap = (yColumns?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!yColumnMap) return null;
+
     return {
-      schemaId: columnMap.get('schemaId') as string,
-      value: columnMap.get('value') as unknown,
+      schemaId: yColumnMap.get('schemaId') as string,
+      value: yColumnMap.get('value') as unknown,
     };
   }
 
   getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
-    return (this.columnSchema.get(id) ?? null) as ColumnSchema | null;
+    return (this.yColumnSchema.get(id) ?? null) as ColumnSchema | null;
   }
 
   setColumnSchema(
     schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
   ): string {
     const id = schema.id ?? this._idGenerator();
-    this.transact(() => this.columnSchema.set(id, { ...schema, id }));
+    this.transact(() => this.yColumnSchema.set(id, { ...schema, id }));
     return id;
   }
 
   deleteColumnSchema(id: ColumnSchema['id']) {
-    this.transact(() => this.columnSchema.delete(id));
+    this.transact(() => this.yColumnSchema.delete(id));
   }
 
   copyBlockColumnById(copyId: ColumnSchema['id'], toId: ColumnSchema['id']) {
     this.transact(() => {
-      this.columns.forEach(column => {
+      this.yColumns.forEach(column => {
         const copyColumn = column.get(copyId) as Y.Map<unknown>;
         if (copyColumn) {
           const columnMap = new Y.Map();
@@ -277,9 +286,9 @@ export class Page extends Space<FlatBlockMap> {
     value: string
   ) {
     this.transact(() => {
-      const columns = this.columns.get(rowId);
-      assertExists(columns);
-      const cell = columns.get(columnId) as Y.Map<string[]> | undefined;
+      const yColumns = this.yColumns.get(rowId);
+      assertExists(yColumns);
+      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
       if (!cell) return;
 
       const selected = cell.get('value') as string[];
@@ -287,31 +296,67 @@ export class Page extends Space<FlatBlockMap> {
       const index = newSelected.indexOf(oldValue);
       newSelected[index] = value;
 
-      const columnMap = new Y.Map();
-      columnMap.set('schemaId', columnId);
-      columnMap.set('value', newSelected);
-      columns.set(columnId, columnMap);
+      const yColumnMap = new Y.Map();
+      yColumnMap.set('schemaId', columnId);
+      yColumnMap.set('value', newSelected);
+      yColumns.set(columnId, yColumnMap);
     });
   }
 
   deleteSelectedColumnValue(
-    rowId: BaseBlockModel['id'],
+    rowId: string,
     columnId: ColumnSchema['id'],
     value: string
   ) {
     this.transact(() => {
-      const columns = this.columns.get(rowId);
-      assertExists(columns);
-      const cell = columns.get(columnId) as Y.Map<string[]> | undefined;
+      const yColumns = this.yColumns.get(rowId);
+      assertExists(yColumns);
+      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
       if (!cell) return;
 
       const selected = cell.get('value') as string[];
       const newSelected = selected.filter(item => item !== value);
 
-      const columnMap = new Y.Map();
-      columnMap.set('schemaId', columnId);
-      columnMap.set('value', newSelected);
-      columns.set(columnId, columnMap);
+      const yColumnMap = new Y.Map();
+      yColumnMap.set('schemaId', columnId);
+      yColumnMap.set('value', newSelected);
+      yColumns.set(columnId, yColumnMap);
+    });
+  }
+
+  // TODO: remove hard coded types
+  updateColumnValue(columnId: string, newType: 'select' | 'rich-text') {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        const yTargetColumn = yColumn.get(columnId) as Y.Map<unknown>;
+        if (!yTargetColumn) return;
+
+        if (newType === 'select') {
+          const value = yTargetColumn.get('value');
+          if (!value) return;
+
+          const yColumnMap = new Y.Map();
+          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('value', [(value as string[])[0]]);
+          yColumn.set(columnId, yColumnMap);
+        } else if (newType === 'rich-text') {
+          const value = yTargetColumn.get('value');
+          if (!value) return;
+
+          const yColumnMap = new Y.Map();
+          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('value', new Y.Text((value as number) + ''));
+          yColumn.set(columnId, yColumnMap);
+        }
+      });
+    });
+  }
+
+  deleteBlockColumns(id: BaseBlockModel['id']) {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        yColumn.delete(id);
+      });
     });
   }
 

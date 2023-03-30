@@ -1,5 +1,3 @@
-import '../affine-code-line.js';
-
 import type { AttributesRenderer } from '@blocksuite/virgo';
 import { html } from 'lit';
 import type { Highlighter, Lang } from 'shiki';
@@ -9,9 +7,9 @@ export const getCodeLineRenderer: (
     lang: Lang;
     highlighter: Highlighter | null;
   }
-) => AttributesRenderer = getHighlightOptions => (vText, _) => {
+) => AttributesRenderer = getHighlightOptions => delta => {
   return html`<affine-code-line
-    .vText=${vText}
+    .delta=${delta}
     .getHighlightOptions=${getHighlightOptions}
   ></affine-code-line>`;
 };

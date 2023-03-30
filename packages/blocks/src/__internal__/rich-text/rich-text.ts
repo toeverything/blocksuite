@@ -106,7 +106,7 @@ export class RichText extends NonShadowLitElement {
 
             vEditor.insertText(vRange, e.data, attributes);
             vEditor.setVRange({
-              index: vRange.index + 1,
+              index: vRange.index + e.data.length,
               length: 0,
             });
             return true;

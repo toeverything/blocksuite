@@ -1,35 +1,18 @@
-import './affine-text.js';
-import '../link-node/affine-link.js';
-
 import type { AttributesRenderer } from '@blocksuite/virgo';
 import { html } from 'lit';
 
 import type { AffineTextAttributes } from './types.js';
 
-export const attributesRenderer: AttributesRenderer<AffineTextAttributes> = (
-  vText,
-  attributes
-) => {
-  if (attributes?.link) {
-    return html`<affine-link
-      .vText=${vText}
-      .textAttributes=${attributes}
-    ></affine-link>`;
+export const attributesRenderer: AttributesRenderer<
+  AffineTextAttributes
+> = delta => {
+  if (delta?.attributes?.link) {
+    return html`<affine-link .delta=${delta}></affine-link>`;
   }
 
-  if (attributes?.reference) {
-    return html`<affine-reference
-      .vText=${vText}
-      .textAttributes=${attributes}
-    ></affine-reference>`;
+  if (delta?.attributes?.reference) {
+    return html`<affine-reference .delta=${delta}></affine-reference>`;
   }
 
-  if (attributes) {
-    return html`<affine-text
-      .vText=${vText}
-      .textAttributes=${attributes}
-    ></affine-text>`;
-  } else {
-    return html`<affine-text .vText=${vText}></affine-text>`;
-  }
+  return html`<affine-text .delta=${delta}></affine-text>`;
 };
