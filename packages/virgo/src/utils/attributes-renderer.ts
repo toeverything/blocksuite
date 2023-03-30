@@ -40,10 +40,11 @@ function virgoTextStyles(
 
 export const getDefaultAttributeRenderer =
   <T extends BaseTextAttributes>(): AttributesRenderer<T> =>
-  (unitText, attributes) => {
-    const style = attributes
-      ? virgoTextStyles(attributes)
+  delta => {
+    const style = delta.attributes
+      ? virgoTextStyles(delta.attributes)
       : styleMap({ 'white-space': 'pre-wrap' });
-
-    return html`<span style=${style}>${unitText}</span>`;
+    return html`<span style=${style}
+      ><v-text .str=${delta.insert}></v-text
+    ></span>`;
   };

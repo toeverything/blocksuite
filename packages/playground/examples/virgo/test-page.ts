@@ -1,7 +1,11 @@
 import '@shoelace-style/shoelace';
 
 import { NonShadowLitElement } from '@blocksuite/blocks';
-import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
+import {
+  type BaseTextAttributes,
+  type DeltaInsert,
+  VEditor,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -41,26 +45,24 @@ function virgoTextStyles(
   });
 }
 
-const attributeRenderer = (
-  vText: VText,
-  attributes: BaseTextAttributes = {}
-) => {
-  const style = attributes ? virgoTextStyles(attributes) : styleMap({});
+const attributeRenderer = (delta: DeltaInsert) => {
+  const style = delta.attributes
+    ? virgoTextStyles(delta.attributes)
+    : styleMap({ 'white-space': 'pre-wrap' });
 
   // just for test
-  if (vText.str.length > 4) {
-    const leftStr = vText.str.slice(0, 3);
-    const rightStr = vText.str.slice(3);
+  if (delta.insert.length > 4) {
+    const leftStr = delta.insert.slice(0, 3);
+    const rightStr = delta.insert.slice(3);
 
-    const leftVText = new VText();
-    leftVText.str = leftStr;
-    const rightVText = new VText();
-    rightVText.str = rightStr;
-
-    return html`<span style=${style}>${leftVText}${rightVText}</span>`;
+    return html`<span style=${style}
+      ><v-text .str=${leftStr}></v-text><v-text .str=${rightStr}></v-text
+    ></span>`;
   }
 
-  return html`<span style=${style}>${vText}</span>`;
+  return html`<span style=${style}
+    ><v-text .str=${delta.insert}></v-text
+  ></span>`;
 };
 
 function toggleStyle(

@@ -885,6 +885,7 @@ test('pressing enter when selecting multiple blocks should create new block', as
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await waitNextFrame(page);
   await pressEnter(page);
   await assertRichTexts(page, ['1', '89']);
   await assertSelection(page, 1, 0, 0);

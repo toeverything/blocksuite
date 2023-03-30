@@ -1,8 +1,9 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { VEditor, VText } from '@blocksuite/virgo';
+import { type DeltaInsert, VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
@@ -12,13 +13,12 @@ import type { AffineTextAttributes } from '../virgo/types.js';
 @customElement('affine-link')
 export class AffineLink extends NonShadowLitElement {
   @property({ type: Object })
-  textAttributes: AffineTextAttributes = {};
-
-  @property({ type: Object })
-  vText: VText = new VText();
+  delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 
   get link() {
-    const link = this.textAttributes?.link;
+    const link = this.delta.attributes?.link;
     if (!link) {
       return '';
     }
@@ -84,7 +84,7 @@ export class AffineLink extends NonShadowLitElement {
       return;
     }
 
-    const text = this.vText.str;
+    const text = this.delta.insert;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
       text,
@@ -111,8 +111,8 @@ export class AffineLink extends NonShadowLitElement {
   private _updateLink(link?: string, text?: string) {
     const model = getModelByElement(this);
     const { page } = model;
-    const oldStr = this.vText.str;
-    const oldTextAttributes = this.textAttributes;
+    const oldStr = this.delta.insert;
+    const oldTextAttributes = this.delta.attributes;
 
     const textElement = this.querySelector('[data-virgo-text="true"]');
     assertExists(textElement);
@@ -197,7 +197,9 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   render() {
-    const style = affineTextStyles(this.textAttributes);
+    const style = this.delta.attributes
+      ? affineTextStyles(this.delta.attributes)
+      : styleMap({});
 
     return html`<a
       href=${this.link}
@@ -205,8 +207,8 @@ export class AffineLink extends NonShadowLitElement {
       target="_blank"
       style=${style}
       @mouseup=${this._onMouseUp}
-      >${FontLinkIcon}${this.vText}</a
-    >`;
+      >${FontLinkIcon}<v-text .str=${this.delta.insert}></v-text
+    ></a>`;
   }
 }
 

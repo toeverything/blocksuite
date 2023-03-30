@@ -1,7 +1,7 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
-import { VText } from '@blocksuite/virgo';
+import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -29,10 +29,10 @@ export class AffineReference extends NonShadowLitElement {
   `;
 
   @property({ type: Object })
-  textAttributes: AffineTextAttributes = {};
-
-  @property({ type: Object })
-  vText: VText = new VText();
+  delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+    attributes: {},
+  };
 
   @state()
   private _refMeta?: PageMeta;
@@ -41,13 +41,13 @@ export class AffineReference extends NonShadowLitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    if (this.vText.str !== REFERENCE_NODE) {
+    if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
-        `Reference node must be initialized with ${REFERENCE_NODE}, but got '${this.vText.str}'`
+        `Reference node must be initialized with ${REFERENCE_NODE}, but got '${this.delta.insert}'`
       );
     }
     const model = getModelByElement(this);
-    const reference = this.textAttributes?.reference;
+    const reference = this.delta.attributes?.reference;
     assertExists(reference, 'Unable to get reference!');
 
     this._refMeta = model.page.workspace.meta.pageMetas.find(
@@ -86,7 +86,7 @@ export class AffineReference extends NonShadowLitElement {
       ? refMeta.title
       : // Maybe the page is deleted
         'Referenced Page Not Found';
-    const type = this.textAttributes.reference?.type;
+    const type = this.delta.attributes?.reference?.type;
     assertExists(type, 'Unable to get reference type!');
 
     // TODO fix cursor with white space
@@ -95,8 +95,8 @@ export class AffineReference extends NonShadowLitElement {
     // This node is under contenteditable="true",
     // so we should not add any extra white space between HTML tags
     return html`<span class="affine-reference" @click=${this._onClick}
-      >${FontLinkIcon}<span contenteditable="false">${title}</span>${this
-        .vText}</span
+      >${FontLinkIcon}<span contenteditable="false">${title}</span>${this.delta
+        .insert}</span
     >`;
   }
 }
