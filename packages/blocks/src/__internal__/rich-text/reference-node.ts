@@ -1,4 +1,4 @@
-import { FontLinkIcon } from '@blocksuite/global/config';
+import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
 import {
@@ -137,7 +137,7 @@ export class AffineReference extends NonShadowLitElement {
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
-      >${FontLinkIcon}<span
+      >${type === 'LinkedPage' ? FontPageSubpageIcon : FontPageIcon}<span
         class="affine-reference-title"
         data-title=${title}
         data-virgo-text="true"
