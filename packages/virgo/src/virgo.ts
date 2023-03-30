@@ -2,7 +2,8 @@ import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import type * as Y from 'yjs';
+import { styleMap } from 'lit/directives/style-map.js';
+import * as Y from 'yjs';
 import type { z, ZodTypeDef } from 'zod';
 
 import { VirgoLine } from './components/index.js';
@@ -31,6 +32,11 @@ import {
   isVText,
   renderElement,
 } from './utils/index.js';
+
+export interface VEditorOptions {
+  // it is a option to determine defult `_attributesRenderer`
+  defualtMode: 'rich' | 'pure';
+}
 
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
@@ -345,7 +351,21 @@ export class VEditor<
     return this._marks;
   }
 
-  constructor(yText: VEditor['yText']) {
+  constructor(
+    text: VEditor['yText'] | string,
+    options: VEditorOptions = {
+      defualtMode: 'rich',
+    }
+  ) {
+    let yText: Y.Text;
+    if (typeof text === 'string') {
+      const temporaryYDoc = new Y.Doc();
+      yText = temporaryYDoc.getText('text');
+      yText.insert(0, text);
+    } else {
+      yText = text;
+    }
+
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
@@ -354,6 +374,17 @@ export class VEditor<
       throw new Error(
         'yText must not contain \r because it will break the range synclization'
       );
+    }
+
+    // we can change default render to pure for making `VEditor` to be a pure string render,
+    // you can change schema and renderer again after construction
+    if (options.defualtMode === 'pure') {
+      this._attributesRenderer = delta => {
+        const style = styleMap({ 'white-space': 'pre-wrap' });
+        return html`<span style=${style}
+          ><v-text .str=${delta.insert}></v-text
+        ></span>`;
+      };
     }
 
     this._yText = yText;
