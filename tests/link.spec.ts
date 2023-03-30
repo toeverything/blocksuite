@@ -280,3 +280,20 @@ test('should keyboard work in link popover', async ({ page }) => {
   const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
   await assertKeyboardWorkInInput(page, editLinkInput);
 });
+
+test('link bar should not be appear when the range is collapsed', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  await pressCreateLinkShortCut(page);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).not.toBeVisible();
+
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+});

@@ -13,10 +13,11 @@ import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange || blockRange.startOffset === blockRange.endOffset) return;
+  if (!blockRange) return;
   if (blockRange.models.length > 1) {
     throw new Error("Can't create link with multiple blocks for now");
   }
+  if (blockRange.startOffset === blockRange.endOffset) return;
   const startModel = blockRange.models[0];
   if (!startModel) return;
   const vEditor = getVirgoByModel(startModel);
