@@ -1,6 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { VText } from './components/index.js';
 import type { BaseTextAttributes } from './utils/index.js';
 
 export type DeltaInsert<
@@ -12,7 +11,7 @@ export type DeltaInsert<
 
 export type AttributesRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
-> = (vText: VText, attributes?: TextAttributes) => TemplateResult<1>;
+> = (delta: DeltaInsert<TextAttributes>) => TemplateResult<1>;
 
 export interface VRange {
   index: number;
