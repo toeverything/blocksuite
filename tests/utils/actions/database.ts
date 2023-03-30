@@ -51,3 +51,36 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
 }
+
+export async function doSelectColumnTagAction(
+  page: Page,
+  actionClass: string,
+  index = 0
+) {
+  const cell = getFirstColumnCell(
+    page,
+    'affine-database-select-cell-container'
+  );
+  await cell.click();
+
+  const selectOptions = page.locator('.select-option');
+  const selectOption = selectOptions.nth(index);
+  const box = await selectOption.boundingBox();
+  if (!box) throw new Error('Missing select tag option');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  const actionIcon = selectOption.locator('.select-option-icon');
+  await actionIcon.click();
+  const action = page.locator(`.${actionClass}`);
+  await action.click();
+
+  return {
+    cellSelected: cell.locator('.select-selected'),
+    selectOption: selectOptions,
+    saveIcon: actionIcon,
+  };
+}
+
+export async function clickOutSide(page: Page) {
+  await page.mouse.move(0, 0);
+}

@@ -2,7 +2,9 @@ import { expect } from '@playwright/test';
 
 import {
   assertDatabaseColumnOrder,
+  clickOutSide,
   doColumnAction,
+  doSelectColumnTagAction,
   enterPlaygroundRoom,
   focusDatabaseSearch,
   focusDatabaseTitle,
@@ -24,6 +26,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockCount,
@@ -91,9 +94,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   await switchColumnType(page, 'number');
   await initDatabaseDynamicRowWithData(page, '1', true);
 
-  // click outside
-  await page.mouse.click(200, 200);
-
+  await clickOutSide(page);
   const cell = getFirstColumnCell(page, 'number');
   expect(await cell.innerText()).toBe('1');
 });
@@ -444,5 +445,45 @@ test.describe('switch column type', () => {
 
     await switchColumnType(page, 'number');
     expect(await cell.innerText()).toBe('');
+  });
+});
+
+test.describe('select column tag action', () => {
+  test('should support select tag renaming', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await initDatabaseDynamicRowWithData(page, 'abc');
+
+    const { cellSelected, selectOption, saveIcon } =
+      await doSelectColumnTagAction(page, 'rename');
+    await waitNextFrame(page);
+    await type(page, '4567abc00');
+    const option1 = selectOption.nth(0);
+    const input = option1.locator('[data-virgo-text="true"]');
+    // The maximum length of the tag name is 10
+    expect((await input.innerText()).length).toBe(10);
+    expect(await input.innerText()).toBe('1234567abc');
+    await saveIcon.click();
+
+    await clickOutSide(page);
+    const selected1 = cellSelected.nth(0);
+    const selected2 = cellSelected.nth(1);
+    expect(await selected1.innerText()).toBe('1234567abc');
+    expect(await selected2.innerText()).toBe('abc');
+  });
+
+  test('should support select tag deletion', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    const { cellSelected } = await doSelectColumnTagAction(page, 'delete');
+    await clickOutSide(page);
+    expect(await cellSelected.count()).toBe(0);
   });
 });
