@@ -3,6 +3,13 @@ import type { Rectangle } from '../rectangle.js';
 import type { Point } from '../simplify-path.js';
 import type { CreateGraphReturned } from './types.js';
 
+/**
+ * The function checks if manual node generation is applicable under the following conditions:
+ * 1. There are no rectangles.
+ * 2. There is only one rectangle and two points, and:
+ *    - Both points are on the left, right, top, or bottom of the rectangle.
+ *    - At least one point is inside the rectangle.
+ */
 export function shouldManuelGenerateNodes(
   rectangles: Rectangle[],
   points: Point[]
@@ -10,14 +17,30 @@ export function shouldManuelGenerateNodes(
   if (!rectangles.length) {
     return true;
   }
+  if (rectangles.length !== 1 || points.length !== 2) {
+    return false;
+  }
+  const p0x = points[0].x;
+  const p0y = points[0].y;
+  const p1x = points[1].x;
+  const p1y = points[1].y;
+
+  const rect = rectangles[0];
+  const { x, y, maxX, maxY } = rect;
+
+  const pointsBothOnLeft = p0x <= x && p1x <= rect.x;
+  const pointsBothOnRight = p0x >= maxX && p1x >= maxX;
+  const pointsBothOnTop = p0y <= y && p1y <= y;
+  const pointsBothOnBottom = p0y >= maxY && p1y >= maxY;
+  const atLeastOnePointInside =
+    rect.contains(p0x, p0y) || rect.contains(p1x, p1y);
+
   if (
-    rectangles.length === 1 &&
-    points.length === 2 &&
-    ((points[0].x <= rectangles[0].x && points[1].x <= rectangles[0].x) ||
-      (points[0].x >= rectangles[0].maxX &&
-        points[1].x >= rectangles[0].maxX) ||
-      (points[0].y <= rectangles[0].y && points[1].y <= rectangles[0].y) ||
-      (points[0].y >= rectangles[0].maxY && points[1].y >= rectangles[0].maxY))
+    pointsBothOnLeft ||
+    pointsBothOnRight ||
+    pointsBothOnTop ||
+    pointsBothOnBottom ||
+    atLeastOnePointInside
   ) {
     return true;
   }
