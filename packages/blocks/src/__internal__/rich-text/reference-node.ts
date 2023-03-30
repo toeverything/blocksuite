@@ -1,7 +1,11 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
-import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import {
+  type DeltaInsert,
+  ZERO_WIDTH_NON_JOINER,
+  ZERO_WIDTH_SPACE,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -84,10 +88,11 @@ export class AffineReference extends NonShadowLitElement {
     if (!refMeta || refMeta.id === model.page.id) {
       return;
     }
-    // const targetPageId = refMeta.id;
+    const targetPageId = refMeta.id;
     // TODO jump to the reference
     const editor = getEditorContainer(model.page);
-    editor.page = model.page.workspace.getPage(refMeta.id);
+    // @ts-expect-error
+    editor.page = model.page.workspace.getPage(targetPageId);
   }
 
   render() {
@@ -96,7 +101,7 @@ export class AffineReference extends NonShadowLitElement {
     const isDisabled = !refMeta;
     const title = isDisabled
       ? // Maybe the page is deleted
-        'Linked page is deleted'
+        'Deleted page'
       : refMeta.title;
     const attributes = this.delta.attributes;
     assertExists(attributes, 'Failed to get attributes!');
@@ -128,7 +133,7 @@ export class AffineReference extends NonShadowLitElement {
         class="affine-reference-title"
         data-title=${title}
         data-virgo-text="true"
-        >${this.delta.insert}</span
+        >${ZERO_WIDTH_NON_JOINER}</span
       ></span
     >`;
   }
