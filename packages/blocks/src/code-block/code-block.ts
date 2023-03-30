@@ -9,6 +9,7 @@ import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { getHighlighter, type Highlighter, type Lang } from 'shiki';
+import { z } from 'zod';
 
 import {
   type BlockHost,
@@ -21,6 +22,7 @@ import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
+import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -168,6 +170,15 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   @state()
   private _wrap = false;
+
+  @state()
+  textSchema = {
+    attributesSchema: z.object({}),
+    textRenderer: getCodeLineRenderer(() => ({
+      lang: this.model.language.toLowerCase() as Lang,
+      highlighter: this._highlighter,
+    })),
+  };
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
@@ -454,10 +465,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
           <rich-text
             .host=${this.host}
             .model=${this.model}
-            .codeBlockHighlighterOptionsGetter=${() => ({
-              lang: this.model.language.toLowerCase() as Lang,
-              highlighter: this._highlighter,
-            })}
+            .textSchema=${this.textSchema}
           >
           </rich-text>
         </div>

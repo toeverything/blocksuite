@@ -1,6 +1,10 @@
-import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
+import type {
+  AttributesRenderer,
+  DeltaInsert,
+  VEditor,
+} from '@blocksuite/virgo';
 import { baseTextAttributes } from '@blocksuite/virgo';
-import { z } from 'zod';
+import { z, type ZodTypeDef } from 'zod';
 
 export const affineTextAttributes = baseTextAttributes.extend({
   reference: z
@@ -16,3 +20,8 @@ export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
 export type AffineDeltaInsert = DeltaInsert<AffineTextAttributes>;
 
 export type AffineVEditor = VEditor<AffineTextAttributes>;
+
+export type AffineTextSchema = {
+  attributesSchema: z.ZodSchema<AffineTextAttributes, ZodTypeDef, unknown>;
+  textRenderer: AttributesRenderer<AffineTextAttributes>;
+};

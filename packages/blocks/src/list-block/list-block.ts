@@ -9,6 +9,8 @@ import {
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import { attributesRenderer } from '../__internal__/rich-text/virgo/attributes-renderer.js';
+import { affineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -80,6 +82,12 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
+  @state()
+  textSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributesRenderer,
+  };
+
   private _select() {
     const { selection } = getDefaultPageBlock(this.model);
     selection?.selectOneBlock(this);
@@ -130,7 +138,11 @@ export class ListBlockComponent extends NonShadowLitElement {
           }`}
         >
           ${listIcon}
-          <rich-text .host=${this.host} .model=${this.model}></rich-text>
+          <rich-text
+            .host=${this.host}
+            .model=${this.model}
+            .textSchema=${this.textSchema}
+          ></rich-text>
         </div>
         ${childrenContainer}
       </div>

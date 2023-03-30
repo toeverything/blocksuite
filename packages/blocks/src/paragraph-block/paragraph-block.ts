@@ -13,6 +13,8 @@ import {
   isPageMode,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import { attributesRenderer } from '../__internal__/rich-text/virgo/attributes-renderer.js';
+import { affineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
@@ -174,6 +176,13 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   private _isComposing = false;
   @state()
   private _isFocus = false;
+
+  @state()
+  textSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributesRenderer,
+  };
+
   private _placeholderDisposables = new DisposableGroup();
 
   override connectedCallback() {
@@ -250,6 +259,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
         <rich-text
           .host=${this.host}
           .model=${this.model}
+          .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}
           @focusout=${this._onFocusOut}
           style=${styleMap({
