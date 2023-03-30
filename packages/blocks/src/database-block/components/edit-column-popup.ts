@@ -379,14 +379,20 @@ export class EditColumnPopup extends LitElement {
 
     const currentType = this.targetColumnSchema.type;
     this.targetModel.page.captureSync();
+
+    // select -> multi-select
     if (currentType === 'select' && targetType === 'multi-select') {
       this._updateColumnSchema(columnId, { type: targetType });
-    } else if (currentType === 'multi-select' && targetType === 'select') {
+    }
+    // multi-select -> select
+    else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateBlockColumnsToSelect(columnId);
-    } else if (currentType === 'number' && targetType === 'rich-text') {
+      this.targetModel.page.updateColumnValue(columnId, 'select');
+    }
+    // number -> rich-text
+    else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateBlockColumnsToRichText(columnId);
+      this.targetModel.page.updateColumnValue(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnSchemaRenderer(targetType);

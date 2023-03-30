@@ -279,36 +279,30 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  updateBlockColumnsToSelect(id: BaseBlockModel['id']) {
+  // TODO: remove hard coded types
+  updateColumnValue(columnId: string, newType: 'select' | 'rich-text') {
     this.transact(() => {
       this.yColumns.forEach(yColumn => {
-        const yTargetColumn = yColumn.get(id) as Y.Map<unknown>;
+        const yTargetColumn = yColumn.get(columnId) as Y.Map<unknown>;
         if (!yTargetColumn) return;
 
-        const value = yTargetColumn.get('value') as string[] | undefined;
-        if (!value) return;
+        if (newType === 'select') {
+          const value = yTargetColumn.get('value');
+          if (!value) return;
 
-        const yColumnMap = new Y.Map();
-        yColumnMap.set('schemaId', id);
-        yColumnMap.set('value', [value[0]]);
-        yColumn.set(id, yColumnMap);
-      });
-    });
-  }
+          const yColumnMap = new Y.Map();
+          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('value', [(value as string[])[0]]);
+          yColumn.set(columnId, yColumnMap);
+        } else if (newType === 'rich-text') {
+          const value = yTargetColumn.get('value');
+          if (!value) return;
 
-  updateBlockColumnsToRichText(id: BaseBlockModel['id']) {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        const yTargetColumn = yColumn.get(id) as Y.Map<unknown>;
-        if (!yTargetColumn) return;
-
-        const value = yTargetColumn.get('value') as number | undefined;
-        if (!value) return;
-
-        const yColumnMap = new Y.Map();
-        yColumnMap.set('schemaId', id);
-        yColumnMap.set('value', new Y.Text(value + ''));
-        yColumn.set(id, yColumnMap);
+          const yColumnMap = new Y.Map();
+          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('value', new Y.Text((value as number) + ''));
+          yColumn.set(columnId, yColumnMap);
+        }
       });
     });
   }
