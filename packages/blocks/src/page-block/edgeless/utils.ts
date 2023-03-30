@@ -1,21 +1,9 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  MouseMode,
-  Point,
-  TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import {
-  doesInSamePath,
-  getClosestBlockElementByPoint,
-  getHoveringFrame,
-  isInEmptyDatabaseByPoint,
-  Rect,
-} from '@blocksuite/blocks/std';
+import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
 import type { Point as ConnectorPoint, Rectangle } from '@blocksuite/connector';
 import { simplifyPath } from '@blocksuite/connector';
 import { route } from '@blocksuite/connector';
 import type {
+  AttachedElementDirection,
   Bound,
   Controller,
   PhasorElement,
@@ -30,14 +18,9 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
-import { DragHandle } from '../../components/index.js';
-import type {
-  EdgelessContainer,
-  EdgelessPageBlockComponent,
-} from './edgeless-page-block.js';
+import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export const FRAME_MIN_WIDTH = 200;
@@ -173,79 +156,13 @@ export function getCursorMode(mouseMode: MouseMode) {
   }
 }
 
-export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
-  return new DragHandle({
-    // Drag handle should be at the same level with EditorContainer
-    container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blocks, editingState) {
-      const page = pageBlock.page;
-      if (editingState) {
-        const { rect, model, element } = editingState;
-        const models = blocks.map(b => b.model);
-        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
-          return;
-        }
-
-        let parentId;
-
-        page.captureSync();
-
-        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
-          page.moveBlocks(models, model);
-          parentId = model.id;
-        } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
-          const parent = page.getParent(model);
-          assertExists(parent);
-          page.moveBlocks(
-            models,
-            parent,
-            model,
-            distanceToTop < distanceToBottom
-          );
-          parentId = parent.id;
-        }
-
-        pageBlock.setSelectionByBlockId(parentId, true);
-        return;
-      }
-
-      // blank area
-      page.captureSync();
-      pageBlock.moveBlocksToNewFrame(
-        blocks.map(b => b.model),
-        point
-      );
-    },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ) {
-      return;
-    },
-    getSelectedBlocks() {
-      return [];
-    },
-    getClosestBlockElement(point: Point) {
-      if (pageBlock.mouseMode.type !== 'default') return null;
-      const hoveringFrame = getHoveringFrame(point);
-      if (!hoveringFrame) return null;
-      return getClosestBlockElementByPoint(
-        point,
-        { container: hoveringFrame, rect: Rect.fromDOM(hoveringFrame) },
-        pageBlock.surface.viewport.zoom
-      );
-    },
-  });
-}
-
 export function pickBy(
   surface: SurfaceManager,
   page: Page,
   x: number,
   y: number,
   filter: (element: Selectable) => boolean
-) {
+): Selectable | null {
   const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
   const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
 
@@ -281,7 +198,9 @@ export function generatePath(
       fixed === 'start'
         ? originControllers.slice(0, customizedStart + 1)
         : route(startRect ? [startRect] : [], [startPoint, part0EndPoint]);
+
     const part1 = originControllers.slice(customizedStart, customizedEnd + 1);
+
     const part2StartPoint = originControllers[customizedEnd];
     const part2 =
       fixed === 'end'
@@ -301,4 +220,37 @@ export function generatePath(
     startPoint,
     endPoint,
   ]);
+}
+
+export function getAttachedPointByDirection(
+  { x, y, w, h }: Rectangle,
+  direction: AttachedElementDirection
+) {
+  switch (direction) {
+    case 'top': {
+      return { x: x + w / 2, y };
+    }
+    case 'right': {
+      return { x: x + w, y: y + h / 2 };
+    }
+    case 'bottom': {
+      return { x: x + w / 2, y: y + h };
+    }
+    case 'left': {
+      return { x, y: y + h / 2 };
+    }
+  }
+}
+
+export function getAttachedPoint(
+  x: number,
+  y: number,
+  rect?: Rectangle | null
+) {
+  if (!rect) {
+    return { point: { x, y }, direction: 'left' as const };
+  }
+  const direction = rect.relativeDirection(x, y);
+  const point = getAttachedPointByDirection(rect, direction);
+  return { point, direction };
 }

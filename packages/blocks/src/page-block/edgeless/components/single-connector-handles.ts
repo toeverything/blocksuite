@@ -12,10 +12,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  getPoint,
-  getPointByDirection,
-} from '../mode-controllers/connector-mode.js';
-import { generatePath, getXYWH, pickBy } from '../utils.js';
+  generatePath,
+  getAttachedPoint,
+  getAttachedPointByDirection,
+  getXYWH,
+  pickBy,
+} from '../utils.js';
 
 function capMousedown(
   event: MouseEvent,
@@ -42,7 +44,7 @@ function capMousedown(
       : null;
     const originStartPoint =
       originStartRect && startElement
-        ? getPointByDirection(originStartRect, startElement.direction)
+        ? getAttachedPointByDirection(originStartRect, startElement.direction)
         : {
             x: element.x + element.controllers[0].x,
             y: element.y + element.controllers[0].y,
@@ -54,7 +56,7 @@ function capMousedown(
       : null;
     const originEndPoint =
       originEndRect && endElement
-        ? getPointByDirection(originEndRect, endElement.direction)
+        ? getAttachedPointByDirection(originEndRect, endElement.direction)
         : {
             x:
               element.x + element.controllers[element.controllers.length - 1].x,
@@ -73,7 +75,7 @@ function capMousedown(
       ? new Rectangle(...deserializeXYWH(getXYWH(picked)))
       : null;
 
-    const { point: newPoint, direction: startDirection } = getPoint(
+    const { point: newPoint, direction: startDirection } = getAttachedPoint(
       modelX,
       modelY,
       newRect

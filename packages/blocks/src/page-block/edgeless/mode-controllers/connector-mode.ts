@@ -1,6 +1,5 @@
 import { Rectangle, route } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
-import type { AttachedElementDirection } from '@blocksuite/phasor';
 import {
   Bound,
   deserializeXYWH,
@@ -13,37 +12,8 @@ import type {
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import type { Selectable, SelectionArea } from '../selection-manager.js';
-import { getXYWH, pickBy } from '../utils.js';
+import { getAttachedPoint, getXYWH, pickBy } from '../utils.js';
 import { MouseModeController } from './index.js';
-
-export function getPointByDirection(
-  { x, y, w, h }: Rectangle,
-  direction: AttachedElementDirection
-) {
-  switch (direction) {
-    case 'top': {
-      return { x: x + w / 2, y };
-    }
-    case 'right': {
-      return { x: x + w, y: y + h / 2 };
-    }
-    case 'bottom': {
-      return { x: x + w / 2, y: y + h };
-    }
-    case 'left': {
-      return { x, y: y + h / 2 };
-    }
-  }
-}
-
-export function getPoint(x: number, y: number, rect?: Rectangle | null) {
-  if (!rect) {
-    return { point: { x, y }, direction: 'left' as const };
-  }
-  const direction = rect.relativeDirection(x, y);
-  const point = getPointByDirection(rect, direction);
-  return { point, direction };
-}
 
 export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
   readonly mouseMode = <ConnectorMouseMode>{
@@ -97,7 +67,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       ? new Rectangle(...deserializeXYWH(getXYWH(this._draggingStartElement)))
       : null;
 
-    const { point: startPoint, direction: startDirection } = getPoint(
+    const { point: startPoint, direction: startDirection } = getAttachedPoint(
       modelX,
       modelY,
       this._draggingStartRect
@@ -160,7 +130,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     const {
       point: { x: endX, y: endY },
       direction: endDirection,
-    } = getPoint(endModelX, endModelY, endRect);
+    } = getAttachedPoint(endModelX, endModelY, endRect);
 
     const routes = route(
       [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],

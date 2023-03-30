@@ -36,7 +36,7 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils.js';
-import { getPointByDirection } from './connector-mode.js';
+import { getAttachedPointByDirection } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 enum DragType {
@@ -201,7 +201,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             : null;
           const originStartPoint =
             originStartRect && startElement
-              ? getPointByDirection(originStartRect, startElement.direction)
+              ? getAttachedPointByDirection(
+                  originStartRect,
+                  startElement.direction
+                )
               : {
                   x: x + controllers[0].x,
                   y: y + controllers[0].y,
@@ -215,7 +218,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
             : null;
           const originEndPoint =
             originEndRect && endElement
-              ? getPointByDirection(originEndRect, endElement.direction)
+              ? getAttachedPointByDirection(originEndRect, endElement.direction)
               : {
                   x: x + controllers[controllers.length - 1].x,
                   y: y + controllers[controllers.length - 1].y,
