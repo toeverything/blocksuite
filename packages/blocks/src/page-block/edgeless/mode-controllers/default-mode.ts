@@ -29,7 +29,7 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
-  generatePath,
+  generateConnectorPath,
   getXYWH,
   isPhasorElement,
   isTopLevelBlock,
@@ -223,7 +223,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
                   x: x + controllers[controllers.length - 1].x,
                   y: y + controllers[controllers.length - 1].y,
                 };
-          const routes = generatePath(
+          const routes = generateConnectorPath(
             originStartRect,
             originEndRect,
             originStartPoint,

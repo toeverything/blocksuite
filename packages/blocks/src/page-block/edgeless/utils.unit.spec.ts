@@ -2,7 +2,7 @@ import { Rectangle } from '@blocksuite/connector';
 import { describe, expect, it } from 'vitest';
 
 import {
-  generatePath,
+  generateConnectorPath,
   getAttachedPoint,
   getAttachedPointByDirection,
 } from './utils.js';
@@ -29,7 +29,7 @@ describe('page-block edgeless utils', () => {
     expect(ret).toMatchObject({ point: { x: 10, y: 10 }, direction: 'left' });
   });
 
-  it('generatePath with fixed', () => {
+  it('generateConnectorPath with fixed', () => {
     const startRect = new Rectangle(30, 30, 200, 200);
     const endRect = new Rectangle(130, 130, 300, 300);
     const startPoint = { x: 130, y: 30 };
@@ -43,7 +43,7 @@ describe('page-block edgeless utils', () => {
       { x: 25, y: 40 },
     ];
 
-    const pathWithFixedStart = generatePath(
+    const pathWithFixedStart = generateConnectorPath(
       startRect,
       endRect,
       startPoint,
@@ -56,7 +56,7 @@ describe('page-block edgeless utils', () => {
       controllers.slice(0, 4)
     );
 
-    const pathWithFixedEnd = generatePath(
+    const pathWithFixedEnd = generateConnectorPath(
       startRect,
       endRect,
       startPoint,

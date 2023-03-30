@@ -12,7 +12,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  generatePath,
+  generateConnectorPath,
   getAttachedPoint,
   getAttachedPointByDirection,
   getXYWH,
@@ -83,7 +83,7 @@ function capMousedown(
 
     const routes =
       position === 'start'
-        ? generatePath(
+        ? generateConnectorPath(
             newRect,
             originEndRect,
             newPoint,
@@ -91,7 +91,7 @@ function capMousedown(
             originControllers,
             'end'
           )
-        : generatePath(
+        : generateConnectorPath(
             originStartRect,
             newRect,
             originStartPoint,

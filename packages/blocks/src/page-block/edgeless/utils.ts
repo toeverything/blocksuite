@@ -175,7 +175,7 @@ export function pickBy(
       );
 }
 
-export function generatePath(
+export function generateConnectorPath(
   startRect: Rectangle | null,
   endRect: Rectangle | null,
   startPoint: ConnectorPoint,
