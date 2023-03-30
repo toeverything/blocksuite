@@ -5,8 +5,8 @@ import { createNodes } from './create-nodes.js';
 import { createRulers } from './create-rulers.js';
 import {
   manuelGenerateGraph,
-  shouldManuelGenerateNodes,
-} from './manuel-generate-nodes.js';
+  shouldManuelGenerateGraph,
+} from './manuel-generate-graph.js';
 import type { CreateGraphReturned } from './types.js';
 
 export function createGraph(
@@ -14,7 +14,7 @@ export function createGraph(
   points: Point[],
   margin = [10, 10]
 ): CreateGraphReturned {
-  if (shouldManuelGenerateNodes(rectangles, points)) {
+  if (shouldManuelGenerateGraph(rectangles, points)) {
     return manuelGenerateGraph(rectangles, points);
   }
 

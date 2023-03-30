@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { Rectangle } from '../rectangle.js';
 import {
   manuelGenerateGraph,
-  shouldManuelGenerateNodes,
-} from './manuel-generate-nodes.js';
+  shouldManuelGenerateGraph,
+} from './manuel-generate-graph.js';
 import type { CreateGraphReturned } from './types.js';
 
 describe('shouldManuelGenerateNodes', () => {
@@ -15,7 +15,7 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateNodes(rectangles, points);
+    const result = shouldManuelGenerateGraph(rectangles, points);
     expect(result).toBeTruthy();
   });
 
@@ -26,7 +26,7 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateNodes(rectangles, points);
+    const result = shouldManuelGenerateGraph(rectangles, points);
     expect(result).toBeFalsy();
   });
 
@@ -40,7 +40,7 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateNodes(rectangles, points);
+    const result = shouldManuelGenerateGraph(rectangles, points);
     expect(result).toBeFalsy();
   });
 });

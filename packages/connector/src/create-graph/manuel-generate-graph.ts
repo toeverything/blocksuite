@@ -10,7 +10,7 @@ import type { CreateGraphReturned } from './types.js';
  *    - Both points are on the left, right, top, or bottom of the rectangle.
  *    - At least one point is inside the rectangle.
  */
-export function shouldManuelGenerateNodes(
+export function shouldManuelGenerateGraph(
   rectangles: Rectangle[],
   points: Point[]
 ) {
