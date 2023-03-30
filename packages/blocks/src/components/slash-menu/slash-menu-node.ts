@@ -1,6 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,16 +21,10 @@ export class SlashMenu extends LitElement {
   static styles = styles;
 
   @property()
-  transform: string | null = null;
-
-  @property()
-  maxHeight: number | null = null;
-
-  @property()
   model!: BaseBlockModel;
 
   @query('.slash-menu')
-  slashMenuElement!: HTMLElement;
+  slashMenuElement?: HTMLElement;
 
   @state()
   private _leftPanelActivated = false;
@@ -43,6 +37,13 @@ export class SlashMenu extends LitElement {
 
   @state()
   private _hide = false;
+
+  @state()
+  private _position: {
+    x: string;
+    y: string;
+    height: number;
+  } | null = null;
 
   abortController = new AbortController();
 
@@ -79,6 +80,10 @@ export class SlashMenu extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+  }
+
+  updatePosition(position: { x: string; y: string; height: number }) {
+    this._position = position;
   }
 
   // Handle click outside
@@ -345,23 +350,24 @@ export class SlashMenu extends LitElement {
 
   override render() {
     if (this._hide) {
-      return html``;
+      return nothing;
     }
 
     const MAX_HEIGHT_WITH_CATEGORY = 408;
     const MAX_HEIGHT = 344;
     const showCategory = !this._searchString.length;
 
-    const slashMenuStyles = styleMap({
-      visibility: this.transform ? null : 'hidden',
-      transform: this.transform,
-      maxHeight: this.maxHeight
-        ? `${Math.min(
-            this.maxHeight,
+    const slashMenuStyles = this._position
+      ? styleMap({
+          transform: `translate(${this._position.x}, ${this._position.y})`,
+          maxHeight: `${Math.min(
+            this._position.height,
             showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
-          )}px`
-        : null,
-    });
+          )}px`,
+        })
+      : styleMap({
+          visibility: 'hidden',
+        });
 
     const filterItems = this.model.page.awarenessStore.getFlag(
       'enable_database'
