@@ -23,6 +23,14 @@ import type { PageMeta, Workspace } from './workspace.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
+type SerializedNestedColumns = {
+  // row
+  [key: string]: {
+    // column
+    [key: string]: BlockColumn;
+  };
+};
+
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockProps = Record<string, any> & {
@@ -106,10 +114,13 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get columns() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
+  protected get columns() {
+    assertExists(this.root?.columns);
     return this.root.columns as Y.Map<Y.Map<unknown>>;
+  }
+
+  get columnJSON(): SerializedNestedColumns {
+    return this.columns.toJSON();
   }
 
   get columnSchema() {
