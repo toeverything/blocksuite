@@ -56,10 +56,6 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
-    this._disposables.addFromEvent(window, 'keydown', this._keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
-      capture: true,
-    });
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -212,6 +208,8 @@ export class SlashMenu extends LitElement {
       }
 
       case 'ArrowLeft':
+        // If the left panel is hidden, should not activate it
+        if (!this._searchString.length) return;
         this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
@@ -230,6 +228,10 @@ export class SlashMenu extends LitElement {
 
   private _updateItem(): SlashItem[] {
     this._activatedItemIndex = 0;
+    // Activate the right panel when search string is not empty
+    if (this._leftPanelActivated) {
+      this._leftPanelActivated = false;
+    }
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
       return menuGroups.flatMap(group => group.items);
