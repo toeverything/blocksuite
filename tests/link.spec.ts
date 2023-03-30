@@ -6,6 +6,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusRichTextEnd,
   initEmptyParagraphState,
   pressEnter,
   pressShiftEnter,
@@ -299,7 +300,7 @@ test('link bar should not be appear when the range is collapsed', async ({
   await pressCreateLinkShortCut(page);
   await expect(linkPopoverLocator).toBeVisible();
 
-  await focusRichText(page);
+  await focusRichTextEnd(page);
   await pressShiftEnter(page);
   await waitNextFrame(page);
   await type(page, 'bbb');
@@ -307,7 +308,7 @@ test('link bar should not be appear when the range is collapsed', async ({
   await pressCreateLinkShortCut(page);
   await expect(linkPopoverLocator).toBeVisible();
 
-  await focusRichText(page, 0);
+  await focusRichTextEnd(page, 0);
   await pressEnter(page);
   // create auto line-break in span element
   await type(page, 'd'.repeat(67));

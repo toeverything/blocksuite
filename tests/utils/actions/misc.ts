@@ -361,6 +361,12 @@ export async function initEmptyCodeBlockState(page: Page) {
 }
 
 export async function focusRichText(page: Page, i = 0) {
+  await page.mouse.move(0, 0);
+  const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
+  await locator.click();
+}
+
+export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(i => {
     const richTexts = Array.from(document.querySelectorAll('rich-text'));
 
