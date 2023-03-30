@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   assertDatabaseColumnOrder,
-  clickOutSide,
+  clickDatabaseOutside,
   doColumnAction,
   doSelectColumnTagAction,
   enterPlaygroundRoom,
@@ -94,7 +94,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   await switchColumnType(page, 'number');
   await initDatabaseDynamicRowWithData(page, '1', true);
 
-  await clickOutSide(page);
+  await clickDatabaseOutside(page);
   const cell = getFirstColumnCell(page, 'number');
   expect(await cell.innerText()).toBe('1');
 });
@@ -162,15 +162,13 @@ test('should show or hide database toolbar', async ({ page }) => {
   await db.mouseLeave();
   await expect(toolbar).toBeVisible();
 
-  // click outside
-  const pageTitle = page.locator('.affine-default-page-block-title');
-  await pageTitle.click();
+  await clickDatabaseOutside(page);
   await expect(toolbar).toBeHidden();
 
   await db.mouseOver();
   await searchIcon.click();
   await type(page, '1');
-  await pageTitle.click();
+  await clickDatabaseOutside(page);
   await expect(toolbar).toBeVisible();
 });
 
@@ -468,7 +466,7 @@ test.describe('select column tag action', () => {
     expect(await input.innerText()).toBe('1234567abc');
     await saveIcon.click();
 
-    await clickOutSide(page);
+    await clickDatabaseOutside(page);
     const selected1 = cellSelected.nth(0);
     const selected2 = cellSelected.nth(1);
     expect(await selected1.innerText()).toBe('1234567abc');
@@ -483,7 +481,7 @@ test.describe('select column tag action', () => {
     await initDatabaseDynamicRowWithData(page, '123', true);
 
     const { cellSelected } = await doSelectColumnTagAction(page, 'delete');
-    await clickOutSide(page);
+    await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
   });
 });

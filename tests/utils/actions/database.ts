@@ -81,6 +81,7 @@ export async function doSelectColumnTagAction(
   };
 }
 
-export async function clickOutSide(page: Page) {
-  await page.mouse.move(0, 0);
+export async function clickDatabaseOutside(page: Page) {
+  const pageTitle = page.locator('.affine-default-page-block-title');
+  await pageTitle.click();
 }
