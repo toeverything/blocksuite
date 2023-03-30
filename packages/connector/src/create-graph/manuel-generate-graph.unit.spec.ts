@@ -8,10 +8,10 @@ import {
 import type { CreateGraphReturned } from './types.js';
 
 describe('shouldManuelGenerateNodes', () => {
-  it('should return true for at least one point inside', () => {
+  it('should return true for both on right', () => {
     const rectangles: Rectangle[] = [new Rectangle(2, 2, 2, 2)];
     const points = [
-      { x: 3, y: 3 },
+      { x: 10, y: 10 },
       { x: 5, y: 5 },
     ];
 

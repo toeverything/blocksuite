@@ -32,15 +32,12 @@ export function shouldManuelGenerateGraph(
   const pointsBothOnRight = p0x >= maxX && p1x >= maxX;
   const pointsBothOnTop = p0y <= y && p1y <= y;
   const pointsBothOnBottom = p0y >= maxY && p1y >= maxY;
-  const atLeastOnePointInside =
-    rect.contains(p0x, p0y) || rect.contains(p1x, p1y);
 
   if (
     pointsBothOnLeft ||
     pointsBothOnRight ||
     pointsBothOnTop ||
-    pointsBothOnBottom ||
-    atLeastOnePointInside
+    pointsBothOnBottom
   ) {
     return true;
   }
