@@ -264,6 +264,7 @@ export function generatePath(
   startPoint: ConnectorPoint,
   endPoint: ConnectorPoint,
   originControllers: Controller[],
+  // this indicating which part of the path is fixed when there are customized control points
   fixed?: 'start' | 'end'
 ) {
   let customizedStart = Infinity;
@@ -276,32 +277,22 @@ export function generatePath(
   });
   if (customizedEnd > -1) {
     const part0EndPoint = originControllers[customizedStart];
-    const part0 = route(startRect ? [startRect] : [], [
-      startPoint,
-      part0EndPoint,
-    ]);
+    const part0 =
+      fixed === 'start'
+        ? originControllers.slice(0, customizedStart + 1)
+        : route(startRect ? [startRect] : [], [startPoint, part0EndPoint]);
     const part1 = originControllers.slice(customizedStart, customizedEnd + 1);
     const part2StartPoint = originControllers[customizedEnd];
-    const part2 = route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
+    const part2 =
+      fixed === 'end'
+        ? originControllers.slice(customizedEnd)
+        : route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
 
-    let finalPath: Controller[];
-    if (fixed === 'start') {
-      finalPath = simplifyPath([
-        ...originControllers.slice(0, customizedEnd + 1),
-        ...part2.slice(1),
-      ]);
-    } else if (fixed === 'end') {
-      finalPath = simplifyPath([
-        ...part0.slice(0, -1),
-        ...originControllers.slice(customizedStart),
-      ]);
-    } else {
-      finalPath = simplifyPath([
-        ...part0.slice(0, -1),
-        ...part1,
-        ...part2.slice(1),
-      ]);
-    }
+    const finalPath = simplifyPath([
+      ...part0.slice(0, -1),
+      ...part1,
+      ...part2.slice(1),
+    ]);
 
     return finalPath;
   }
