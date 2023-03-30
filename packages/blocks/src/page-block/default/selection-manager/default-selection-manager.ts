@@ -519,6 +519,13 @@ export class DefaultSelectionManager {
     }
   }
 
+  refreshRemoteSelection() {
+    const element = document.querySelector('remote-selection');
+    if (element) {
+      element.requestUpdate();
+    }
+  }
+
   selectOneBlock(element: Element | null, rect?: DOMRect) {
     // clear selection first
     this.clear();

@@ -512,6 +512,10 @@ export class DefaultPageBlockComponent
   }
 
   render() {
+    requestAnimationFrame(() => {
+      this.selection.refreshRemoteSelection();
+    });
+
     const { page, selection } = this;
     const { viewport } = selection.state;
 
