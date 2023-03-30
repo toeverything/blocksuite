@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { css,html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { DirectiveResult } from 'lit/directive.js';
 import { styleMap, type StyleMapDirective } from 'lit/directives/style-map.js';
@@ -7,6 +7,12 @@ import { ZERO_WIDTH_SPACE } from '../constant.js';
 
 @customElement('v-text')
 export class VText extends LitElement {
+  static styles = css`
+    v-text {
+      white-spaces: pre-wrap;
+    }
+  `;
+
   @property()
   str: string = ZERO_WIDTH_SPACE;
 
