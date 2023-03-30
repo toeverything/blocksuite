@@ -62,7 +62,6 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
       if (event.key === 'Enter' && this.value) {
-        this.rowHost.setValue(this.value);
         this.rowHost.setEditing(false);
       }
     });
