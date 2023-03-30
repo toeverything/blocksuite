@@ -1,5 +1,5 @@
 import { aStarRoute } from './a-star.js';
-import { createGraph } from './create-graph.js';
+import { createGraph } from './create-graph/create-graph.js';
 import type { GraphNode } from './graph.js';
 import type { Rectangle } from './rectangle.js';
 import type { Point } from './simplify-path.js';
