@@ -214,7 +214,7 @@ export class SlashMenu extends LitElement {
 
       case 'ArrowLeft':
         // If the left panel is hidden, should not activate it
-        if (!this._searchString.length) return;
+        if (this._searchString.length) return;
         this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
