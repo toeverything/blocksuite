@@ -89,7 +89,7 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
     this.databaseModel.page.captureSync();
     if (!this.column) {
       const yText = new this.databaseModel.page.YText();
-      this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
+      this.databaseModel.page.updateColumn(this.rowModel.id, {
         columnId: this.columnSchema.id,
         value: yText,
       });

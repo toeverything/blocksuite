@@ -387,12 +387,12 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateColumnValue(columnId, 'select');
+      this.targetModel.page.convertColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateColumnValue(columnId, 'rich-text');
+      this.targetModel.page.convertColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnSchemaRenderer(targetType);
@@ -400,7 +400,7 @@ export class EditColumnPopup extends LitElement {
         type: targetType,
         property: renderer.propertyCreator(),
       });
-      this.targetModel.page.deleteBlockColumns(columnId);
+      this.targetModel.page.deleteColumn(columnId);
     }
 
     this.closePopup();
@@ -463,7 +463,7 @@ export class EditColumnPopup extends LitElement {
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.copyBlockColumnById(copyId, id);
+      this.targetModel.page.copyColumn(copyId, id);
       this.closePopup();
       return;
     }
