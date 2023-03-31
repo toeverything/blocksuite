@@ -2,10 +2,12 @@ import type {
   PlaywrightTestConfig,
   PlaywrightWorkerOptions,
 } from '@playwright/test';
+import * as process from 'process';
 
 const config: PlaywrightTestConfig = {
   testDir: 'src/',
   testIgnore: ['**.unit.spec.ts'],
+  forbidOnly: !!process.env.CI,
   workers: 4,
   use: {
     browserName:

@@ -63,7 +63,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run virgo playwright test
-        run: pnpm --filter=@blocksuite/virgo test:e2e -- --forbid-only
+        run: pnpm --filter=@blocksuite/virgo test:e2e
         env:
           COVERAGE: false
 
