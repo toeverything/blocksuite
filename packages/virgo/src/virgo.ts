@@ -318,6 +318,8 @@ export class VEditor<
 
   // Expose delta service API
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
+  getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
+  mapDeltasInRange = this.deltaService.mapDeltasInRange;
 
   constructor(
     text: VEditor['yText'] | string,
@@ -403,45 +405,6 @@ export class VEditor<
     if (selection.rangeCount === 0) return null;
 
     return selection;
-  }
-
-  /**
-   * Here are examples of how this function computes and gets the delta.
-   *
-   * We have such a text:
-   * ```
-   * [
-   *   {
-   *      insert: 'aaa',
-   *      attributes: { bold: true },
-   *   },
-   *   {
-   *      insert: 'bbb',
-   *      attributes: { italic: true },
-   *   },
-   * ]
-   * ```
-   *
-   * `getDeltaByRangeIndex(0)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
-   *
-   * `getDeltaByRangeIndex(1)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
-   *
-   * `getDeltaByRangeIndex(3)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
-   *
-   * `getDeltaByRangeIndex(4)` returns `{ insert: 'bbb', attributes: { italic: true } }`.
-   */
-  getDeltaByRangeIndex(rangeIndex: VRange['index']): DeltaInsert | null {
-    const deltas = this.yText.toDelta() as DeltaInsert[];
-
-    let index = 0;
-    for (const delta of deltas) {
-      if (index + delta.insert.length >= rangeIndex) {
-        return delta;
-      }
-      index += delta.insert.length;
-    }
-
-    return null;
   }
 
   getTextPoint(rangeIndex: VRange['index']): TextPoint {

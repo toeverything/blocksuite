@@ -15,6 +15,76 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     this._editor = editor;
   }
 
+  get deltas() {
+    return this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
+  }
+
+  mapDeltasInRange = <Result>(
+    vRange: VRange,
+    callback: (delta: DeltaInsert<TextAttributes>, index: number) => Result
+  ) => {
+    const deltas = this.deltas;
+    const result: Result[] = [];
+
+    deltas.reduce((index, delta) => {
+      const length = delta.insert.length;
+      const from = vRange.index - length;
+      const to = vRange.index + vRange.length;
+
+      const deltaInRange =
+        index >= from &&
+        (index < to || (vRange.length === 0 && index === vRange.index));
+
+      if (deltaInRange) {
+        const value = callback(delta, index);
+        result.push(value);
+      }
+
+      return index + length;
+    }, 0);
+
+    return result;
+  };
+
+  /**
+   * Here are examples of how this function computes and gets the delta.
+   *
+   * We have such a text:
+   * ```
+   * [
+   *   {
+   *      insert: 'aaa',
+   *      attributes: { bold: true },
+   *   },
+   *   {
+   *      insert: 'bbb',
+   *      attributes: { italic: true },
+   *   },
+   * ]
+   * ```
+   *
+   * `getDeltaByRangeIndex(0)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(1)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(3)` returns `{ insert: 'aaa', attributes: { bold: true } }`.
+   *
+   * `getDeltaByRangeIndex(4)` returns `{ insert: 'bbb', attributes: { italic: true } }`.
+   */
+  getDeltaByRangeIndex = (rangeIndex: number) => {
+    const deltas = this.deltas;
+
+    let index = 0;
+    for (const delta of deltas) {
+      if (index + delta.insert.length >= rangeIndex) {
+        return delta;
+      }
+      index += delta.insert.length;
+    }
+
+    return null;
+  };
+
   /**
    * Here are examples of how this function computes and gets the deltas.
    *
@@ -72,35 +142,20 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
    * ```
    */
   getDeltasByVRange = (vRange: VRange): DeltaEntry<TextAttributes>[] => {
-    const deltas =
-      this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
-
-    const result: DeltaEntry<TextAttributes>[] = [];
-    deltas.reduce((index, delta) => {
-      const length = delta.insert.length;
-      const from = vRange.index - length;
-      const to = vRange.index + vRange.length;
-
-      const deltaInRange =
-        index >= from &&
-        (index < to || (vRange.length === 0 && index === vRange.index));
-
-      if (deltaInRange) {
-        result.push([delta, { index, length }]);
-      }
-
-      return index + length;
-    }, 0);
-
-    return result;
+    return this.mapDeltasInRange(
+      vRange,
+      (delta, index): DeltaEntry<TextAttributes> => [
+        delta,
+        { index, length: delta.insert.length },
+      ]
+    );
   };
 
   // render current deltas to VLines
   render = async () => {
     const rootElement = this._editor.rootElement;
 
-    const deltas =
-      this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
+    const deltas = this.deltas;
     const chunks = deltaInsertsToChunks(deltas);
 
     // every chunk is a line
