@@ -120,7 +120,13 @@ export type OpenBlockInfo = {
   width?: number;
   height?: number;
   language?: string;
-  id?: string;
+  databaseProps?: {
+    id: string;
+    title: string;
+    titleColumn: string;
+    columnIds: string[];
+    columnSchemaIds: string[];
+  };
 };
 
 declare global {

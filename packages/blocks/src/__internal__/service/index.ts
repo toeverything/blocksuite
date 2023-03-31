@@ -55,7 +55,6 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     return {
       flavour: block.flavour,
-      id: block.id,
       type: block.type as string,
       text: delta,
       children: block.children?.map((child, index) => {
@@ -79,6 +78,12 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   ) {
     return json2block(focusedBlockModel, pastedBlocks, range);
   }
+
+  async onBlockPasted(
+    model: BlockModel,
+    clipboardData: Record<string, unknown>
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ) {}
 
   private static deltaLeaf2Html(
     block: BaseBlockModel,

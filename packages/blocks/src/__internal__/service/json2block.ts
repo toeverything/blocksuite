@@ -1,4 +1,3 @@
-import type { ColumnSchema } from '@blocksuite/global/database';
 import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -6,6 +5,7 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
+import { getService } from '../service.js';
 import { type BlockRange, type OpenBlockInfo } from '../utils/index.js';
 import { getVirgoByModel } from '../utils/query.js';
 
@@ -138,11 +138,11 @@ export function addBlocks(
   parent: BaseBlockModel,
   index: number
 ) {
-  const addedBlockIds: string[] = [];
+  const addedBlockIds = [];
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
     const flavour = block.flavour as keyof BlockModels;
-    const blockProps: Record<string, unknown> = {
+    const blockProps = {
       flavour,
       type: block.type as string,
       checked: block.checked,
@@ -151,27 +151,19 @@ export function addBlocks(
       width: block.width,
       height: block.height,
       language: block.language,
+      title: block.databaseProps?.title,
+      titleColumn: block.databaseProps?.titleColumn,
     };
-    if (flavour === 'affine:database' && block.id) {
-      // add ext:columnSchema
-      const databaseModel = page.getBlockById(
-        block.id
-      ) as BlockModels['affine:database'];
-      const columnIds = databaseModel.columns as string[];
-      const columnSchemas = columnIds
-        .map(id => page.getColumnSchema(id))
-        .filter((s: ColumnSchema | null): s is ColumnSchema => s !== null);
-      const columnSchemaIds = columnSchemas.map(schema => {
-        const { id, ...nonIdProps } = schema;
-        return page.setColumnSchema(nonIdProps);
-      });
-      blockProps.columns = columnSchemaIds;
-    }
-
     const id = page.addBlock(flavour, blockProps, parent, index + i);
-
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
+    assertExists(model);
+
+    const service = getService(flavour);
+    service.onBlockPasted(model, {
+      columnIds: block.databaseProps?.columnIds,
+      columnSchemaIds: block.databaseProps?.columnSchemaIds,
+    });
 
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
@@ -181,44 +173,5 @@ export function addBlocks(
 
     model && block.children && addBlocks(page, block.children, model, 0);
   }
-
-  blocks.forEach((block, index) => {
-    if (block.flavour === 'affine:database' && block.id) {
-      // add ext:columns
-      const newId = addedBlockIds[index];
-      const newModel = page.getBlockById(
-        newId
-      ) as BlockModels['affine:database'];
-      const newColumnSchemaIds = newModel.columns as string[];
-      const newColumnIds = newModel.children.map(child => child.id);
-
-      const oldModel = page.getBlockById(
-        block.id
-      ) as BlockModels['affine:database'];
-      const oldColumnSchemaIds = oldModel.columns as string[];
-      const oldColumnIds = oldModel.children.map(child => child.id);
-
-      const columnIdMap = oldColumnIds.reduce((prev, oldColumnId, index) => {
-        return {
-          ...prev,
-          [oldColumnId]: newColumnIds[index],
-        };
-      }, {} as Record<string, string>);
-      const columnSchemaIdMap = oldColumnSchemaIds.reduce(
-        (prev, oldColumnSchemaId, index) => {
-          return {
-            ...prev,
-            [oldColumnSchemaId]: newColumnSchemaIds[index],
-          };
-        },
-        {} as Record<string, string>
-      );
-      page.copyBlockColumns(columnIdMap, columnSchemaIdMap);
-
-      // Add a paragraph after database
-      page.addBlock('affine:paragraph', {}, parent.id);
-    }
-  });
-
   return addedBlockIds;
 }
