@@ -25,12 +25,7 @@ export function nativePointToTextPoint(
   }
 
   if (isVLine(node) || isVRoot(node)) {
-    const texts = getTextNodesFromElement(node);
-    if (texts.length > 0) {
-      const [text] = texts;
-      return [text, offset === 0 ? offset : text.length];
-    }
-    return null;
+    return getTextPointFromElementByOffset(node, offset, true);
   }
 
   if (!(node instanceof Node)) {
