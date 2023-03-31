@@ -19,6 +19,7 @@ import {
   pressShiftTab,
   pressSpace,
   pressTab,
+  redoByClick,
   resetHistory,
   selectAllByKeyboard,
   setSelection,
@@ -508,5 +509,9 @@ test('should copy&paste of database work', async ({ page }) => {
   await focusRichText(page, 1);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await waitNextFrame(page);
+  await assertDatabaseEqual(page);
+
+  await undoByClick(page);
+  await redoByClick(page);
   await assertDatabaseEqual(page);
 });
