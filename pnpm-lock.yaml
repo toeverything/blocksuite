@@ -399,8 +399,8 @@ importers:
         specifier: ^0.7.3
         version: 0.7.3
       affine-next-y-indexeddb:
-        specifier: ^0.2.1
-        version: 0.2.1(yjs@13.5.50)
+        specifier: ^0.2.2
+        version: 0.2.2(yjs@13.5.50)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -3056,8 +3056,8 @@ packages:
     hasBin: true
     dev: true
 
-  /affine-next-y-indexeddb@0.2.1(yjs@13.5.50):
-    resolution: {integrity: sha512-ss4TgHO9680nHMqAtS037UtCeprnTt8+nImIY+L38oyyu8KVRxGJwqlgvcvvPxUmr7VJYt5/CCPs9DrGRk19rg==}
+  /affine-next-y-indexeddb@0.2.2(yjs@13.5.50):
+    resolution: {integrity: sha512-dJ0ec80qcNSiop8rLxcBQo4Z0UP8Wn6E1hCMV1PLoYzicuR05DqqERZvEFAn7m+qL/L1Gy89Nw+xJsXPiiksXw==}
     peerDependencies:
       yjs: ^13
     dependencies:

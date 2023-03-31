@@ -20,7 +20,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
-    "affine-next-y-indexeddb": "^0.2.1",
+    "affine-next-y-indexeddb": "^0.2.2",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
