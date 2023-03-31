@@ -6,7 +6,6 @@ import {
   getModelByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
-  handleNativeRangeDblClick,
   handleNativeRangeDragMove,
   noop,
   Point,
@@ -20,6 +19,7 @@ import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import { showFormatQuickBarByDoubleClick } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -247,23 +247,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
-    if (this._page.readonly) return;
-
-    const range = handleNativeRangeDblClick(this._page, e);
-    const direction = 'center-bottom';
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
-    if (!range || range.collapsed) return;
-
-    // Show format quick bar when double click on text
-    showFormatQuickBar({
-      page: this._page,
-      direction,
-      anchorEl: {
-        getBoundingClientRect: () => {
-          return calcCurrentSelectionPosition(direction);
-        },
-      },
-    });
+    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {
@@ -344,6 +328,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       showFormatQuickBar({
         page: this._page,
+        container: this._edgeless,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {
