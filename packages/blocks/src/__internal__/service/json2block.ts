@@ -152,7 +152,7 @@ export function addBlocks(
       height: block.height,
       language: block.language,
     };
-    if (flavour === 'affine:database') {
+    if (flavour === 'affine:database' && block.id) {
       // add ext:columnSchema
       const databaseModel = page.getBlockById(
         block.id
@@ -183,7 +183,7 @@ export function addBlocks(
   }
 
   blocks.forEach((block, index) => {
-    if (block.flavour === 'affine:database') {
+    if (block.flavour === 'affine:database' && block.id) {
       // add ext:columns
       const newId = addedBlockIds[index];
       const newModel = page.getBlockById(

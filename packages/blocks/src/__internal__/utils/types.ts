@@ -120,7 +120,7 @@ export type OpenBlockInfo = {
   width?: number;
   height?: number;
   language?: string;
-  id: string;
+  id?: string;
 };
 
 declare global {
