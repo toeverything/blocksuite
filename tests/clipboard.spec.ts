@@ -513,5 +513,6 @@ test('should copy&paste of database work', async ({ page }) => {
 
   await undoByClick(page);
   await redoByClick(page);
+  await waitNextFrame(page);
   await assertDatabaseEqual(page);
 });
