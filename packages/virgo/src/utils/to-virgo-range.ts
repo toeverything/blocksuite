@@ -1,4 +1,3 @@
-import { match } from 'ts-pattern';
 import type * as Y from 'yjs';
 
 import type { VRange } from '../types.js';
@@ -237,17 +236,27 @@ export function toVirgoRange(
 ): VRange | null {
   const context = buildContext(selection, rootElement, yText);
 
-  return (
-    match(context)
-      .with(null, () => null)
-      // case 1
-      .when(rangeHasAnchorAndFocus, rangeHasAnchorAndFocusHandler)
-      // case 2.1
-      .when(rangeOnlyHasFocus, rangeOnlyHasFocusHandler)
-      // case 2.2
-      .when(rangeOnlyHasAnchor, rangeOnlyHasAnchorHandler)
-      // case 3
-      .when(rangeHasNoAnchorAndFocus, rangeHasNoAnchorAndFocusHandler)
-      .otherwise(() => null)
-  );
+  if (!context) return null;
+
+  // case 1
+  if (rangeHasAnchorAndFocus(context)) {
+    return rangeHasAnchorAndFocusHandler(context);
+  }
+
+  // case 2.1
+  if (rangeOnlyHasFocus(context)) {
+    return rangeOnlyHasFocusHandler(context);
+  }
+
+  // case 2.2
+  if (rangeOnlyHasAnchor(context)) {
+    return rangeOnlyHasAnchorHandler(context);
+  }
+
+  // case 3
+  if (rangeHasNoAnchorAndFocus(context)) {
+    return rangeHasNoAnchorAndFocusHandler(context);
+  }
+
+  return null;
 }
