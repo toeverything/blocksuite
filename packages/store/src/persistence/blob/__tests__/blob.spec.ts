@@ -1,12 +1,12 @@
-import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { test } from '@playwright/test';
 
+import { getDefaultPlaygroundURL } from '../../../../../../tests/utils/actions';
 import { collectTestResult } from '../../../__tests__/test-utils-node.js';
 
 // checkout test-entry.ts for actual test cases
 const blobExamplePage = new URL(
   '/examples/blob',
-  getDefaultPlaygroundURL(!!process.env.CI)
+  getDefaultPlaygroundURL()
 ).toString();
 
 test('blob storage basics', async ({ page }) => {

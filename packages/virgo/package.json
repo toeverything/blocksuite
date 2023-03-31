@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
+    "ts-pattern": "^4.2.2",
     "zod": "^3.21.4"
   }
 }
