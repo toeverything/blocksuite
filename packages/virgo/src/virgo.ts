@@ -523,14 +523,10 @@ export class VEditor<
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
       .forEach(([delta, deltaVRange]) => {
-        const targetVRange = {
-          index: Math.max(vRange.index, deltaVRange.index),
-          length:
-            Math.min(
-              vRange.index + vRange.length,
-              deltaVRange.index + deltaVRange.length
-            ) - Math.max(vRange.index, deltaVRange.index),
-        };
+        const targetVRange = this._rangeService.mergeTwoRanges(
+          vRange,
+          deltaVRange
+        );
 
         if (mode === 'replace') {
           this.resetText(targetVRange);

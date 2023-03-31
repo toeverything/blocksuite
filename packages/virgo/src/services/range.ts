@@ -111,6 +111,21 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return range;
   };
 
+  toVRange = (selection: Selection): VRange | null => {
+    const { rootElement, yText } = this._editor;
+
+    return toVirgoRange(selection, rootElement, yText);
+  };
+
+  mergeTwoRanges = (range1: VRange, range2: VRange): VRange => {
+    return {
+      index: Math.max(range1.index, range2.index),
+      length:
+        Math.min(range1.index + range1.length, range2.index + range2.length) -
+        Math.max(range1.index, range2.index),
+    };
+  };
+
   private _applyVRange = (vRange: VRange): void => {
     const newRange = this.toDomRange(vRange);
 
@@ -141,11 +156,5 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
         block: 'nearest',
       });
     }
-  };
-
-  toVRange = (selection: Selection): VRange | null => {
-    const { rootElement, yText } = this._editor;
-
-    return toVirgoRange(selection, rootElement, yText);
   };
 }
