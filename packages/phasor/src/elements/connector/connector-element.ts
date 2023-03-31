@@ -3,33 +3,15 @@ import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
+import { drawArrow } from './draw-arrow.js';
+import { drawOrthogonal } from './draw-orthogonal.js';
+import { drawStraight } from './draw-straight.js';
 import type {
   AttachedElement,
   Controller,
   SerializedConnectorProps,
 } from './types.js';
-
-/* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
-const kRect = 1 - 0.5522847498;
-const RADIUS = 10;
-
-function drawArrow(
-  path: Path2D,
-  [startX, startY]: number[],
-  [endX, endY]: number[]
-) {
-  const angle = (Math.atan2(startY - endY, startX - endX) * 180) / Math.PI;
-  const ptAngle = ((angle + 40) * Math.PI) / 180;
-  const pt = [endX + Math.cos(ptAngle) * 10, endY + Math.sin(ptAngle) * 10];
-
-  const pbAngle = ((angle - 40) * Math.PI) / 180;
-  const pb = [endX + Math.cos(pbAngle) * 10, endY + Math.sin(pbAngle) * 10];
-
-  path.moveTo(endX, endY);
-  path.lineTo(pt[0], pt[1]);
-  path.moveTo(endX, endY);
-  path.lineTo(pb[0], pb[1]);
-}
+import { ConnectorMode } from './types.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
@@ -39,9 +21,8 @@ export class ConnectorElement extends BaseElement {
   w = 0;
   h = 0;
 
+  mode: ConnectorMode = ConnectorMode.Orthogonal;
   lineWidth = 2;
-  // relative to element x,y.
-  // [x0, y0, x1, y1, x2, y2...]
   controllers: Controller[] = [];
   startElement?: AttachedElement;
   endElement?: AttachedElement;
@@ -54,126 +35,15 @@ export class ConnectorElement extends BaseElement {
     ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
 
     const path = new Path2D();
-    path.moveTo(this.controllers[0].x, this.controllers[0].y);
-    let lastX = this.controllers[0].x;
-    let lastY = this.controllers[0].y;
-    for (let i = 1; i < this.controllers.length - 1; i = i + 1) {
-      const currentX = this.controllers[i].x;
-      const currentY = this.controllers[i].y;
-      const nextX = this.controllers[i + 1].x;
-      const nextY = this.controllers[i + 1].y;
-
-      const minX = Math.min(lastX, nextX);
-      const minY = Math.min(lastY, nextY);
-      const maxX = Math.max(lastX, nextX);
-      const maxY = Math.max(lastY, nextY);
-      const radius = Math.min(RADIUS, (maxX - minX) / 2, (maxY - minY) / 2);
-
-      // current is right-bottom conner
-      if (currentX === maxX && currentY === maxY) {
-        if (lastX === currentX) {
-          path.lineTo(currentX, currentY - radius);
-          path.bezierCurveTo(
-            currentX,
-            currentY - kRect * radius,
-            currentX - kRect * radius,
-            currentY,
-            currentX - radius,
-            currentY
-          );
-        } else {
-          path.lineTo(currentX - radius, currentY);
-          path.bezierCurveTo(
-            currentX - kRect * radius,
-            currentY,
-            currentX,
-            currentY - kRect * radius,
-            currentX,
-            currentY - radius
-          );
-        }
-      }
-      // current is left-bottom conner
-      else if (currentX === minX && currentY === maxY) {
-        if (lastX === currentX) {
-          path.lineTo(currentX, currentY - radius);
-          path.bezierCurveTo(
-            currentX,
-            currentY - kRect * radius,
-            currentX + kRect * radius,
-            currentY,
-            currentX + radius,
-            currentY
-          );
-        } else {
-          path.lineTo(currentX + radius, currentY);
-          path.bezierCurveTo(
-            currentX + kRect * radius,
-            currentY,
-            currentX,
-            currentY - kRect * radius,
-            currentX,
-            currentY - radius
-          );
-        }
-      }
-      // current is left-top conner
-      else if (currentX === minX && currentY === minY) {
-        if (lastX === currentX) {
-          path.lineTo(currentX, currentY + radius);
-          path.bezierCurveTo(
-            currentX,
-            currentY + kRect * radius,
-            currentX + kRect * radius,
-            currentY,
-            currentX + radius,
-            currentY
-          );
-        } else {
-          path.lineTo(currentX + radius, currentY);
-          path.bezierCurveTo(
-            currentX + kRect * radius,
-            currentY,
-            currentX,
-            currentY + kRect * radius,
-            currentX,
-            currentY + radius
-          );
-        }
-      }
-      // current is right-top conner
-      else if (currentX === maxX && currentY === minY) {
-        if (lastX === currentX) {
-          path.lineTo(currentX, currentY + radius);
-          path.bezierCurveTo(
-            currentX,
-            currentY + kRect * radius,
-            currentX - kRect * radius,
-            currentY,
-            currentX - radius,
-            currentY
-          );
-        } else {
-          path.lineTo(currentX - radius, currentY);
-          path.bezierCurveTo(
-            currentX - kRect * radius,
-            currentY,
-            currentX,
-            currentY + kRect * radius,
-            currentX,
-            currentY + radius
-          );
-        }
-      }
-
-      lastX = currentX;
-      lastY = currentY;
+    if (this.mode === ConnectorMode.Orthogonal) {
+      drawOrthogonal(path, this.controllers);
+    } else {
+      drawStraight(path, this.controllers);
     }
-    const end = this.controllers[this.controllers.length - 1];
-    path.lineTo(end.x, end.y);
 
+    const last = this.controllers[this.controllers.length - 1];
     const secondToLast = this.controllers[this.controllers.length - 2];
-    drawArrow(path, [secondToLast.x, secondToLast.y], [end.x, end.y]);
+    drawArrow(path, [secondToLast.x, secondToLast.y], [last.x, last.y]);
 
     ctx.strokeStyle = this.color;
     ctx.lineWidth = this.lineWidth;
@@ -189,6 +59,7 @@ export class ConnectorElement extends BaseElement {
       type: this.type,
       xywh: this._xywh,
 
+      mode: this.mode,
       color: this.color,
       lineWidth: this.lineWidth,
 
@@ -205,14 +76,14 @@ export class ConnectorElement extends BaseElement {
     const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     setXYWH(element, { x, y, w, h });
 
-    const { controllers, startElement, endElement } = ConnectorElement.getProps(
-      element,
-      data
-    ) as SerializedConnectorProps;
+    const { controllers, startElement, endElement, mode, color } =
+      ConnectorElement.getProps(element, data) as SerializedConnectorProps;
     ConnectorElement.updateProps(element, {
       controllers: controllers?.length ? JSON.parse(controllers) : [],
       startElement,
       endElement,
+      mode,
+      color,
     });
 
     return element;
@@ -228,6 +99,7 @@ export class ConnectorElement extends BaseElement {
   static getProps(element: BaseElement, rawProps: Record<string, unknown>) {
     const props = simplePick(rawProps, [
       'index',
+      'mode',
       'color',
       'lineWidth',
       'xywh',

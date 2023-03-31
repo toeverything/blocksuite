@@ -1,5 +1,10 @@
 import type { Color } from '../../consts.js';
 
+export enum ConnectorMode {
+  Straight,
+  Orthogonal,
+}
+
 export type AttachedElementDirection = 'left' | 'top' | 'right' | 'bottom';
 
 export interface AttachedElement {
@@ -20,6 +25,7 @@ export type SerializedConnectorProps = {
   type: string;
   xywh: string;
 
+  mode: ConnectorMode;
   lineWidth: number;
   color: Color;
 
@@ -34,6 +40,6 @@ export type SerializedConnectorProps = {
 export type ConnectorProperties = Partial<
   Pick<
     SerializedConnectorProps,
-    'lineWidth' | 'color' | 'startElement' | 'endElement'
+    'mode' | 'lineWidth' | 'color' | 'startElement' | 'endElement'
   >
 >;

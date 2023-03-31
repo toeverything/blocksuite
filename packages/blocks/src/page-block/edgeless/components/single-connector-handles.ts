@@ -1,9 +1,11 @@
+import type { Point } from '@blocksuite/connector';
 import { Rectangle, simplifyPath } from '@blocksuite/connector';
 import type {
   ConnectorElement,
   Controller,
   SurfaceManager,
 } from '@blocksuite/phasor';
+import { ConnectorMode } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -25,6 +27,7 @@ function capMousedown(
   page: Page,
   element: ConnectorElement,
   position: 'start' | 'end',
+  connectorMode: ConnectorMode,
   requestUpdate: () => void
 ) {
   const originControllers = element.controllers.map(c => ({
@@ -81,24 +84,35 @@ function capMousedown(
       newRect
     );
 
-    const routes =
-      position === 'start'
-        ? generateConnectorPath(
-            newRect,
-            originEndRect,
-            newPoint,
-            originEndPoint,
-            originControllers,
-            'end'
-          )
-        : generateConnectorPath(
-            originStartRect,
-            newRect,
-            originStartPoint,
-            newPoint,
-            originControllers,
-            'start'
-          );
+    let routes: Point[];
+    if (position === 'start') {
+      if (connectorMode === ConnectorMode.Orthogonal) {
+        routes = generateConnectorPath(
+          newRect,
+          originEndRect,
+          newPoint,
+          originEndPoint,
+          originControllers,
+          'end'
+        );
+      } else {
+        routes = [newPoint, originEndPoint];
+      }
+    } else {
+      if (connectorMode === ConnectorMode.Orthogonal) {
+        routes = generateConnectorPath(
+          originStartRect,
+          newRect,
+          originStartPoint,
+          newPoint,
+          originControllers,
+          'start'
+        );
+      } else {
+        routes = [originStartPoint, newPoint];
+      }
+    }
+
     const bound = getBrushBoundFromPoints(
       routes.map(r => [r.x, r.y]),
       0
@@ -251,8 +265,9 @@ export function SingleConnectorHandles(
   page: Page,
   requestUpdate: () => void
 ) {
-  const { controllers } = element;
-  const controllerHandles = getControllerHandles(controllers);
+  const { controllers, mode } = element;
+  const controllerHandles =
+    mode === ConnectorMode.Orthogonal ? getControllerHandles(controllers) : [];
   const start = {
     position: 'absolute',
     left: `${controllers[0].x}px`,
@@ -283,14 +298,14 @@ export function SingleConnectorHandles(
       class="line-controller"
       style=${styleMap(start)}
       @mousedown=${(e: MouseEvent) => {
-        capMousedown(e, surface, page, element, 'start', requestUpdate);
+        capMousedown(e, surface, page, element, 'start', mode, requestUpdate);
       }}
     ></div>
     <div
       class="line-controller"
       style=${styleMap(end)}
       @mousedown=${(e: MouseEvent) => {
-        capMousedown(e, surface, page, element, 'end', requestUpdate);
+        capMousedown(e, surface, page, element, 'end', mode, requestUpdate);
       }}
     ></div>
     ${repeat(

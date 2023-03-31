@@ -2,6 +2,7 @@ import { Rectangle, route } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
+  ConnectorMode,
   deserializeXYWH,
   getBrushBoundFromPoints,
 } from '@blocksuite/phasor';
@@ -54,6 +55,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     this._page.captureSync();
     const { viewport } = this._edgeless.surface;
+    const { mode, color } = this.mouseMode;
 
     // create a block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
@@ -83,6 +85,8 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
         { x: 1, y: 1 },
       ],
       {
+        mode,
+        color,
         startElement: this._draggingStartElement
           ? {
               id: this._draggingStartElement.id,
@@ -108,6 +112,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     assertExists(this._draggingArea);
 
     const { viewport } = this._edgeless.surface;
+    const { mode } = this.mouseMode;
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
@@ -132,13 +137,19 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       direction: endDirection,
     } = getAttachedPoint(endModelX, endModelY, endRect);
 
-    const routes = route(
-      [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],
-      [
-        { x: startX, y: startY },
-        { x: endX, y: endY },
-      ]
-    );
+    const routes =
+      mode === ConnectorMode.Orthogonal
+        ? route(
+            [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],
+            [
+              { x: startX, y: startY },
+              { x: endX, y: endY },
+            ]
+          )
+        : [
+            { x: startX, y: startY },
+            { x: endX, y: endY },
+          ];
 
     const bound = getBrushBoundFromPoints(
       routes.map(r => [r.x, r.y]),
