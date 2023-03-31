@@ -37,21 +37,10 @@ export function nativePointToTextPoint(
     return null;
   }
 
-  const vLine = node.parentElement?.closest('v-line');
+  const vNodes = getVNodesFromNode(node);
 
-  if (vLine) {
-    const vElements = Array.from(vLine.querySelectorAll('v-element'));
-    return getTextPointFromVNodes(vElements, node, offset);
-  }
-
-  const container =
-    node instanceof Element
-      ? node.closest('[data-virgo-root="true"]')
-      : node.parentElement?.closest('[data-virgo-root="true"]');
-
-  if (container) {
-    const vLines = Array.from(container.querySelectorAll('v-line'));
-    return getTextPointFromVNodes(vLines, node, offset);
+  if (vNodes) {
+    return getTextPointFromVNodes(vNodes, node, offset);
   }
 
   return null;
@@ -101,8 +90,27 @@ export function textPointToDomPoint(
   return { text, index: index + lineIndex };
 }
 
-function getTextPointFromVNodes<VNode extends VirgoLine | VirgoElement>(
-  vNodes: VNode[],
+function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
+  const vLine = node.parentElement?.closest('v-line');
+
+  if (vLine) {
+    return Array.from(vLine.querySelectorAll('v-element'));
+  }
+
+  const container =
+    node instanceof Element
+      ? node.closest('[data-virgo-root="true"]')
+      : node.parentElement?.closest('[data-virgo-root="true"]');
+
+  if (container) {
+    return Array.from(container.querySelectorAll('v-line'));
+  }
+
+  return null;
+}
+
+function getTextPointFromVNodes(
+  vNodes: VirgoLine[] | VirgoElement[],
   node: Node,
   offset: number
 ): TextPoint | null {
