@@ -1,3 +1,4 @@
+import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -75,18 +76,19 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
       this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
 
     const result: DeltaEntry<TextAttributes>[] = [];
-    let index = 0;
-    for (let i = 0; i < deltas.length; i++) {
-      const delta = deltas[i];
-      if (
-        index + delta.insert.length >= vRange.index &&
+    deltas.reduce((index, delta) => {
+      const length = delta.insert.length;
+      const deltaInRange =
+        index + length >= vRange.index &&
         (index < vRange.index + vRange.length ||
-          (vRange.length === 0 && index === vRange.index))
-      ) {
-        result.push([delta, { index, length: delta.insert.length }]);
+          (vRange.length === 0 && index === vRange.index));
+
+      if (deltaInRange) {
+        result.push([delta, { index, length: length }]);
       }
-      index += delta.insert.length;
-    }
+
+      return index + length;
+    }, 0);
 
     return result;
   };
@@ -101,7 +103,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
     // every chunk is a line
     const lines = chunks.map(chunk => {
-      const elementTs = [];
+      const elementTs: TemplateResult<1>[] = [];
       if (chunk.length === 0) {
         elementTs.push(html`<v-element></v-element>`);
       } else {
@@ -129,11 +131,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     );
 
     const vLines = Array.from(rootElement.querySelectorAll('v-line'));
-    await Promise.all(
-      vLines.map(async line => {
-        await line.updateComplete;
-      })
-    );
+    await Promise.all(vLines.map(line => line.updateComplete));
 
     this._editor.slots.updated.emit();
   };
