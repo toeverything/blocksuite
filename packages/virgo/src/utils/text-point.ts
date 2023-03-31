@@ -1,4 +1,5 @@
 import type { VirgoLine } from '../components/index.js';
+import type { VirgoElement } from '../components/index.js';
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 import type { DomPoint, TextPoint } from '../types.js';
 import { isVElement, isVLine, isVRoot, isVText } from './guard.js';
@@ -40,7 +41,8 @@ export function nativePointToTextPoint(
   const vLine = node.parentElement?.closest('v-line');
 
   if (vLine) {
-    return handleInVLine(vLine, node, offset);
+    const vElements = Array.from(vLine.querySelectorAll('v-element'));
+    return getTextPointFromVNodes(vElements, node, offset);
   }
 
   const container =
@@ -49,7 +51,8 @@ export function nativePointToTextPoint(
       : node.parentElement?.closest('[data-virgo-root="true"]');
 
   if (container) {
-    return handleOutVLine(container, node, offset);
+    const vLines = Array.from(container.querySelectorAll('v-line'));
+    return getTextPointFromVNodes(vLines, node, offset);
   }
 
   return null;
@@ -99,49 +102,14 @@ export function textPointToDomPoint(
   return { text, index: index + lineIndex };
 }
 
-function handleInVLine(
-  vLine: VirgoLine,
+function getTextPointFromVNodes<VNode extends VirgoLine | VirgoElement>(
+  vNodes: VNode[],
   node: Node,
   offset: number
 ): TextPoint | null {
-  const vElements = Array.from(vLine.querySelectorAll('v-element'));
-  const first = vElements[0];
-  for (let i = 0; i < vElements.length; i++) {
-    const vElement = vElements[i];
-
-    if (i === 0 && AFollowedByB(node, vElement)) {
-      return getTextPointFromElementByOffset(first, offset, true);
-    }
-
-    if (AInsideB(node, vElement)) {
-      return getTextPointFromElementByOffset(first, offset, false);
-    }
-
-    if (i === vElements.length - 1 && APrecededByB(node, vElement)) {
-      return getTextPointFromElement(vElement);
-    }
-
-    if (
-      i < vElements.length - 1 &&
-      APrecededByB(node, vElement) &&
-      AFollowedByB(node, vElements[i + 1])
-    ) {
-      return getTextPointFromElement(vElement);
-    }
-  }
-
-  return null;
-}
-
-function handleOutVLine(
-  container: Element,
-  node: Node,
-  offset: number
-): TextPoint | null {
-  const vLines = Array.from(container.querySelectorAll('v-line'));
-  const first = vLines[0];
-  for (let i = 0; i < vLines.length; i++) {
-    const vLine = vLines[i];
+  const first = vNodes[0];
+  for (let i = 0; i < vNodes.length; i++) {
+    const vLine = vNodes[i];
 
     if (i === 0 && AFollowedByB(node, vLine)) {
       return getTextPointFromElementByOffset(first, offset, true);
@@ -151,14 +119,14 @@ function handleOutVLine(
       return getTextPointFromElementByOffset(first, offset, false);
     }
 
-    if (i === vLines.length - 1 && APrecededByB(node, vLine)) {
+    if (i === vNodes.length - 1 && APrecededByB(node, vLine)) {
       return getTextPointFromElement(vLine);
     }
 
     if (
-      i < vLines.length - 1 &&
+      i < vNodes.length - 1 &&
       APrecededByB(node, vLine) &&
-      AFollowedByB(node, vLines[i + 1])
+      AFollowedByB(node, vNodes[i + 1])
     ) {
       return getTextPointFromElement(vLine);
     }
