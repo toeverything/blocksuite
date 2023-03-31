@@ -159,11 +159,14 @@ export async function addBlocks(
     const model = page.getBlockById(id);
     assertExists(model);
 
-    const service = await getServiceOrRegister(flavour);
-    service.onBlockPasted(model, {
-      columnIds: block.databaseProps?.columnIds,
-      columnSchemaIds: block.databaseProps?.columnSchemaIds,
-    });
+    // use `getServiceOrRegister` to avoid `embed` test fail
+    const service = getServiceOrRegister(flavour);
+    if (!(service instanceof Promise)) {
+      service.onBlockPasted(model, {
+        columnIds: block.databaseProps?.columnIds,
+        columnSchemaIds: block.databaseProps?.columnSchemaIds,
+      });
+    }
 
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);

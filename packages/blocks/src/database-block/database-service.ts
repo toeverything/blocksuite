@@ -88,7 +88,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     props: Record<string, string[]>
   ) {
     // wait for the database's children to be added
-    setTimeout(() => {
+    queueMicrotask(() => {
       const { columnIds, columnSchemaIds } = props;
 
       // add ext:columnSchema
