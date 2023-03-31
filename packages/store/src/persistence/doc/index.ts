@@ -2,6 +2,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import type * as Y from 'yjs';
 
 export { DebugDocProvider } from './debug-provider.js';
+export { IndexedDBDocProvider } from './local-provider.js';
 
 /**
  * Different examples of providers could include webrtc sync,
