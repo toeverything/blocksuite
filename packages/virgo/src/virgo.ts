@@ -319,7 +319,7 @@ export class VEditor<
   // Expose delta service API
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
-  mapDeltasInRange = this.deltaService.mapDeltasInRange;
+  mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
 
   constructor(
     text: VEditor['yText'] | string,

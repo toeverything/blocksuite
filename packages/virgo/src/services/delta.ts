@@ -19,7 +19,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     return this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
   }
 
-  mapDeltasInRange = <Result>(
+  mapDeltasInVRange = <Result>(
     vRange: VRange,
     callback: (delta: DeltaInsert<TextAttributes>, index: number) => Result
   ) => {
@@ -142,7 +142,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
    * ```
    */
   getDeltasByVRange = (vRange: VRange): DeltaEntry<TextAttributes>[] => {
-    return this.mapDeltasInRange(
+    return this.mapDeltasInVRange(
       vRange,
       (delta, index): DeltaEntry<TextAttributes> => [
         delta,
