@@ -25,7 +25,6 @@ import type {
 import {
   generateConnectorPath,
   getConnectorAttachedInfo,
-  pickById,
 } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
 

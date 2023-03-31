@@ -14,7 +14,6 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import { Rectangle } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { ConnectorElement, PhasorElement, XYWH } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
@@ -36,10 +35,8 @@ import {
   isPhasorElement,
   isTopLevelBlock,
   pickBlocksByBound,
-  pickById,
   pickTopBlock,
 } from '../utils.js';
-import { getAttachedPointByDirection } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 enum DragType {

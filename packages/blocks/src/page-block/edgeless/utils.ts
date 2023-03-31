@@ -177,7 +177,7 @@ export function pickBy(
       );
 }
 
-export function pickById(surface: SurfaceManager, page: Page, id: string) {
+function pickById(surface: SurfaceManager, page: Page, id: string) {
   const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
