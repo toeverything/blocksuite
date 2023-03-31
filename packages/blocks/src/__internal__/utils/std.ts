@@ -229,6 +229,20 @@ export function isPrintableKeyEvent(event: KeyboardEvent): boolean {
   return event.key.length === 1 && !isControlledKeyboardEvent(event);
 }
 
+/**
+ * Checks if there are at least `n` elements in the array that match the given condition.
+ *
+ * @param arr - The input array of elements.
+ * @param matchFn - A function that takes an element of the array and returns a boolean value
+ *                  indicating if the element matches the desired condition.
+ * @param n - The minimum number of matching elements required.
+ * @returns A boolean value indicating if there are at least `n` matching elements in the array.
+ *
+ * @example
+ * const arr = [1, 2, 3, 4, 5];
+ * const isEven = (num: number): boolean => num % 2 === 0;
+ * console.log(atLeastNMatches(arr, isEven, 2)); // Output: true
+ */
 export function atLeastNMatches<T>(
   arr: T[],
   matchFn: (element: T) => boolean,
