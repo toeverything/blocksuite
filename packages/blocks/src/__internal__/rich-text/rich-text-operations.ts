@@ -381,9 +381,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     }
 
     const parent = page.getParent(model);
-    const next = page.getNextSibling(model);
+    const previousSibling = getPreviousBlock(model);
+    const nextSibling = page.getNextSibling(model);
     if (parent && matchFlavours(parent, ['affine:frame'] as const)) {
-      const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
         : null;
@@ -449,9 +449,13 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         page.deleteBlock(model);
         focusTitle(page, title.length - textLength);
       }
-    } else if (next && matchFlavours(next, ['affine:list'])) {
+    } else if (
+      previousSibling &&
+      nextSibling &&
+      matchFlavours(nextSibling, ['affine:list'])
+    ) {
       page.deleteBlock(model);
-      focusBlockByModel(next);
+      focusBlockByModel(previousSibling);
     } else {
       // Before
       // - line1
