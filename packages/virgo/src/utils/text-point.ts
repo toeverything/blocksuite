@@ -105,28 +105,20 @@ function handleInVLine(
   offset: number
 ): TextPoint | null {
   const vElements = Array.from(vLine.querySelectorAll('v-element'));
+  const first = vElements[0];
   for (let i = 0; i < vElements.length; i++) {
     const vElement = vElements[i];
 
     if (i === 0 && AFollowedByB(node, vElement)) {
-      const texts = getTextNodesFromElement(vElement);
-      if (texts.length === 0) return null;
-      const [text] = texts;
-      return [text, offset === 0 ? offset : text.length];
+      return getTextPointFromElementByOffset(first, offset, true);
     }
 
     if (AInsideB(node, vElement)) {
-      const texts = getTextNodesFromElement(vElements[0]);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, offset === 0 ? offset : text.length];
+      return getTextPointFromElementByOffset(first, offset, false);
     }
 
     if (i === vElements.length - 1 && APrecededByB(node, vElement)) {
-      const texts = getTextNodesFromElement(vElement);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, calculateTextLength(text)];
+      return getTextPointFromElement(vElement);
     }
 
     if (
@@ -134,10 +126,7 @@ function handleInVLine(
       APrecededByB(node, vElement) &&
       AFollowedByB(node, vElements[i + 1])
     ) {
-      const texts = getTextNodesFromElement(vElement);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, calculateTextLength(text)];
+      return getTextPointFromElement(vElement);
     }
   }
 
@@ -150,28 +139,20 @@ function handleOutVLine(
   offset: number
 ): TextPoint | null {
   const vLines = Array.from(container.querySelectorAll('v-line'));
+  const first = vLines[0];
   for (let i = 0; i < vLines.length; i++) {
     const vLine = vLines[i];
 
     if (i === 0 && AFollowedByB(node, vLine)) {
-      const texts = getTextNodesFromElement(vLine);
-      if (texts.length === 0) return null;
-      const [text] = texts;
-      return [text, offset === 0 ? offset : text.length];
+      return getTextPointFromElementByOffset(first, offset, true);
     }
 
     if (AInsideB(node, vLine)) {
-      const texts = getTextNodesFromElement(vLines[0]);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, offset === 0 ? offset : text.length];
+      return getTextPointFromElementByOffset(first, offset, false);
     }
 
     if (i === vLines.length - 1 && APrecededByB(node, vLine)) {
-      const texts = getTextNodesFromElement(vLine);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, calculateTextLength(text)];
+      return getTextPointFromElement(vLine);
     }
 
     if (
@@ -179,14 +160,29 @@ function handleOutVLine(
       APrecededByB(node, vLine) &&
       AFollowedByB(node, vLines[i + 1])
     ) {
-      const texts = getTextNodesFromElement(vLine);
-      if (texts.length === 0) return null;
-      const text = texts[texts.length - 1];
-      return [text, calculateTextLength(text)];
+      return getTextPointFromElement(vLine);
     }
   }
 
   return null;
+}
+
+function getTextPointFromElement(element: Element): TextPoint | null {
+  const texts = getTextNodesFromElement(element);
+  if (texts.length === 0) return null;
+  const text = texts[texts.length - 1];
+  return [text, calculateTextLength(text)];
+}
+
+function getTextPointFromElementByOffset(
+  element: Element,
+  offset: number,
+  fromStart: boolean
+): TextPoint | null {
+  const texts = getTextNodesFromElement(element);
+  if (texts.length === 0) return null;
+  const text = fromStart ? texts[0] : texts[texts.length - 1];
+  return [text, offset === 0 ? offset : text.length];
 }
 
 function AInsideB(a: Node, b: Node): boolean {
