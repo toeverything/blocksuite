@@ -16,7 +16,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   generateConnectorPath,
   getAttachedPoint,
-  getAttachedPointByDirection,
+  getConnectorAttachedInfo,
   getXYWH,
   pickBy,
 } from '../utils.js';
@@ -38,34 +38,7 @@ function capMousedown(
   const mousemove = (mouseMoveEvent: MouseEvent) => {
     const { x, y } = mouseMoveEvent;
     const [modelX, modelY] = surface.toModelCoord(x, y);
-    const { startElement, endElement } = element;
-    const originStart = startElement?.id
-      ? surface.pickById(startElement.id)
-      : null;
-    const originStartRect = originStart
-      ? new Rectangle(...deserializeXYWH(getXYWH(originStart)))
-      : null;
-    const originStartPoint =
-      originStartRect && startElement
-        ? getAttachedPointByDirection(originStartRect, startElement.direction)
-        : {
-            x: element.x + element.controllers[0].x,
-            y: element.y + element.controllers[0].y,
-          };
-
-    const originEnd = endElement?.id ? surface.pickById(endElement.id) : null;
-    const originEndRect = originEnd
-      ? new Rectangle(...deserializeXYWH(getXYWH(originEnd)))
-      : null;
-    const originEndPoint =
-      originEndRect && endElement
-        ? getAttachedPointByDirection(originEndRect, endElement.direction)
-        : {
-            x:
-              element.x + element.controllers[element.controllers.length - 1].x,
-            y:
-              element.y + element.controllers[element.controllers.length - 1].y,
-          };
+    const { start, end } = getConnectorAttachedInfo(element, surface, page);
 
     const picked = pickBy(
       surface,
@@ -89,27 +62,27 @@ function capMousedown(
       if (connectorMode === ConnectorMode.Orthogonal) {
         routes = generateConnectorPath(
           newRect,
-          originEndRect,
+          end.rect,
           newPoint,
-          originEndPoint,
+          end.point,
           originControllers,
           'end'
         );
       } else {
-        routes = [newPoint, originEndPoint];
+        routes = [newPoint, end.point];
       }
     } else {
       if (connectorMode === ConnectorMode.Orthogonal) {
         routes = generateConnectorPath(
-          originStartRect,
+          start.rect,
           newRect,
-          originStartPoint,
+          start.point,
           newPoint,
           originControllers,
           'start'
         );
       } else {
-        routes = [originStartPoint, newPoint];
+        routes = [start.point, newPoint];
       }
     }
 

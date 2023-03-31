@@ -1,10 +1,12 @@
 import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
-import type { Point as ConnectorPoint, Rectangle } from '@blocksuite/connector';
+import type { Point as ConnectorPoint } from '@blocksuite/connector';
+import { Rectangle } from '@blocksuite/connector';
 import { simplifyPath } from '@blocksuite/connector';
 import { route } from '@blocksuite/connector';
 import type {
   AttachedElementDirection,
   Bound,
+  ConnectorElement,
   Controller,
   PhasorElement,
   SurfaceManager,
@@ -175,6 +177,12 @@ export function pickBy(
       );
 }
 
+export function pickById(surface: SurfaceManager, page: Page, id: string) {
+  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const element = surface.pickById(id) || blocks.find(b => b.id === id);
+  return element;
+}
+
 export function generateConnectorPath(
   startRect: Rectangle | null,
   endRect: Rectangle | null,
@@ -253,4 +261,48 @@ export function getAttachedPoint(
   const direction = rect.relativeDirection(x, y);
   const point = getAttachedPointByDirection(rect, direction);
   return { point, direction };
+}
+
+export function getConnectorAttachedInfo(
+  element: ConnectorElement,
+  surface: SurfaceManager,
+  page: Page
+) {
+  const { startElement, endElement } = element;
+  const start = startElement?.id
+    ? pickById(surface, page, startElement.id)
+    : null;
+  const startRect = start
+    ? new Rectangle(...deserializeXYWH(getXYWH(start)))
+    : null;
+  const startPoint =
+    startRect && startElement
+      ? getAttachedPointByDirection(startRect, startElement.direction)
+      : {
+          x: element.x + element.controllers[0].x,
+          y: element.y + element.controllers[0].y,
+        };
+
+  const end = endElement?.id ? pickById(surface, page, endElement.id) : null;
+  const endRect = end ? new Rectangle(...deserializeXYWH(getXYWH(end))) : null;
+  const endPoint =
+    endRect && endElement
+      ? getAttachedPointByDirection(endRect, endElement.direction)
+      : {
+          x: element.x + element.controllers[element.controllers.length - 1].x,
+          y: element.y + element.controllers[element.controllers.length - 1].y,
+        };
+
+  return {
+    start: {
+      element: startElement,
+      rect: startRect,
+      point: startPoint,
+    },
+    end: {
+      element: endElement,
+      rect: endRect,
+      point: endPoint,
+    },
+  };
 }

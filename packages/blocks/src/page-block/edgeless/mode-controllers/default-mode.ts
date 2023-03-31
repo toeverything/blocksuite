@@ -17,6 +17,7 @@ import {
 import { Rectangle } from '@blocksuite/connector';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { ConnectorElement, PhasorElement, XYWH } from '@blocksuite/phasor';
+import { ConnectorMode } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
@@ -30,10 +31,12 @@ import {
 import type { Selectable } from '../selection-manager.js';
 import {
   generateConnectorPath,
+  getConnectorAttachedInfo,
   getXYWH,
   isPhasorElement,
   isTopLevelBlock,
   pickBlocksByBound,
+  pickById,
   pickTopBlock,
 } from '../utils.js';
 import { getAttachedPointByDirection } from '../utils.js';
@@ -191,50 +194,31 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           ) {
             return;
           }
-          const { startElement, endElement, id, x, y, controllers } =
+          const { startElement, endElement, id, x, y, controllers, mode } =
             bindingElement;
-          const originStart = startElement?.id
-            ? surface.pickById(startElement.id)
-            : null;
-          const originStartRect = originStart
-            ? new Rectangle(...deserializeXYWH(getXYWH(originStart)))
-            : null;
-          const originStartPoint =
-            originStartRect && startElement
-              ? getAttachedPointByDirection(
-                  originStartRect,
-                  startElement.direction
-                )
-              : {
-                  x: x + controllers[0].x,
-                  y: y + controllers[0].y,
-                };
-
-          const originEnd = endElement?.id
-            ? surface.pickById(endElement.id)
-            : null;
-          const originEndRect = originEnd
-            ? new Rectangle(...deserializeXYWH(getXYWH(originEnd)))
-            : null;
-          const originEndPoint =
-            originEndRect && endElement
-              ? getAttachedPointByDirection(originEndRect, endElement.direction)
-              : {
-                  x: x + controllers[controllers.length - 1].x,
-                  y: y + controllers[controllers.length - 1].y,
-                };
-          const routes = generateConnectorPath(
-            originStartRect,
-            originEndRect,
-            originStartPoint,
-            originEndPoint,
-            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+          const { start, end } = getConnectorAttachedInfo(
+            bindingElement,
+            surface,
+            this._page
+          );
+          const fixed =
             startElement?.id === selected.id
               ? 'end'
               : endElement?.id === selected.id
               ? 'start'
-              : undefined
-          );
+              : undefined;
+
+          const routes =
+            mode === ConnectorMode.Orthogonal
+              ? generateConnectorPath(
+                  start.rect,
+                  end.rect,
+                  start.point,
+                  end.point,
+                  controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+                  fixed
+                )
+              : [start.point, end.point];
           const bound = getBrushBoundFromPoints(
             routes.map(r => [r.x, r.y]),
             0

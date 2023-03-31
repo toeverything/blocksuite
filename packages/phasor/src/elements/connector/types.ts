@@ -37,7 +37,7 @@ export type SerializedConnectorProps = {
   controllers: string;
 };
 
-export type ConnectorProperties = Partial<
+export type ConnectorProps = Partial<
   Pick<
     SerializedConnectorProps,
     'mode' | 'lineWidth' | 'color' | 'startElement' | 'endElement'

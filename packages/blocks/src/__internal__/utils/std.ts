@@ -228,3 +228,23 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function isPrintableKeyEvent(event: KeyboardEvent): boolean {
   return event.key.length === 1 && !isControlledKeyboardEvent(event);
 }
+
+export function atLeastNMatches<T>(
+  arr: T[],
+  matchFn: (element: T) => boolean,
+  n: number
+): boolean {
+  let count = 0;
+
+  for (let i = 0; i < arr.length; i++) {
+    if (matchFn(arr[i])) {
+      count++;
+
+      if (count >= n) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}

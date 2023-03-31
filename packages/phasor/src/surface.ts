@@ -6,10 +6,7 @@ import * as Y from 'yjs';
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
-import type {
-  ConnectorProperties,
-  Controller,
-} from './elements/connector/types.js';
+import type { ConnectorProps, Controller } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -101,7 +98,7 @@ export class SurfaceManager {
   addConnectorElement(
     bound: IBound,
     controllers: Controller[],
-    properties: ConnectorProperties = {}
+    properties: ConnectorProps = {}
   ) {
     const id = nanoid(10);
     const element = new ConnectorElement(id);
@@ -126,7 +123,7 @@ export class SurfaceManager {
     id: string,
     bound: IBound,
     controllers: Controller[],
-    properties: ConnectorProperties = {}
+    properties: ConnectorProps = {}
   ) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
@@ -147,7 +144,10 @@ export class SurfaceManager {
     }
   }
 
-  updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
+  updateElementProps(
+    id: string,
+    rawProps: ShapeProps | BrushProps | ConnectorProps
+  ) {
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
