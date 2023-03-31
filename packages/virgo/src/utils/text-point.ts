@@ -1,5 +1,4 @@
-import type { VirgoLine } from '../components/index.js';
-import type { VirgoElement } from '../components/index.js';
+import type { VirgoElement, VirgoLine } from '../components/index.js';
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 import type { DomPoint, TextPoint } from '../types.js';
 import { isVElement, isVLine, isVRoot, isVText } from './guard.js';
