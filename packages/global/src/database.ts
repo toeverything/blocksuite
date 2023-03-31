@@ -56,7 +56,7 @@ export interface ColumnSchema<
 }
 
 export type BlockColumn<Schema extends ColumnSchema = ColumnSchema> = {
-  schemaId: Schema['id'];
+  columnId: Schema['id'];
   value: Schema extends ColumnSchema<infer _, infer __, infer Value>
     ? Value
     : never;
