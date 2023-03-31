@@ -126,8 +126,14 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     selection.removeAllRanges();
     selection.addRange(newRange);
 
+    this._scrollIntoViewIfNeeded(newRange);
+
+    this._editor.slots.rangeUpdated.emit(newRange);
+  };
+
+  private _scrollIntoViewIfNeeded = (range: Range) => {
     if (this._editor.shouldScrollIntoView) {
-      let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
+      let lineElement: HTMLElement | null = range.endContainer.parentElement;
       while (!(lineElement instanceof VirgoLine)) {
         lineElement = lineElement?.parentElement ?? null;
       }
@@ -135,8 +141,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
         block: 'nearest',
       });
     }
-
-    this._editor.slots.rangeUpdated.emit(newRange);
   };
 
   /**

@@ -37,7 +37,8 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -48,7 +49,10 @@ function virgoTextStyles(
 const attributeRenderer = (delta: DeltaInsert) => {
   const style = delta.attributes
     ? virgoTextStyles(delta.attributes)
-    : styleMap({ 'white-space': 'pre-wrap' });
+    : styleMap({
+        'white-space': 'break-spaces',
+        'word-wrap': 'break-word',
+      });
 
   // just for test
   if (delta.insert.length > 4) {
@@ -135,6 +139,8 @@ export class RichText extends NonShadowLitElement {
           width: 100%;
           height: 100%;
           outline: none;
+          word-break: break-word;
+          white-space: break-spaces;
         }
 
         code {

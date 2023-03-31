@@ -2,7 +2,6 @@ import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 import type { z, ZodTypeDef } from 'zod';
 
@@ -397,10 +396,7 @@ export class VEditor<
     // you can change schema and renderer again after construction
     if (options.defaultMode === 'pure') {
       this._attributesRenderer = delta => {
-        const style = styleMap({ 'white-space': 'pre-wrap' });
-        return html`<span style=${style}
-          ><v-text .str=${delta.insert}></v-text
-        ></span>`;
+        return html`<span><v-text .str=${delta.insert}></v-text></span>`;
       };
     }
 
