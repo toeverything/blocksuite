@@ -63,7 +63,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run virgo playwright test
-        run: pnpm --filter=@blocksuite/virgo test:e2e -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm --filter=@blocksuite/virgo test:e2e -- --forbid-only
         env:
           COVERAGE: false
 
