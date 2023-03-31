@@ -78,13 +78,15 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     const result: DeltaEntry<TextAttributes>[] = [];
     deltas.reduce((index, delta) => {
       const length = delta.insert.length;
+      const from = vRange.index - length;
+      const to = vRange.index + vRange.length;
+
       const deltaInRange =
-        index + length >= vRange.index &&
-        (index < vRange.index + vRange.length ||
-          (vRange.length === 0 && index === vRange.index));
+        index >= from &&
+        (index < to || (vRange.length === 0 && index === vRange.index));
 
       if (deltaInRange) {
-        result.push([delta, { index, length: length }]);
+        result.push([delta, { index, length }]);
       }
 
       return index + length;
