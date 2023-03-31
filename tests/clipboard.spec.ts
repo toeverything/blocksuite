@@ -1,12 +1,16 @@
 import './utils/declare-test-window.js';
 
 import {
+  assertDatabaseEqual,
   captureHistory,
   copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   importMarkdown,
+  initDatabaseColumn,
+  initDatabaseDynamicRowWithData,
+  initEmptyDatabaseWithParagraphState,
   initEmptyParagraphState,
   pasteByKeyboard,
   pasteContent,
@@ -487,4 +491,22 @@ test('pasting into empty list should not convert the list into paragraph', async
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['test']);
   await assertTypeFormat(page, 'bulleted');
+});
+
+test('should copy&paste of database work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseWithParagraphState(page);
+
+  // init database columns and rows
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'abc', true);
+
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+c`);
+
+  await focusRichText(page, 1);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await waitNextFrame(page);
+  await assertDatabaseEqual(page);
 });

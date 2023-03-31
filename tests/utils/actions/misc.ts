@@ -270,6 +270,34 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyDatabaseWithParagraphState(
+  page: Page,
+  pageId?: string
+) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+        titleColumn: 'Title',
+      },
+      frameId
+    );
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.captureSync();
+    return { pageId, frameId, databaseId };
+  }, pageId);
+  return ids;
+}
+
 export async function initDatabaseColumn(page: Page, title = '') {
   const columnAddBtn = page.locator('.affine-database-add-column-button');
   await columnAddBtn.click();
