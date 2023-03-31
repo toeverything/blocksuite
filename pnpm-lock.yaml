@@ -275,6 +275,9 @@ importers:
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
+      affine-next-y-indexeddb:
+        specifier: ^0.2.0
+        version: 0.2.0(yjs@13.5.50)
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
@@ -3053,6 +3056,15 @@ packages:
     hasBin: true
     dev: true
 
+  /affine-next-y-indexeddb@0.2.0(yjs@13.5.50):
+    resolution: {integrity: sha512-lnyrqGRpYSk1sQcxcO+x0dDfqIqAb33bEpMfRkHFbHmTkyDK7E0ALUxguALn3o78g8nKfzhFg/uvyNvBCkFIOQ==}
+    peerDependencies:
+      yjs: ^13.5.51
+    dependencies:
+      idb: 7.1.1
+      yjs: 13.5.50
+    dev: false
+
   /aggregate-error@3.1.0:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
@@ -4789,6 +4801,10 @@ packages:
     resolution: {integrity: sha512-uw+MIyQn2jl3+hroD7hF8J7PUviBU7BPKWw4f/ISf32D4LoGu98yHjrzWWJDASu9QNrX10tCJqk9YY0ClWm8Ng==}
     dependencies:
       safari-14-idb-fix: 3.0.0
+    dev: false
+
+  /idb@7.1.1:
+    resolution: {integrity: sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==}
     dev: false
 
   /ieee754@1.2.1:

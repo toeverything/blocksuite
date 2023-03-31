@@ -7,17 +7,18 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
+import type { DocProvider, Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
   DebugDocProvider,
   type DocProviderConstructor,
   Generator,
-  IndexedDBDocProvider,
   type StoreOptions,
   Utils,
   Workspace,
 } from '@blocksuite/store';
+import { createIndexedDBProvider } from 'affine-next-y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
@@ -134,6 +135,20 @@ export function createWorkspaceOptions(): Pick<
   }
 
   if (providerArgs.includes('indexeddb')) {
+    class IndexedDBDocProvider implements DocProvider {
+      private _provider: ReturnType<typeof createIndexedDBProvider>;
+      constructor(id: string, doc: Y.Doc) {
+        this._provider = createIndexedDBProvider(id, doc, 'blocksuite-local');
+      }
+      connect() {
+        this._provider.connect();
+        return this._provider.whenSynced;
+      }
+      disconnect() {
+        return this._provider.disconnect();
+      }
+    }
+
     providers.push(IndexedDBDocProvider);
     idGenerator = Generator.UUIDv4; // works in production
   }
