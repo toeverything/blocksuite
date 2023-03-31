@@ -377,6 +377,101 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
+  function handleDatabaseSibling(
+    page: Page,
+    model: ExtendedModel,
+    previousSiblingParent: ExtendedModel | null
+  ) {
+    if (
+      !previousSiblingParent ||
+      !matchFlavours(previousSiblingParent, ['affine:database'] as const)
+    )
+      return false;
+
+    focusBlockByModel(previousSiblingParent, 'end');
+    if (!model.text?.length) {
+      page.captureSync();
+      page.deleteBlock(model);
+    }
+    return true;
+  }
+
+  function handleParagraphOrListSibling(
+    page: Page,
+    model: ExtendedModel,
+    previousSibling: ExtendedModel | null
+  ) {
+    if (
+      !previousSibling ||
+      !matchFlavours(previousSibling, [
+        'affine:paragraph',
+        'affine:list',
+      ] as const)
+    )
+      return false;
+
+    page.captureSync();
+    const preTextLength = previousSibling.text?.length || 0;
+    model.text?.length && previousSibling.text?.join(model.text as Text);
+    page.deleteBlock(model, {
+      bringChildrenTo: previousSibling,
+    });
+    const vEditor = getVirgoByModel(previousSibling);
+    vEditor?.setVRange({
+      index: preTextLength,
+      length: 0,
+    });
+    return true;
+  }
+
+  function handleEmbedDividerCodeSibling(
+    page: Page,
+    model: ExtendedModel,
+    previousSibling: ExtendedModel | null
+  ) {
+    if (
+      !previousSibling ||
+      !matchFlavours(previousSibling, [
+        'affine:embed',
+        'affine:divider',
+        'affine:code',
+      ] as const)
+    )
+      return false;
+
+    focusBlockByModel(previousSibling);
+    if (!model.text?.length) {
+      page.captureSync();
+      page.deleteBlock(model);
+    }
+    return true;
+  }
+
+  function handleNoPreviousSibling(
+    page: Page,
+    model: ExtendedModel,
+    previousSibling: ExtendedModel | null
+  ) {
+    if (previousSibling) return false;
+
+    const text = model.text;
+    const titleElement = document.querySelector(
+      '.affine-default-page-block-title'
+    ) as HTMLTextAreaElement;
+    const pageModel = getModelByElement(titleElement) as PageBlockModel;
+    const title = pageModel.title;
+
+    page.captureSync();
+    let textLength = 0;
+    if (text) {
+      textLength = text.length;
+      title.join(text);
+    }
+    page.deleteBlock(model);
+    focusTitle(page, title.length - textLength);
+    return true;
+  }
+
   const parent = page.getParent(model);
   if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
     const previousSibling = getPreviousBlock(model);
@@ -384,77 +479,12 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       ? page.getParent(previousSibling)
       : null;
 
-    if (
-      previousSiblingParent &&
-      matchFlavours(previousSiblingParent, ['affine:database'] as const)
-    ) {
-      // We can not delete block if the block has content
-      focusBlockByModel(previousSiblingParent, 'end');
-      if (!model.text?.length) {
-        page.captureSync();
-        page.deleteBlock(model);
-      }
-      return true;
-    }
-
-    if (
-      previousSibling &&
-      matchFlavours(previousSibling, [
-        'affine:paragraph',
-        'affine:list',
-      ] as const)
-    ) {
-      page.captureSync();
-      const preTextLength = previousSibling.text?.length || 0;
-      model.text?.length && previousSibling.text?.join(model.text as Text);
-      page.deleteBlock(model, {
-        bringChildrenTo: previousSibling,
-      });
-      const vEditor = getVirgoByModel(previousSibling);
-      vEditor?.setVRange({
-        index: preTextLength,
-        length: 0,
-      });
-      return true;
-    }
-
-    if (
-      previousSibling &&
-      matchFlavours(previousSibling, [
-        'affine:embed',
-        'affine:divider',
-        'affine:code',
-      ] as const)
-    ) {
-      // We can not delete block if the block has content
-      focusBlockByModel(previousSibling);
-      if (!model.text?.length) {
-        page.captureSync();
-        page.deleteBlock(model);
-      }
-      return true;
-    }
-
-    // No previous sibling, it's the first block
-    // Try to merge with the title
-    if (!previousSibling) {
-      const text = model.text;
-      const titleElement = document.querySelector(
-        '.affine-default-page-block-title'
-      ) as HTMLTextAreaElement;
-      const pageModel = getModelByElement(titleElement) as PageBlockModel;
-      const title = pageModel.title;
-
-      page.captureSync();
-      let textLength = 0;
-      if (text) {
-        textLength = text.length;
-        title.join(text);
-      }
-      page.deleteBlock(model);
-      focusTitle(page, title.length - textLength);
-      return true;
-    }
+    return (
+      handleDatabaseSibling(page, model, previousSiblingParent) ||
+      handleParagraphOrListSibling(page, model, previousSibling) ||
+      handleEmbedDividerCodeSibling(page, model, previousSibling) ||
+      handleNoPreviousSibling(page, model, previousSibling)
+    );
   }
 
   return false;
