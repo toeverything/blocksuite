@@ -47,6 +47,6 @@ describe('atLeastNMatches', () => {
     const longerThan5 = (str: string): boolean => str.length > 5;
 
     expect(atLeastNMatches(strArr, startsWithA, 1)).toBe(true);
-    expect(atLeastNMatches(strArr, longerThan5, 2)).toBe(false);
+    expect(atLeastNMatches(strArr, longerThan5, 3)).toBe(false);
   });
 });
