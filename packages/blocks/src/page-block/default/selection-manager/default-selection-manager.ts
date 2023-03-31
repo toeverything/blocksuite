@@ -278,11 +278,12 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
+    if (this.page.readonly) return;
+
     const range = handleNativeRangeDblClick(this.page, e);
     const direction = 'center-bottom';
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     if (!range || range.collapsed) return;
-    if (this.page.readonly) return;
 
     // Show format quick bar when double click on text
     showFormatQuickBar({

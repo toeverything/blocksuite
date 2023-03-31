@@ -6,6 +6,7 @@ import {
   getModelByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
+  handleNativeRangeDblClick,
   handleNativeRangeDragMove,
   noop,
   Point,
@@ -245,8 +246,24 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     repairContextMenuRange(e);
   }
 
-  onContainerDblClick(_: SelectionEvent) {
-    noop();
+  onContainerDblClick(e: SelectionEvent) {
+    if (this._page.readonly) return;
+
+    const range = handleNativeRangeDblClick(this._page, e);
+    const direction = 'center-bottom';
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
+    if (!range || range.collapsed) return;
+
+    // Show format quick bar when double click on text
+    showFormatQuickBar({
+      page: this._page,
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction);
+        },
+      },
+    });
   }
 
   onContainerDragStart(e: SelectionEvent) {
