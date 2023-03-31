@@ -434,8 +434,7 @@ export class VEditor<
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     let index = 0;
-    for (let i = 0; i < deltas.length; i++) {
-      const delta = deltas[i];
+    for (const delta of deltas) {
       if (index + delta.insert.length >= rangeIndex) {
         return delta;
       }
