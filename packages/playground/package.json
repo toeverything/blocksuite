@@ -20,7 +20,7 @@
     "@rich-data/json-plugin": "^3.0.0-20230329005843-d296129",
     "@rich-data/viewer": "^3.0.0-20230329005843-d296129",
     "@shoelace-style/shoelace": "2.0.0",
-    "affine-next-y-indexeddb": "^0.2.0",
+    "affine-next-y-indexeddb": "^0.2.1",
     "browser-fs-access": "^0.32.1",
     "lit": "^2.6.1",
     "react": "^18.2.0",
