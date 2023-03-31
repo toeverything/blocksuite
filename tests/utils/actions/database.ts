@@ -1,5 +1,5 @@
 import type { ColumnSchemaType } from '@blocksuite/global/database';
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
 
@@ -50,18 +50,4 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
   const cell = page.locator(cellSelector);
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
-}
-
-export async function assertDatabaseEqual(page: Page) {
-  const databases = page.locator('affine-database');
-  expect(await databases.count()).toBe(2);
-
-  const database1 = databases.nth(0);
-  const database2 = databases.nth(1);
-
-  const select1 = database1.locator('.select-selected');
-  const select2 = database2.locator('.select-selected');
-  const selected1 = await select1.innerText();
-  const selected2 = await select2.innerText();
-  expect(selected1).toEqual(selected2);
 }

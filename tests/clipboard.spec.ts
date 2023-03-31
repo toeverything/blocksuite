@@ -1,7 +1,6 @@
 import './utils/declare-test-window.js';
 
 import {
-  assertDatabaseEqual,
   captureHistory,
   copyByKeyboard,
   dragBetweenCoords,
@@ -19,7 +18,6 @@ import {
   pressShiftTab,
   pressSpace,
   pressTab,
-  redoByClick,
   resetHistory,
   selectAllByKeyboard,
   setSelection,
@@ -508,11 +506,70 @@ test('should copy&paste of database work', async ({ page }) => {
 
   await focusRichText(page, 1);
   await page.keyboard.press(`${SHORT_KEY}+v`);
-  await waitNextFrame(page);
-  await assertDatabaseEqual(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:mode={2}
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:database
+      prop:columns={
+        Array [
+          "10",
+        ]
+      }
+      prop:mode={2}
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 
   await undoByClick(page);
-  await redoByClick(page);
-  await waitNextFrame(page);
-  await assertDatabaseEqual(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:mode={2}
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });
