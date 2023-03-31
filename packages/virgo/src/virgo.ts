@@ -4,26 +4,24 @@ import { html } from 'lit';
 import * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
-import { ZERO_WIDTH_SPACE } from './constant.js';
-import { VirgoAttributeService } from './services/attribute.js';
-import { VirgoDeltaService } from './services/delta.js';
-import { VirgoEventService } from './services/index.js';
-import { VirgoRangeService } from './services/range.js';
+import {
+  VirgoAttributeService,
+  VirgoDeltaService,
+  VirgoEventService,
+  VirgoRangeService,
+} from './services/index.js';
 import type {
   DeltaInsert,
-  DomPoint,
+  TextPoint,
   VRange,
   VRangeUpdatedProp,
 } from './types.js';
-import type { TextPoint } from './types.js';
 import {
   type BaseTextAttributes,
-  calculateTextLength,
   findDocumentOrShadowRoot,
-  isVElement,
-  isVLine,
-  isVRoot,
-  isVText,
+  getTextNodesFromElement,
+  nativePointToTextPoint,
+  textPointToDomPoint,
 } from './utils/index.js';
 
 export interface VEditorOptions {
@@ -34,216 +32,9 @@ export interface VEditorOptions {
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
 > {
-  static nativePointToTextPoint(
-    node: unknown,
-    offset: number
-  ): TextPoint | null {
-    let text: Text | null = null;
-    let textOffset = offset;
-
-    if (isVText(node)) {
-      text = node;
-      textOffset = offset;
-    } else if (isVElement(node)) {
-      const texts = VEditor.getTextNodesFromElement(node);
-      for (let i = 0; i < texts.length; i++) {
-        if (offset <= texts[i].length) {
-          text = texts[i];
-          textOffset = offset;
-          break;
-        }
-        offset -= texts[i].length;
-      }
-    } else if (isVLine(node) || isVRoot(node)) {
-      const texts = VEditor.getTextNodesFromElement(node);
-      if (texts.length > 0) {
-        text = texts[0];
-        textOffset = offset === 0 ? offset : text.length;
-      }
-    } else {
-      if (node instanceof Node) {
-        const vLine = node.parentElement?.closest('v-line');
-        if (vLine) {
-          const vElements = Array.from(vLine.querySelectorAll('v-element'));
-          for (let i = 0; i < vElements.length; i++) {
-            if (
-              node.compareDocumentPosition(vElements[i]) ===
-                Node.DOCUMENT_POSITION_CONTAINED_BY ||
-              node.compareDocumentPosition(vElements[i]) === 20
-            ) {
-              const texts = VEditor.getTextNodesFromElement(vElements[0]);
-              if (texts.length === 0) return null;
-              text = texts[texts.length - 1];
-              textOffset = offset === 0 ? offset : text.length;
-              break;
-            }
-
-            if (
-              i === 0 &&
-              node.compareDocumentPosition(vElements[i]) ===
-                Node.DOCUMENT_POSITION_FOLLOWING
-            ) {
-              const texts = VEditor.getTextNodesFromElement(vElements[i]);
-              if (texts.length === 0) return null;
-              text = texts[0];
-              textOffset = offset === 0 ? offset : text.length;
-              break;
-            } else if (
-              i === vElements.length - 1 &&
-              node.compareDocumentPosition(vElements[i]) ===
-                Node.DOCUMENT_POSITION_PRECEDING
-            ) {
-              const texts = VEditor.getTextNodesFromElement(vElements[i]);
-              if (texts.length === 0) return null;
-              text = texts[texts.length - 1];
-              textOffset = calculateTextLength(text);
-              break;
-            }
-
-            if (
-              i < vElements.length - 1 &&
-              node.compareDocumentPosition(vElements[i]) ===
-                Node.DOCUMENT_POSITION_PRECEDING &&
-              node.compareDocumentPosition(vElements[i + 1]) ===
-                Node.DOCUMENT_POSITION_FOLLOWING
-            ) {
-              const texts = VEditor.getTextNodesFromElement(vElements[i]);
-              if (texts.length === 0) return null;
-              text = texts[texts.length - 1];
-              textOffset = calculateTextLength(text);
-              break;
-            }
-          }
-        } else {
-          const container =
-            node instanceof Element
-              ? node.closest('[data-virgo-root="true"]')
-              : node.parentElement?.closest('[data-virgo-root="true"]');
-          if (container) {
-            const vLines = Array.from(container.querySelectorAll('v-line'));
-            for (let i = 0; i < vLines.length; i++) {
-              if (
-                node.compareDocumentPosition(vLines[i]) ===
-                  Node.DOCUMENT_POSITION_CONTAINED_BY ||
-                node.compareDocumentPosition(vLines[i]) === 20
-              ) {
-                const texts = VEditor.getTextNodesFromElement(vLines[0]);
-                if (texts.length === 0) return null;
-                text = texts[texts.length - 1];
-                textOffset = offset === 0 ? offset : text.length;
-                break;
-              }
-
-              if (
-                i === 0 &&
-                node.compareDocumentPosition(vLines[i]) ===
-                  Node.DOCUMENT_POSITION_FOLLOWING
-              ) {
-                const texts = VEditor.getTextNodesFromElement(vLines[i]);
-                if (texts.length === 0) return null;
-                text = texts[0];
-                textOffset = offset === 0 ? offset : text.length;
-                break;
-              } else if (
-                i === vLines.length - 1 &&
-                node.compareDocumentPosition(vLines[i]) ===
-                  Node.DOCUMENT_POSITION_PRECEDING
-              ) {
-                const texts = VEditor.getTextNodesFromElement(vLines[i]);
-                if (texts.length === 0) return null;
-                text = texts[texts.length - 1];
-                textOffset = calculateTextLength(text);
-                break;
-              }
-
-              if (
-                i < vLines.length - 1 &&
-                node.compareDocumentPosition(vLines[i]) ===
-                  Node.DOCUMENT_POSITION_PRECEDING &&
-                node.compareDocumentPosition(vLines[i + 1]) ===
-                  Node.DOCUMENT_POSITION_FOLLOWING
-              ) {
-                const texts = VEditor.getTextNodesFromElement(vLines[i]);
-                if (texts.length === 0) return null;
-                text = texts[texts.length - 1];
-                textOffset = calculateTextLength(text);
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (!text) {
-      return null;
-    }
-
-    return [text, textOffset] as const;
-  }
-
-  static textPointToDomPoint(
-    text: Text,
-    offset: number,
-    rootElement: HTMLElement
-  ): DomPoint | null {
-    if (rootElement.dataset.virgoRoot !== 'true') {
-      throw new Error(
-        'textRangeToDomPoint should be called with editor root element'
-      );
-    }
-
-    if (!rootElement.contains(text)) {
-      return null;
-    }
-
-    const texts = VEditor.getTextNodesFromElement(rootElement);
-    const goalIndex = texts.indexOf(text);
-    let index = 0;
-    for (const text of texts.slice(0, goalIndex)) {
-      index += calculateTextLength(text);
-    }
-
-    if (text.wholeText !== ZERO_WIDTH_SPACE) {
-      index += offset;
-    }
-
-    const textParentElement = text.parentElement;
-    if (!textParentElement) {
-      throw new Error('text element parent not found');
-    }
-
-    const lineElement = textParentElement.closest('v-line');
-
-    if (!lineElement) {
-      throw new Error('line element not found');
-    }
-
-    const lineIndex = Array.from(
-      rootElement.querySelectorAll('v-line')
-    ).indexOf(lineElement);
-
-    return { text, index: index + lineIndex };
-  }
-
-  static getTextNodesFromElement(element: Element): Text[] {
-    const textSpanElements = Array.from(
-      element.querySelectorAll('[data-virgo-text="true"]')
-    );
-    const textNodes = textSpanElements.map(textSpanElement => {
-      const textNode = Array.from(textSpanElement.childNodes).find(
-        (node): node is Text => node instanceof Text
-      );
-
-      if (!textNode) {
-        throw new Error('text node not found');
-      }
-
-      return textNode;
-    });
-
-    return textNodes;
-  }
+  static nativePointToTextPoint = nativePointToTextPoint;
+  static textPointToDomPoint = textPointToDomPoint;
+  static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
   private _rootElement: HTMLElement | null = null;
@@ -300,6 +91,7 @@ export class VEditor<
   get marks() {
     return this._attributeService.marks;
   }
+
   setAttributesSchema = this._attributeService.setAttributesSchema;
   setAttributesRenderer = this._attributeService.setAttributesRenderer;
   setMarks = this._attributeService.setMarks;
@@ -350,7 +142,7 @@ export class VEditor<
     // you can change schema and renderer again after construction
     if (options.defaultMode === 'pure') {
       this._attributeService.setAttributesRenderer(delta => {
-        return html`<span><v-text .str=${delta.insert}></v-text></span>`;
+        return html`<span><v-text .str="${delta.insert}"></v-text></span>`;
       });
     }
 
