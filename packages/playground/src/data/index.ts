@@ -192,12 +192,12 @@ export const database: InitFn = (workspace: Workspace) => {
   );
 
   page.updateBlockColumn(p1, {
-    schemaId: col1,
+    columnId: col1,
     value: 0.1,
   });
 
   page.updateBlockColumn(p2, {
-    schemaId: col2,
+    columnId: col2,
     value: ['TODO'],
   });
 
@@ -205,7 +205,7 @@ export const database: InitFn = (workspace: Workspace) => {
   text.insert(0, '123');
   text.insert(0, 'code');
   page.updateBlockColumn(p2, {
-    schemaId: col3,
+    columnId: col3,
     value: text,
   });
 

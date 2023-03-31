@@ -229,9 +229,9 @@ export class Page extends Space<FlatBlockMap> {
       }
       // Related issue: https://github.com/yjs/yjs/issues/255
       const yColumnMap = new Y.Map();
-      yColumnMap.set('schemaId', column.schemaId);
+      yColumnMap.set('columnId', column.columnId);
       yColumnMap.set('value', column.value);
-      yColumns.set(column.schemaId, yColumnMap);
+      yColumns.set(column.columnId, yColumnMap);
     });
   }
 
@@ -244,7 +244,7 @@ export class Page extends Space<FlatBlockMap> {
     if (!yColumnMap) return null;
 
     return {
-      schemaId: yColumnMap.get('schemaId') as string,
+      columnId: yColumnMap.get('columnId') as string,
       value: yColumnMap.get('value') as unknown,
     };
   }
@@ -271,7 +271,7 @@ export class Page extends Space<FlatBlockMap> {
         const copyColumn = column.get(copyId) as Y.Map<unknown>;
         if (copyColumn) {
           const columnMap = new Y.Map();
-          columnMap.set('schemaId', toId);
+          columnMap.set('columnId', toId);
           columnMap.set('value', copyColumn.get('value'));
           column.set(toId, columnMap);
         }
@@ -291,7 +291,7 @@ export class Page extends Space<FlatBlockMap> {
           if (!value) return;
 
           const yColumnMap = new Y.Map();
-          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('columnId', columnId);
           yColumnMap.set('value', [(value as string[])[0]]);
           yColumn.set(columnId, yColumnMap);
         } else if (newType === 'rich-text') {
@@ -299,7 +299,7 @@ export class Page extends Space<FlatBlockMap> {
           if (!value) return;
 
           const yColumnMap = new Y.Map();
-          yColumnMap.set('schemaId', columnId);
+          yColumnMap.set('columnId', columnId);
           yColumnMap.set('value', new Y.Text((value as number) + ''));
           yColumn.set(columnId, yColumnMap);
         }

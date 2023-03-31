@@ -34,7 +34,7 @@ export class DatabaseCellContainer
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
       this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
-        schemaId: this.columnSchema.id,
+        columnId: this.columnSchema.id,
         value,
       });
     });
