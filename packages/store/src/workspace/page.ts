@@ -265,16 +265,51 @@ export class Page extends Space<FlatBlockMap> {
     this.transact(() => this.yColumnSchema.delete(id));
   }
 
-  copyBlockColumnById(copyId: ColumnSchema['id'], toId: ColumnSchema['id']) {
+  duplicateBlockColumnById(
+    copyId: ColumnSchema['id'],
+    toId: ColumnSchema['id']
+  ) {
     this.transact(() => {
       this.yColumns.forEach(column => {
         const copyColumn = column.get(copyId) as Y.Map<unknown>;
         if (copyColumn) {
           const columnMap = new Y.Map();
           columnMap.set('schemaId', toId);
-          columnMap.set('value', copyColumn.get('value'));
+          const value = copyColumn.get('value');
+          if (value instanceof Y.Text) {
+            columnMap.set('value', value.clone());
+          } else {
+            columnMap.set('value', value);
+          }
           column.set(toId, columnMap);
         }
+      });
+    });
+  }
+
+  copyBlockColumns(
+    columnIdMap: Record<string, string>,
+    columnSchemaIdMap: Record<string, string>
+  ) {
+    this.transact(() => {
+      Object.entries(columnIdMap).forEach(([columnFromId, columnToId]) => {
+        const yColumn = new Y.Map();
+        this.yColumns.set(columnToId, yColumn);
+
+        const oldColumns = this.yColumns.get(columnFromId);
+        if (!oldColumns) return;
+        oldColumns.forEach((oldSchema, oldSchemaId) => {
+          const schema = new Y.Map();
+          const newSchemaId = columnSchemaIdMap[oldSchemaId];
+          schema.set('schemaId', newSchemaId);
+          const value = (oldSchema as Y.Map<unknown>).get('value');
+          if (value instanceof Y.Text) {
+            schema.set('value', value.clone());
+          } else {
+            schema.set('value', value);
+          }
+          yColumn.set(newSchemaId, schema);
+        });
       });
     });
   }
