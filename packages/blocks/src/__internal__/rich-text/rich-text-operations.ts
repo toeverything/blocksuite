@@ -381,7 +381,8 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     }
 
     const parent = page.getParent(model);
-    if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
+    const next = page.getNextSibling(model);
+    if (parent && matchFlavours(parent, ['affine:frame'] as const)) {
       const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
@@ -407,7 +408,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         const preTextLength = previousSibling.text?.length || 0;
         model.text?.length && previousSibling.text?.join(model.text as Text);
         page.deleteBlock(model, {
-          bringChildrenTo: previousSibling,
+          bringChildrenTo: parent,
         });
         const vEditor = getVirgoByModel(previousSibling);
         vEditor?.setVRange({
@@ -448,18 +449,21 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         page.deleteBlock(model);
         focusTitle(page, title.length - textLength);
       }
+    } else if (next && matchFlavours(next, ['affine:list'])) {
+      page.deleteBlock(model);
+      focusBlockByModel(next);
+    } else {
+      // Before
+      // - line1
+      //   - | <- cursor here, press backspace
+      //   - line3
+      //
+      // After
+      // - line1
+      // - | <- cursor here
+      //   - line3
+      handleUnindent(page, model);
     }
-
-    // Before
-    // - line1
-    //   - | <- cursor here, press backspace
-    //   - line3
-    //
-    // After
-    // - line1
-    // - | <- cursor here
-    //   - line3
-    handleUnindent(page, model);
     return;
   }
 
