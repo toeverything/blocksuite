@@ -1,16 +1,15 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html, render } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
+import { html } from 'lit';
 import * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
 import { VirgoAttributeService } from './services/attribute.js';
+import { VirgoDeltaService } from './services/delta.js';
 import { VirgoEventService } from './services/index.js';
 import { VirgoRangeService } from './services/range.js';
 import type {
-  DeltaEntry,
   DeltaInsert,
   DomPoint,
   VRange,
@@ -20,13 +19,11 @@ import type { TextPoint } from './types.js';
 import {
   type BaseTextAttributes,
   calculateTextLength,
-  deltaInsertsToChunks,
   findDocumentOrShadowRoot,
   isVElement,
   isVLine,
   isVRoot,
   isVText,
-  renderElement,
 } from './utils/index.js';
 
 export interface VEditorOptions {
@@ -261,50 +258,8 @@ export class VEditor<
   private _attributeService: VirgoAttributeService<TextAttributes> =
     new VirgoAttributeService<TextAttributes>(this);
 
-  private _renderDeltas = async () => {
-    assertExists(this._rootElement);
-
-    const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
-    const chunks = deltaInsertsToChunks(deltas);
-
-    // every chunk is a line
-    const lines = chunks.map(chunk => {
-      const elementTs = [];
-      if (chunk.length === 0) {
-        elementTs.push(html`<v-element></v-element>`);
-      } else {
-        chunk.forEach(delta => {
-          const element = renderElement(
-            delta,
-            this._attributeService.normalizeAttributes,
-            this._attributeService.attributesRenderer
-          );
-
-          elementTs.push(element);
-        });
-      }
-
-      return html`<v-line .elements=${elementTs}></v-line>`;
-    });
-
-    render(
-      repeat(
-        lines.map((line, i) => ({ line, index: i })),
-        entry => entry.index,
-        entry => entry.line
-      ),
-      this._rootElement
-    );
-
-    const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
-    await Promise.all(
-      vLines.map(async line => {
-        await line.updateComplete;
-      })
-    );
-
-    this.slots.updated.emit();
-  };
+  private _deltaService: VirgoDeltaService<TextAttributes> =
+    new VirgoDeltaService<TextAttributes>(this);
 
   shouldScrollIntoView = true;
 
@@ -337,6 +292,10 @@ export class VEditor<
     return this._attributeService;
   }
 
+  get deltaService() {
+    return this._deltaService;
+  }
+
   // Expose attribute service API
   get marks() {
     return this._attributeService.marks;
@@ -345,6 +304,7 @@ export class VEditor<
   setAttributesRenderer = this._attributeService.setAttributesRenderer;
   setMarks = this._attributeService.setMarks;
   resetMarks = this._attributeService.resetMarks;
+  getFormat = this._attributeService.getFormat;
 
   // Expose event service API
   bindHandlers = this._eventService.bindHandlers;
@@ -355,6 +315,9 @@ export class VEditor<
   getVRange = this.rangeService.getVRange;
   setVRange = this.rangeService.setVRange;
   syncVRange = this.rangeService.syncVRange;
+
+  // Expose delta service API
+  getDeltasByVRange = this.deltaService.getDeltasByVRange;
 
   constructor(
     text: VEditor['yText'] | string,
@@ -409,7 +372,7 @@ export class VEditor<
     this._rootElement.dataset.virgoRoot = 'true';
     this.yText.observe(this._onYTextChange);
 
-    this._renderDeltas();
+    this._deltaService.render();
 
     this._eventService.mount();
 
@@ -429,7 +392,7 @@ export class VEditor<
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
-      this._renderDeltas();
+      this._deltaService.render();
     });
   }
 
@@ -531,82 +494,6 @@ export class VEditor<
     throw new Error('failed to find line');
   }
 
-  /**
-   * Here are examples of how this function computes and gets the deltas.
-   *
-   * We have such a text:
-   * ```
-   * [
-   *   {
-   *      insert: 'aaa',
-   *      attributes: { bold: true },
-   *   },
-   *   {
-   *      insert: 'bbb',
-   *      attributes: { italic: true },
-   *   },
-   *   {
-   *      insert: 'ccc',
-   *      attributes: { underline: true },
-   *   },
-   * ]
-   * ```
-   *
-   * `getDeltasByVRange({ index: 0, length: 0 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
-   * ```
-   *
-   * `getDeltasByVRange({ index: 0, length: 1 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
-   * ```
-   *
-   * `getDeltasByVRange({ index: 0, length: 4 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
-   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
-   * ```
-   *
-   * `getDeltasByVRange({ index: 3, length: 1 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
-   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
-   * ```
-   *
-   * `getDeltasByVRange({ index: 3, length: 3 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
-   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
-   * ```
-   *
-   *  `getDeltasByVRange({ index: 3, length: 4 })` returns
-   * ```
-   * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
-   *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }],
-   *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
-   * ```
-   */
-  getDeltasByVRange(vRange: VRange): DeltaEntry<TextAttributes>[] {
-    const deltas = this.yText.toDelta() as DeltaInsert<TextAttributes>[];
-
-    const result: DeltaEntry<TextAttributes>[] = [];
-    let index = 0;
-    for (let i = 0; i < deltas.length; i++) {
-      const delta = deltas[i];
-      if (
-        index + delta.insert.length >= vRange.index &&
-        (index < vRange.index + vRange.length ||
-          (vRange.length === 0 && index === vRange.index))
-      ) {
-        result.push([delta, { index, length: delta.insert.length }]);
-      }
-      index += delta.insert.length;
-    }
-
-    return result;
-  }
-
   setReadonly(isReadonly: boolean): void {
     this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
     this._isReadonly = isReadonly;
@@ -669,7 +556,7 @@ export class VEditor<
     } = {}
   ): void {
     const { match = () => true, mode = 'merge' } = options;
-    const deltas = this.getDeltasByVRange(vRange);
+    const deltas = this._deltaService.getDeltasByVRange(vRange);
 
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
@@ -731,7 +618,7 @@ export class VEditor<
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
-      this._renderDeltas();
+      this.deltaService.render();
     });
   };
 
