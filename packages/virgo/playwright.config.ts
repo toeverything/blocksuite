@@ -5,10 +5,12 @@ import type {
 import * as process from 'process';
 
 const config: PlaywrightTestConfig = {
+  fullyParallel: true,
   testDir: 'src/',
   testIgnore: ['**.unit.spec.ts'],
   forbidOnly: !!process.env.CI,
   workers: 4,
+  retries: 1,
   use: {
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
@@ -23,6 +25,8 @@ if (process.env.CI) {
     command: 'pnpm -w dev',
     port: 5173,
   };
+  config.retries = 3;
+  config.workers = '50%';
 }
 
 export default config;
