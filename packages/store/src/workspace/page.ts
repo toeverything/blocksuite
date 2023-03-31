@@ -620,7 +620,7 @@ export class Page extends Space<FlatBlockMap> {
     return (this.yColumnSchema.get(id) ?? null) as ColumnSchema | null;
   }
 
-  setColumnSchema(
+  updateColumnSchema(
     schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
   ): string {
     const id = schema.id ?? this._idGenerator();

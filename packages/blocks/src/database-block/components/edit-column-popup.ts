@@ -368,7 +368,7 @@ export class EditColumnPopup extends LitElement {
     const currentSchema = this.targetModel.page.getColumnSchema(columnId);
     assertExists(currentSchema);
     const schema = { ...currentSchema, ...schemaProperties };
-    this.targetModel.page.setColumnSchema(schema);
+    this.targetModel.page.updateColumnSchema(schema);
   };
 
   private _changeColumnType = (
@@ -457,7 +457,7 @@ export class EditColumnPopup extends LitElement {
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this.targetModel.page.setColumnSchema(schema);
+      const id = this.targetModel.page.updateColumnSchema(schema);
       const newColumns = [...this.targetModel.columns];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {

@@ -55,7 +55,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.columnSchema.property);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setColumnSchema({
+    this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
       property: newProperty,
     });
