@@ -3,14 +3,13 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
-import type { z, ZodTypeDef } from 'zod';
 
 import type { VirgoLine } from './components/index.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
+import { VirgoAttributeService } from './services/attribute.js';
 import { VirgoEventService } from './services/index.js';
 import { VirgoRangeService } from './services/range.js';
 import type {
-  AttributesRenderer,
   DeltaEntry,
   DeltaInsert,
   DomPoint,
@@ -20,11 +19,9 @@ import type {
 import type { TextPoint } from './types.js';
 import {
   type BaseTextAttributes,
-  baseTextAttributes,
   calculateTextLength,
   deltaInsertsToChunks,
   findDocumentOrShadowRoot,
-  getDefaultAttributeRenderer,
   isVElement,
   isVLine,
   isVRoot,
@@ -254,13 +251,6 @@ export class VEditor<
   private readonly _yText: Y.Text;
   private _rootElement: HTMLElement | null = null;
   private _isReadonly = false;
-  private _marks: TextAttributes | null = null;
-
-  private _attributesRenderer: AttributesRenderer<TextAttributes> =
-    getDefaultAttributeRenderer<TextAttributes>();
-
-  private _attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
-    baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
   private _eventService: VirgoEventService<TextAttributes> =
     new VirgoEventService<TextAttributes>(this);
@@ -268,21 +258,8 @@ export class VEditor<
   private _rangeService: VirgoRangeService<TextAttributes> =
     new VirgoRangeService<TextAttributes>(this);
 
-  private _parseSchema = (textAttributes?: TextAttributes) => {
-    if (!textAttributes) {
-      return undefined;
-    }
-    const attributesResult = this._attributesSchema.safeParse(textAttributes);
-    if (!attributesResult.success) {
-      console.error(attributesResult.error);
-      return undefined;
-    }
-    const attributes = Object.fromEntries(
-      // filter out undefined values
-      Object.entries(attributesResult.data).filter(([k, v]) => v)
-    ) as TextAttributes;
-    return attributes;
-  };
+  private _attributeService: VirgoAttributeService<TextAttributes> =
+    new VirgoAttributeService<TextAttributes>(this);
 
   private _renderDeltas = async () => {
     assertExists(this._rootElement);
@@ -299,8 +276,8 @@ export class VEditor<
         chunk.forEach(delta => {
           const element = renderElement(
             delta,
-            this._parseSchema,
-            this._attributesRenderer
+            this._attributeService.normalizeAttributes,
+            this._attributeService.attributesRenderer
           );
 
           elementTs.push(element);
@@ -356,11 +333,23 @@ export class VEditor<
     return this._rangeService;
   }
 
-  get marks() {
-    return this._marks;
+  get attributeService() {
+    return this._attributeService;
   }
 
-  // Range API exposed from service
+  // Expose attribute service API
+  get marks() {
+    return this._attributeService.marks;
+  }
+  setAttributesSchema = this._attributeService.setAttributesSchema;
+  setAttributesRenderer = this._attributeService.setAttributesRenderer;
+  setMarks = this._attributeService.setMarks;
+  resetMarks = this._attributeService.resetMarks;
+
+  // Expose event service API
+  bindHandlers = this._eventService.bindHandlers;
+
+  // Expose range service API
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
   getVRange = this.rangeService.getVRange;
@@ -395,9 +384,9 @@ export class VEditor<
     // we can change default render to pure for making `VEditor` to be a pure string render,
     // you can change schema and renderer again after construction
     if (options.defaultMode === 'pure') {
-      this._attributesRenderer = delta => {
+      this._attributeService.setAttributesRenderer(delta => {
         return html`<span><v-text .str=${delta.insert}></v-text></span>`;
-      };
+      });
     }
 
     this._yText = yText;
@@ -412,18 +401,6 @@ export class VEditor<
 
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
   }
-
-  setAttributesSchema = (
-    schema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>
-  ) => {
-    this._attributesSchema = schema;
-  };
-
-  setAttributesRenderer = (renderer: AttributesRenderer<TextAttributes>) => {
-    this._attributesRenderer = renderer;
-  };
-
-  bindHandlers = this._eventService.bindHandlers;
 
   mount(rootElement: HTMLElement) {
     this._rootElement = rootElement;
@@ -630,52 +607,6 @@ export class VEditor<
     return result;
   }
 
-  getFormat(vRange: VRange, loose = false): TextAttributes {
-    const deltas = this.getDeltasByVRange(vRange).filter(
-      ([delta, position]) =>
-        position.index + position.length > vRange.index &&
-        position.index <= vRange.index + vRange.length
-    );
-    const maybeAttributesArray = deltas.map(([delta]) => delta.attributes);
-    if (loose) {
-      return maybeAttributesArray.reduce(
-        (acc, cur) => ({ ...acc, ...cur }),
-        {}
-      ) as TextAttributes;
-    }
-    if (
-      !maybeAttributesArray.length ||
-      // some text does not have any attributes
-      maybeAttributesArray.some(attributes => !attributes)
-    ) {
-      return {} as TextAttributes;
-    }
-    const attributesArray = maybeAttributesArray as TextAttributes[];
-    return attributesArray.reduce((acc, cur) => {
-      const newFormat = {} as TextAttributes;
-      for (const key in acc) {
-        const typedKey = key as keyof TextAttributes;
-        // If the given range contains multiple different formats
-        // such as links with different values,
-        // we will treat it as having no format
-        if (acc[typedKey] === cur[typedKey]) {
-          // This cast is secure because we have checked that the value of the key is the same.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          newFormat[typedKey] = acc[typedKey] as any;
-        }
-      }
-      return newFormat;
-    });
-  }
-
-  setMarks(marks: TextAttributes): void {
-    this._marks = marks;
-  }
-
-  resetMarks(): void {
-    this._marks = null;
-  }
-
   setReadonly(isReadonly: boolean): void {
     this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
     this._isReadonly = isReadonly;
@@ -706,10 +637,11 @@ export class VEditor<
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
-    if (this._marks) {
-      attributes = { ...attributes, ...this._marks };
+    if (this._attributeService.marks) {
+      attributes = { ...attributes, ...this._attributeService.marks };
     }
-    const normalizedAttributes = this._parseSchema(attributes);
+    const normalizedAttributes =
+      this._attributeService.normalizeAttributes(attributes);
 
     if (!text || !text.length) {
       throw new Error('text must not be empty');
