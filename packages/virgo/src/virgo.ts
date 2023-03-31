@@ -2,13 +2,13 @@ import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 import type { z, ZodTypeDef } from 'zod';
 
-import { VirgoLine } from './components/index.js';
+import type { VirgoLine } from './components/index.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
 import { VirgoEventService } from './services/index.js';
+import { VirgoRangeService } from './services/range.js';
 import type {
   AttributesRenderer,
   DeltaEntry,
@@ -25,7 +25,6 @@ import {
   deltaInsertsToChunks,
   findDocumentOrShadowRoot,
   getDefaultAttributeRenderer,
-  isSelectionBackwards,
   isVElement,
   isVLine,
   isVRoot,
@@ -254,7 +253,6 @@ export class VEditor<
 
   private readonly _yText: Y.Text;
   private _rootElement: HTMLElement | null = null;
-  private _vRange: VRange | null = null;
   private _isReadonly = false;
   private _marks: TextAttributes | null = null;
 
@@ -266,6 +264,9 @@ export class VEditor<
 
   private _eventService: VirgoEventService<TextAttributes> =
     new VirgoEventService<TextAttributes>(this);
+
+  private _rangeService: VirgoRangeService<TextAttributes> =
+    new VirgoRangeService<TextAttributes>(this);
 
   private _parseSchema = (textAttributes?: TextAttributes) => {
     if (!textAttributes) {
@@ -351,9 +352,20 @@ export class VEditor<
     return this._eventService;
   }
 
+  get rangeService() {
+    return this._rangeService;
+  }
+
   get marks() {
     return this._marks;
   }
+
+  // Range API exposed from service
+  toDomRange = this.rangeService.toDomRange;
+  toVRange = this.rangeService.toVRange;
+  getVRange = this.rangeService.getVRange;
+  setVRange = this.rangeService.setVRange;
+  syncVRange = this.rangeService.syncVRange;
 
   constructor(
     text: VEditor['yText'] | string,
@@ -384,10 +396,7 @@ export class VEditor<
     // you can change schema and renderer again after construction
     if (options.defaultMode === 'pure') {
       this._attributesRenderer = delta => {
-        const style = styleMap({ 'white-space': 'pre-wrap' });
-        return html`<span style=${style}
-          ><v-text .str=${delta.insert}></v-text
-        ></span>`;
+        return html`<span><v-text .str=${delta.insert}></v-text></span>`;
       };
     }
 
@@ -401,7 +410,7 @@ export class VEditor<
       rangeUpdated: new Slot<Range>(),
     };
 
-    this.slots.vRangeUpdated.on(this._onVRangeUpdated);
+    this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
   }
 
   setAttributesSchema = (
@@ -621,10 +630,6 @@ export class VEditor<
     return result;
   }
 
-  getVRange(): VRange | null {
-    return this._vRange;
-  }
-
   getFormat(vRange: VRange, loose = false): TextAttributes {
     const deltas = this.getDeltasByVRange(vRange).filter(
       ([delta, position]) =>
@@ -683,15 +688,8 @@ export class VEditor<
   /**
    * the vRange is synced to the native selection asynchronically
    */
-  setVRange(vRange: VRange): void {
-    this.slots.vRangeUpdated.emit([vRange, 'other']);
-  }
-
-  /**
-   * the vRange is synced to the native selection asynchronically
-   */
   focusEnd(): void {
-    this.setVRange({
+    this.rangeService.setVRange({
       index: this.yText.length,
       length: 0,
     });
@@ -791,254 +789,6 @@ export class VEditor<
     });
   }
 
-  /**
-   * sync the dom selection from vRange for **this Editor**
-   */
-  syncVRange(): void {
-    if (this._vRange) {
-      this._applyVRange(this._vRange);
-    }
-  }
-
-  private _applyVRange = (vRange: VRange): void => {
-    const newRange = this.toDomRange(vRange);
-
-    if (!newRange) {
-      return;
-    }
-
-    const selectionRoot = findDocumentOrShadowRoot(this);
-    const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return;
-    }
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-
-    if (this.shouldScrollIntoView) {
-      let lineElement: HTMLElement | null = newRange.endContainer.parentElement;
-      while (!(lineElement instanceof VirgoLine)) {
-        lineElement = lineElement?.parentElement ?? null;
-      }
-      lineElement?.scrollIntoView({
-        block: 'nearest',
-      });
-    }
-
-    this.slots.rangeUpdated.emit(newRange);
-  };
-
-  /**
-   * calculate the dom selection from vRange for **this Editor**
-   */
-  toDomRange(vRange: VRange): Range | null {
-    assertExists(this._rootElement);
-    const lineElements = Array.from(
-      this._rootElement.querySelectorAll('v-line')
-    );
-
-    // calculate anchorNode and focusNode
-    let anchorText: Text | null = null;
-    let focusText: Text | null = null;
-    let anchorOffset = 0;
-    let focusOffset = 0;
-    let index = 0;
-
-    for (let i = 0; i < lineElements.length; i++) {
-      if (anchorText && focusText) {
-        break;
-      }
-
-      const texts = VEditor.getTextNodesFromElement(lineElements[i]);
-      for (const text of texts) {
-        const textLength = calculateTextLength(text);
-
-        if (!anchorText && index + textLength >= vRange.index) {
-          anchorText = text;
-          anchorOffset = vRange.index - index;
-        }
-        if (!focusText && index + textLength >= vRange.index + vRange.length) {
-          focusText = text;
-          focusOffset = vRange.index + vRange.length - index;
-        }
-
-        if (anchorText && focusText) {
-          break;
-        }
-
-        index += textLength;
-      }
-
-      // the one because of the line break
-      index += 1;
-    }
-
-    if (!anchorText || !focusText) {
-      return null;
-    }
-
-    const range = document.createRange();
-    range.setStart(anchorText, anchorOffset);
-    range.setEnd(focusText, focusOffset);
-
-    return range;
-  }
-
-  /**
-   * calculate the vRange from dom selection for **this Editor**
-   * there are three cases when the vRange of this Editor is not null:
-   * (In the following, "|" mean anchor and focus, each line is a separate Editor)
-   * 1. anchor and focus are in this Editor
-   *    aaaaaa
-   *    b|bbbb|b
-   *    cccccc
-   *    the vRange of second Editor is {index: 1, length: 4}, the others are null
-   * 2. anchor and focus one in this Editor, one in another Editor
-   *    aaa|aaa    aaaaaa
-   *    bbbbb|b or bbbbb|b
-   *    cccccc     cc|cccc
-   *    2.1
-   *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
-   *        the third is null
-   *    2.2
-   *        the vRange of first Editor is null, the second is {index: 5, length: 1},
-   *        the third is {index: 0, length: 2}
-   * 3. anchor and focus are in another Editor
-   *    aa|aaaa
-   *    bbbbbb
-   *    cccc|cc
-   *    the vRange of first Editor is {index: 2, length: 4},
-   *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
-   */
-  toVRange(selection: Selection): VRange | null {
-    assertExists(this._rootElement);
-    const root = this._rootElement;
-
-    const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
-    if (!anchorNode || !focusNode) {
-      return null;
-    }
-
-    const anchorTextPoint = VEditor.nativePointToTextPoint(
-      anchorNode,
-      anchorOffset
-    );
-    const focusTextPoint = VEditor.nativePointToTextPoint(
-      focusNode,
-      focusOffset
-    );
-
-    if (!anchorTextPoint || !focusTextPoint) {
-      return null;
-    }
-
-    const [anchorText, anchorTextOffset] = anchorTextPoint;
-    const [focusText, focusTextOffset] = focusTextPoint;
-
-    // case 1
-    if (root.contains(anchorText) && root.contains(focusText)) {
-      const anchorDomPoint = VEditor.textPointToDomPoint(
-        anchorText,
-        anchorTextOffset,
-        this._rootElement
-      );
-      const focusDomPoint = VEditor.textPointToDomPoint(
-        focusText,
-        focusTextOffset,
-        this._rootElement
-      );
-
-      if (!anchorDomPoint || !focusDomPoint) {
-        return null;
-      }
-
-      return {
-        index: Math.min(anchorDomPoint.index, focusDomPoint.index),
-        length: Math.abs(anchorDomPoint.index - focusDomPoint.index),
-      };
-    }
-
-    // case 2.1
-    if (!root.contains(anchorText) && root.contains(focusText)) {
-      if (isSelectionBackwards(selection)) {
-        const anchorDomPoint = VEditor.textPointToDomPoint(
-          anchorText,
-          anchorTextOffset,
-          this._rootElement
-        );
-
-        if (!anchorDomPoint) {
-          return null;
-        }
-
-        return {
-          index: anchorDomPoint.index,
-          length: this.yText.length - anchorDomPoint.index,
-        };
-      } else {
-        const focusDomPoint = VEditor.textPointToDomPoint(
-          focusText,
-          focusTextOffset,
-          this._rootElement
-        );
-
-        if (!focusDomPoint) {
-          return null;
-        }
-
-        return {
-          index: 0,
-          length: focusDomPoint.index,
-        };
-      }
-    }
-
-    // case 2.2
-    if (root.contains(anchorText) && !root.contains(focusText)) {
-      if (isSelectionBackwards(selection)) {
-        const focusDomPoint = VEditor.textPointToDomPoint(
-          focusText,
-          focusTextOffset,
-          this._rootElement
-        );
-
-        if (!focusDomPoint) {
-          return null;
-        }
-
-        return {
-          index: 0,
-          length: focusDomPoint.index,
-        };
-      } else {
-        const anchorDomPoint = VEditor.textPointToDomPoint(
-          anchorText,
-          anchorTextOffset,
-          this._rootElement
-        );
-
-        if (!anchorDomPoint) {
-          return null;
-        }
-
-        return {
-          index: anchorDomPoint.index,
-          length: this.yText.length - anchorDomPoint.index,
-        };
-      }
-    }
-
-    // case 3
-    if (!root.contains(anchorText) && !root.contains(focusText)) {
-      return {
-        index: 0,
-        length: this.yText.length,
-      };
-    }
-
-    return null;
-  }
-
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
@@ -1051,25 +801,6 @@ export class VEditor<
 
       this._renderDeltas();
     });
-  };
-
-  private _onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
-    this._vRange = newVRange;
-
-    if (origin === 'native') {
-      return;
-    }
-
-    const fn = () => {
-      if (newVRange) {
-        // when using input method _vRange will return to the starting point,
-        // so we need to re-sync
-        this._applyVRange(newVRange);
-      }
-    };
-
-    // updates in lit are performed asynchronously
-    requestAnimationFrame(fn);
   };
 
   private _transact(fn: () => void): void {
