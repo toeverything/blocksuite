@@ -454,7 +454,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
           <rich-text
             .host=${this.host}
             .model=${this.model}
-            .codeBlockGetHighlighterOptions=${() => ({
+            .codeBlockHighlighterOptionsGetter=${() => ({
               lang: this.model.language.toLowerCase() as Lang,
               highlighter: this._highlighter,
             })}
