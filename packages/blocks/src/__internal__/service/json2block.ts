@@ -51,7 +51,7 @@ export async function json2block(
       shouldSplitBlock &&
         (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
 
-      const [id] = addBlocks(
+      const [id] = await addBlocks(
         page,
         pastedBlocks,
         parent,
@@ -88,7 +88,7 @@ export async function json2block(
     parent.children.indexOf(focusedBlockModel) +
     (shouldMergeFirstBlock ? 1 : 0);
 
-  const ids = addBlocks(
+  const ids = await addBlocks(
     page,
     pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
     parent,
@@ -132,7 +132,7 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
 }
 
 // TODO: used old code, need optimize
-export function addBlocks(
+export async function addBlocks(
   page: Page,
   blocks: OpenBlockInfo[],
   parent: BaseBlockModel,
@@ -160,13 +160,11 @@ export function addBlocks(
     assertExists(model);
 
     // use `getServiceOrRegister` to avoid `embed` test fail
-    const service = getServiceOrRegister(flavour);
-    if (!(service instanceof Promise)) {
-      service.onBlockPasted(model, {
-        columnIds: block.databaseProps?.columnIds,
-        columnSchemaIds: block.databaseProps?.columnSchemaIds,
-      });
-    }
+    const service = await getServiceOrRegister(flavour);
+    service.onBlockPasted(model, {
+      columnIds: block.databaseProps?.columnIds,
+      columnSchemaIds: block.databaseProps?.columnSchemaIds,
+    });
 
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);

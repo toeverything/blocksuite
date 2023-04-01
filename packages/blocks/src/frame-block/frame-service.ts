@@ -9,6 +9,6 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: OpenBlockInfo[]
   ) {
-    addBlocks(focusedBlockModel.page, pastedBlocks, focusedBlockModel, 0);
+    await addBlocks(focusedBlockModel.page, pastedBlocks, focusedBlockModel, 0);
   }
 }
