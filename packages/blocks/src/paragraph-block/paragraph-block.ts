@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
 import { BlockHubIcon20 } from '@blocksuite/global/config';

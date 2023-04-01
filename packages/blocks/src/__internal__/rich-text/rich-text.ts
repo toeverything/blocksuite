@@ -64,7 +64,7 @@ export class RichText extends NonShadowLitElement {
       'Failed to render rich-text! textSchema not found'
     );
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
-    this._vEditor.setAttributeRenderer(textSchema.textRenderer);
+    this._vEditor.setAttributeRenderer(textSchema.textRenderer(this.host));
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(

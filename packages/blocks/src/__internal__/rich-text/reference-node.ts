@@ -10,6 +10,7 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
+  type BlockHost,
   getEditorContainer,
   getModelByElement,
   NonShadowLitElement,
@@ -54,6 +55,9 @@ export class AffineReference extends NonShadowLitElement {
     insert: ZERO_WIDTH_SPACE,
     attributes: {},
   };
+
+  @property()
+  host!: BlockHost;
 
   @state()
   private _refMeta?: PageMeta;
