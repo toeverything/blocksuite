@@ -6,11 +6,14 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusRichTextEnd,
   initEmptyParagraphState,
   pressEnter,
+  pressShiftEnter,
   SHORT_KEY,
   switchReadonly,
   type,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -279,4 +282,39 @@ test('should keyboard work in link popover', async ({ page }) => {
   await assertKeyboardWorkInInput(page, editTextInput);
   const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
   await assertKeyboardWorkInInput(page, editLinkInput);
+});
+
+test('link bar should not be appear when the range is collapsed', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  await pressCreateLinkShortCut(page);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).not.toBeVisible();
+
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+
+  await focusRichTextEnd(page);
+  await pressShiftEnter(page);
+  await waitNextFrame(page);
+  await type(page, 'bbb');
+  await dragBetweenIndices(page, [0, 1], [0, 5]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+
+  await focusRichTextEnd(page, 0);
+  await pressEnter(page);
+  // create auto line-break in span element
+  await type(page, 'd'.repeat(67));
+  await page.mouse.click(1, 1);
+  await waitNextFrame(page);
+  await dragBetweenIndices(page, [1, 1], [1, 66]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
 });

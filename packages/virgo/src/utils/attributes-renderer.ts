@@ -43,7 +43,7 @@ export const getDefaultAttributeRenderer =
   delta => {
     const style = delta.attributes
       ? virgoTextStyles(delta.attributes)
-      : styleMap({ 'white-space': 'pre-wrap' });
+      : styleMap({});
     return html`<span style=${style}
       ><v-text .str=${delta.insert}></v-text
     ></span>`;
