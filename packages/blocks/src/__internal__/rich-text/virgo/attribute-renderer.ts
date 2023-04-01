@@ -1,9 +1,9 @@
-import type { AttributesRenderer } from '@blocksuite/virgo';
+import type { AttributeRenderer } from '@blocksuite/virgo';
 import { html } from 'lit';
 
 import type { AffineTextAttributes } from './types.js';
 
-export const attributesRenderer: AttributesRenderer<
+export const attributeRenderer: AttributeRenderer<
   AffineTextAttributes
 > = delta => {
   if (delta?.attributes?.link) {

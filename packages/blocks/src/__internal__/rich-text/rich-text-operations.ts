@@ -14,6 +14,7 @@ import {
 } from '../utils/common-operations.js';
 import {
   getModelByElement,
+  getNextBlock,
   getPreviousBlock,
   getVirgoByModel,
 } from '../utils/query.js';
@@ -377,6 +378,19 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
+  function handleListItem(
+    page: Page,
+    model: ExtendedModel,
+    previousSibling: ExtendedModel | null
+  ) {
+    if (previousSibling) {
+      page.deleteBlock(model);
+      focusBlockByModel(previousSibling);
+      return true;
+    }
+    return false;
+  }
+
   function handleDatabaseSibling(
     page: Page,
     model: ExtendedModel,
@@ -399,7 +413,8 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   function handleParagraphOrListSibling(
     page: Page,
     model: ExtendedModel,
-    previousSibling: ExtendedModel | null
+    previousSibling: ExtendedModel | null,
+    parent: ExtendedModel
   ) {
     if (
       !previousSibling ||
@@ -414,7 +429,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     const preTextLength = previousSibling.text?.length || 0;
     model.text?.length && previousSibling.text?.join(model.text as Text);
     page.deleteBlock(model, {
-      bringChildrenTo: previousSibling,
+      bringChildrenTo: parent,
     });
     const vEditor = getVirgoByModel(previousSibling);
     vEditor?.setVRange({
@@ -473,18 +488,21 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   }
 
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:frame'] as const)) {
-    const previousSibling = getPreviousBlock(model);
-    const previousSiblingParent = previousSibling
-      ? page.getParent(previousSibling)
-      : null;
-
+  if (!parent) return false;
+  const previousSibling = getPreviousBlock(model);
+  const nextSibling = getNextBlock(model);
+  const previousSiblingParent = previousSibling
+    ? page.getParent(previousSibling)
+    : null;
+  if (matchFlavours(parent, ['affine:frame'])) {
     return (
       handleDatabaseSibling(page, model, previousSiblingParent) ||
-      handleParagraphOrListSibling(page, model, previousSibling) ||
+      handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
       handleNoPreviousSibling(page, model, previousSibling)
     );
+  } else if (nextSibling && matchFlavours(nextSibling, ['affine:list'])) {
+    return handleListItem(page, model, previousSibling);
   }
 
   return false;

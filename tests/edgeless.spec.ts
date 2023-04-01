@@ -1050,3 +1050,25 @@ test('when the selection is always a frame, it should remain in an active state'
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
 });
+
+test('format quick bar should show up when double-clicking on text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+
+  await page.mouse.dblclick(CENTER_X, CENTER_Y);
+  await waitNextFrame(page);
+
+  await page
+    .locator('.affine-rich-text')
+    .nth(1)
+    .dblclick({
+      position: { x: 10, y: 10 },
+    });
+  await page.waitForTimeout(200);
+  const formatQuickBar = page.locator('.format-quick-bar');
+  await expect(formatQuickBar).toBeVisible();
+});
