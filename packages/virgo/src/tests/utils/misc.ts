@@ -1,7 +1,7 @@
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
 
-const getDefaultPlaygroundURL = () => new URL(`http://localhost:5173/`);
+const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
 export async function type(page: Page, content: string) {
   await page.keyboard.type(content, { delay: 50 });
@@ -12,7 +12,7 @@ export async function press(page: Page, content: string) {
 }
 
 export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', getDefaultPlaygroundURL());
+  const url = new URL('examples/virgo/index.html', defaultPlaygroundURL);
   await page.goto(url.toString());
 }
 

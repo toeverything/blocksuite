@@ -16,10 +16,10 @@ import {
   type,
 } from './keyboard.js';
 
-export const getDefaultPlaygroundURL = () => new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL().toString();
+const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.virgo-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {

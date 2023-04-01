@@ -315,7 +315,7 @@ export class VEditor<
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
       .forEach(([delta, deltaVRange]) => {
-        const targetVRange = this._rangeService.mergeTwoRanges(
+        const targetVRange = this._rangeService.mergeRanges(
           vRange,
           deltaVRange
         );

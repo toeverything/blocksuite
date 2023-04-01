@@ -58,22 +58,22 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
           position.index + position.length > vRange.index &&
           position.index <= vRange.index + vRange.length
       );
-    const maybeAttributesArray = deltas.map(([delta]) => delta.attributes);
+    const maybeAttributesList = deltas.map(([delta]) => delta.attributes);
     if (loose) {
-      return maybeAttributesArray.reduce(
+      return maybeAttributesList.reduce(
         (acc, cur) => ({ ...acc, ...cur }),
         {}
       ) as TextAttributes;
     }
     if (
-      !maybeAttributesArray.length ||
-      // some text does not have any attributes
-      maybeAttributesArray.some(attributes => !attributes)
+      !maybeAttributesList.length ||
+      // some text does not have any attribute
+      maybeAttributesList.some(attributes => !attributes)
     ) {
       return {} as TextAttributes;
     }
-    const attributesArray = maybeAttributesArray as TextAttributes[];
-    return attributesArray.reduce((acc, cur) => {
+    const attributesList = maybeAttributesList as TextAttributes[];
+    return attributesList.reduce((acc, cur) => {
       const newFormat = {} as TextAttributes;
       for (const key in acc) {
         const typedKey = key as keyof TextAttributes;

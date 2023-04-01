@@ -117,7 +117,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return toVirgoRange(selection, rootElement, yText);
   };
 
-  mergeTwoRanges = (range1: VRange, range2: VRange): VRange => {
+  mergeRanges = (range1: VRange, range2: VRange): VRange => {
     return {
       index: Math.max(range1.index, range2.index),
       length:
