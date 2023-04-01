@@ -27,7 +27,7 @@ export const enum SelectMode {
   Single = 'single',
 }
 
-type SelectProperty = {
+export type SelectProperty = {
   color: string;
   value: string;
 };
