@@ -6,13 +6,24 @@ import type { AffineTextAttributes } from './types.js';
 export const attributeRenderer: AttributeRenderer<
   AffineTextAttributes
 > = delta => {
-  if (delta?.attributes?.link) {
+  const defaultTemplate = html`<affine-text .delta=${delta}></affine-text>`;
+  if (!delta.attributes) {
+    return defaultTemplate;
+  }
+  const attributes = delta.attributes;
+
+  if (attributes.link) {
+    if (attributes.reference) {
+      console.error(
+        'Invalid attributes: link and reference cannot be used together',
+        delta
+      );
+    }
     return html`<affine-link .delta=${delta}></affine-link>`;
   }
-
-  if (delta?.attributes?.reference) {
+  if (attributes.reference) {
     return html`<affine-reference .delta=${delta}></affine-reference>`;
   }
 
-  return html`<affine-text .delta=${delta}></affine-text>`;
+  return defaultTemplate;
 };
