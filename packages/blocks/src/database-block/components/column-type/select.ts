@@ -1,4 +1,5 @@
 import {
+  DatabaseSearchClose,
   DeleteIcon,
   MoreHorizontalIcon,
   PenIcon,
@@ -192,6 +193,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
     .select-option-container {
       padding: 8px;
+      color: rgba(0, 0, 0, 0.9);
     }
     .select-option-container-header {
       padding: 8px 0px;
@@ -203,8 +205,13 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       padding: 2px 10px;
       gap: 10px;
       height: 28px;
-      background: #f3f0ff;
       border-radius: 4px;
+      color: rgba(0, 0, 0, 0.9);
+      background: #f3f0ff;
+    }
+    .select-selected > .close-icon {
+      display: flex;
+      align-items: center;
     }
 
     .select-option-new {
@@ -448,8 +455,10 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
           ${selectedValue.map(value => {
             return html`<span class="select-selected">
               ${value}
-              <span @click=${() => this._onDeleteSelected(selectedValue, value)}
-                >x</span
+              <span
+                class="close-icon"
+                @click=${() => this._onDeleteSelected(selectedValue, value)}
+                >${DatabaseSearchClose}</span
               >
             </span>`;
           })}
