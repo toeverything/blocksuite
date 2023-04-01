@@ -277,7 +277,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   };
 
   private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.setColumnSchema({
+    this.targetModel.page.updateColumnSchema({
       ...column,
       name,
     });
@@ -845,7 +845,7 @@ export class DatabaseBlockComponent
       },
       property: renderer.propertyCreator(),
     };
-    const id = this.model.page.setColumnSchema(schema);
+    const id = this.model.page.updateColumnSchema(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {

@@ -133,7 +133,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
   type Option = 'Done' | 'TODO' | 'WIP';
   const selection = ['Done', 'TODO', 'WIP'] as Option[];
-  const col1 = page.setColumnSchema({
+  const col1 = page.updateColumnSchema({
     internalProperty: {
       color: '#ff0000',
       width: 200,
@@ -145,7 +145,7 @@ export const database: InitFn = (workspace: Workspace) => {
     name: 'Number',
     type: 'number',
   });
-  const col2 = page.setColumnSchema({
+  const col2 = page.updateColumnSchema({
     internalProperty: {
       color: '#ff0000',
       width: 200,
@@ -157,7 +157,7 @@ export const database: InitFn = (workspace: Workspace) => {
     name: 'Single Select',
     type: 'select',
   });
-  const col3 = page.setColumnSchema({
+  const col3 = page.updateColumnSchema({
     internalProperty: {
       color: '#ff0000',
       width: 200,
@@ -191,21 +191,21 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
-  page.updateBlockColumn(p1, {
-    schemaId: col1,
+  page.updateColumn(p1, {
+    columnId: col1,
     value: 0.1,
   });
 
-  page.updateBlockColumn(p2, {
-    schemaId: col2,
+  page.updateColumn(p2, {
+    columnId: col2,
     value: ['TODO'],
   });
 
   const text = new page.YText();
   text.insert(0, '123');
   text.insert(0, 'code');
-  page.updateBlockColumn(p2, {
-    schemaId: col3,
+  page.updateColumn(p2, {
+    columnId: col3,
     value: text,
   });
 
