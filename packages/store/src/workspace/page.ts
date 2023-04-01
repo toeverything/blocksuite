@@ -663,6 +663,36 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
+  updateSelectedColumn(
+    rowId: string,
+    columnId: string,
+    oldValue: string,
+    value?: string
+  ) {
+    this.transact(() => {
+      const yColumns = this.yColumns.get(rowId);
+      assertExists(yColumns);
+      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
+      if (!cell) return;
+
+      const selected = cell.get('value') as string[];
+      let newSelected = [...selected];
+      if (value !== undefined) {
+        // rename tag
+        const index = newSelected.indexOf(oldValue);
+        newSelected[index] = value;
+      } else {
+        // delete tag
+        newSelected = selected.filter(item => item !== oldValue);
+      }
+
+      const yColumnMap = new Y.Map();
+      yColumnMap.set('schemaId', columnId);
+      yColumnMap.set('value', newSelected);
+      yColumns.set(columnId, yColumnMap);
+    });
+  }
+
   copyColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
     this.transact(() => {
       this.yColumns.forEach(column => {
