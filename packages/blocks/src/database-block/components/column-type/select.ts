@@ -5,6 +5,7 @@ import {
   PenIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { SelectProperty } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo/virgo';
 import { createPopper } from '@popperjs/core';
@@ -20,7 +21,7 @@ import {
   defineColumnSchemaRenderer,
 } from '../../register.js';
 import type { SelectTagAction, SelectTagActionName } from '../../types.js';
-import { onClickOutside } from '../../utils.js';
+import { getTagColor, onClickOutside } from '../../utils.js';
 import { actionStyles, isDivider } from '../edit-column-popup.js';
 
 export const enum SelectMode {
@@ -50,15 +51,13 @@ const INPUT_MAX_LENGTH = 10;
 @customElement('affine-database-select-option-text')
 class SelectOptionText extends LitElement {
   static styles = css`
-    :host {
+    .select-option-text {
+      display: inline-block;
+      min-width: 2px;
       height: 100%;
       padding: 2px 10px;
       background: #fce8ff;
       border-radius: 4px;
-    }
-    .select-option-text {
-      display: inline-block;
-      min-width: 2px;
     }
     .select-option-text:focus {
       outline: none;
@@ -69,7 +68,7 @@ class SelectOptionText extends LitElement {
   databaseModel!: DatabaseBlockModel;
 
   @property()
-  selectText!: string;
+  select!: SelectProperty;
 
   @property()
   editing!: boolean;
@@ -91,7 +90,7 @@ class SelectOptionText extends LitElement {
   }
 
   firstUpdated() {
-    this._vEditor = new VEditor(this.selectText, {
+    this._vEditor = new VEditor(this.select.value, {
       defaultMode: 'pure',
     });
     this._vEditor.mount(this._container);
@@ -130,12 +129,15 @@ class SelectOptionText extends LitElement {
   };
 
   render() {
-    return html`<div class="select-option-text"></div>`;
+    const style = styleMap({
+      backgroundColor: this.select.color,
+    });
+    return html`<div class="select-option-text" style=${style}></div>`;
   }
 }
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellLitElement<string[]> {
+class SelectCell extends DatabaseCellLitElement<SelectProperty[]> {
   static styles = css`
     :host {
       display: flex;
@@ -158,13 +160,13 @@ class SelectCell extends DatabaseCellLitElement<string[]> {
       height: 28px;
       padding: 2px 10px;
       border-radius: 4px;
-      background: #f3f0ff;
+      background: #f5f5f5;
     }
   `;
 
   static tag = literal`affine-database-select-cell`;
   override render() {
-    const values = (this.column?.value ?? []) as string[];
+    const values = (this.column?.value ?? []) as SelectProperty[];
     return html`
       <div
         class="affine-database-select-cell-container"
@@ -173,7 +175,12 @@ class SelectCell extends DatabaseCellLitElement<string[]> {
         })}
       >
         ${values.map(item => {
-          return html`<span class="select-selected">${item}</span>`;
+          const style = styleMap({
+            backgroundColor: item.color,
+          });
+          return html`<span class="select-selected" style=${style}
+            >${item.value}</span
+          >`;
         })}
       </div>
     `;
@@ -238,8 +245,8 @@ class SelectAction extends LitElement {
   }
 }
 @customElement('affine-database-select-cell-editing')
-class SelectCellEditing extends DatabaseCellLitElement<string[]> {
-  value: string | undefined = undefined;
+class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
+  value: SelectProperty | undefined = undefined;
 
   static styles = css`
     :host {
@@ -291,7 +298,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       padding: 2px 10px;
       gap: 10px;
       height: 28px;
-      background: #f3f0ff;
+      background: #f5f5f5;
       border-radius: 4px;
     }
 
@@ -341,6 +348,15 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     .select-option-text-container {
       flex: 1;
     }
+    .select-option-text {
+      display: none;
+      display: inline-block;
+      height: 100%;
+      padding: 2px 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      outline: none;
+    }
     .select-option-icon {
       display: none;
       justify-content: center;
@@ -371,6 +387,9 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   @property()
   mode: SelectMode = SelectMode.Single;
 
+  @query('.select-input')
+  private _selectInput!: HTMLInputElement;
+
   @state()
   private _inputValue = '';
 
@@ -379,6 +398,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
 
   @query('.select-option-container')
   private _selectOptionContainer!: HTMLDivElement;
+  private _selectColor: string | undefined = undefined;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
@@ -387,6 +407,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   protected firstUpdated() {
     // this.style.width = `${this.columnSchema.internalProperty.width}px`;
     this.style.width = `${345}px`;
+    this._selectInput.focus();
   }
 
   connectedCallback() {
@@ -407,7 +428,10 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     );
   }
 
-  private _onDeleteSelected = (selectedValue: string[], value: string) => {
+  private _onDeleteSelected = (
+    selectedValue: SelectProperty[],
+    value: SelectProperty
+  ) => {
     const filteredValue = selectedValue.filter(item => item !== value);
     this.rowHost.setValue(filteredValue);
   };
@@ -415,15 +439,24 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
   private _onSelectSearchInput = (event: KeyboardEvent) => {
     const value = (event.target as HTMLInputElement).value;
     this._inputValue = value;
+    if (!this._selectColor) {
+      this._selectColor = getTagColor();
+    }
   };
 
-  private _onSelectOrAdd = (event: KeyboardEvent, selectedValue: string[]) => {
+  private _onSelectOrAdd = (
+    event: KeyboardEvent,
+    selectedValue: SelectProperty[]
+  ) => {
     if (event.key === 'Enter' && this._inputValue.trim() !== '') {
       this._onAddSelection(selectedValue);
     }
   };
 
-  private _onSelect = (selectedValue: string[], select: string) => {
+  private _onSelect = (
+    selectedValue: SelectProperty[],
+    select: SelectProperty
+  ) => {
     // when editing, do not select
     if (this._editingIndex !== -1) return;
     this.value = select;
@@ -441,25 +474,31 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
   };
 
-  private _onAddSelection = (selectedValue: string[]) => {
+  private _onAddSelection = (selectedValue: SelectProperty[]) => {
     let value = this._inputValue.trim();
     if (value === '') return;
     if (value.length > INPUT_MAX_LENGTH) {
       value = value.slice(0, INPUT_MAX_LENGTH);
     }
 
+    const tagColor = this._selectColor ?? getTagColor();
+    this._selectColor = undefined;
+    const newSelect = { value, color: tagColor };
+
     this.rowHost.updateColumnProperty(property => {
-      const selection = property.selection as string[];
+      const selection = property.selection as SelectProperty[];
       return {
         ...property,
         selection:
-          selection.findIndex(select => select === value) === -1
-            ? [...selection, value]
+          selection.findIndex(select => select.value === value) === -1
+            ? [...selection, newSelect]
             : selection,
       };
     });
 
-    const newValue = this.isSingleMode ? [value] : [...selectedValue, value];
+    const newValue = this.isSingleMode
+      ? [newSelect]
+      : [...selectedValue, newSelect];
     this.rowHost.setValue(newValue);
     this.rowHost.setEditing(false);
 
@@ -489,15 +528,17 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     }
 
     if (type === 'delete') {
-      const selection = [...(this.columnSchema.property.selection as string[])];
+      const selection = [
+        ...(this.columnSchema.property.selection as SelectProperty[]),
+      ];
       this.databaseModel.page.updateColumnSchema({
         ...this.columnSchema,
         property: {
           selection: selection.filter((_, i) => i !== index),
         },
       });
-      const value = selection[index];
-      this.databaseModel.page.deleteColumnValue(this.columnSchema.id, value);
+      const select = selection[index];
+      this.databaseModel.page.deleteColumnValue(this.columnSchema.id, select);
       return;
     }
   };
@@ -542,10 +583,12 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
       .querySelectorAll('affine-database-select-option-text')
       .item(index) as SelectOptionText;
 
-    const value = selectOption.getSelectionValue();
-    const selection = [...(this.columnSchema.property.selection as string[])];
-    const oldValue = selection[index];
-    selection[index] = value;
+    const selection = [
+      ...(this.columnSchema.property.selection as SelectProperty[]),
+    ];
+    const oldSelect = selection[index];
+    const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
+    selection[index] = newSelect;
     this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
       property: {
@@ -554,37 +597,42 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     });
     this.databaseModel.page.renameColumnValue(
       this.columnSchema.id,
-      oldValue,
-      value
+      oldSelect,
+      newSelect
     );
 
     this._editingIndex = -1;
   };
 
   override render() {
-    const selection = this.columnSchema.property.selection as string[];
+    const selection = this.columnSchema.property.selection as SelectProperty[];
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {
         return true;
       }
       return (
-        item.toLocaleLowerCase().indexOf(this._inputValue.toLocaleLowerCase()) >
-        -1
+        item.value
+          .toLocaleLowerCase()
+          .indexOf(this._inputValue.toLocaleLowerCase()) > -1
       );
     });
 
-    const selectedValue = (this.column?.value ?? []) as string[];
+    const selectedTag = (this.column?.value ?? []) as SelectProperty[];
     const showCreateTip =
       this._inputValue &&
-      filteredSelection.findIndex(item => item === this._inputValue) === -1;
+      filteredSelection.findIndex(item => item.value === this._inputValue) ===
+        -1;
 
     return html`
       <div class="affine-database-select-cell-select">
         <div class="select-input-container">
-          ${selectedValue.map(value => {
-            return html`<span class="select-selected">
-              ${value}
-              <span @click=${() => this._onDeleteSelected(selectedValue, value)}
+          ${selectedTag.map(item => {
+            const style = styleMap({
+              backgroundColor: item.color,
+            });
+            return html`<span class="select-selected" style=${style}>
+              ${item.value}
+              <span @click=${() => this._onDeleteSelected(selectedTag, item)}
                 >x</span
               >
             </span>`;
@@ -595,7 +643,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
             maxlength=${INPUT_MAX_LENGTH}
             @input=${this._onSelectSearchInput}
             @keydown=${(event: KeyboardEvent) =>
-              this._onSelectOrAdd(event, selectedValue)}
+              this._onSelectOrAdd(event, selectedTag)}
           />
         </div>
         <div class="select-option-container">
@@ -608,7 +656,11 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                 @click=${this._onAddSelection}
               >
                 <div class="select-option-new-icon">Create ${PlusIcon}</div>
-                <span class="select-option-new-text">${this._inputValue}</span>
+                <span
+                  class="select-option-new-text"
+                  style=${styleMap({ backgroundColor: this._selectColor })}
+                  >${this._inputValue}</span
+                >
               </div>`
             : html``}
           ${repeat(
@@ -623,11 +675,11 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
                 <div class="select-option ${isEditing ? 'editing' : ''}">
                   <div
                     class="select-option-text-container"
-                    @click=${() => this._onSelect(selectedValue, select)}
+                    @click=${() => this._onSelect(selectedTag, select)}
                   >
                     <affine-database-select-option-text
                       .databaseModel=${this.databaseModel}
-                      .selectText=${select}
+                      .select=${select}
                       .editing=${index === this._editingIndex}
                     ></affine-database-select-option-text>
                   </div>
@@ -645,16 +697,18 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
 }
 
 @customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellLitElement<string[]> {
+class SelectColumnPropertyEditing extends DatabaseCellLitElement<
+  SelectProperty[]
+> {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
 export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
   'select',
   () => ({
-    selection: [] as string[],
+    selection: [] as SelectProperty[],
   }),
-  () => null as string[] | null,
+  () => null as SelectProperty[] | null,
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,

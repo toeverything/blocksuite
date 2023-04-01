@@ -1,4 +1,8 @@
-import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import type {
+  BlockColumn,
+  ColumnSchema,
+  SelectProperty,
+} from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -740,16 +744,22 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  renameColumnValue(columnId: string, oldValue: string, value: string) {
+  renameColumnValue(
+    columnId: string,
+    oldValue: SelectProperty,
+    newValue: SelectProperty
+  ) {
     this.transact(() => {
       this.yColumns.forEach(yColumn => {
-        const cell = yColumn.get(columnId) as Y.Map<string[]> | undefined;
+        const cell = yColumn.get(columnId) as
+          | Y.Map<SelectProperty[]>
+          | undefined;
         if (!cell) return;
 
-        const selected = cell.get('value') as string[];
+        const selected = cell.get('value') as SelectProperty[];
         const newSelected = [...selected];
         const index = newSelected.indexOf(oldValue);
-        newSelected[index] = value;
+        newSelected[index] = newValue;
 
         const yColumnMap = new Y.Map();
         yColumnMap.set('schemaId', columnId);
@@ -759,15 +769,17 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  deleteColumnValue(columnId: string, value: string) {
+  deleteColumnValue(columnId: string, newValue: SelectProperty) {
     this.transact(() => {
       this.yColumns.forEach(yColumn => {
-        const cell = yColumn.get(columnId) as Y.Map<string[]> | undefined;
+        const cell = yColumn.get(columnId) as
+          | Y.Map<SelectProperty[]>
+          | undefined;
         if (!cell) return;
 
-        const selected = cell.get('value') as string[];
+        const selected = cell.get('value') as SelectProperty[];
         let newSelected = [...selected];
-        newSelected = selected.filter(item => item !== value);
+        newSelected = selected.filter(item => item.value !== newValue.value);
 
         const yColumnMap = new Y.Map();
         yColumnMap.set('schemaId', columnId);
