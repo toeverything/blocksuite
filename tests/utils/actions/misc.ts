@@ -366,6 +366,15 @@ export async function focusRichText(page: Page, i = 0) {
   await locator.click();
 }
 
+export async function focusRichTextEnd(page: Page, i = 0) {
+  await page.evaluate(i => {
+    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+
+    richTexts[i].vEditor?.focusEnd();
+  }, i);
+  await waitNextFrame(page);
+}
+
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
   await type(page, '123');

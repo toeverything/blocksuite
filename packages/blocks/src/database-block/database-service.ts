@@ -32,7 +32,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
 
     // default column
-    const tagColumnId = page.setColumnSchema({
+    const tagColumnId = page.updateColumnSchema({
       internalProperty: {
         color: '#ff0000',
         width: 200,

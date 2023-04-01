@@ -33,8 +33,8 @@ export class DatabaseCellContainer
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
-        schemaId: this.columnSchema.id,
+      this.databaseModel.page.updateColumn(this.rowModel.id, {
+        columnId: this.columnSchema.id,
         value,
       });
     });
@@ -55,7 +55,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.columnSchema.property);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setColumnSchema({
+    this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
       property: newProperty,
     });
@@ -110,9 +110,9 @@ export class DatabaseCellContainer
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  protected render() {
+  render() {
     const renderer = getColumnSchemaRenderer(this.columnSchema.type);
-    const column = this.databaseModel.page.getBlockColumnBySchema(
+    const column = this.databaseModel.page.getColumn(
       this.rowModel,
       this.columnSchema
     );
