@@ -1,6 +1,6 @@
 import type { z, ZodTypeDef } from 'zod';
 
-import type { AttributesRenderer } from '../types.js';
+import type { AttributeRenderer } from '../types.js';
 import type { VRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import {
@@ -14,10 +14,10 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
 
   private _marks: TextAttributes | null = null;
 
-  private _attributesRenderer: AttributesRenderer<TextAttributes> =
+  private _attributeRenderer: AttributeRenderer<TextAttributes> =
     getDefaultAttributeRenderer<TextAttributes>();
 
-  private _attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
+  private _attributeSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
     baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
   constructor(editor: VEditor<TextAttributes>) {
@@ -28,8 +28,8 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     return this._marks;
   }
 
-  get attributesRenderer() {
-    return this._attributesRenderer;
+  get attributeRenderer() {
+    return this._attributeRenderer;
   }
 
   setMarks = (marks: TextAttributes): void => {
@@ -40,14 +40,14 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     this._marks = null;
   };
 
-  setAttributesSchema = (
+  setAttributeSchema = (
     schema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>
   ) => {
-    this._attributesSchema = schema;
+    this._attributeSchema = schema;
   };
 
-  setAttributesRenderer = (renderer: AttributesRenderer<TextAttributes>) => {
-    this._attributesRenderer = renderer;
+  setAttributeRenderer = (renderer: AttributeRenderer<TextAttributes>) => {
+    this._attributeRenderer = renderer;
   };
 
   getFormat = (vRange: VRange, loose = false): TextAttributes => {
@@ -94,14 +94,14 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     if (!textAttributes) {
       return undefined;
     }
-    const attributesResult = this._attributesSchema.safeParse(textAttributes);
-    if (!attributesResult.success) {
-      console.error(attributesResult.error);
+    const attributeResult = this._attributeSchema.safeParse(textAttributes);
+    if (!attributeResult.success) {
+      console.error(attributeResult.error);
       return undefined;
     }
     return Object.fromEntries(
       // filter out undefined values
-      Object.entries(attributesResult.data).filter(([k, v]) => v)
+      Object.entries(attributeResult.data).filter(([k, v]) => v)
     ) as TextAttributes;
   };
 }

@@ -11,7 +11,7 @@ import { NonShadowLitElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
-import { attributesRenderer } from './virgo/attributes-renderer.js';
+import { attributeRenderer } from './virgo/attribute-renderer.js';
 import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
@@ -47,7 +47,7 @@ export class RichText extends NonShadowLitElement {
   model!: BaseBlockModel;
 
   @property()
-  codeBlockGetHighlighterOptions?: () => {
+  codeBlockHighlighterOptionsGetter?: () => {
     lang: Lang;
     highlighter: Highlighter | null;
   };
@@ -64,14 +64,14 @@ export class RichText extends NonShadowLitElement {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
-    if (this.codeBlockGetHighlighterOptions) {
-      this._vEditor.setAttributesSchema(z.object({}));
-      this._vEditor.setAttributesRenderer(
-        getCodeLineRenderer(this.codeBlockGetHighlighterOptions)
+    if (this.codeBlockHighlighterOptionsGetter) {
+      this._vEditor.setAttributeSchema(z.object({}));
+      this._vEditor.setAttributeRenderer(
+        getCodeLineRenderer(this.codeBlockHighlighterOptionsGetter)
       );
     } else {
-      this._vEditor.setAttributesRenderer(attributesRenderer);
-      this._vEditor.setAttributesSchema(affineTextAttributes);
+      this._vEditor.setAttributeRenderer(attributeRenderer);
+      this._vEditor.setAttributeSchema(affineTextAttributes);
     }
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);

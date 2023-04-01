@@ -175,7 +175,7 @@ export class ToolBar extends NonShadowLitElement {
     this.vEditor = vEditor;
   }
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const boldButton = this.querySelector('.bold');
     const italicButton = this.querySelector('.italic');
     const underlineButton = this.querySelector('.underline');
@@ -254,7 +254,7 @@ export class ToolBar extends NonShadowLitElement {
     });
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="tool-bar">
         <sl-button class="bold">bold</sl-button>
@@ -300,7 +300,7 @@ export class TestPage extends NonShadowLitElement {
     }
   `;
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const TEXT_ID = 'virgo';
     const yDocA = new Y.Doc();
     const yDocB = new Y.Doc();
@@ -315,7 +315,7 @@ export class TestPage extends NonShadowLitElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA);
-    editorA.setAttributesRenderer(attributeRenderer);
+    editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
     const editorB = new VEditor(textB);
@@ -343,7 +343,7 @@ export class TestPage extends NonShadowLitElement {
     docB.appendChild(richTextB);
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="container">
         <div class="editors">

@@ -168,7 +168,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
           const element = renderElement(
             delta,
             this._editor.attributeService.normalizeAttributes,
-            this._editor.attributeService.attributesRenderer
+            this._editor.attributeService.attributeRenderer
           );
 
           elementTs.push(element);

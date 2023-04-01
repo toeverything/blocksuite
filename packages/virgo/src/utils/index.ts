@@ -1,4 +1,4 @@
-export * from './attributes-renderer.js';
+export * from './attribute-renderer.js';
 export * from './base-attributes.js';
 export * from './convert.js';
 export * from './guard.js';

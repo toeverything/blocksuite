@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AttributesRenderer } from '../types.js';
+import type { AttributeRenderer } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 function virgoTextStyles(
@@ -40,7 +40,7 @@ function virgoTextStyles(
 }
 
 export const getDefaultAttributeRenderer =
-  <T extends BaseTextAttributes>(): AttributesRenderer<T> =>
+  <T extends BaseTextAttributes>(): AttributeRenderer<T> =>
   delta => {
     const style = delta.attributes
       ? virgoTextStyles(delta.attributes)

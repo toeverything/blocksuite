@@ -25,7 +25,7 @@ import {
 } from './utils/index.js';
 
 export interface VEditorOptions {
-  // it is a option to determine defult `_attributesRenderer`
+  // it is a option to determine defult `_attributeRenderer`
   defaultMode: 'rich' | 'pure';
 }
 
@@ -92,8 +92,8 @@ export class VEditor<
     return this._attributeService.marks;
   }
 
-  setAttributesSchema = this._attributeService.setAttributesSchema;
-  setAttributesRenderer = this._attributeService.setAttributesRenderer;
+  setAttributeSchema = this._attributeService.setAttributeSchema;
+  setAttributeRenderer = this._attributeService.setAttributeRenderer;
   setMarks = this._attributeService.setMarks;
   resetMarks = this._attributeService.resetMarks;
   getFormat = this._attributeService.getFormat;
@@ -141,7 +141,7 @@ export class VEditor<
     // we can change default render to pure for making `VEditor` to be a pure string render,
     // you can change schema and renderer again after construction
     if (options.defaultMode === 'pure') {
-      this._attributeService.setAttributesRenderer(delta => {
+      this._attributeService.setAttributeRenderer(delta => {
         return html`<span><v-text .str="${delta.insert}"></v-text></span>`;
       });
     }
