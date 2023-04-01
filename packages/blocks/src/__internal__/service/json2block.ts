@@ -131,7 +131,6 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
   vEditor.setVRange(vRange);
 }
 
-// TODO: used old code, need optimize
 export async function addSerializedBlocks(
   page: Page,
   serializedBlocks: SerializedBlock[],
@@ -139,6 +138,8 @@ export async function addSerializedBlocks(
   index: number
 ) {
   const addedBlockIds: string[] = [];
+  const pendingModels: { model: BaseBlockModel; json: SerializedBlock }[] = [];
+
   for (let i = 0; i < serializedBlocks.length; i++) {
     const json = serializedBlocks[i];
     const flavour = json.flavour as keyof BlockModels;
@@ -166,14 +167,18 @@ export async function addSerializedBlocks(
     }
 
     if (model && json.children) {
-      addSerializedBlocks(page, json.children, model, 0);
-
-      const service = await getServiceOrRegister(flavour);
-      service.onBlockPasted(model, {
-        columnIds: json.databaseProps?.columnIds,
-        columnSchemaIds: json.databaseProps?.columnSchemaIds,
-      });
+      await addSerializedBlocks(page, json.children, model, 0);
+      pendingModels.push({ model, json });
     }
+  }
+
+  for (const { model, json } of pendingModels) {
+    const flavour = model.flavour as keyof BlockModels;
+    const service = await getServiceOrRegister(flavour);
+    service.onBlockPasted(model, {
+      columnIds: json.databaseProps?.columnIds,
+      columnSchemaIds: json.databaseProps?.columnSchemaIds,
+    });
   }
 
   return addedBlockIds;
