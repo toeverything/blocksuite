@@ -51,7 +51,7 @@ export async function json2block(
       shouldSplitBlock &&
         (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
 
-      const [id] = await addBlocks(
+      const [id] = addBlocks(
         page,
         pastedBlocks,
         parent,
@@ -88,7 +88,7 @@ export async function json2block(
     parent.children.indexOf(focusedBlockModel) +
     (shouldMergeFirstBlock ? 1 : 0);
 
-  const ids = await addBlocks(
+  const ids = addBlocks(
     page,
     pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
     parent,
@@ -132,7 +132,7 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
 }
 
 // TODO: used old code, need optimize
-export async function addBlocks(
+export function addBlocks(
   page: Page,
   blocks: OpenBlockInfo[],
   parent: BaseBlockModel,

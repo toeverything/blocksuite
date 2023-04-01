@@ -103,22 +103,21 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
       // add ext:columns
       const newColumnIds = model.children.map(child => child.id);
-      const columnIdMap = columnIds.reduce((prev, oldColumnId, index) => {
-        return {
-          ...prev,
-          [oldColumnId]: newColumnIds[index],
-        };
-      }, {} as Record<string, string>);
-      const columnSchemaIdMap = columnSchemaIds.reduce(
-        (prev, oldColumnSchemaId, index) => {
-          return {
-            ...prev,
-            [oldColumnSchemaId]: newColumnSchemaIds[index],
-          };
-        },
-        {} as Record<string, string>
-      );
-      model.page.copyColumn(columnIdMap, columnSchemaIdMap);
+      columnIds.forEach((columnId, columnIndex) => {
+        const newColumnId = newColumnIds[columnIndex];
+        columnSchemaIds.forEach((columnSchemaId, columnSchemaIndex) => {
+          const cellData = model.page.getColumn(columnId, columnSchemaId);
+          let value = cellData?.value;
+          if (!value) return;
+          if (value instanceof model.page.YText) {
+            value = value.clone();
+          }
+          model.page.updateColumn(newColumnId, {
+            columnId: newColumnSchemaIds[columnSchemaIndex],
+            value,
+          });
+        });
+      });
     });
   }
 }

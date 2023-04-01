@@ -632,9 +632,12 @@ export class Page extends Space<FlatBlockMap> {
     this.transact(() => this.yColumnSchema.delete(id));
   }
 
-  getColumn(model: BaseBlockModel, schema: ColumnSchema): BlockColumn | null {
-    const yColumns = this.yColumns.get(model.id);
-    const yColumnMap = (yColumns?.get(schema.id) as Y.Map<unknown>) ?? null;
+  getColumn(
+    modelId: BaseBlockModel['id'],
+    schemaId: ColumnSchema['id']
+  ): BlockColumn | null {
+    const yColumns = this.yColumns.get(modelId);
+    const yColumnMap = (yColumns?.get(schemaId) as Y.Map<unknown>) ?? null;
     if (!yColumnMap) return null;
 
     return {
@@ -663,8 +666,7 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  /** database column action: Duplicate column */
-  duplicateColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
+  copyColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
     this.transact(() => {
       this.yColumns.forEach(column => {
         const copyColumn = column.get(fromId) as Y.Map<unknown>;
@@ -680,34 +682,6 @@ export class Page extends Space<FlatBlockMap> {
           }
           column.set(toId, columnMap);
         }
-      });
-    });
-  }
-
-  /** database action: copy database */
-  copyColumn(
-    columnIdMap: Record<string, string>,
-    columnSchemaIdMap: Record<string, string>
-  ) {
-    this.transact(() => {
-      Object.entries(columnIdMap).forEach(([columnFromId, columnToId]) => {
-        const yColumn = new Y.Map();
-        this.yColumns.set(columnToId, yColumn);
-
-        const oldColumns = this.yColumns.get(columnFromId);
-        if (!oldColumns) return;
-        oldColumns.forEach((oldSchema, oldSchemaId) => {
-          const schema = new Y.Map();
-          const newSchemaId = columnSchemaIdMap[oldSchemaId];
-          schema.set('columnId', newSchemaId);
-          const value = (oldSchema as Y.Map<unknown>).get('value');
-          if (value instanceof Y.Text) {
-            schema.set('value', value.clone());
-          } else {
-            schema.set('value', value);
-          }
-          yColumn.set(newSchemaId, schema);
-        });
       });
     });
   }

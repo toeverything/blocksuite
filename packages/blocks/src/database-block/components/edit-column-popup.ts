@@ -463,7 +463,7 @@ export class EditColumnPopup extends LitElement {
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.duplicateColumn(copyId, id);
+      this.targetModel.page.copyColumn(copyId, id);
       this.closePopup();
       return;
     }
