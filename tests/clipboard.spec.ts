@@ -503,9 +503,12 @@ test('should copy and paste of database work', async ({ page }) => {
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
+  await waitNextFrame(page);
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
+  await waitNextFrame(page);
+
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
