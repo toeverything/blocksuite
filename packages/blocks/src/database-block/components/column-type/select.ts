@@ -383,7 +383,6 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
     const tagColor = this._selectColor ?? getTagColor();
     this._selectColor = undefined;
     const newSelect = { value, color: tagColor };
-    console.log(newSelect.color);
 
     this.rowHost.updateColumnProperty(property => {
       const selection = property.selection as SelectProperty[];
