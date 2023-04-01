@@ -501,6 +501,7 @@ test('should copy and paste of database work', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', true);
 
   await selectAllByKeyboard(page);
+  await waitNextFrame(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await waitNextFrame(page);
