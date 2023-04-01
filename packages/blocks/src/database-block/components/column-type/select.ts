@@ -19,19 +19,16 @@ import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
 } from '../../register.js';
+import type { SelectTagAction, SelectTagActionName } from '../../types.js';
 import { onClickOutside } from '../../utils.js';
-import {
-  actionStyles,
-  type ColumnAction,
-  isDivider,
-} from '../edit-column-popup.js';
+import { actionStyles, isDivider } from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
   Single = 'single',
 }
 
-const tagActions: ColumnAction[] = [
+const tagActions: SelectTagAction[] = [
   {
     type: 'rename',
     text: 'Rename',
@@ -216,7 +213,7 @@ class SelectAction extends LitElement {
   index!: number;
 
   @property()
-  onAction!: (type: string, index: number) => void;
+  onAction!: (type: SelectTagActionName, index: number) => void;
 
   render() {
     return html`
@@ -485,7 +482,7 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     });
   };
 
-  private _onSelectAction = (type: string, index: number) => {
+  private _onSelectAction = (type: SelectTagActionName, index: number) => {
     if (type === 'rename') {
       this._editingIndex = index;
       return;
@@ -493,18 +490,14 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
 
     if (type === 'delete') {
       const selection = [...(this.columnSchema.property.selection as string[])];
-      this.databaseModel.page.setColumnSchema({
+      this.databaseModel.page.updateColumnSchema({
         ...this.columnSchema,
         property: {
           selection: selection.filter((_, i) => i !== index),
         },
       });
       const value = selection[index];
-      this.databaseModel.page.updateSelectedColumnValue(
-        this.rowModel.id,
-        this.columnSchema.id,
-        value
-      );
+      this.databaseModel.page.deleteColumnValue(this.columnSchema.id, value);
       return;
     }
   };
@@ -553,14 +546,13 @@ class SelectCellEditing extends DatabaseCellLitElement<string[]> {
     const selection = [...(this.columnSchema.property.selection as string[])];
     const oldValue = selection[index];
     selection[index] = value;
-    this.databaseModel.page.setColumnSchema({
+    this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
       property: {
         selection,
       },
     });
-    this.databaseModel.page.updateSelectedColumnValue(
-      this.rowModel.id,
+    this.databaseModel.page.renameColumnValue(
       this.columnSchema.id,
       oldValue,
       value

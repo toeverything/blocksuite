@@ -710,6 +710,43 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
+  renameColumnValue(columnId: string, oldValue: string, value: string) {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        const cell = yColumn.get(columnId) as Y.Map<string[]> | undefined;
+        if (!cell) return;
+
+        const selected = cell.get('value') as string[];
+        const newSelected = [...selected];
+        const index = newSelected.indexOf(oldValue);
+        newSelected[index] = value;
+
+        const yColumnMap = new Y.Map();
+        yColumnMap.set('schemaId', columnId);
+        yColumnMap.set('value', newSelected);
+        yColumn.set(columnId, yColumnMap);
+      });
+    });
+  }
+
+  deleteColumnValue(columnId: string, value: string) {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        const cell = yColumn.get(columnId) as Y.Map<string[]> | undefined;
+        if (!cell) return;
+
+        const selected = cell.get('value') as string[];
+        let newSelected = [...selected];
+        newSelected = selected.filter(item => item !== value);
+
+        const yColumnMap = new Y.Map();
+        yColumnMap.set('schemaId', columnId);
+        yColumnMap.set('value', newSelected);
+        yColumn.set(columnId, yColumnMap);
+      });
+    });
+  }
+
   trySyncFromExistingDoc() {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
