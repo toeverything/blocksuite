@@ -6,12 +6,12 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import { getServiceOrRegister } from '../service.js';
-import { type BlockRange, type OpenBlockInfo } from '../utils/index.js';
+import { type BlockRange, type SerializedBlock } from '../utils/index.js';
 import { getVirgoByModel } from '../utils/query.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
-  pastedBlocks: OpenBlockInfo[],
+  pastedBlocks: SerializedBlock[],
   range?: BlockRange
 ) {
   assertExists(range);
@@ -51,7 +51,7 @@ export async function json2block(
       shouldSplitBlock &&
         (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
 
-      const [id] = await addBlocks(
+      const [id] = await addSerializedBlocks(
         page,
         pastedBlocks,
         parent,
@@ -88,7 +88,7 @@ export async function json2block(
     parent.children.indexOf(focusedBlockModel) +
     (shouldMergeFirstBlock ? 1 : 0);
 
-  const ids = await addBlocks(
+  const ids = await addSerializedBlocks(
     page,
     pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
     parent,
@@ -132,47 +132,49 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
 }
 
 // TODO: used old code, need optimize
-export async function addBlocks(
+export async function addSerializedBlocks(
   page: Page,
-  blocks: OpenBlockInfo[],
+  serializedBlocks: SerializedBlock[],
   parent: BaseBlockModel,
   index: number
 ) {
-  const addedBlockIds = [];
-  for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i];
-    const flavour = block.flavour as keyof BlockModels;
+  const addedBlockIds: string[] = [];
+  for (let i = 0; i < serializedBlocks.length; i++) {
+    const json = serializedBlocks[i];
+    const flavour = json.flavour as keyof BlockModels;
     const blockProps = {
       flavour,
-      type: block.type as string,
-      checked: block.checked,
-      sourceId: block.sourceId,
-      caption: block.caption,
-      width: block.width,
-      height: block.height,
-      language: block.language,
-      title: block.databaseProps?.title,
-      titleColumn: block.databaseProps?.titleColumn,
+      type: json.type as string,
+      checked: json.checked,
+      sourceId: json.sourceId,
+      caption: json.caption,
+      width: json.width,
+      height: json.height,
+      language: json.language,
+      title: json.databaseProps?.title,
+      titleColumn: json.databaseProps?.titleColumn,
     };
     const id = page.addBlock(flavour, blockProps, parent, index + i);
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
     assertExists(model);
 
-    // use `getServiceOrRegister` to avoid `embed` test fail
-    const service = await getServiceOrRegister(flavour);
-    service.onBlockPasted(model, {
-      columnIds: block.databaseProps?.columnIds,
-      columnSchemaIds: block.databaseProps?.columnSchemaIds,
-    });
-
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
     if (initialProps && initialProps.text instanceof Text) {
-      block.text && model?.text?.applyDelta(block.text);
+      json.text && model?.text?.applyDelta(json.text);
     }
 
-    model && block.children && addBlocks(page, block.children, model, 0);
+    if (model && json.children) {
+      addSerializedBlocks(page, json.children, model, 0);
+
+      const service = await getServiceOrRegister(flavour);
+      service.onBlockPasted(model, {
+        columnIds: json.databaseProps?.columnIds,
+        columnSchemaIds: json.databaseProps?.columnSchemaIds,
+      });
+    }
   }
+
   return addedBlockIds;
 }

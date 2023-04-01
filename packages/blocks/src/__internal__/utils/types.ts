@@ -99,7 +99,7 @@ export type MouseMode =
   | PanMouseMode
   | TextMouseMode;
 
-export type OpenBlockInfo = {
+export type SerializedBlock = {
   flavour: string;
   type?: string;
   text?: {
@@ -114,7 +114,7 @@ export type OpenBlockInfo = {
     retain?: number;
   }[];
   checked?: boolean;
-  children: OpenBlockInfo[];
+  children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
   width?: number;

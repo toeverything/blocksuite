@@ -14,7 +14,7 @@ import { getService } from '../service.js';
 import type {
   BlockRange,
   BlockTransformContext,
-  OpenBlockInfo,
+  SerializedBlock,
 } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
 import { json2block } from './json2block.js';
@@ -51,7 +51,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return `${text}${childText}`;
   }
 
-  block2Json(block: BlockModel, begin?: number, end?: number): OpenBlockInfo {
+  block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     return {
       flavour: block.flavour,
@@ -73,7 +73,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   // this is the common handler for most block, but like code block, it should be overridden this
   async json2Block(
     focusedBlockModel: BlockModel,
-    pastedBlocks: OpenBlockInfo[],
+    pastedBlocks: SerializedBlock[],
     range?: BlockRange
   ) {
     return json2block(focusedBlockModel, pastedBlocks, range);

@@ -5,8 +5,8 @@ import {
   getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
-  type OpenBlockInfo,
   type Point,
+  type SerializedBlock,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -394,7 +394,7 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData: { data: OpenBlockInfo[] } = {
+  const copyData: { data: SerializedBlock[] } = {
     data: [
       {
         type: model.type,
