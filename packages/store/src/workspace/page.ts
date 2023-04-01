@@ -582,7 +582,7 @@ export class Page extends Space<FlatBlockMap> {
     if (options.bringChildrenTo === 'parent' && parent) {
       parent.children.unshift(...model.children);
     } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-      options.bringChildrenTo.children.unshift(...model.children);
+      options.bringChildrenTo.children.push(...model.children);
     }
     this._blockMap.delete(model.id);
 

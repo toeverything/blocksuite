@@ -131,8 +131,11 @@ export const database: InitFn = (workspace: Workspace) => {
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
-  type Option = 'Done' | 'TODO' | 'WIP';
-  const selection = ['Done', 'TODO', 'WIP'] as Option[];
+  const selection = [
+    { value: 'Done', color: '#F5F5F5' },
+    { value: 'TODO', color: '#FFE1E1' },
+    { value: 'WIP', color: '#E1EFFF' },
+  ];
   const col1 = page.updateColumnSchema({
     internalProperty: {
       color: '#ff0000',
@@ -198,7 +201,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
   page.updateColumn(p2, {
     columnId: col2,
-    value: ['TODO'],
+    value: [selection[1]],
   });
 
   const text = new page.YText();

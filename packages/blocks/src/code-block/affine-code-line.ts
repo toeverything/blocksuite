@@ -20,7 +20,7 @@ export class AffineCodeLine extends NonShadowLitElement {
   };
 
   @property()
-  getHighlightOptions:
+  highlightOptionsGetter:
     | (() => {
         lang: Lang;
         highlighter: Highlighter | null;
@@ -28,8 +28,11 @@ export class AffineCodeLine extends NonShadowLitElement {
     | null = null;
 
   render() {
-    assertExists(this.getHighlightOptions, 'getHighlightOptions is not set');
-    const { lang, highlighter } = this.getHighlightOptions();
+    assertExists(
+      this.highlightOptionsGetter,
+      'highlightOptionsGetter is not set'
+    );
+    const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
       const vText = new VText();

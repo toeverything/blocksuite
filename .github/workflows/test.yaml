@@ -23,7 +23,7 @@ on:
       - 'packages/docs/**'
 
 jobs:
-  e2e-test:
+  root-level-e2e-test:
     name: Playground E2E test
     runs-on: ubuntu-latest
     strategy:
@@ -113,3 +113,34 @@ jobs:
           flags: unittest
           name: blocksuite
           fail_ci_if_error: true
+
+  virgo-e2e-test:
+    name: Virgo E2E test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run virgo playwright test
+        run: pnpm --filter=@blocksuite/virgo test:e2e
+
+      - name: Upload test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-main
+          path: ./test-results
+          if-no-files-found: ignore
