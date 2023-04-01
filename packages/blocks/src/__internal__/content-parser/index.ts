@@ -11,8 +11,8 @@ import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
 
