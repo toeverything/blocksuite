@@ -3,8 +3,6 @@ import { expect } from '@playwright/test';
 import {
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
-  doColumnAction,
-  doSelectColumnTagAction,
   enterPlaygroundRoom,
   focusDatabaseSearch,
   focusDatabaseTitle,
@@ -16,6 +14,8 @@ import {
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
+  performColumnAction,
+  performSelectColumnTagAction,
   pressArrowLeft,
   pressBackspace,
   pressEnter,
@@ -238,7 +238,7 @@ test('should support rename column', async ({ page }) => {
   const title = columnTitle.locator('.affine-database-column-text-input');
   expect(await title.innerText()).toBe('abc');
 
-  await doColumnAction(page, '3', 'rename');
+  await performColumnAction(page, '3', 'rename');
   await type(page, '123');
   await pressEnter(page);
   expect(await title.innerText()).toBe('123');
@@ -268,7 +268,7 @@ test('should support right insert column', async ({ page }) => {
 
   await initDatabaseColumn(page);
 
-  await doColumnAction(page, '3', 'insert-right');
+  await performColumnAction(page, '3', 'insert-right');
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(3);
 
@@ -281,7 +281,7 @@ test('should support left insert column', async ({ page }) => {
 
   await initDatabaseColumn(page);
 
-  await doColumnAction(page, '3', 'insert-left');
+  await performColumnAction(page, '3', 'insert-left');
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(3);
 
@@ -297,7 +297,7 @@ test('should support delete column', async ({ page }) => {
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(2);
 
-  await doColumnAction(page, '3', 'delete');
+  await performColumnAction(page, '3', 'delete');
   expect(await columns.count()).toBe(1);
 });
 
@@ -308,7 +308,7 @@ test('should support duplicate column', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  await doColumnAction(page, '3', 'duplicate');
+  await performColumnAction(page, '3', 'duplicate');
   const cells = page.locator('.affine-database-select-cell-container');
   expect(await cells.count()).toBe(2);
 
@@ -327,7 +327,7 @@ test('should support move column right', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
   await assertDatabaseColumnOrder(page, ['3', '5']);
 
-  await doColumnAction(page, '3', 'move-right');
+  await performColumnAction(page, '3', 'move-right');
   await assertDatabaseColumnOrder(page, ['5', '3']);
 
   await undoByClick(page);
@@ -354,7 +354,7 @@ test('should support move column left', async ({ page }) => {
   const moveLeft = page.locator('.move-left');
   expect(await moveLeft.count()).toBe(0);
 
-  await doColumnAction(page, '5', 'move-left');
+  await performColumnAction(page, '5', 'move-left');
   await assertDatabaseColumnOrder(page, ['5', '3']);
 });
 
@@ -456,7 +456,7 @@ test.describe('select column tag action', () => {
     await initDatabaseDynamicRowWithData(page, 'abc');
 
     const { cellSelected, selectOption, saveIcon } =
-      await doSelectColumnTagAction(page, 'rename');
+      await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
     await type(page, '4567abc00');
     const option1 = selectOption.nth(0);
@@ -480,7 +480,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
 
-    const { cellSelected } = await doSelectColumnTagAction(page, 'delete');
+    const { cellSelected } = await performSelectColumnTagAction(page, 'delete');
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
   });

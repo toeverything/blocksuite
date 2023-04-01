@@ -3,7 +3,7 @@ import { type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
 
-export async function doColumnAction(
+export async function performColumnAction(
   page: Page,
   columnId: string,
   action: string
@@ -52,7 +52,7 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
   return cellContent;
 }
 
-export async function doSelectColumnTagAction(
+export async function performSelectColumnTagAction(
   page: Page,
   actionClass: string,
   index = 0
