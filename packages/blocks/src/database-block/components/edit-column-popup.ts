@@ -368,7 +368,7 @@ export class EditColumnPopup extends LitElement {
     const currentSchema = this.targetModel.page.getColumnSchema(columnId);
     assertExists(currentSchema);
     const schema = { ...currentSchema, ...schemaProperties };
-    this.targetModel.page.setColumnSchema(schema);
+    this.targetModel.page.updateColumnSchema(schema);
   };
 
   private _changeColumnType = (
@@ -387,12 +387,12 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateColumnValue(columnId, 'select');
+      this.targetModel.page.convertColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.updateColumnValue(columnId, 'rich-text');
+      this.targetModel.page.convertColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnSchemaRenderer(targetType);
@@ -400,7 +400,7 @@ export class EditColumnPopup extends LitElement {
         type: targetType,
         property: renderer.propertyCreator(),
       });
-      this.targetModel.page.deleteBlockColumns(columnId);
+      this.targetModel.page.deleteColumn(columnId);
     }
 
     this.closePopup();
@@ -457,13 +457,13 @@ export class EditColumnPopup extends LitElement {
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this.targetModel.page.setColumnSchema(schema);
+      const id = this.targetModel.page.updateColumnSchema(schema);
       const newColumns = [...this.targetModel.columns];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.duplicateBlockColumnById(copyId, id);
+      this.targetModel.page.duplicateColumn(copyId, id);
       this.closePopup();
       return;
     }

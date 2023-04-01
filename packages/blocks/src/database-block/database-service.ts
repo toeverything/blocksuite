@@ -36,7 +36,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
 
     // default column
-    const tagColumnId = page.setColumnSchema({
+    const tagColumnId = page.updateColumnSchema({
       internalProperty: {
         color: '#ff0000',
         width: 200,
@@ -74,10 +74,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       },
       children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
-          // @ts-ignore
           return getService(child.flavour).block2Json(child, 0, end);
         }
-        // @ts-ignore
         return getService(child.flavour).block2Json(child);
       }),
     };
@@ -97,7 +95,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         .filter((s: ColumnSchema | null): s is ColumnSchema => s !== null);
       const newColumnSchemaIds = columnSchemas.map(schema => {
         const { id, ...nonIdProps } = schema;
-        return model.page.setColumnSchema(nonIdProps);
+        return model.page.updateColumnSchema(nonIdProps);
       });
       model.page.updateBlock(model, {
         columns: newColumnSchemaIds,
@@ -120,7 +118,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         },
         {} as Record<string, string>
       );
-      model.page.copyBlockColumns(columnIdMap, columnSchemaIdMap);
+      model.page.copyColumn(columnIdMap, columnSchemaIdMap);
     });
   }
 }
