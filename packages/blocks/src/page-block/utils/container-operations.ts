@@ -8,10 +8,12 @@ import {
   getClosestBlockElementByElement,
   getDefaultPageBlock,
   getVirgoByModel,
+  handleNativeRangeDblClick,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
+  type SelectionEvent,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
 import type { BlockModels } from '@blocksuite/global/types';
@@ -34,8 +36,13 @@ import {
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { BlockSchemas } from '../../models.js';
-import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
+import type {
+  DefaultSelectionManager,
+  PageSelectionState,
+} from '../default/selection-manager/index.js';
+import { calcCurrentSelectionPosition } from './position.js';
 
 const DEFAULT_SPACING = 64;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
@@ -508,5 +515,30 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
         offset = newX + w;
       }
     });
+  });
+}
+
+// Show format quick bar when double clicking on text
+export function showFormatQuickBarByDoubleClick(
+  e: SelectionEvent,
+  page: Page,
+  container?: HTMLElement,
+  state?: PageSelectionState
+) {
+  const range = handleNativeRangeDblClick(page, e);
+  if (e.raw.target instanceof HTMLTextAreaElement) return;
+  if (!range || range.collapsed) return;
+  if (page.readonly) return;
+
+  const direction = 'center-bottom';
+  showFormatQuickBar({
+    page,
+    container,
+    direction,
+    anchorEl: {
+      getBoundingClientRect: () => {
+        return calcCurrentSelectionPosition(direction, state);
+      },
+    },
   });
 }
