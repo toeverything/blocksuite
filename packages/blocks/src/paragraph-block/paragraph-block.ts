@@ -13,7 +13,7 @@ import {
   isPageMode,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { attributesRenderer } from '../__internal__/rich-text/virgo/attributes-renderer.js';
+import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
@@ -180,7 +180,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @state()
   textSchema = {
     attributesSchema: affineTextAttributes,
-    textRenderer: attributesRenderer,
+    textRenderer: attributeRenderer,
   };
 
   private _placeholderDisposables = new DisposableGroup();
