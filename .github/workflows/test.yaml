@@ -131,29 +131,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: playground-artifact
-          path: ./packages/playground/dist
-
       - name: Install playwright browsers
         run: npx playwright install chromium
 
       - name: Run virgo playwright test
         run: pnpm --filter=@blocksuite/virgo test:e2e
-
-      - name: Collect code coverage report
-        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
-
-      - name: Upload e2e test coverage results
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/lcov.info
-          flags: e2etest
-          name: blocksuite
-          fail_ci_if_error: true
 
       - name: Upload test results
         if: ${{ failure() }}
