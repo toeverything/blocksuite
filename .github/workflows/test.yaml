@@ -105,9 +105,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run virgo unit test
-        run: pnpm --filter=@blocksuite/virgo test:unit
-
       - name: Run unit test
         run: pnpm test:unit:coverage
 
