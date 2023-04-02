@@ -484,3 +484,22 @@ test.describe('select column tag action', () => {
     expect(await cellSelected.count()).toBe(0);
   });
 });
+
+test('should support delete database through action menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await focusDatabaseSearch(page);
+  const moreAction = page.locator('.more-action');
+  await moreAction.click();
+  const actionPopup = page.locator('affine-database-toolbar-action-popup');
+  expect(actionPopup).toBeVisible();
+
+  const deleteDb = page.locator('.delete-database');
+  await deleteDb.click();
+  const db = page.locator('affine-database');
+  expect(await db.count()).toBe(0);
+
+  await undoByClick(page);
+  expect(await db.count()).toBe(1);
+});

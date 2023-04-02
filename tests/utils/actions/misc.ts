@@ -323,18 +323,6 @@ export async function initDatabaseDynamicRowWithData(
   await pressEnter(page);
 }
 
-export async function getDatabaseMouse(page: Page) {
-  const databaseRect = await getBoundingClientRect(page, 'affine-database');
-  return {
-    mouseOver: async () => {
-      await page.mouse.move(databaseRect.x, databaseRect.y);
-    },
-    mouseLeave: async () => {
-      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
-    },
-  };
-}
-
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();
