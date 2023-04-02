@@ -1,3 +1,4 @@
+import type { SelectProperty } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
@@ -6,7 +7,7 @@ import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
 } from '../../register.js';
-import { SelectMode, type SelectProperty } from './select.js';
+import { SelectMode } from './select.js';
 
 @customElement('affine-database-multi-select-cell')
 class MultiSelectCell extends DatabaseCellLitElement<SelectProperty[]> {
