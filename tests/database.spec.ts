@@ -58,9 +58,8 @@ test('edit database block title and create new rows', async ({ page }) => {
   await assertBlockProps(page, '2', {
     title: 'Database 1',
   });
-  const button = page.locator('.affine-database-block-add-row[role="button"]');
-  await button.click();
-  await button.click();
+  await initDatabaseRowWithData(page, '');
+  await initDatabaseRowWithData(page, '');
   await assertBlockProps(page, '3', {
     flavour: 'affine:paragraph',
   });
@@ -158,7 +157,7 @@ test('should show or hide database toolbar', async ({ page }) => {
   await expect(toolbar).toBeHidden();
 
   await db.mouseOver();
-  const searchIcon = await focusDatabaseSearch(page);
+  await focusDatabaseSearch(page);
   await db.mouseLeave();
   await expect(toolbar).toBeVisible();
 
@@ -166,7 +165,9 @@ test('should show or hide database toolbar', async ({ page }) => {
   await expect(toolbar).toBeHidden();
 
   await db.mouseOver();
-  await searchIcon.click();
+  await focusDatabaseSearch(page);
+  // wait for transition end
+  await waitNextFrame(page, 400);
   await type(page, '1');
   await clickDatabaseOutside(page);
   await expect(toolbar).toBeVisible();
@@ -180,7 +181,7 @@ test.skip('should database search work', async ({ page }) => {
   await initDatabaseRowWithData(page, 'text1');
   await initDatabaseDynamicRowWithData(page, '123', false);
   await initDatabaseRowWithData(page, 'text2');
-  await initDatabaseDynamicRowWithData(page, '', false);
+  await initDatabaseDynamicRowWithData(page, 'a', false);
   await initDatabaseRowWithData(page, 'text3');
   await initDatabaseDynamicRowWithData(page, '26', false);
 

@@ -335,6 +335,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       display: flex;
       flex-direction: row;
       height: 44px;
+      border-bottom: 1px solid var(--affine-border-color);
     }
     .affine-database-column-header > .affine-database-column:first-child {
       background: rgba(0, 0, 0, 0.04);
@@ -641,9 +642,6 @@ function DataBaseRowContainer(
       }
       .affine-database-block-row > .affine-database-block-row-cell:first-child {
         background: rgba(0, 0, 0, 0.04);
-      }
-      .affine-database-block-row:nth-of-type(1) {
-        border-top: 1px solid var(--affine-border-color);
       }
 
       .affine-database-block-row-cell {
@@ -1070,14 +1068,19 @@ export class DatabaseBlockComponent
 
   private _onSearchKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      this._searchInput.value = '';
-      this._searchState = SearchState.SearchInput;
+      if (this._searchInput.value) {
+        this._searchInput.value = '';
+        this._searchState = SearchState.SearchInput;
+      } else {
+        this._resetSearchStatus();
+      }
     }
   };
 
   private _clearSearch = (event: MouseEvent) => {
     event.stopPropagation();
-    this._resetSearchStatus();
+    this._searchInput.value = '';
+    this._searchState = SearchState.SearchInput;
   };
 
   private _resetSearchStatus = () => {
@@ -1233,6 +1236,7 @@ export class DatabaseBlockComponent
             placeholder="Search..."
             class="affine-database-search-input"
             @input=${this._onSearch}
+            @click=${(event: MouseEvent) => event.stopPropagation()}
             @keydown=${this._onSearchKeydown}
           />
           <div class="has-tool-tip close-icon" @click=${this._clearSearch}>
