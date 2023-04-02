@@ -42,9 +42,14 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
-      items.forEach((item: ClipboardItem) =>
-        clipboardData.setData(item.mimeType, item.data)
-      );
+      const dv = document.createElement('div');
+      document
+        .querySelector('.affine-block-children-container')
+        ?.appendChild(dv);
+      items.forEach((item: ClipboardItem) => {
+        dv.innerText += `${item.data}`;
+        clipboardData.setData(item.mimeType, item.data);
+      });
     }
 
     e.preventDefault();
