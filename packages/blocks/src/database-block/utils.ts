@@ -27,3 +27,31 @@ export function onClickOutside(
 
   return removeClickListener;
 }
+
+/** select tag color poll */
+const tagColorPoll: string[] = [
+  '#F5F5F5',
+  '#E3E2E0',
+  '#FFE1E1',
+  '#FFEACA',
+  '#FFF4D8',
+  '#DFF4E8',
+  '#DFF4F3',
+  '#E1EFFF',
+  '#F3F0FF',
+  '#FCE8FF',
+];
+
+function tagColorHelper() {
+  let colors = [...tagColorPoll];
+  return () => {
+    if (colors.length === 0) {
+      colors = [...tagColorPoll];
+    }
+    const index = Math.floor(Math.random() * colors.length);
+    const color = colors.splice(index, 1)[0];
+    return color;
+  };
+}
+
+export const getTagColor = tagColorHelper();

@@ -19,6 +19,7 @@ import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import { showFormatQuickBarByDoubleClick } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -245,8 +246,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     repairContextMenuRange(e);
   }
 
-  onContainerDblClick(_: SelectionEvent) {
-    noop();
+  onContainerDblClick(e: SelectionEvent) {
+    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {
@@ -327,6 +328,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       showFormatQuickBar({
         page: this._page,
+        container: this._edgeless,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {

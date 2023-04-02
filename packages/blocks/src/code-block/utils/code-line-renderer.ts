@@ -1,15 +1,15 @@
-import type { AttributesRenderer } from '@blocksuite/virgo';
+import type { AttributeRenderer } from '@blocksuite/virgo';
 import { html } from 'lit';
 import type { Highlighter, Lang } from 'shiki';
 
 export const getCodeLineRenderer: (
-  getHighlightOptions: () => {
+  highlightOptionsGetter: () => {
     lang: Lang;
     highlighter: Highlighter | null;
   }
-) => AttributesRenderer = getHighlightOptions => delta => {
+) => AttributeRenderer = highlightOptionsGetter => delta => {
   return html`<affine-code-line
     .delta=${delta}
-    .getHighlightOptions=${getHighlightOptions}
+    .highlightOptionsGetter=${highlightOptionsGetter}
   ></affine-code-line>`;
 };
