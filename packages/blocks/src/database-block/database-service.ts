@@ -84,11 +84,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
     // add ext:columnSchema
     const columnSchemas = columnSchemaIds
-      .map(id => model.page.getColumnSchema(id))
+      .map(id => model.page.db.getColumnSchema(id))
       .filter((s: ColumnSchema | null): s is ColumnSchema => s !== null);
     const newColumnSchemaIds = columnSchemas.map(schema => {
       const { id, ...nonIdProps } = schema;
-      return model.page.updateColumnSchema(nonIdProps);
+      return model.page.db.updateColumnSchema(nonIdProps);
     });
     model.page.updateBlock(model, {
       columns: newColumnSchemaIds,
@@ -99,13 +99,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     columnIds.forEach((columnId, columnIndex) => {
       const newColumnId = newColumnIds[columnIndex];
       columnSchemaIds.forEach((columnSchemaId, columnSchemaIndex) => {
-        const cellData = model.page.getColumn(columnId, columnSchemaId);
+        const cellData = model.page.db.getColumn(columnId, columnSchemaId);
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {
           value = value.clone();
         }
-        model.page.updateColumn(newColumnId, {
+        model.page.db.updateColumn(newColumnId, {
           columnId: newColumnSchemaIds[columnSchemaIndex],
           value,
         });
