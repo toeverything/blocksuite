@@ -6,7 +6,7 @@ import type { SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -104,6 +104,9 @@ export class EdgelessMoreButton extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @state()
+  private _popperShow = false;
+
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
 
@@ -148,7 +151,13 @@ export class EdgelessMoreButton extends LitElement {
   firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._actionsMenuPopper = createButtonPopper(this, this._actionsMenu);
+    this._actionsMenuPopper = createButtonPopper(
+      this,
+      this._actionsMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
     _disposables.add(this._actionsMenuPopper);
     super.firstUpdated(changedProperties);
   }
@@ -157,7 +166,7 @@ export class EdgelessMoreButton extends LitElement {
     const actions = Actions(this._runAction);
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'More'}
+        .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
         @tool.click=${() => this._actionsMenuPopper?.toggle()}
       >
