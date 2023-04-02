@@ -167,30 +167,30 @@ export class Page extends Space<FlatBlockMap> {
     return Text;
   }
 
-  undo = () => {
+  undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  };
+  }
 
-  redo = () => {
+  redo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  };
+  }
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync = () => {
+  captureSync() {
     this._history.stopCapturing();
-  };
+  }
 
-  resetHistory = () => {
+  resetHistory() {
     this._history.clear();
-  };
+  }
 
   createId() {
     return this._idGenerator();
@@ -296,7 +296,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlocksByFlavour<
+  addBlocks<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -327,7 +327,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlock<
+  addBlock<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -405,15 +405,6 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     return id;
-  }
-
-  updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.updateBlock(model, props);
   }
 
   @debug('CRUD')
@@ -527,22 +518,13 @@ export class Page extends Space<FlatBlockMap> {
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      return this.addBlocksByFlavour(blocks, parent.id, insertIndex);
+      return this.addBlocks(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
-  }
-
-  deleteBlockById(id: string) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.deleteBlock(model);
   }
 
   @debug('CRUD')
@@ -587,7 +569,7 @@ export class Page extends Space<FlatBlockMap> {
         if (options.bringChildrenTo === 'parent' && parent) {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlockById(options.bringChildrenTo.id, {
+          this.updateBlock(options.bringChildrenTo, {
             children: options.bringChildrenTo.children,
           });
         }

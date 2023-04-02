@@ -155,7 +155,7 @@ describe('addBlock', () => {
       title: new page.Text(),
     });
     page.addBlock('affine:paragraph');
-    page.addBlocksByFlavour([
+    page.addBlocks([
       { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
       { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
     ]);
@@ -323,7 +323,7 @@ describe('deleteBlock', () => {
       },
     });
 
-    page.deleteBlockById('0');
+    page.deleteBlock(page.root as BaseBlockModel);
     assert.deepEqual(serialize(page)[spaceId], {});
   });
 

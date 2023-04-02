@@ -347,7 +347,7 @@ export class EdgelessPageBlockComponent
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
     const frameId = this._addFrameWithPoint(point);
-    const ids = this.page.addBlocksByFlavour(
+    const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
         return {
