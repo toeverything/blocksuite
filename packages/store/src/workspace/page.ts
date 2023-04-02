@@ -1,4 +1,8 @@
-import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
+import type {
+  BlockColumn,
+  ColumnSchema,
+  SelectProperty,
+} from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -663,6 +667,36 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
+  updateSelectedColumn(
+    rowId: string,
+    columnId: string,
+    oldValue: string,
+    value?: string
+  ) {
+    this.transact(() => {
+      const yColumns = this.yColumns.get(rowId);
+      assertExists(yColumns);
+      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
+      if (!cell) return;
+
+      const selected = cell.get('value') as string[];
+      let newSelected = [...selected];
+      if (value !== undefined) {
+        // rename tag
+        const index = newSelected.indexOf(oldValue);
+        newSelected[index] = value;
+      } else {
+        // delete tag
+        newSelected = selected.filter(item => item !== oldValue);
+      }
+
+      const yColumnMap = new Y.Map();
+      yColumnMap.set('schemaId', columnId);
+      yColumnMap.set('value', newSelected);
+      yColumns.set(columnId, yColumnMap);
+    });
+  }
+
   copyColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
     this.transact(() => {
       this.yColumns.forEach(column => {
@@ -706,6 +740,51 @@ export class Page extends Space<FlatBlockMap> {
           yColumnMap.set('value', new Y.Text((value as number) + ''));
           yColumn.set(columnId, yColumnMap);
         }
+      });
+    });
+  }
+
+  renameColumnValue(
+    columnId: string,
+    oldValue: SelectProperty,
+    newValue: SelectProperty
+  ) {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        const cell = yColumn.get(columnId) as
+          | Y.Map<SelectProperty[]>
+          | undefined;
+        if (!cell) return;
+
+        const selected = cell.get('value') as SelectProperty[];
+        const newSelected = [...selected];
+        const index = newSelected.indexOf(oldValue);
+        newSelected[index] = newValue;
+
+        const yColumnMap = new Y.Map();
+        yColumnMap.set('schemaId', columnId);
+        yColumnMap.set('value', newSelected);
+        yColumn.set(columnId, yColumnMap);
+      });
+    });
+  }
+
+  deleteColumnValue(columnId: string, newValue: SelectProperty) {
+    this.transact(() => {
+      this.yColumns.forEach(yColumn => {
+        const cell = yColumn.get(columnId) as
+          | Y.Map<SelectProperty[]>
+          | undefined;
+        if (!cell) return;
+
+        const selected = cell.get('value') as SelectProperty[];
+        let newSelected = [...selected];
+        newSelected = selected.filter(item => item.value !== newValue.value);
+
+        const yColumnMap = new Y.Map();
+        yColumnMap.set('schemaId', columnId);
+        yColumnMap.set('value', newSelected);
+        yColumn.set(columnId, yColumnMap);
       });
     });
   }

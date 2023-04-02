@@ -1,5 +1,6 @@
 import {
   ArrowDownIcon,
+  DatabaseDone,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -20,36 +21,18 @@ import {
 } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
 import { getColumnSchemaRenderer } from '../register.js';
-
-type ColumnType = {
-  type: ColumnSchemaType;
-  text: string;
-  icon: TemplateResult;
-};
-
-type CommonEditAction = {
-  type:
-    | 'rename'
-    | 'column-type'
-    | 'duplicate'
-    | 'insert-left'
-    | 'insert-right'
-    | 'move-left'
-    | 'move-right'
-    | 'delete';
-  text: string;
-  icon: TemplateResult;
-};
-type DividerAction = {
-  type: 'divider';
-};
-
-export type ColumnAction = CommonEditAction | DividerAction;
+import type {
+  ActionName,
+  ColumnAction,
+  ColumnType,
+  DividerAction,
+  TitleColumnAction,
+} from '../types.js';
 
 export const actionStyles = css`
   .action {
@@ -158,7 +141,7 @@ const columnActions: ColumnAction[] = [
   },
 ];
 
-const titleColumnActions: ColumnAction[] = [
+const titleColumnActions: TitleColumnAction[] = [
   {
     type: 'rename',
     text: 'Rename',
@@ -196,7 +179,6 @@ class ColumnTypePopup extends LitElement {
     .action > svg {
       width: 16px;
       height: 16px;
-      fill: #77757d;
     }
     /* TODO: svg color */
     .rich-text {
@@ -265,7 +247,7 @@ class ColumnTypePopup extends LitElement {
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>
               </div>
-              ${TextIcon}
+              ${selected ? DatabaseDone : null}
             </div>
           `;
         })}
@@ -406,14 +388,14 @@ export class EditColumnPopup extends LitElement {
     this.closePopup();
   };
 
-  private _onActionClick = (action: CommonEditAction, columnId: string) => {
-    if (action.type === 'rename') {
+  private _onActionClick = (actionType: ActionName, columnId: string) => {
+    if (actionType === 'rename') {
       this.setTitleColumnEditId(columnId);
       this.closePopup();
       return;
     }
-    if (action.type === 'insert-right' || action.type === 'insert-left') {
-      if (action.type === 'insert-right') {
+    if (actionType === 'insert-right' || actionType === 'insert-left') {
+      if (actionType === 'insert-right') {
         this.insertColumn(ColumnInsertPosition.Right);
       } else {
         this.insertColumn(ColumnInsertPosition.Left);
@@ -422,9 +404,10 @@ export class EditColumnPopup extends LitElement {
       return;
     }
 
-    if (action.type === 'delete') {
+    if (actionType === 'delete') {
       this.targetModel.page.captureSync();
       this.targetModel.page.deleteColumnSchema(columnId);
+      this.targetModel.page.deleteColumn(columnId);
       const columns = this.targetModel.columns.filter(id => id !== columnId);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns,
@@ -433,10 +416,10 @@ export class EditColumnPopup extends LitElement {
       return;
     }
 
-    if (action.type === 'move-left' || action.type === 'move-right') {
+    if (actionType === 'move-left' || actionType === 'move-right') {
       this.targetModel.page.captureSync();
       const targetIndex =
-        action.type === 'move-left'
+        actionType === 'move-left'
           ? this.columnIndex - 1
           : this.columnIndex + 1;
       const columns = [...this.targetModel.columns];
@@ -451,7 +434,7 @@ export class EditColumnPopup extends LitElement {
       return;
     }
 
-    if (action.type === 'duplicate') {
+    if (actionType === 'duplicate') {
       this.targetModel.page.captureSync();
       const currentSchema = this.targetModel.page.getColumnSchema(columnId);
       assertExists(currentSchema);
@@ -503,7 +486,7 @@ export class EditColumnPopup extends LitElement {
           <div
             class="action ${action.type}"
             @mouseover=${onMouseOver}
-            @click=${() => this._onActionClick(action, columnId)}
+            @click=${() => this._onActionClick(action.type, columnId)}
           >
             <div class="action-content">
               ${action.icon}<span>${action.text}</span>

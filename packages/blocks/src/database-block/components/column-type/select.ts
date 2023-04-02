@@ -1,38 +1,35 @@
 import {
+  DatabaseDone,
   DeleteIcon,
   MoreHorizontalIcon,
   PenIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { SelectProperty } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
+import { VEditor } from '@blocksuite/virgo/virgo';
 import { createPopper } from '@popperjs/core';
 import { css, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
+import type { DatabaseBlockModel } from '../../database-model.js';
 import {
   DatabaseCellLitElement,
   defineColumnSchemaRenderer,
 } from '../../register.js';
+import type { SelectTagAction, SelectTagActionName } from '../../types.js';
 import { getTagColor, onClickOutside } from '../../utils.js';
-import {
-  actionStyles,
-  type ColumnAction,
-  isDivider,
-} from '../edit-column-popup.js';
+import { actionStyles, isDivider } from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
   Single = 'single',
 }
 
-export type SelectProperty = {
-  color: string;
-  value: string;
-};
-
-const tagActions: ColumnAction[] = [
+const tagActions: SelectTagAction[] = [
   {
     type: 'rename',
     text: 'Rename',
@@ -50,6 +47,94 @@ const tagActions: ColumnAction[] = [
 
 /** select input max length */
 const INPUT_MAX_LENGTH = 10;
+
+@customElement('affine-database-select-option-text')
+class SelectOptionText extends LitElement {
+  static styles = css`
+    .select-option-text {
+      display: inline-block;
+      min-width: 2px;
+      height: 100%;
+      padding: 2px 10px;
+      background: #fce8ff;
+      border-radius: 4px;
+    }
+    .select-option-text:focus {
+      outline: none;
+    }
+  `;
+
+  @property()
+  databaseModel!: DatabaseBlockModel;
+
+  @property()
+  select!: SelectProperty;
+
+  @property()
+  editing!: boolean;
+
+  @query('.select-option-text')
+  private _container!: HTMLDivElement;
+
+  private _vEditor!: VEditor;
+
+  updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+    if (changedProperties.has('editing') && this.editing) {
+      this._vEditor.focusEnd();
+    }
+  }
+
+  getSelectionValue() {
+    return this._vEditor.yText.toString();
+  }
+
+  firstUpdated() {
+    this._vEditor = new VEditor(this.select.value, {
+      defaultMode: 'pure',
+    });
+    this._vEditor.mount(this._container);
+    this._vEditor.bindHandlers({
+      virgoInput: this._handleInput,
+      paste: this._handlePaste,
+    });
+  }
+
+  private _handleInput = (event: InputEvent) => {
+    const length = this._vEditor.yText.length;
+    if (length >= INPUT_MAX_LENGTH && event.data) {
+      // prevent input
+      return true;
+    }
+    return false;
+  };
+
+  private _handlePaste = (event: ClipboardEvent) => {
+    const length = this._vEditor.yText.length;
+    const restLength = INPUT_MAX_LENGTH - length;
+    if (restLength <= 0) return;
+
+    const data = event.clipboardData?.getData('text/plain');
+    if (!data) return;
+
+    const vRange = this._vEditor.getVRange();
+    const text = data.length > restLength ? data.slice(0, restLength) : data;
+    if (vRange) {
+      this._vEditor.insertText(vRange, text);
+      this._vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
+    }
+  };
+
+  render() {
+    const style = styleMap({
+      backgroundColor: this.select.color,
+    });
+    return html`<div class="select-option-text" style=${style}></div>`;
+  }
+}
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement<SelectProperty[]> {
@@ -135,7 +220,7 @@ class SelectAction extends LitElement {
   index!: number;
 
   @property()
-  onAction!: (type: string, index: number) => void;
+  onAction!: (type: SelectTagActionName, index: number) => void;
 
   render() {
     return html`
@@ -147,7 +232,7 @@ class SelectAction extends LitElement {
           return html`
             <div
               class="action ${action.type}"
-              @click=${() => this.onAction(action.type, this.index)}
+              @mousedown=${() => this.onAction(action.type, this.index)}
             >
               <div class="action-content">
                 ${action.icon}<span>${action.text}</span>
@@ -285,7 +370,16 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
       background: rgba(0, 0, 0, 0.04);
     }
     .select-option-icon svg {
+      width: 16px;
+      height: 16px;
       pointer-events: none;
+    }
+    .editing {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .editing .select-option-icon {
+      display: flex;
+      background: rgba(0, 0, 0, 0.08);
     }
   `;
   static tag = literal`affine-database-select-cell-editing`;
@@ -299,6 +393,11 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
   @state()
   private _inputValue = '';
 
+  @state()
+  private _editingIndex = -1;
+
+  @query('.select-option-container')
+  private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
 
   get isSingleMode() {
@@ -358,6 +457,8 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
     selectedValue: SelectProperty[],
     select: SelectProperty
   ) => {
+    // when editing, do not select
+    if (this._editingIndex !== -1) return;
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
     if (!isSelected) {
@@ -420,8 +521,26 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
     });
   };
 
-  private _onSelectAction = (type: string, index: number) => {
-    // TODO
+  private _onSelectAction = (type: SelectTagActionName, index: number) => {
+    if (type === 'rename') {
+      this._editingIndex = index;
+      return;
+    }
+
+    if (type === 'delete') {
+      const selection = [
+        ...(this.columnSchema.property.selection as SelectProperty[]),
+      ];
+      this.databaseModel.page.updateColumnSchema({
+        ...this.columnSchema,
+        property: {
+          selection: selection.filter((_, i) => i !== index),
+        },
+      });
+      const select = selection[index];
+      this.databaseModel.page.deleteColumnValue(this.columnSchema.id, select);
+      return;
+    }
   };
 
   private _showSelectAction = (index: number) => {
@@ -457,6 +576,32 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
       () => action.remove(),
       'mousedown'
     );
+  };
+
+  private _onSaveSelectionName = (index: number) => {
+    const selectOption = this._selectOptionContainer
+      .querySelectorAll('affine-database-select-option-text')
+      .item(index) as SelectOptionText;
+
+    const selection = [
+      ...(this.columnSchema.property.selection as SelectProperty[]),
+    ];
+    const oldSelect = selection[index];
+    const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
+    selection[index] = newSelect;
+    this.databaseModel.page.updateColumnSchema({
+      ...this.columnSchema,
+      property: {
+        selection,
+      },
+    });
+    this.databaseModel.page.renameColumnValue(
+      this.columnSchema.id,
+      oldSelect,
+      newSelect
+    );
+
+    this._editingIndex = -1;
   };
 
   override render() {
@@ -518,29 +663,33 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
                 >
               </div>`
             : html``}
-          ${filteredSelection.map((select, index) => {
-            const style = styleMap({
-              backgroundColor: select.color,
-            });
-            return html`
-              <div class="select-option">
-                <div
-                  class="select-option-text-container"
-                  @click=${() => this._onSelect(selectedTag, select)}
-                >
-                  <span class="select-option-text" style=${style}
-                    >${select.value}</span
+          ${repeat(
+            filteredSelection,
+            item => item,
+            (select, index) => {
+              const isEditing = index === this._editingIndex;
+              const onOptionIconClick = isEditing
+                ? () => this._onSaveSelectionName(index)
+                : () => this._showSelectAction(index);
+              return html`
+                <div class="select-option ${isEditing ? 'editing' : ''}">
+                  <div
+                    class="select-option-text-container"
+                    @click=${() => this._onSelect(selectedTag, select)}
                   >
+                    <affine-database-select-option-text
+                      .databaseModel=${this.databaseModel}
+                      .select=${select}
+                      .editing=${index === this._editingIndex}
+                    ></affine-database-select-option-text>
+                  </div>
+                  <div class="select-option-icon" @click=${onOptionIconClick}>
+                    ${isEditing ? DatabaseDone : MoreHorizontalIcon}
+                  </div>
                 </div>
-                <div
-                  class="select-option-icon"
-                  @click=${() => this._showSelectAction(index)}
-                >
-                  ${MoreHorizontalIcon}
-                </div>
-              </div>
-            `;
-          })}
+              `;
+            }
+          )}
         </div>
       </div>
     `;
