@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   getBlockElementsExcludeSubtrees,
-  getDropZoneByBlockAndPoint,
+  getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
@@ -600,7 +600,7 @@ export class DragHandle extends LitElement {
 
     if (element) {
       const model = getModelByBlockElement(element);
-      rect = getDropZoneByBlockAndPoint(model, element, point);
+      rect = getDropRectByPoint(point, model, element);
 
       lastModelState = {
         rect,

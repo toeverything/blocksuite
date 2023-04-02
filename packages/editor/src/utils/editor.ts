@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/blocks';
 import {
   getHoveringFrame,
-  isPointInEmptyDatabase,
+  isInEmptyDatabaseByPoint,
   Point,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -49,16 +49,14 @@ export const createBlockHub: (
         const { rect, model, element } = end;
 
         let ids: string[] = [];
-        let shouldMove = true;
-        if (isPointInEmptyDatabase(model, element, point, blocks))
-          shouldMove = false;
-        page.captureSync();
-        ids = page.addBlocks(blocks, model);
 
-        if (shouldMove) {
+        page.captureSync();
+
+        if (isInEmptyDatabaseByPoint(point, model, element, blocks)) {
+          ids = page.addBlocks(blocks, model);
+        } else {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
-          page.captureSync();
           ids = page.addSiblingBlocks(
             model,
             blocks,

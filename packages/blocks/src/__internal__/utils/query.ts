@@ -920,10 +920,10 @@ export function getDatabaseBlockRowsElement(element: Element) {
 /**
  * Gets the drop rect by block and point.
  */
-export function getDropZoneByBlockAndPoint(
+export function getDropRectByPoint(
+  point: Point,
   model: BaseBlockModel,
-  element: Element,
-  point: Point
+  element: Element
 ) {
   let rect = getRectByBlockElement(element);
   // If the database is empty and the point is inside the database
@@ -950,10 +950,10 @@ export function getDropZoneByBlockAndPoint(
 /**
  * Returns `true` if the point is inside the empty database.
  */
-export function isPointInEmptyDatabase(
+export function isInEmptyDatabaseByPoint(
+  point: Point,
   model: BaseBlockModel,
   element: Element,
-  point: Point,
   blocks: BaseBlockModel[]
 ) {
   if (matchFlavours(model, ['affine:database'] as const)) {

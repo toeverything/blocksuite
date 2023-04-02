@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
-  getDropZoneByBlockAndPoint,
+  getDropRectByPoint,
   getModelByBlockElement,
   NonShadowLitElement,
   Point,
@@ -726,7 +726,7 @@ export class BlockHub extends NonShadowLitElement {
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      targetRect = getDropZoneByBlockAndPoint(model, element, point);
+      targetRect = getDropRectByPoint(point, model, element);
 
       lastModelState = {
         model,

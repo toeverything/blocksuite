@@ -9,7 +9,7 @@ import {
   getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
-  isPointInEmptyDatabase,
+  isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -503,24 +503,20 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (!editingState) return;
       const { rect, model, element } = editingState;
       const page = defaultPageBlock.page;
-      if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
+      const models = blocks.map(b => b.model);
+      if (models.length === 1 && doesInSamePath(page, model, models[0])) {
         return;
       }
 
-      const models = blocks.map(b => b.model);
-      let shouldMove = true;
-      if (isPointInEmptyDatabase(model, element, point, models)) {
-        shouldMove = false;
-        page.captureSync();
-        page.moveBlocks(models, model);
-      }
+      page.captureSync();
 
-      if (shouldMove) {
+      if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+        page.moveBlocks(models, model);
+      } else {
         const distanceToTop = Math.abs(rect.top - point.y);
         const distanceToBottom = Math.abs(rect.bottom - point.y);
         const parent = page.getParent(model);
         assertExists(parent);
-        page.captureSync();
         page.moveBlocks(
           models,
           parent,

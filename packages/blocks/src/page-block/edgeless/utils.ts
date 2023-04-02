@@ -9,7 +9,7 @@ import {
   doesInSamePath,
   getClosestBlockElementByPoint,
   getHoveringFrame,
-  isPointInEmptyDatabase,
+  isInEmptyDatabaseByPoint,
   Rect,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -171,37 +171,33 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       const page = pageBlock.page;
       if (editingState) {
         const { rect, model, element } = editingState;
-        if (
-          blocks.length === 1 &&
-          doesInSamePath(page, model, blocks[0].model)
-        ) {
+        const models = blocks.map(b => b.model);
+        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
 
-        const models = blocks.map(b => b.model);
-        let shouldMove = true;
-        if (isPointInEmptyDatabase(model, element, point, models)) {
-          shouldMove = false;
-          page.captureSync();
-          page.moveBlocks(models, model);
-          pageBlock.setSelectionByBlockId(model.id, true);
-        }
+        let parentId;
 
-        if (shouldMove) {
+        page.captureSync();
+
+        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+          page.moveBlocks(models, model);
+          parentId = model.id;
+        } else {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
-          page.captureSync();
           page.moveBlocks(
             models,
             parent,
             model,
             distanceToTop < distanceToBottom
           );
-          pageBlock.setSelectionByBlockId(parent.id, true);
+          parentId = parent.id;
         }
 
+        pageBlock.setSelectionByBlockId(parentId, true);
         return;
       }
 
