@@ -46,7 +46,7 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
 
     if (clipboardData) {
       items.forEach((item: ClipboardItem, index) => {
-        clipboardData?.items[index].getAsString(data => {
+        clipboardData?.items[index]?.getAsString(data => {
           dv.innerText += `x${index}x${data}`;
         });
 
