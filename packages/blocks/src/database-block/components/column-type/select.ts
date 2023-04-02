@@ -171,7 +171,7 @@ class SelectCell extends DatabaseCellLitElement<SelectProperty[]> {
       <div
         class="affine-database-select-cell-container"
         style=${styleMap({
-          maxWidth: `${this.columnSchema.internalProperty.width}px`,
+          maxWidth: `${this.columnSchema.width}px`,
         })}
       >
         ${values.map(item => {
@@ -405,7 +405,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
   }
 
   protected firstUpdated() {
-    // this.style.width = `${this.columnSchema.internalProperty.width}px`;
+    // this.style.width = `${this.columnSchema.width}px`;
     this.style.width = `${345}px`;
     this._selectInput.focus();
   }
@@ -528,9 +528,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
     }
 
     if (type === 'delete') {
-      const selection = [
-        ...(this.columnSchema.property.selection as SelectProperty[]),
-      ];
+      const selection = [...(this.columnSchema.selection as SelectProperty[])];
       this.databaseModel.page.updateColumnSchema({
         ...this.columnSchema,
         property: {
@@ -583,9 +581,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
       .querySelectorAll('affine-database-select-option-text')
       .item(index) as SelectOptionText;
 
-    const selection = [
-      ...(this.columnSchema.property.selection as SelectProperty[]),
-    ];
+    const selection = [...(this.columnSchema.selection as SelectProperty[])];
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
@@ -605,7 +601,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
   };
 
   override render() {
-    const selection = this.columnSchema.property.selection as SelectProperty[];
+    const selection = this.columnSchema.selection as SelectProperty[];
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {
         return true;

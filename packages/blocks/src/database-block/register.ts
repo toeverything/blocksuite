@@ -37,11 +37,6 @@ export interface ColumnSchemaRenderer<
   components: ColumnUIComponents;
 }
 
-export type RendererToColumnSchema<Renderer extends ColumnSchemaRenderer> =
-  Renderer extends ColumnSchemaRenderer<infer Type, infer Property, infer Value>
-    ? ColumnSchema<Type, Property, Value>
-    : never;
-
 /**
  * @internal
  */
