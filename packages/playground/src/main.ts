@@ -47,6 +47,12 @@ function subscribePage(workspace: Workspace) {
       }
       editor.page = page;
     });
+    editor.slots.onLinkPage.on(({ pageId }) => {
+      console.log('onLinkPage', page);
+    });
+    editor.slots.onUnlinkPage.on(({ pageId }) => {
+      console.log('onUnlinkPage', page);
+    });
 
     document.getElementById('app')?.append(editor);
 

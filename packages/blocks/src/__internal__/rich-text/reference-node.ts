@@ -1,7 +1,11 @@
 import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { DeltaOperation, PageMeta } from '@blocksuite/store';
+import type {
+  BaseBlockModel,
+  DeltaOperation,
+  PageMeta,
+} from '@blocksuite/store';
 import {
   type DeltaInsert,
   ZERO_WIDTH_NON_JOINER,
@@ -81,8 +85,9 @@ export class AffineReference extends NonShadowLitElement {
   host!: BlockHost<RefNodeSlots>;
 
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
-  @state()
   private _refMeta?: PageMeta;
+
+  private _model?: BaseBlockModel;
 
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
@@ -99,6 +104,7 @@ export class AffineReference extends NonShadowLitElement {
       );
     }
     const model = getModelByElement(this);
+    this._model = model;
     const refAttribute = this.delta.attributes?.reference;
     assertExists(refAttribute, 'Failed to get reference attribute!');
     this._refAttribute = refAttribute;
@@ -133,9 +139,10 @@ export class AffineReference extends NonShadowLitElement {
     if (this._refAttribute.type !== 'Subpage') {
       return;
     }
-    const model = getModelByElement(this);
+    const model = this._model;
+    assertExists(model, 'Failed to get model!');
     const text = model.text;
-    assertExists(text, 'Unable to get text!');
+    assertExists(text, 'Failed to get text');
     const delta = text.toDelta();
 
     if (!isRefPageInDelta(delta, this._refAttribute.pageId)) {
