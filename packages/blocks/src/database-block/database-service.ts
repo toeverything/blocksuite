@@ -35,7 +35,6 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const tagColumnId = page.updateColumnSchema({
       name: 'Tag',
       type: 'multi-select',
-      color: '#ff0000',
       width: 200,
       hide: false,
       selection: [],

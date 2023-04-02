@@ -57,7 +57,7 @@ export class DatabaseCellContainer
     this.databaseModel.page.captureSync();
     this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
-      property: newProperty,
+      ...newProperty,
     });
   }
 
