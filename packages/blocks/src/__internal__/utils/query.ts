@@ -654,11 +654,11 @@ export function getClosestBlockElementByPoint(
     // Database
     if (isDatabase(element)) {
       bounds = element.getBoundingClientRect();
-      childBounds = element
-        .querySelector('.affine-database-block-rows')
-        ?.getBoundingClientRect();
+      const rows = getDatabaseBlockRowsElement(element);
+      assertExists(rows);
+      childBounds = rows.getBoundingClientRect();
 
-      if (childBounds && childBounds.height) {
+      if (childBounds.height) {
         if (point.y < childBounds.top || point.y > childBounds.bottom) {
           return element;
         }
@@ -899,15 +899,22 @@ export function isEmptyDatabase(model: BaseBlockModel) {
 /**
  * Gets the table of the database.
  */
-export function getDatabaseBlockTable(element: Element) {
+export function getDatabaseBlockTableElement(element: Element) {
   return element.querySelector('.affine-database-block-table');
 }
 
 /**
  * Gets the column header of the database.
  */
-export function getDatabaseBlockColumnHeader(element: Element) {
+export function getDatabaseBlockColumnHeaderElement(element: Element) {
   return element.querySelector('.affine-database-column-header');
+}
+
+/**
+ * Gets the rows of the database.
+ */
+export function getDatabaseBlockRowsElement(element: Element) {
+  return element.querySelector('.affine-database-block-rows');
 }
 
 /**
@@ -921,11 +928,11 @@ export function getDropZoneByBlockAndPoint(
   let rect = getRectByBlockElement(element);
   // If the database is empty and the point is inside the database
   if (isEmptyDatabase(model)) {
-    const table = getDatabaseBlockTable(element);
+    const table = getDatabaseBlockTableElement(element);
     assertExists(table);
     const bounds = table.getBoundingClientRect();
     if (bounds.top <= point.y && point.y <= bounds.bottom) {
-      const header = getDatabaseBlockColumnHeader(element);
+      const header = getDatabaseBlockColumnHeaderElement(element);
       assertExists(header);
       const headerBounds = header.getBoundingClientRect();
       rect = new DOMRect(
@@ -958,7 +965,7 @@ export function isPointInEmptyDatabase(
     }
 
     if (model.isEmpty()) {
-      const table = getDatabaseBlockTable(element);
+      const table = getDatabaseBlockTableElement(element);
       assertExists(table);
       const bounds = table.getBoundingClientRect();
       if (bounds.top <= point.y && point.y <= bounds.bottom) {
