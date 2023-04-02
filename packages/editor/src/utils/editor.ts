@@ -53,7 +53,7 @@ export const createBlockHub: (
         if (isPointInEmptyDatabase(model, element, point, blocks))
           shouldMove = false;
         page.captureSync();
-        ids = page.addBlocksByFlavour(blocks, model);
+        ids = page.addBlocks(blocks, model);
 
         if (shouldMove) {
           const distanceToTop = Math.abs(rect.top - point.y);

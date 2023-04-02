@@ -184,6 +184,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           shouldMove = false;
           page.captureSync();
           page.moveBlocks(models, model);
+          pageBlock.setSelectionByBlockId(model.id, true);
         }
 
         if (shouldMove) {
