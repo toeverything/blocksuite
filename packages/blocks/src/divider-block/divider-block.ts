@@ -2,7 +2,11 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type BlockHost, NonShadowLitElement } from '../__internal__/index.js';
+import {
+  asyncFocusRichText,
+  type BlockHost,
+  NonShadowLitElement,
+} from '../__internal__/index.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { DividerBlockModel } from './divider-model.js';
 
@@ -32,6 +36,13 @@ export class DividerBlockComponent extends NonShadowLitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+    const { page } = this.model;
+    const nextSibling = page.getNextSibling(this.model);
+    const parent = page.getParent(this.model);
+    if (!nextSibling) {
+      const id = page.addBlock('affine:paragraph', {}, parent);
+      asyncFocusRichText(page, id);
+    }
   }
 
   render() {
