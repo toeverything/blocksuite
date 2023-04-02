@@ -342,7 +342,7 @@ export async function focusDatabaseTitle(page: Page) {
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
   const columns = await page.evaluate(async () => {
     const database = window.page?.getBlockById('2') as DatabaseBlockModel;
-    return database.columns;
+    return database.cells;
   });
   expect(columns).toEqual(order);
 }
