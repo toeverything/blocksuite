@@ -43,7 +43,13 @@ import {
 } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
-import { onClickOutside } from './utils.js';
+import type {
+  DatabaseTypeAction,
+  DatabaseTypeActionName,
+  ToolbarAction,
+  ToolbarActionName,
+} from './types.js';
+import { isDivider, onClickOutside } from './utils.js';
 
 type ColumnValues = string[];
 
@@ -83,16 +89,6 @@ if (once) {
   once = false;
 }
 
-type DividerAction = {
-  type: 'divider';
-};
-type ToolbarActionType = {
-  type: 'database-type' | 'copy' | 'delete-database';
-  text: string;
-  icon: TemplateResult;
-};
-type ToolbarAction = ToolbarActionType | DividerAction;
-
 const toolbarActions: ToolbarAction[] = [
   {
     type: 'database-type',
@@ -113,11 +109,8 @@ const toolbarActions: ToolbarAction[] = [
     icon: DeleteIcon,
   },
 ];
-function isDivider(action: ToolbarAction): action is DividerAction {
-  return action.type === 'divider';
-}
 
-const databaseTypes = [
+const databaseTypes: DatabaseTypeAction[] = [
   {
     type: 'table-view',
     text: 'Table View',
@@ -179,7 +172,7 @@ class DatabaseTypePopup extends LitElement {
   `;
 
   @property()
-  columnType: string | undefined;
+  dbType: DatabaseTypeActionName | undefined;
 
   render() {
     return html`
@@ -190,7 +183,7 @@ class DatabaseTypePopup extends LitElement {
         <div class="action-divider"></div>
         ${databaseTypes.map(column => {
           const isKanban = column.type === 'kanban-view';
-          const selected = column.type === this.columnType && !isKanban;
+          const selected = column.type === this.dbType && !isKanban;
 
           return html`
             <div
@@ -249,7 +242,10 @@ class ToolbarActionPopup extends LitElement {
 
   private _databaseTypePopup!: DatabaseTypePopup | null;
 
-  private _onActionClick = (event: MouseEvent, actionType: string) => {
+  private _onActionClick = (
+    event: MouseEvent,
+    actionType: ToolbarActionName
+  ) => {
     event.stopPropagation();
     // console.log('action click');
     if (actionType === 'delete-database') {
@@ -262,7 +258,7 @@ class ToolbarActionPopup extends LitElement {
   private _onShowDatabaseType = () => {
     if (this._databaseTypePopup) return;
     this._databaseTypePopup = new DatabaseTypePopup();
-    this._databaseTypePopup.columnType = 'table-view';
+    this._databaseTypePopup.dbType = 'table-view';
     this._container.appendChild(this._databaseTypePopup);
     createPopper(this._container, this._databaseTypePopup, {
       placement: 'right-start',

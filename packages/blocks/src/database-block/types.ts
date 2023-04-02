@@ -7,7 +7,13 @@ export type ColumnType = {
   icon: TemplateResult;
 };
 
-export type ActionName =
+/** database toolbar */
+export type ToolbarActionName = 'database-type' | 'copy' | 'delete-database';
+/** database type */
+export type DatabaseTypeActionName = 'table-view' | 'kanban-view';
+
+/** database column */
+export type ColumnActionName =
   | 'rename'
   | 'column-type'
   | 'duplicate'
@@ -17,7 +23,13 @@ export type ActionName =
   | 'move-right'
   | 'delete';
 
-type CommonEditAction<T extends ActionName = ActionName> = {
+/** all database action */
+type DatabaseAction =
+  | ColumnActionName
+  | ToolbarActionName
+  | DatabaseTypeActionName;
+
+type CommonAction<T extends DatabaseAction> = {
   type: T;
   text: string;
   icon: TemplateResult;
@@ -27,15 +39,21 @@ export type DividerAction = {
   type: 'divider';
 };
 
+export type AnyDatabaseAction = DividerAction | CommonAction<DatabaseAction>;
+
 /** none title column type action */
-export type ColumnAction = DividerAction | CommonEditAction;
+export type ColumnAction = DividerAction | CommonAction<ColumnActionName>;
 
 /** title column action */
 export type TitleColumnActionName = 'rename' | 'insert-right';
-export type TitleColumnAction = CommonEditAction<TitleColumnActionName>;
+export type TitleColumnAction = CommonAction<TitleColumnActionName>;
 
 /** select tag action */
 export type SelectTagActionName = 'rename' | 'delete';
-export type SelectTagAction =
-  | DividerAction
-  | CommonEditAction<SelectTagActionName>;
+export type SelectTagAction = DividerAction | CommonAction<SelectTagActionName>;
+
+/** database toolbar action */
+export type ToolbarAction = DividerAction | CommonAction<ToolbarActionName>;
+
+/** database type action */
+export type DatabaseTypeAction = CommonAction<DatabaseTypeActionName>;

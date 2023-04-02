@@ -27,12 +27,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { getColumnSchemaRenderer } from '../register.js';
 import type {
-  ActionName,
   ColumnAction,
+  ColumnActionName,
   ColumnType,
-  DividerAction,
   TitleColumnAction,
 } from '../types.js';
+import { isDivider } from '../utils.js';
 
 export const actionStyles = css`
   .action {
@@ -153,10 +153,6 @@ const titleColumnActions: TitleColumnAction[] = [
     icon: DatabaseInsertRight,
   },
 ];
-
-export function isDivider(action: ColumnAction): action is DividerAction {
-  return action.type === 'divider';
-}
 
 function isTitleColumn(
   columnSchema: ColumnSchema | string
@@ -388,7 +384,7 @@ export class EditColumnPopup extends LitElement {
     this.closePopup();
   };
 
-  private _onActionClick = (actionType: ActionName, columnId: string) => {
+  private _onActionClick = (actionType: ColumnActionName, columnId: string) => {
     if (actionType === 'rename') {
       this.setTitleColumnEditId(columnId);
       this.closePopup();
