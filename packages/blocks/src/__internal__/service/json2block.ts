@@ -139,6 +139,8 @@ export async function addSerializedBlocks(
 ) {
   const addedBlockIds: string[] = [];
   const pendingModels: { model: BaseBlockModel; json: SerializedBlock }[] = [];
+  const dv = document.createElement('div');
+  document.querySelector('.affine-block-children-container')?.appendChild(dv);
 
   for (let i = 0; i < serializedBlocks.length; i++) {
     const json = serializedBlocks[i];
@@ -159,6 +161,8 @@ export async function addSerializedBlocks(
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
     assertExists(model);
+
+    dv.innerText += JSON.stringify(id);
 
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
