@@ -1002,11 +1002,7 @@ export class DatabaseBlockComponent
   }
 
   private _onShowTitleTooltip = () => {
-    // const vEditorEl = this._titleContainer.querySelector(
-    //   '[data-virgo-text="true"]'
-    // );
-    // assertExists(vEditorEl);
-    // vEditorEl.classList.add('has-tool-tip');
+    // TODO: show tooltip according to title content(vEditor)
   };
 
   private _getDatabaseMap() {
@@ -1313,16 +1309,16 @@ export class DatabaseBlockComponent
               this._filteredRowIds,
               this._searchState
             )}
-            <div class="affine-database-block-footer">
-              <div
-                class="affine-database-block-add-row"
-                data-test-id="affine-database-add-row-button"
-                role="button"
-                @click=${() => this._addRow()}
-              >
-                ${PlusIcon}<span>New Record</span>
-              </div>
-            </div>
+          </div>
+        </div>
+        <div class="affine-database-block-footer">
+          <div
+            class="affine-database-block-add-row"
+            data-test-id="affine-database-add-row-button"
+            role="button"
+            @click=${() => this._addRow()}
+          >
+            ${PlusIcon}<span>New Record</span>
           </div>
         </div>
 
