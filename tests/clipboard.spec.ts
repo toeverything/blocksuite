@@ -521,7 +521,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "4",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >
@@ -535,7 +534,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "10",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >
@@ -562,7 +560,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "4",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >
