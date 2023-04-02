@@ -501,11 +501,15 @@ test('should copy and paste of database work', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', true);
 
   await selectAllByKeyboard(page);
+  await waitNextFrame(page);
   await selectAllByKeyboard(page);
-  await page.keyboard.press(`${SHORT_KEY}+c`);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
 
   await focusRichText(page, 1);
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
@@ -517,7 +521,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "4",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >
@@ -531,7 +534,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "10",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >
@@ -558,7 +560,6 @@ test('should copy and paste of database work', async ({ page }) => {
           "4",
         ]
       }
-      prop:mode={2}
       prop:title="Database 1"
       prop:titleColumn="Title"
     >

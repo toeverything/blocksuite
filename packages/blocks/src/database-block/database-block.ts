@@ -16,11 +16,7 @@ import {
   ColumnInsertPosition,
   type ColumnSchema,
 } from '@blocksuite/global/database';
-import {
-  assertEquals,
-  assertExists,
-  DisposableGroup,
-} from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css, type TemplateResult } from 'lit';
@@ -36,7 +32,6 @@ import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
@@ -362,7 +357,6 @@ function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
-  assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
 
   const filteredChildren =
     searchState === SearchState.Searching
