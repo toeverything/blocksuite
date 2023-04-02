@@ -731,8 +731,8 @@ export class Page extends Space<FlatBlockMap> {
     // TODO use schema
     if (model.flavour === 'affine:database') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<unknown>
+      (model as any).cells = (
+        yBlock.get('prop:cells') as Y.Array<unknown>
       ).toArray();
     }
 
