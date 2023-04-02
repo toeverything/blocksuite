@@ -505,22 +505,28 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
         return;
       }
-      page.captureSync();
 
       let shouldMove = true;
-      if (
-        matchFlavours(model, ['affine:database']) &&
-        (model as BaseBlockModel).empty()
-      ) {
-        const bounds = element
-          .querySelector('.affine-database-block-table')
-          ?.getBoundingClientRect();
-        if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-          shouldMove = false;
-          page.moveBlocks(
-            blocks.map(b => b.model),
-            model
-          );
+      if (matchFlavours(model, ['affine:database'])) {
+        // Currently, nested databases are not supported
+        if (
+          blocks.some(block => matchFlavours(block.model, ['affine:database']))
+        ) {
+          return;
+        }
+
+        if ((model as BaseBlockModel).empty()) {
+          const bounds = element
+            .querySelector('.affine-database-block-table')
+            ?.getBoundingClientRect();
+          if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
+            shouldMove = false;
+            page.captureSync();
+            page.moveBlocks(
+              blocks.map(b => b.model),
+              model
+            );
+          }
         }
       }
 
@@ -529,6 +535,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         const distanceToBottom = Math.abs(rect.bottom - point.y);
         const parent = page.getParent(model);
         assertExists(parent);
+        page.captureSync();
         page.moveBlocks(
           blocks.map(b => b.model),
           parent,

@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/blocks';
 import { getHoveringFrame, Point, Rect } from '@blocksuite/blocks/std';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -43,27 +43,34 @@ export const createBlockHub: (
       if (end) {
         const { rect, model, element } = end;
 
-        page.captureSync();
-
-        // TODO: Nested Database
         let ids: string[] = [];
         let shouldMove = true;
-        if (
-          matchFlavours(model, ['affine:database']) &&
-          (model as BaseBlockModel).empty()
-        ) {
-          const bounds = element
-            .querySelector('.affine-database-block-table')
-            ?.getBoundingClientRect();
-          if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-            shouldMove = false;
-            ids = page.addBlocksByFlavour(blocks, model);
+        if (matchFlavours(model, ['affine:database'])) {
+          // Currently, nested databases are not supported
+          if (
+            blocks.some(block =>
+              matchFlavours(block.model, ['affine:database'])
+            )
+          ) {
+            return;
+          }
+
+          if ((model as BaseBlockModel).empty()) {
+            const bounds = element
+              .querySelector('.affine-database-block-table')
+              ?.getBoundingClientRect();
+            if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
+              shouldMove = false;
+              page.captureSync();
+              ids = page.addBlocksByFlavour(blocks, model);
+            }
           }
         }
 
         if (shouldMove) {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
+          page.captureSync();
           ids = page.addSiblingBlocks(
             model,
             blocks,

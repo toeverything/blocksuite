@@ -178,24 +178,27 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           return;
         }
 
-        page.captureSync();
-
-        // TODO: Nested Database
         let shouldMove = true;
         if (matchFlavours(model, ['affine:database'])) {
+          // Currently, nested databases are not supported
+          if (
+            blocks.some(block =>
+              matchFlavours(block.model, ['affine:database'])
+            )
+          ) {
+            return;
+          }
+
           if ((model as BaseBlockModel).empty()) {
             const bounds = element
               .querySelector('.affine-database-block-table')
               ?.getBoundingClientRect();
             if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
               shouldMove = false;
+              page.captureSync();
               page.moveBlocks(
                 blocks.map(b => b.model),
                 model
-              );
-              pageBlock.setSelectionByBlockId(
-                (model as BaseBlockModel).id,
-                true
               );
             }
           }
@@ -206,6 +209,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
+          page.captureSync();
           page.moveBlocks(
             blocks.map(b => b.model),
             parent,
