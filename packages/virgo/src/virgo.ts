@@ -175,6 +175,7 @@ export class VEditor<
 
   unmount() {
     this._eventService.unmount();
+    this.yText.unobserve(this._onYTextChange);
 
     this._rootElement?.replaceChildren();
     this._rootElement = null;
