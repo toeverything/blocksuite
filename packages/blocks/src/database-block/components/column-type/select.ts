@@ -22,8 +22,8 @@ import {
   defineColumnSchemaRenderer,
 } from '../../register.js';
 import type { SelectTagAction, SelectTagActionName } from '../../types.js';
-import { getTagColor, onClickOutside } from '../../utils.js';
-import { actionStyles, isDivider } from '../edit-column-popup.js';
+import { getTagColor, isDivider, onClickOutside } from '../../utils.js';
+import { actionStyles } from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
