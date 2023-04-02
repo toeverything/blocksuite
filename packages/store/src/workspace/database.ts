@@ -126,10 +126,10 @@ export class DatabaseManager {
           const value = yCell.get('value');
           if (!value) return;
 
-          const yNewCell = new Y.Map();
-          yNewCell.set('columnId', columnId);
-          yNewCell.set('value', new Y.Text((value as number) + ''));
-          yNewCell.set(columnId, yNewCell);
+          const yRow = new Y.Map();
+          yRow.set('columnId', columnId);
+          yRow.set('value', new Y.Text((value as number) + ''));
+          yRow.set(columnId, yRow);
         }
       });
     });
@@ -142,7 +142,7 @@ export class DatabaseManager {
   ) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
-        const yCell = (yRow.get(columnId) as Y.Map<SelectTag[]>) ?? null;
+        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]> | undefined;
         if (!yCell) return;
 
         const selected = yCell.get('value') as SelectTag[];
@@ -161,7 +161,7 @@ export class DatabaseManager {
   deleteSelectedCellTag(columnId: ColumnSchema['id'], target: SelectTag) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
-        const yCell = (yRow.get(columnId) as Y.Map<SelectTag[]>) ?? null;
+        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]> | undefined;
         if (!yCell) return;
 
         const selected = yCell.get('value') as SelectTag[];

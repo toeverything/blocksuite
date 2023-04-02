@@ -160,7 +160,7 @@ export const database: InitFn = (workspace: Workspace) => {
   const databaseId = page.addBlock(
     'affine:database',
     {
-      cells: [col1, col2, col3],
+      columns: [col1, col2, col3],
       titleColumn: 'Title',
     },
     frameId

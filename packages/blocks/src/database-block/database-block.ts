@@ -668,7 +668,7 @@ export class DatabaseBlockComponent
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): ColumnSchema[] {
-    return this.model.cells.map(id =>
+    return this.model.columns.map(id =>
       this.model.page.db.getColumnSchema(id)
     ) as ColumnSchema[];
   }
@@ -823,10 +823,10 @@ export class DatabaseBlockComponent
       ...renderer.propertyCreator(),
     };
     const id = this.model.page.db.updateColumnSchema(schema);
-    const newColumns = [...this.model.cells];
+    const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
-      cells: newColumns,
+      columns: newColumns,
     });
 
     requestAnimationFrame(() => {
@@ -889,7 +889,6 @@ export class DatabaseBlockComponent
     </div>`;
   };
 
-  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const totalWidth =
       this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
