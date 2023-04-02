@@ -90,8 +90,8 @@ function getOptimalClipboardData(
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
-
-    dv.innerText += data;
+    dv.innerText +=
+      `${clipboardData?.getData('blocksuite/x-c+w')}|${mimeType}:` + data;
 
     if (data) {
       return {
@@ -117,10 +117,6 @@ export async function clipboardData2Blocks(
   }
 
   const optimalClipboardData = getOptimalClipboardData(clipboardData);
-
-  const dv = document.createElement('div');
-  document.querySelector('.affine-block-children-container')?.appendChild(dv);
-  dv.innerText = JSON.stringify(optimalClipboardData?.data);
 
   if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
     return JSON.parse(optimalClipboardData.data);

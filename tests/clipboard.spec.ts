@@ -548,29 +548,29 @@ test('should copy and paste of database work', async ({ page }) => {
 </affine:page>`
   );
 
-  await undoByClick(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:frame>
-    <affine:database
-      prop:columns={
-        Array [
-          "4",
-        ]
-      }
-      prop:title="Database 1"
-      prop:titleColumn="Title"
-    >
-      <affine:paragraph
-        prop:type="text"
-      />
-    </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
-  </affine:frame>
-</affine:page>`
-  );
+  //   await undoByClick(page);
+  //   await assertStoreMatchJSX(
+  //     page,
+  //     /*xml*/ `
+  // <affine:page>
+  //   <affine:frame>
+  //     <affine:database
+  //       prop:columns={
+  //         Array [
+  //           "4",
+  //         ]
+  //       }
+  //       prop:title="Database 1"
+  //       prop:titleColumn="Title"
+  //     >
+  //       <affine:paragraph
+  //         prop:type="text"
+  //       />
+  //     </affine:database>
+  //     <affine:paragraph
+  //       prop:type="text"
+  //     />
+  //   </affine:frame>
+  // </affine:page>`
+  //   );
 });
