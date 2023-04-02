@@ -81,10 +81,11 @@ jobs:
 
       - name: Upload test results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
-          name: playwright-report
-          path: playwright-report
+          name: test-results-main
+          path: ./test-results
+          if-no-files-found: ignore
 
   unit-test:
     name: Unit test
@@ -138,7 +139,8 @@ jobs:
 
       - name: Upload test results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
-          name: playwright-report
-          path: playwright-report
+          name: test-results-main
+          path: ./test-results
+          if-no-files-found: ignore
