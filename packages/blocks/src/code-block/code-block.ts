@@ -18,6 +18,7 @@ import {
   NonShadowLitElement,
   queryCurrentMode,
 } from '../__internal__/index.js';
+import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -173,12 +174,13 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _wrap = false;
 
   @state()
-  textSchema = {
+  textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
-    textRenderer: getCodeLineRenderer(() => ({
-      lang: this.model.language.toLowerCase() as Lang,
-      highlighter: this._highlighter,
-    })),
+    textRenderer: () =>
+      getCodeLineRenderer(() => ({
+        lang: this.model.language.toLowerCase() as Lang,
+        highlighter: this._highlighter,
+      })),
   };
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {

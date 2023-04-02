@@ -11,7 +11,10 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -84,7 +87,7 @@ export class ListBlockComponent extends NonShadowLitElement {
   showChildren = true;
 
   @state()
-  textSchema = {
+  textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
   };

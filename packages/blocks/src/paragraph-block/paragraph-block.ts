@@ -14,7 +14,10 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
@@ -178,7 +181,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   private _isFocus = false;
 
   @state()
-  textSchema = {
+  textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
   };
