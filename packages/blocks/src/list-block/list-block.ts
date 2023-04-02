@@ -86,8 +86,7 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
-  @state()
-  textSchema: AffineTextSchema = {
+  readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
   };

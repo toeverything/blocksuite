@@ -12,7 +12,7 @@ import {
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import {
   type BlockHost,

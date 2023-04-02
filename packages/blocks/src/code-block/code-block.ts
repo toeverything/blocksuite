@@ -1,7 +1,7 @@
 import '../__internal__/rich-text/rich-text.js';
-import './components/lang-list.js';
-import './components/code-option.js';
 import '../components/portal.js';
+import './components/code-option.js';
+import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
@@ -173,8 +173,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   private _wrap = false;
 
-  @state()
-  textSchema: AffineTextSchema = {
+  readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
     textRenderer: () =>
       getCodeLineRenderer(() => ({

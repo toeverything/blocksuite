@@ -180,8 +180,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @state()
   private _isFocus = false;
 
-  @state()
-  textSchema: AffineTextSchema = {
+  readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
   };
