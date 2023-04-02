@@ -40,6 +40,13 @@ function subscribePage(workspace: Workspace) {
     const editor = new EditorContainer();
     editor.page = page;
     editor.autofocus = true;
+    editor.slots.onJumpToPage.on(({ pageId }) => {
+      const page = workspace.getPage(pageId);
+      if (!page) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = page;
+    });
 
     document.getElementById('app')?.append(editor);
 
