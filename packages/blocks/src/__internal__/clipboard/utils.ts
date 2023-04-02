@@ -87,11 +87,16 @@ function getOptimalClipboardData(
   const dv = document.createElement('div');
   document.querySelector('.affine-block-children-container')?.appendChild(dv);
 
+  clipboardData?.items[0].getAsString(data => {
+    dv.innerText += `0${data}`;
+  });
+  clipboardData?.items[1].getAsString(data => {
+    dv.innerText += `1${data}`;
+  });
+
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
-    dv.innerText +=
-      `${clipboardData?.getData('blocksuite/x-c+w')}|${mimeType}:` + data;
 
     if (data) {
       return {
