@@ -170,7 +170,6 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     onDropCallback(point, blocks, editingState) {
       const page = pageBlock.page;
       if (editingState) {
-        page.captureSync();
         const { rect, model, element } = editingState;
         if (
           blocks.length === 1 &&
@@ -179,23 +178,30 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           return;
         }
 
-        let shouldInsert = true;
+        page.captureSync();
+
+        // TODO: Nested Database
+        let shouldMove = true;
         if (matchFlavours(model, ['affine:database'])) {
           if ((model as BaseBlockModel).empty()) {
             const bounds = element
-              .querySelector('.affine-database-block')
+              .querySelector('.affine-database-block-table')
               ?.getBoundingClientRect();
             if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-              shouldInsert = false;
+              shouldMove = false;
               page.moveBlocks(
                 blocks.map(b => b.model),
                 model
+              );
+              pageBlock.setSelectionByBlockId(
+                (model as BaseBlockModel).id,
+                true
               );
             }
           }
         }
 
-        if (shouldInsert) {
+        if (shouldMove) {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
@@ -208,14 +214,16 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           );
           pageBlock.setSelectionByBlockId(parent.id, true);
         }
-      } else {
-        // blank area
-        page.captureSync();
-        pageBlock.moveBlocksToNewFrame(
-          blocks.map(b => b.model),
-          point
-        );
+
+        return;
       }
+
+      // blank area
+      page.captureSync();
+      pageBlock.moveBlocksToNewFrame(
+        blocks.map(b => b.model),
+        point
+      );
     },
     setSelectedBlocks(
       selectedBlocks: EditingState | BlockComponentElement[] | null

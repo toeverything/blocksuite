@@ -792,9 +792,7 @@ export function getClosestFrameBlockElementById(
 export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
-  if (isDatabase(element)) {
-    return element.getBoundingClientRect();
-  }
+  if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
 

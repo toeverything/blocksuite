@@ -8,8 +8,8 @@ import {
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import { getHoveringFrame, Point, Rect } from '@blocksuite/blocks/std';
-import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -29,11 +29,10 @@ export const createBlockHub: (
       const data = dataTransfer.getData('affine/block-hub');
       const blocks = [];
       const props = JSON.parse(data);
-      if (props.flavour === 'affine:database') {
-        if (!page.awarenessStore.getFlag('enable_database')) {
-          console.warn('database block is not enabled');
-          return;
-        }
+      const isDatabase = props.flavour === 'affine:database';
+      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
+        console.warn('database block is not enabled');
+        return;
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
         blocks.push(...(await uploadImageFromLocal(page)));
@@ -42,23 +41,43 @@ export const createBlockHub: (
       }
 
       if (end) {
-        const { model, rect } = end;
-        page.captureSync();
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
-        const ids = page.addSiblingBlocks(
-          model,
-          blocks,
-          distanceToTop < distanceToBottom ? 'before' : 'after'
-        );
+        const { rect, model, element } = end;
 
-        // database init basic structure
-        if (props.flavour === 'affine:database') {
-          const service = await getServiceOrRegister(props.flavour);
-          service.initDatabaseBlock(page, model, ids[0]);
+        page.captureSync();
+
+        // TODO: Nested Database
+        let ids: string[] = [];
+        let shouldMove = true;
+        if (
+          matchFlavours(model, ['affine:database']) &&
+          (model as BaseBlockModel).empty()
+        ) {
+          const bounds = element
+            .querySelector('.affine-database-block-table')
+            ?.getBoundingClientRect();
+          if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
+            shouldMove = false;
+            ids = page.addBlocksByFlavour(blocks, model);
+          }
+        }
+
+        if (shouldMove) {
+          const distanceToTop = Math.abs(rect.top - point.y);
+          const distanceToBottom = Math.abs(rect.bottom - point.y);
+          ids = page.addSiblingBlocks(
+            model,
+            blocks,
+            distanceToTop < distanceToBottom ? 'before' : 'after'
+          );
         }
 
         if (ids.length) {
+          // database init basic structure
+          if (isDatabase) {
+            const service = await getServiceOrRegister(props.flavour);
+            service.initDatabaseBlock(page, model, ids[0]);
+          }
+
           asyncFocusRichText(page, ids[0]);
         }
       }

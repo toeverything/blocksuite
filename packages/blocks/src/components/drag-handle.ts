@@ -607,11 +607,11 @@ export class DragHandle extends LitElement {
         (model as BaseBlockModel).empty()
       ) {
         const bounds = element
-          .querySelector('.affine-database-block')
+          .querySelector('.affine-database-block-table')
           ?.getBoundingClientRect();
         if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
           const headerBounds = element
-            .querySelector('.affine-database-block-header')
+            .querySelector('.affine-database-column-header')
             ?.getBoundingClientRect();
           assertExists(headerBounds);
           rect = new DOMRect(
