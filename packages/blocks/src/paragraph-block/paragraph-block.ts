@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type BlockHost,
+  type CommonSlots,
   isPageMode,
   NonShadowLitElement,
 } from '../__internal__/index.js';
@@ -167,7 +168,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   model!: ParagraphBlockModel;
 
   @property()
-  host!: BlockHost;
+  host!: BlockHost<CommonSlots>;
 
   @state()
   private _tipsPlaceholderTemplate = html``;

@@ -2,6 +2,7 @@
 import {
   asyncFocusRichText,
   type BlockHost,
+  type CommonSlots,
   type EditingState,
   hotkey,
   HOTKEY_SCOPE,
@@ -43,6 +44,9 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
+  /**
+   * @deprecated Not used yet
+   */
   codeBlockOptionUpdated?: Slot;
   /**
    * @deprecated Not used yet
@@ -53,7 +57,7 @@ export interface DefaultSelectionSlots {
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
   extends NonShadowLitElement
-  implements BlockHost
+  implements BlockHost<CommonSlots>
 {
   static styles = css`
     .affine-default-viewport {
@@ -166,12 +170,16 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots: DefaultSelectionSlots = {
+  slots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
+
+    onLinkPage: new Slot<{ pageId: string }>(),
+    onUnlinkPage: new Slot<{ pageId: string }>(),
+    onJumpToPage: new Slot<{ pageId: string }>(),
   };
 
   @query('.affine-default-page-block-title')

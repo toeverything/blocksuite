@@ -5,6 +5,7 @@ import './components/edgeless-selected-rect.js';
 import {
   almostEqual,
   type BlockHost,
+  type CommonSlots,
   getClosestFrameBlockElementById,
   type Point,
   resetNativeSelection,
@@ -76,7 +77,7 @@ export interface EdgelessContainer extends HTMLElement {
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
   extends NonShadowLitElement
-  implements EdgelessContainer, BlockHost
+  implements EdgelessContainer, BlockHost<CommonSlots>
 {
   static styles = css`
     .affine-edgeless-page-block-container {
@@ -143,12 +144,16 @@ export class EdgelessPageBlockComponent
 
   clipboard = new EdgelessClipboard(this.page);
 
-  slots: EdgelessSelectionSlots = {
+  slots = {
     viewportUpdated: new Slot(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+
+    onLinkPage: new Slot<{ pageId: string }>(),
+    onUnlinkPage: new Slot<{ pageId: string }>(),
+    onJumpToPage: new Slot<{ pageId: string }>(),
   };
 
   surface!: SurfaceManager;

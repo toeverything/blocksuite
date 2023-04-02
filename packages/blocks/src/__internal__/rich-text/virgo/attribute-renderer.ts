@@ -1,10 +1,10 @@
 import { html } from 'lit';
 
-import type { BlockHost } from '../../index.js';
+import type { BlockHost, CommonSlots } from '../../index.js';
 import type { AffineTextSchema } from './types.js';
 
 export const attributeRenderer: AffineTextSchema['textRenderer'] =
-  (host: BlockHost) => delta => {
+  (host: BlockHost<CommonSlots>) => delta => {
     const defaultTemplate = html`<affine-text
       .host=${host}
       .delta=${delta}

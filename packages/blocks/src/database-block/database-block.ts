@@ -436,9 +436,10 @@ function DataBaseRowContainer(
 @customElement('affine-database')
 export class DatabaseBlockComponent
   extends NonShadowLitElement
-  implements BlockHost
+  implements BlockHost<undefined>
 {
   flavour = 'affine:database' as const;
+  slots: undefined;
   get page() {
     return this.host.page;
   }
@@ -889,7 +890,6 @@ export class DatabaseBlockComponent
     </div>`;
   };
 
-  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const totalWidth =
       this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
@@ -943,6 +943,7 @@ export class DatabaseBlockComponent
           data-test-id="affine-database-add-column-button"
           @click=${() => this._addColumn(this.columns.length)}
         >
+          <!-- Fix move to icon -->
           <svg
             viewBox="0 0 16 16"
             style=${styleMap({
