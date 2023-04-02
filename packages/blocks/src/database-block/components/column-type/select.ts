@@ -537,12 +537,15 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
 
     if (type === 'delete') {
       const selection = [...(this.columnSchema.selection as SelectProperty[])];
-      this.databaseModel.page.updateColumnSchema({
+      this.databaseModel.page.db.updateColumnSchema({
         ...this.columnSchema,
         selection: selection.filter((_, i) => i !== index),
       });
       const select = selection[index];
-      this.databaseModel.page.deleteColumnValue(this.columnSchema.id, select);
+      this.databaseModel.page.db.deleteColumnValue(
+        this.columnSchema.id,
+        select
+      );
       return;
     }
   };
@@ -591,11 +594,11 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
-    this.databaseModel.page.updateColumnSchema({
+    this.databaseModel.page.db.updateColumnSchema({
       ...this.columnSchema,
       selection,
     });
-    this.databaseModel.page.renameColumnValue(
+    this.databaseModel.page.db.renameColumnValue(
       this.columnSchema.id,
       oldSelect,
       newSelect

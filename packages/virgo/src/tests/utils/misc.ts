@@ -35,7 +35,7 @@ export async function getDeltaFromVirgoRichText(
   page: Page,
   index = 0
 ): Promise<DeltaInsert> {
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(100);
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')

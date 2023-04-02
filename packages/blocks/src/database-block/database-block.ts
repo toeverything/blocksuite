@@ -511,7 +511,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   };
 
   private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.updateColumnSchema({
+    this.targetModel.page.db.updateColumnSchema({
       ...column,
       name,
     });
@@ -968,7 +968,7 @@ export class DatabaseBlockComponent
 
   get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
-      this.model.page.getColumnSchema(id)
+      this.model.page.db.getColumnSchema(id)
     ) as ColumnSchema[];
   }
 
@@ -1012,7 +1012,7 @@ export class DatabaseBlockComponent
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const nestedColumns = this.model.page.columnJSON;
+    const nestedColumns = this.model.page.db.columnJSON;
     const rowIds = this.model.children.map(child => child.id);
 
     rowIds.forEach(blockId => {
@@ -1177,7 +1177,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.updateColumnSchema(schema);
+    const id = this.model.page.db.updateColumnSchema(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
