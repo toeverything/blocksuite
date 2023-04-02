@@ -33,16 +33,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
     // default column
     const tagColumnId = page.updateColumnSchema({
-      internalProperty: {
-        color: '#ff0000',
-        width: 200,
-        hide: false,
-      },
-      property: {
-        selection: [],
-      },
       name: 'Tag',
       type: 'multi-select',
+      width: 200,
+      hide: false,
+      selection: [],
     });
     const blockModel = page.getBlockById(databaseId);
     assertExists(blockModel);

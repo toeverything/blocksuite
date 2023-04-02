@@ -312,8 +312,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
                   : ''}"
                 data-column-id="${column.id}"
                 style=${styleMap({
-                  minWidth: `${column.internalProperty.width}px`,
-                  maxWidth: `${column.internalProperty.width}px`,
+                  minWidth: `${column.width}px`,
+                  maxWidth: `${column.width}px`,
                 })}
                 @click=${(event: MouseEvent) =>
                   this._onShowEditColumnPopup(
@@ -818,12 +818,9 @@ export class DatabaseBlockComponent
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
-      internalProperty: {
-        width: 200,
-        hide: false,
-        color: '#000',
-      },
-      property: renderer.propertyCreator(),
+      width: 200,
+      hide: false,
+      ...renderer.propertyCreator(),
     };
     const id = this.model.page.updateColumnSchema(schema);
     const newColumns = [...this.model.columns];
@@ -895,9 +892,7 @@ export class DatabaseBlockComponent
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const totalWidth =
-      this.columns
-        .map(column => column.internalProperty.width)
-        .reduce((t, x) => t + x, 0) +
+      this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
       FIRST_LINE_TEXT_WIDTH +
       ADD_COLUMN_BUTTON_WIDTH;
 
