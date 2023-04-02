@@ -1039,7 +1039,6 @@ export class DatabaseBlockComponent
     }
 
     const databaseMap = this._getDatabaseMap();
-    console.log(databaseMap);
     const existingRowIds = Object.keys(databaseMap).filter(key => {
       return (
         databaseMap[key].findIndex(item =>
