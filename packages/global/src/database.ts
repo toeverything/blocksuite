@@ -66,3 +66,9 @@ export const enum ColumnInsertPosition {
   Left = 'left',
   Right = 'right',
 }
+
+/** select tag property */
+export type SelectProperty = {
+  color: string;
+  value: string;
+};
