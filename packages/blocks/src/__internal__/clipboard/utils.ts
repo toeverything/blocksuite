@@ -84,9 +84,15 @@ export function getFileFromClipboard(clipboardData: DataTransfer) {
 function getOptimalClipboardData(
   clipboardData: ClipboardEvent['clipboardData']
 ) {
+  const dv = document.createElement('div');
+  document.querySelector('.affine-block-children-container')?.appendChild(dv);
+
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
+
+    dv.innerText += data;
+
     if (data) {
       return {
         type: mimeType,
@@ -111,6 +117,10 @@ export async function clipboardData2Blocks(
   }
 
   const optimalClipboardData = getOptimalClipboardData(clipboardData);
+
+  const dv = document.createElement('div');
+  document.querySelector('.affine-block-children-container')?.appendChild(dv);
+  dv.innerText = JSON.stringify(optimalClipboardData?.data);
 
   if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
     return JSON.parse(optimalClipboardData.data);

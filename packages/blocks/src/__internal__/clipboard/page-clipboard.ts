@@ -39,9 +39,6 @@ export class PageClipboard implements Clipboard {
     if (!blocks.length) {
       return;
     }
-    const dv = document.createElement('div');
-    document.querySelector('.affine-block-children-container')?.appendChild(dv);
-    dv.innerText = JSON.stringify(blocks);
     this._page.captureSync();
 
     await deleteModelsByRange(this._page);
