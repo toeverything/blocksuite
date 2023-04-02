@@ -1025,10 +1025,14 @@ export class DatabaseBlockComponent
       if (!columnMap) return;
 
       // Flatten the columnMap into a list of values
-      const columnValues = Object.keys(columnMap).map(
-        key => columnMap[key].value + ''
-      );
-      databaseMap[blockId].push(...columnValues);
+      const columnValues = Object.keys(columnMap).map(key => {
+        const value = columnMap[key].value;
+        if (Array.isArray(value)) {
+          return value.map(item => item.value);
+        }
+        return columnMap[key].value + '';
+      });
+      databaseMap[blockId].push(...columnValues.flat());
     });
 
     return databaseMap;
@@ -1043,6 +1047,7 @@ export class DatabaseBlockComponent
     }
 
     const databaseMap = this._getDatabaseMap();
+    console.log(databaseMap);
     const existingRowIds = Object.keys(databaseMap).filter(key => {
       return (
         databaseMap[key].findIndex(item =>

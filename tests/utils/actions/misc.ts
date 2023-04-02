@@ -335,12 +335,6 @@ export async function getDatabaseMouse(page: Page) {
   };
 }
 
-export async function focusDatabaseSearch(page: Page) {
-  const searchIcon = page.locator('.affine-database-search-input-icon');
-  await searchIcon.click();
-  return searchIcon;
-}
-
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();

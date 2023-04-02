@@ -166,14 +166,12 @@ test('should show or hide database toolbar', async ({ page }) => {
 
   await db.mouseOver();
   await focusDatabaseSearch(page);
-  // wait for transition end
-  await waitNextFrame(page, 400);
   await type(page, '1');
   await clickDatabaseOutside(page);
   await expect(toolbar).toBeVisible();
 });
 
-test.skip('should database search work', async ({ page }) => {
+test('should database search work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -194,7 +192,7 @@ test.skip('should database search work', async ({ page }) => {
   // search for '23'
   await type(page, '3');
   expect(await rows.count()).toBe(1);
-  const cell = page.locator('affine-database-number-cell > span');
+  const cell = page.locator('.select-selected');
   expect(await cell.innerText()).toBe('123');
 
   // clear search input
