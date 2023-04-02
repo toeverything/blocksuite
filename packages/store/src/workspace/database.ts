@@ -85,36 +85,6 @@ export class DatabaseManager {
     });
   }
 
-  updateSelectedCell(
-    rowId: string,
-    columnId: string,
-    oldValue: string,
-    value?: string
-  ) {
-    this.page.transact(() => {
-      const yRow = this.yCells.get(rowId);
-      assertExists(yRow);
-      const yCell = yRow.get(columnId) as Y.Map<string[]> | undefined;
-      if (!yCell) return;
-
-      const selected = yCell.get('value') as string[];
-      let newSelected = [...selected];
-      if (value) {
-        // rename tag
-        const index = newSelected.indexOf(oldValue);
-        newSelected[index] = value;
-      } else {
-        // delete tag
-        newSelected = selected.filter(item => item !== oldValue);
-      }
-
-      const yNewCell = new Y.Map();
-      yNewCell.set('schemaId', columnId);
-      yNewCell.set('value', newSelected);
-      yRow.set(columnId, yNewCell);
-    });
-  }
-
   copyCellsByColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
