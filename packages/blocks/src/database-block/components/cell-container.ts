@@ -33,7 +33,7 @@ export class DatabaseCellContainer
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.updateColumn(this.rowModel.id, {
+      this.databaseModel.page.db.updateColumn(this.rowModel.id, {
         columnId: this.columnSchema.id,
         value,
       });
@@ -53,11 +53,11 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.columnSchema.property);
+    const newProperty = apply(this.columnSchema);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.updateColumnSchema({
+    this.databaseModel.page.db.updateColumnSchema({
       ...this.columnSchema,
-      property: newProperty,
+      ...newProperty,
     });
   }
 
@@ -78,8 +78,8 @@ export class DatabaseCellContainer
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('columnSchema')) {
       requestAnimationFrame(() => {
-        this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
-        this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
+        this.style.minWidth = `${this.columnSchema.width}px`;
+        this.style.maxWidth = `${this.columnSchema.width}px`;
       });
     }
   }
@@ -112,9 +112,9 @@ export class DatabaseCellContainer
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const renderer = getColumnSchemaRenderer(this.columnSchema.type);
-    const column = this.databaseModel.page.getColumn(
-      this.rowModel.id,
-      this.columnSchema.id
+    const column = this.databaseModel.page.db.getColumn(
+      this.rowModel,
+      this.columnSchema
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;

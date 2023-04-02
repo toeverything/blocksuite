@@ -1,8 +1,3 @@
-import type {
-  BlockColumn,
-  ColumnSchema,
-  SelectProperty,
-} from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -21,19 +16,12 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { DatabaseManager } from './database.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
-
-type SerializedNestedColumns = {
-  // row
-  [key: string]: {
-    // column
-    [key: string]: BlockColumn;
-  };
-};
 
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,6 +77,7 @@ export class Page extends Space<FlatBlockMap> {
       subpageIds: string[];
     }>(),
   };
+  readonly db: DatabaseManager;
 
   constructor(
     workspace: Workspace,
@@ -100,6 +89,7 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this.db = new DatabaseManager(this);
   }
 
   get readonly() {
@@ -116,20 +106,6 @@ export class Page extends Space<FlatBlockMap> {
 
   get meta() {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
-  }
-
-  protected get yColumns() {
-    assertExists(this.root?.columns);
-    return this.root.columns as Y.Map<Y.Map<unknown>>;
-  }
-
-  protected get yColumnSchema() {
-    assertExists(this.root?.columnSchema);
-    return this.root.columnSchema as Y.Map<unknown>;
-  }
-
-  get columnJSON(): SerializedNestedColumns {
-    return this.yColumns.toJSON();
   }
 
   get blobs() {
@@ -191,30 +167,34 @@ export class Page extends Space<FlatBlockMap> {
     return Text;
   }
 
-  undo = () => {
+  undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  };
+  }
 
-  redo = () => {
+  redo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  };
+  }
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync = () => {
+  captureSync() {
     this._history.stopCapturing();
-  };
+  }
 
-  resetHistory = () => {
+  resetHistory() {
     this._history.clear();
-  };
+  }
+
+  createId() {
+    return this._idGenerator();
+  }
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
@@ -316,7 +296,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlocksByFlavour<
+  addBlocks<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -347,7 +327,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlock<
+  addBlock<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -425,15 +405,6 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     return id;
-  }
-
-  updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.updateBlock(model, props);
   }
 
   @debug('CRUD')
@@ -547,22 +518,13 @@ export class Page extends Space<FlatBlockMap> {
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      return this.addBlocksByFlavour(blocks, parent.id, insertIndex);
+      return this.addBlocks(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
-  }
-
-  deleteBlockById(id: string) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.deleteBlock(model);
   }
 
   @debug('CRUD')
@@ -607,7 +569,7 @@ export class Page extends Space<FlatBlockMap> {
         if (options.bringChildrenTo === 'parent' && parent) {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlockById(options.bringChildrenTo.id, {
+          this.updateBlock(options.bringChildrenTo, {
             children: options.bringChildrenTo.children,
           });
         }
@@ -617,184 +579,6 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.emit({
       type: 'delete',
       id: model.id,
-    });
-  }
-
-  getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
-    return (this.yColumnSchema.get(id) ?? null) as ColumnSchema | null;
-  }
-
-  updateColumnSchema(
-    schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
-  ): string {
-    const id = schema.id ?? this._idGenerator();
-    this.transact(() => this.yColumnSchema.set(id, { ...schema, id }));
-    return id;
-  }
-
-  deleteColumnSchema(id: ColumnSchema['id']) {
-    this.transact(() => this.yColumnSchema.delete(id));
-  }
-
-  getColumn(
-    modelId: BaseBlockModel['id'],
-    schemaId: ColumnSchema['id']
-  ): BlockColumn | null {
-    const yColumns = this.yColumns.get(modelId);
-    const yColumnMap = (yColumns?.get(schemaId) as Y.Map<unknown>) ?? null;
-    if (!yColumnMap) return null;
-
-    return {
-      columnId: yColumnMap.get('columnId') as string,
-      value: yColumnMap.get('value') as unknown,
-    };
-  }
-
-  updateColumn(columnId: string, column: BlockColumn) {
-    const hasColumn = this.yColumns.has(columnId);
-    let yColumns: Y.Map<unknown>;
-    if (!hasColumn) {
-      yColumns = new Y.Map();
-    } else {
-      yColumns = this.yColumns.get(columnId) as Y.Map<unknown>;
-    }
-    this.transact(() => {
-      if (!hasColumn) {
-        this.yColumns.set(columnId, yColumns);
-      }
-      // Related issue: https://github.com/yjs/yjs/issues/255
-      const yColumnMap = new Y.Map();
-      yColumnMap.set('columnId', column.columnId);
-      yColumnMap.set('value', column.value);
-      yColumns.set(column.columnId, yColumnMap);
-    });
-  }
-
-  updateSelectedColumn(
-    rowId: string,
-    columnId: string,
-    oldValue: string,
-    value?: string
-  ) {
-    this.transact(() => {
-      const yColumns = this.yColumns.get(rowId);
-      assertExists(yColumns);
-      const cell = yColumns.get(columnId) as Y.Map<string[]> | undefined;
-      if (!cell) return;
-
-      const selected = cell.get('value') as string[];
-      let newSelected = [...selected];
-      if (value !== undefined) {
-        // rename tag
-        const index = newSelected.indexOf(oldValue);
-        newSelected[index] = value;
-      } else {
-        // delete tag
-        newSelected = selected.filter(item => item !== oldValue);
-      }
-
-      const yColumnMap = new Y.Map();
-      yColumnMap.set('schemaId', columnId);
-      yColumnMap.set('value', newSelected);
-      yColumns.set(columnId, yColumnMap);
-    });
-  }
-
-  copyColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
-    this.transact(() => {
-      this.yColumns.forEach(column => {
-        const copyColumn = column.get(fromId) as Y.Map<unknown>;
-        if (copyColumn) {
-          const columnMap = new Y.Map();
-          columnMap.set('columnId', toId);
-          const value = copyColumn.get('value');
-          // rich-text column
-          if (value instanceof Y.Text) {
-            columnMap.set('value', value.clone());
-          } else {
-            columnMap.set('value', value);
-          }
-          column.set(toId, columnMap);
-        }
-      });
-    });
-  }
-
-  deleteColumn(id: string) {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => yColumn.delete(id));
-    });
-  }
-
-  convertColumn(columnId: string, newType: 'select' | 'rich-text') {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        const yTargetColumn = yColumn.get(columnId) as Y.Map<unknown>;
-        if (!yTargetColumn) return;
-
-        if (newType === 'select') {
-          const value = yTargetColumn.get('value');
-          if (!value) return;
-
-          const yColumnMap = new Y.Map();
-          yColumnMap.set('columnId', columnId);
-          yColumnMap.set('value', [(value as string[])[0]]);
-          yColumn.set(columnId, yColumnMap);
-        } else if (newType === 'rich-text') {
-          const value = yTargetColumn.get('value');
-          if (!value) return;
-
-          const yColumnMap = new Y.Map();
-          yColumnMap.set('columnId', columnId);
-          yColumnMap.set('value', new Y.Text((value as number) + ''));
-          yColumn.set(columnId, yColumnMap);
-        }
-      });
-    });
-  }
-
-  renameColumnValue(
-    columnId: string,
-    oldValue: SelectProperty,
-    newValue: SelectProperty
-  ) {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        const cell = yColumn.get(columnId) as
-          | Y.Map<SelectProperty[]>
-          | undefined;
-        if (!cell) return;
-
-        const selected = cell.get('value') as SelectProperty[];
-        const newSelected = [...selected];
-        const index = newSelected.indexOf(oldValue);
-        newSelected[index] = newValue;
-
-        const yColumnMap = new Y.Map();
-        yColumnMap.set('schemaId', columnId);
-        yColumnMap.set('value', newSelected);
-        yColumn.set(columnId, yColumnMap);
-      });
-    });
-  }
-
-  deleteColumnValue(columnId: string, newValue: SelectProperty) {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        const cell = yColumn.get(columnId) as
-          | Y.Map<SelectProperty[]>
-          | undefined;
-        if (!cell) return;
-
-        const selected = cell.get('value') as SelectProperty[];
-        let newSelected = [...selected];
-        newSelected = selected.filter(item => item.value !== newValue.value);
-
-        const yColumnMap = new Y.Map();
-        yColumnMap.set('schemaId', columnId);
-        yColumnMap.set('value', newSelected);
-        yColumn.set(columnId, yColumnMap);
-      });
     });
   }
 

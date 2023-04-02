@@ -116,7 +116,7 @@ export function handleBlockSplit(
     newBlockIndex = 0;
   }
   const children = [...model.children];
-  page.updateBlockById(model.id, { children: [] });
+  page.updateBlock(model, { children: [] });
   const id = page.addBlock(
     model.flavour,
     {
