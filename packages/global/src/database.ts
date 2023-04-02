@@ -7,24 +7,6 @@ export interface RowHost<Value = unknown> extends HTMLElement {
   ): void;
 }
 
-export interface SchemaInternalProperty {
-  /**
-   * color of the column
-   */
-  color: `#${string}`;
-  /**
-   * width of a column
-   */
-  width: number; // px
-  /**
-   * whether this display in the table
-   */
-  hide: boolean;
-}
-
-export type ColumnSchemaProperty<Property extends Record<string, unknown>> =
-  Property;
-
 export type ColumnSchemaType =
   | 'rich-text'
   | 'select'
@@ -32,34 +14,16 @@ export type ColumnSchemaType =
   | 'number'
   | 'progress';
 
-export interface ColumnSchema<
-  Type extends ColumnSchemaType = ColumnSchemaType,
-  Property extends Record<string, unknown> = Record<string, unknown>,
-  BaseValue = unknown
-> {
-  /**
-   * each instance of tag type has its own unique uuid
-   */
+export interface ColumnSchema extends Record<string, unknown> {
   id: string;
-  type: Type;
-  /**
-   * column name
-   */
-  name: string;
-  internalProperty: SchemaInternalProperty;
-  property: ColumnSchemaProperty<Property>;
-  /**
-   * this value is just for hold the `BaseValue`,
-   *  don't use this value in the runtime.
-   */
-  __$TYPE_HOLDER$__?: BaseValue;
+  type: ColumnSchemaType;
+  width: number; // px
+  hide: boolean;
 }
 
-export type BlockColumn<Schema extends ColumnSchema = ColumnSchema> = {
-  columnId: Schema['id'];
-  value: Schema extends ColumnSchema<infer _, infer __, infer Value>
-    ? Value
-    : never;
+export type BlockColumn = {
+  columnId: ColumnSchema['id'];
+  value: unknown;
 };
 
 export const enum ColumnInsertPosition {

@@ -53,11 +53,11 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.columnSchema.property);
+    const newProperty = apply(this.columnSchema);
     this.databaseModel.page.captureSync();
     this.databaseModel.page.updateColumnSchema({
       ...this.columnSchema,
-      property: newProperty,
+      ...newProperty,
     });
   }
 
@@ -78,8 +78,8 @@ export class DatabaseCellContainer
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('columnSchema')) {
       requestAnimationFrame(() => {
-        this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
-        this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
+        this.style.minWidth = `${this.columnSchema.width}px`;
+        this.style.maxWidth = `${this.columnSchema.width}px`;
       });
     }
   }

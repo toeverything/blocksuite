@@ -22,11 +22,7 @@ import {
   ColumnInsertPosition,
   type ColumnSchema,
 } from '@blocksuite/global/database';
-import {
-  assertEquals,
-  assertExists,
-  DisposableGroup,
-} from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
 import { css, LitElement, type TemplateResult } from 'lit';
@@ -46,7 +42,6 @@ import {
   EditColumnPopup,
 } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { DatabaseBlockDisplayMode } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
@@ -570,8 +565,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
                   : ''}"
                 data-column-id="${column.id}"
                 style=${styleMap({
-                  minWidth: `${column.internalProperty.width}px`,
-                  maxWidth: `${column.internalProperty.width}px`,
+                  minWidth: `${column.width}px`,
+                  maxWidth: `${column.width}px`,
                 })}
                 @click=${(event: MouseEvent) =>
                   this._onShowEditColumnPopup(
@@ -615,7 +610,6 @@ function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
-  assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
 
   const filteredChildren =
     searchState === SearchState.Searching
@@ -1178,12 +1172,9 @@ export class DatabaseBlockComponent
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
-      internalProperty: {
-        width: 200,
-        hide: false,
-        color: '#000',
-      },
-      property: renderer.propertyCreator(),
+      width: 200,
+      hide: false,
+      ...renderer.propertyCreator(),
     };
     const id = this.model.page.updateColumnSchema(schema);
     const newColumns = [...this.model.columns];
@@ -1276,9 +1267,7 @@ export class DatabaseBlockComponent
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const totalWidth =
-      this.columns
-        .map(column => column.internalProperty.width)
-        .reduce((t, x) => t + x, 0) +
+      this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
       FIRST_LINE_TEXT_WIDTH +
       ADD_COLUMN_BUTTON_WIDTH;
 

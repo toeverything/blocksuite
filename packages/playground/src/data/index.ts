@@ -137,38 +137,24 @@ export const database: InitFn = (workspace: Workspace) => {
     { value: 'WIP', color: '#E1EFFF' },
   ];
   const col1 = page.updateColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {
-      decimal: 0,
-    },
     name: 'Number',
     type: 'number',
+    width: 200,
+    hide: false,
+    decimal: 0,
   });
   const col2 = page.updateColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {
-      selection: selection,
-    },
     name: 'Single Select',
     type: 'select',
+    width: 200,
+    hide: false,
+    selection,
   });
   const col3 = page.updateColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {},
     name: 'Rich Text',
     type: 'rich-text',
+    width: 200,
+    hide: false,
   });
   // Add database block inside frame block
   const databaseId = page.addBlock(
