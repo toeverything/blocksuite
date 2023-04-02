@@ -369,12 +369,12 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'select');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'rich-text');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnSchemaRenderer(targetType);
@@ -382,7 +382,7 @@ export class EditColumnPopup extends LitElement {
         type: targetType,
         property: renderer.propertyCreator(),
       });
-      this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
     }
 
     this.closePopup();
@@ -407,8 +407,8 @@ export class EditColumnPopup extends LitElement {
     if (actionType === 'delete') {
       this.targetModel.page.captureSync();
       this.targetModel.page.db.deleteColumnSchema(columnId);
-      this.targetModel.page.db.deleteColumn(columnId);
-      const columns = this.targetModel.columns.filter(id => id !== columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
+      const columns = this.targetModel.cells.filter(id => id !== columnId);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns,
       });
@@ -422,7 +422,7 @@ export class EditColumnPopup extends LitElement {
         actionType === 'move-left'
           ? this.columnIndex - 1
           : this.columnIndex + 1;
-      const columns = [...this.targetModel.columns];
+      const columns = [...this.targetModel.cells];
       [columns[this.columnIndex], columns[targetIndex]] = [
         columns[targetIndex],
         columns[this.columnIndex],
@@ -441,12 +441,12 @@ export class EditColumnPopup extends LitElement {
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
       const id = this.targetModel.page.db.updateColumnSchema(schema);
-      const newColumns = [...this.targetModel.columns];
+      const newColumns = [...this.targetModel.cells];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.db.copyColumn(copyId, id);
+      this.targetModel.page.db.copyCellsByColumn(copyId, id);
       this.closePopup();
       return;
     }
@@ -466,7 +466,7 @@ export class EditColumnPopup extends LitElement {
         // boundary
         if (
           (this.columnIndex === 0 && action.type === 'move-left') ||
-          (this.columnIndex === this.targetModel.columns.length - 1 &&
+          (this.columnIndex === this.targetModel.cells.length - 1 &&
             action.type === 'move-right')
         ) {
           return null;

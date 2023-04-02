@@ -721,7 +721,7 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     if (matchFlavours(model, ['affine:page'] as const)) {
-      model.columns = yBlock.get('ext:columns') as Y.Map<Y.Map<unknown>>;
+      model.cells = yBlock.get('ext:cells') as Y.Map<Y.Map<unknown>>;
       model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
@@ -887,7 +887,7 @@ export class Page extends Space<FlatBlockMap> {
         }
       } else if (
         event.path.includes('ext:columnSchema') ||
-        event.path.includes('ext:columns')
+        event.path.includes('ext:cells')
       ) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
@@ -898,7 +898,7 @@ export class Page extends Space<FlatBlockMap> {
         });
       }
     } else {
-      if (event.path.includes('ext:columns')) {
+      if (event.path.includes('ext:cells')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);

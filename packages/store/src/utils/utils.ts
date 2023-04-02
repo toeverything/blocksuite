@@ -33,7 +33,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
   if (props.flavour === 'affine:page') {
-    yBlock.set('ext:columns', new Y.Map());
+    yBlock.set('ext:cells', new Y.Map());
     yBlock.set('ext:columnSchema', new Y.Map());
   }
 

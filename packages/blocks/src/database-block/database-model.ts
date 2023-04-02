@@ -6,7 +6,7 @@ export const DatabaseBlockSchema = defineBlockSchema(
   'affine:database',
   internal => ({
     title: internal.Text(),
-    columns: [] as ColumnSchema['id'][],
+    cells: [] as ColumnSchema['id'][],
     titleColumn: '',
   }),
   {
