@@ -1,6 +1,6 @@
 import { html, type TemplateResult } from 'lit';
 
-import type { AttributesRenderer, DeltaInsert } from '../types.js';
+import type { AttributeRenderer, DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function renderElement<TextAttributes extends BaseTextAttributes>(
@@ -8,13 +8,13 @@ export function renderElement<TextAttributes extends BaseTextAttributes>(
   parseAttributes: (
     textAttributes?: TextAttributes
   ) => TextAttributes | undefined,
-  attributesRenderer: AttributesRenderer<TextAttributes>
+  attributeRenderer: AttributeRenderer<TextAttributes>
 ): TemplateResult<1> {
   return html`<v-element
     .delta=${{
       insert: delta.insert,
       attributes: parseAttributes(delta.attributes),
     }}
-    .attributesRenderer=${attributesRenderer}
+    .attributeRenderer=${attributeRenderer}
   ></v-element>`;
 }

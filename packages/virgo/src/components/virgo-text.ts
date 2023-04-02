@@ -9,7 +9,8 @@ import { ZERO_WIDTH_SPACE } from '../constant.js';
 export class VText extends LitElement {
   static styles = css`
     v-text {
-      white-spaces: pre-wrap;
+      word-wrap: break-word;
+      white-space: break-spaces;
     }
   `;
 

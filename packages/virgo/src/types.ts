@@ -9,7 +9,7 @@ export type DeltaInsert<
   attributes?: TextAttributes;
 };
 
-export type AttributesRenderer<
+export type AttributeRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
 > = (delta: DeltaInsert<TextAttributes>) => TemplateResult<1>;
 
