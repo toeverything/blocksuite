@@ -5,8 +5,8 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
+  getDropZoneByBlockAndPoint,
   getModelByBlockElement,
-  getRectByBlockElement,
   NonShadowLitElement,
   Point,
 } from '@blocksuite/blocks/std';
@@ -26,7 +26,6 @@ import {
   assertExists,
   DisposableGroup,
   isFirefox,
-  matchFlavours,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -727,28 +726,7 @@ export class BlockHub extends NonShadowLitElement {
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      targetRect = getRectByBlockElement(element);
-
-      if (
-        matchFlavours(model, ['affine:database']) &&
-        (model as BaseBlockModel).empty()
-      ) {
-        const bounds = element
-          .querySelector('.affine-database-block-table')
-          ?.getBoundingClientRect();
-        if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-          const headerBounds = element
-            .querySelector('.affine-database-column-header')
-            ?.getBoundingClientRect();
-          assertExists(headerBounds);
-          targetRect = new DOMRect(
-            headerBounds.left,
-            headerBounds.bottom + 1,
-            targetRect.width,
-            1
-          );
-        }
-      }
+      targetRect = getDropZoneByBlockAndPoint(model, element, point);
 
       lastModelState = {
         model,

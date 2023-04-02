@@ -9,9 +9,10 @@ import {
   doesInSamePath,
   getClosestBlockElementByPoint,
   getHoveringFrame,
+  isPointInEmptyDatabase,
   Rect,
 } from '@blocksuite/blocks/std';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
@@ -20,7 +21,6 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import type { BaseBlockModel } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
@@ -178,30 +178,12 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           return;
         }
 
+        const models = blocks.map(b => b.model);
         let shouldMove = true;
-        if (matchFlavours(model, ['affine:database'])) {
-          // Currently, nested databases are not supported
-          if (
-            blocks.some(block =>
-              matchFlavours(block.model, ['affine:database'])
-            )
-          ) {
-            return;
-          }
-
-          if ((model as BaseBlockModel).empty()) {
-            const bounds = element
-              .querySelector('.affine-database-block-table')
-              ?.getBoundingClientRect();
-            if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-              shouldMove = false;
-              page.captureSync();
-              page.moveBlocks(
-                blocks.map(b => b.model),
-                model
-              );
-            }
-          }
+        if (isPointInEmptyDatabase(model, element, point, models)) {
+          shouldMove = false;
+          page.captureSync();
+          page.moveBlocks(models, model);
         }
 
         if (shouldMove) {
@@ -211,7 +193,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           assertExists(parent);
           page.captureSync();
           page.moveBlocks(
-            blocks.map(b => b.model),
+            models,
             parent,
             model,
             distanceToTop < distanceToBottom

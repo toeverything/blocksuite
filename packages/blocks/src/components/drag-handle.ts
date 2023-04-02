@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   getBlockElementsExcludeSubtrees,
+  getDropZoneByBlockAndPoint,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
@@ -15,7 +16,6 @@ import {
   assertExists,
   DisposableGroup,
   isFirefox,
-  matchFlavours,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
@@ -600,28 +600,7 @@ export class DragHandle extends LitElement {
 
     if (element) {
       const model = getModelByBlockElement(element);
-      rect = getRectByBlockElement(element);
-
-      if (
-        matchFlavours(model, ['affine:database']) &&
-        (model as BaseBlockModel).empty()
-      ) {
-        const bounds = element
-          .querySelector('.affine-database-block-table')
-          ?.getBoundingClientRect();
-        if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-          const headerBounds = element
-            .querySelector('.affine-database-column-header')
-            ?.getBoundingClientRect();
-          assertExists(headerBounds);
-          rect = new DOMRect(
-            headerBounds.left,
-            headerBounds.bottom + 1,
-            rect.width,
-            1
-          );
-        }
-      }
+      rect = getDropZoneByBlockAndPoint(model, element, point);
 
       lastModelState = {
         rect,

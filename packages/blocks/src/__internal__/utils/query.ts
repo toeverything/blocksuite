@@ -888,3 +888,84 @@ export function getHoveringFrame(point: Point) {
     null
   );
 }
+
+/**
+ * Returns `true` if the database is empty.
+ */
+export function isEmptyDatabase(model: BaseBlockModel) {
+  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+}
+
+/**
+ * Gets the table of the database.
+ */
+export function getDatabaseBlockTable(element: Element) {
+  return element.querySelector('.affine-database-block-table');
+}
+
+/**
+ * Gets the column header of the database.
+ */
+export function getDatabaseBlockColumnHeader(element: Element) {
+  return element.querySelector('.affine-database-column-header');
+}
+
+/**
+ * Gets the drop rect by block and point.
+ */
+export function getDropZoneByBlockAndPoint(
+  model: BaseBlockModel,
+  element: Element,
+  point: Point
+) {
+  let rect = getRectByBlockElement(element);
+  // If the database is empty and the point is inside the database
+  if (isEmptyDatabase(model)) {
+    const table = getDatabaseBlockTable(element);
+    assertExists(table);
+    const bounds = table.getBoundingClientRect();
+    if (bounds.top <= point.y && point.y <= bounds.bottom) {
+      const header = getDatabaseBlockColumnHeader(element);
+      assertExists(header);
+      const headerBounds = header.getBoundingClientRect();
+      rect = new DOMRect(
+        headerBounds.left,
+        headerBounds.bottom + 1,
+        rect.width,
+        1
+      );
+    }
+  }
+
+  return rect;
+}
+
+/**
+ * Returns `true` if the point is inside the empty database.
+ */
+export function isPointInEmptyDatabase(
+  model: BaseBlockModel,
+  element: Element,
+  point: Point,
+  blocks: BaseBlockModel[]
+) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Currently, nested databases are not supported
+    if (
+      blocks.some(block => matchFlavours(block, ['affine:database'] as const))
+    ) {
+      return false;
+    }
+
+    if (model.isEmpty()) {
+      const table = getDatabaseBlockTable(element);
+      assertExists(table);
+      const bounds = table.getBoundingClientRect();
+      if (bounds.top <= point.y && point.y <= bounds.bottom) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}

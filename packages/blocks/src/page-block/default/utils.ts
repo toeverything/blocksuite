@@ -9,6 +9,7 @@ import {
   getBlockElementById,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
+  isPointInEmptyDatabase,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -506,28 +507,12 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         return;
       }
 
+      const models = blocks.map(b => b.model);
       let shouldMove = true;
-      if (matchFlavours(model, ['affine:database'])) {
-        // Currently, nested databases are not supported
-        if (
-          blocks.some(block => matchFlavours(block.model, ['affine:database']))
-        ) {
-          return;
-        }
-
-        if ((model as BaseBlockModel).empty()) {
-          const bounds = element
-            .querySelector('.affine-database-block-table')
-            ?.getBoundingClientRect();
-          if (bounds && bounds.top <= point.y && point.y <= bounds.bottom) {
-            shouldMove = false;
-            page.captureSync();
-            page.moveBlocks(
-              blocks.map(b => b.model),
-              model
-            );
-          }
-        }
+      if (isPointInEmptyDatabase(model, element, point, models)) {
+        shouldMove = false;
+        page.captureSync();
+        page.moveBlocks(models, model);
       }
 
       if (shouldMove) {
@@ -537,7 +522,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         assertExists(parent);
         page.captureSync();
         page.moveBlocks(
-          blocks.map(b => b.model),
+          models,
           parent,
           model,
           distanceToTop < distanceToBottom

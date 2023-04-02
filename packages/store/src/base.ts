@@ -126,7 +126,7 @@ export class BaseBlockModel<Props = unknown>
     this.children = [];
   }
 
-  empty() {
+  isEmpty() {
     return this.children.length === 0;
   }
 
