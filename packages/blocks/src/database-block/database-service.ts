@@ -42,7 +42,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId);
     assertExists(blockModel);
     page.updateBlock(blockModel, {
-      columns: [tagColumnId],
+      cells: [tagColumnId],
     });
   }
 }

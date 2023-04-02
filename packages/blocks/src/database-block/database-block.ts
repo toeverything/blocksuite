@@ -826,7 +826,7 @@ export class DatabaseBlockComponent
     const newColumns = [...this.model.cells];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
-      columns: newColumns,
+      cells: newColumns,
     });
 
     requestAnimationFrame(() => {

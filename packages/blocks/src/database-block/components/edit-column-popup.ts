@@ -444,7 +444,7 @@ export class EditColumnPopup extends LitElement {
       const newColumns = [...this.targetModel.cells];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {
-        columns: newColumns,
+        cells: newColumns,
       });
       this.targetModel.page.db.copyCellsByColumn(copyId, id);
       this.closePopup();
