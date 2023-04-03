@@ -13,7 +13,6 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
   TEXT = 'text/plain',
   // IMAGE_BMP = 'image/bmp',
@@ -26,7 +25,6 @@ export enum CLIPBOARD_MIMETYPE {
 }
 
 export const optimalMimeTypes: string[] = [
-  CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
   CLIPBOARD_MIMETYPE.HTML,
   CLIPBOARD_MIMETYPE.TEXT,
 ];
@@ -89,8 +87,6 @@ function getOptimalClipboardData(
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
-    console.warn(`paste-${mimeType}`);
-    console.warn(JSON.stringify(data));
     if (data) {
       return {
         type: mimeType,
@@ -114,21 +110,26 @@ export async function clipboardData2Blocks(
     return contentParser.file2Blocks(clipboardData);
   }
 
-  const optimalClipboardData = getOptimalClipboardData(clipboardData);
+  const hasHTML = !!clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+  if (hasHTML) {
+    const blockSuiteClipboardData = detectBlockSuiteClipboardData(
+      clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
+    );
+    console.warn('paste - blockSuiteClipboardData');
+    console.warn(blockSuiteClipboardData);
 
-  if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
-    // @ts-ignore
-    return JSON.parse(optimalClipboardData.data).data;
+    if (blockSuiteClipboardData) {
+      return blockSuiteClipboardData;
+    }
   }
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
   const shouldConvertMarkdown =
     markdownUtils.checkIfTextContainsMd(textClipData);
-  if (
-    optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML &&
-    !shouldConvertMarkdown
-  ) {
-    return await contentParser.htmlText2Block(optimalClipboardData.data);
+  if (hasHTML && !shouldConvertMarkdown) {
+    return await contentParser.htmlText2Block(
+      clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
+    );
   }
 
   if (shouldConvertMarkdown) {
@@ -185,30 +186,28 @@ export function copy(range: BlockRange) {
     return getBlockClipboardInfo(model);
   });
 
+  const customClipboardFragment = `<blocksuite style="display: none">${JSON.stringify(
+    clipGroups
+      .filter(group => {
+        if (!group.json) {
+          return false;
+        }
+        // XXX: should handle this issue here?
+        // Children json info is collected by its parent,
+        // but getCurrentBlockRange.models return parent and children at same time,
+        // children should be deleted from group
+        return !isChildBlock(range.models, group.model);
+      })
+      .map(group => group.json)
+  )}</blocksuite>>`;
+
   const textClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.TEXT,
     clipGroups.map(group => group.text).join('')
   );
   const htmlClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.HTML,
-    clipGroups.map(group => group.html).join('')
-  );
-  const customClipboardItem = new ClipboardItem(
-    CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-    JSON.stringify({
-      data: clipGroups
-        .filter(group => {
-          if (!group.json) {
-            return false;
-          }
-          // XXX: should handle this issue here?
-          // Children json info is collected by its parent,
-          // but getCurrentBlockRange.models return parent and children at same time,
-          // children should be deleted from group
-          return !isChildBlock(range.models, group.model);
-        })
-        .map(group => group.json),
-    })
+    `${clipGroups.map(group => group.html).join('')}${customClipboardFragment}`
   );
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
@@ -216,7 +215,7 @@ export function copy(range: BlockRange) {
   performNativeCopy([
     textClipboardItem,
     htmlClipboardItem,
-    customClipboardItem,
+    // customClipboardItem,
   ]);
 
   savedRange && resetNativeSelection(savedRange);
@@ -240,3 +239,13 @@ const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
   }
   return false;
 };
+
+function detectBlockSuiteClipboardData(html: string) {
+  const blocksuite = html.match(
+    /<blocksuite style="display: none">(.*)<\/blocksuite>/
+  );
+  if (blocksuite) {
+    return JSON.parse(blocksuite[1]);
+  }
+  return null;
+}
