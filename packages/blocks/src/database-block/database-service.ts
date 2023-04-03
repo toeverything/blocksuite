@@ -55,6 +55,12 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     begin?: number,
     end?: number
   ): SerializedBlock {
+    return {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'abctest' }],
+      children: [],
+    };
     const columnSchemaIds = block.columns as string[];
     const columnIds = block.children.map(child => child.id);
 
