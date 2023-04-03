@@ -1,8 +1,8 @@
-import type { ColumnSchemaType } from '@blocksuite/global/database';
+import type { ColumnType } from '@blocksuite/global/database';
 import type { TemplateResult } from 'lit';
 
 export type ColumnType = {
-  type: ColumnSchemaType;
+  type: ColumnType;
   text: string;
   icon: TemplateResult;
 };

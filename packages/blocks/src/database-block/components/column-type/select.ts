@@ -16,10 +16,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 import type { SelectTagAction, SelectTagActionName } from '../../types.js';
 import { getTagColor, onClickOutside } from '../../utils.js';
 import { actionStyles, isDivider } from '../edit-column-popup.js';
@@ -137,7 +134,7 @@ class SelectOptionText extends LitElement {
 }
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellLitElement<SelectTag[]> {
+class SelectCell extends DatabaseCellElement<SelectTag[]> {
   static styles = css`
     :host {
       display: flex;
@@ -246,7 +243,7 @@ class SelectAction extends LitElement {
   }
 }
 @customElement('affine-database-select-cell-editing')
-class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
+class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   value: SelectTag | undefined = undefined;
 
   static styles = css`
@@ -527,7 +524,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
 
     if (type === 'delete') {
       const selection = [...(this.columnSchema.selection as SelectTag[])];
-      this.databaseModel.page.db.updateColumnSchema({
+      this.databaseModel.page.db.updateColumn({
         ...this.columnSchema,
         selection: selection.filter((_, i) => i !== index),
       });
@@ -584,7 +581,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
-    this.databaseModel.page.db.updateColumnSchema({
+    this.databaseModel.page.db.updateColumn({
       ...this.columnSchema,
       selection,
     });
@@ -690,11 +687,11 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
 }
 
 @customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellLitElement<SelectTag[]> {
+class SelectColumnPropertyEditing extends DatabaseCellElement<SelectTag[]> {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
-export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const SelectColumnRenderer = defineColumnRenderer(
   'select',
   () => ({
     selection: [] as SelectTag[],
