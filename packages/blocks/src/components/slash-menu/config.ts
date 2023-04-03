@@ -3,7 +3,6 @@ import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
-  DividerIcon,
   DuplicateIcon,
   ImageIcon20,
   NowIcon,
@@ -24,7 +23,6 @@ import type { TemplateResult } from 'lit';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
-  asyncFocusRichText,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -65,25 +63,6 @@ function insertContent(model: BaseBlockModel, text: string) {
   });
 }
 
-const dividerItem: SlashItem = {
-  name: 'Divider',
-  icon: DividerIcon,
-  action({ page, model }) {
-    const parent = page.getParent(model);
-    if (!parent) {
-      return;
-    }
-    const index = parent.children.indexOf(model);
-    const nextSibling = page.getNextSibling(model);
-    let nextSiblingId = nextSibling?.id as string;
-    page.addBlock('affine:divider', {}, parent, index + 1);
-    if (!nextSibling) {
-      nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
-    }
-    asyncFocusRichText(page, nextSiblingId);
-  },
-};
-
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
   {
     name: 'Text',
@@ -114,7 +93,6 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
           },
         })),
-      dividerItem,
     ],
   },
   {

@@ -14,9 +14,9 @@ import {
   type DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  type StoreOptions,
   Utils,
   Workspace,
+  type WorkspaceOptions,
 } from '@blocksuite/store';
 import { fileOpen } from 'browser-fs-access';
 
@@ -121,10 +121,7 @@ export async function tryInitExternalContent(
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
  * We use webrtcDocProvider by default if the `providers` param is missing.
  */
-export function createWorkspaceOptions(): Pick<
-  StoreOptions,
-  'providers' | 'idGenerator' | 'id' | 'defaultFlags'
-> {
+export function createWorkspaceOptions(): WorkspaceOptions {
   const providers: DocProviderConstructor[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
@@ -156,7 +153,7 @@ export function createWorkspaceOptions(): Pick<
       enable_block_hub: true,
       enable_database: true,
       enable_edgeless_toolbar: true,
-      enable_linked_page: false,
+      enable_linked_page: true,
       readonly: {
         'space:page0': false,
       },

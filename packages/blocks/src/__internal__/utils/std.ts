@@ -14,7 +14,14 @@ export const IS_MAC = /Mac/i.test(globalThis.navigator?.platform);
  * Whether the block supports rendering its children.
  */
 export function supportsChildren(model: BaseBlockModel): boolean {
-  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
+  if (
+    matchFlavours(model, [
+      // 'affine:database',
+      'affine:embed',
+      'affine:divider',
+      'affine:code',
+    ])
+  ) {
     return false;
   }
   if (
