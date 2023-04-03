@@ -1,5 +1,5 @@
 import type { BlockModels } from '@blocksuite/global/types';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
@@ -11,20 +11,26 @@ import { getVirgoByModel } from '../utils/query.js';
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
   pastedBlocks: OpenBlockInfo[],
-  range?: BlockRange
+  options?: {
+    convertToPastedIfEmpty?: boolean;
+    range?: BlockRange;
+  }
 ) {
+  const { convertToPastedIfEmpty = true, range } = options ?? {};
+
   assertExists(range);
+
   const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
   const firstBlock = pastedBlocks[0];
   const lastBlock = pastedBlocks[pastedBlocks.length - 1];
   const isFocusedBlockEmpty =
-    !focusedBlockModel.text?.length &&
-    !matchFlavours(focusedBlockModel, ['affine:list' as const]);
+    !focusedBlockModel.text?.length && !convertToPastedIfEmpty;
   const shouldMergeFirstBlock =
     !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
   const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;
   const parent = page.getParent(focusedBlockModel);
+
   assertExists(parent);
   if (pastedBlocks.length === 1) {
     // TODO: optimize textLength
