@@ -39,11 +39,11 @@ export interface BlockHostContext {
 
 export type CommonSlots = RefNodeSlots;
 
-export interface BlockHost<Slots = unknown> extends BlockHostContext {
+export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   clipboard: Clipboard;
-  readonly slots: Slots;
+  readonly slots: CommonSlots;
 }
 
 /**

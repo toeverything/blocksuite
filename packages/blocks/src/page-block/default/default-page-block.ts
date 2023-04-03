@@ -2,7 +2,6 @@
 import {
   asyncFocusRichText,
   type BlockHost,
-  type CommonSlots,
   type EditingState,
   hotkey,
   HOTKEY_SCOPE,
@@ -57,7 +56,7 @@ export interface DefaultSelectionSlots {
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
   extends NonShadowLitElement
-  implements BlockHost<CommonSlots>
+  implements BlockHost
 {
   static styles = css`
     .affine-default-viewport {

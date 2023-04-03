@@ -13,7 +13,6 @@ import { z } from 'zod';
 
 import {
   type BlockHost,
-  type CommonSlots,
   getViewportElement,
   NonShadowLitElement,
   queryCurrentMode,
@@ -159,7 +158,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   model!: CodeBlockModel;
 
   @property()
-  host!: BlockHost<CommonSlots>;
+  host!: BlockHost;
 
   @state()
   private _showLangList = false;

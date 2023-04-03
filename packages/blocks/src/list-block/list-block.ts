@@ -6,7 +6,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   type BlockHost,
-  type CommonSlots,
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
@@ -81,7 +80,7 @@ export class ListBlockComponent extends NonShadowLitElement {
   model!: ListBlockModel;
 
   @property()
-  host!: BlockHost<CommonSlots>;
+  host!: BlockHost;
 
   @state()
   showChildren = true;

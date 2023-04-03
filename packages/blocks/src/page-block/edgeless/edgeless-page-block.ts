@@ -77,7 +77,7 @@ export interface EdgelessContainer extends HTMLElement {
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
   extends NonShadowLitElement
-  implements EdgelessContainer, BlockHost<CommonSlots>
+  implements EdgelessContainer, BlockHost
 {
   static styles = css`
     .affine-edgeless-page-block-container {

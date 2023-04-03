@@ -28,7 +28,5 @@ export type AffineTextSchema<
   TextAttributes extends BaseTextAttributes = AffineTextAttributes
 > = {
   attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
-  textRenderer: (
-    host: BlockHost<CommonSlots>
-  ) => AttributeRenderer<TextAttributes>;
+  textRenderer: (host: BlockHost) => AttributeRenderer<TextAttributes>;
 };

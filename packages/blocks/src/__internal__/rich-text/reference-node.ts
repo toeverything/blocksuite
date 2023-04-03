@@ -82,7 +82,7 @@ export class AffineReference extends NonShadowLitElement {
   };
 
   @property()
-  host!: BlockHost<RefNodeSlots>;
+  host!: BlockHost;
 
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   private _refMeta?: PageMeta;
@@ -154,10 +154,15 @@ export class AffineReference extends NonShadowLitElement {
   }
 
   private _onClick(e: MouseEvent) {
-    e.preventDefault();
     const refMeta = this._refMeta;
     const model = getModelByElement(this);
-    if (!refMeta || refMeta.id === model.page.id) {
+    if (!refMeta) {
+      // The page is deleted
+      console.warn('The page is deleted', this._refAttribute.pageId);
+      return;
+    }
+    if (refMeta.id === model.page.id) {
+      // the page is the current page.
       return;
     }
     const targetPageId = refMeta.id;

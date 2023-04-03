@@ -37,7 +37,7 @@ export class RichText extends NonShadowLitElement {
   }
 
   @property()
-  host!: BlockHost<CommonSlots>;
+  host!: BlockHost;
 
   @property()
   model!: BaseBlockModel;
