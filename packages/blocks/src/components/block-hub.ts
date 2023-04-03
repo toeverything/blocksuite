@@ -5,8 +5,8 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
+  getDropRectByPoint,
   getModelByBlockElement,
-  getRectByBlockElement,
   NonShadowLitElement,
   Point,
 } from '@blocksuite/blocks/std';
@@ -709,8 +709,6 @@ export class BlockHub extends NonShadowLitElement {
       return;
     }
 
-    this._indicator.cursorPosition = new Point(x, y);
-
     const point = new Point(x, y);
     const { container, rect, scale } = this.getHoveringFrameState(
       point.clone()
@@ -727,16 +725,19 @@ export class BlockHub extends NonShadowLitElement {
     let targetRect = null;
     let lastModelState = null;
     if (element) {
-      targetRect = getRectByBlockElement(element);
+      const model = getModelByBlockElement(element);
+      targetRect = getDropRectByPoint(point, model, element);
+
       lastModelState = {
+        model,
         rect: targetRect,
         element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
       };
     }
 
     this._lastModelState = lastModelState;
     this._indicator.targetRect = targetRect;
+    this._indicator.cursorPosition = point;
   };
 
   private _onDragOver = (e: DragEvent) => {
