@@ -13,9 +13,9 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
-  HTML = 'text/html',
-  TEXT = 'text/plain',
+  BLOCKS_CLIP_WRAPPED = 'text/html',
+  // HTML = 'text/html',
+  // TEXT = 'text/plain',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',
@@ -27,8 +27,8 @@ export enum CLIPBOARD_MIMETYPE {
 
 export const optimalMimeTypes: string[] = [
   CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-  CLIPBOARD_MIMETYPE.HTML,
-  CLIPBOARD_MIMETYPE.TEXT,
+  // CLIPBOARD_MIMETYPE.HTML,
+  // CLIPBOARD_MIMETYPE.TEXT,
 ];
 
 export const performNativeCopy = (items: ClipboardItem[]): boolean => {
@@ -95,7 +95,7 @@ function getOptimalClipboardData(
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
-    console.warn(mimeType);
+    console.warn(`paste-${mimeType}`);
     console.warn(JSON.stringify(data || {}));
     // ===================== debug ====================
     dv.innerText = `paste ${mimeType}: ${data}\n`;
