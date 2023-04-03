@@ -88,17 +88,25 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
   private _handleClick() {
     this.databaseModel.page.captureSync();
     if (!this.cell) {
-      const yText = new this.databaseModel.page.YText();
-      this.databaseModel.page.db.updateCell(this.rowModel.id, {
-        columnId: this.columnSchema.id,
-        value: yText,
-      });
-      this.vEditor = new VEditor(yText);
-      setupVirgoScroll(this.databaseModel.page, this.vEditor);
-      this.vEditor.mount(this._container);
-      this.vEditor.bindHandlers({
-        keydown: this._handleKeyDown,
-      });
+      if (!this.cell && !this.vEditor) {
+        const yText = new this.databaseModel.page.YText();
+        this.databaseModel.page.db.updateCell(this.rowModel.id, {
+          columnId: this.columnSchema.id,
+          value: yText,
+        });
+        this._initVEditor(yText, true);
+      }
+    }
+  }
+
+  private _initVEditor(value: Y.Text, focus = false) {
+    this.vEditor = new VEditor(value);
+    setupVirgoScroll(this.databaseModel.page, this.vEditor);
+    this.vEditor.mount(this._container);
+    this.vEditor.bindHandlers({
+      keydown: this._handleKeyDown,
+    });
+    if (focus) {
       this.vEditor.focusEnd();
     }
   }
@@ -183,7 +191,7 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
     }
   };
 
-  protected update(changedProperties: Map<string, unknown>) {
+  update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (this.cell && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
