@@ -13,7 +13,7 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
+  BLOCKS_CLIP_WRAPPED = 'text/uri-list',
   HTML = 'text/html',
   TEXT = 'text/plain',
   // IMAGE_BMP = 'image/bmp',
@@ -90,7 +90,7 @@ function getOptimalClipboardData(
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
     console.warn(`paste-${mimeType}`);
-    console.warn(JSON.stringify(data || {}));
+    console.warn(JSON.stringify(data));
     if (data) {
       return {
         type: mimeType,
