@@ -22,6 +22,8 @@ export class DatabaseCellContainer
     :host {
       display: flex;
       align-items: center;
+      width: 100%;
+      height: 100%;
       padding: 10px ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
@@ -73,15 +75,6 @@ export class DatabaseCellContainer
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.columnSchema.id);
-  }
-
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('columnSchema')) {
-      requestAnimationFrame(() => {
-        this.style.minWidth = `${this.columnSchema.width}px`;
-        this.style.maxWidth = `${this.columnSchema.width}px`;
-      });
-    }
   }
 
   _onClick = (event: Event) => {

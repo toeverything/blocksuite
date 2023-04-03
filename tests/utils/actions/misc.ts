@@ -261,7 +261,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumn: 'Title',
+        titleColumnName: 'Title',
       },
       frameId
     );
@@ -309,7 +309,7 @@ export async function initDatabaseDynamicRowWithData(
     await initDatabaseRow(page);
   }
   const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-database-cell-container').nth(index);
+  const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await cell.click();
   await type(page, data);

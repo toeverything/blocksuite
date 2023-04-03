@@ -54,8 +54,9 @@ const enum SearchState {
   Searching = 'searching',
 }
 
-const FIRST_LINE_TEXT_WIDTH = 200;
-const ADD_COLUMN_BUTTON_WIDTH = 40;
+const DEFAULT_COLUMN_WIDTH = 200;
+const DEFAULT_COLUMN_MIN_WIDTH = 100;
+const DEFAULT_COLUMN_TITLE_HEIGHT = 40;
 
 const columnTypeIconMap: Record<string, TemplateResult> = {
   select: DatabaseSelect,
@@ -71,26 +72,69 @@ if (once) {
   once = false;
 }
 
+type ColumnWidthConfig = {
+  isChangingWidth: boolean;
+  index: number;
+  startPositionX: number;
+  containerWidth: number;
+  leftColumnCells: HTMLElement[];
+  firstTitleColumn: HTMLElement;
+};
+
 @customElement('affine-database-column-header')
 class DatabaseColumnHeader extends NonShadowLitElement {
   static styles = css`
-    :host * {
-      box-sizing: border-box;
-    }
     .affine-database-column-header {
       display: flex;
       flex-direction: row;
-      height: 44px;
+      height: 40px;
     }
 
     .affine-database-column {
+      position: relative;
+      z-index: 1;
+      width: ${DEFAULT_COLUMN_WIDTH}px;
+      transform: translateX(0);
+    }
+    .database-cell {
+      min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+    }
+    .affine-database-column-content {
       display: flex;
       align-items: center;
-      width: 145px;
+      width: 100%;
+      height: 100%;
       padding: 8px;
       border-right: 1px solid var(--affine-border-color);
     }
-    .affine-database-column:hover {
+    .affine-database-column-drag-handle {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      right: -20px;
+      width: 40px;
+      height: 100%;
+      cursor: col-resize;
+    }
+    .affine-database-column-drag-handle::before {
+      content: ' ';
+      display: none;
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      left: 19px;
+      background: #5438ff;
+      box-shadow: 0px 0px 8px rgba(84, 56, 255, 0.35);
+    }
+    .affine-database-column-drag-handle:hover::before {
+      display: block;
+    }
+    .affine-database-column:last-child .affine-database-column-drag-handle {
+      width: 20px;
+      right: 1px;
+    }
+
+    .affine-database-column-content:hover {
       background: linear-gradient(
           0deg,
           rgba(0, 0, 0, 0.04),
@@ -98,7 +142,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         ),
         #ffffff;
     }
-    .affine-database-column.edit {
+    .affine-database-column-content.edit {
       background: linear-gradient(
           0deg,
           rgba(0, 0, 0, 0.08),
@@ -111,7 +155,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       display: flex;
       align-items: center;
       gap: 4px;
-      max-width: 173px;
       color: var(--affine-secondary-text-color);
       font-size: 14px;
       font-weight: 600;
@@ -153,7 +196,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       width: 10px;
       height: 14px;
     }
-    .affine-database-column:hover .affine-database-column-drag {
+    .affine-database-column-content:hover .affine-database-column-drag {
       visibility: visible;
     }
   `;
@@ -167,15 +210,44 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   @property()
   addColumn!: (index: number) => string;
 
+  @property()
+  setChangingColumnWidth!: (config: ColumnWidthConfig) => void;
+
+  @property()
+  tableContainer!: HTMLElement;
+
   @state()
   private _editingColumnId = '';
 
   @query('.affine-database-column-input')
   private _titleColumnInput!: HTMLInputElement;
 
+  @query('.affine-database-column-header')
+  private _headerContainer!: HTMLElement;
+
+  private _disposables: DisposableGroup = new DisposableGroup();
+
+  private _isChangingWidth = false;
+
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
   };
+
+  firstUpdated() {
+    this._initChangeColumnWidth();
+
+    const db = this.closest('affine-database');
+    const databaseBody = db?.querySelector('.affine-database-block-rows');
+    assertExists(databaseBody);
+    const dragHandleHeight =
+      databaseBody.clientHeight + DEFAULT_COLUMN_TITLE_HEIGHT - 1;
+    const allDragHandle = db?.querySelectorAll<HTMLElement>(
+      '.affine-database-column-drag-handle'
+    );
+    allDragHandle?.forEach(handle => {
+      handle.style.height = `${dragHandleHeight}px`;
+    });
+  }
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
@@ -193,11 +265,51 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     }
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
+  private _initChangeColumnWidth() {
+    const columns = this._headerContainer.querySelectorAll<HTMLDivElement>(
+      '.affine-database-column'
+    );
+    columns.forEach((column, index) => {
+      this._disposables.addFromEvent(column, 'mousedown', (event: MouseEvent) =>
+        this._onColumnWidthMousedown(event, index)
+      );
+    });
+  }
+  private _onColumnWidthMousedown = (event: MouseEvent, index: number) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const currentColumnCells =
+      this.tableContainer.querySelectorAll<HTMLElement>(
+        `.database-cell:nth-child(${index + 1})`
+      );
+
+    const firstTitleColumn = this._headerContainer.querySelector<HTMLElement>(
+      `.affine-database-column:nth-child(1)`
+    );
+    assertExists(firstTitleColumn);
+    this._isChangingWidth = true;
+    this.setChangingColumnWidth({
+      startPositionX: event.clientX,
+      isChangingWidth: this._isChangingWidth,
+      index,
+      leftColumnCells: Array.from(currentColumnCells),
+      // rightColumnCells: Array.from(currentColumnCells),
+      containerWidth: this.tableContainer.offsetWidth,
+      firstTitleColumn,
+    });
+  };
+
   private _onShowEditColumnPopup = (
     target: Element,
     column: ColumnSchema | string,
     index: number
   ) => {
+    if (this._isChangingWidth) return;
     if (this._editingColumnId) return;
 
     const currentEl = target as Element;
@@ -251,9 +363,9 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     }
   };
 
-  private _onUpdateTitleColumn = (name: string) => {
+  private _onUpdateTitleColumn = (titleColumnName: string) => {
     this.targetModel.page.updateBlock(this.targetModel, {
-      titleColumn: name,
+      titleColumnName,
     });
   };
 
@@ -267,76 +379,80 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   render() {
     return html`
-      <div class="affine-database-column-header">
-        <div
-          class="affine-database-column ${this._editingColumnId === '-1'
-            ? 'edit'
-            : ''}"
-          data-column-id="-1"
-          style=${styleMap({
-            minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-            maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-          })}
-          @click=${(event: MouseEvent) =>
-            this._onShowEditColumnPopup(
-              event.target as Element,
-              this.targetModel.titleColumn,
-              0
-            )}
-        >
-          <div class="affine-database-column-text">
-            ${TextIcon}
-            <div class="affine-database-column-text-input">
-              ${this._editingColumnId === '-1'
-                ? html`<input
-                    class="affine-database-column-input"
-                    value=${this.targetModel.titleColumn}
-                    @keydown=${(event: KeyboardEvent) =>
-                      this._onKeydown(event, 'title')}
-                  />`
-                : this.targetModel.titleColumn}
+      <div class="affine-database-column-header database-row">
+        <div class="affine-database-column database-cell">
+          <div
+            class="affine-database-column-content ${this._editingColumnId ===
+            '-1'
+              ? 'edit'
+              : ''}"
+            data-column-id="-1"
+            @click=${(event: MouseEvent) =>
+              this._onShowEditColumnPopup(
+                event.target as Element,
+                this.targetModel.titleColumnName,
+                0
+              )}
+          >
+            <div class="affine-database-column-text">
+              ${TextIcon}
+              <div class="affine-database-column-text-input">
+                ${this._editingColumnId === '-1'
+                  ? html`<input
+                      class="affine-database-column-input"
+                      value=${this.targetModel.titleColumnName}
+                      @keydown=${(event: KeyboardEvent) =>
+                        this._onKeydown(event, 'title')}
+                    />`
+                  : this.targetModel.titleColumnName}
+              </div>
             </div>
+            <!-- TODO: change icon -->
+            <div class="affine-database-column-drag">${TextIcon}</div>
           </div>
-          <!-- TODO: change icon -->
-          <div class="affine-database-column-drag">${TextIcon}</div>
+          <div class="affine-database-column-drag-handle"></div>
         </div>
         ${repeat(
           this.columns,
           column => column.id,
           (column, index) => {
+            const isLastColumn = this.columns.length - 1 === index;
             return html`
-              <div
-                class="affine-database-column  ${this._editingColumnId ===
-                column.id
-                  ? 'edit'
-                  : ''}"
-                data-column-id="${column.id}"
-                style=${styleMap({
-                  minWidth: `${column.width}px`,
-                  maxWidth: `${column.width}px`,
-                })}
-                @click=${(event: MouseEvent) =>
-                  this._onShowEditColumnPopup(
-                    event.target as Element,
-                    column,
-                    index + 1
-                  )}
-              >
-                <div class="affine-database-column-text ${column.type}">
-                  ${columnTypeIconMap[column.type]}
-                  <div class="affine-database-column-text-input">
-                    ${this._editingColumnId === column.id
-                      ? html`<input
-                          class="affine-database-column-input"
-                          value=${column.name}
-                          @keydown=${(event: KeyboardEvent) =>
-                            this._onKeydown(event, 'normal', column)}
-                        />`
-                      : column.name}
+              <div class="affine-database-column database-cell">
+                <div
+                  class="affine-database-column-content ${this
+                    ._editingColumnId === column.id
+                    ? 'edit'
+                    : ''}"
+                  data-column-id="${column.id}"
+                  @click=${(event: MouseEvent) =>
+                    this._onShowEditColumnPopup(
+                      event.target as Element,
+                      column,
+                      index + 1
+                    )}
+                >
+                  <div class="affine-database-column-text ${column.type}">
+                    ${columnTypeIconMap[column.type]}
+                    <div class="affine-database-column-text-input">
+                      ${this._editingColumnId === column.id
+                        ? html`<input
+                            class="affine-database-column-input"
+                            value=${column.name}
+                            @keydown=${(event: KeyboardEvent) =>
+                              this._onKeydown(event, 'normal', column)}
+                          />`
+                        : column.name}
+                    </div>
                   </div>
+                  <!-- TODO: change icon -->
+                  <div class="affine-database-column-drag">${TextIcon}</div>
                 </div>
-                <!-- TODO: change icon -->
-                <div class="affine-database-column-drag">${TextIcon}</div>
+                ${isLastColumn
+                  ? null
+                  : html`<div
+                      class="affine-database-column-drag-handle"
+                    ></div>`}
               </div>
             `;
           }
@@ -386,15 +502,21 @@ function DataBaseRowContainer(
       }
 
       .affine-database-block-row-cell {
+        width: ${DEFAULT_COLUMN_WIDTH}px;
+      }
+      .affine-database-block-row-cell-content {
         display: flex;
         align-items: center;
-        width: 145px;
         min-height: 44px;
         padding: 0 8px;
         border-right: 1px solid var(--affine-border-color);
+        transform: translateX(0);
       }
-      .affine-database-block-row-cell > affine-paragraph > .text {
+      .affine-database-block-row-cell-content > affine-paragraph > .text {
         margin-top: unset;
+      }
+      .database-cell {
+        min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
       }
     </style>
     <div class="affine-database-block-rows">
@@ -403,26 +525,30 @@ function DataBaseRowContainer(
         child => child.id,
         (child, idx) => {
           return html`
-            <div class="affine-database-block-row" data-row-id="${idx}">
-              <div
-                class="affine-database-block-row-cell"
-                style=${styleMap({
-                  minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-                  maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-                })}
-              >
-                ${BlockElementWithService(child, databaseBlock, () => {
-                  databaseBlock.requestUpdate();
-                })}
+            <div
+              class="affine-database-block-row database-row"
+              data-row-id="${idx}"
+            >
+              <div class="affine-database-block-row-cell database-cell">
+                <div class="affine-database-block-row-cell-content">
+                  ${BlockElementWithService(child, databaseBlock, () => {
+                    databaseBlock.requestUpdate();
+                  })}
+                </div>
               </div>
               ${repeat(databaseBlock.columns, column => {
                 return html`
-                  <affine-database-cell-container
-                    .databaseModel=${databaseModel}
-                    .rowModel=${child}
-                    .columnSchema=${column}
+                  <div
+                    class="database-cell"
+                    style=${styleMap({ width: `${column.width}px` })}
                   >
-                  </affine-database-cell-container>
+                    <affine-database-cell-container
+                      .databaseModel=${databaseModel}
+                      .rowModel=${child}
+                      .columnSchema=${column}
+                    >
+                    </affine-database-cell-container>
+                  </div>
                 `;
               })}
             </div>
@@ -646,6 +772,9 @@ export class DatabaseBlockComponent
   @property()
   host!: BlockHost;
 
+  @query('.affine-database-table-container')
+  private _tableContainer!: HTMLDivElement;
+
   @query('.affine-database-block-title')
   private _container!: HTMLDivElement;
 
@@ -666,6 +795,7 @@ export class DatabaseBlockComponent
 
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
+  private _changColumnWidthConfig: ColumnWidthConfig | null = null;
 
   get columns(): ColumnSchema[] {
     return this.model.columns.map(id =>
@@ -684,6 +814,8 @@ export class DatabaseBlockComponent
 
   firstUpdated() {
     this._initTitleVEditor();
+    this._initChangeColumnWidthEvent();
+    this._initTableWidth();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -693,6 +825,93 @@ export class DatabaseBlockComponent
     super.disconnectedCallback();
     this._disposables.dispose();
   }
+
+  private _initTableWidth = () => {
+    const tableWidth = (this.columns.length + 1) * DEFAULT_COLUMN_WIDTH;
+    const parentElement = this._tableContainer.parentElement;
+    assertExists(parentElement);
+    const parentWidth = parentElement.clientWidth;
+    const width = Math.max(tableWidth, parentWidth);
+    this._tableContainer.style.width = `${width}px`;
+
+    // set title column width
+    const isFill = tableWidth > parentWidth;
+    if (!isFill) {
+      const titleColumnWidth =
+        parentWidth - this.columns.length * DEFAULT_COLUMN_WIDTH;
+      // wait for title column render
+      requestAnimationFrame(() => {
+        const firstColumnCells =
+          this._tableContainer.querySelectorAll<HTMLElement>(
+            `.database-cell:first-child`
+          );
+        firstColumnCells.forEach(cell => {
+          cell.style.width = `${titleColumnWidth}px`;
+        });
+      });
+    }
+  };
+  private _setChangingColumnWidth = (config: ColumnWidthConfig) => {
+    this._changColumnWidthConfig = config;
+  };
+
+  private _initChangeColumnWidthEvent() {
+    this._disposables.addFromEvent(
+      this._tableContainer,
+      'mousemove',
+      this._onColumnWidthMousemove
+    );
+    this._disposables.addFromEvent(
+      this._tableContainer,
+      'mouseup',
+      this._onColumnWidthMouseup
+    );
+  }
+
+  private _onColumnWidthMousemove = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this._changColumnWidthConfig) return;
+
+    const { startPositionX, leftColumnCells } = this._changColumnWidthConfig;
+    const deltaX = event.clientX - startPositionX;
+    // const isDragToRight = deltaX > 0;
+    // const cells = isDragToRight;
+
+    const { left } = leftColumnCells[0].getBoundingClientRect();
+    const columnWidth = event.clientX - left;
+    if (columnWidth < DEFAULT_COLUMN_MIN_WIDTH) return;
+
+    // update column width
+    leftColumnCells.forEach(cell => {
+      const el = cell as HTMLDivElement;
+      el.style.width = `${columnWidth}px`;
+    });
+
+    // update table width
+    const tableWidth = this._changColumnWidthConfig.containerWidth + deltaX;
+    this._tableContainer.style.width = `${tableWidth}px`;
+  };
+  private _onColumnWidthMouseup = (event: MouseEvent) => {
+    assertExists(this._changColumnWidthConfig);
+    const { index, leftColumnCells } = this._changColumnWidthConfig;
+    this._changColumnWidthConfig = null;
+
+    const columnWidth = leftColumnCells[0].offsetWidth;
+    this.model.page.captureSync();
+    if (index === 0) {
+      this.model.page.updateBlock(this.model, {
+        titleColumnWidth: columnWidth,
+      });
+    } else {
+      const schemaId = this.model.columns[index - 1];
+      const schemaProps = this.model.page.db.getColumnSchema(schemaId);
+      this.model.page.db.updateColumnSchema({
+        ...schemaProps,
+        width: columnWidth,
+      });
+    }
+  };
 
   private _getDatabaseMap() {
     const databaseMap: DatabaseMap = {};
@@ -891,11 +1110,6 @@ export class DatabaseBlockComponent
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
-    const totalWidth =
-      this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
-      FIRST_LINE_TEXT_WIDTH +
-      ADD_COLUMN_BUTTON_WIDTH;
-
     const isEmpty = !this.model.title || !this.model.title.length;
 
     return html`
@@ -910,15 +1124,13 @@ export class DatabaseBlockComponent
           ${this._renderToolbar()}
         </div>
         <div class="affine-database-block-table">
-          <div
-            style=${styleMap({
-              width: `${totalWidth}px`,
-            })}
-          >
+          <div class="affine-database-table-container">
             <affine-database-column-header
               .columns=${this.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
+              .setChangingColumnWidth=${this._setChangingColumnWidth}
+              .tableContainer=${this._tableContainer}
             ></affine-database-column-header>
             ${DataBaseRowContainer(
               this,
