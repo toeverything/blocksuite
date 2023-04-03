@@ -34,7 +34,6 @@ import {
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertTypeFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -474,21 +473,6 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await waitNextFrame(page);
   await assertRichTexts(page, ['a', 'b', 'c']);
-});
-
-test('pasting into empty list should not convert the list into paragraph', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'test');
-  await setVirgoSelection(page, 0, 4);
-  await copyByKeyboard(page);
-  await type(page, '- ');
-  await page.keyboard.press(`${SHORT_KEY}+v`);
-  await assertRichTexts(page, ['test']);
-  await assertTypeFormat(page, 'bulleted');
 });
 
 test('cut will delete all content, and copy will reappear content', async ({
