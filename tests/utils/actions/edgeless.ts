@@ -37,7 +37,7 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text' | 'connector';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -52,6 +52,8 @@ export function locatorEdgelessToolButton(
     brush: 'Pen',
     pan: 'Hand',
     text: 'Text',
+    connector: 'Connector',
+
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
@@ -91,7 +93,8 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'default':
     case 'brush':
     case 'pan':
-    case 'text': {
+    case 'text':
+    case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
       break;
@@ -167,6 +170,16 @@ export async function addBasicRectShapeElement(
 ) {
   await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 10 });
+  await setMouseMode(page, 'default');
+}
+
+export async function addBasicConnectorElement(
+  page: Page,
+  start: { x: number; y: number },
+  end: { x: number; y: number }
+) {
+  await setMouseMode(page, 'connector');
+  await dragBetweenCoords(page, start, end, { steps: 100 });
   await setMouseMode(page, 'default');
 }
 
