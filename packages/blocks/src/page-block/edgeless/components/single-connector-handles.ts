@@ -59,31 +59,25 @@ function capMousedown(
 
     let routes: Point[];
     if (position === 'start') {
-      if (connectorMode === ConnectorMode.Orthogonal) {
-        routes = generateConnectorPath(
-          newRect,
-          end.rect,
-          newPoint,
-          end.point,
-          originControllers,
-          'end'
-        );
-      } else {
-        routes = [newPoint, end.point];
-      }
+      routes = generateConnectorPath(
+        newRect,
+        end.rect,
+        newPoint,
+        end.point,
+        originControllers,
+        connectorMode,
+        'end'
+      );
     } else {
-      if (connectorMode === ConnectorMode.Orthogonal) {
-        routes = generateConnectorPath(
-          start.rect,
-          newRect,
-          start.point,
-          newPoint,
-          originControllers,
-          'start'
-        );
-      } else {
-        routes = [start.point, newPoint];
-      }
+      routes = generateConnectorPath(
+        start.rect,
+        newRect,
+        start.point,
+        newPoint,
+        originControllers,
+        connectorMode,
+        'start'
+      );
     }
 
     const bound = getBrushBoundFromPoints(

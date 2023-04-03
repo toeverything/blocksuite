@@ -12,6 +12,7 @@ import type {
   SurfaceManager,
   SurfaceViewport,
 } from '@blocksuite/phasor';
+import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
@@ -189,9 +190,13 @@ export function generateConnectorPath(
   startPoint: ConnectorPoint,
   endPoint: ConnectorPoint,
   originControllers: Controller[],
+  mode: ConnectorMode = ConnectorMode.Orthogonal,
   // this indicating which part of the path is fixed when there are customized control points
   fixed?: 'start' | 'end'
 ) {
+  if (mode !== ConnectorMode.Orthogonal) {
+    return [startPoint, endPoint];
+  }
   let customizedStart = Infinity;
   let customizedEnd = -1;
   originControllers.forEach((c, index) => {

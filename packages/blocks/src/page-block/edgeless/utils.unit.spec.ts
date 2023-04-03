@@ -1,4 +1,5 @@
 import { Rectangle } from '@blocksuite/connector';
+import { ConnectorMode } from '@blocksuite/phasor';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -49,6 +50,7 @@ describe('page-block edgeless utils', () => {
       startPoint,
       endPoint,
       controllers,
+      ConnectorMode.Orthogonal,
       'start'
     );
     expect(pathWithFixedStart).not.toMatchObject(controllers);
@@ -62,9 +64,21 @@ describe('page-block edgeless utils', () => {
       startPoint,
       endPoint,
       controllers,
+      ConnectorMode.Orthogonal,
       'end'
     );
     expect(pathWithFixedEnd).not.toMatchObject(controllers);
     expect(pathWithFixedEnd.slice(-4)).toMatchObject(controllers.slice(-4));
+
+    const pathStraight = generateConnectorPath(
+      startRect,
+      endRect,
+      startPoint,
+      endPoint,
+      controllers,
+      ConnectorMode.Straight,
+      'end'
+    );
+    expect(pathStraight).toMatchObject([startPoint, endPoint]);
   });
 });

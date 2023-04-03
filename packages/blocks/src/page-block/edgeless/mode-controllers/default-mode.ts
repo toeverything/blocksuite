@@ -205,17 +205,16 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
               ? 'start'
               : undefined;
 
-          const routes =
-            mode === ConnectorMode.Orthogonal
-              ? generateConnectorPath(
-                  start.rect,
-                  end.rect,
-                  start.point,
-                  end.point,
-                  controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
-                  fixed
-                )
-              : [start.point, end.point];
+          const routes = generateConnectorPath(
+            start.rect,
+            end.rect,
+            start.point,
+            end.point,
+            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+            mode,
+            fixed
+          );
+
           const bound = getBrushBoundFromPoints(
             routes.map(r => [r.x, r.y]),
             0
