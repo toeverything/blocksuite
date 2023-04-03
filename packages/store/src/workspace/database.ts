@@ -121,15 +121,15 @@ export class DatabaseManager {
           const yNewCell = new Y.Map();
           yNewCell.set('columnId', columnId);
           yNewCell.set('value', [(value as string[])[0]]);
-          yNewCell.set(columnId, yNewCell);
+          yRow.set(columnId, yNewCell);
         } else if (newType === 'rich-text') {
           const value = yCell.get('value');
           if (!value) return;
 
-          const yRow = new Y.Map();
-          yRow.set('columnId', columnId);
-          yRow.set('value', new Y.Text((value as number) + ''));
-          yRow.set(columnId, yRow);
+          const yNewCell = new Y.Map();
+          yNewCell.set('columnId', columnId);
+          yNewCell.set('value', new Y.Text((value as number) + ''));
+          yRow.set(columnId, yNewCell);
         }
       });
     });
