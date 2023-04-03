@@ -180,12 +180,12 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
-  page.db.updateColumn(p1, {
+  page.db.updateCell(p1, {
     columnId: col1,
     value: 0.1,
   });
 
-  page.db.updateColumn(p2, {
+  page.db.updateCell(p2, {
     columnId: col2,
     value: [selection[1]],
   });
@@ -193,7 +193,7 @@ export const database: InitFn = (workspace: Workspace) => {
   const text = new page.YText();
   text.insert(0, '123');
   text.insert(0, 'code');
-  page.db.updateColumn(p2, {
+  page.db.updateCell(p2, {
     columnId: col3,
     value: text,
   });

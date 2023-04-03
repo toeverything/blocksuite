@@ -35,15 +35,15 @@ import type { DatabaseBlockModel } from './database-model.js';
 import { getColumnSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
-type ColumnValues = string[];
+type CellValues = string[];
 
 /**
- * Containing all the rows and column values inside the database block.
+ * Containing all the cell values in rows.
  * ```
- * { rowId: ColumnValues }
+ * { rowId: CellValues }
  * ```
  */
-type DatabaseMap = Record<string, ColumnValues>;
+type DatabaseMap = Record<string, CellValues>;
 
 const enum SearchState {
   /** show search input */
@@ -694,26 +694,26 @@ export class DatabaseBlockComponent
     this._disposables.dispose();
   }
 
-  private _getDatabaseMap() {
+  private get _databaseMap() {
     const databaseMap: DatabaseMap = {};
     for (const child of this.model.children) {
       // The first value is the text context of the row block
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const nestedColumns = this.model.page.db.columnJSON;
+    const { serializedCells } = this.model.page.db;
     const rowIds = this.model.children.map(child => child.id);
 
-    rowIds.forEach(blockId => {
+    rowIds.forEach(rowId => {
       // The map containing all columns related to this row (block)
-      const columnMap = nestedColumns[blockId];
+      const columnMap = serializedCells[rowId];
       if (!columnMap) return;
 
       // Flatten the columnMap into a list of values
       const columnValues = Object.keys(columnMap).map(
         key => columnMap[key].value + ''
       );
-      databaseMap[blockId].push(...columnValues);
+      databaseMap[rowId].push(...columnValues);
     });
 
     return databaseMap;
@@ -727,10 +727,10 @@ export class DatabaseBlockComponent
       this._searchState = SearchState.SearchInput;
     }
 
-    const databaseMap = this._getDatabaseMap();
-    const existingRowIds = Object.keys(databaseMap).filter(key => {
+    const { _databaseMap } = this;
+    const existingRowIds = Object.keys(_databaseMap).filter(key => {
       return (
-        databaseMap[key].findIndex(item =>
+        _databaseMap[key].findIndex(item =>
           item.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())
         ) > -1
       );
@@ -889,7 +889,6 @@ export class DatabaseBlockComponent
     </div>`;
   };
 
-  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const totalWidth =
       this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
