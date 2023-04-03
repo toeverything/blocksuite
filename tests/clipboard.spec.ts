@@ -510,10 +510,10 @@ test('cut will delete all content, and copy will reappear content', async ({
   await type(page, '4');
 
   const box123 = await getRichTextBoundingBox(page, '1');
-  const inside123 = { x: box123.left - 1, y: box123.top - 1 };
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
 
   const box789 = await getRichTextBoundingBox(page, '6');
-  const inside789 = { x: box789.right + 10, y: box789.bottom + 10 };
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
   // from top to bottom
   await dragBetweenCoords(page, inside123, inside789);
 
@@ -524,8 +524,9 @@ test('cut will delete all content, and copy will reappear content', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame>
-    <affine:paragraph
-      prop:type="text"
+    <affine:list
+      prop:checked={false}
+      prop:type="bulleted"
     />
   </affine:frame>
 </affine:page>`
