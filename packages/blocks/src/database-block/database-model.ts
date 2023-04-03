@@ -8,7 +8,7 @@ export const DatabaseBlockSchema = defineBlockSchema(
     title: internal.Text(),
     columns: [] as ColumnSchema['id'][],
     titleColumnName: '',
-    titleColumnWidth: 200,
+    titleColumnWidth: 432,
   }),
   {
     version: 1,

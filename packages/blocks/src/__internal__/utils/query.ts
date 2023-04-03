@@ -653,10 +653,17 @@ export function getClosestBlockElementByPoint(
   if (element) {
     // Database
     if (isDatabase(element)) {
-      bounds = element
-        .querySelector('.affine-database-block-title')
-        ?.getBoundingClientRect();
-      if (bounds && point.y >= bounds.top && point.y <= bounds.bottom) {
+      bounds = element.getBoundingClientRect();
+      const rows = getDatabaseBlockRowsElement(element);
+      assertExists(rows);
+      childBounds = rows.getBoundingClientRect();
+
+      if (childBounds.height) {
+        if (point.y < childBounds.top || point.y > childBounds.bottom) {
+          return element;
+        }
+        childBounds = null;
+      } else {
         return element;
       }
     } else {
@@ -785,6 +792,7 @@ export function getClosestFrameBlockElementById(
 export function getRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
+  if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
 
@@ -879,4 +887,92 @@ export function getHoveringFrame(point: Point) {
     document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
     null
   );
+}
+
+/**
+ * Returns `true` if the database is empty.
+ */
+export function isEmptyDatabase(model: BaseBlockModel) {
+  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+}
+
+/**
+ * Gets the table of the database.
+ */
+export function getDatabaseBlockTableElement(element: Element) {
+  return element.querySelector('.affine-database-block-table');
+}
+
+/**
+ * Gets the column header of the database.
+ */
+export function getDatabaseBlockColumnHeaderElement(element: Element) {
+  return element.querySelector('.affine-database-column-header');
+}
+
+/**
+ * Gets the rows of the database.
+ */
+export function getDatabaseBlockRowsElement(element: Element) {
+  return element.querySelector('.affine-database-block-rows');
+}
+
+/**
+ * Gets the drop rect by block and point.
+ */
+export function getDropRectByPoint(
+  point: Point,
+  model: BaseBlockModel,
+  element: Element
+) {
+  let rect = getRectByBlockElement(element);
+  // If the database is empty and the point is inside the database
+  if (isEmptyDatabase(model)) {
+    const table = getDatabaseBlockTableElement(element);
+    assertExists(table);
+    const bounds = table.getBoundingClientRect();
+    if (bounds.top <= point.y && point.y <= bounds.bottom) {
+      const header = getDatabaseBlockColumnHeaderElement(element);
+      assertExists(header);
+      const headerBounds = header.getBoundingClientRect();
+      rect = new DOMRect(
+        headerBounds.left,
+        headerBounds.bottom + 1,
+        rect.width,
+        1
+      );
+    }
+  }
+
+  return rect;
+}
+
+/**
+ * Returns `true` if the point is inside the empty database.
+ */
+export function isInEmptyDatabaseByPoint(
+  point: Point,
+  model: BaseBlockModel,
+  element: Element,
+  blocks: BaseBlockModel[]
+) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Currently, nested databases are not supported
+    if (
+      blocks.some(block => matchFlavours(block, ['affine:database'] as const))
+    ) {
+      return false;
+    }
+
+    if (model.isEmpty()) {
+      const table = getDatabaseBlockTableElement(element);
+      assertExists(table);
+      const bounds = table.getBoundingClientRect();
+      if (bounds.top <= point.y && point.y <= bounds.bottom) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }

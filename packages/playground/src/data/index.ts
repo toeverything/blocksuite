@@ -162,6 +162,7 @@ export const database: InitFn = (workspace: Workspace) => {
     {
       columns: [col1, col2, col3],
       titleColumnName: 'Title',
+      titleColumnWidth: 200,
     },
     frameId
   );

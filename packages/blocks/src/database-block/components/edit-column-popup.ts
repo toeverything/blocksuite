@@ -265,6 +265,7 @@ export class EditColumnPopup extends LitElement {
       padding: 8px;
       border: 1px solid #e3e2e4;
       border-radius: 4px;
+      z-index: 1;
     }
 
     .affine-database-edit-column-popup {

@@ -39,6 +39,7 @@ export class DatabaseCellContainer
         columnId: this.columnSchema.id,
         value,
       });
+      this.requestUpdate();
     });
   }
 
@@ -68,10 +69,6 @@ export class DatabaseCellContainer
   };
 
   protected firstUpdated() {
-    this.databaseModel.propsUpdated.on(() => this.requestUpdate());
-    this.databaseModel.childrenUpdated.on(() => this.requestUpdate());
-    this.rowModel.propsUpdated.on(() => this.requestUpdate());
-    this.rowModel.childrenUpdated.on(() => this.requestUpdate());
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.columnSchema.id);

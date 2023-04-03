@@ -24,6 +24,7 @@ import type { TemplateResult } from 'lit';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
+  asyncFocusRichText,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -73,7 +74,13 @@ const dividerItem: SlashItem = {
       return;
     }
     const index = parent.children.indexOf(model);
+    const nextSibling = page.getNextSibling(model);
+    let nextSiblingId = nextSibling?.id as string;
     page.addBlock('affine:divider', {}, parent, index + 1);
+    if (!nextSibling) {
+      nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
+    }
+    asyncFocusRichText(page, nextSiblingId);
   },
 };
 

@@ -57,6 +57,7 @@ const enum SearchState {
 const DEFAULT_COLUMN_WIDTH = 200;
 const DEFAULT_COLUMN_MIN_WIDTH = 100;
 const DEFAULT_COLUMN_TITLE_HEIGHT = 40;
+const DEFAULT_ADD_BUTTON_WIDTH = 40;
 
 const columnTypeIconMap: Record<string, TemplateResult> = {
   select: DatabaseSelect,
@@ -73,12 +74,11 @@ if (once) {
 }
 
 type ColumnWidthConfig = {
-  isChangingWidth: boolean;
   index: number;
   startPositionX: number;
   containerWidth: number;
-  leftColumnCells: HTMLElement[];
   firstTitleColumn: HTMLElement;
+  leftColumnCells: HTMLElement[];
 };
 
 @customElement('affine-database-column-header')
@@ -93,11 +93,18 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     .affine-database-column {
       position: relative;
       z-index: 1;
-      width: ${DEFAULT_COLUMN_WIDTH}px;
       transform: translateX(0);
     }
     .database-cell {
       min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+    }
+    .database-cell.add-column-button {
+      width: auto;
+      min-width: ${DEFAULT_ADD_BUTTON_WIDTH}px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .affine-database-column-content {
       display: flex;
@@ -107,12 +114,15 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       padding: 8px;
       border-right: 1px solid var(--affine-border-color);
     }
+    .affine-database-column:last-child .affine-database-column-content {
+      border-right: none;
+    }
     .affine-database-column-drag-handle {
       position: absolute;
       z-index: 1;
       top: 0;
-      right: -20px;
-      width: 40px;
+      left: -8px;
+      width: 16px;
       height: 100%;
       cursor: col-resize;
     }
@@ -122,18 +132,13 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       position: absolute;
       width: 2px;
       height: 100%;
-      left: 19px;
+      left: 7px;
       background: #5438ff;
       box-shadow: 0px 0px 8px rgba(84, 56, 255, 0.35);
     }
     .affine-database-column-drag-handle:hover::before {
       display: block;
     }
-    .affine-database-column:last-child .affine-database-column-drag-handle {
-      width: 20px;
-      right: 1px;
-    }
-
     .affine-database-column-content:hover {
       background: linear-gradient(
           0deg,
@@ -205,7 +210,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  columns!: ColumnSchema[];
+  columnIds!: string[];
 
   @property()
   addColumn!: (index: number) => string;
@@ -227,31 +232,20 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  private _isChangingWidth = false;
-
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
   };
 
   firstUpdated() {
     this._initChangeColumnWidth();
-
-    const db = this.closest('affine-database');
-    const databaseBody = db?.querySelector('.affine-database-block-rows');
-    assertExists(databaseBody);
-    const dragHandleHeight =
-      databaseBody.clientHeight + DEFAULT_COLUMN_TITLE_HEIGHT - 1;
-    const allDragHandle = db?.querySelectorAll<HTMLElement>(
-      '.affine-database-column-drag-handle'
-    );
-    allDragHandle?.forEach(handle => {
-      handle.style.height = `${dragHandleHeight}px`;
-    });
+    this.setDragHandleHeight();
   }
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
+      this.setDragHandleHeight();
+
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
@@ -270,6 +264,20 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     this._disposables.dispose();
   }
 
+  setDragHandleHeight() {
+    const db = this.closest('affine-database');
+    const databaseBody = db?.querySelector('.affine-database-block-rows');
+    assertExists(databaseBody);
+    const dragHandleHeight =
+      databaseBody.clientHeight + DEFAULT_COLUMN_TITLE_HEIGHT - 1;
+    const allDragHandle = db?.querySelectorAll<HTMLElement>(
+      '.affine-database-column-drag-handle'
+    );
+    allDragHandle?.forEach(handle => {
+      handle.style.height = `${dragHandleHeight}px`;
+    });
+  }
+
   private _initChangeColumnWidth() {
     const columns = this._headerContainer.querySelectorAll<HTMLDivElement>(
       '.affine-database-column'
@@ -281,24 +289,19 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     });
   }
   private _onColumnWidthMousedown = (event: MouseEvent, index: number) => {
-    event.preventDefault();
-    event.stopPropagation();
     const currentColumnCells =
       this.tableContainer.querySelectorAll<HTMLElement>(
-        `.database-cell:nth-child(${index + 1})`
+        `.database-cell:nth-child(${index})`
       );
 
     const firstTitleColumn = this._headerContainer.querySelector<HTMLElement>(
       `.affine-database-column:nth-child(1)`
     );
     assertExists(firstTitleColumn);
-    this._isChangingWidth = true;
     this.setChangingColumnWidth({
       startPositionX: event.clientX,
-      isChangingWidth: this._isChangingWidth,
-      index,
+      index: index - 1,
       leftColumnCells: Array.from(currentColumnCells),
-      // rightColumnCells: Array.from(currentColumnCells),
       containerWidth: this.tableContainer.offsetWidth,
       firstTitleColumn,
     });
@@ -309,7 +312,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     column: ColumnSchema | string,
     index: number
   ) => {
-    if (this._isChangingWidth) return;
     if (this._editingColumnId) return;
 
     const currentEl = target as Element;
@@ -378,9 +380,16 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   };
 
   render() {
+    const style = styleMap({
+      width: `${this.targetModel.titleColumnWidth}px`,
+    });
+    const columns = this.columnIds.map(id =>
+      this.targetModel.page.db.getColumnSchema(id)
+    ) as ColumnSchema[];
+
     return html`
       <div class="affine-database-column-header database-row">
-        <div class="affine-database-column database-cell">
+        <div class="affine-database-column database-cell" style=${style}>
           <div
             class="affine-database-column-content ${this._editingColumnId ===
             '-1'
@@ -410,15 +419,16 @@ class DatabaseColumnHeader extends NonShadowLitElement {
             <!-- TODO: change icon -->
             <div class="affine-database-column-drag">${TextIcon}</div>
           </div>
-          <div class="affine-database-column-drag-handle"></div>
         </div>
         ${repeat(
-          this.columns,
+          columns,
           column => column.id,
           (column, index) => {
-            const isLastColumn = this.columns.length - 1 === index;
+            const style = styleMap({
+              width: `${column.width}px`,
+            });
             return html`
-              <div class="affine-database-column database-cell">
+              <div class="affine-database-column database-cell" style=${style}>
                 <div
                   class="affine-database-column-content ${this
                     ._editingColumnId === column.id
@@ -448,15 +458,28 @@ class DatabaseColumnHeader extends NonShadowLitElement {
                   <!-- TODO: change icon -->
                   <div class="affine-database-column-drag">${TextIcon}</div>
                 </div>
-                ${isLastColumn
-                  ? null
-                  : html`<div
-                      class="affine-database-column-drag-handle"
-                    ></div>`}
+                <div class="affine-database-column-drag-handle"></div>
               </div>
             `;
           }
         )}
+        <div class="affine-database-column database-cell add-column-button">
+          <div class="affine-database-column-drag-handle"></div>
+          <div class="add-column-button-container">
+            <svg
+              viewBox="0 0 16 16"
+              style=${styleMap({
+                width: '12px',
+                height: '100%',
+                fill: 'var(--affine-text-color)',
+              })}
+            >
+              <path
+                d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+              ></path>
+            </svg>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -473,6 +496,9 @@ function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
+  const columns = databaseModel.columns.map(id =>
+    databaseModel.page.db.getColumnSchema(id)
+  ) as ColumnSchema[];
 
   const filteredChildren =
     searchState === SearchState.Searching
@@ -501,9 +527,6 @@ function DataBaseRowContainer(
         border-top: 1px solid var(--affine-border-color);
       }
 
-      .affine-database-block-row-cell {
-        width: ${DEFAULT_COLUMN_WIDTH}px;
-      }
       .affine-database-block-row-cell-content {
         display: flex;
         align-items: center;
@@ -518,25 +541,34 @@ function DataBaseRowContainer(
       .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
       }
+      .database-cell:last-child affine-database-cell-container {
+        border-right: none;
+      }
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
         filteredChildren,
         child => child.id,
         (child, idx) => {
+          const style = styleMap({
+            width: `${databaseModel.titleColumnWidth}px`,
+          });
           return html`
             <div
               class="affine-database-block-row database-row"
               data-row-id="${idx}"
             >
-              <div class="affine-database-block-row-cell database-cell">
+              <div
+                class="affine-database-block-row-cell database-cell"
+                style=${style}
+              >
                 <div class="affine-database-block-row-cell-content">
                   ${BlockElementWithService(child, databaseBlock, () => {
                     databaseBlock.requestUpdate();
                   })}
                 </div>
               </div>
-              ${repeat(databaseBlock.columns, column => {
+              ${repeat(columns, column => {
                 return html`
                   <div
                     class="database-cell"
@@ -551,6 +583,7 @@ function DataBaseRowContainer(
                   </div>
                 `;
               })}
+              <div class="database-cell add-column-button"></div>
             </div>
           `;
         }
@@ -755,7 +788,7 @@ export class DatabaseBlockComponent
 
     .affine-database-add-column-button {
       position: absolute;
-      top: 58px;
+      top: 57px;
       right: -40px;
       display: flex;
       align-items: center;
@@ -795,13 +828,7 @@ export class DatabaseBlockComponent
 
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
-  private _changColumnWidthConfig: ColumnWidthConfig | null = null;
-
-  get columns(): ColumnSchema[] {
-    return this.model.columns.map(id =>
-      this.model.page.db.getColumnSchema(id)
-    ) as ColumnSchema[];
-  }
+  private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
 
   connectedCallback() {
     super.connectedCallback();
@@ -827,32 +854,23 @@ export class DatabaseBlockComponent
   }
 
   private _initTableWidth = () => {
-    const tableWidth = (this.columns.length + 1) * DEFAULT_COLUMN_WIDTH;
+    const tableWidth =
+      this.model.titleColumnWidth +
+      this.model.columns.length * DEFAULT_COLUMN_WIDTH +
+      DEFAULT_ADD_BUTTON_WIDTH;
+    this._setTableWidth(tableWidth);
+  };
+
+  private _setTableWidth = (tableWidth: number) => {
     const parentElement = this._tableContainer.parentElement;
     assertExists(parentElement);
     const parentWidth = parentElement.clientWidth;
     const width = Math.max(tableWidth, parentWidth);
     this._tableContainer.style.width = `${width}px`;
-
-    // set title column width
-    const isFill = tableWidth > parentWidth;
-    if (!isFill) {
-      const titleColumnWidth =
-        parentWidth - this.columns.length * DEFAULT_COLUMN_WIDTH;
-      // wait for title column render
-      requestAnimationFrame(() => {
-        const firstColumnCells =
-          this._tableContainer.querySelectorAll<HTMLElement>(
-            `.database-cell:first-child`
-          );
-        firstColumnCells.forEach(cell => {
-          cell.style.width = `${titleColumnWidth}px`;
-        });
-      });
-    }
   };
+
   private _setChangingColumnWidth = (config: ColumnWidthConfig) => {
-    this._changColumnWidthConfig = config;
+    this._changeColumnWidthConfig = config;
   };
 
   private _initChangeColumnWidthEvent() {
@@ -871,13 +889,10 @@ export class DatabaseBlockComponent
   private _onColumnWidthMousemove = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!this._changColumnWidthConfig) return;
+    if (!this._changeColumnWidthConfig) return;
 
-    const { startPositionX, leftColumnCells } = this._changColumnWidthConfig;
+    const { startPositionX, leftColumnCells } = this._changeColumnWidthConfig;
     const deltaX = event.clientX - startPositionX;
-    // const isDragToRight = deltaX > 0;
-    // const cells = isDragToRight;
-
     const { left } = leftColumnCells[0].getBoundingClientRect();
     const columnWidth = event.clientX - left;
     if (columnWidth < DEFAULT_COLUMN_MIN_WIDTH) return;
@@ -889,13 +904,13 @@ export class DatabaseBlockComponent
     });
 
     // update table width
-    const tableWidth = this._changColumnWidthConfig.containerWidth + deltaX;
-    this._tableContainer.style.width = `${tableWidth}px`;
+    const tableWidth = this._changeColumnWidthConfig.containerWidth + deltaX;
+    this._setTableWidth(tableWidth);
   };
   private _onColumnWidthMouseup = (event: MouseEvent) => {
-    assertExists(this._changColumnWidthConfig);
-    const { index, leftColumnCells } = this._changColumnWidthConfig;
-    this._changColumnWidthConfig = null;
+    if (!this._changeColumnWidthConfig) return;
+    const { index, leftColumnCells } = this._changeColumnWidthConfig;
+    this._changeColumnWidthConfig = null;
 
     const columnWidth = leftColumnCells[0].offsetWidth;
     this.model.page.captureSync();
@@ -1027,6 +1042,10 @@ export class DatabaseBlockComponent
 
     this.model.page.captureSync();
     this.model.page.addBlock('affine:paragraph', {}, this.model.id);
+
+    requestAnimationFrame(() => {
+      this._columnHeaderComponent.setDragHandleHeight();
+    });
   };
 
   private _addColumn = (index: number) => {
@@ -1037,7 +1056,7 @@ export class DatabaseBlockComponent
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
-      width: 200,
+      width: DEFAULT_COLUMN_WIDTH,
       hide: false,
       ...renderer.propertyCreator(),
     };
@@ -1051,6 +1070,9 @@ export class DatabaseBlockComponent
     requestAnimationFrame(() => {
       this._columnHeaderComponent.setEditingColumnId(id);
     });
+    this._setTableWidth(
+      this._tableContainer.offsetWidth + DEFAULT_COLUMN_WIDTH
+    );
   };
 
   private _initTitleVEditor() {
@@ -1126,7 +1148,7 @@ export class DatabaseBlockComponent
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
-              .columns=${this.columns}
+              .columnIds=${this.model.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
               .setChangingColumnWidth=${this._setChangingColumnWidth}
@@ -1153,7 +1175,7 @@ export class DatabaseBlockComponent
         <div
           class="affine-database-add-column-button"
           data-test-id="affine-database-add-column-button"
-          @click=${() => this._addColumn(this.columns.length)}
+          @click=${() => this._addColumn(this.model.columns.length)}
         >
           <svg
             viewBox="0 0 16 16"
