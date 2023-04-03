@@ -3,9 +3,11 @@ import './utils/declare-test-window.js';
 import {
   captureHistory,
   copyByKeyboard,
+  cutByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getRichTextBoundingBox,
   importMarkdown,
   initEmptyParagraphState,
   pasteByKeyboard,
@@ -487,4 +489,79 @@ test('pasting into empty list should not convert the list into paragraph', async
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['test']);
   await assertTypeFormat(page, 'bulleted');
+});
+
+test.only('cut will delete all content, and copy will reappear content', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, '1');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '2');
+  await pressEnter(page);
+  await type(page, '3');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await type(page, '4');
+
+  const box123 = await getRichTextBoundingBox(page, '1');
+  const inside123 = { x: box123.left - 1, y: box123.top - 1 };
+
+  const box789 = await getRichTextBoundingBox(page, '6');
+  const inside789 = { x: box789.right + 10, y: box789.bottom + 10 };
+  // from top to bottom
+  await dragBetweenCoords(page, inside123, inside789);
+
+  await cutByKeyboard(page);
+  await waitNextFrame(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+  await waitNextFrame(page);
+  await focusRichText(page);
+
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:list
+      prop:checked={false}
+      prop:text="1"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="2"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="3"
+        prop:type="bulleted"
+      />
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="4"
+      prop:type="bulleted"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });
