@@ -262,3 +262,44 @@ export function atLeastNMatches<T>(
 
   return false;
 }
+
+/**
+ * Groups an array of elements based on a provided key function.
+ *
+ * @example
+ * interface Student {
+ *   name: string;
+ *   age: number;
+ * }
+ * const students: Student[] = [
+ *   { name: 'Alice', age: 25 },
+ *   { name: 'Bob', age: 23 },
+ *   { name: 'Cathy', age: 25 },
+ * ];
+ * const groupedByAge = groupBy(students, (student) => student.age.toString());
+ * console.log(groupedByAge);
+ * // Output: {
+ *  '23': [ { name: 'Bob', age: 23 } ],
+ *  '25': [ { name: 'Alice', age: 25 }, { name: 'Cathy', age: 25 } ]
+ * }
+ */
+export function groupBy<T>(
+  arr: T[],
+  key: string | ((item: T) => string)
+): Record<string, T[]> {
+  const result = {} as Record<string, T[]>;
+
+  for (const item of arr) {
+    const groupKey = (
+      typeof key === 'function' ? key(item) : (item as any)[key]
+    ) as string;
+
+    if (!result[groupKey]) {
+      result[groupKey] = [];
+    }
+
+    result[groupKey].push(item);
+  }
+
+  return result;
+}

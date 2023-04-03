@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { atLeastNMatches, countBy, maxBy } from './std.js';
+import { atLeastNMatches, countBy, groupBy, maxBy } from './std.js';
 
 describe('countBy', () => {
   it('basic', () => {
@@ -48,5 +48,35 @@ describe('atLeastNMatches', () => {
 
     expect(atLeastNMatches(strArr, startsWithA, 1)).toBe(true);
     expect(atLeastNMatches(strArr, longerThan5, 3)).toBe(false);
+  });
+});
+
+describe('groupBy', () => {
+  it('basic', () => {
+    const students = [
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 23 },
+      { name: 'Cathy', age: 25 },
+      { name: 'David', age: 23 },
+    ];
+
+    const groupedByAge = groupBy(students, student => student.age.toString());
+    const expectedGroupedByAge = {
+      '23': [
+        { name: 'Bob', age: 23 },
+        { name: 'David', age: 23 },
+      ],
+      '25': [
+        { name: 'Alice', age: 25 },
+        { name: 'Cathy', age: 25 },
+      ],
+    };
+    expect(groupedByAge).toMatchObject(expectedGroupedByAge);
+  });
+
+  it('empty', () => {
+    const emptyArray: string[] = [];
+    const groupedEmptyArray = groupBy(emptyArray, item => item);
+    expect(Object.keys(groupedEmptyArray).length).toBe(0);
   });
 });

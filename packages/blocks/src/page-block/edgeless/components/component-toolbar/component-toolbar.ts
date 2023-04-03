@@ -15,7 +15,10 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import { atLeastNMatches } from '../../../../__internal__/utils/std.js';
+import {
+  atLeastNMatches,
+  groupBy,
+} from '../../../../__internal__/utils/std.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
@@ -66,23 +69,14 @@ export class EdgelessComponentToolbar extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
-  private _category(): CategorizedElements {
-    const cate: Record<string, unknown[]> = {
-      frame: [],
-    };
-
-    this.selected.forEach(s => {
+  private _groupSelected(): CategorizedElements {
+    const result = groupBy(this.selected, s => {
       if (isTopLevelBlock(s)) {
-        cate.frame.push(s);
-        return;
+        return 'frame';
       }
-      if (!cate[s.type]) {
-        cate[s.type] = [];
-      }
-      cate[s.type].push(s);
+      return s.type;
     });
-
-    return cate as CategorizedElements;
+    return result as CategorizedElements;
   }
 
   private _getShapeButton(shapeElements?: ShapeElement[]) {
@@ -124,12 +118,12 @@ export class EdgelessComponentToolbar extends LitElement {
   }
 
   render() {
-    const categorized = this._category();
-    const { shape, brush, connector } = categorized;
+    const groupedSelected = this._groupSelected();
+    const { shape, brush, connector } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
-      Object.values(categorized),
+      Object.values(groupedSelected),
       e => !!e.length,
       2
     );
@@ -140,9 +134,9 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getShapeButton(shape),
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
-        ];
+        ].filter(b => !!b);
 
-    const divider = selectedAtLeastTwoTypes
+    const divider = !buttons.length
       ? nothing
       : html`<menu-divider .vertical=${true}></menu-divider>`;
     return html`<div class="container">
