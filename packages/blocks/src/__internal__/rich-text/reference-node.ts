@@ -12,7 +12,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import {
   getEditorContainer,
   getModelByElement,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
@@ -20,7 +20,7 @@ import type { AffineTextAttributes } from './virgo/types.js';
 export const REFERENCE_NODE = ' ';
 
 @customElement('affine-reference')
-export class AffineReference extends NonShadowLitElement {
+export class AffineReference extends ShadowlessElement {
   static styles = css`
     .affine-reference {
       white-space: nowrap;

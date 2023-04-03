@@ -12,10 +12,10 @@ import { getHighlighter, type Highlighter, type Lang } from 'shiki';
 
 import {
   type BlockHost,
-  DisposableMixin,
   getViewportElement,
-  NonShadowLitElement,
   queryCurrentMode,
+  ShadowlessElement,
+  WithDisposable,
 } from '../__internal__/index.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -24,7 +24,7 @@ import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends DisposableMixin(NonShadowLitElement) {
+export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   static styles = css`
     code-block {
       position: relative;

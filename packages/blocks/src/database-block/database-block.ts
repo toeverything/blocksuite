@@ -31,7 +31,7 @@ import { html } from 'lit/static-html.js';
 
 import { type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
-import { NonShadowLitElement } from '../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
@@ -91,7 +91,7 @@ if (once) {
 }
 
 @customElement('affine-database-column-header')
-class DatabaseColumnHeader extends NonShadowLitElement {
+class DatabaseColumnHeader extends ShadowlessElement {
   static styles = css`
     :host * {
       box-sizing: border-box;
@@ -455,7 +455,7 @@ function DataBaseRowContainer(
 
 @customElement('affine-database')
 export class DatabaseBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;

@@ -6,7 +6,7 @@ import type {
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
@@ -18,7 +18,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
-export class EditorContainer extends NonShadowLitElement {
+export class EditorContainer extends ShadowlessElement {
   @property()
   page!: Page;
 

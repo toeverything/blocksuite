@@ -2,13 +2,13 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type BlockHost, NonShadowLitElement } from '../__internal__/index.js';
+import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tryUpdateFrameSize } from '../page-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends NonShadowLitElement {
+export class FrameBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-frame-block-container.selected {
       background-color: var(--affine-selected-color);

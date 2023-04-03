@@ -7,8 +7,8 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  NonShadowLitElement,
   Point,
+  ShadowlessElement,
 } from '@blocksuite/blocks/std';
 import {
   BLOCKHUB_FILE_ITEMS,
@@ -442,7 +442,7 @@ function BlockHubMenu(
 }
 
 @customElement('affine-block-hub')
-export class BlockHub extends NonShadowLitElement {
+export class BlockHub extends ShadowlessElement {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */

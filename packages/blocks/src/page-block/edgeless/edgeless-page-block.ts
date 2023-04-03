@@ -29,7 +29,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../../__internal__/utils/lit.js';
 import type {
   DragHandle,
   FrameBlockModel,
@@ -75,7 +75,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements EdgelessContainer, BlockHost
 {
   static styles = css`

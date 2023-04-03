@@ -11,7 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   type BlockHost,
   isPageMode,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
@@ -56,7 +56,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends NonShadowLitElement {
+export class ParagraphBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-paragraph-block-container {
       position: relative;

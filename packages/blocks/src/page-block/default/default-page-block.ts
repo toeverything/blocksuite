@@ -24,7 +24,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -52,7 +52,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements BlockHost
 {
   static styles = css`

@@ -6,24 +6,8 @@ import {
   LitElement,
 } from 'lit';
 
-export class DisposableLitElement extends LitElement {
-  protected _disposables = new DisposableGroup();
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-  }
-}
-
 // see https://lit.dev/docs/composition/mixins/#mixins-in-typescript
-export declare class DisposableMixinInterface {
+declare class DisposableClass {
   protected _disposables: DisposableGroup;
 }
 
@@ -39,36 +23,35 @@ type Constructor<T = object> = new (...args: any[]) => T;
  *
  * @example
  * ```ts
- * class MyElement extends DisposableMixin(NonShadowLitElement) {
+ * class MyElement extends WithDisposable(ShadowlessElement) {
  *   onClick() {
  *     this._disposables.add(...);
  *   }
  * }
  * ```
  */
-export const DisposableMixin = <T extends Constructor<LitElement>>(
-  superClass: T
-) => {
-  class DisposableMixinClass extends superClass {
+export function WithDisposable<T extends Constructor<LitElement>>(
+  SuperClass: T
+) {
+  class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
 
-    connectedCallback(): void {
+    connectedCallback() {
       super.connectedCallback();
       if (this._disposables.disposed) {
         this._disposables = new DisposableGroup();
       }
     }
 
-    disconnectedCallback(): void {
+    disconnectedCallback() {
       super.disconnectedCallback();
       this._disposables.dispose();
     }
   }
-  return DisposableMixinClass as unknown as T &
-    Constructor<DisposableMixinInterface>;
-};
+  return DerivedClass as unknown as T & Constructor<DisposableClass>;
+}
 
-export class NonShadowLitElement extends LitElement {
+export class ShadowlessElement extends LitElement {
   static disableShadowRoot = true;
 
   protected static finalizeStyles(
@@ -77,7 +60,7 @@ export class NonShadowLitElement extends LitElement {
     let elementStyles = super.finalizeStyles(styles);
     const styleRoot = document.head;
     if (this.disableShadowRoot) {
-      // WARNING: This break component encapsulation and applies styles to the document.
+      // XXX: This breaks component encapsulation and applies styles to the document.
       // These styles should be manually scoped.
       elementStyles.forEach((s: CSSResultOrNative) => {
         if (s instanceof CSSResult) {
@@ -94,8 +77,7 @@ export class NonShadowLitElement extends LitElement {
   }
 
   createRenderRoot() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (this.constructor as any).disableShadowRoot
+    return (this.constructor as typeof ShadowlessElement).disableShadowRoot
       ? this
       : super.createRenderRoot();
   }
