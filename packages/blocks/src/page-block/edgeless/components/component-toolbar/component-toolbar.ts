@@ -125,7 +125,6 @@ export class EdgelessComponentToolbar extends LitElement {
 
   render() {
     const categorized = this._category();
-    console.log(categorized);
     const { shape, brush, connector } = categorized;
 
     // when selected types more than two, only show `more` button
