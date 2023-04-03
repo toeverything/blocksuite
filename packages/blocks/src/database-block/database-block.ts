@@ -433,12 +433,206 @@ function DataBaseRowContainer(
   `;
 }
 
+const styles = css`
+  affine-database {
+    position: relative;
+  }
+
+  .affine-database-block-title-container {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    margin: 12px 0px;
+  }
+
+  .affine-database-block-title {
+    flex: 1;
+    position: sticky;
+    width: 300px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #424149;
+    font-family: inherit;
+    overflow: hidden;
+    cursor: text;
+  }
+
+  .affine-database-block-title [data-virgo-text='true'] {
+    display: inline-block;
+    width: 300px;
+    max-width: 300px;
+    white-space: nowrap !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .affine-database-block-title:focus {
+    outline: none;
+  }
+
+  .affine-database-block-title:disabled {
+    background-color: transparent;
+  }
+
+  .affine-database-block-title-empty::before {
+    content: 'Database';
+    color: var(--affine-placeholder-color);
+    position: absolute;
+    opacity: 0.5;
+  }
+
+  .affine-database-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+  .affine-database-toolbar-search svg,
+  .affine-database-toolbar svg {
+    width: 16px;
+    height: 16px;
+  }
+  .affine-database-toolbar-item {
+    display: flex;
+    align-items: center;
+  }
+  .affine-database-toolbar-item.search {
+    overflow: hidden;
+  }
+  .affine-database-search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 138px;
+    height: 32px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0);
+    transform: translate(110px, 0px);
+    transition: all 0.3s ease;
+  }
+  .affine-database-search-container > svg {
+    min-width: 16px;
+    min-height: 16px;
+  }
+  .search-container-expand {
+    transform: translate(0px, 0px);
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  .search-input-container {
+    display: flex;
+    align-items: center;
+  }
+  .affine-database-search-input-icon {
+    display: inline-flex;
+  }
+  .affine-database-search-input {
+    flex: 1;
+    height: 16px;
+    width: 80px;
+    border: none;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    box-sizing: border-box;
+    color: inherit;
+    background: transparent;
+  }
+  .affine-database-search-input:focus {
+    outline: none;
+  }
+  .affine-database-search-input::placeholder {
+    color: #888a9e;
+    font-size: var(--affine-font-sm);
+  }
+
+  .affine-database-toolbar-item.new-record {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 120px;
+    height: 32px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
+      0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
+      #ffffff;
+  }
+
+  .affine-database-block-table {
+    position: relative;
+    width: 100%;
+    overflow-x: scroll;
+    border-top: 1.5px solid var(--affine-border-color);
+  }
+
+  .affine-database-block-tag-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .affine-database-block-tag {
+    display: inline-flex;
+    border-radius: 11px;
+    align-items: center;
+    padding: 0 8px;
+    cursor: pointer;
+  }
+
+  .affine-database-block-footer {
+    display: flex;
+    width: 100%;
+    height: 42px;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .affine-database-block-add-row {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+  }
+  .affine-database-block-add-row svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .affine-database-add-column-button {
+    position: absolute;
+    top: 58px;
+    right: -40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+`;
+
 @customElement('affine-database')
 export class DatabaseBlockComponent
   extends NonShadowLitElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;
+
+  static styles = styles;
+
+  get slots() {
+    return this.host.slots;
+  }
+
   get page() {
     return this.host.page;
   }
@@ -448,197 +642,6 @@ export class DatabaseBlockComponent
   get getService() {
     return this.host.getService;
   }
-
-  static styles = css`
-    affine-database {
-      position: relative;
-    }
-
-    .affine-database-block-title-container {
-      display: flex;
-      align-items: center;
-      height: 44px;
-      margin: 12px 0px;
-    }
-
-    .affine-database-block-title {
-      flex: 1;
-      position: sticky;
-      width: 300px;
-      height: 30px;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 24px;
-      color: #424149;
-      font-family: inherit;
-      overflow: hidden;
-      cursor: text;
-    }
-
-    .affine-database-block-title [data-virgo-text='true'] {
-      display: inline-block;
-      width: 300px;
-      max-width: 300px;
-      white-space: nowrap !important;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-
-    .affine-database-block-title:focus {
-      outline: none;
-    }
-
-    .affine-database-block-title:disabled {
-      background-color: transparent;
-    }
-
-    .affine-database-block-title-empty::before {
-      content: 'Database';
-      color: var(--affine-placeholder-color);
-      position: absolute;
-      opacity: 0.5;
-    }
-
-    .affine-database-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 26px;
-    }
-    .affine-database-toolbar-search svg,
-    .affine-database-toolbar svg {
-      width: 16px;
-      height: 16px;
-    }
-    .affine-database-toolbar-item {
-      display: flex;
-      align-items: center;
-    }
-    .affine-database-toolbar-item.search {
-      overflow: hidden;
-    }
-    .affine-database-search-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 138px;
-      height: 32px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0);
-      transform: translate(110px, 0px);
-      transition: all 0.3s ease;
-    }
-    .affine-database-search-container > svg {
-      min-width: 16px;
-      min-height: 16px;
-    }
-    .search-container-expand {
-      transform: translate(0px, 0px);
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-    .search-input-container {
-      display: flex;
-      align-items: center;
-    }
-    .affine-database-search-input-icon {
-      display: inline-flex;
-    }
-    .affine-database-search-input {
-      flex: 1;
-      height: 16px;
-      width: 80px;
-      border: none;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      box-sizing: border-box;
-      color: inherit;
-      background: transparent;
-    }
-    .affine-database-search-input:focus {
-      outline: none;
-    }
-    .affine-database-search-input::placeholder {
-      color: #888a9e;
-      font-size: var(--affine-font-sm);
-    }
-
-    .affine-database-toolbar-item.new-record {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 120px;
-      height: 32px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      font-size: 14px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-        0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
-      background: linear-gradient(
-          0deg,
-          rgba(0, 0, 0, 0.04),
-          rgba(0, 0, 0, 0.04)
-        ),
-        #ffffff;
-    }
-
-    .affine-database-block-table {
-      position: relative;
-      width: 100%;
-      overflow-x: scroll;
-      border-top: 1.5px solid var(--affine-border-color);
-    }
-
-    .affine-database-block-tag-circle {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .affine-database-block-tag {
-      display: inline-flex;
-      border-radius: 11px;
-      align-items: center;
-      padding: 0 8px;
-      cursor: pointer;
-    }
-
-    .affine-database-block-footer {
-      display: flex;
-      width: 100%;
-      height: 42px;
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    .affine-database-block-add-row {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      user-select: none;
-      font-size: 14px;
-    }
-    .affine-database-block-add-row svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .affine-database-add-column-button {
-      position: absolute;
-      top: 58px;
-      right: -40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-    }
-  `;
 
   @property()
   model!: DatabaseBlockModel;
@@ -942,6 +945,7 @@ export class DatabaseBlockComponent
           data-test-id="affine-database-add-column-button"
           @click=${() => this._addColumn(this.columns.length)}
         >
+          <!-- Fix move to icon -->
           <svg
             viewBox="0 0 16 16"
             style=${styleMap({

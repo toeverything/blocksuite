@@ -504,7 +504,7 @@ export class DefaultSelectionManager {
   }
 
   refreshRemoteSelection() {
-    const element = document.querySelector('remote-selection');
+    const element = this._container.querySelector('remote-selection');
     if (element) {
       element.requestUpdate();
     }

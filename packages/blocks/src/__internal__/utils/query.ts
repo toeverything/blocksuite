@@ -419,8 +419,9 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
-  // maybe should check element.closest(ATTR_SELECTOR) is not null
-  return getModelByBlockElement(element.closest(ATTR_SELECTOR) as Element);
+  const closestBlock = element.closest(ATTR_SELECTOR);
+  assertExists(closestBlock, 'Cannot find block element by element');
+  return getModelByBlockElement(closestBlock);
 }
 
 function mergeRect(a: DOMRect, b: DOMRect) {

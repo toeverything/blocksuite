@@ -7,6 +7,7 @@ import type {
   ServiceFlavour,
 } from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
+import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -36,12 +37,18 @@ export interface BlockHostContext {
   ) => BlockServiceInstanceByKey<Key>;
 }
 
+export type CommonSlots = RefNodeSlots;
+
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   clipboard: Clipboard;
+  readonly slots: CommonSlots;
 }
 
+/**
+ * @deprecated Not used yet
+ */
 export interface CommonBlockElement extends HTMLElement {
   host: BlockHost;
   model: BaseBlockModel;
