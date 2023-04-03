@@ -28,12 +28,12 @@ export type RefNodeSlots = {
   /**
    * Emit when the subpage is linked to the current page.
    */
-  onLinkPage: Slot<{ pageId: string }>;
+  subpageLinked: Slot<{ pageId: string }>;
   /**
    * Emit when the subpage is unlinked from the current page.
    */
-  onUnlinkPage: Slot<{ pageId: string }>;
-  onJumpToPage: Slot<{ pageId: string }>;
+  subpageUnlinked: Slot<{ pageId: string }>;
+  pageLinkClicked: Slot<{ pageId: string }>;
 };
 
 function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
@@ -129,7 +129,7 @@ export class AffineReference extends NonShadowLitElement {
         return;
       }
       // User may create a subpage ref node by paste or undo/redo.
-      this.host.slots.onLinkPage.emit({ pageId: refAttribute.pageId });
+      this.host.slots.subpageLinked.emit({ pageId: refAttribute.pageId });
     }
   }
 
@@ -147,7 +147,9 @@ export class AffineReference extends NonShadowLitElement {
 
     if (!isRefPageInDelta(delta, this._refAttribute.pageId)) {
       // The subpage is deleted
-      this.host.slots.onUnlinkPage.emit({ pageId: this._refAttribute.pageId });
+      this.host.slots.subpageUnlinked.emit({
+        pageId: this._refAttribute.pageId,
+      });
     }
   }
 
@@ -159,7 +161,7 @@ export class AffineReference extends NonShadowLitElement {
       return;
     }
     const targetPageId = refMeta.id;
-    this.host.slots.onJumpToPage.emit({ pageId: targetPageId });
+    this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
 
     // const editor = getEditorContainer(model.page);
     // editor.page = model.page.workspace.getPage(targetPageId);

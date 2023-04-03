@@ -74,9 +74,9 @@ export class EditorContainer extends NonShadowLitElement {
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   slots: CommonSlots = {
-    onJumpToPage: new Slot(),
-    onLinkPage: new Slot(),
-    onUnlinkPage: new Slot(),
+    pageLinkClicked: new Slot(),
+    subpageLinked: new Slot(),
+    subpageUnlinked: new Slot(),
   };
 
   connectedCallback() {

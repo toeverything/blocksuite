@@ -151,9 +151,9 @@ export class EdgelessPageBlockComponent
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
 
-    onLinkPage: new Slot<{ pageId: string }>(),
-    onUnlinkPage: new Slot<{ pageId: string }>(),
-    onJumpToPage: new Slot<{ pageId: string }>(),
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   surface!: SurfaceManager;
