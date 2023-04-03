@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-toolbar.js';
 import './components/edgeless-selected-rect.js';
+import './toolbar/edgeless-toolbar.js';
 
 import {
   almostEqual,
@@ -145,12 +145,16 @@ export class EdgelessPageBlockComponent
 
   clipboard = new EdgelessClipboard(this.page);
 
-  slots: EdgelessSelectionSlots = {
+  slots = {
     viewportUpdated: new Slot(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   surface!: SurfaceManager;
@@ -348,7 +352,7 @@ export class EdgelessPageBlockComponent
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
     const frameId = this._addFrameWithPoint(point);
-    const ids = this.page.addBlocksByFlavour(
+    const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
         return {

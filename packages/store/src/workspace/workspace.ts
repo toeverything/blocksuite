@@ -21,6 +21,10 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
 import { Indexer, type QueryContent } from './search.js';
 
+export type WorkspaceOptions = {
+  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
+} & StoreOptions;
+
 export interface PageMeta {
   id: string;
   title: string;
@@ -285,17 +289,19 @@ export class Workspace {
 
   readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
-  constructor(options: StoreOptions) {
-    this.inlineSuggestionProvider =
-      options.experimentalInlineSuggestionProvider;
-    this._store = new Store(options);
+  constructor({
+    experimentalInlineSuggestionProvider,
+    ...storeOptions
+  }: WorkspaceOptions) {
+    this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+    this._store = new Store(storeOptions);
     this._indexer = new Indexer(this.doc);
-    if (options.blobOptionsGetter) {
-      this._blobOptionsGetter = options.blobOptionsGetter;
+    if (storeOptions.blobOptionsGetter) {
+      this._blobOptionsGetter = storeOptions.blobOptionsGetter;
     }
 
-    if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.id, k => {
+    if (!storeOptions.isSSR) {
+      this._blobStorage = getBlobStorage(storeOptions.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._initBlobStorage();

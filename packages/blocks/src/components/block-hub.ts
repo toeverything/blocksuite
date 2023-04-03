@@ -1,12 +1,13 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  Rect,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type Rect,
+  WithDisposable,
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
+  getDropRectByPoint,
   getModelByBlockElement,
-  getRectByBlockElement,
   Point,
   ShadowlessElement,
 } from '@blocksuite/blocks/std';
@@ -22,11 +23,7 @@ import {
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
-import {
-  assertExists,
-  DisposableGroup,
-  isFirefox,
-} from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
@@ -442,7 +439,7 @@ function BlockHubMenu(
 }
 
 @customElement('affine-block-hub')
-export class BlockHub extends ShadowlessElement {
+export class BlockHub extends WithDisposable(ShadowlessElement) {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
@@ -506,7 +503,6 @@ export class BlockHub extends ShadowlessElement {
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   static styles = styles;
 
@@ -709,8 +705,6 @@ export class BlockHub extends ShadowlessElement {
       return;
     }
 
-    this._indicator.cursorPosition = new Point(x, y);
-
     const point = new Point(x, y);
     const { container, rect, scale } = this.getHoveringFrameState(
       point.clone()
@@ -727,16 +721,19 @@ export class BlockHub extends ShadowlessElement {
     let targetRect = null;
     let lastModelState = null;
     if (element) {
-      targetRect = getRectByBlockElement(element);
+      const model = getModelByBlockElement(element);
+      targetRect = getDropRectByPoint(point, model, element);
+
       lastModelState = {
+        model,
         rect: targetRect,
         element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
       };
     }
 
     this._lastModelState = lastModelState;
     this._indicator.targetRect = targetRect;
+    this._indicator.cursorPosition = point;
   };
 
   private _onDragOver = (e: DragEvent) => {

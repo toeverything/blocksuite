@@ -33,10 +33,11 @@ export class DatabaseCellContainer
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
-        schemaId: this.columnSchema.id,
+      this.databaseModel.page.db.updateCell(this.rowModel.id, {
+        columnId: this.columnSchema.id,
         value,
       });
+      this.requestUpdate();
     });
   }
 
@@ -53,11 +54,11 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.columnSchema.property);
+    const newProperty = apply(this.columnSchema);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setColumnSchema({
+    this.databaseModel.page.db.updateColumnSchema({
       ...this.columnSchema,
-      property: newProperty,
+      ...newProperty,
     });
   }
 
@@ -66,10 +67,6 @@ export class DatabaseCellContainer
   };
 
   protected firstUpdated() {
-    this.databaseModel.propsUpdated.on(() => this.requestUpdate());
-    this.databaseModel.childrenUpdated.on(() => this.requestUpdate());
-    this.rowModel.propsUpdated.on(() => this.requestUpdate());
-    this.rowModel.childrenUpdated.on(() => this.requestUpdate());
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.columnSchema.id);
@@ -78,8 +75,8 @@ export class DatabaseCellContainer
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('columnSchema')) {
       requestAnimationFrame(() => {
-        this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
-        this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
+        this.style.minWidth = `${this.columnSchema.width}px`;
+        this.style.maxWidth = `${this.columnSchema.width}px`;
       });
     }
   }
@@ -110,9 +107,9 @@ export class DatabaseCellContainer
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  protected render() {
+  render() {
     const renderer = getColumnSchemaRenderer(this.columnSchema.type);
-    const column = this.databaseModel.page.getBlockColumnBySchema(
+    const cell = this.databaseModel.page.db.getCell(
       this.rowModel,
       this.columnSchema
     );
@@ -125,7 +122,7 @@ export class DatabaseCellContainer
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
           .columnSchema=${this.columnSchema}
-          .column=${column}
+          .cell=${cell}
         ></${editingTag}>
       `;
     }
@@ -136,7 +133,7 @@ export class DatabaseCellContainer
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .columnSchema=${this.columnSchema}
-        .column=${column}
+        .cell=${cell}
       ></${previewTag}>
     `;
   }

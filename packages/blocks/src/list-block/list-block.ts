@@ -9,6 +9,11 @@ import {
   getDefaultPageBlock,
   ShadowlessElement,
 } from '../__internal__/index.js';
+import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -80,6 +85,11 @@ export class ListBlockComponent extends ShadowlessElement {
   @state()
   showChildren = true;
 
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
+
   private _select() {
     const { selection } = getDefaultPageBlock(this.model);
     selection?.selectOneBlock(this);
@@ -130,7 +140,11 @@ export class ListBlockComponent extends ShadowlessElement {
           }`}
         >
           ${listIcon}
-          <rich-text .host=${this.host} .model=${this.model}></rich-text>
+          <rich-text
+            .host=${this.host}
+            .model=${this.model}
+            .textSchema=${this.textSchema}
+          ></rich-text>
         </div>
         ${childrenContainer}
       </div>

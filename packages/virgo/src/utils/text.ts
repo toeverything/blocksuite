@@ -7,3 +7,22 @@ export function calculateTextLength(text: Text): number {
     return text.wholeText.length;
   }
 }
+
+export function getTextNodesFromElement(element: Element): Text[] {
+  const textSpanElements = Array.from(
+    element.querySelectorAll('[data-virgo-text="true"]')
+  );
+  const textNodes = textSpanElements.map(textSpanElement => {
+    const textNode = Array.from(textSpanElement.childNodes).find(
+      (node): node is Text => node instanceof Text
+    );
+
+    if (!textNode) {
+      throw new Error('text node not found');
+    }
+
+    return textNode;
+  });
+
+  return textNodes;
+}

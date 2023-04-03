@@ -2,17 +2,13 @@ import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import type { Highlighter, Lang } from 'shiki';
-import { z } from 'zod';
 
-import { getCodeLineRenderer } from '../../code-block/utils/code-line-renderer.js';
 import { type BlockHost } from '../utils/index.js';
 import { ShadowlessElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
-import { attributesRenderer } from './virgo/attributes-renderer.js';
-import { affineTextAttributes, type AffineVEditor } from './virgo/types.js';
+import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
 
@@ -47,10 +43,7 @@ export class RichText extends ShadowlessElement {
   model!: BaseBlockModel;
 
   @property()
-  codeBlockGetHighlighterOptions?: () => {
-    lang: Lang;
-    highlighter: Highlighter | null;
-  };
+  textSchema?: AffineTextSchema;
 
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
@@ -64,15 +57,14 @@ export class RichText extends ShadowlessElement {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
-    if (this.codeBlockGetHighlighterOptions) {
-      this._vEditor.setAttributesSchema(z.object({}));
-      this._vEditor.setAttributesRenderer(
-        getCodeLineRenderer(this.codeBlockGetHighlighterOptions)
-      );
-    } else {
-      this._vEditor.setAttributesRenderer(attributesRenderer);
-      this._vEditor.setAttributesSchema(affineTextAttributes);
-    }
+
+    const textSchema = this.textSchema;
+    assertExists(
+      textSchema,
+      'Failed to render rich-text! textSchema not found'
+    );
+    this._vEditor.setAttributeSchema(textSchema.attributesSchema);
+    this._vEditor.setAttributeRenderer(textSchema.textRenderer(this.host));
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(

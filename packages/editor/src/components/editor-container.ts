@@ -1,4 +1,7 @@
 import {
+  type CommonSlots,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
   type MouseMode,
   type PageBlockModel,
   type SurfaceBlockModel,
@@ -9,13 +12,22 @@ import {
   getServiceOrRegister,
   ShadowlessElement,
 } from '@blocksuite/blocks';
-import type { Page } from '@blocksuite/store';
+import { type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
+  Object.entries(from).forEach(([key, slot]) => {
+    if (key in to) {
+      slot.pipe(to[key]);
+    }
+  });
+}
 
 @customElement('editor-container')
 export class EditorContainer extends WithDisposable(ShadowlessElement) {
@@ -53,19 +65,17 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       : null;
   }
 
-  firstUpdated() {
-    // todo: refactor to a better solution
-    getServiceOrRegister('affine:code');
+  @query('affine-default-page')
+  private _defaultPageBlock?: DefaultPageBlockComponent;
 
-    if (this.mode === 'page') {
-      setTimeout(() => {
-        const defaultPage = this.querySelector('affine-default-page');
-        if (this.autofocus) {
-          defaultPage?.titleVEditor.focusEnd();
-        }
-      });
-    }
-  }
+  @query('affine-edgeless-page')
+  private _edgelessPageBlock?: EdgelessPageBlockComponent;
+
+  slots: CommonSlots = {
+    pageLinkClicked: new Slot(),
+    subpageLinked: new Slot(),
+    subpageUnlinked: new Slot(),
+  };
 
   connectedCallback() {
     super.connectedCallback();
@@ -136,17 +146,43 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.page.awarenessStore.setLocalRange(this.page, null);
+  }
+
+  firstUpdated() {
+    // todo: refactor to a better solution
+    getServiceOrRegister('affine:code');
+
+    if (this.mode === 'page') {
+      setTimeout(() => {
+        const defaultPage = this.querySelector('affine-default-page');
+        if (this.autofocus) {
+          defaultPage?.titleVEditor.focusEnd();
+        }
+      });
+    }
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    if (!changedProperties.has('page') && !changedProperties.has('mode')) {
+      return;
+    }
+    if (this._defaultPageBlock) {
+      forwardSlot(this._defaultPageBlock.slots, this.slots);
+    }
+    if (this._edgelessPageBlock) {
+      forwardSlot(this._edgelessPageBlock.slots, this.slots);
+    }
+  }
+
   async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
       await new Promise(res => this.page.slots.rootAdded.once(res));
     }
     return createBlockHub(this, this.page);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   render() {

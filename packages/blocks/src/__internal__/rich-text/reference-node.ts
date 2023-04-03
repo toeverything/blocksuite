@@ -1,16 +1,21 @@
 import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
+import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PageMeta } from '@blocksuite/store';
+import type {
+  BaseBlockModel,
+  DeltaOperation,
+  PageMeta,
+} from '@blocksuite/store';
 import {
   type DeltaInsert,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import {
-  getEditorContainer,
+  type BlockHost,
   getModelByElement,
   ShadowlessElement,
   WithDisposable,
@@ -19,6 +24,27 @@ import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
+
+export type RefNodeSlots = {
+  /**
+   * Emit when the subpage is linked to the current page.
+   */
+  subpageLinked: Slot<{ pageId: string }>;
+  /**
+   * Emit when the subpage is unlinked from the current page.
+   */
+  subpageUnlinked: Slot<{ pageId: string }>;
+  pageLinkClicked: Slot<{ pageId: string }>;
+};
+
+function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
+  if (!delta.length) {
+    return false;
+  }
+  return delta.some(op => {
+    return op.attributes?.reference?.pageId === pageId;
+  });
+}
 
 @customElement('affine-reference')
 export class AffineReference extends WithDisposable(ShadowlessElement) {
@@ -56,8 +82,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     attributes: {},
   };
 
-  @state()
+  @property()
+  host!: BlockHost;
+
+  // Since the linked page may be deleted, the `_refMeta` could be undefined.
   private _refMeta?: PageMeta;
+
+  private _model?: BaseBlockModel;
+
+  private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
+    type: 'LinkedPage',
+    pageId: '0',
+  };
 
   connectedCallback() {
     super.connectedCallback();
@@ -67,40 +103,80 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       );
     }
     const model = getModelByElement(this);
-    const reference = this.delta.attributes?.reference;
-    assertExists(reference, 'Unable to get reference!');
+    this._model = model;
+    const refAttribute = this.delta.attributes?.reference;
+    assertExists(refAttribute, 'Failed to get reference attribute!');
+    this._refAttribute = refAttribute;
 
     this._refMeta = model.page.workspace.meta.pageMetas.find(
-      page => page.id === reference.pageId
+      page => page.id === refAttribute.pageId
     );
 
     this._disposables.add(
       model.page.workspace.slots.pagesUpdated.on(() => {
         this._refMeta = model.page.workspace.meta.pageMetas.find(
-          page => page.id === reference.pageId
+          page => page.id === refAttribute.pageId
         );
       })
     );
+
+    if (refAttribute.type === 'Subpage') {
+      if (!this._refMeta) {
+        // The subpage is deleted
+        console.warn('The subpage is deleted', refAttribute.pageId);
+        // TODO remove this node since the subpage not exists.
+        return;
+      }
+      // User may create a subpage ref node by paste or undo/redo.
+      this.host.slots.subpageLinked.emit({ pageId: refAttribute.pageId });
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+    if (this._refAttribute.type !== 'Subpage') {
+      return;
+    }
+    const model = this._model;
+    assertExists(model, 'Failed to get model!');
+    const text = model.text;
+    assertExists(text, 'Failed to get text');
+    const delta = text.toDelta();
+
+    if (!isRefPageInDelta(delta, this._refAttribute.pageId)) {
+      // The subpage is deleted
+      this.host.slots.subpageUnlinked.emit({
+        pageId: this._refAttribute.pageId,
+      });
+    }
   }
 
   private _onClick(e: MouseEvent) {
-    e.preventDefault();
     const refMeta = this._refMeta;
     const model = getModelByElement(this);
-    if (!refMeta || refMeta.id === model.page.id) {
+    if (!refMeta) {
+      // The page is deleted
+      console.warn('The page is deleted', this._refAttribute.pageId);
+      return;
+    }
+    if (refMeta.id === model.page.id) {
+      // the page is the current page.
       return;
     }
     const targetPageId = refMeta.id;
-    // TODO jump to the reference
-    const editor = getEditorContainer(model.page);
-    // @ts-expect-error
-    editor.page = model.page.workspace.getPage(targetPageId);
+    this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
+
+    // const editor = getEditorContainer(model.page);
+    // editor.page = model.page.workspace.getPage(targetPageId);
   }
 
   render() {
-    // const style = affineTextStyles(this.textAttributes);
     const refMeta = this._refMeta;
     const isDisabled = !refMeta;
+    if (isDisabled && this._refAttribute.type === 'Subpage') {
+      return html`<v-text .str=${this.delta.insert}></v-text>`;
+    }
     const title = isDisabled
       ? // Maybe the page is deleted
         'Deleted page'
@@ -110,8 +186,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
     const style = affineTextStyles(attributes);
-
-    // TODO update icon
 
     // Sine reference title should not be edit by user,
     // we set it into the `::before` pseudo element.

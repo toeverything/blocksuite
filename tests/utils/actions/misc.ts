@@ -2,7 +2,6 @@
 import '../declare-test-window.js';
 
 import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -17,8 +16,10 @@ import {
   type,
 } from './keyboard.js';
 
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
+const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.virgo-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {

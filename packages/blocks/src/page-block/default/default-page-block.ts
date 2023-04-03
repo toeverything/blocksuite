@@ -40,6 +40,9 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
+  /**
+   * @deprecated Not used yet
+   */
   codeBlockOptionUpdated?: Slot;
   /**
    * @deprecated Not used yet
@@ -163,12 +166,16 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots: DefaultSelectionSlots = {
+  slots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
+
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   @query('.affine-default-page-block-title')

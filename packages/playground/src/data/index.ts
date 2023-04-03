@@ -131,41 +131,30 @@ export const database: InitFn = (workspace: Workspace) => {
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
-  type Option = 'Done' | 'TODO' | 'WIP';
-  const selection = ['Done', 'TODO', 'WIP'] as Option[];
-  const col1 = page.setColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {
-      decimal: 0,
-    },
+  const selection = [
+    { value: 'Done', color: '#F5F5F5' },
+    { value: 'TODO', color: '#FFE1E1' },
+    { value: 'WIP', color: '#E1EFFF' },
+  ];
+  const col1 = page.db.updateColumnSchema({
     name: 'Number',
     type: 'number',
+    width: 200,
+    hide: false,
+    decimal: 0,
   });
-  const col2 = page.setColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {
-      selection: selection,
-    },
+  const col2 = page.db.updateColumnSchema({
     name: 'Single Select',
     type: 'select',
+    width: 200,
+    hide: false,
+    selection,
   });
-  const col3 = page.setColumnSchema({
-    internalProperty: {
-      color: '#ff0000',
-      width: 200,
-      hide: false,
-    },
-    property: {},
+  const col3 = page.db.updateColumnSchema({
     name: 'Rich Text',
     type: 'rich-text',
+    width: 200,
+    hide: false,
   });
   // Add database block inside frame block
   const databaseId = page.addBlock(
@@ -191,21 +180,21 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
-  page.updateBlockColumn(p1, {
-    schemaId: col1,
+  page.db.updateCell(p1, {
+    columnId: col1,
     value: 0.1,
   });
 
-  page.updateBlockColumn(p2, {
-    schemaId: col2,
-    value: ['TODO'],
+  page.db.updateCell(p2, {
+    columnId: col2,
+    value: [selection[1]],
   });
 
   const text = new page.YText();
   text.insert(0, '123');
   text.insert(0, 'code');
-  page.updateBlockColumn(p2, {
-    schemaId: col3,
+  page.db.updateCell(p2, {
+    columnId: col3,
     value: text,
   });
 

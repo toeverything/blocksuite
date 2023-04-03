@@ -1,4 +1,3 @@
-import type { BlockColumn, ColumnSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
@@ -17,19 +16,12 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { DatabaseManager } from './database.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
-
-type SerializedNestedColumns = {
-  // row
-  [key: string]: {
-    // column
-    [key: string]: BlockColumn;
-  };
-};
 
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +77,7 @@ export class Page extends Space<FlatBlockMap> {
       subpageIds: string[];
     }>(),
   };
+  readonly db: DatabaseManager;
 
   constructor(
     workspace: Workspace,
@@ -96,6 +89,7 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this.db = new DatabaseManager(this);
   }
 
   get readonly() {
@@ -112,20 +106,6 @@ export class Page extends Space<FlatBlockMap> {
 
   get meta() {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
-  }
-
-  protected get yColumns() {
-    assertExists(this.root?.columns);
-    return this.root.columns as Y.Map<Y.Map<unknown>>;
-  }
-
-  protected get yColumnSchema() {
-    assertExists(this.root?.columnSchema);
-    return this.root.columnSchema as Y.Map<unknown>;
-  }
-
-  get columnJSON(): SerializedNestedColumns {
-    return this.yColumns.toJSON();
   }
 
   get blobs() {
@@ -187,132 +167,33 @@ export class Page extends Space<FlatBlockMap> {
     return Text;
   }
 
-  undo = () => {
+  undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  };
+  }
 
-  redo = () => {
+  redo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  };
+  }
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync = () => {
+  captureSync() {
     this._history.stopCapturing();
-  };
+  }
 
-  resetHistory = () => {
+  resetHistory() {
     this._history.clear();
-  };
-
-  updateBlockColumn<Column extends BlockColumn>(
-    id: BaseBlockModel['id'],
-    column: Column
-  ) {
-    const hasColumn = this.yColumns.has(id);
-    let yColumns: Y.Map<unknown>;
-    if (!hasColumn) {
-      yColumns = new Y.Map();
-    } else {
-      yColumns = this.yColumns.get(id) as Y.Map<unknown>;
-    }
-    this.transact(() => {
-      if (!hasColumn) {
-        this.yColumns.set(id, yColumns);
-      }
-      // Related issue: https://github.com/yjs/yjs/issues/255
-      const yColumnMap = new Y.Map();
-      yColumnMap.set('schemaId', column.schemaId);
-      yColumnMap.set('value', column.value);
-      yColumns.set(column.schemaId, yColumnMap);
-    });
   }
 
-  getBlockColumnBySchema(
-    model: BaseBlockModel,
-    schema: ColumnSchema
-  ): BlockColumn | null {
-    const yColumns = this.yColumns.get(model.id);
-    const yColumnMap = (yColumns?.get(schema.id) as Y.Map<unknown>) ?? null;
-    if (!yColumnMap) return null;
-
-    return {
-      schemaId: yColumnMap.get('schemaId') as string,
-      value: yColumnMap.get('value') as unknown,
-    };
-  }
-
-  getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
-    return (this.yColumnSchema.get(id) ?? null) as ColumnSchema | null;
-  }
-
-  setColumnSchema(
-    schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
-  ): string {
-    const id = schema.id ?? this._idGenerator();
-    this.transact(() => this.yColumnSchema.set(id, { ...schema, id }));
-    return id;
-  }
-
-  deleteColumnSchema(id: ColumnSchema['id']) {
-    this.transact(() => this.yColumnSchema.delete(id));
-  }
-
-  copyBlockColumnById(copyId: ColumnSchema['id'], toId: ColumnSchema['id']) {
-    this.transact(() => {
-      this.yColumns.forEach(column => {
-        const copyColumn = column.get(copyId) as Y.Map<unknown>;
-        if (copyColumn) {
-          const columnMap = new Y.Map();
-          columnMap.set('schemaId', toId);
-          columnMap.set('value', copyColumn.get('value'));
-          column.set(toId, columnMap);
-        }
-      });
-    });
-  }
-
-  // TODO: remove hard coded types
-  updateColumnValue(columnId: string, newType: 'select' | 'rich-text') {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        const yTargetColumn = yColumn.get(columnId) as Y.Map<unknown>;
-        if (!yTargetColumn) return;
-
-        if (newType === 'select') {
-          const value = yTargetColumn.get('value');
-          if (!value) return;
-
-          const yColumnMap = new Y.Map();
-          yColumnMap.set('schemaId', columnId);
-          yColumnMap.set('value', [(value as string[])[0]]);
-          yColumn.set(columnId, yColumnMap);
-        } else if (newType === 'rich-text') {
-          const value = yTargetColumn.get('value');
-          if (!value) return;
-
-          const yColumnMap = new Y.Map();
-          yColumnMap.set('schemaId', columnId);
-          yColumnMap.set('value', new Y.Text((value as number) + ''));
-          yColumn.set(columnId, yColumnMap);
-        }
-      });
-    });
-  }
-
-  deleteBlockColumns(id: BaseBlockModel['id']) {
-    this.transact(() => {
-      this.yColumns.forEach(yColumn => {
-        yColumn.delete(id);
-      });
-    });
+  createId() {
+    return this._idGenerator();
   }
 
   getBlockById(id: string) {
@@ -415,7 +296,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlocksByFlavour<
+  addBlocks<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -446,7 +327,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  public addBlock<
+  addBlock<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockModelProps,
     Flavour extends keyof ALLProps & string = keyof ALLProps & string
@@ -524,15 +405,6 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     return id;
-  }
-
-  updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.updateBlock(model, props);
   }
 
   @debug('CRUD')
@@ -646,22 +518,13 @@ export class Page extends Space<FlatBlockMap> {
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      return this.addBlocksByFlavour(blocks, parent.id, insertIndex);
+      return this.addBlocks(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
-  }
-
-  deleteBlockById(id: string) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.deleteBlock(model);
   }
 
   @debug('CRUD')
@@ -685,7 +548,7 @@ export class Page extends Space<FlatBlockMap> {
     if (options.bringChildrenTo === 'parent' && parent) {
       parent.children.unshift(...model.children);
     } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-      options.bringChildrenTo.children.unshift(...model.children);
+      options.bringChildrenTo.children.push(...model.children);
     }
     this._blockMap.delete(model.id);
 
@@ -706,7 +569,7 @@ export class Page extends Space<FlatBlockMap> {
         if (options.bringChildrenTo === 'parent' && parent) {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlockById(options.bringChildrenTo.id, {
+          this.updateBlock(options.bringChildrenTo, {
             children: options.bringChildrenTo.children,
           });
         }
@@ -858,7 +721,7 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     if (matchFlavours(model, ['affine:page'] as const)) {
-      model.columns = yBlock.get('ext:columns') as Y.Map<Y.Map<unknown>>;
+      model.cells = yBlock.get('ext:cells') as Y.Map<Y.Map<unknown>>;
       model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
@@ -869,7 +732,7 @@ export class Page extends Space<FlatBlockMap> {
     if (model.flavour === 'affine:database') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<unknown>
+        yBlock.get('prop:columns') as Y.Array<string>
       ).toArray();
     }
 
@@ -1024,7 +887,7 @@ export class Page extends Space<FlatBlockMap> {
         }
       } else if (
         event.path.includes('ext:columnSchema') ||
-        event.path.includes('ext:columns')
+        event.path.includes('ext:cells')
       ) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
@@ -1035,7 +898,7 @@ export class Page extends Space<FlatBlockMap> {
         });
       }
     } else {
-      if (event.path.includes('ext:columns')) {
+      if (event.path.includes('ext:cells')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);

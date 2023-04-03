@@ -14,7 +14,6 @@ import {
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
-  handleNativeRangeDblClick,
   initMouseEventHandlers,
   isBlankArea,
   isDatabase,
@@ -35,6 +34,7 @@ import {
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
+import { showFormatQuickBarByDoubleClick } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -278,23 +278,7 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
-    const range = handleNativeRangeDblClick(this.page, e);
-    const direction = 'center-bottom';
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
-    if (!range || range.collapsed) return;
-    if (this.page.readonly) return;
-
-    // Show format quick bar when double click on text
-    showFormatQuickBar({
-      page: this.page,
-      container: this._container,
-      direction,
-      anchorEl: {
-        getBoundingClientRect: () => {
-          return calcCurrentSelectionPosition(direction, this.state);
-        },
-      },
-    });
+    showFormatQuickBarByDoubleClick(e, this.page, this._container, this.state);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -520,7 +504,7 @@ export class DefaultSelectionManager {
   }
 
   refreshRemoteSelection() {
-    const element = document.querySelector('remote-selection');
+    const element = this._container.querySelector('remote-selection');
     if (element) {
       element.requestUpdate();
     }

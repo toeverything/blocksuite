@@ -37,7 +37,8 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -48,7 +49,10 @@ function virgoTextStyles(
 const attributeRenderer = (delta: DeltaInsert) => {
   const style = delta.attributes
     ? virgoTextStyles(delta.attributes)
-    : styleMap({ 'white-space': 'pre-wrap' });
+    : styleMap({
+        'white-space': 'break-spaces',
+        'word-wrap': 'break-word',
+      });
 
   // just for test
   if (delta.insert.length > 4) {
@@ -135,6 +139,8 @@ export class RichText extends ShadowlessElement {
           width: 100%;
           height: 100%;
           outline: none;
+          word-break: break-word;
+          white-space: break-spaces;
         }
 
         code {
@@ -169,7 +175,7 @@ export class ToolBar extends ShadowlessElement {
     this.vEditor = vEditor;
   }
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const boldButton = this.querySelector('.bold');
     const italicButton = this.querySelector('.italic');
     const underlineButton = this.querySelector('.underline');
@@ -248,7 +254,7 @@ export class ToolBar extends ShadowlessElement {
     });
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="tool-bar">
         <sl-button class="bold">bold</sl-button>
@@ -294,7 +300,7 @@ export class TestPage extends ShadowlessElement {
     }
   `;
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const TEXT_ID = 'virgo';
     const yDocA = new Y.Doc();
     const yDocB = new Y.Doc();
@@ -309,7 +315,7 @@ export class TestPage extends ShadowlessElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA);
-    editorA.setAttributesRenderer(attributeRenderer);
+    editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
     const editorB = new VEditor(textB);
@@ -337,7 +343,7 @@ export class TestPage extends ShadowlessElement {
     docB.appendChild(richTextB);
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="container">
         <div class="editors">

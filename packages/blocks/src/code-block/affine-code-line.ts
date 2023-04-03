@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
-import { queryCurrentMode,ShadowlessElement } from '../std.js';
+import { queryCurrentMode, ShadowlessElement } from '../std.js';
 import {
   highlightCache,
   type highlightCacheKey,
@@ -20,7 +20,7 @@ export class AffineCodeLine extends ShadowlessElement {
   };
 
   @property()
-  getHighlightOptions:
+  highlightOptionsGetter:
     | (() => {
         lang: Lang;
         highlighter: Highlighter | null;
@@ -28,8 +28,11 @@ export class AffineCodeLine extends ShadowlessElement {
     | null = null;
 
   render() {
-    assertExists(this.getHighlightOptions, 'getHighlightOptions is not set');
-    const { lang, highlighter } = this.getHighlightOptions();
+    assertExists(
+      this.highlightOptionsGetter,
+      'highlightOptionsGetter is not set'
+    );
+    const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
       const vText = new VText();

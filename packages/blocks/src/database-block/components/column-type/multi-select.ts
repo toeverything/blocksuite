@@ -1,3 +1,4 @@
+import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
@@ -9,7 +10,7 @@ import {
 import { SelectMode } from './select.js';
 
 @customElement('affine-database-multi-select-cell')
-class MultiSelectCell extends DatabaseCellLitElement<string[]> {
+class MultiSelectCell extends DatabaseCellLitElement<SelectTag[]> {
   static styles = css`
     :host {
       width: 100%;
@@ -23,14 +24,14 @@ class MultiSelectCell extends DatabaseCellLitElement<string[]> {
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .columnSchema=${this.columnSchema}
-        .column=${this.column}
+        .cell=${this.cell}
       ></affine-database-select-cell>
     `;
   }
 }
 
 @customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellLitElement<string[]> {
+class MultiSelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
   static tag = literal`affine-database-multi-select-cell-editing`;
 
   override render() {
@@ -41,7 +42,7 @@ class MultiSelectCellEditing extends DatabaseCellLitElement<string[]> {
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .columnSchema=${this.columnSchema}
-        .column=${this.column}
+        .cell=${this.cell}
         .mode=${SelectMode.Multi}
       ></affine-database-select-cell-editing>
     `;
@@ -50,7 +51,7 @@ class MultiSelectCellEditing extends DatabaseCellLitElement<string[]> {
 
 @customElement('affine-database-multi-select-column-property-editing')
 class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement<
-  string[]
+  SelectTag[]
 > {
   static tag = literal`affine-database-multi-select-column-property-editing`;
 }
@@ -58,9 +59,9 @@ class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement<
 export const MultiSelectColumnSchemaRenderer = defineColumnSchemaRenderer(
   'multi-select',
   () => ({
-    selection: [] as string[],
+    selection: [] as SelectTag[],
   }),
-  () => [] as string[],
+  () => [] as SelectTag[],
   {
     Cell: MultiSelectCell,
     CellEditing: MultiSelectCellEditing,
