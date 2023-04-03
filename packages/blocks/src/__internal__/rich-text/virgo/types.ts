@@ -7,7 +7,7 @@ import type {
 import { baseTextAttributes } from '@blocksuite/virgo';
 import { z, type ZodTypeDef } from 'zod';
 
-import type { BlockHost, CommonSlots } from '../../utils/types.js';
+import type { BlockHost } from '../../utils/types.js';
 
 export const affineTextAttributes = baseTextAttributes.extend({
   reference: z

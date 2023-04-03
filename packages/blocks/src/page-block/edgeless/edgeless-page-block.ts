@@ -1,11 +1,10 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-toolbar.js';
 import './components/edgeless-selected-rect.js';
+import './toolbar/edgeless-toolbar.js';
 
 import {
   almostEqual,
   type BlockHost,
-  type CommonSlots,
   getClosestFrameBlockElementById,
   type Point,
   resetNativeSelection,

@@ -3,7 +3,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { type BlockHost, type CommonSlots } from '../utils/index.js';
+import { type BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
