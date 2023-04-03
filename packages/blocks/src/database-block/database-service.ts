@@ -99,13 +99,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     columnIds.forEach((columnId, columnIndex) => {
       const newColumnId = newColumnIds[columnIndex];
       columnSchemaIds.forEach((columnSchemaId, columnSchemaIndex) => {
-        const cellData = model.page.db.getColumn(columnId, columnSchemaId);
+        const cellData = model.page.db.getCell(columnId, columnSchemaId);
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {
           value = value.clone();
         }
-        model.page.db.updateColumn(newColumnId, {
+        model.page.db.updateCell(newColumnId, {
           columnId: newColumnSchemaIds[columnSchemaIndex],
           value,
         });
