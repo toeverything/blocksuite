@@ -89,11 +89,12 @@ function getOptimalClipboardData(
 ) {
   const dv = document.createElement('div');
   document.querySelector('.affine-block-children-container')?.appendChild(dv);
-
+  console.warn('getOptimalClipboardData');
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
-
+    console.warn(mimeType);
+    console.warn(JSON.stringify(data || {}));
     // ===================== debug ====================
     dv.innerText = `paste ${mimeType}: ${data}\n`;
     // ===================== debug ====================
