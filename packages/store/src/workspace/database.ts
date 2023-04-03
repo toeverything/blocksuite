@@ -142,7 +142,7 @@ export class DatabaseManager {
   ) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
-        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]> | undefined;
+        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]>;
         if (!yCell) return;
 
         const selected = yCell.get('value') as SelectTag[];
@@ -161,7 +161,7 @@ export class DatabaseManager {
   deleteSelectedCellTag(columnId: ColumnSchema['id'], target: SelectTag) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
-        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]> | undefined;
+        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]>;
         if (!yCell) return;
 
         const selected = yCell.get('value') as SelectTag[];
