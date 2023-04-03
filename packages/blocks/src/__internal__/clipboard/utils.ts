@@ -38,19 +38,15 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   document.body.appendChild(tempElem);
   tempElem.select();
   tempElem.setSelectionRange(0, tempElem.value.length);
-
+  const dv = document.createElement('div');
+  document.querySelector('.affine-block-children-container')?.appendChild(dv);
   const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
-    const dv = document.createElement('div');
-    document.querySelector('.affine-block-children-container')?.appendChild(dv);
 
     if (clipboardData) {
-      items.forEach((item: ClipboardItem, index) => {
-        clipboardData?.items[index]?.getAsString(data => {
-          dv.innerText += `x${index}x${data}`;
-        });
-
+      items.forEach((item: ClipboardItem) => {
         clipboardData.setData(item.mimeType, item.data);
+        dv.innerText = `copy ${item.mimeType}: ${item.data}\n`;
       });
     }
 
@@ -94,16 +90,13 @@ function getOptimalClipboardData(
   const dv = document.createElement('div');
   document.querySelector('.affine-block-children-container')?.appendChild(dv);
 
-  clipboardData?.items[0].getAsString(data => {
-    dv.innerText += `0${data}`;
-  });
-  clipboardData?.items[1].getAsString(data => {
-    dv.innerText += `1${data}`;
-  });
-
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
+
+    // ===================== debug ====================
+    dv.innerText = `paste ${mimeType}: ${data}\n`;
+    // ===================== debug ====================
 
     if (data) {
       return {
