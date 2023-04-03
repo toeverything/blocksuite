@@ -703,6 +703,23 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+d`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="text"
+  />
+  <affine:divider />
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 });
 
 test('format list to h1', async ({ page }) => {

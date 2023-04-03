@@ -195,6 +195,29 @@ export function updateBlockType(
     }
     return [model];
   }
+  if (flavour === 'affine:divider') {
+    const model = models.at(-1);
+    if (!model) {
+      return [];
+    }
+    const parent = page.getParent(model);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(model);
+    const nextSibling = page.getNextSibling(model);
+    let nextSiblingId = nextSibling?.id as string;
+    const id = page.addBlock('affine:divider', {}, parent, index + 1);
+    if (!nextSibling) {
+      nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
+    }
+    asyncFocusRichText(page, nextSiblingId);
+    const newModel = page.getBlockById(id);
+    if (!newModel) {
+      throw new Error('Failed to get model after add divider block!');
+    }
+    return [newModel];
+  }
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
   models.forEach(model => {
