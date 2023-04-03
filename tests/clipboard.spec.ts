@@ -491,7 +491,7 @@ test('pasting into empty list should not convert the list into paragraph', async
   await assertTypeFormat(page, 'bulleted');
 });
 
-test.only('cut will delete all content, and copy will reappear content', async ({
+test('cut will delete all content, and copy will reappear content', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
