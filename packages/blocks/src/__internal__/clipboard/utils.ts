@@ -42,9 +42,11 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
-      items.forEach((item: ClipboardItem) =>
-        clipboardData.setData(item.mimeType, item.data)
-      );
+      items.forEach((item: ClipboardItem) => {
+        clipboardData.setData(item.mimeType, item.data);
+        console.warn(`copy-${item.mimeType}`);
+        console.warn(clipboardData.getData(item.mimeType));
+      });
     }
 
     e.preventDefault();
@@ -87,6 +89,8 @@ function getOptimalClipboardData(
   for (let i = 0; i < optimalMimeTypes.length; i++) {
     const mimeType = optimalMimeTypes[i];
     const data = clipboardData?.getData(mimeType);
+    console.warn(`paste-${mimeType}`);
+    console.warn(JSON.stringify(data || {}));
     if (data) {
       return {
         type: mimeType,
