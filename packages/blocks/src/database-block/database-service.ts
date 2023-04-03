@@ -8,7 +8,7 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import type { SerializedBlock } from '../std.js';
+import type { BlockTransformContext, SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
@@ -74,6 +74,9 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         return getService(child.flavour).block2Json(child);
       }),
     };
+  }
+  override block2html(block: DatabaseBlockModel): string {
+    return '<>database</>';
   }
 
   async onBlockPasted(
