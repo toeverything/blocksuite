@@ -46,6 +46,8 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
     if (clipboardData) {
       items.forEach((item: ClipboardItem) => {
         clipboardData.setData(item.mimeType, item.data);
+        console.warn(`copy-${item.mimeType}`);
+        console.warn(clipboardData.getData(item.mimeType));
         dv.innerText = `copy ${item.mimeType}: ${item.data}\n`;
       });
     }
