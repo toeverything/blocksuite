@@ -12,7 +12,7 @@ import {
   PlusIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import { type Column,ColumnInsertPosition } from '@blocksuite/global/database';
+import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
