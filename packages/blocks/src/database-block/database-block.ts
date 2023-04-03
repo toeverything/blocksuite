@@ -436,10 +436,14 @@ function DataBaseRowContainer(
 @customElement('affine-database')
 export class DatabaseBlockComponent
   extends NonShadowLitElement
-  implements BlockHost<undefined>
+  implements BlockHost
 {
   flavour = 'affine:database' as const;
-  slots: undefined;
+
+  get slots() {
+    return this.host.slots;
+  }
+
   get page() {
     return this.host.page;
   }
