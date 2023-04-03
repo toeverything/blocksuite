@@ -39,6 +39,8 @@ export class PageClipboard implements Clipboard {
     if (!blocks.length) {
       return;
     }
+    console.warn('blocks!!!!');
+    console.warn(JSON.stringify(blocks));
     this._page.captureSync();
 
     await deleteModelsByRange(this._page);
