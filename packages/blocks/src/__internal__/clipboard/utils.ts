@@ -13,9 +13,9 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'text/plain',
+  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
-  TEXT = 'text/plain1',
+  TEXT = 'text/plain',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',
@@ -117,7 +117,8 @@ export async function clipboardData2Blocks(
   const optimalClipboardData = getOptimalClipboardData(clipboardData);
 
   if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
-    return JSON.parse(optimalClipboardData.data);
+    // @ts-ignore
+    return JSON.parse(optimalClipboardData.data).data;
   }
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
@@ -194,8 +195,8 @@ export function copy(range: BlockRange) {
   );
   const customClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-    JSON.stringify(
-      clipGroups
+    JSON.stringify({
+      data: clipGroups
         .filter(group => {
           if (!group.json) {
             return false;
@@ -206,8 +207,8 @@ export function copy(range: BlockRange) {
           // children should be deleted from group
           return !isChildBlock(range.models, group.model);
         })
-        .map(group => group.json)
-    )
+        .map(group => group.json),
+    })
   );
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;

@@ -34,9 +34,6 @@ export class PageClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    console.log('e', e);
-    const text = navigator.clipboard.readText();
-    console.log('text', text);
 
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
     if (!blocks.length) {
