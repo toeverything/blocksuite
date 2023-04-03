@@ -1,7 +1,7 @@
 import type { ColumnType } from '@blocksuite/global/database';
 import type { TemplateResult } from 'lit';
 
-export type ColumnType = {
+export type ColumnHeader = {
   type: ColumnType;
   text: string;
   icon: TemplateResult;

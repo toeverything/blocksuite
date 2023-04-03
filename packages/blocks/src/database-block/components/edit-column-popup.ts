@@ -29,7 +29,7 @@ import { getColumnRenderer } from '../register.js';
 import type {
   ActionName,
   ColumnAction,
-  ColumnType,
+  ColumnHeader,
   DividerAction,
   TitleColumnAction,
 } from '../types.js';
@@ -64,7 +64,7 @@ export const actionStyles = css`
   }
 `;
 
-const columnTypes: ColumnType[] = [
+const columnTypes: ColumnHeader[] = [
   {
     type: 'rich-text',
     text: 'Text',
