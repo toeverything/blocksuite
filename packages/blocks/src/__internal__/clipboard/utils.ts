@@ -94,8 +94,6 @@ export async function clipboardData2Blocks(
     const blockSuiteClipboardData = detectBlockSuiteClipboardData(
       clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
     );
-    console.warn('paste - blockSuiteClipboardData');
-    console.warn(blockSuiteClipboardData);
 
     if (blockSuiteClipboardData) {
       return blockSuiteClipboardData;
