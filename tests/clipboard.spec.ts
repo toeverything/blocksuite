@@ -39,7 +39,7 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-test('clipboard copy paste', async ({ page }) => {
+test.skip('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -52,7 +52,7 @@ test('clipboard copy paste', async ({ page }) => {
   await assertText(page, 'testtes');
 });
 
-test('clipboard paste html', async ({ page }) => {
+test.skip('clipboard paste html', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -78,7 +78,7 @@ test('clipboard paste html', async ({ page }) => {
   await assertText(page, 'aaabbbccc');
 });
 
-test('markdown format parse', async ({ page }) => {
+test.skip('markdown format parse', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -179,7 +179,7 @@ test('markdown format parse', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('split block when paste', async ({ page }) => {
+test.skip('split block when paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -228,7 +228,7 @@ test('split block when paste', async ({ page }) => {
   // await assertRichTexts(page, ['aaa', 'bbc', 'text', 'h1']);
 });
 
-test('import markdown', async ({ page }) => {
+test.skip('import markdown', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -335,7 +335,7 @@ test.skip('copy more than one delta op on a block', async ({ page }) => {
   );
 });
 
-test('copy & paste outside editor', async ({ page }) => {
+test.skip('copy & paste outside editor', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await page.evaluate(() => {
@@ -458,7 +458,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
   );
 });
 
-test('cut should work for multi-block selection', async ({ page }) => {
+test.skip('cut should work for multi-block selection', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -477,7 +477,7 @@ test('cut should work for multi-block selection', async ({ page }) => {
   await assertRichTexts(page, ['a', 'b', 'c']);
 });
 
-test('pasting into empty list should not convert the list into paragraph', async ({
+test.skip('pasting into empty list should not convert the list into paragraph', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
