@@ -16,7 +16,7 @@ export async function json2block(
     range?: BlockRange;
   }
 ) {
-  const { convertToPastedIfEmpty = true, range } = options ?? {};
+  const { convertToPastedIfEmpty = false, range } = options ?? {};
 
   assertExists(range);
 
