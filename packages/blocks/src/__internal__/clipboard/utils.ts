@@ -13,9 +13,9 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'text/uri-list',
+  BLOCKS_CLIP_WRAPPED = 'text/plain',
   HTML = 'text/html',
-  TEXT = 'text/plain',
+  TEXT = 'text/plain1',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',
