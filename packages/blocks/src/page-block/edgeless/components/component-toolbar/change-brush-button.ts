@@ -1,9 +1,9 @@
 import '../tool-icon-button.js';
 import '../../toolbar/brush-tool/color-panel.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -31,7 +31,7 @@ function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
 }
 
 @customElement('edgeless-change-brush-button')
-export class EdgelessChangeBrushButton extends LitElement {
+export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: flex;
@@ -113,8 +113,6 @@ export class EdgelessChangeBrushButton extends LitElement {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
-
   private _setBrushSize(size: BrushSize) {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -136,10 +134,8 @@ export class EdgelessChangeBrushButton extends LitElement {
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
     this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
-    _disposables.add(this._colorPanelPopper);
+    this._disposables.add(this._colorPanelPopper);
     super.firstUpdated(changedProperties);
   }
 

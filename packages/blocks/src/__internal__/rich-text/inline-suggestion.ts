@@ -43,7 +43,7 @@ export class InlineSuggestionController implements ReactiveController {
   private provider?: InlineSuggestionProvider;
 
   private _abortController = new AbortController();
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   private _suggestionState = {
     show: false,
@@ -57,12 +57,12 @@ export class InlineSuggestionController implements ReactiveController {
     this.host = host;
   }
 
-  hostConnected(): void {
-    this._disposableGroup = new DisposableGroup();
+  hostConnected() {
+    this._disposables = new DisposableGroup();
   }
 
   hostDisconnected() {
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   init({
@@ -104,7 +104,7 @@ export class InlineSuggestionController implements ReactiveController {
 
     const editor = this.vEditor;
     assertExists(editor);
-    this._disposableGroup.add(
+    this._disposables.add(
       editor.slots.vRangeUpdated.on(async ([vRange, type]) => {
         this._updateSuggestions(vRange);
       })
@@ -114,8 +114,8 @@ export class InlineSuggestionController implements ReactiveController {
   readonly onFocusOut = (e: FocusEvent) => {
     this._abortController.abort();
     // We should not observe text change when focus out
-    this._disposableGroup.dispose();
-    this._disposableGroup = new DisposableGroup();
+    this._disposables.dispose();
+    this._disposables = new DisposableGroup();
   };
 
   private _updateSuggestions = debounce(

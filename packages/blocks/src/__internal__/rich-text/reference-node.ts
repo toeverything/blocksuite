@@ -1,5 +1,5 @@
 import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
@@ -13,6 +13,7 @@ import {
   getEditorContainer,
   getModelByElement,
   ShadowlessElement,
+  WithDisposable,
 } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
@@ -20,7 +21,7 @@ import type { AffineTextAttributes } from './virgo/types.js';
 export const REFERENCE_NODE = ' ';
 
 @customElement('affine-reference')
-export class AffineReference extends ShadowlessElement {
+export class AffineReference extends WithDisposable(ShadowlessElement) {
   static styles = css`
     .affine-reference {
       white-space: nowrap;
@@ -58,8 +59,6 @@ export class AffineReference extends ShadowlessElement {
   @state()
   private _refMeta?: PageMeta;
 
-  private _disposables = new DisposableGroup();
-
   connectedCallback() {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
@@ -82,11 +81,6 @@ export class AffineReference extends ShadowlessElement {
         );
       })
     );
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
   }
 
   private _onClick(e: MouseEvent) {

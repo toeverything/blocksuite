@@ -1,10 +1,10 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -42,7 +42,7 @@ function Actions(onClick: (action: Action) => void) {
 }
 
 @customElement('edgeless-more-button')
-export class EdgelessMoreButton extends LitElement {
+export class EdgelessMoreButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -106,8 +106,6 @@ export class EdgelessMoreButton extends LitElement {
   private _actionsMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
-
   private _delete() {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -130,10 +128,8 @@ export class EdgelessMoreButton extends LitElement {
   };
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
     this._actionsMenuPopper = createButtonPopper(this, this._actionsMenu);
-    _disposables.add(this._actionsMenuPopper);
+    this._disposables.add(this._actionsMenuPopper);
     super.firstUpdated(changedProperties);
   }
 

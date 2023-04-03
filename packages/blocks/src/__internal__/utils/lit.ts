@@ -6,8 +6,9 @@ import {
   LitElement,
 } from 'lit';
 
-// see https://lit.dev/docs/composition/mixins/#mixins-in-typescript
-declare class DisposableClass {
+// See https://lit.dev/docs/composition/mixins/#mixins-in-typescript
+// This definition should be exported, see https://github.com/microsoft/TypeScript/issues/30355#issuecomment-839834550
+export declare class DisposableClass {
   protected _disposables: DisposableGroup;
 }
 

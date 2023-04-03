@@ -1,7 +1,8 @@
-import type {
-  MouseMode,
-  PageBlockModel,
-  SurfaceBlockModel,
+import {
+  type MouseMode,
+  type PageBlockModel,
+  type SurfaceBlockModel,
+  WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
@@ -9,7 +10,6 @@ import {
   ShadowlessElement,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -18,7 +18,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
-export class EditorContainer extends ShadowlessElement {
+export class EditorContainer extends WithDisposable(ShadowlessElement) {
   @property()
   page!: Page;
 
@@ -52,8 +52,6 @@ export class EditorContainer extends ShadowlessElement {
       ? (this.model[1] as SurfaceBlockModel)
       : null;
   }
-
-  private _disposables = new DisposableGroup();
 
   firstUpdated() {
     // todo: refactor to a better solution
@@ -149,7 +147,6 @@ export class EditorContainer extends ShadowlessElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
-    this._disposables.dispose();
   }
 
   render() {

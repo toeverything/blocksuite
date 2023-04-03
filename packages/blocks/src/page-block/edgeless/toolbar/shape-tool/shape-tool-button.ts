@@ -1,8 +1,8 @@
 import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import { ShapeIcon } from '@blocksuite/global/config';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -16,7 +16,7 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
 @customElement('edgeless-shape-tool-button')
-export class EdgelessShapeToolButton extends LitElement {
+export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: flex;
@@ -42,8 +42,6 @@ export class EdgelessShapeToolButton extends LitElement {
 
   private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
-
   private _toggleShapeMenu() {
     this._shapeMenuPopper?.toggle();
   }
@@ -53,11 +51,9 @@ export class EdgelessShapeToolButton extends LitElement {
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
     this._shapeMenuPopper = createButtonPopper(this, this._shapeMenu);
-    _disposables.add(this._shapeMenuPopper);
-    _disposables.add(
+    this._disposables.add(this._shapeMenuPopper);
+    this._disposables.add(
       this._shapeMenu.slots.select.on(shape => {
         this._setMouseMode({
           type: 'shape',
