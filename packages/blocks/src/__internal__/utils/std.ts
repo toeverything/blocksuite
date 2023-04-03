@@ -16,7 +16,7 @@ export const IS_MAC = /Mac/i.test(globalThis.navigator?.platform);
 export function supportsChildren(model: BaseBlockModel): boolean {
   if (
     matchFlavours(model, [
-      'affine:database',
+      // 'affine:database',
       'affine:embed',
       'affine:divider',
       'affine:code',
