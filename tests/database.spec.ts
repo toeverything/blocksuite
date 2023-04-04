@@ -270,7 +270,7 @@ test('should support right insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-right');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['3', '4']);
 });
@@ -283,7 +283,7 @@ test('should support left insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-left');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['4', '3']);
 });
@@ -295,10 +295,10 @@ test('should support delete column', async ({ page }) => {
   await initDatabaseColumn(page);
 
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(2);
+  expect(await columns.count()).toBe(3);
 
   await performColumnAction(page, '3', 'delete');
-  expect(await columns.count()).toBe(1);
+  expect(await columns.count()).toBe(2);
 });
 
 test('should support duplicate column', async ({ page }) => {
