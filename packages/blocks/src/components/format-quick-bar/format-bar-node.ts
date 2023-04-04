@@ -4,6 +4,7 @@ import {
   ArrowDownIcon,
   type BlockConfig,
   CopyIcon,
+  DatabaseTableViewIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -22,6 +23,7 @@ import {
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
+import { showDatabaseModal } from '../database-modal/index.js';
 import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
 
@@ -214,6 +216,12 @@ export class FormatQuickBar extends LitElement {
     </div>`;
   }
 
+  private _showDatabaseModal() {
+    showDatabaseModal({
+      page: this.page,
+    });
+  }
+
   override render() {
     const page = this.page;
 
@@ -262,14 +270,24 @@ export class FormatQuickBar extends LitElement {
         </format-bar-button>`
       );
 
-    const actionItems = html` <format-bar-button
-      class="has-tool-tip"
-      data-testid="copy"
-      @click=${() => this._onCopy()}
-    >
-      ${CopyIcon}
-      <tool-tip inert role="tooltip">Copy</tool-tip>
-    </format-bar-button>`;
+    const actionItems = html`
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="copy"
+        @click=${() => this._onCopy()}
+      >
+        ${CopyIcon}
+        <tool-tip inert role="tooltip">Copy</tool-tip>
+      </format-bar-button>
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="convert-to-database"
+        @click=${() => this._showDatabaseModal()}
+      >
+        ${DatabaseTableViewIcon}
+        <tool-tip inert role="tooltip">To Database</tool-tip>
+      </format-bar-button>
+    `;
 
     const styles = styleMap({
       left: this.left,
