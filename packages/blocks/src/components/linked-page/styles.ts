@@ -5,6 +5,12 @@ export const styles = css`
     position: absolute;
   }
 
+  .linked-page-popover icon-button {
+    padding-left: 8px;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
   .linked-page-popover {
     position: fixed;
     left: 0;
