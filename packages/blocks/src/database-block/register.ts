@@ -1,7 +1,7 @@
 import type {
   Cell,
-  ColumnSchema,
-  ColumnSchemaType,
+  Column,
+  ColumnType,
   RowHost,
 } from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
@@ -12,7 +12,7 @@ import type { literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from './database-model.js';
 
-export abstract class DatabaseCellLitElement<Value> extends LitElement {
+export abstract class DatabaseCellElement<Value> extends LitElement {
   static tag: ReturnType<typeof literal>;
   @property()
   rowHost!: RowHost<Value>;
@@ -21,39 +21,39 @@ export abstract class DatabaseCellLitElement<Value> extends LitElement {
   @property()
   rowModel!: BaseBlockModel;
   @property()
-  columnSchema!: ColumnSchema;
+  columnSchema!: Column;
   @property()
   cell!: Cell | null;
 }
 
-export interface ColumnSchemaRenderer<
-  Type extends ColumnSchemaType = ColumnSchemaType,
+export interface ColumnRenderer<
+  Type extends ColumnType = ColumnType,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
 > {
   displayName: string;
   type: Type;
   propertyCreator: () => Property;
-  components: ColumnUIComponents;
+  components: ColumnComponents;
 }
 
 /**
  * @internal
  */
-const registry = new Map<ColumnSchemaRenderer['type'], ColumnSchemaRenderer>();
+const registry = new Map<ColumnRenderer['type'], ColumnRenderer>();
 
-export interface ColumnUIComponents<
+export interface ColumnComponents<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
   Value = unknown
 > {
-  Cell: typeof DatabaseCellLitElement<Value>;
-  CellEditing: typeof DatabaseCellLitElement<Value> | false;
-  ColumnPropertyEditing: typeof DatabaseCellLitElement<Value>;
+  Cell: typeof DatabaseCellElement<Value>;
+  CellEditing: typeof DatabaseCellElement<Value> | false;
+  ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
 }
 
-export function defineColumnSchemaRenderer<
-  Type extends ColumnSchemaType,
+export function defineColumnRenderer<
+  Type extends ColumnType,
   Property extends Record<string, unknown>,
   Value
 >(
@@ -61,14 +61,14 @@ export function defineColumnSchemaRenderer<
   propertyCreator: () => Property,
   defaultValue: (page: Page) => Value | null,
   components: {
-    Cell: typeof DatabaseCellLitElement<Value>;
-    CellEditing: typeof DatabaseCellLitElement<Value> | false;
-    ColumnPropertyEditing: typeof DatabaseCellLitElement<Value>;
+    Cell: typeof DatabaseCellElement<Value>;
+    CellEditing: typeof DatabaseCellElement<Value> | false;
+    ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
   },
   config: {
     displayName: string;
   }
-): ColumnSchemaRenderer<Type, Property, Value> {
+): ColumnRenderer<Type, Property, Value> {
   return {
     displayName: config.displayName,
     type,
@@ -77,20 +77,20 @@ export function defineColumnSchemaRenderer<
   };
 }
 
-export function registerColumnSchemaRenderer(renderer: ColumnSchemaRenderer) {
+export function registerColumnRenderer(renderer: ColumnRenderer) {
   if (registry.has(renderer.type)) {
     throw new Error('cannot register twice for ' + renderer.type);
   }
   registry.set(renderer.type, renderer);
 }
 
-export function listColumnSchemaRenderer(): ColumnSchemaRenderer[] {
+export function listColumnRenderer(): ColumnRenderer[] {
   return [...registry.values()];
 }
 
-export function getColumnSchemaRenderer(
-  type: ColumnSchemaRenderer['type']
-): ColumnSchemaRenderer {
+export function getColumnRenderer(
+  type: ColumnRenderer['type']
+): ColumnRenderer {
   const renderer = registry.get(type);
   if (!renderer) {
     throw new Error('cannot find renderer');

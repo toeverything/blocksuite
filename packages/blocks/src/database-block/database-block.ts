@@ -12,10 +12,7 @@ import {
   PlusIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import {
-  ColumnInsertPosition,
-  type ColumnSchema,
-} from '@blocksuite/global/database';
+import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
@@ -32,7 +29,7 @@ import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnSchemaRenderer } from './register.js';
+import { getColumnRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
 type CellValues = string[];
@@ -162,7 +159,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  columns!: ColumnSchema[];
+  columns!: Column[];
 
   @property()
   addColumn!: (index: number) => string;
@@ -195,7 +192,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   private _onShowEditColumnPopup = (
     target: Element,
-    column: ColumnSchema | string,
+    column: Column | string,
     index: number
   ) => {
     if (this._editingColumnId) return;
@@ -229,7 +226,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   private _onKeydown = (
     event: KeyboardEvent,
     type: 'title' | 'normal',
-    column?: ColumnSchema
+    column?: Column
   ) => {
     const name = (event.target as HTMLInputElement).value;
     if (event.key === 'Enter') {
@@ -257,8 +254,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     });
   };
 
-  private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.db.updateColumnSchema({
+  private _onUpdateNormalColumn = (name: string, column: Column) => {
+    this.targetModel.page.db.updateColumn({
       ...column,
       name,
     });
@@ -670,10 +667,10 @@ export class DatabaseBlockComponent
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  get columns(): ColumnSchema[] {
+  get columns(): Column[] {
     return this.model.columns.map(id =>
-      this.model.page.db.getColumnSchema(id)
-    ) as ColumnSchema[];
+      this.model.page.db.getColumn(id)
+    ) as Column[];
   }
 
   connectedCallback() {
@@ -816,8 +813,8 @@ export class DatabaseBlockComponent
   private _addColumn = (index: number) => {
     this.model.page.captureSync();
     const defaultColumnType = 'multi-select';
-    const renderer = getColumnSchemaRenderer(defaultColumnType);
-    const schema: Omit<ColumnSchema, 'id'> = {
+    const renderer = getColumnRenderer(defaultColumnType);
+    const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
@@ -825,7 +822,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumnSchema(schema);
+    const id = this.model.page.db.updateColumn(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
