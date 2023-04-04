@@ -232,6 +232,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   private _headerContainer!: HTMLElement;
 
   private _disposables: DisposableGroup = new DisposableGroup();
+  private _changeColumnWidthDisposable: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
 
   setEditingColumnId = (id: string) => {
@@ -246,8 +247,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
-      this.setDragHandleHeight();
-
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
@@ -258,6 +257,12 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         },
         'mousedown'
       );
+    }
+
+    if (changedProperties.has('columns')) {
+      // bind event when new column is added
+      this._initChangeColumnWidthEvent();
+      this.setDragHandleHeight();
     }
   }
 
@@ -281,21 +286,25 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   }
 
   private _initChangeColumnWidthEvent() {
+    this._changeColumnWidthDisposable.dispose();
+
     const columns = this._headerContainer.querySelectorAll<HTMLDivElement>(
       '.affine-database-column'
     );
     columns.forEach((column, index) => {
-      this._disposables.addFromEvent(column, 'mousedown', (event: MouseEvent) =>
-        this._onColumnWidthMousedown(event, index)
+      this._changeColumnWidthDisposable.addFromEvent(
+        column,
+        'mousedown',
+        (event: MouseEvent) => this._onColumnWidthMousedown(event, index)
       );
     });
 
-    this._disposables.addFromEvent(
+    this._changeColumnWidthDisposable.addFromEvent(
       document,
       'mousemove',
       this._onColumnWidthMousemove
     );
-    this._disposables.addFromEvent(
+    this._changeColumnWidthDisposable.addFromEvent(
       document,
       'mouseup',
       this._onColumnWidthMouseup
