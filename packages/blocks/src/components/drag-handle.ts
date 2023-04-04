@@ -275,9 +275,11 @@ export class DragHandle extends LitElement {
         normalDisplay = 'none';
 
         if (selectedBlocks.length > 1) {
-          const first = getRectByBlockElement(selectedBlocks[0]);
+          const tempSelectedBlocks =
+            getBlockElementsExcludeSubtrees(selectedBlocks);
+          const first = getRectByBlockElement(tempSelectedBlocks[0]);
           const last = getRectByBlockElement(
-            selectedBlocks[selectedBlocks.length - 1]
+            tempSelectedBlocks[tempSelectedBlocks.length - 1]
           );
           startX = first.left;
           startY = first.top;
@@ -429,9 +431,11 @@ export class DragHandle extends LitElement {
     let height = rect.height;
 
     if (selectedBlocks.includes(element) && selectedBlocks.length > 1) {
-      const first = getRectByBlockElement(selectedBlocks[0]);
+      const tempSelectedBlocks =
+        getBlockElementsExcludeSubtrees(selectedBlocks);
+      const first = getRectByBlockElement(tempSelectedBlocks[0]);
       const last = getRectByBlockElement(
-        selectedBlocks[selectedBlocks.length - 1]
+        tempSelectedBlocks[tempSelectedBlocks.length - 1]
       );
       startY = first.top;
       height = last.bottom - first.top;
