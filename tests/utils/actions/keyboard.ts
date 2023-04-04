@@ -114,7 +114,9 @@ export async function strikethrough(page: Page) {
 export async function copyByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
 }
-
+export async function cutByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
+}
 export async function pasteByKeyboard(page: Page) {
   const doesEditorActive = await page.evaluate(() =>
     document.activeElement?.closest('editor-container')

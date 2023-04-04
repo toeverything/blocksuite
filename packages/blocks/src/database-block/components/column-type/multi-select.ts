@@ -3,14 +3,11 @@ import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 import { SelectMode } from './select.js';
 
 @customElement('affine-database-multi-select-cell')
-class MultiSelectCell extends DatabaseCellLitElement<SelectTag[]> {
+class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
   static styles = css`
     :host {
       width: 100%;
@@ -31,7 +28,7 @@ class MultiSelectCell extends DatabaseCellLitElement<SelectTag[]> {
 }
 
 @customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
+class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   static tag = literal`affine-database-multi-select-cell-editing`;
 
   override render() {
@@ -50,13 +47,13 @@ class MultiSelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
 }
 
 @customElement('affine-database-multi-select-column-property-editing')
-class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement<
+class MultiSelectColumnPropertyEditing extends DatabaseCellElement<
   SelectTag[]
 > {
   static tag = literal`affine-database-multi-select-column-property-editing`;
 }
 
-export const MultiSelectColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const MultiSelectColumnRenderer = defineColumnRenderer(
   'multi-select',
   () => ({
     selection: [] as SelectTag[],

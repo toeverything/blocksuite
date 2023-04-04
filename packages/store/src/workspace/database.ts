@@ -1,8 +1,4 @@
-import type {
-  Cell,
-  ColumnSchema,
-  SelectTag,
-} from '@blocksuite/global/database';
+import type { Cell, Column, SelectTag } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
@@ -29,35 +25,30 @@ export class DatabaseManager {
     return this.page.root.cells as Y.Map<Y.Map<unknown>>;
   }
 
-  protected get yColumnSchema() {
-    assertExists(this.page.root?.columnSchema);
-    return this.page.root.columnSchema as Y.Map<unknown>;
+  protected get yColumns() {
+    assertExists(this.page.root?.columns);
+    return this.page.root.columns as Y.Map<unknown>;
   }
 
   get serializedCells(): SerializedCells {
     return this.yCells.toJSON();
   }
 
-  getColumnSchema(id: ColumnSchema['id']): ColumnSchema | null {
-    return (this.yColumnSchema.get(id) ?? null) as ColumnSchema | null;
+  getColumn(id: Column['id']): Column | null {
+    return (this.yColumns.get(id) ?? null) as Column | null;
   }
 
-  updateColumnSchema(
-    schema: Omit<ColumnSchema, 'id'> & { id?: ColumnSchema['id'] }
-  ): string {
-    const id = schema.id ?? this.page.createId();
-    this.page.transact(() => this.yColumnSchema.set(id, { ...schema, id }));
+  updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
+    const id = column.id ?? this.page.createId();
+    this.page.transact(() => this.yColumns.set(id, { ...column, id }));
     return id;
   }
 
-  deleteColumnSchema(columnId: ColumnSchema['id']) {
-    this.page.transact(() => this.yColumnSchema.delete(columnId));
+  deleteColumn(columnId: Column['id']) {
+    this.page.transact(() => this.yColumns.delete(columnId));
   }
 
-  getCell(
-    modelId: BaseBlockModel['id'],
-    schemaId: ColumnSchema['id']
-  ): Cell | null {
+  getCell(modelId: BaseBlockModel['id'], schemaId: Column['id']): Cell | null {
     const yRow = this.yCells.get(modelId);
     const yCell = (yRow?.get(schemaId) as Y.Map<unknown>) ?? null;
     if (!yCell) return null;
@@ -88,7 +79,7 @@ export class DatabaseManager {
     });
   }
 
-  copyCellsByColumn(fromId: ColumnSchema['id'], toId: ColumnSchema['id']) {
+  copyCellsByColumn(fromId: Column['id'], toId: Column['id']) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
         const yCell = yRow.get(fromId) as Y.Map<unknown>;
@@ -102,14 +93,14 @@ export class DatabaseManager {
     });
   }
 
-  deleteCellsByColumn(columnId: ColumnSchema['id']) {
+  deleteCellsByColumn(columnId: Column['id']) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => yRow.delete(columnId));
     });
   }
 
   convertCellsByColumn(
-    columnId: ColumnSchema['id'],
+    columnId: Column['id'],
     newType: 'select' | 'rich-text'
   ) {
     this.page.transact(() => {
@@ -139,7 +130,7 @@ export class DatabaseManager {
   }
 
   renameSelectedCellTag(
-    columnId: ColumnSchema['id'],
+    columnId: Column['id'],
     oldValue: SelectTag,
     newValue: SelectTag
   ) {
@@ -154,14 +145,14 @@ export class DatabaseManager {
         newSelected[index] = newValue;
 
         const yNewCell = new Y.Map();
-        yNewCell.set('schemaId', columnId);
+        yNewCell.set('columnId', columnId);
         yNewCell.set('value', newSelected);
         yRow.set(columnId, yNewCell);
       });
     });
   }
 
-  deleteSelectedCellTag(columnId: ColumnSchema['id'], target: SelectTag) {
+  deleteSelectedCellTag(columnId: Column['id'], target: SelectTag) {
     this.page.transact(() => {
       this.yCells.forEach(yRow => {
         const yCell = yRow.get(columnId) as Y.Map<SelectTag[]>;
@@ -172,7 +163,7 @@ export class DatabaseManager {
         newSelected = selected.filter(item => item.value !== target.value);
 
         const yNewCell = new Y.Map();
-        yNewCell.set('schemaId', columnId);
+        yNewCell.set('columnId', columnId);
         yNewCell.set('value', newSelected);
         yRow.set(columnId, yNewCell);
       });

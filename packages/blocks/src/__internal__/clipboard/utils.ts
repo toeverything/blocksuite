@@ -13,7 +13,6 @@ import { ClipboardItem } from './clipboard-item.js';
 import markdownUtils from './markdown-utils.js';
 
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
   TEXT = 'text/plain',
   // IMAGE_BMP = 'image/bmp',
@@ -25,12 +24,8 @@ export enum CLIPBOARD_MIMETYPE {
   // IMAGE_WEBP = 'image/webp',
 }
 
-export const optimalMimeTypes: string[] = [
-  CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-  CLIPBOARD_MIMETYPE.HTML,
-  CLIPBOARD_MIMETYPE.TEXT,
-];
-
+const CUSTOM_CLIPBOARD_FRAGMENT_START = '<blocksuite style="display: none">';
+const CUSTOM_CLIPBOARD_FRAGMENT_END = '</blocksuite>';
 export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   let success = false;
   const tempElem = document.createElement('textarea');
@@ -84,30 +79,6 @@ export function getFileFromClipboard(clipboardData: DataTransfer) {
   return;
 }
 
-function getOptimalClipboardData(
-  clipboardData: ClipboardEvent['clipboardData']
-) {
-  const dv = document.createElement('div');
-  document.querySelector('.affine-block-children-container')?.appendChild(dv);
-
-  for (let i = 0; i < optimalMimeTypes.length; i++) {
-    const mimeType = optimalMimeTypes[i];
-    const data = clipboardData?.getData(mimeType);
-
-    // ===================== debug ====================
-    dv.innerText = `paste ${mimeType}: ${data}\n`;
-    // ===================== debug ====================
-
-    if (data) {
-      return {
-        type: mimeType,
-        data,
-      };
-    }
-  }
-  return null;
-}
-
 export async function clipboardData2Blocks(
   page: Page,
   clipboardData: ClipboardEvent['clipboardData']
@@ -121,20 +92,22 @@ export async function clipboardData2Blocks(
     return contentParser.file2Blocks(clipboardData);
   }
 
-  const optimalClipboardData = getOptimalClipboardData(clipboardData);
+  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+  if (HTMLClipboardData) {
+    const blockSuiteClipboardData = detectBlockSuiteClipboardData(
+      clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
+    );
 
-  if (optimalClipboardData?.type === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
-    return JSON.parse(optimalClipboardData.data);
+    if (blockSuiteClipboardData) {
+      return blockSuiteClipboardData;
+    }
   }
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
   const shouldConvertMarkdown =
     markdownUtils.checkIfTextContainsMd(textClipData);
-  if (
-    optimalClipboardData?.type === CLIPBOARD_MIMETYPE.HTML &&
-    !shouldConvertMarkdown
-  ) {
-    return await contentParser.htmlText2Block(optimalClipboardData.data);
+  if (HTMLClipboardData && !shouldConvertMarkdown) {
+    return await contentParser.htmlText2Block(HTMLClipboardData);
   }
 
   if (shouldConvertMarkdown) {
@@ -191,30 +164,30 @@ export function copy(range: BlockRange) {
     return getBlockClipboardInfo(model);
   });
 
+  // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
+  // `CUSTOM_CLIPBOARD_FRAGMENT_START` and `CUSTOM_CLIPBOARD_FRAGMENT_END` are used to mark the start and end of the custom clipboard fragment and match the custom clipboard fragment in the paste process
+  const customClipboardFragment = `${CUSTOM_CLIPBOARD_FRAGMENT_START}${JSON.stringify(
+    clipGroups
+      .filter(group => {
+        if (!group.json) {
+          return false;
+        }
+        // XXX: should handle this issue here?
+        // Children json info is collected by its parent,
+        // but getCurrentBlockRange.models return parent and children at same time,
+        // children should be deleted from group
+        return !isChildBlock(range.models, group.model);
+      })
+      .map(group => group.json)
+  )}${CUSTOM_CLIPBOARD_FRAGMENT_END}`;
+
   const textClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.TEXT,
     clipGroups.map(group => group.text).join('')
   );
   const htmlClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.HTML,
-    clipGroups.map(group => group.html).join('')
-  );
-  const customClipboardItem = new ClipboardItem(
-    CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-    JSON.stringify(
-      clipGroups
-        .filter(group => {
-          if (!group.json) {
-            return false;
-          }
-          // XXX: should handle this issue here?
-          // Children json info is collected by its parent,
-          // but getCurrentBlockRange.models return parent and children at same time,
-          // children should be deleted from group
-          return !isChildBlock(range.models, group.model);
-        })
-        .map(group => group.json)
-    )
+    `${clipGroups.map(group => group.html).join('')}${customClipboardFragment}`
   );
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
@@ -222,7 +195,7 @@ export function copy(range: BlockRange) {
   performNativeCopy([
     textClipboardItem,
     htmlClipboardItem,
-    customClipboardItem,
+    // customClipboardItem,
   ]);
 
   savedRange && resetNativeSelection(savedRange);
@@ -246,3 +219,15 @@ const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
   }
   return false;
 };
+
+function detectBlockSuiteClipboardData(html: string) {
+  const blocksuite = html.match(
+    new RegExp(
+      CUSTOM_CLIPBOARD_FRAGMENT_START + '(.*)' + CUSTOM_CLIPBOARD_FRAGMENT_END
+    )
+  );
+  if (blocksuite) {
+    return JSON.parse(blocksuite[1]);
+  }
+  return null;
+}

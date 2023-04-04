@@ -7,22 +7,22 @@ export interface RowHost<Value = unknown> extends HTMLElement {
   ): void;
 }
 
-export type ColumnSchemaType =
+export type ColumnType =
   | 'rich-text'
   | 'select'
   | 'multi-select'
   | 'number'
   | 'progress';
 
-export interface ColumnSchema extends Record<string, unknown> {
+export interface Column extends Record<string, unknown> {
   id: string;
-  type: ColumnSchemaType;
+  type: ColumnType;
   width: number; // px
   hide: boolean;
 }
 
 export type Cell = {
-  columnId: ColumnSchema['id'];
+  columnId: Column['id'];
   value: unknown;
 };
 

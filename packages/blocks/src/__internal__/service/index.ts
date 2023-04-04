@@ -76,7 +76,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     pastedBlocks: SerializedBlock[],
     range?: BlockRange
   ) {
-    return json2block(focusedBlockModel, pastedBlocks, range);
+    return json2block(focusedBlockModel, pastedBlocks, { range });
   }
 
   async onBlockPasted(
