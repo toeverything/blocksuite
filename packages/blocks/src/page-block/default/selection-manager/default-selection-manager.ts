@@ -300,7 +300,7 @@ export class DefaultSelectionManager {
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
-        rect: getSelectedStateRectByBlockElement(element),
+        rect: getRectByBlockElement(element),
       };
     }
 

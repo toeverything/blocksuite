@@ -123,6 +123,8 @@ const DRAG_HANDLE_WIDTH = 24; // px
 export class DragHandle extends LitElement {
   static styles = css`
     :host {
+      top: 0;
+      left: 0;
       overflow: hidden;
       width: ${DRAG_HANDLE_WIDTH + 8}px;
       transform-origin: 0 0;
@@ -245,6 +247,10 @@ export class DragHandle extends LitElement {
 
   private readonly _getClosestBlockElement: (point: Point) => Element | null;
 
+  protected get selectedBlocks() {
+    return this._getSelectedBlocks() ?? [];
+  }
+
   onContainerMouseMove(event: SelectionEvent, modelState: EditingState | null) {
     const frameBlock = this._container.querySelector(
       '.affine-frame-block-container'
@@ -257,40 +263,51 @@ export class DragHandle extends LitElement {
     }
 
     if (modelState) {
-      this._handleAnchorState = modelState;
-      const selectedBlocks = this._getSelectedBlocks() ?? [];
-      if (selectedBlocks.includes(modelState.element)) {
-        this._dragHandleOver.style.display = 'block';
-        this._dragHandleNormal.style.display = 'none';
-      } else {
-        this._dragHandleOver.style.display = 'none';
-        this._dragHandleNormal.style.display = 'block';
-      }
-      const rect = modelState.rect;
-      this.style.display = 'block';
-      this.style.height = `${rect.height / this._scale}px`;
-      this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = '0';
-      this.style.top = '0';
-      const containerRect = this._container.getBoundingClientRect();
+      const { rect, element } = modelState;
+      let startX = rect.left;
+      let startY = rect.top;
+      let height = rect.height;
+      let overDisplay = 'none';
+      let normalDisplay = 'block';
+      const selectedBlocks = this.selectedBlocks;
+      if (selectedBlocks.includes(element)) {
+        overDisplay = normalDisplay;
+        normalDisplay = 'none';
 
-      const xOffset =
-        rect.left -
+        if (selectedBlocks.length > 1) {
+          const first = getRectByBlockElement(selectedBlocks[0]);
+          const last = getRectByBlockElement(
+            selectedBlocks[selectedBlocks.length - 1]
+          );
+          startX = first.left;
+          startY = first.top;
+          height = last.bottom - first.top;
+        }
+      }
+      this._handleAnchorState = modelState;
+      this._dragHandleOver.style.display = overDisplay;
+      this._dragHandleNormal.style.display = normalDisplay;
+      this.style.display = 'block';
+      this.style.height = `${height / this._scale}px`;
+      this.style.width = `${DRAG_HANDLE_WIDTH}px`;
+
+      const containerRect = this._container.getBoundingClientRect();
+      const posX =
+        startX -
         containerRect.left -
         (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
+      const posY = startY - containerRect.top;
 
-      const yOffset = rect.top - containerRect.top;
-
-      this.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(${this._scale})`;
+      this.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
       this.style.opacity = `${(
         1 -
-        (event.raw.clientX - rect.left) / rect.width
+        (event.raw.clientX - startX) / rect.width
       ).toFixed(2)}`;
 
       const top = this._calcDragHandleY(
         event.raw.clientY,
-        rect.top,
-        rect.height,
+        startY,
+        height,
         this._scale
       );
       this._dragHandle.style.transform = `translateY(${top}px)`;
@@ -406,13 +423,21 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    const { rect } = this._handleAnchorState;
-    const top = this._calcDragHandleY(
-      e.clientY,
-      rect.top,
-      rect.height,
-      this._scale
-    );
+    const { rect, element } = this._handleAnchorState;
+    const selectedBlocks = this.selectedBlocks;
+    let startY = rect.top;
+    let height = rect.height;
+
+    if (selectedBlocks.includes(element) && selectedBlocks.length > 1) {
+      const first = getRectByBlockElement(selectedBlocks[0]);
+      const last = getRectByBlockElement(
+        selectedBlocks[selectedBlocks.length - 1]
+      );
+      startY = first.top;
+      height = last.bottom - first.top;
+    }
+
+    const top = this._calcDragHandleY(e.clientY, startY, height, this._scale);
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
@@ -420,7 +445,7 @@ export class DragHandle extends LitElement {
 
   private _calcDragHandleY(
     clientY: number,
-    yOffset: number,
+    startY: number,
     height: number,
     scale: number
   ) {
@@ -428,7 +453,7 @@ export class DragHandle extends LitElement {
       Math.max(
         0,
         Math.min(
-          clientY - yOffset - (DRAG_HANDLE_HEIGHT * scale) / 2,
+          clientY - startY - (DRAG_HANDLE_HEIGHT * scale) / 2,
           height - DRAG_HANDLE_HEIGHT
         )
       ) / scale
