@@ -112,7 +112,7 @@ export class BaseBlockModel<Props = unknown>
   type?: string;
   children: BaseBlockModel[];
   cells?: Y.Map<Y.Map<unknown>>;
-  columnSchema?: Y.Map<unknown>;
+  columns?: Y.Map<unknown>;
   text?: Text;
   sourceId?: string;
 

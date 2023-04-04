@@ -32,7 +32,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
 
     // default column
-    const tagColumnId = page.db.updateColumnSchema({
+    const tagColumnId = page.db.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,

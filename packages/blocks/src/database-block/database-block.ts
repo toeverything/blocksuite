@@ -18,10 +18,7 @@ import {
   PlusIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import {
-  ColumnInsertPosition,
-  type ColumnSchema,
-} from '@blocksuite/global/database';
+import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
@@ -42,7 +39,7 @@ import {
   EditColumnPopup,
 } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnSchemaRenderer } from './register.js';
+import { getColumnRenderer } from './register.js';
 import type {
   DatabaseTypeAction,
   DatabaseTypeActionName,
@@ -411,7 +408,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  columns!: ColumnSchema[];
+  columns!: Column[];
 
   @property()
   addColumn!: (index: number) => string;
@@ -444,7 +441,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   private _onShowEditColumnPopup = (
     target: Element,
-    column: ColumnSchema | string,
+    column: Column | string,
     index: number
   ) => {
     if (this._editingColumnId) return;
@@ -478,7 +475,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   private _onKeydown = (
     event: KeyboardEvent,
     type: 'title' | 'normal',
-    column?: ColumnSchema
+    column?: Column
   ) => {
     const name = (event.target as HTMLInputElement).value;
     if (event.key === 'Enter') {
@@ -506,8 +503,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     });
   };
 
-  private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.db.updateColumnSchema({
+  private _onUpdateNormalColumn = (name: string, column: Column) => {
+    this.targetModel.page.db.updateColumn({
       ...column,
       name,
     });
@@ -755,84 +752,9 @@ const styles = css`
     opacity: 0.5;
   }
 
-  .affine-database-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 26px;
-  }
-  .affine-database-toolbar-search svg,
-  .affine-database-toolbar svg {
-    width: 16px;
-    height: 16px;
-  }
-  .affine-database-toolbar-item {
-    display: flex;
-    align-items: center;
-  }
   .affine-database-toolbar-item.search {
     overflow: hidden;
   }
-  .affine-database-search-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 138px;
-    height: 32px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0);
-    transform: translate(110px, 0px);
-    transition: all 0.3s ease;
-  }
-  .affine-database-search-container > svg {
-    min-width: 16px;
-    min-height: 16px;
-  }
-  .search-container-expand {
-    transform: translate(0px, 0px);
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-  .search-input-container {
-    display: flex;
-    align-items: center;
-  }
-  .affine-database-search-input-icon {
-    display: inline-flex;
-  }
-  .affine-database-search-input {
-    flex: 1;
-    height: 16px;
-    width: 80px;
-    border: none;
-    font-family: var(--affine-font-family);
-    font-size: var(--affine-font-sm);
-    box-sizing: border-box;
-    color: inherit;
-    background: transparent;
-  }
-  .affine-database-search-input:focus {
-    outline: none;
-  }
-  .affine-database-search-input::placeholder {
-    color: #888a9e;
-    font-size: var(--affine-font-sm);
-  }
-
-  .affine-database-toolbar-item.new-record {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 120px;
-    height: 32px;
-    padding: 6px 8px;
-    border-radius: 8px;
-    font-size: 14px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-      0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
-      #ffffff;
-  }
-
   .affine-database-block-table {
     position: relative;
     width: 100%;
@@ -1098,10 +1020,10 @@ export class DatabaseBlockComponent
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  get columns(): ColumnSchema[] {
+  get columns(): Column[] {
     return this.model.columns.map(id =>
-      this.model.page.db.getColumnSchema(id)
-    ) as ColumnSchema[];
+      this.model.page.db.getColumn(id)
+    ) as Column[];
   }
 
   connectedCallback() {
@@ -1299,8 +1221,8 @@ export class DatabaseBlockComponent
   private _addColumn = (index: number) => {
     this.model.page.captureSync();
     const defaultColumnType = 'multi-select';
-    const renderer = getColumnSchemaRenderer(defaultColumnType);
-    const schema: Omit<ColumnSchema, 'id'> = {
+    const renderer = getColumnRenderer(defaultColumnType);
+    const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
@@ -1308,7 +1230,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumnSchema(schema);
+    const id = this.model.page.db.updateColumn(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {

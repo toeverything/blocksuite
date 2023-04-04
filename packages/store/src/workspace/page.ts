@@ -722,7 +722,7 @@ export class Page extends Space<FlatBlockMap> {
 
     if (matchFlavours(model, ['affine:page'] as const)) {
       model.cells = yBlock.get('ext:cells') as Y.Map<Y.Map<unknown>>;
-      model.columnSchema = yBlock.get('ext:columnSchema') as Y.Map<unknown>;
+      model.columns = yBlock.get('ext:columns') as Y.Map<unknown>;
 
       const titleText = yBlock.get('prop:title') as Y.Text;
       model.title = new Text(titleText);
@@ -886,7 +886,7 @@ export class Page extends Space<FlatBlockMap> {
           model.childrenUpdated.emit();
         }
       } else if (
-        event.path.includes('ext:columnSchema') ||
+        event.path.includes('ext:columns') ||
         event.path.includes('ext:cells')
       ) {
         const blocks = this.getBlockByFlavour('affine:database');
