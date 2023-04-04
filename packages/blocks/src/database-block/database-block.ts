@@ -351,7 +351,16 @@ class DatabaseColumnHeader extends NonShadowLitElement {
           : event.clientX - left;
 
       // update column width
-      rowCells.forEach(cell => (cell.style.width = `${columnWidth}px`));
+      rowCells.forEach(cell => {
+        cell.style.width = `${columnWidth}px`;
+        const titleText = cell.querySelector<HTMLDivElement>(
+          '.affine-database-column-text-input'
+        );
+        if (titleText) {
+          // 54px is the width of other elements of the column
+          titleText.style.width = `${columnWidth - 54}px`;
+        }
+      });
 
       // scroll when crossing the right border
       const parentElement = this.tableContainer.parentElement;
