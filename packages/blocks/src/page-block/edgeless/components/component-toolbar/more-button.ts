@@ -14,16 +14,20 @@ import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
 
-type Action = { name: string; value: string; disabled: boolean };
+type Action = {
+  name: string;
+  value: 'delete' | 'moveToBack' | 'moveToFront';
+  disabled?: boolean;
+};
 const ACTIONS: Action[] = [
   // FIXME: should implement these function
   // { name: 'Copy', value: 'copy', disabled: true },
   // { name: 'Paste', value: 'paste', disabled: true },
   // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  // { name: 'Bring to front', value: 'bring to front', disabled: true },
-  // { name: 'Send to back', value: 'send to back', disabled: true },
+  { name: 'Bring to front', value: 'moveToFront' },
+  { name: 'Send to back', value: 'moveToBack' },
   // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
-  { name: 'Delete', value: 'delete', disabled: false },
+  { name: 'Delete', value: 'delete' },
 ];
 
 function Actions(onClick: (action: Action) => void) {
@@ -124,9 +128,21 @@ export class EdgelessMoreButton extends LitElement {
   }
 
   private _runAction = (action: Action) => {
-    if (action.value === 'delete') {
-      this._delete();
+    switch (action.value) {
+      case 'delete': {
+        this._delete();
+        break;
+      }
+      case 'moveToBack': {
+        this.surface.moveToBack(this.elements.map(ele => ele.id));
+        break;
+      }
+      case 'moveToFront': {
+        this.surface.moveToFront(this.elements.map(ele => ele.id));
+        break;
+      }
     }
+    this._actionsMenuPopper?.hide();
   };
 
   firstUpdated(changedProperties: Map<string, unknown>) {

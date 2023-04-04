@@ -21,6 +21,7 @@ import {
   selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
+  triggerComponentToolbarAction,
   updateExistedBrushElementSize,
   zoomByMouseWheel,
 } from './utils/actions/edgeless.js';
@@ -1071,4 +1072,66 @@ test('format quick bar should show up when double-clicking on text', async ({
   await page.waitForTimeout(200);
   const formatQuickBar = page.locator('.format-quick-bar');
   await expect(formatQuickBar).toBeVisible();
+});
+
+test('bring to front', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // should be rect0
+  await page.mouse.click(110, 110);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  // bring rect0 to front
+  await triggerComponentToolbarAction(page, 'bring to front');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+});
+
+test('send to back', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // bring rect1 to back
+  await triggerComponentToolbarAction(page, 'send to back');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
