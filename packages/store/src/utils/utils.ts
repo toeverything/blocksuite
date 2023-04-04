@@ -57,7 +57,12 @@ export function syncBlockProps(
 
     const isText = propSchema[key] instanceof Text;
     if (isText) {
-      yBlock.set(`prop:${key}`, value.yText);
+      if (value instanceof Text) {
+        yBlock.set(`prop:${key}`, value.yText);
+      } else {
+        // When copying the database, the value of title is a string
+        yBlock.set(`prop:${key}`, new Y.Text(value));
+      }
       return;
     }
     if (!isPrimitive(value) && !Array.isArray(value)) {

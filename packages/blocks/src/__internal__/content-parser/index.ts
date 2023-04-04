@@ -1,5 +1,5 @@
 import type { PageBlockModel } from '@blocksuite/blocks';
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import type { SerializedBlock } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
@@ -11,8 +11,10 @@ import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
+type ParseHtml2BlockFunc = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...args: any[]
+) => Promise<SerializedBlock[] | null>;
 
 export class ContentParser {
   private _page: Page;
@@ -70,7 +72,7 @@ export class ContentParser {
     ).reduce((text, block) => text + block, '');
   }
 
-  public async htmlText2Block(html: string): Promise<OpenBlockInfo[]> {
+  public async htmlText2Block(html: string): Promise<SerializedBlock[]> {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
@@ -98,7 +100,7 @@ export class ContentParser {
     return [];
   }
 
-  public async markdown2Block(text: string): Promise<OpenBlockInfo[]> {
+  public async markdown2Block(text: string): Promise<SerializedBlock[]> {
     const underline = {
       name: 'underline',
       level: 'inline',
@@ -167,7 +169,7 @@ export class ContentParser {
     return this._parsers[name] || null;
   }
 
-  public text2blocks(text: string): OpenBlockInfo[] {
+  public text2blocks(text: string): SerializedBlock[] {
     return text.split('\n').map((str: string) => {
       return {
         flavour: 'affine:paragraph',
@@ -239,7 +241,7 @@ export class ContentParser {
 
   private async _convertHtml2Blocks(
     element: Element
-  ): Promise<OpenBlockInfo[]> {
+  ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
         const clipBlockInfos =
@@ -252,7 +254,7 @@ export class ContentParser {
       }
     );
 
-    const results: Array<OpenBlockInfo[]> = [];
+    const results: Array<SerializedBlock[]> = [];
     for (const item of openBlockPromises) {
       results.push(await item);
     }

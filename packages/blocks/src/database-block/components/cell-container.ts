@@ -107,8 +107,8 @@ export class DatabaseCellContainer
   render() {
     const renderer = getColumnRenderer(this.columnSchema.type);
     const cell = this.databaseModel.page.db.getCell(
-      this.rowModel,
-      this.columnSchema
+      this.rowModel.id,
+      this.columnSchema.id
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;

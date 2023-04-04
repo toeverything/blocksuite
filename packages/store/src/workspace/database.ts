@@ -48,9 +48,9 @@ export class DatabaseManager {
     this.page.transact(() => this.yColumns.delete(columnId));
   }
 
-  getCell(model: BaseBlockModel, column: Column): Cell | null {
-    const yRow = this.yCells.get(model.id);
-    const yCell = (yRow?.get(column.id) as Y.Map<unknown>) ?? null;
+  getCell(modelId: BaseBlockModel['id'], schemaId: Column['id']): Cell | null {
+    const yRow = this.yCells.get(modelId);
+    const yCell = (yRow?.get(schemaId) as Y.Map<unknown>) ?? null;
     if (!yCell) return null;
 
     return {
