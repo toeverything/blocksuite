@@ -9,6 +9,9 @@ import {
   focusRichText,
   getRichTextBoundingBox,
   importMarkdown,
+  initDatabaseColumn,
+  initDatabaseDynamicRowWithData,
+  initEmptyDatabaseWithParagraphState,
   initEmptyParagraphState,
   pasteByKeyboard,
   pasteContent,
@@ -561,6 +564,89 @@ test('cut will delete all content, and copy will reappear content', async ({
       prop:checked={false}
       prop:text="4"
       prop:type="bulleted"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test('should copy and paste of database work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseWithParagraphState(page);
+
+  // init database columns and rows
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'abc', true);
+
+  await selectAllByKeyboard(page);
+  await waitNextFrame(page);
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:database
+      prop:columns={
+        Array [
+          "10",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+
+  await undoByClick(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
     />
   </affine:frame>
 </affine:page>`

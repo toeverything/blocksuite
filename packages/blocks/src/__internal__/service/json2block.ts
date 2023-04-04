@@ -5,12 +5,13 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
-import { type BlockRange, type OpenBlockInfo } from '../utils/index.js';
+import { getServiceOrRegister } from '../service.js';
+import { type BlockRange, type SerializedBlock } from '../utils/index.js';
 import { getVirgoByModel } from '../utils/query.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
-  pastedBlocks: OpenBlockInfo[],
+  pastedBlocks: SerializedBlock[],
   options?: {
     convertToPastedIfEmpty?: boolean;
     range?: BlockRange;
@@ -56,7 +57,7 @@ export async function json2block(
       shouldSplitBlock &&
         (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
 
-      const [id] = addBlocks(
+      const [id] = await addSerializedBlocks(
         page,
         pastedBlocks,
         parent,
@@ -93,7 +94,7 @@ export async function json2block(
     parent.children.indexOf(focusedBlockModel) +
     (shouldMergeFirstBlock ? 1 : 0);
 
-  const ids = addBlocks(
+  const ids = await addSerializedBlocks(
     page,
     pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
     parent,
@@ -136,39 +137,55 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
   vEditor.setVRange(vRange);
 }
 
-// TODO: used old code, need optimize
-export function addBlocks(
+export async function addSerializedBlocks(
   page: Page,
-  blocks: OpenBlockInfo[],
+  serializedBlocks: SerializedBlock[],
   parent: BaseBlockModel,
   index: number
 ) {
-  const addedBlockIds = [];
-  for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i];
-    const flavour = block.flavour as keyof BlockModels;
+  const addedBlockIds: string[] = [];
+  const pendingModels: { model: BaseBlockModel; json: SerializedBlock }[] = [];
+
+  for (let i = 0; i < serializedBlocks.length; i++) {
+    const json = serializedBlocks[i];
+    const flavour = json.flavour as keyof BlockModels;
     const blockProps = {
       flavour,
-      type: block.type as string,
-      checked: block.checked,
-      sourceId: block.sourceId,
-      caption: block.caption,
-      width: block.width,
-      height: block.height,
-      language: block.language,
+      type: json.type as string,
+      checked: json.checked,
+      sourceId: json.sourceId,
+      caption: json.caption,
+      width: json.width,
+      height: json.height,
+      language: json.language,
+      title: json.databaseProps?.title,
+      titleColumn: json.databaseProps?.titleColumn,
     };
     const id = page.addBlock(flavour, blockProps, parent, index + i);
-
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
+    assertExists(model);
 
     const initialProps =
       model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
     if (initialProps && initialProps.text instanceof Text) {
-      block.text && model?.text?.applyDelta(block.text);
+      json.text && model?.text?.applyDelta(json.text);
     }
 
-    model && block.children && addBlocks(page, block.children, model, 0);
+    if (model && json.children) {
+      await addSerializedBlocks(page, json.children, model, 0);
+      pendingModels.push({ model, json });
+    }
   }
+
+  for (const { model, json } of pendingModels) {
+    const flavour = model.flavour as keyof BlockModels;
+    const service = await getServiceOrRegister(flavour);
+    service.onBlockPasted(model, {
+      columnIds: json.databaseProps?.columnIds,
+      columnSchemaIds: json.databaseProps?.columnSchemaIds,
+    });
+  }
+
   return addedBlockIds;
 }

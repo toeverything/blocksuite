@@ -1,4 +1,4 @@
-import type { OpenBlockInfo } from '@blocksuite/blocks';
+import type { SerializedBlock } from '@blocksuite/blocks';
 import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, Page } from '@blocksuite/store';
@@ -66,7 +66,7 @@ export class HtmlParser {
   // TODO parse children block
   private _nodeParser = async (
     node: Element
-  ): Promise<OpenBlockInfo[] | null> => {
+  ): Promise<SerializedBlock[] | null> => {
     let result;
     // custom parser
     result = await this._contentParser.getParserHtmlText2Block(
@@ -211,7 +211,7 @@ export class HtmlParser {
       }
     );
 
-    const results: Array<OpenBlockInfo[]> = [];
+    const results: Array<SerializedBlock[]> = [];
     for (const item of openBlockPromises) {
       results.push(await item);
     }
@@ -230,7 +230,7 @@ export class HtmlParser {
     type: string;
     checked?: boolean;
     ignoreEmptyElement?: boolean;
-  }): Promise<OpenBlockInfo[] | null> => {
+  }): Promise<SerializedBlock[] | null> => {
     const res = await this._commonHTML2Block(
       element,
       flavour,
@@ -247,7 +247,7 @@ export class HtmlParser {
     type: string,
     checked?: boolean,
     ignoreEmptyElement = true
-  ): Promise<OpenBlockInfo | null> {
+  ): Promise<SerializedBlock | null> {
     const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: DeltaOperation[] = [];
@@ -337,7 +337,7 @@ export class HtmlParser {
 
   private _listItemParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> => {
+  ): Promise<SerializedBlock[] | null> => {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
     let checked;
@@ -378,9 +378,9 @@ export class HtmlParser {
 
   private _blockQuoteParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> => {
-    const getText = (list: OpenBlockInfo[]): OpenBlockInfo['text'] => {
-      const result: OpenBlockInfo['text'] = [];
+  ): Promise<SerializedBlock[] | null> => {
+    const getText = (list: SerializedBlock[]): SerializedBlock['text'] => {
+      const result: SerializedBlock['text'] = [];
       list.forEach(item => {
         const texts = item.text?.filter(textItem => textItem.insert) || [];
         if (result.length > 0 && texts.length > 0) {
@@ -420,7 +420,7 @@ export class HtmlParser {
 
   private _codeBlockParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> => {
+  ): Promise<SerializedBlock[] | null> => {
     // code block doesn't parse other nested Markdown syntax, thus is always one layer deep, example:
     // <pre><code class="language-typescript">code content</code></pre>
     const content = element.firstChild?.textContent || '';
@@ -442,8 +442,8 @@ export class HtmlParser {
 
   private _embedItemParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> => {
-    let result: OpenBlockInfo[] | null = [];
+  ): Promise<SerializedBlock[] | null> => {
+    let result: SerializedBlock[] | null = [];
     if (element instanceof HTMLImageElement) {
       const imgUrl = (element as HTMLImageElement).src;
       let resp;

@@ -5,7 +5,7 @@ import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import type {
   BlockTransformContext,
-  OpenBlockInfo,
+  SerializedBlock,
 } from '../__internal__/utils/index.js';
 import type { PageBlockModel } from './page-model.js';
 
@@ -27,7 +27,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
 
   async json2Block(
     focusedBlockModel: BaseBlockModel,
-    pastedBlocks: OpenBlockInfo[]
+    pastedBlocks: SerializedBlock[]
   ) {
     // this is page block empty case
     const frameId = focusedBlockModel.page.addBlock(

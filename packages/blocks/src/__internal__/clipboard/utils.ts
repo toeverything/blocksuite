@@ -33,9 +33,9 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   document.body.appendChild(tempElem);
   tempElem.select();
   tempElem.setSelectionRange(0, tempElem.value.length);
-
   const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
+
     if (clipboardData) {
       items.forEach((item: ClipboardItem) =>
         clipboardData.setData(item.mimeType, item.data)

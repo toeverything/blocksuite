@@ -1,7 +1,7 @@
 import { BaseService } from '../__internal__/service/index.js';
 import type {
   BlockTransformContext,
-  OpenBlockInfo,
+  SerializedBlock,
 } from '../__internal__/utils/index.js';
 import type { EmbedBlockModel } from './embed-model.js';
 export class EmbedBlockService extends BaseService<EmbedBlockModel> {
@@ -23,7 +23,7 @@ export class EmbedBlockService extends BaseService<EmbedBlockModel> {
     block: EmbedBlockModel,
     begin?: number,
     end?: number
-  ): OpenBlockInfo {
+  ): SerializedBlock {
     return {
       type: block.type,
       sourceId: block.sourceId,
