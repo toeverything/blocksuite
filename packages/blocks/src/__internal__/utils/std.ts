@@ -290,9 +290,9 @@ export function groupBy<T>(
   const result = {} as Record<string, T[]>;
 
   for (const item of arr) {
-    const groupKey = (
-      typeof key === 'function' ? key(item) : (item as any)[key]
-    ) as string;
+    const groupKey =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (typeof key === 'function' ? key(item) : (item as any)[key]) as string;
 
     if (!result[groupKey]) {
       result[groupKey] = [];
