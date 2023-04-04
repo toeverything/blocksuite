@@ -570,7 +570,7 @@ test('cut will delete all content, and copy will reappear content', async ({
   );
 });
 
-test.only('should copy and paste of database work', async ({ page }) => {
+test('should copy and paste of database work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
