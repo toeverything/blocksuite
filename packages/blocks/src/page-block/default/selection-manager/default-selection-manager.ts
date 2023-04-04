@@ -116,6 +116,14 @@ export class DefaultSelectionManager {
       return;
     }
 
+    if (
+      e.raw.target instanceof HTMLElement &&
+      e.raw.target.tagName === 'AFFINE-PAGE-SELECTED-RECTS'
+    ) {
+      e.raw.stopPropagation();
+      return;
+    }
+
     // disable dragHandle button
     this._container.components.dragHandle?.setPointerEvents('none');
 
