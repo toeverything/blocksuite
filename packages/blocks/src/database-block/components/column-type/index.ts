@@ -1,12 +1,12 @@
-import { registerColumnSchemaRenderer } from '../../register.js';
-import { MultiSelectColumnSchemaRenderer } from './multi-select.js';
-import { NumberColumnSchemaRenderer } from './number.js';
-import { RichTextColumnSchemaRenderer } from './rich-text.js';
-import { SelectColumnSchemaRenderer } from './select.js';
+import { registerColumnRenderer } from '../../register.js';
+import { MultiSelectColumnRenderer } from './multi-select.js';
+import { NumberColumnRenderer } from './number.js';
+import { RichTextColumnRenderer } from './rich-text.js';
+import { SelectColumnRenderer } from './select.js';
 
 export function registerInternalRenderer() {
-  registerColumnSchemaRenderer(NumberColumnSchemaRenderer);
-  registerColumnSchemaRenderer(SelectColumnSchemaRenderer);
-  registerColumnSchemaRenderer(MultiSelectColumnSchemaRenderer);
-  registerColumnSchemaRenderer(RichTextColumnSchemaRenderer);
+  registerColumnRenderer(NumberColumnRenderer);
+  registerColumnRenderer(SelectColumnRenderer);
+  registerColumnRenderer(MultiSelectColumnRenderer);
+  registerColumnRenderer(RichTextColumnRenderer);
 }

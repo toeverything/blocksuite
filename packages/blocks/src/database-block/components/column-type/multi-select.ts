@@ -1,16 +1,13 @@
-import type { SelectProperty } from '@blocksuite/global/database';
+import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 import { SelectMode } from './select.js';
 
 @customElement('affine-database-multi-select-cell')
-class MultiSelectCell extends DatabaseCellLitElement<SelectProperty[]> {
+class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
   static styles = css`
     :host {
       width: 100%;
@@ -24,14 +21,14 @@ class MultiSelectCell extends DatabaseCellLitElement<SelectProperty[]> {
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .columnSchema=${this.columnSchema}
-        .column=${this.column}
+        .cell=${this.cell}
       ></affine-database-select-cell>
     `;
   }
 }
 
 @customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
+class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   static tag = literal`affine-database-multi-select-cell-editing`;
 
   override render() {
@@ -42,7 +39,7 @@ class MultiSelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .columnSchema=${this.columnSchema}
-        .column=${this.column}
+        .cell=${this.cell}
         .mode=${SelectMode.Multi}
       ></affine-database-select-cell-editing>
     `;
@@ -50,18 +47,18 @@ class MultiSelectCellEditing extends DatabaseCellLitElement<SelectProperty[]> {
 }
 
 @customElement('affine-database-multi-select-column-property-editing')
-class MultiSelectColumnPropertyEditing extends DatabaseCellLitElement<
-  SelectProperty[]
+class MultiSelectColumnPropertyEditing extends DatabaseCellElement<
+  SelectTag[]
 > {
   static tag = literal`affine-database-multi-select-column-property-editing`;
 }
 
-export const MultiSelectColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const MultiSelectColumnRenderer = defineColumnRenderer(
   'multi-select',
   () => ({
-    selection: [] as SelectProperty[],
+    selection: [] as SelectTag[],
   }),
-  () => [] as SelectProperty[],
+  () => [] as SelectTag[],
   {
     Cell: MultiSelectCell,
     CellEditing: MultiSelectCellEditing,

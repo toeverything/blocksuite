@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { generateKeyBetween } from 'fractional-indexing';
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
@@ -16,6 +16,7 @@ import {
   ShapeElement,
   type ShapeType,
 } from './elements/index.js';
+import { compare } from './grid.js';
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
@@ -183,6 +184,58 @@ export class SurfaceManager {
     elements.forEach(element => this._addElement(element));
   }
 
+  moveToBack(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    let startIndex = this._lastIndex;
+    this._elements.forEach(element => {
+      if (elementIds.includes(element.id)) {
+        return;
+      }
+      if (element.index < startIndex) {
+        startIndex = element.index;
+      }
+    });
+
+    const keys = generateNKeysBetween(null, startIndex, elementIds.length);
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as PhasorElement[]
+    ).sort(compare);
+
+    this._transact(() => {
+      sortedElements.forEach((ele, index) => {
+        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  moveToFront(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const keys = generateNKeysBetween(this._lastIndex, null, elementIds.length);
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as PhasorElement[]
+    ).sort(compare);
+
+    this._transact(() => {
+      sortedElements.forEach((ele, index) => {
+        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
@@ -193,6 +246,10 @@ export class SurfaceManager {
 
     this._renderer.addElement(element);
     this._elements.set(element.id, element);
+
+    if (element.index > this._lastIndex) {
+      this._lastIndex = element.index;
+    }
   }
 
   private _syncFromExistingContainer() {
@@ -201,7 +258,6 @@ export class SurfaceManager {
 
   private _addElement(element: PhasorElement) {
     element.index = generateKeyBetween(this._lastIndex, null);
-    this._lastIndex = element.index as string;
 
     this._transact(() => {
       const yElement = this._createYElement(element);

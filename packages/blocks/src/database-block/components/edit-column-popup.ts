@@ -15,9 +15,9 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import {
+  type Column,
   ColumnInsertPosition,
-  type ColumnSchema,
-  type ColumnSchemaType,
+  type ColumnType,
 } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
@@ -25,11 +25,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
-import { getColumnSchemaRenderer } from '../register.js';
+import { getColumnRenderer } from '../register.js';
 import type {
   ActionName,
   ColumnAction,
-  ColumnType,
+  ColumnHeader,
   DividerAction,
   TitleColumnAction,
 } from '../types.js';
@@ -64,7 +64,7 @@ export const actionStyles = css`
   }
 `;
 
-const columnTypes: ColumnType[] = [
+const columnTypes: ColumnHeader[] = [
   {
     type: 'rich-text',
     text: 'Text',
@@ -158,9 +158,7 @@ export function isDivider(action: ColumnAction): action is DividerAction {
   return action.type === 'divider';
 }
 
-function isTitleColumn(
-  columnSchema: ColumnSchema | string
-): columnSchema is string {
+function isTitleColumn(columnSchema: Column | string): columnSchema is string {
   return typeof columnSchema === 'string';
 }
 
@@ -212,13 +210,13 @@ class ColumnTypePopup extends LitElement {
   `;
 
   @property()
-  columnType: ColumnSchemaType | undefined;
+  columnType: ColumnType | undefined;
 
   @property()
   columnId!: string;
 
   @property()
-  changeColumnType!: (columnId: string, type: ColumnSchemaType) => void;
+  changeColumnType!: (columnId: string, type: ColumnType) => void;
 
   render() {
     return html`
@@ -292,7 +290,7 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  targetColumnSchema!: ColumnSchema | string;
+  targetColumnSchema!: Column | string;
 
   /** base on database column index */
   @property()
@@ -346,18 +344,15 @@ export class EditColumnPopup extends LitElement {
 
   private _updateColumnSchema = (
     columnId: string,
-    schemaProperties: Partial<ColumnSchema>
+    schemaProperties: Partial<Column>
   ) => {
-    const currentSchema = this.targetModel.page.db.getColumnSchema(columnId);
+    const currentSchema = this.targetModel.page.db.getColumn(columnId);
     assertExists(currentSchema);
     const schema = { ...currentSchema, ...schemaProperties };
-    this.targetModel.page.db.updateColumnSchema(schema);
+    this.targetModel.page.db.updateColumn(schema);
   };
 
-  private _changeColumnType = (
-    columnId: string,
-    targetType: ColumnSchemaType
-  ) => {
+  private _changeColumnType = (columnId: string, targetType: ColumnType) => {
     if (isTitleColumn(this.targetColumnSchema)) return;
 
     const currentType = this.targetColumnSchema.type;
@@ -370,20 +365,20 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'select');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'rich-text');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
-      const renderer = getColumnSchemaRenderer(targetType);
+      const renderer = getColumnRenderer(targetType);
       this._updateColumnSchema(columnId, {
         type: targetType,
         property: renderer.propertyCreator(),
       });
-      this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
     }
 
     this.closePopup();
@@ -407,8 +402,8 @@ export class EditColumnPopup extends LitElement {
 
     if (actionType === 'delete') {
       this.targetModel.page.captureSync();
-      this.targetModel.page.db.deleteColumnSchema(columnId);
       this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
       const columns = this.targetModel.columns.filter(id => id !== columnId);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns,
@@ -437,17 +432,17 @@ export class EditColumnPopup extends LitElement {
 
     if (actionType === 'duplicate') {
       this.targetModel.page.captureSync();
-      const currentSchema = this.targetModel.page.db.getColumnSchema(columnId);
+      const currentSchema = this.targetModel.page.db.getColumn(columnId);
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this.targetModel.page.db.updateColumnSchema(schema);
+      const id = this.targetModel.page.db.updateColumn(schema);
       const newColumns = [...this.targetModel.columns];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.db.copyColumn(copyId, id);
+      this.targetModel.page.db.copyCellsByColumn(copyId, id);
       this.closePopup();
       return;
     }

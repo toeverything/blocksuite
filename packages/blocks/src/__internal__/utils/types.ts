@@ -7,6 +7,7 @@ import type {
   ServiceFlavour,
 } from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
+import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -36,12 +37,18 @@ export interface BlockHostContext {
   ) => BlockServiceInstanceByKey<Key>;
 }
 
+export type CommonSlots = RefNodeSlots;
+
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   clipboard: Clipboard;
+  readonly slots: CommonSlots;
 }
 
+/**
+ * @deprecated Not used yet
+ */
 export interface CommonBlockElement extends HTMLElement {
   host: BlockHost;
   model: BaseBlockModel;
@@ -99,7 +106,7 @@ export type MouseMode =
   | PanMouseMode
   | TextMouseMode;
 
-export type OpenBlockInfo = {
+export type SerializedBlock = {
   flavour: string;
   type?: string;
   text?: {
@@ -114,12 +121,19 @@ export type OpenBlockInfo = {
     retain?: number;
   }[];
   checked?: boolean;
-  children: OpenBlockInfo[];
+  children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
   width?: number;
   height?: number;
   language?: string;
+  databaseProps?: {
+    id: string;
+    title: string;
+    titleColumn: string;
+    columnIds: string[];
+    columnSchemaIds: string[];
+  };
 };
 
 declare global {

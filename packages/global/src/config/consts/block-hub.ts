@@ -115,6 +115,13 @@ export const paragraphConfig = [
     hotkey: null,
     icon: QuoteIcon,
   },
+  {
+    flavour: 'affine:divider',
+    type: 'divider',
+    name: 'Divider',
+    hotkey: 'command+option+d,ctrl+shift+d',
+    icon: DividerIcon,
+  },
   // {
   //   flavour: 'affine:',
   //   type: 'callout',

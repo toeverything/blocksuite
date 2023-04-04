@@ -11,10 +11,7 @@ import type {
   AffineVEditor,
 } from '../../../__internal__/rich-text/virgo/types.js';
 import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -65,7 +62,7 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellLitElement<Y.Text> {
+class TextCell extends DatabaseCellElement<Y.Text> {
   static styles = css`
     :host {
       display: flex;
@@ -87,13 +84,15 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
 
   private _handleClick() {
     this.databaseModel.page.captureSync();
-    if (!this.column && !this.vEditor) {
-      const yText = new this.databaseModel.page.YText();
-      this.databaseModel.page.db.updateColumn(this.rowModel.id, {
-        columnId: this.columnSchema.id,
-        value: yText,
-      });
-      this._initVEditor(yText, true);
+    if (!this.cell) {
+      if (!this.cell && !this.vEditor) {
+        const yText = new this.databaseModel.page.YText();
+        this.databaseModel.page.db.updateCell(this.rowModel.id, {
+          columnId: this.columnSchema.id,
+          value: yText,
+        });
+        this._initVEditor(yText, true);
+      }
     }
   }
 
@@ -173,14 +172,14 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
   };
 
   private _onSoftEnter = () => {
-    if (this.column && this.vEditor) {
+    if (this.cell && this.vEditor) {
       const vRange = this.vEditor.getVRange();
       assertExists(vRange);
 
       const page = this.databaseModel.page;
       page.captureSync();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const text = new Text(this.column.value as any);
+      const text = new Text(this.cell.value as any);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
         index: vRange.index + 1,
@@ -189,11 +188,19 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
     }
   };
 
-  protected update(changedProperties: Map<string, unknown>) {
+  update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
-    if (this.column && !this.vEditor) {
+    if (this.cell && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this._initVEditor(this.column.value as Y.Text);
+      this.vEditor = new VEditor(this.cell.value as any);
+      setupVirgoScroll(this.databaseModel.page, this.vEditor);
+      this.vEditor.mount(this._container);
+      this.vEditor.bindHandlers({
+        keydown: this._handleKeyDown,
+      });
+    } else if (!this.cell && this.vEditor) {
+      this.vEditor.unmount();
+      this.vEditor = null;
     }
   }
 
@@ -223,11 +230,11 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
 }
 
 @customElement('affine-database-rich-text-column-property-editing')
-class TextColumnPropertyEditing extends DatabaseCellLitElement<Y.Text> {
+class TextColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
   static tag = literal`affine-database-rich-text-column-property-editing`;
 }
 
-export const RichTextColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
   () => ({}),
   page => new page.YText(''),

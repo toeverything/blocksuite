@@ -21,6 +21,7 @@ import {
   selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
+  triggerComponentToolbarAction,
   updateExistedBrushElementSize,
   zoomByMouseWheel,
 } from './utils/actions/edgeless.js';
@@ -250,7 +251,7 @@ test('add brush element', async ({ page }) => {
   await addBasicBrushElement(page, start, end);
 
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 });
 
 test('resize brush element', async ({ page }) => {
@@ -263,14 +264,14 @@ test('resize brush element', async ({ page }) => {
   await addBasicBrushElement(page, start, end);
 
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
   await resizeElementByTopLeftHandle(page, delta, 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
-  await assertEdgelessHoverRect(page, [120, 140, 84, 64]);
+  await assertEdgelessHoverRect(page, [118, 138, 84, 64]);
 });
 
 test('add brush element with color', async ({ page }) => {
@@ -306,12 +307,12 @@ test('add brush element with different size', async ({ page }) => {
     await pickColorAtPoints(page, [
       // Select two points on the top and bottom border of the line,
       // their color should be the same as the specified color
-      [110, 100],
-      [110, 115],
+      [110, 92],
+      [110, 107],
       // Select two points close to the upper and lower boundaries of the line,
       // their color should be different from the specified color
-      [110, 99],
-      [110, 116],
+      [110, 91],
+      [110, 108],
     ]);
   assertSameColor(topEdge, '#B638FF');
   assertSameColor(bottomEdge, '#B638FF');
@@ -665,20 +666,20 @@ test('select multiple shapes and resize', async ({ page }) => {
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
   await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
   await page.mouse.move(220, 120);
   await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
-  await assertEdgelessSelectedRect(page, [150, 150, 160, 60]);
+  await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
 
   await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [150, 150, 79, 57]);
+  await assertEdgelessHoverRect(page, [148, 148, 79, 57.5]);
 
   await page.mouse.move(260, 160);
   await assertEdgelessHoverRect(page, [234, 155, 76, 55]);
@@ -692,23 +693,23 @@ test('select multiple shapes and resize to negative', async ({ page }) => {
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
   await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
   await page.mouse.move(220, 120);
   await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   await resizeElementByTopLeftHandle(page, { x: 400, y: 300 }, 30);
-  await assertEdgelessSelectedRect(page, [310, 210, 190, 190]);
+  await assertEdgelessSelectedRect(page, [310, 210, 188, 188]);
 
   await page.mouse.move(450, 300);
-  await assertEdgelessHoverRect(page, [406, 220, 94, 180]);
+  await assertEdgelessHoverRect(page, [406, 223, 92, 174.5]);
 
   await page.mouse.move(320, 220);
-  await assertEdgelessHoverRect(page, [310, 210, 90, 173]);
+  await assertEdgelessHoverRect(page, [310, 210, 88.6, 167.8]);
 });
 
 test('select multiple shapes and translate', async ({ page }) => {
@@ -719,20 +720,20 @@ test('select multiple shapes and translate', async ({ page }) => {
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
   await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
   await page.mouse.move(220, 120);
   await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [100, 100, 210, 110]);
+  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
-  await assertEdgelessSelectedRect(page, [130, 130, 210, 110]);
+  await assertEdgelessSelectedRect(page, [128, 128, 212, 112]);
 
   await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [130, 130, 104, 104]);
+  await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
 
   await page.mouse.move(260, 160);
   await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
@@ -790,14 +791,14 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   await updateExistedBrushElementSize(page, 'thick');
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [100, 100, 116, 116]);
+  await assertEdgelessHoverRect(page, [98, 98, 116, 116]);
 
   // change to thin
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 'thin');
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [100, 100, 104, 104]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 });
 
 test('delete shape by component-toolbar', async ({ page }) => {
@@ -1071,4 +1072,66 @@ test('format quick bar should show up when double-clicking on text', async ({
   await page.waitForTimeout(200);
   const formatQuickBar = page.locator('.format-quick-bar');
   await expect(formatQuickBar).toBeVisible();
+});
+
+test('bring to front', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // should be rect0
+  await page.mouse.click(110, 110);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  // bring rect0 to front
+  await triggerComponentToolbarAction(page, 'bring to front');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+});
+
+test('send to back', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // bring rect1 to back
+  await triggerComponentToolbarAction(page, 'send to back');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });

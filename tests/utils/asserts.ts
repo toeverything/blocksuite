@@ -57,8 +57,8 @@ export const defaultStore: SerializedStore = {
   },
   'space:page0': {
     '0': {
+      'ext:cells': {},
       'ext:columns': {},
-      'ext:columnSchema': {},
       'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',

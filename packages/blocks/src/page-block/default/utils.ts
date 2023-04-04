@@ -1,8 +1,8 @@
 import type {
   BlockComponentElement,
   EditingState,
-  OpenBlockInfo,
   Point,
+  SerializedBlock,
 } from '@blocksuite/blocks/std';
 import {
   doesInSamePath,
@@ -397,7 +397,7 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData: { data: OpenBlockInfo[] } = {
+  const copyData: { data: SerializedBlock[] } = {
     data: [
       {
         type: model.type,

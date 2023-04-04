@@ -8,7 +8,7 @@ import { BaseService } from '../__internal__/service/index.js';
 import type {
   BlockRange,
   BlockTransformContext,
-  OpenBlockInfo,
+  SerializedBlock,
 } from '../__internal__/utils/index.js';
 import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -38,7 +38,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
 
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
-    pastedBlocks: OpenBlockInfo[],
+    pastedBlocks: SerializedBlock[],
     range?: BlockRange
   ) {
     assertExists(range);

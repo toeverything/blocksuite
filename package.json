@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.0.0",
+  "packageManager": "pnpm@8.1.1",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
@@ -31,7 +31,7 @@
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "test:unit": "pnpm -r test:unit",
     "test:unit:coverage": "pnpm -r test:unit:coverage",
-    "test:headed": "playwright test --headed",
+    "test:headed": "playwright test --debug",
     "test:store": "pnpm --filter @blocksuite/store test",
     "test:virgo": "pnpm --filter @blocksuite/virgo test",
     "format": "prettier --write --cache packages tests",

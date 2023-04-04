@@ -12,10 +12,7 @@ import {
   PlusIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import {
-  ColumnInsertPosition,
-  type ColumnSchema,
-} from '@blocksuite/global/database';
+import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
@@ -32,18 +29,18 @@ import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { EditColumnPopup } from './components/edit-column-popup.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnSchemaRenderer } from './register.js';
+import { getColumnRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
-type ColumnValues = string[];
+type CellValues = string[];
 
 /**
- * Containing all the rows and column values inside the database block.
+ * Containing all the cell values in rows.
  * ```
- * { rowId: ColumnValues }
+ * { rowId: CellValues }
  * ```
  */
-type DatabaseMap = Record<string, ColumnValues>;
+type DatabaseMap = Record<string, CellValues>;
 
 const enum SearchState {
   /** show search input */
@@ -309,7 +306,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   private _onShowEditColumnPopup = (
     target: Element,
-    column: ColumnSchema | string,
+    column: Column | string,
     index: number
   ) => {
     if (this._editingColumnId) return;
@@ -343,7 +340,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   private _onKeydown = (
     event: KeyboardEvent,
     type: 'title' | 'normal',
-    column?: ColumnSchema
+    column?: Column
   ) => {
     const name = (event.target as HTMLInputElement).value;
     if (event.key === 'Enter') {
@@ -371,8 +368,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     });
   };
 
-  private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.db.updateColumnSchema({
+  private _onUpdateNormalColumn = (name: string, column: Column) => {
+    this.targetModel.page.db.updateColumn({
       ...column,
       name,
     });
@@ -384,8 +381,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       width: `${this.targetModel.titleColumnWidth}px`,
     });
     const columns = this.columnIds.map(id =>
-      this.targetModel.page.db.getColumnSchema(id)
-    ) as ColumnSchema[];
+      this.targetModel.page.db.getColumn(id)
+    ) as Column[];
 
     return html`
       <div class="affine-database-column-header database-row">
@@ -497,8 +494,8 @@ function DataBaseRowContainer(
 ) {
   const databaseModel = databaseBlock.model;
   const columns = databaseModel.columns.map(id =>
-    databaseModel.page.db.getColumnSchema(id)
-  ) as ColumnSchema[];
+    databaseModel.page.db.getColumn(id)
+  ) as Column[];
 
   const filteredChildren =
     searchState === SearchState.Searching
@@ -592,12 +589,206 @@ function DataBaseRowContainer(
   `;
 }
 
+const styles = css`
+  affine-database {
+    position: relative;
+  }
+
+  .affine-database-block-title-container {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    margin: 12px 0px;
+  }
+
+  .affine-database-block-title {
+    flex: 1;
+    position: sticky;
+    width: 300px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #424149;
+    font-family: inherit;
+    overflow: hidden;
+    cursor: text;
+  }
+
+  .affine-database-block-title [data-virgo-text='true'] {
+    display: inline-block;
+    width: 300px;
+    max-width: 300px;
+    white-space: nowrap !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .affine-database-block-title:focus {
+    outline: none;
+  }
+
+  .affine-database-block-title:disabled {
+    background-color: transparent;
+  }
+
+  .affine-database-block-title-empty::before {
+    content: 'Database';
+    color: var(--affine-placeholder-color);
+    position: absolute;
+    opacity: 0.5;
+  }
+
+  .affine-database-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+  .affine-database-toolbar-search svg,
+  .affine-database-toolbar svg {
+    width: 16px;
+    height: 16px;
+  }
+  .affine-database-toolbar-item {
+    display: flex;
+    align-items: center;
+  }
+  .affine-database-toolbar-item.search {
+    overflow: hidden;
+  }
+  .affine-database-search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 138px;
+    height: 32px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0);
+    transform: translate(110px, 0px);
+    transition: all 0.3s ease;
+  }
+  .affine-database-search-container > svg {
+    min-width: 16px;
+    min-height: 16px;
+  }
+  .search-container-expand {
+    transform: translate(0px, 0px);
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  .search-input-container {
+    display: flex;
+    align-items: center;
+  }
+  .affine-database-search-input-icon {
+    display: inline-flex;
+  }
+  .affine-database-search-input {
+    flex: 1;
+    height: 16px;
+    width: 80px;
+    border: none;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    box-sizing: border-box;
+    color: inherit;
+    background: transparent;
+  }
+  .affine-database-search-input:focus {
+    outline: none;
+  }
+  .affine-database-search-input::placeholder {
+    color: #888a9e;
+    font-size: var(--affine-font-sm);
+  }
+
+  .affine-database-toolbar-item.new-record {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 120px;
+    height: 32px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
+      0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
+      #ffffff;
+  }
+
+  .affine-database-block-table {
+    position: relative;
+    width: 100%;
+    overflow-x: scroll;
+    border-top: 1.5px solid var(--affine-border-color);
+  }
+
+  .affine-database-block-tag-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .affine-database-block-tag {
+    display: inline-flex;
+    border-radius: 11px;
+    align-items: center;
+    padding: 0 8px;
+    cursor: pointer;
+  }
+
+  .affine-database-block-footer {
+    display: flex;
+    width: 100%;
+    height: 42px;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .affine-database-block-add-row {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+  }
+  .affine-database-block-add-row svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .affine-database-add-column-button {
+    position: absolute;
+    top: 58px;
+    right: -40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+`;
+
 @customElement('affine-database')
 export class DatabaseBlockComponent
   extends NonShadowLitElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;
+
+  static styles = styles;
+
+  get slots() {
+    return this.host.slots;
+  }
+
   get page() {
     return this.host.page;
   }
@@ -607,197 +798,6 @@ export class DatabaseBlockComponent
   get getService() {
     return this.host.getService;
   }
-
-  static styles = css`
-    affine-database {
-      position: relative;
-    }
-
-    .affine-database-block-title-container {
-      display: flex;
-      align-items: center;
-      height: 44px;
-      margin: 12px 0px;
-    }
-
-    .affine-database-block-title {
-      flex: 1;
-      position: sticky;
-      width: 300px;
-      height: 30px;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 24px;
-      color: #424149;
-      font-family: inherit;
-      overflow: hidden;
-      cursor: text;
-    }
-
-    .affine-database-block-title [data-virgo-text='true'] {
-      display: inline-block;
-      width: 300px;
-      max-width: 300px;
-      white-space: nowrap !important;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-
-    .affine-database-block-title:focus {
-      outline: none;
-    }
-
-    .affine-database-block-title:disabled {
-      background-color: transparent;
-    }
-
-    .affine-database-block-title-empty::before {
-      content: 'Database';
-      color: var(--affine-placeholder-color);
-      position: absolute;
-      opacity: 0.5;
-    }
-
-    .affine-database-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 26px;
-    }
-    .affine-database-toolbar-search svg,
-    .affine-database-toolbar svg {
-      width: 16px;
-      height: 16px;
-    }
-    .affine-database-toolbar-item {
-      display: flex;
-      align-items: center;
-    }
-    .affine-database-toolbar-item.search {
-      overflow: hidden;
-    }
-    .affine-database-search-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 138px;
-      height: 32px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background-color: rgba(0, 0, 0, 0);
-      transform: translate(110px, 0px);
-      transition: all 0.3s ease;
-    }
-    .affine-database-search-container > svg {
-      min-width: 16px;
-      min-height: 16px;
-    }
-    .search-container-expand {
-      transform: translate(0px, 0px);
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-    .search-input-container {
-      display: flex;
-      align-items: center;
-    }
-    .affine-database-search-input-icon {
-      display: inline-flex;
-    }
-    .affine-database-search-input {
-      flex: 1;
-      height: 16px;
-      width: 80px;
-      border: none;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-sm);
-      box-sizing: border-box;
-      color: inherit;
-      background: transparent;
-    }
-    .affine-database-search-input:focus {
-      outline: none;
-    }
-    .affine-database-search-input::placeholder {
-      color: #888a9e;
-      font-size: var(--affine-font-sm);
-    }
-
-    .affine-database-toolbar-item.new-record {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      width: 120px;
-      height: 32px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      font-size: 14px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-        0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
-      background: linear-gradient(
-          0deg,
-          rgba(0, 0, 0, 0.04),
-          rgba(0, 0, 0, 0.04)
-        ),
-        #ffffff;
-    }
-
-    .affine-database-block-table {
-      position: relative;
-      width: 100%;
-      overflow-x: scroll;
-      border-top: 1.5px solid var(--affine-border-color);
-    }
-
-    .affine-database-block-tag-circle {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .affine-database-block-tag {
-      display: inline-flex;
-      border-radius: 11px;
-      align-items: center;
-      padding: 0 8px;
-      cursor: pointer;
-    }
-
-    .affine-database-block-footer {
-      display: flex;
-      width: 100%;
-      height: 42px;
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-
-    .affine-database-block-add-row {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      user-select: none;
-      font-size: 14px;
-    }
-    .affine-database-block-add-row svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .affine-database-add-column-button {
-      position: absolute;
-      top: 57px;
-      right: -40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-    }
-  `;
 
   @property()
   model!: DatabaseBlockModel;
@@ -829,6 +829,12 @@ export class DatabaseBlockComponent
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
+
+  get columns(): Column[] {
+    return this.model.columns.map(id =>
+      this.model.page.db.getColumn(id)
+    ) as Column[];
+  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -920,34 +926,34 @@ export class DatabaseBlockComponent
       });
     } else {
       const schemaId = this.model.columns[index - 1];
-      const schemaProps = this.model.page.db.getColumnSchema(schemaId);
-      this.model.page.db.updateColumnSchema({
+      const schemaProps = this.model.page.db.getColumn(schemaId);
+      this.model.page.db.updateColumn({
         ...schemaProps,
         width: columnWidth,
       });
     }
   };
 
-  private _getDatabaseMap() {
+  private get _databaseMap() {
     const databaseMap: DatabaseMap = {};
     for (const child of this.model.children) {
       // The first value is the text context of the row block
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const nestedColumns = this.model.page.db.columnJSON;
+    const { serializedCells } = this.model.page.db;
     const rowIds = this.model.children.map(child => child.id);
 
-    rowIds.forEach(blockId => {
+    rowIds.forEach(rowId => {
       // The map containing all columns related to this row (block)
-      const columnMap = nestedColumns[blockId];
+      const columnMap = serializedCells[rowId];
       if (!columnMap) return;
 
       // Flatten the columnMap into a list of values
       const columnValues = Object.keys(columnMap).map(
         key => columnMap[key].value + ''
       );
-      databaseMap[blockId].push(...columnValues);
+      databaseMap[rowId].push(...columnValues);
     });
 
     return databaseMap;
@@ -961,10 +967,10 @@ export class DatabaseBlockComponent
       this._searchState = SearchState.SearchInput;
     }
 
-    const databaseMap = this._getDatabaseMap();
-    const existingRowIds = Object.keys(databaseMap).filter(key => {
+    const { _databaseMap } = this;
+    const existingRowIds = Object.keys(_databaseMap).filter(key => {
       return (
-        databaseMap[key].findIndex(item =>
+        _databaseMap[key].findIndex(item =>
           item.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())
         ) > -1
       );
@@ -1051,8 +1057,8 @@ export class DatabaseBlockComponent
   private _addColumn = (index: number) => {
     this.model.page.captureSync();
     const defaultColumnType = 'multi-select';
-    const renderer = getColumnSchemaRenderer(defaultColumnType);
-    const schema: Omit<ColumnSchema, 'id'> = {
+    const renderer = getColumnRenderer(defaultColumnType);
+    const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
@@ -1060,7 +1066,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumnSchema(schema);
+    const id = this.model.page.db.updateColumn(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
@@ -1130,7 +1136,6 @@ export class DatabaseBlockComponent
     </div>`;
   };
 
-  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const isEmpty = !this.model.title || !this.model.title.length;
 
@@ -1177,6 +1182,7 @@ export class DatabaseBlockComponent
           data-test-id="affine-database-add-column-button"
           @click=${() => this._addColumn(this.model.columns.length)}
         >
+          <!-- Fix move to icon -->
           <svg
             viewBox="0 0 16 16"
             style=${styleMap({
