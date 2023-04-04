@@ -600,7 +600,8 @@ test('should copy and paste of database work', async ({ page }) => {
         ]
       }
       prop:title="Database 1"
-      prop:titleColumn="Title"
+      prop:titleColumnName="Title"
+      prop:titleColumnWidth={432}
     >
       <affine:paragraph
         prop:type="text"
@@ -613,7 +614,8 @@ test('should copy and paste of database work', async ({ page }) => {
         ]
       }
       prop:title="Database 1"
-      prop:titleColumn="Title"
+      prop:titleColumnName="Title"
+      prop:titleColumnWidth={432}
     >
       <affine:paragraph
         prop:type="text"
@@ -639,7 +641,8 @@ test('should copy and paste of database work', async ({ page }) => {
         ]
       }
       prop:title="Database 1"
-      prop:titleColumn="Title"
+      prop:titleColumnName="Title"
+      prop:titleColumnWidth={432}
     >
       <affine:paragraph
         prop:type="text"
