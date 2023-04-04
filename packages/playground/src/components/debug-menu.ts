@@ -538,10 +538,10 @@ function getTabGroupTemplate({
   return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
       <sl-button
         size="small"
-        content="new page"
+        content="Add New Page"
         @click=${() => createPage(workspace)}
       >
-        <sl-icon name="file-earmark-plus" label="new page"></sl-icon>
+        <sl-icon name="file-earmark-plus"></sl-icon>
       </sl-button>
     </sl-tooltip>
     <sl-tab-group
@@ -575,8 +575,9 @@ function getTabGroupTemplate({
               }
               workspace.removePage(page.id);
             }}
-            >${page.title}</sl-tab
-          >`
+          >
+            ${page.title}
+          </sl-tab>`
       )}
     </sl-tab-group>`;
 }
