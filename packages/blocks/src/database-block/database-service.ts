@@ -1,4 +1,4 @@
-import type { ColumnSchema } from '@blocksuite/global/database';
+import type { Column } from '@blocksuite/global/database';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -84,11 +84,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
     // add ext:columnSchema
     const columnSchemas = columnSchemaIds
-      .map(id => model.page.db.getColumnSchema(id))
-      .filter((s: ColumnSchema | null): s is ColumnSchema => s !== null);
+      .map(id => model.page.db.getColumn(id))
+      .filter((s: Column | null): s is Column => s !== null);
     const newColumnSchemaIds = columnSchemas.map(schema => {
       const { id, ...nonIdProps } = schema;
-      return model.page.db.updateColumnSchema(nonIdProps);
+      return model.page.db.updateColumn(nonIdProps);
     });
     model.page.updateBlock(model, {
       columns: newColumnSchemaIds,
