@@ -252,7 +252,7 @@ export class DefaultSelectionManager {
     ) {
       window.getSelection()?.removeAllRanges();
 
-      this.state.activeComponent = getBlockElementByModel(clickBlockInfo.model);
+      this.state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
@@ -310,9 +310,11 @@ export class DefaultSelectionManager {
     );
 
     if (hoverEditingState) {
-      const { model, rect } = hoverEditingState;
+      const { model, element } = hoverEditingState;
+      let shouldClear = true;
 
       if (model.type === 'image') {
+        const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
         const isLarge = rect.width > 680;
         tempRect.right += isLarge ? 0 : 60;
@@ -320,10 +322,12 @@ export class DefaultSelectionManager {
         if (tempRect.isPointIn(point)) {
           // when image size is too large, the option popup should show inside
           rect.x = rect.right + (isLarge ? -50 : 10);
-        } else {
-          hoverEditingState = null;
+          hoverEditingState.rect = rect;
+          shouldClear = false;
         }
-      } else {
+      }
+
+      if (shouldClear) {
         hoverEditingState = null;
       }
     }
