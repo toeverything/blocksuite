@@ -72,6 +72,7 @@ if (once) {
 
 type ColumnWidthConfig = {
   index: number;
+  scrollLeft: number;
   startPositionX: number;
   containerWidth: number;
   firstTitleColumn: HTMLElement;
@@ -295,12 +296,15 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       `.affine-database-column:nth-child(1)`
     );
     assertExists(firstTitleColumn);
+    const parentElement = this.tableContainer.parentElement;
+    assertExists(parentElement);
     this.setChangingColumnWidth({
       startPositionX: event.clientX,
       index: index - 1,
       leftColumnCells: Array.from(currentColumnCells),
       containerWidth: this.tableContainer.offsetWidth,
       firstTitleColumn,
+      scrollLeft: parentElement.scrollLeft,
     });
   };
 
@@ -378,7 +382,9 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
   render() {
     const style = styleMap({
-      width: `${this.targetModel.titleColumnWidth}px`,
+      // width: `${this.targetModel.titleColumnWidth}px`,
+      minWidth: `${this.targetModel.titleColumnWidth}px`,
+      maxWidth: `${this.targetModel.titleColumnWidth}px`,
     });
     const columns = this.columnIds.map(id =>
       this.targetModel.page.db.getColumn(id)
@@ -422,7 +428,9 @@ class DatabaseColumnHeader extends NonShadowLitElement {
           column => column.id,
           (column, index) => {
             const style = styleMap({
-              width: `${column.width}px`,
+              // width: `${column.width}px`,
+              minWidth: `${column.width}px`,
+              maxWidth: `${column.width}px`,
             });
             return html`
               <div class="affine-database-column database-cell" style=${style}>
@@ -548,7 +556,9 @@ function DataBaseRowContainer(
         child => child.id,
         (child, idx) => {
           const style = styleMap({
-            width: `${databaseModel.titleColumnWidth}px`,
+            // width: `${databaseModel.titleColumnWidth}px`,
+            minWidth: `${databaseModel.titleColumnWidth}px`,
+            maxWidth: `${databaseModel.titleColumnWidth}px`,
           });
           return html`
             <div
@@ -569,7 +579,11 @@ function DataBaseRowContainer(
                 return html`
                   <div
                     class="database-cell"
-                    style=${styleMap({ width: `${column.width}px` })}
+                    style=${styleMap({
+                      // width: `${column.width}px`
+                      minWidth: `${column.width}px`,
+                      maxWidth: `${column.width}px`,
+                    })}
                   >
                     <affine-database-cell-container
                       .databaseModel=${databaseModel}
@@ -829,6 +843,7 @@ export class DatabaseBlockComponent
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
+  private _autoScrollTimer: number | undefined = undefined;
 
   get columns(): Column[] {
     return this.model.columns.map(id =>
@@ -881,12 +896,12 @@ export class DatabaseBlockComponent
 
   private _initChangeColumnWidthEvent() {
     this._disposables.addFromEvent(
-      this._tableContainer,
+      document,
       'mousemove',
       this._onColumnWidthMousemove
     );
     this._disposables.addFromEvent(
-      this._tableContainer,
+      document,
       'mouseup',
       this._onColumnWidthMouseup
     );
@@ -897,26 +912,51 @@ export class DatabaseBlockComponent
     event.stopPropagation();
     if (!this._changeColumnWidthConfig) return;
 
-    const { startPositionX, leftColumnCells } = this._changeColumnWidthConfig;
+    const { startPositionX, leftColumnCells, scrollLeft } =
+      this._changeColumnWidthConfig;
     const deltaX = event.clientX - startPositionX;
     const { left } = leftColumnCells[0].getBoundingClientRect();
-    const columnWidth = event.clientX - left;
+    const columnWidth = Math.ceil(event.clientX - left);
     if (columnWidth < DEFAULT_COLUMN_MIN_WIDTH) return;
 
     // update column width
     leftColumnCells.forEach(cell => {
       const el = cell as HTMLDivElement;
-      el.style.width = `${columnWidth}px`;
+      // el.style.width = `${columnWidth}px`;
+      el.style.minWidth = `${columnWidth}px`;
+      el.style.maxWidth = `${columnWidth}px`;
     });
 
     // update table width
     const tableWidth = this._changeColumnWidthConfig.containerWidth + deltaX;
     this._setTableWidth(tableWidth);
+
+    // auto scroll
+    const parentElement = this._tableContainer.parentElement;
+    assertExists(parentElement);
+    const { right: boundaryRight } = parentElement.getBoundingClientRect();
+    // console.log(boundaryLeft, boundaryRight, event.clientX);
+    // console.log(event.clientX + DEFAULT_ADD_BUTTON_WIDTH - boundaryRight);
+    // dragHandle 到右侧的距离
+    const dragHandleRight = boundaryRight - startPositionX - deltaX;
+    // console.log(boundaryRight - startPositionX - deltaX);
+    // 到达右侧边界后，又拖动的距离
+    const scrollDelta = Math.ceil(DEFAULT_ADD_BUTTON_WIDTH - dragHandleRight);
+    if (scrollDelta > 0) {
+      console.log(scrollDelta);
+      // 需要滚动的距离
+      const newScrollLeft = parentElement.scrollLeft + 1;
+      parentElement.scrollLeft = newScrollLeft;
+      // parentElement.scrollTo(newScrollLeft, 0);
+    }
   };
   private _onColumnWidthMouseup = (event: MouseEvent) => {
     if (!this._changeColumnWidthConfig) return;
     const { index, leftColumnCells } = this._changeColumnWidthConfig;
     this._changeColumnWidthConfig = null;
+
+    // this._autoScrollTimer = undefined;
+    // clearInterval(this._autoScrollTimer);
 
     const columnWidth = leftColumnCells[0].offsetWidth;
     this.model.page.captureSync();
