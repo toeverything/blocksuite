@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
@@ -7,6 +8,7 @@ import {
   focusDatabaseSearch,
   focusDatabaseTitle,
   focusRichText,
+  getBlockModel,
   getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -14,6 +16,8 @@ import {
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
+  initEmptyDatabaseWithParagraphState,
+  pasteByKeyboard,
   performColumnAction,
   performSelectColumnTagAction,
   pressArrowLeft,
@@ -33,6 +37,7 @@ import {
   assertBlockProps,
   assertDatabaseCellRichTexts,
   assertDatabaseTitleText,
+  assertLocatorVisible,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -502,4 +507,31 @@ test('should support delete database through action menu', async ({ page }) => {
 
   await undoByClick(page);
   expect(await db.count()).toBe(1);
+});
+
+test('should support copy database through action menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseWithParagraphState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, '123', true);
+  await initDatabaseDynamicRowWithData(page, 'abc');
+
+  await focusDatabaseSearch(page);
+  const moreAction = page.locator('.more-action');
+  await moreAction.click();
+  const actionPopup = page.locator('affine-database-toolbar-action-popup');
+  await assertLocatorVisible(page, actionPopup);
+
+  const copyDb = page.locator('.copy');
+  await copyDb.click();
+  expect(await actionPopup.count()).toBe(0);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+
+  await assertBlockCount(page, 'database', 2);
+  const db1Model = (await getBlockModel(page, '2')) as DatabaseBlockModel;
+  const db2Model = (await getBlockModel(page, '6')) as DatabaseBlockModel;
+  expect(db1Model.title.toString()).toEqual(db2Model.title.toString());
 });
