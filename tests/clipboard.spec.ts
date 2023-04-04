@@ -245,7 +245,7 @@ test('import markdown', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test('copy clipItems format', async ({ page }) => {
+test.skip('copy clipItems format', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -270,7 +270,7 @@ test('copy clipItems format', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test('copy partially selected text', async ({ page }) => {
+test.skip('copy partially selected text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

@@ -37,9 +37,9 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
     const clipboardData = e.clipboardData;
 
     if (clipboardData) {
-      items.forEach((item: ClipboardItem) => {
-        clipboardData.setData(item.mimeType, item.data);
-      });
+      items.forEach((item: ClipboardItem) =>
+        clipboardData.setData(item.mimeType, item.data)
+      );
     }
 
     e.preventDefault();

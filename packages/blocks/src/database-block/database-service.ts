@@ -75,9 +75,6 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       }),
     };
   }
-  override block2html(block: DatabaseBlockModel): string {
-    return '<>database</>';
-  }
 
   async onBlockPasted(
     model: BlockModels['affine:database'],
