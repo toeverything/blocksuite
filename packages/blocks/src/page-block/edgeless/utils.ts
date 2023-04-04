@@ -9,8 +9,10 @@ import {
   doesInSamePath,
   getClosestBlockElementByPoint,
   getHoveringFrame,
+  isInEmptyDatabaseByPoint,
   Rect,
 } from '@blocksuite/blocks/std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
 import {
   contains,
@@ -19,7 +21,6 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import { DragHandle } from '../../components/index.js';
@@ -169,34 +170,43 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     onDropCallback(point, blocks, editingState) {
       const page = pageBlock.page;
       if (editingState) {
-        page.captureSync();
-        const { rect, model } = editingState;
-        if (
-          blocks.length === 1 &&
-          doesInSamePath(page, model, blocks[0].model)
-        ) {
+        const { rect, model, element } = editingState;
+        const models = blocks.map(b => b.model);
+        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
-        const parent = page.getParent(model);
-        assertExists(parent);
-        page.moveBlocks(
-          blocks.map(b => b.model),
-          parent,
-          model,
-          distanceToTop < distanceToBottom
-        );
 
-        pageBlock.setSelectionByBlockId(parent.id, true);
-      } else {
-        // blank area
+        let parentId;
+
         page.captureSync();
-        pageBlock.moveBlocksToNewFrame(
-          blocks.map(b => b.model),
-          point
-        );
+
+        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+          page.moveBlocks(models, model);
+          parentId = model.id;
+        } else {
+          const distanceToTop = Math.abs(rect.top - point.y);
+          const distanceToBottom = Math.abs(rect.bottom - point.y);
+          const parent = page.getParent(model);
+          assertExists(parent);
+          page.moveBlocks(
+            models,
+            parent,
+            model,
+            distanceToTop < distanceToBottom
+          );
+          parentId = parent.id;
+        }
+
+        pageBlock.setSelectionByBlockId(parentId, true);
+        return;
       }
+
+      // blank area
+      page.captureSync();
+      pageBlock.moveBlocksToNewFrame(
+        blocks.map(b => b.model),
+        point
+      );
     },
     setSelectedBlocks(
       selectedBlocks: EditingState | BlockComponentElement[] | null

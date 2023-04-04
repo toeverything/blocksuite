@@ -123,7 +123,7 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': [],
@@ -139,7 +139,7 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -162,7 +162,7 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'sys:children': ['1', '2', '3'],
         'sys:flavour': 'affine:page',
@@ -314,7 +314,7 @@ describe('deleteBlock', () => {
     });
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -336,7 +336,7 @@ describe('deleteBlock', () => {
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': ['1'],
@@ -357,7 +357,7 @@ describe('deleteBlock', () => {
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:columns': {},
+        'ext:cells': {},
         'ext:columnSchema': {},
         'prop:title': '',
         'sys:children': [],

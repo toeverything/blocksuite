@@ -21,7 +21,7 @@ export interface ColumnSchema extends Record<string, unknown> {
   hide: boolean;
 }
 
-export type BlockColumn = {
+export type Cell = {
   columnId: ColumnSchema['id'];
   value: unknown;
 };
@@ -32,7 +32,7 @@ export const enum ColumnInsertPosition {
 }
 
 /** select tag property */
-export type SelectProperty = {
+export type SelectTag = {
   color: string;
   value: string;
 };

@@ -1,16 +1,19 @@
+import type {
+  BlockComponentElement,
+  EditingState,
+  SelectionEvent,
+} from '@blocksuite/blocks/std';
 import {
-  type BlockComponentElement,
-  type EditingState,
   getBlockElementsExcludeSubtrees,
+  getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-  type SelectionEvent,
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
 import {
   assertExists,
-  type Disposable,
   DisposableGroup,
   isFirefox,
 } from '@blocksuite/global/utils';
@@ -123,6 +126,7 @@ export class DragHandle extends LitElement {
       overflow: hidden;
       width: ${DRAG_HANDLE_WIDTH + 8}px;
       transform-origin: 0 0;
+      pointer-events: none;
       user-select: none;
     }
 
@@ -224,6 +228,7 @@ export class DragHandle extends LitElement {
   private _scale = 1;
   private _currentClientX = 0;
   private _currentClientY = 0;
+  private _stopPropagation = false;
 
   /**
    * Current drag handle model state
@@ -399,9 +404,14 @@ export class DragHandle extends LitElement {
       this._currentClientY = e.clientY;
     }
 
+    if (this._stopPropagation) {
+      e.stopPropagation();
+    }
+
     if (!this._handleAnchorState) {
       return;
     }
+
     const { rect } = this._handleAnchorState;
     const top = this._calcDragHandleY(
       e.clientY,
@@ -412,8 +422,6 @@ export class DragHandle extends LitElement {
 
     this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.transform = `translateY(${top}px)`;
-
-    e.stopPropagation();
   }
 
   private _calcDragHandleY(
@@ -510,12 +518,15 @@ export class DragHandle extends LitElement {
     e.stopPropagation();
   };
 
-  private _onMouseUp = (_: MouseEvent) => {
-    this._removeDragPreview();
+  private _onMouseDown = (e: MouseEvent) => {
+    this._stopPropagation = true;
+    e.stopPropagation();
   };
 
-  private _onMouseDown = (e: MouseEvent) => {
+  private _onMouseUp = (e: MouseEvent) => {
     e.stopPropagation();
+    this._stopPropagation = false;
+    this._removeDragPreview();
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
@@ -588,11 +599,13 @@ export class DragHandle extends LitElement {
     let lastModelState = null;
 
     if (element) {
-      rect = getRectByBlockElement(element);
+      const model = getModelByBlockElement(element);
+      rect = getDropRectByPoint(point, model, element);
+
       lastModelState = {
         rect,
+        model,
         element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
       };
     }
 
@@ -602,6 +615,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragEnd = (e: DragEvent) => {
+    this._stopPropagation = false;
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
     this._removeDragPreview();

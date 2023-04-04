@@ -365,12 +365,12 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'select');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumnSchema(columnId, { type: targetType });
-      this.targetModel.page.db.convertColumn(columnId, 'rich-text');
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnSchemaRenderer(targetType);
@@ -378,7 +378,7 @@ export class EditColumnPopup extends LitElement {
         type: targetType,
         property: renderer.propertyCreator(),
       });
-      this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
     }
 
     this.closePopup();
@@ -403,7 +403,7 @@ export class EditColumnPopup extends LitElement {
     if (actionType === 'delete') {
       this.targetModel.page.captureSync();
       this.targetModel.page.db.deleteColumnSchema(columnId);
-      this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
       const columns = this.targetModel.columns.filter(id => id !== columnId);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns,
@@ -442,7 +442,7 @@ export class EditColumnPopup extends LitElement {
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.db.copyColumn(copyId, id);
+      this.targetModel.page.db.copyCellsByColumn(copyId, id);
       this.closePopup();
       return;
     }

@@ -1,5 +1,5 @@
 import type {
-  BlockColumn,
+  Cell,
   ColumnSchema,
   ColumnSchemaType,
   RowHost,
@@ -23,7 +23,7 @@ export abstract class DatabaseCellLitElement<Value> extends LitElement {
   @property()
   columnSchema!: ColumnSchema;
   @property()
-  column!: BlockColumn | null;
+  cell!: Cell | null;
 }
 
 export interface ColumnSchemaRenderer<

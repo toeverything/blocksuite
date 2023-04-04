@@ -71,7 +71,6 @@ export interface StoreOptions<
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
   blobOptionsGetter?: BlobOptionsGetter;
-  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
 }
 
 const flagsPreset = {
