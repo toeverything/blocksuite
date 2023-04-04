@@ -16,7 +16,6 @@ import {
 } from '@blocksuite/blocks/std';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { ConnectorElement, PhasorElement, XYWH } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
