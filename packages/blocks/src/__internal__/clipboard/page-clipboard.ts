@@ -36,6 +36,8 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
 
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+    console.warn('blocks!!!!');
+    console.log(JSON.stringify(blocks));
     if (!blocks.length) {
       return;
     }
