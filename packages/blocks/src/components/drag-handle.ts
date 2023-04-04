@@ -168,7 +168,6 @@ export class DragHandle extends LitElement {
       selectedBlocks: EditingState | BlockComponentElement[] | null
     ) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
-    getFocusedBlock: () => BlockComponentElement | null;
     getClosestBlockElement: (point: Point) => Element | null;
     // clearSelection: () => void;
   }) {
@@ -179,7 +178,6 @@ export class DragHandle extends LitElement {
     };
     this.onDropCallback = options.onDropCallback;
     this.setSelectedBlocks = options.setSelectedBlocks;
-    this._getFocusedBlock = options.getFocusedBlock;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
     // this._clearSelection = options.clearSelection;
@@ -211,7 +209,6 @@ export class DragHandle extends LitElement {
   ) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
-  private _getFocusedBlock: () => BlockComponentElement | null;
   // private _clearSelection: () => void;
 
   @query('.affine-drag-handle')
@@ -242,7 +239,6 @@ export class DragHandle extends LitElement {
   private _lastDroppingTarget: EditingState | null = null;
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
-  private _clickedBlock: BlockComponentElement | null = null;
   private _dragPreview: DragPreview | null = null;
 
   private _disposables: DisposableGroup = new DisposableGroup();
@@ -262,10 +258,8 @@ export class DragHandle extends LitElement {
 
     if (modelState) {
       this._handleAnchorState = modelState;
-      if (
-        this._handleAnchorState.element === this._clickedBlock &&
-        this._clickedBlock === this._getFocusedBlock()
-      ) {
+      const selectedBlocks = this._getSelectedBlocks() ?? [];
+      if (selectedBlocks.includes(modelState.element)) {
         this._dragHandleOver.style.display = 'block';
         this._dragHandleNormal.style.display = 'none';
       } else {
@@ -510,7 +504,6 @@ export class DragHandle extends LitElement {
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
     if (this._handleAnchorState) {
-      this._clickedBlock = this._handleAnchorState.element;
       this.setSelectedBlocks(this._handleAnchorState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
@@ -543,8 +536,6 @@ export class DragHandle extends LitElement {
     }
 
     e.dataTransfer.effectAllowed = 'move';
-
-    this._clickedBlock = this._handleAnchorState.element;
 
     const selectedBlocks = this._getSelectedBlocks() ?? [];
 
@@ -628,7 +619,6 @@ export class DragHandle extends LitElement {
 
     assertExists(this._draggingElements);
 
-    this._clickedBlock = null;
     // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
       this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY),
