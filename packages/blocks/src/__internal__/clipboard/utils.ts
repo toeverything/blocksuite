@@ -162,7 +162,7 @@ export function copy(range: BlockRange) {
   });
 
   // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
-  // `CUSTOM_CLIPBOARD_FRAGMENT_START` and `CUSTOM_CLIPBOARD_FRAGMENT_START` are used to mark the start and end of the custom clipboard fragment and match the custom clipboard fragment in the paste process
+  // `CUSTOM_CLIPBOARD_FRAGMENT_START` and `CUSTOM_CLIPBOARD_FRAGMENT_END` are used to mark the start and end of the custom clipboard fragment and match the custom clipboard fragment in the paste process
   const customClipboardFragment = `${CUSTOM_CLIPBOARD_FRAGMENT_START}${JSON.stringify(
     clipGroups
       .filter(group => {
