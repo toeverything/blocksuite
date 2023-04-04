@@ -21,6 +21,9 @@ import {
 } from '../../__internal__/utils/std.js';
 import { styles } from './styles.js';
 
+/**
+ * Remove specified text from the current range.
+ */
 function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
   const vRange = vEditor.getVRange();
   assertExists(vRange);
@@ -163,6 +166,28 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   @state()
   private _activatedItemIndex = 0;
 
+  private get _actionList() {
+    const pageName = this._query || DEFAULT_PAGE_NAME;
+    return [
+      ...this._pageList.map((page, idx) => ({
+        name: page.title,
+        active: idx === this._activatedItemIndex,
+        action: () => this._insertLinkedNode('LinkedPage', page.id),
+      })),
+      // The active condition is a bit tricky here
+      {
+        name: `Create "${pageName}" page`,
+        active: this._pageList.length === this._activatedItemIndex,
+        action: () => this._createPage(),
+      },
+      {
+        name: `Create "${pageName}" subpage`,
+        active: this._pageList.length + 1 === this._activatedItemIndex,
+        action: () => this._createSubpage(),
+      },
+    ];
+  }
+
   @query('.linked-page-popover')
   linkedPageElement?: Element;
 
@@ -187,12 +212,12 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onUpdateQuery: str => this._updateQuery(str),
       abortController: this.abortController,
       onMove: step => {
-        // TODO Take the remainder
-        this._activatedItemIndex += step;
+        this._activatedItemIndex =
+          (this._actionList.length + this._activatedItemIndex + step) %
+          this._actionList.length;
       },
       onConfirm: () => {
-        // TODO confirm
-        console.log('confirm', this._activatedItemIndex);
+        this._actionList[this._activatedItemIndex].action();
       },
     });
     // this._disposables.addFromEvent(richText, 'keydown', keyDownListener);
@@ -204,7 +229,6 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._pageList = this._page.workspace.meta.pageMetas;
     this._disposables.add(
       this.model.page.workspace.slots.pagesUpdated.on(() => {
-        // TODO filter by query
         this._pageList = this._page.workspace.meta.pageMetas;
       })
     );
@@ -220,13 +244,13 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _insertLinkedNode(type: 'Subpage' | 'LinkedPage', pageId: string) {
     this.abortController.abort();
-    const editor = getVirgoByModel(this.model);
-    assertExists(editor, 'Editor not found');
-    cleanSpecifiedTail(editor, '@' + this._query);
-    const vRange = editor.getVRange();
+    const vEditor = getVirgoByModel(this.model);
+    assertExists(vEditor, 'Editor not found');
+    cleanSpecifiedTail(vEditor, '@' + this._query);
+    const vRange = vEditor.getVRange();
     assertExists(vRange);
-    editor.insertText(vRange, REFERENCE_NODE, { reference: { type, pageId } });
-    editor.setVRange({
+    vEditor.insertText(vRange, REFERENCE_NODE, { reference: { type, pageId } });
+    vEditor.setVRange({
       index: vRange.index + 1,
       length: 0,
     });
@@ -263,29 +287,36 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._pageList.map(
-      page => html`<icon-button
-        width="280px"
-        height="32px"
-        @click=${() => {
-          this._insertLinkedNode('LinkedPage', page.id);
-        }}
-        >${page.title}</icon-button
-      >`
-    );
+    const pageList = this._actionList
+      .slice(0, -2)
+      .map(
+        ({ name, action, active }) => html`<icon-button
+          width="280px"
+          height="32px"
+          ?hover=${active}
+          @click=${action}
+          >${name}</icon-button
+        >`
+      );
 
-    const pageName = this._query || DEFAULT_PAGE_NAME;
+    const createList = this._actionList
+      .slice(-2)
+      .map(
+        ({ name, action, active }) => html`<icon-button
+          width="280px"
+          height="32px"
+          ?hover=${active}
+          @click=${action}
+          >${name}</icon-button
+        >`
+      );
+
     return html`<div class="linked-page-popover" style="${style}">
       <div>Link to page</div>
       ${pageList}
       <div class="divider"></div>
       <div>New page</div>
-      <icon-button width="280px" height="32px" @click=${this._createPage}
-        >Create "${pageName}" page</icon-button
-      >
-      <icon-button width="280px" height="32px" @click=${this._createSubpage}
-        >Create "${pageName}" subpage</icon-button
-      >
+      ${createList}
     </div>`;
   }
 }
