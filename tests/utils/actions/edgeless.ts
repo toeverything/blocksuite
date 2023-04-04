@@ -285,3 +285,42 @@ export async function zoomByMouseWheel(
   await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
 }
+
+function locatorComponentToolbarMoreButton(page: Page) {
+  const moreButton = page
+    .locator('edgeless-component-toolbar')
+    .locator('edgeless-more-button');
+  return moreButton;
+}
+type Action = 'bring to front' | 'send to back';
+export async function triggerComponentToolbarAction(
+  page: Page,
+  action: Action
+) {
+  switch (action) {
+    case 'bring to front': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'send to back': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send to back',
+        });
+      await actionButton.click();
+      break;
+    }
+  }
+}
