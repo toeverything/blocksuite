@@ -77,8 +77,10 @@ if (once) {
 type ColumnWidthConfig = {
   index: number;
   rafId?: number;
+  rawWidth: number;
   scrollLeft: number;
   lastClientX: number;
+  startClientX: number;
   rowCells: HTMLElement[];
 };
 
@@ -137,7 +139,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       background: #5438ff;
       box-shadow: 0px 0px 8px rgba(84, 56, 255, 0.35);
     }
-    .affine-database-column-drag-handle:hover::before {
+    .affine-database-column-drag-handle:hover::before,
+    .affine-database-column-drag-handle.dragging::before {
       display: block;
     }
     .affine-database-column-content:hover {
@@ -231,6 +234,9 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   @query('.affine-database-column-header')
   private _headerContainer!: HTMLElement;
 
+  @state()
+  private _widthChangingIndex = -1;
+
   private _disposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthDisposable: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
@@ -312,18 +318,21 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   }
   private _onColumnWidthMousedown = (event: MouseEvent, index: number) => {
     // all rows cell in current column
-    const currentColumnCells =
+    const currentColumnCells = Array.from(
       this.tableContainer.querySelectorAll<HTMLElement>(
         `.database-cell:nth-child(${index})`
-      );
+      )
+    );
 
     const parentElement = this.tableContainer.parentElement;
     assertExists(parentElement);
     this._changeColumnWidthConfig = {
       index: index - 1,
-      rowCells: Array.from(currentColumnCells),
+      rowCells: currentColumnCells,
       scrollLeft: parentElement.scrollLeft,
       lastClientX: event.clientX,
+      startClientX: event.clientX,
+      rawWidth: currentColumnCells[0].clientWidth,
       rafId: undefined,
     };
   };
@@ -334,21 +343,25 @@ class DatabaseColumnHeader extends NonShadowLitElement {
 
     const {
       rafId,
-      lastClientX,
+      index,
       rowCells,
+      rawWidth,
+      lastClientX,
+      startClientX,
       scrollLeft: startScrollLeft,
     } = this._changeColumnWidthConfig;
 
+    if (this._widthChangingIndex !== index) this._widthChangingIndex = index;
     if (event.clientX - lastClientX === 0) return;
+
     const direction = event.clientX - lastClientX > 0 ? 'right' : 'left';
     this._changeColumnWidthConfig.lastClientX = event.clientX;
 
     const onUpdateDOM = () => {
-      const { left } = rowCells[0].getBoundingClientRect();
       const columnWidth =
-        event.clientX - left <= DEFAULT_COLUMN_MIN_WIDTH
+        rawWidth + event.clientX - startClientX <= DEFAULT_COLUMN_MIN_WIDTH
           ? DEFAULT_COLUMN_MIN_WIDTH
-          : event.clientX - left;
+          : rawWidth + event.clientX - startClientX;
 
       // update column width
       rowCells.forEach(cell => {
@@ -368,7 +381,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       const { right: boundaryRight } = parentElement.getBoundingClientRect();
       // the distance from the drag handle to the right border
       const dragHandleRight = event.clientX - boundaryRight;
-      if (dragHandleRight > 0 && direction === 'right') {
+      if (dragHandleRight >= 0 && direction === 'right') {
         parentElement.scrollLeft = startScrollLeft + dragHandleRight;
       }
     };
@@ -376,6 +389,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     this._changeColumnWidthConfig.rafId = requestAnimationFrame(onUpdateDOM);
   };
   private _onColumnWidthMouseup = (event: MouseEvent) => {
+    this._widthChangingIndex = -1;
     if (!this._changeColumnWidthConfig) return;
     const { rafId, index, rowCells } = this._changeColumnWidthConfig;
     if (rafId) cancelAnimationFrame(rafId);
@@ -545,13 +559,23 @@ class DatabaseColumnHeader extends NonShadowLitElement {
                   <!-- TODO: change icon -->
                   <div class="affine-database-column-drag">${TextIcon}</div>
                 </div>
-                <div class="affine-database-column-drag-handle"></div>
+                <div
+                  class="affine-database-column-drag-handle ${this
+                    ._widthChangingIndex === index
+                    ? 'dragging'
+                    : ''}"
+                ></div>
               </div>
             `;
           }
         )}
         <div class="affine-database-column database-cell add-column-button">
-          <div class="affine-database-column-drag-handle"></div>
+          <div
+            class="affine-database-column-drag-handle  ${this
+              ._widthChangingIndex === this.columns.length
+              ? 'dragging'
+              : ''}"
+          ></div>
           <div class="add-column-button-container">
             <svg
               viewBox="0 0 16 16"
