@@ -33,17 +33,12 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
   document.body.appendChild(tempElem);
   tempElem.select();
   tempElem.setSelectionRange(0, tempElem.value.length);
-  const dv = document.createElement('div');
-  document.querySelector('.affine-block-children-container')?.appendChild(dv);
   const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
 
     if (clipboardData) {
       items.forEach((item: ClipboardItem) => {
         clipboardData.setData(item.mimeType, item.data);
-        console.warn(`copy-${item.mimeType}`);
-        console.warn(clipboardData.getData(item.mimeType));
-        dv.innerText = `copy ${item.mimeType}: ${item.data}\n`;
       });
     }
 
