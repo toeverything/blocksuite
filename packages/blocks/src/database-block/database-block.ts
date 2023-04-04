@@ -79,7 +79,7 @@ type ColumnWidthConfig = {
   rafId?: number;
   scrollLeft: number;
   lastClientX: number;
-  leftColumnCells: HTMLElement[];
+  rowCells: HTMLElement[];
 };
 
 @customElement('affine-database-column-header')
@@ -302,6 +302,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     );
   }
   private _onColumnWidthMousedown = (event: MouseEvent, index: number) => {
+    // all rows cell in current column
     const currentColumnCells =
       this.tableContainer.querySelectorAll<HTMLElement>(
         `.database-cell:nth-child(${index})`
@@ -311,7 +312,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     assertExists(parentElement);
     this._changeColumnWidthConfig = {
       index: index - 1,
-      leftColumnCells: Array.from(currentColumnCells),
+      rowCells: Array.from(currentColumnCells),
       scrollLeft: parentElement.scrollLeft,
       lastClientX: event.clientX,
       rafId: undefined,
@@ -325,7 +326,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     const {
       rafId,
       lastClientX,
-      leftColumnCells,
+      rowCells,
       scrollLeft: startScrollLeft,
     } = this._changeColumnWidthConfig;
 
@@ -334,14 +335,14 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     this._changeColumnWidthConfig.lastClientX = event.clientX;
 
     const onUpdateDOM = () => {
-      const { left } = leftColumnCells[0].getBoundingClientRect();
+      const { left } = rowCells[0].getBoundingClientRect();
       const columnWidth =
         event.clientX - left <= DEFAULT_COLUMN_MIN_WIDTH
           ? DEFAULT_COLUMN_MIN_WIDTH
           : event.clientX - left;
 
       // update column width
-      leftColumnCells.forEach(cell => (cell.style.width = `${columnWidth}px`));
+      rowCells.forEach(cell => (cell.style.width = `${columnWidth}px`));
 
       // scroll when crossing the right border
       const parentElement = this.tableContainer.parentElement;
@@ -358,11 +359,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   };
   private _onColumnWidthMouseup = (event: MouseEvent) => {
     if (!this._changeColumnWidthConfig) return;
-    const { rafId, index, leftColumnCells } = this._changeColumnWidthConfig;
+    const { rafId, index, rowCells } = this._changeColumnWidthConfig;
     if (rafId) cancelAnimationFrame(rafId);
     this._changeColumnWidthConfig = null;
 
-    const columnWidth = leftColumnCells[0].offsetWidth;
+    const columnWidth = rowCells[0].offsetWidth;
     this.targetModel.page.captureSync();
     if (index === 0) {
       this.targetModel.page.updateBlock(this.targetModel, {
