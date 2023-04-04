@@ -28,10 +28,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { copy } from '../__internal__/clipboard/utils.js';
 import { asyncFocusRichText, type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
+import { toast } from '../components/toast.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import {
@@ -110,12 +112,12 @@ const toolbarActions: ToolbarAction[] = [
 const databaseTypes: DatabaseTypeAction[] = [
   {
     type: 'table-view',
-    text: 'Table View',
+    text: 'Table view',
     icon: DatabaseTableViewIcon,
   },
   {
     type: 'kanban-view',
-    text: 'Kanban View',
+    text: 'Kanban view',
     icon: DatabaseKanbanViewIcon,
   },
 ];
@@ -234,6 +236,9 @@ class ToolbarActionPopup extends LitElement {
 
   targetModel!: DatabaseBlockModel;
 
+  @property()
+  close!: () => void;
+
   @query('.affine-database-toolbar-action-popup')
   private _container!: HTMLDivElement;
 
@@ -244,12 +249,21 @@ class ToolbarActionPopup extends LitElement {
     actionType: ToolbarActionName
   ) => {
     event.stopPropagation();
-    // console.log('action click');
+
     if (actionType === 'delete-database') {
       const models = [this.targetModel, ...this.targetModel.children];
       models.forEach(model => this.targetModel.page.deleteBlock(model));
-      return;
+    } else if (actionType === 'copy') {
+      copy({
+        type: 'Block',
+        models: [this.targetModel],
+        startOffset: 0,
+        endOffset: 0,
+      });
+      toast('Copied Database to clipboard');
     }
+
+    this.close();
   };
 
   private _onShowDatabaseType = () => {
@@ -1162,13 +1176,13 @@ export class DatabaseBlockComponent
 
   private _onShowAction = () => {
     if (this._toolbarAction) {
-      this._toolbarAction.remove();
-      this._toolbarAction = undefined;
+      this._closeToolbarAction();
       return;
     }
     this._searchState = SearchState.Action;
     this._toolbarAction = new ToolbarActionPopup();
     this._toolbarAction.targetModel = this.model;
+    this._toolbarAction.close = this._closeToolbarAction;
     this._moreActionContainer.appendChild(this._toolbarAction);
     createPopper(this._moreActionContainer, this._toolbarAction, {
       placement: 'bottom',
@@ -1176,11 +1190,15 @@ export class DatabaseBlockComponent
     onClickOutside(
       this._moreActionContainer,
       () => {
-        this._toolbarAction?.remove();
-        this._toolbarAction = undefined;
+        this._closeToolbarAction();
       },
       'mousedown'
     );
+  };
+
+  private _closeToolbarAction = () => {
+    this._toolbarAction?.remove();
+    this._toolbarAction = undefined;
   };
 
   private _onMouseOver = () => {
