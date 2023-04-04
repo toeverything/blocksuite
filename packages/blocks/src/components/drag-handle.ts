@@ -464,10 +464,10 @@ export class DragHandle extends LitElement {
     e: DragEvent,
     draggingBlockElements: BlockComponentElement[]
   ) {
+    const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
     const rect = draggingBlockElements[0].getBoundingClientRect();
 
-    const dragPreview = new DragPreview();
     dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
     dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
     dragPreview.style.width = `${rect.width}px`;
@@ -476,6 +476,11 @@ export class DragHandle extends LitElement {
     }px, ${rect.top - containerRect.top}px)`;
 
     const fragment = document.createDocumentFragment();
+
+    draggingBlockElements = getBlockElementsExcludeSubtrees(
+      draggingBlockElements
+    ) as BlockComponentElement[];
+
     draggingBlockElements.forEach(e => {
       const c = document.createElement('div');
       c.classList.add('affine-block-element');
@@ -484,7 +489,6 @@ export class DragHandle extends LitElement {
     });
 
     dragPreview.appendChild(fragment);
-    this._dragPreview = dragPreview;
     this._container.appendChild(dragPreview);
 
     requestAnimationFrame(() => {
@@ -556,7 +560,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragStart = (e: DragEvent) => {
-    if (!this._handleAnchorState || !e.dataTransfer || this._dragPreview) {
+    if (this._dragPreview || !this._handleAnchorState || !e.dataTransfer) {
       return;
     }
 
