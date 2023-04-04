@@ -14,7 +14,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function compare(a: PhasorElement, b: PhasorElement): number {
+export function compare(a: PhasorElement, b: PhasorElement): number {
   if (a.index > b.index) return 1;
   else if (a.index < b.index) return -1;
   return a.id > b.id ? 1 : -1;
