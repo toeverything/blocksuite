@@ -43,10 +43,10 @@ import {
 import type { DatabaseBlockModel } from './database-model.js';
 import { getColumnRenderer } from './register.js';
 import type {
-  DatabaseTypeAction,
-  DatabaseTypeActionName,
+  SwitchViewAction,
+  SwitchViewActionType,
   ToolbarAction,
-  ToolbarActionName,
+  ToolbarActionType,
 } from './types.js';
 import { isDivider, onClickOutside } from './utils.js';
 
@@ -109,7 +109,7 @@ const toolbarActions: ToolbarAction[] = [
   },
 ];
 
-const databaseTypes: DatabaseTypeAction[] = [
+const databaseTypes: SwitchViewAction[] = [
   {
     type: 'table-view',
     text: 'Table view',
@@ -171,7 +171,7 @@ class DatabaseTypePopup extends LitElement {
   `;
 
   @property()
-  dbType: DatabaseTypeActionName | undefined;
+  dbType!: SwitchViewActionType;
 
   render() {
     return html`
@@ -246,7 +246,7 @@ class ToolbarActionPopup extends LitElement {
 
   private _onActionClick = (
     event: MouseEvent,
-    actionType: ToolbarActionName
+    actionType: ToolbarActionType
   ) => {
     event.stopPropagation();
 

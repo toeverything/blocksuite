@@ -18,7 +18,7 @@ import { html, literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-import type { SelectTagAction, SelectTagActionName } from '../../types.js';
+import type { SelectTagAction, SelectTagActionType } from '../../types.js';
 import { getTagColor, isDivider, onClickOutside } from '../../utils.js';
 import { actionStyles } from '../edit-column-popup.js';
 
@@ -219,7 +219,7 @@ class SelectAction extends LitElement {
   index!: number;
 
   @property()
-  onAction!: (type: SelectTagActionName, index: number) => void;
+  onAction!: (type: SelectTagActionType, index: number) => void;
 
   render() {
     return html`
@@ -524,7 +524,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     });
   };
 
-  private _onSelectAction = (type: SelectTagActionName, index: number) => {
+  private _onSelectAction = (type: SelectTagActionType, index: number) => {
     if (type === 'rename') {
       this._editingIndex = index;
       return;

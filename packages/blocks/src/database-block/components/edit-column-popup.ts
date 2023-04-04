@@ -28,7 +28,7 @@ import type { DatabaseBlockModel } from '../database-model.js';
 import { getColumnRenderer } from '../register.js';
 import type {
   ColumnAction,
-  ColumnActionName,
+  ColumnActionType,
   ColumnHeader,
   TitleColumnAction,
 } from '../types.js';
@@ -379,7 +379,7 @@ export class EditColumnPopup extends LitElement {
     this.closePopup();
   };
 
-  private _onActionClick = (actionType: ColumnActionName, columnId: string) => {
+  private _onActionClick = (actionType: ColumnActionType, columnId: string) => {
     if (actionType === 'rename') {
       this.setTitleColumnEditId(columnId);
       this.closePopup();
