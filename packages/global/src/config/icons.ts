@@ -25,6 +25,17 @@ function fontIcon(svg: TemplateResult<2>) {
   </svg>`;
 }
 
+function icon(svg: TemplateResult<2>, size = 24) {
+  return html`<svg
+    width="${size}"
+    height="${size}"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    ${svg}
+  </svg>`;
+}
+
 // Paragraph icons
 
 const TextSVG = svg`<path
@@ -33,27 +44,13 @@ const TextSVG = svg`<path
   d="M3.25 4C3.25 3.58579 3.58579 3.25 4 3.25H20C20.4142 3.25 20.75 3.58579 20.75 4V6.66667C20.75 7.08088 20.4142 7.41667 20 7.41667C19.5858 7.41667 19.25 7.08088 19.25 6.66667V4.75H12.75V19.25H16C16.4142 19.25 16.75 19.5858 16.75 20C16.75 20.4142 16.4142 20.75 16 20.75H8C7.58579 20.75 7.25 20.4142 7.25 20C7.25 19.5858 7.58579 19.25 8 19.25H11.25V4.75H4.75V6.66667C4.75 7.08088 4.41421 7.41667 4 7.41667C3.58579 7.41667 3.25 7.08088 3.25 6.66667V4Z"
 />`;
 
-export const TextIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${TextSVG}
-</svg>`;
+export const TextIcon = icon(TextSVG, 20);
 
 /**
  * When icons with same shape with have multiple sizes, mark them as Small, _, Large size
  * For example: TextIconSmall, TextIcon, TextIconLarge
  */
-export const TextIconLarge = html`<svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${TextSVG}
-</svg> `;
+export const TextIconLarge = icon(TextSVG);
 
 export const H1Icon = html`<svg
   width="20"
@@ -169,23 +166,9 @@ const BulletedListSVG = svg`<path
   d="M3 6.5C3 5.83266 3.54099 5.29167 4.20833 5.29167C4.87568 5.29167 5.41667 5.83265 5.41667 6.5C5.41667 7.16734 4.87568 7.70833 4.20833 7.70833C3.54099 7.70833 3 7.16734 3 6.5ZM7.58333 6.50057C7.58336 6.08636 7.91916 5.75059 8.33337 5.75061L20.25 5.75127C20.6642 5.7513 21 6.0871 21 6.50131C21 6.91553 20.6641 7.2513 20.2499 7.25127L8.33329 7.25061C7.91908 7.25059 7.58331 6.91478 7.58333 6.50057ZM3 12C3 11.3327 3.54099 10.7917 4.20833 10.7917C4.87568 10.7917 5.41667 11.3327 5.41667 12C5.41667 12.6673 4.87568 13.2083 4.20833 13.2083C3.54099 13.2083 3 12.6673 3 12ZM7.58333 12.0006C7.58336 11.5864 7.91916 11.2506 8.33338 11.2507L20.2501 11.2514C20.6643 11.2514 21.0001 11.5872 21 12.0014C21 12.4156 20.6642 12.7514 20.25 12.7514L8.33329 12.7507C7.91907 12.7506 7.58331 12.4148 7.58333 12.0006ZM3 17.5C3 16.8327 3.54099 16.2917 4.20833 16.2917C4.87568 16.2917 5.41667 16.8327 5.41667 17.5C5.41667 18.1673 4.87568 18.7083 4.20833 18.7083C3.54099 18.7083 3 18.1673 3 17.5ZM7.58333 17.5006C7.58336 17.0864 7.91916 16.7506 8.33338 16.7507L20.2501 16.7514C20.6643 16.7514 21 17.0872 21 17.5014C21 17.9156 20.6642 18.2514 20.25 18.2514L8.33329 18.2507C7.91907 18.2506 7.58331 17.9148 7.58333 17.5006Z"
 />`;
 
-export const BulletedListIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${BulletedListSVG}
-</svg>`;
+export const BulletedListIcon = icon(BulletedListSVG, 20);
 
-export const BulletedListIconLarge = html`<svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${BulletedListSVG}
-</svg>`;
+export const BulletedListIconLarge = icon(BulletedListSVG, 24);
 
 export const NumberedListIconLarge = html`<svg
   width="24"
@@ -419,14 +402,7 @@ const LinkSVG = svg`<path
   d="M12.8423 4.60675C14.6513 2.79775 17.5842 2.79775 19.3932 4.60676C21.2023 6.41576 21.2023 9.34874 19.3932 11.1577L17.3344 13.2166C17.0415 13.5095 16.5666 13.5095 16.2737 13.2166C15.9808 12.9237 15.9808 12.4489 16.2737 12.156L18.3326 10.0971C19.5558 8.87387 19.5558 6.89064 18.3326 5.66742C17.1094 4.4442 15.1261 4.44419 13.9029 5.66741L11.1577 8.41258C9.93453 9.6358 9.93453 11.619 11.1577 12.8423C11.3498 13.0343 11.5596 13.1955 11.7816 13.3266C12.1382 13.5373 12.2566 13.9971 12.046 14.3538C11.8353 14.7104 11.3754 14.8288 11.0188 14.6182C10.6891 14.4235 10.379 14.1849 10.0971 13.9029C8.28808 12.0939 8.28808 9.16093 10.0971 7.35192L12.8423 4.60675ZM11.954 9.64621C12.1647 9.28955 12.6246 9.17119 12.9812 9.38183C13.3109 9.57652 13.621 9.81515 13.9029 10.0971C15.7119 11.9061 15.7119 14.8391 13.9029 16.6481L11.1577 19.3932C9.34874 21.2023 6.41576 21.2023 4.60675 19.3932C2.79775 17.5842 2.79775 14.6513 4.60675 12.8423L6.66563 10.7834C6.95852 10.4905 7.4334 10.4905 7.72629 10.7834C8.01918 11.0763 8.01918 11.5511 7.72629 11.844L5.66741 13.9029C4.4442 15.1261 4.4442 17.1094 5.66742 18.3326C6.89064 19.5558 8.87387 19.5558 10.0971 18.3326L12.8423 15.5874C14.0655 14.3642 14.0655 12.381 12.8423 11.1577C12.6502 10.9657 12.4404 10.8045 12.2184 10.6734C11.8618 10.4627 11.7434 10.0029 11.954 9.64621Z"
 />`;
 
-export const LinkIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${LinkSVG}
-</svg>`;
+export const LinkIcon = icon(LinkSVG, 20);
 
 export const FontLinkIcon = fontIcon(LinkSVG);
 
@@ -1393,7 +1369,7 @@ export const DatabaseAddColumn = html`
 `;
 // Linked Page
 
-export const PageIconSVG = svg`
+const PageIconSVG = svg`
   <path
     fill-rule="evenodd"
     clip-rule="evenodd"
@@ -1416,7 +1392,7 @@ export const PageIconSVG = svg`
   />
 `;
 
-export const PageSubpageSVG = svg`<path
+const PageSubpageSVG = svg`<path
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
@@ -1474,3 +1450,37 @@ export const ConnectorLIcon = html`<svg
 
 export const FontPageIcon = fontIcon(PageIconSVG);
 export const FontPageSubpageIcon = fontIcon(PageSubpageSVG);
+
+export const PageIcon = icon(PageIconSVG, 20);
+export const PageSubpageIcon = icon(PageSubpageSVG, 20);
+
+export const NewPageIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M12 3.25C12.4142 3.25 12.75 3.58579 12.75 4V20C12.75 20.4142 12.4142 20.75 12 20.75C11.5858 20.75 11.25 20.4142 11.25 20V4C11.25 3.58579 11.5858 3.25 12 3.25Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H20C20.4142 11.25 20.75 11.5858 20.75 12C20.75 12.4142 20.4142 12.75 20 12.75H4C3.58579 12.75 3.25 12.4142 3.25 12Z"
+  />
+</svg>`;
+
+export const DualLinkIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M11 4.75C10.5858 4.75 10.25 4.41421 10.25 4C10.25 3.58579 10.5858 3.25 11 3.25H19.9C19.9174 3.25 19.9346 3.25052 19.9517 3.25155C20.1594 3.23823 20.3716 3.31093 20.5303 3.46967C20.6891 3.62841 20.7618 3.84059 20.7485 4.04829C20.7495 4.0654 20.75 4.08264 20.75 4.1V13C20.75 13.4142 20.4142 13.75 20 13.75C19.5858 13.75 19.25 13.4142 19.25 13V5.81066L4.53033 20.5303C4.23744 20.8232 3.76256 20.8232 3.46967 20.5303C3.17678 20.2374 3.17678 19.7626 3.46967 19.4697L18.1893 4.75H11Z"
+  />
+</svg>`;

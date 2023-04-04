@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/blocks/std';
+import { DualLinkIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import {
   assertExists,
@@ -167,22 +168,29 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   private _activatedItemIndex = 0;
 
   private get _actionList() {
+    const DISPLAY_LENGTH = 8;
     const pageName = this._query || DEFAULT_PAGE_NAME;
+    const displayPageName =
+      pageName.slice(0, DISPLAY_LENGTH) +
+      (pageName.length > DISPLAY_LENGTH ? '..' : '');
     return [
       ...this._pageList.map((page, idx) => ({
         name: page.title,
         active: idx === this._activatedItemIndex,
+        icon: PageIcon,
         action: () => this._insertLinkedNode('LinkedPage', page.id),
       })),
       // The active condition is a bit tricky here
       {
-        name: `Create "${pageName}" page`,
+        name: `Create "${displayPageName}" page`,
         active: this._pageList.length === this._activatedItemIndex,
+        icon: NewPageIcon,
         action: () => this._createPage(),
       },
       {
-        name: `Create "${pageName}" subpage`,
+        name: `Create "${displayPageName}" subpage`,
         active: this._pageList.length + 1 === this._activatedItemIndex,
+        icon: DualLinkIcon,
         action: () => this._createSubpage(),
       },
     ];
@@ -290,32 +298,34 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const pageList = this._actionList
       .slice(0, -2)
       .map(
-        ({ name, action, active }) => html`<icon-button
+        ({ name, action, active, icon }) => html`<icon-button
           width="280px"
           height="32px"
+          text=${name}
           ?hover=${active}
           @click=${action}
-          >${name}</icon-button
+          >${icon}</icon-button
         >`
       );
 
     const createList = this._actionList
       .slice(-2)
       .map(
-        ({ name, action, active }) => html`<icon-button
+        ({ name, action, active, icon }) => html`<icon-button
           width="280px"
           height="32px"
+          text=${name}
           ?hover=${active}
           @click=${action}
-          >${name}</icon-button
+          >${icon}</icon-button
         >`
       );
 
     return html`<div class="linked-page-popover" style="${style}">
-      <div>Link to page</div>
+      <div class="group-title">Link to page</div>
       ${pageList}
       <div class="divider"></div>
-      <div>New page</div>
+      <div class="group-title">New page</div>
       ${createList}
     </div>`;
   }
