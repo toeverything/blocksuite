@@ -556,7 +556,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragStart = (e: DragEvent) => {
-    if (!this._handleAnchorState || !e.dataTransfer) {
+    if (!this._handleAnchorState || !e.dataTransfer || this._dragPreview) {
       return;
     }
 
