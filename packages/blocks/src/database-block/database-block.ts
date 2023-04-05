@@ -3,6 +3,7 @@ import './components/add-column-type-popup.js';
 import './components/cell-container.js';
 
 import {
+  DatabaseAddColumn,
   DatabaseMultiSelect,
   DatabaseNumber,
   DatabaseProgress,
@@ -222,6 +223,14 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       justify-content: center;
       width: 40px;
       height: 38px;
+      cursor: pointer;
+    }
+    .header-add-column-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
       cursor: pointer;
     }
   `;
@@ -658,19 +667,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
               ? 'dragging'
               : ''}"
           ></div>
-          <div class="add-column-button-container">
-            <svg
-              viewBox="0 0 16 16"
-              style=${styleMap({
-                width: '12px',
-                height: '100%',
-                fill: 'var(--affine-text-color)',
-              })}
-            >
-              <path
-                d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
-              ></path>
-            </svg>
+          <div
+            class="header-add-column-button"
+            @click=${() => this.addColumn(this.targetModel.columns.length)}
+          >
+            ${DatabaseAddColumn}
           </div>
         </div>
         <div
@@ -678,19 +679,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
           data-test-id="affine-database-add-column-button"
           @click=${() => this.addColumn(this.targetModel.columns.length)}
         >
-          <!-- Fix move to icon -->
-          <svg
-            viewBox="0 0 16 16"
-            style=${styleMap({
-              width: '12px',
-              height: '100%',
-              fill: 'var(--affine-text-color)',
-            })}
-          >
-            <path
-              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
-            ></path>
-          </svg>
+          ${DatabaseAddColumn}
         </div>
       </div>
     `;
