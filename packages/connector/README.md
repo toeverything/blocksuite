@@ -1,24 +1,21 @@
-# Connector
+# `@blocksuite/connector`
 
 ## How to use
 
-```
+```ts
 import { route, Rectangle } from '@blocksuite/connector';
 
 const rects = [
   new Rectangle(30, 30, 200, 200),
-  new Rectangle(160, 160, 300, 300)
-]
+  new Rectangle(160, 160, 300, 300),
+];
 
 const points = [
   { x: 50, y: 30 },
-  { x: 160, y: 200 }
-]
+  { x: 160, y: 200 },
+];
 
-const path = route(
-  rects,
-  points
-)
+const path = route(rects, points);
 console.log('path', path);
 ```
 
@@ -40,7 +37,7 @@ Problems caused by modifications:
 
 - The Graph becomes larger, and more points.length lines are added, causing the final path point to increase points.length \* 2n
 
-## Reference:
+## References
 
 Blog：
 
