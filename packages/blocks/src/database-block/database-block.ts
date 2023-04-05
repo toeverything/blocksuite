@@ -95,9 +95,6 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       flex-direction: row;
       height: 40px;
     }
-    .affine-database-column-header:hover .affine-database-add-column-button {
-      visibility: visible;
-    }
 
     .affine-database-column {
       position: relative;
@@ -262,12 +259,16 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   @query('.affine-database-add-column-button')
   private _addColumnButton!: HTMLElement;
 
+  @query('.header-add-column-button')
+  private _headerAddColumnButton!: HTMLElement;
+
   @state()
   private _widthChangingIndex = -1;
 
   private _disposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthDisposable: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
+  private _isHeaderHover = false;
 
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
@@ -280,6 +281,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     const databaseElement = this.closest('affine-database');
     assertExists(databaseElement);
     this._initResizeEffect(databaseElement);
+    this._initHeaderMousemoveEvent();
   }
 
   updated(changedProperties: Map<string, unknown>) {
@@ -343,6 +345,46 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       handle.style.height = `${dragHandleHeight}px`;
     });
   }
+
+  private _initHeaderMousemoveEvent() {
+    this._disposables.addFromEvent(
+      this._headerContainer,
+      'mouseover',
+      event => {
+        this._isHeaderHover = true;
+        this.showAddColumnButton(event);
+      }
+    );
+    this._disposables.addFromEvent(
+      this._headerContainer,
+      'mouseleave',
+      event => {
+        this._isHeaderHover = false;
+        this.showAddColumnButton(event);
+      }
+    );
+  }
+  showAddColumnButton = (event?: MouseEvent) => {
+    const databaseElement = this.closest('affine-database');
+    assertExists(databaseElement);
+    const { right: boundaryRight } = databaseElement.getBoundingClientRect();
+    const { left: headerAddColumnButtonLeft } =
+      this._headerAddColumnButton.getBoundingClientRect();
+
+    let isInHeader = true;
+    if (event) {
+      // mouse over the header
+      isInHeader =
+        event.offsetY <= DEFAULT_COLUMN_TITLE_HEIGHT && event.offsetY >= 0;
+    }
+
+    const needShow = boundaryRight <= headerAddColumnButtonLeft;
+    if (needShow && this._isHeaderHover && isInHeader) {
+      this._addColumnButton.style.visibility = 'visible';
+    } else {
+      this._addColumnButton.style.visibility = 'hidden';
+    }
+  };
 
   private _initChangeColumnWidthEvent() {
     this._changeColumnWidthDisposable.dispose();
@@ -1087,22 +1129,24 @@ export class DatabaseBlockComponent
   }
 
   private _onDatabaseScroll = (event: Event) => {
-    const element = event.target as HTMLElement;
-    const titleAddColumnBtn =
-      element.querySelector<HTMLElement>('.add-column-button');
-    const addColumnBtn = element.querySelector<HTMLElement>(
-      '.affine-database-add-column-button'
-    );
-    assertExists(titleAddColumnBtn);
-    assertExists(addColumnBtn);
-    const { right } = element.getBoundingClientRect();
-    const { left } = titleAddColumnBtn.getBoundingClientRect();
-    const isInViewport = left >= right;
-    if (isInViewport) {
-      addColumnBtn.style.display = 'flex';
-    } else {
-      addColumnBtn.style.display = 'none';
-    }
+    this._columnHeaderComponent.showAddColumnButton();
+    // const element = event.target as HTMLElement;
+    // const titleAddColumnBtn =
+    //   element.querySelector<HTMLElement>('.add-column-button');
+    // const addColumnBtn = element.querySelector<HTMLElement>(
+    //   '.affine-database-add-column-button'
+    // );
+    // assertExists(titleAddColumnBtn);
+    // assertExists(addColumnBtn);
+    // const { right: boundaryRight } = element.getBoundingClientRect();
+    // const { left: headerAddColumnButtonLeft } =
+    //   titleAddColumnBtn.getBoundingClientRect();
+    // const needShow = boundaryRight <= headerAddColumnButtonLeft;
+    // if (needShow) {
+    //   addColumnBtn.style.visibility = 'visible';
+    // } else {
+    //   addColumnBtn.style.visibility = 'hidden';
+    // }
   };
 
   private _onSearch = (event: InputEvent) => {
