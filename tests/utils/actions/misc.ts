@@ -305,7 +305,7 @@ export async function initDatabaseColumn(page: Page, title = '') {
   if (!box) throw new Error('Missing column type rect');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 
-  const columnAddBtn = page.locator('.affine-database-add-column-button');
+  const columnAddBtn = page.locator('.header-add-column-button');
   await columnAddBtn.click();
 
   if (title) {
