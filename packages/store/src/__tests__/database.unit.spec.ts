@@ -1,15 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { CodeBlockSchema } from '../../../blocks/src/code-block/code-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
-import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { EmbedBlockSchema } from '../../../blocks/src/embed-block/embed-model.js';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
-import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { SurfaceBlockSchema } from '../../../blocks/src/surface-block/surface-model.js';
 import type { Cell, Column, SelectTag } from '../../../global/src/database.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator } from '../index.js';
@@ -22,14 +17,9 @@ function createTestOptions() {
 }
 
 const AffineSchemas = [
-  CodeBlockSchema,
   ParagraphBlockSchema,
   PageBlockSchema,
-  ListBlockSchema,
   FrameBlockSchema,
-  DividerBlockSchema,
-  EmbedBlockSchema,
-  SurfaceBlockSchema,
   DatabaseBlockSchema,
 ];
 
@@ -169,7 +159,7 @@ describe('DatabaseManager', () => {
     const modelId = page.addBlock('affine:paragraph', {
       text: new page.Text('paragraph'),
     });
-    const schema: Column = {
+    const column: Column = {
       id: 'testColumnId',
       name: 'Test Column',
       type: 'number',
@@ -177,11 +167,11 @@ describe('DatabaseManager', () => {
       hide: false,
     };
     const cell: Cell = {
-      columnId: schema.id,
+      columnId: column.id,
       value: 42,
     };
 
-    page.db.updateColumn(schema);
+    page.db.updateColumn(column);
     page.db.updateCell(modelId, cell);
 
     const model = page.getBlockById(modelId);
@@ -189,7 +179,7 @@ describe('DatabaseManager', () => {
     expect(model).not.toBeNull();
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const result = db.getCell(model!.id, schema.id);
+    const result = db.getCell(model!.id, column.id);
     expect(result).toEqual(cell);
   });
 
