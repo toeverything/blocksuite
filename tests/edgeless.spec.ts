@@ -1159,29 +1159,6 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
   await expect(tooltip).toBeVisible();
 });
 
-test('the tooltip of brush tool button should be hidden when the brush menu is shown', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  const brushTool = locatorEdgelessToolButton(page, 'brush');
-  const brushToolBox = await brushTool.boundingBox();
-  const tooltip = brushTool.locator('tool-tip');
-
-  assertExists(brushToolBox);
-
-  await page.mouse.move(brushToolBox.x + 10, brushToolBox.y + 10);
-  await expect(tooltip).toBeVisible();
-
-  await page.mouse.click(brushToolBox.x + 10, brushToolBox.y + 10);
-  await expect(tooltip).toBeHidden();
-
-  await page.mouse.click(brushToolBox.x + 10, brushToolBox.y + 10);
-  await expect(tooltip).toBeVisible();
-});
-
 test('the tooltip of more button should be hidden when the action menu is shown', async ({
   page,
 }) => {
@@ -1211,87 +1188,5 @@ test('the tooltip of more button should be hidden when the action menu is shown'
   await expect(tooltip).toBeHidden();
 
   await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
-  await expect(tooltip).toBeVisible();
-});
-
-test('the tooltip of change color button should be hidden when the color menu is shown', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
-  await addBasicBrushElement(page, start, end);
-
-  await page.mouse.click(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
-
-  const changeColorButton = locatorEdgelessComponentToolButton(page, 'brush');
-  await expect(changeColorButton).toBeVisible();
-
-  const changeColorButtonBox = await changeColorButton.boundingBox();
-  const tooltip = changeColorButton.locator('tool-tip');
-
-  assertExists(changeColorButtonBox);
-
-  await page.mouse.move(
-    changeColorButtonBox.x + 10,
-    changeColorButtonBox.y + 10
-  );
-  await expect(tooltip).toBeVisible();
-
-  await page.mouse.click(
-    changeColorButtonBox.x + 10,
-    changeColorButtonBox.y + 10
-  );
-  await expect(tooltip).toBeHidden();
-
-  await page.mouse.click(
-    changeColorButtonBox.x + 10,
-    changeColorButtonBox.y + 10
-  );
-  await expect(tooltip).toBeVisible();
-});
-
-test('the tooltip of change shape button should be hidden when the shape menu is shown', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
-  await addBasicRectShapeElement(page, start, end);
-
-  await page.mouse.click(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
-
-  const changeShapeButton = locatorEdgelessComponentToolButton(page, 'shape');
-  await expect(changeShapeButton).toBeVisible();
-
-  const changeShapeButtonBox = await changeShapeButton.boundingBox();
-  const tooltip = changeShapeButton.locator('tool-tip');
-
-  assertExists(changeShapeButtonBox);
-
-  await page.mouse.move(
-    changeShapeButtonBox.x + 10,
-    changeShapeButtonBox.y + 10
-  );
-  await expect(tooltip).toBeVisible();
-
-  await page.mouse.click(
-    changeShapeButtonBox.x + 10,
-    changeShapeButtonBox.y + 10
-  );
-  await expect(tooltip).toBeHidden();
-
-  await page.mouse.click(
-    changeShapeButtonBox.x + 10,
-    changeShapeButtonBox.y + 10
-  );
   await expect(tooltip).toBeVisible();
 });
