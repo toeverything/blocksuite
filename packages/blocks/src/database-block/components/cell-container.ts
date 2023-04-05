@@ -4,10 +4,7 @@ import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  DatabaseCellLitElement,
-  getColumnSchemaRenderer,
-} from '../register.js';
+import { DatabaseCellElement, getColumnRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
@@ -15,7 +12,7 @@ const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
-  extends DatabaseCellLitElement<unknown>
+  extends DatabaseCellElement<unknown>
   implements RowHost
 {
   static styles = css`
@@ -56,7 +53,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.columnSchema);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.db.updateColumnSchema({
+    this.databaseModel.page.db.updateColumn({
       ...this.columnSchema,
       ...newProperty,
     });
@@ -108,10 +105,10 @@ export class DatabaseCellContainer
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
-    const renderer = getColumnSchemaRenderer(this.columnSchema.type);
+    const renderer = getColumnRenderer(this.columnSchema.type);
     const cell = this.databaseModel.page.db.getCell(
-      this.rowModel,
-      this.columnSchema
+      this.rowModel.id,
+      this.columnSchema.id
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;

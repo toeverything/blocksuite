@@ -34,7 +34,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:flavour', props.flavour);
   if (props.flavour === 'affine:page') {
     yBlock.set('ext:cells', new Y.Map());
-    yBlock.set('ext:columnSchema', new Y.Map());
+    yBlock.set('ext:columns', new Y.Map());
   }
 
   const yChildren = new Y.Array();
@@ -57,7 +57,12 @@ export function syncBlockProps(
 
     const isText = propSchema[key] instanceof Text;
     if (isText) {
-      yBlock.set(`prop:${key}`, value.yText);
+      if (value instanceof Text) {
+        yBlock.set(`prop:${key}`, value.yText);
+      } else {
+        // When copying the database, the value of title is a string
+        yBlock.set(`prop:${key}`, new Y.Text(value));
+      }
       return;
     }
     if (!isPrimitive(value) && !Array.isArray(value)) {

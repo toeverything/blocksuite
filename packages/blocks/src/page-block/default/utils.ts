@@ -1,8 +1,8 @@
 import type {
   BlockComponentElement,
   EditingState,
-  OpenBlockInfo,
   Point,
+  SerializedBlock,
 } from '@blocksuite/blocks/std';
 import {
   doesInSamePath,
@@ -397,7 +397,7 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData: { data: OpenBlockInfo[] } = {
+  const copyData: { data: SerializedBlock[] } = {
     data: [
       {
         type: model.type,
@@ -550,9 +550,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     },
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
-    },
-    getFocusedBlock() {
-      return defaultPageBlock.selection.state.focusedBlock;
     },
     // clearSelection() {
     //   defaultPageBlock.selection.clear();

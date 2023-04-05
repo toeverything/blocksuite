@@ -1,5 +1,6 @@
 import {
   DatabaseDone,
+  DatabaseSearchClose,
   DeleteIcon,
   MoreHorizontalIcon,
   PenIcon,
@@ -16,13 +17,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
-import type { SelectTagAction, SelectTagActionName } from '../../types.js';
-import { getTagColor, onClickOutside } from '../../utils.js';
-import { actionStyles, isDivider } from '../edit-column-popup.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import type { SelectTagAction, SelectTagActionType } from '../../types.js';
+import { getTagColor, isDivider, onClickOutside } from '../../utils.js';
+import { actionStyles } from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
@@ -137,7 +135,7 @@ class SelectOptionText extends LitElement {
 }
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellLitElement<SelectTag[]> {
+class SelectCell extends DatabaseCellElement<SelectTag[]> {
   static styles = css`
     :host {
       display: flex;
@@ -221,7 +219,7 @@ class SelectAction extends LitElement {
   index!: number;
 
   @property()
-  onAction!: (type: SelectTagActionName, index: number) => void;
+  onAction!: (type: SelectTagActionType, index: number) => void;
 
   render() {
     return html`
@@ -246,7 +244,7 @@ class SelectAction extends LitElement {
   }
 }
 @customElement('affine-database-select-cell-editing')
-class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
+class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   value: SelectTag | undefined = undefined;
 
   static styles = css`
@@ -288,6 +286,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
     }
     .select-option-container {
       padding: 8px;
+      color: rgba(0, 0, 0, 0.9);
     }
     .select-option-container-header {
       padding: 8px 0px;
@@ -301,6 +300,12 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
       height: 28px;
       background: #f5f5f5;
       border-radius: 4px;
+      color: rgba(0, 0, 0, 0.9);
+      background: #f3f0ff;
+    }
+    .select-selected > .close-icon {
+      display: flex;
+      align-items: center;
     }
 
     .select-option-new {
@@ -519,7 +524,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
     });
   };
 
-  private _onSelectAction = (type: SelectTagActionName, index: number) => {
+  private _onSelectAction = (type: SelectTagActionType, index: number) => {
     if (type === 'rename') {
       this._editingIndex = index;
       return;
@@ -527,7 +532,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
 
     if (type === 'delete') {
       const selection = [...(this.columnSchema.selection as SelectTag[])];
-      this.databaseModel.page.db.updateColumnSchema({
+      this.databaseModel.page.db.updateColumn({
         ...this.columnSchema,
         selection: selection.filter((_, i) => i !== index),
       });
@@ -584,7 +589,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
-    this.databaseModel.page.db.updateColumnSchema({
+    this.databaseModel.page.db.updateColumn({
       ...this.columnSchema,
       selection,
     });
@@ -626,7 +631,7 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
             return html`<span class="select-selected" style=${style}>
               ${item.value}
               <span @click=${() => this._onDeleteSelected(selectedTag, item)}
-                >x</span
+                >${DatabaseSearchClose}</span
               >
             </span>`;
           })}
@@ -690,11 +695,11 @@ class SelectCellEditing extends DatabaseCellLitElement<SelectTag[]> {
 }
 
 @customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellLitElement<SelectTag[]> {
+class SelectColumnPropertyEditing extends DatabaseCellElement<SelectTag[]> {
   static tag = literal`affine-database-select-column-property-editing`;
 }
 
-export const SelectColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const SelectColumnRenderer = defineColumnRenderer(
   'select',
   () => ({
     selection: [] as SelectTag[],

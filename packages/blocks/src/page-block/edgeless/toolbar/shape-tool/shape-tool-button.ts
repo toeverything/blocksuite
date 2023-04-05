@@ -4,7 +4,7 @@ import './shape-menu.js';
 import { WithDisposable } from '@blocksuite/blocks/std';
 import { ShapeIcon } from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type {
   MouseMode,
@@ -37,6 +37,9 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @state()
+  private _popperShow = false;
+
   @query('edgeless-shape-menu')
   private _shapeMenu!: EdgelessShapeMenu;
 
@@ -51,9 +54,17 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    this._shapeMenuPopper = createButtonPopper(this, this._shapeMenu);
-    this._disposables.add(this._shapeMenuPopper);
-    this._disposables.add(
+    const _disposables = this._disposables;
+
+    this._shapeMenuPopper = createButtonPopper(
+      this,
+      this._shapeMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._shapeMenuPopper);
+    _disposables.add(
       this._shapeMenu.slots.select.on(shape => {
         this._setMouseMode({
           type: 'shape',
@@ -76,9 +87,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Shape', 'S')}
+        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
-        .testId=${'shape'}
         @tool.click=${() => {
           this._setMouseMode({
             type: 'shape',

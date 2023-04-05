@@ -605,3 +605,74 @@ test('should create preview when dragging', async ({ page }) => {
     }
   );
 });
+
+test('should cover all selected blocks', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator(
+    '.affine-page-selected-rects-container > *'
+  );
+  await expect(blockSelections).toHaveCount(2);
+
+  const editors = page.locator('rich-text');
+  const dragHandleHover = page.locator('.affine-drag-handle-hover');
+
+  await editors.nth(0).hover({
+    position: {
+      x: 10,
+      y: 10,
+    },
+  });
+  await expect(dragHandleHover).toBeVisible();
+
+  await editors.nth(1).hover({
+    position: {
+      x: 10,
+      y: 10,
+    },
+  });
+  await expect(dragHandleHover).toBeVisible();
+
+  await editors.nth(2).hover({
+    position: {
+      x: 10,
+      y: 10,
+    },
+  });
+  await expect(dragHandleHover).toBeHidden();
+
+  await editors.nth(0).hover({
+    position: {
+      x: 10,
+      y: 10,
+    },
+  });
+
+  await dragHandleHover.hover();
+
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect1 = await editors.nth(1).boundingBox();
+  const dragHandleRect = await page.locator('affine-drag-handle').boundingBox();
+  if (!editorRect0 || !editorRect1 || !dragHandleRect) {
+    throw new Error();
+  }
+
+  expect(dragHandleRect.y).toBeLessThanOrEqual(editorRect0.y);
+  expect(dragHandleRect.y + dragHandleRect.height).toBeGreaterThanOrEqual(
+    editorRect1.y + editorRect1.height
+  );
+});

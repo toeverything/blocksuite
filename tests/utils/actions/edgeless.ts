@@ -39,6 +39,7 @@ export function locatorPanButton(page: Page, innerContainer = true) {
 
 type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
   page: Page,
@@ -57,6 +58,27 @@ export function locatorEdgelessToolButton(
   }[type];
   const button = page
     .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export function locatorEdgelessComponentToolButton(
+  page: Page,
+  type: ComponentToolType,
+  innerContainer = true
+) {
+  const text = {
+    shape: 'Shape',
+    brush: 'Color',
+    thin: 'Thin',
+    thick: 'Thick',
+    more: 'More',
+  }[type];
+  const button = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
     .filter({
       hasText: text,
     });
@@ -284,4 +306,43 @@ export async function zoomByMouseWheel(
   await page.keyboard.down(SHORT_KEY);
   await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
+}
+
+function locatorComponentToolbarMoreButton(page: Page) {
+  const moreButton = page
+    .locator('edgeless-component-toolbar')
+    .locator('edgeless-more-button');
+  return moreButton;
+}
+type Action = 'bring to front' | 'send to back';
+export async function triggerComponentToolbarAction(
+  page: Page,
+  action: Action
+) {
+  switch (action) {
+    case 'bring to front': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'send to back': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send to back',
+        });
+      await actionButton.click();
+      break;
+    }
+  }
 }

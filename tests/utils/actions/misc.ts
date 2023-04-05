@@ -141,8 +141,11 @@ export async function waitEmbedLoaded(page: Page) {
   await page.waitForSelector('.resizable-img');
 }
 
-export async function waitNextFrame(page: Page) {
-  await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
+export async function waitNextFrame(
+  page: Page,
+  frameTimeout = NEXT_FRAME_TIMEOUT
+) {
+  await page.waitForTimeout(frameTimeout);
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {
@@ -271,6 +274,34 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyDatabaseWithParagraphState(
+  page: Page,
+  pageId?: string
+) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+        titleColumn: 'Title',
+      },
+      frameId
+    );
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.captureSync();
+    return { pageId, frameId, databaseId };
+  }, pageId);
+  return ids;
+}
+
 export async function initDatabaseColumn(page: Page, title = '') {
   const columnAddBtn = page.locator('.affine-database-add-column-button');
   await columnAddBtn.click();
@@ -284,6 +315,10 @@ export async function initDatabaseColumn(page: Page, title = '') {
 }
 
 export async function initDatabaseRow(page: Page) {
+  const footer = page.locator('.affine-database-block-footer');
+  const box = await footer.boundingBox();
+  if (!box) throw new Error('Missing database footer rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   const columnAddBtn = page.locator(
     '[data-test-id="affine-database-add-row-button"]'
   );
@@ -314,24 +349,6 @@ export async function initDatabaseDynamicRowWithData(
   await cell.click();
   await type(page, data);
   await pressEnter(page);
-}
-
-export async function getDatabaseMouse(page: Page) {
-  const databaseRect = await getBoundingClientRect(page, 'affine-database');
-  return {
-    mouseOver: async () => {
-      await page.mouse.move(databaseRect.x, databaseRect.y);
-    },
-    mouseLeave: async () => {
-      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
-    },
-  };
-}
-
-export async function focusDatabaseSearch(page: Page) {
-  const searchIcon = page.locator('.affine-database-search-input-icon');
-  await searchIcon.click();
-  return searchIcon;
 }
 
 export async function focusDatabaseTitle(page: Page) {

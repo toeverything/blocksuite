@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/blocks/std';
 import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
@@ -53,15 +53,26 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   @property()
   surface!: SurfaceManager;
 
+  @state()
+  private _popperShow = false;
+
   @query('edgeless-shape-menu')
   private _shapeMenu!: EdgelessShapeMenu;
 
   private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    this._shapeMenuPopper = createButtonPopper(this, this._shapeMenu);
-    this._disposables.add(this._shapeMenuPopper);
-    this._disposables.add(
+    const _disposables = this._disposables;
+
+    this._shapeMenuPopper = createButtonPopper(
+      this,
+      this._shapeMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._shapeMenuPopper);
+    _disposables.add(
       this._shapeMenu.slots.select.on(shapeType => {
         const updatedProps =
           shapeType === 'roundedRect'
@@ -84,7 +95,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       : null;
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'Shape'}
+        .tooltip=${this._popperShow ? '' : 'Shape'}
         .active=${false}
         @tool.click=${() => this._shapeMenuPopper?.toggle()}
       >

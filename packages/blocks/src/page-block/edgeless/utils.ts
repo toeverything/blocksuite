@@ -216,9 +216,6 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     getSelectedBlocks() {
       return [];
     },
-    getFocusedBlock() {
-      return null;
-    },
     getClosestBlockElement(point: Point) {
       if (pageBlock.mouseMode.type !== 'default') return null;
       const hoveringFrame = getHoveringFrame(point);

@@ -11,10 +11,7 @@ import type {
   AffineVEditor,
 } from '../../../__internal__/rich-text/virgo/types.js';
 import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -65,7 +62,7 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellLitElement<Y.Text> {
+class TextCell extends DatabaseCellElement<Y.Text> {
   static styles = css`
     :host {
       display: flex;
@@ -233,11 +230,11 @@ class TextCell extends DatabaseCellLitElement<Y.Text> {
 }
 
 @customElement('affine-database-rich-text-column-property-editing')
-class TextColumnPropertyEditing extends DatabaseCellLitElement<Y.Text> {
+class TextColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
   static tag = literal`affine-database-rich-text-column-property-editing`;
 }
 
-export const RichTextColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
   () => ({}),
   page => new page.YText(''),

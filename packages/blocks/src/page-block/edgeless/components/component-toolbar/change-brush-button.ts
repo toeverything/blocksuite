@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/blocks/std';
 import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
@@ -107,6 +107,9 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @state()
+  private _popperShow = false;
+
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
 
@@ -134,8 +137,16 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
-    this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
-    this._disposables.add(this._colorPanelPopper);
+    const _disposables = this._disposables;
+
+    this._colorPanelPopper = createButtonPopper(
+      this,
+      this._colorPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._colorPanelPopper);
     super.firstUpdated(changedProperties);
   }
 
@@ -172,7 +183,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
-        .tooltip=${'Color'}
+        .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
         @tool.click=${() => this._colorPanelPopper?.toggle()}
       >

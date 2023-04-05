@@ -3,10 +3,15 @@ import './utils/declare-test-window.js';
 import {
   captureHistory,
   copyByKeyboard,
+  cutByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getRichTextBoundingBox,
   importMarkdown,
+  initDatabaseColumn,
+  initDatabaseDynamicRowWithData,
+  initEmptyDatabaseWithParagraphState,
   initEmptyParagraphState,
   pasteByKeyboard,
   pasteContent,
@@ -487,4 +492,163 @@ test('pasting into empty list should not convert the list into paragraph', async
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['test']);
   await assertTypeFormat(page, 'bulleted');
+});
+
+test('cut will delete all content, and copy will reappear content', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, '1');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '2');
+  await pressEnter(page);
+  await type(page, '3');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await type(page, '4');
+
+  const box123 = await getRichTextBoundingBox(page, '1');
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
+
+  const box789 = await getRichTextBoundingBox(page, '6');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
+  // from top to bottom
+  await dragBetweenCoords(page, inside123, inside789);
+
+  await cutByKeyboard(page);
+  await waitNextFrame(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:list
+      prop:checked={false}
+      prop:type="bulleted"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+  await waitNextFrame(page);
+  await focusRichText(page);
+
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:list
+      prop:checked={false}
+      prop:text="1"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="2"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="3"
+        prop:type="bulleted"
+      />
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="4"
+      prop:type="bulleted"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test('should copy and paste of database work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseWithParagraphState(page);
+
+  // init database columns and rows
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'abc', true);
+
+  await selectAllByKeyboard(page);
+  await waitNextFrame(page);
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:database
+      prop:columns={
+        Array [
+          "10",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+
+  await undoByClick(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame>
+    <affine:database
+      prop:columns={
+        Array [
+          "4",
+        ]
+      }
+      prop:title="Database 1"
+      prop:titleColumn="Title"
+    >
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });
