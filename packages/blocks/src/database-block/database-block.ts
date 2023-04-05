@@ -298,6 +298,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+    this._changeColumnWidthDisposable.dispose();
   }
 
   private _initResizeEffect(element: HTMLElement) {
