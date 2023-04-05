@@ -551,9 +551,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
     },
-    getFocusedBlock() {
-      return defaultPageBlock.selection.state.focusedBlock;
-    },
     // clearSelection() {
     //   defaultPageBlock.selection.clear();
     // },
