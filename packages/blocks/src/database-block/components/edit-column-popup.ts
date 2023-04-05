@@ -374,8 +374,8 @@ export class EditColumnPopup extends LitElement {
       // incompatible types: clear the value of the column
       const renderer = getColumnRenderer(targetType);
       this._updateColumnSchema(columnId, {
+        ...renderer.propertyCreator(),
         type: targetType,
-        property: renderer.propertyCreator(),
       });
       this.targetModel.page.db.deleteCellsByColumn(columnId);
     }

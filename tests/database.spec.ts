@@ -444,6 +444,26 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
     expect(await cell.innerText()).toBe('');
   });
+
+  test('switch number to select', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await switchColumnType(page, 'number');
+
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    const cell = getFirstColumnCell(page, 'number');
+    expect(await cell.innerText()).toBe('123');
+
+    await switchColumnType(page, 'select');
+    await initDatabaseDynamicRowWithData(page, 'abc');
+    const selectCell = getFirstColumnCell(page, 'select-selected');
+    expect(await selectCell.innerText()).toBe('abc');
+
+    await switchColumnType(page, 'number');
+    expect(await cell.innerText()).toBe('');
+  });
 });
 
 test.describe('select column tag action', () => {
