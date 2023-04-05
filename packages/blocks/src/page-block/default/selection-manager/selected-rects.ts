@@ -65,7 +65,7 @@ export class PageSelectedRects extends LitElement {
         this.style.top = `${startTop}px`;
         this.style.left = `${startLeft}px`;
       } else {
-        this.draggable = false;
+        this.draggable = true;
         this.draggingArea = null;
       }
     }

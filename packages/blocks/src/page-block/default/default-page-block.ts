@@ -30,7 +30,6 @@ import {
   DraggingArea,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
-  // SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';

@@ -103,14 +103,20 @@ export class DragPreview extends LitElement {
         top: 0;
         left: 0;
         opacity: 0.843;
-        cursor: none;
+        cursor: grabbing;
         user-select: none;
-        pointer-events: none;
         caret-color: transparent;
+        z-index: 2;
       }
 
       affine-drag-preview > .affine-block-element:first-child > *:first-child {
         margin-top: 0;
+      }
+
+      affine-drag-preview .affine-rich-text {
+        cursor: grabbing;
+        user-modify: read-only;
+        -webkit-user-modify: read-only;
       }
     </style>`;
   }
@@ -375,7 +381,7 @@ export class DragHandle extends LitElement {
 
     // document
     if (isFirefox) {
-      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
+      disposables.addFromEvent(document, 'dragover', this.onDragOverDocument);
     }
 
     // document.body
@@ -394,9 +400,9 @@ export class DragHandle extends LitElement {
     disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
     disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
     disposables.addFromEvent(this._dragHandle, 'mouseup', this._onMouseUp);
-    disposables.addFromEvent(this._dragHandle, 'dragstart', this._onDragStart);
-    disposables.addFromEvent(this._dragHandle, 'drag', this._onDrag);
-    disposables.addFromEvent(this._dragHandle, 'dragend', this._onDragEnd);
+    disposables.addFromEvent(this._dragHandle, 'dragstart', this.onDragStart);
+    disposables.addFromEvent(this._dragHandle, 'drag', this.onDrag);
+    disposables.addFromEvent(this._dragHandle, 'dragend', this.onDragEnd);
   }
 
   disconnectedCallback() {
@@ -553,7 +559,7 @@ export class DragHandle extends LitElement {
     this._removeDragPreview();
   };
 
-  private _onDragOverDocument = (e: DragEvent) => {
+  onDragOverDocument = (e: DragEvent) => {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
@@ -561,7 +567,7 @@ export class DragHandle extends LitElement {
     this._currentClientY = e.clientY;
   };
 
-  private _onDragStart = (e: DragEvent) => {
+  onDragStart = (e: DragEvent) => {
     if (this._dragPreview || !this._handleAnchorState || !e.dataTransfer) {
       return;
     }
@@ -582,16 +588,21 @@ export class DragHandle extends LitElement {
         : [this._handleAnchorState.element]
     ) as BlockComponentElement[];
 
-    this._createDragPreview(e, draggingBlockElements);
+    this._createDragPreview(
+      e,
+      getBlockElementsExcludeSubtrees(
+        draggingBlockElements
+      ) as BlockComponentElement[]
+    );
     this._draggingElements = draggingBlockElements;
   };
 
   // TODO: automatic scrolling when top and bottom boundaries are reached
-  private _onDrag = (e: DragEvent) => {
+  onDrag = (e: DragEvent, passed = false) => {
     this._dragHandle.style.cursor = 'grabbing';
     let x = e.clientX;
     let y = e.clientY;
-    if (isFirefox) {
+    if (!passed && isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
       x = this._currentClientX;
@@ -643,14 +654,14 @@ export class DragHandle extends LitElement {
     this._indicator.cursorPosition = point;
   };
 
-  private _onDragEnd = (e: DragEvent) => {
+  onDragEnd = (e: DragEvent, passed = false) => {
     this._stopPropagation = false;
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
     this._removeDragPreview();
 
     // `Esc`
-    if (dropEffect === 'none') {
+    if (!passed && dropEffect === 'none') {
       this.hide();
       return;
     }
