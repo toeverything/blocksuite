@@ -427,18 +427,43 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       // scroll when crossing the right border
       const parentElement = this.tableContainer.parentElement;
       assertExists(parentElement);
-      const { right: boundaryRight } = parentElement.getBoundingClientRect();
+      const { right: boundaryRight, left: boundaryLeft } =
+        parentElement.getBoundingClientRect();
       // the distance from the drag handle to the right border
       const dragHandleRight =
         event.clientX - boundaryRight + DEFAULT_ADD_BUTTON_WIDTH;
-      if (dragHandleRight >= 0 && direction === 'right') {
-        // 1. Drag right 100 (scroll distance 100)
-        // 2. Drag left 30 (scroll distance unchanged)
-        // 3. At this point, dragging further to the right should keep the 100
-        parentElement.scrollLeft = Math.max(
-          parentElement.scrollLeft,
-          startScrollLeft + dragHandleRight
-        );
+      // →
+      if (dragHandleRight >= 0) {
+        // → | →
+        // the `|` is boundary
+        if (direction === 'right') {
+          // 1. Drag right 100 (scroll distance 100)
+          // 2. Drag left 30 (scroll distance unchanged)
+          // 3. At this point, dragging further to the right should keep the 100
+          parentElement.scrollLeft = Math.max(
+            parentElement.scrollLeft,
+            startScrollLeft + dragHandleRight
+          );
+        } else {
+          // → | ←
+          let scrollLeft = parentElement.scrollLeft;
+          if (dragHandleRight <= DEFAULT_ADD_BUTTON_WIDTH) {
+            scrollLeft += dragHandleRight;
+          }
+          parentElement.scrollLeft = Math.min(
+            scrollLeft,
+            startScrollLeft + dragHandleRight
+          );
+        }
+        return;
+      }
+
+      // scroll when crossing the left border
+      const dragHandleLeft =
+        event.clientX - boundaryLeft - DEFAULT_ADD_BUTTON_WIDTH;
+      // ← | ←
+      if (dragHandleLeft <= 0 && parentElement.scrollLeft > 0) {
+        parentElement.scrollLeft = startScrollLeft + dragHandleLeft;
       }
     };
     if (rafId) cancelAnimationFrame(rafId);
