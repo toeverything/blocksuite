@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  assertColumnWidth,
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
   enterPlaygroundRoom,
@@ -484,4 +485,36 @@ test.describe('select column tag action', () => {
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
   });
+});
+
+test('should support drag to change column width', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  const headerColumns = page.locator('.affine-database-column');
+  const titleColumn = headerColumns.nth(0);
+  const normalColumn = headerColumns.nth(1);
+
+  const dragDistance = 100;
+  const titleColumnWidth = 432;
+  const normalColumnWidth = 200;
+
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  const box = await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await page.mouse.move(box.x, box.y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + dragDistance, box.y, {
+    steps: 50,
+  });
+  await waitNextFrame(page);
+  await page.mouse.up();
+
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await undoByClick(page);
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
 });
