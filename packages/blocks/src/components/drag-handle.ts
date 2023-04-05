@@ -182,7 +182,6 @@ export class DragHandle extends LitElement {
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
-    // this._clearSelection = options.clearSelection;
     options.container.appendChild(this);
     this._container = options.container;
   }
@@ -211,7 +210,6 @@ export class DragHandle extends LitElement {
   ) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
-  // private _clearSelection: () => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -570,19 +568,19 @@ export class DragHandle extends LitElement {
 
     e.dataTransfer.effectAllowed = 'move';
 
-    const selectedBlocks = this._getSelectedBlocks() ?? [];
+    const selectedBlocks = this.selectedBlocks;
 
     const included = selectedBlocks.includes(this._handleAnchorState.element);
 
     // TODO: clear selection
     // if (!included) {
-    //   this._clearSelection();
     // }
 
-    // fixme: the block may not have block id?
-    const draggingBlockElements = included
-      ? selectedBlocks
-      : [this._handleAnchorState.element];
+    const draggingBlockElements = (
+      included
+        ? getBlockElementsExcludeSubtrees(this.selectedBlocks)
+        : [this._handleAnchorState.element]
+    ) as BlockComponentElement[];
 
     this._createDragPreview(e, draggingBlockElements);
     this._draggingElements = draggingBlockElements;
@@ -610,7 +608,7 @@ export class DragHandle extends LitElement {
       return;
     }
 
-    if (this._dragPreview && e.screenX && e.screenY) {
+    if (this._dragPreview && e.screenY) {
       const { x: offsetX, y: offsetY } = this._dragPreview.offset;
       this._dragPreview.style.transform = `translate(${x + offsetX}px, ${
         y + offsetY
@@ -623,14 +621,21 @@ export class DragHandle extends LitElement {
     let lastModelState = null;
 
     if (element) {
-      const model = getModelByBlockElement(element);
-      rect = getDropRectByPoint(point, model, element);
+      if (
+        !(
+          this.selectedBlocks.includes(element as BlockComponentElement) ||
+          element === this._handleAnchorState?.element
+        )
+      ) {
+        const model = getModelByBlockElement(element);
+        rect = getDropRectByPoint(point, model, element);
 
-      lastModelState = {
-        rect,
-        model,
-        element: element as BlockComponentElement,
-      };
+        lastModelState = {
+          rect,
+          model,
+          element: element as BlockComponentElement,
+        };
+      }
     }
 
     this._lastDroppingTarget = lastModelState;
@@ -655,10 +660,8 @@ export class DragHandle extends LitElement {
     // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
       this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY),
-      // Must clear subtrees!
-      getBlockElementsExcludeSubtrees(
-        this._draggingElements
-      ) as BlockComponentElement[],
+      // make sure clear subtrees!
+      this._draggingElements,
       this._lastDroppingTarget
     );
 
