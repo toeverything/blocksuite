@@ -22,7 +22,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { type BlockHost } from '../__internal__/index.js';
+import { type BlockHost, getDefaultPage } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
@@ -89,9 +89,13 @@ type ColumnWidthConfig = {
 class DatabaseColumnHeader extends NonShadowLitElement {
   static styles = css`
     .affine-database-column-header {
+      position: relative;
       display: flex;
       flex-direction: row;
       height: 40px;
+    }
+    .affine-database-column-header:hover .affine-database-add-column-button {
+      visibility: visible;
     }
 
     .affine-database-column {
@@ -209,6 +213,17 @@ class DatabaseColumnHeader extends NonShadowLitElement {
     .affine-database-column-content:hover .affine-database-column-drag {
       visibility: visible;
     }
+
+    .affine-database-add-column-button {
+      visibility: hidden;
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 38px;
+      cursor: pointer;
+    }
   `;
 
   @property()
@@ -235,6 +250,9 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   @query('.affine-database-column-header')
   private _headerContainer!: HTMLElement;
 
+  @query('.affine-database-add-column-button')
+  private _addColumnButton!: HTMLElement;
+
   @state()
   private _widthChangingIndex = -1;
 
@@ -249,6 +267,10 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   firstUpdated() {
     this._initChangeColumnWidthEvent();
     this.setDragHandleHeight();
+
+    const databaseElement = this.closest('affine-database');
+    assertExists(databaseElement);
+    this._initResizeEffect(databaseElement);
   }
 
   updated(changedProperties: Map<string, unknown>) {
@@ -276,6 +298,26 @@ class DatabaseColumnHeader extends NonShadowLitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+  }
+
+  private _initResizeEffect(element: HTMLElement) {
+    const pageBlock = getDefaultPage(this.targetModel.page);
+    const viewportElement = pageBlock?.viewportElement;
+    assertExists(viewportElement);
+
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        for (const { target } of entries) {
+          if (target === viewportElement) {
+            const { right: containerRight } = element.getBoundingClientRect();
+            // calc the position of add column button
+            this._addColumnButton.style.left = `${containerRight}px`;
+            break;
+          }
+        }
+      }
+    );
+    resizeObserver.observe(viewportElement);
   }
 
   setDragHandleHeight() {
@@ -604,6 +646,24 @@ class DatabaseColumnHeader extends NonShadowLitElement {
             </svg>
           </div>
         </div>
+        <div
+          class="affine-database-add-column-button"
+          data-test-id="affine-database-add-column-button"
+        >
+          <!-- Fix move to icon -->
+          <svg
+            viewBox="0 0 16 16"
+            style=${styleMap({
+              width: '12px',
+              height: '100%',
+              fill: 'var(--affine-text-color)',
+            })}
+          >
+            <path
+              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+            ></path>
+          </svg>
+        </div>
       </div>
     `;
   }
@@ -893,18 +953,6 @@ const styles = css`
   .affine-database-block-add-row svg {
     width: 16px;
     height: 16px;
-  }
-
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
   }
 `;
 
@@ -1225,26 +1273,6 @@ export class DatabaseBlockComponent
               </div>
             </div>
           </div>
-        </div>
-
-        <div
-          class="affine-database-add-column-button"
-          data-test-id="affine-database-add-column-button"
-          @click=${() => this._addColumn(this.model.columns.length)}
-        >
-          <!-- Fix move to icon -->
-          <svg
-            viewBox="0 0 16 16"
-            style=${styleMap({
-              width: '12px',
-              height: '100%',
-              fill: 'var(--affine-text-color)',
-            })}
-          >
-            <path
-              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
-            ></path>
-          </svg>
         </div>
       </div>
     `;
