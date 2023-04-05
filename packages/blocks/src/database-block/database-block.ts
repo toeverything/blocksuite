@@ -676,6 +676,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
         <div
           class="affine-database-add-column-button"
           data-test-id="affine-database-add-column-button"
+          @click=${() => this.addColumn(this.targetModel.columns.length)}
         >
           <!-- Fix move to icon -->
           <svg

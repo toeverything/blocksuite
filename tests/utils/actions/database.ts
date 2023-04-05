@@ -1,4 +1,4 @@
-import type { ColumnSchemaType } from '@blocksuite/global/database';
+import type { ColumnType } from '@blocksuite/global/database';
 import { type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
@@ -18,7 +18,7 @@ export async function performColumnAction(
 
 export async function switchColumnType(
   page: Page,
-  columnType: ColumnSchemaType,
+  columnType: ColumnType,
   columnId = '3',
   isDefault = false
 ) {
