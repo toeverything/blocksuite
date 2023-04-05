@@ -1,4 +1,3 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -29,8 +28,6 @@ export class PageSelectedRects extends LitElement {
     }
   `;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
-
   @property()
   draggingArea: DOMRect | null = null;
 
@@ -39,18 +36,6 @@ export class PageSelectedRects extends LitElement {
 
   @property()
   rects: DOMRect[] = [];
-
-  connectedCallback() {
-    super.connectedCallback();
-
-    // const disposables = this._disposables;
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this._disposables.dispose();
-  }
 
   protected willUpdate(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('draggingArea')) {
