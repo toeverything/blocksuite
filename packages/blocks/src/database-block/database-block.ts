@@ -429,7 +429,8 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       assertExists(parentElement);
       const { right: boundaryRight } = parentElement.getBoundingClientRect();
       // the distance from the drag handle to the right border
-      const dragHandleRight = event.clientX - boundaryRight;
+      const dragHandleRight =
+        event.clientX - boundaryRight + DEFAULT_ADD_BUTTON_WIDTH;
       if (dragHandleRight >= 0 && direction === 'right') {
         // 1. Drag right 100 (scroll distance 100)
         // 2. Drag left 30 (scroll distance unchanged)
