@@ -1029,6 +1029,27 @@ export class DatabaseBlockComponent
 
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    const tableContent = this._tableContainer.parentElement;
+    assertExists(tableContent);
+    this._disposables.addFromEvent(tableContent, 'scroll', event => {
+      const element = event.target as HTMLElement;
+      const titleAddColumnBtn =
+        element.querySelector<HTMLElement>('.add-column-button');
+      const addColumnBtn = element.querySelector<HTMLElement>(
+        '.affine-database-add-column-button'
+      );
+      assertExists(titleAddColumnBtn);
+      assertExists(addColumnBtn);
+      const { right } = element.getBoundingClientRect();
+      const { left } = titleAddColumnBtn.getBoundingClientRect();
+      const isInViewport = left >= right;
+      if (isInViewport) {
+        addColumnBtn.style.display = 'flex';
+      } else {
+        addColumnBtn.style.display = 'none';
+      }
+    });
   }
 
   disconnectedCallback() {
