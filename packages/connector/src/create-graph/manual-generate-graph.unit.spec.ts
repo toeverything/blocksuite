@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { Rectangle } from '../rectangle.js';
 import {
-  manuelGenerateGraph,
-  shouldManuelGenerateGraph,
-} from './manuel-generate-graph.js';
+  manualGenerateGraph,
+  shouldManualGenerateGraph,
+} from './manual-generate-graph.js';
 import type { CreateGraphReturned } from './types.js';
 
-describe('shouldManuelGenerateNodes', () => {
+describe('shouldManualGenerateNodes', () => {
   it('should return true for both on right', () => {
     const rectangles: Rectangle[] = [new Rectangle(2, 2, 2, 2)];
     const points = [
@@ -15,7 +15,7 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateGraph(rectangles, points);
+    const result = shouldManualGenerateGraph(rectangles, points);
     expect(result).toBeTruthy();
   });
 
@@ -26,7 +26,7 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateGraph(rectangles, points);
+    const result = shouldManualGenerateGraph(rectangles, points);
     expect(result).toBeFalsy();
   });
 
@@ -40,12 +40,12 @@ describe('shouldManuelGenerateNodes', () => {
       { x: 5, y: 5 },
     ];
 
-    const result = shouldManuelGenerateGraph(rectangles, points);
+    const result = shouldManualGenerateGraph(rectangles, points);
     expect(result).toBeFalsy();
   });
 });
 
-describe('manuel generate nodes', () => {
+describe('manual generate nodes', () => {
   it('should generate a correct graph for given rectangles and points', () => {
     const rectangles: Rectangle[] = [new Rectangle(2, 2, 2, 2)];
     const points = [
@@ -68,7 +68,7 @@ describe('manuel generate nodes', () => {
       graph: null,
     } as unknown as CreateGraphReturned;
 
-    const result = manuelGenerateGraph(rectangles, points);
+    const result = manualGenerateGraph(rectangles, points);
     expectedResult.graph = result.graph; // Assign the graph since we cannot compare the Graph objects directly
 
     expect(result).toMatchObject(expectedResult);

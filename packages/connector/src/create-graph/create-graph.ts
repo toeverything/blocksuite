@@ -4,9 +4,9 @@ import type { Point } from '../simplify-path.js';
 import { createNodes } from './create-nodes.js';
 import { createRulers } from './create-rulers.js';
 import {
-  manuelGenerateGraph,
-  shouldManuelGenerateGraph,
-} from './manuel-generate-graph.js';
+  manualGenerateGraph,
+  shouldManualGenerateGraph,
+} from './manual-generate-graph.js';
 import type { CreateGraphReturned } from './types.js';
 
 export function createGraph(
@@ -14,8 +14,8 @@ export function createGraph(
   points: Point[],
   margin = [10, 10]
 ): CreateGraphReturned {
-  if (shouldManuelGenerateGraph(rectangles, points)) {
-    return manuelGenerateGraph(rectangles, points);
+  if (shouldManualGenerateGraph(rectangles, points)) {
+    return manualGenerateGraph(rectangles, points);
   }
 
   const inflatedRects = rectangles.map(r => r.inflate(margin[0], margin[1]));
