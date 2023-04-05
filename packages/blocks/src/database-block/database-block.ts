@@ -81,6 +81,7 @@ type ColumnWidthConfig = {
   scrollLeft: number;
   lastClientX: number;
   startClientX: number;
+  currentCell: HTMLElement;
   rowCells: HTMLElement[];
 };
 
@@ -324,6 +325,11 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       )
     );
 
+    const dragHandleCell = this._headerContainer.querySelector<HTMLElement>(
+      `.database-cell:nth-child(${index + 1})`
+    );
+    assertExists(dragHandleCell);
+
     const parentElement = this.tableContainer.parentElement;
     assertExists(parentElement);
     this._changeColumnWidthConfig = {
@@ -333,6 +339,7 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       lastClientX: event.clientX,
       startClientX: event.clientX,
       rawWidth: currentColumnCells[0].clientWidth,
+      currentCell: dragHandleCell,
       rafId: undefined,
     };
   };
@@ -382,7 +389,13 @@ class DatabaseColumnHeader extends NonShadowLitElement {
       // the distance from the drag handle to the right border
       const dragHandleRight = event.clientX - boundaryRight;
       if (dragHandleRight >= 0 && direction === 'right') {
-        parentElement.scrollLeft = startScrollLeft + dragHandleRight;
+        // 1. Drag right 100 (scroll distance 100)
+        // 2. Drag left 30 (scroll distance unchanged)
+        // 3. At this point, dragging further to the right should keep the 100
+        parentElement.scrollLeft = Math.max(
+          parentElement.scrollLeft,
+          startScrollLeft + dragHandleRight
+        );
       }
     };
     if (rafId) cancelAnimationFrame(rafId);
