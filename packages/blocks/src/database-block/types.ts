@@ -7,7 +7,17 @@ export type ColumnHeader = {
   icon: TemplateResult;
 };
 
-export type ActionName =
+export type ToolbarActionType = 'database-type' | 'copy' | 'delete-database';
+
+export type SwitchViewActionType = 'table-view' | 'kanban-view';
+
+type ActionMenuItem<T extends DatabaseActionType> = {
+  type: T;
+  text: string;
+  icon: TemplateResult;
+};
+
+export type ColumnActionType =
   | 'rename'
   | 'column-type'
   | 'duplicate'
@@ -16,26 +26,26 @@ export type ActionName =
   | 'move-left'
   | 'move-right'
   | 'delete';
+export type ColumnAction = ActionMenuItem<ColumnActionType> | Divider;
 
-type CommonEditAction<T extends ActionName = ActionName> = {
-  type: T;
-  text: string;
-  icon: TemplateResult;
-};
+type DatabaseActionType =
+  | ColumnActionType
+  | ToolbarActionType
+  | SwitchViewActionType;
 
-export type DividerAction = {
+export type DatabaseAction = ActionMenuItem<DatabaseActionType> | Divider;
+
+// divider in menu
+export type Divider = {
   type: 'divider';
 };
 
-/** none title column type action */
-export type ColumnAction = DividerAction | CommonEditAction;
+export type TitleColumnActionType = 'rename' | 'insert-right';
+export type TitleColumnAction = ActionMenuItem<TitleColumnActionType>;
 
-/** title column action */
-export type TitleColumnActionName = 'rename' | 'insert-right';
-export type TitleColumnAction = CommonEditAction<TitleColumnActionName>;
+export type SelectTagActionType = 'rename' | 'delete';
+export type SelectTagAction = ActionMenuItem<SelectTagActionType> | Divider;
 
-/** select tag action */
-export type SelectTagActionName = 'rename' | 'delete';
-export type SelectTagAction =
-  | DividerAction
-  | CommonEditAction<SelectTagActionName>;
+export type ToolbarAction = ActionMenuItem<ToolbarActionType> | Divider;
+
+export type SwitchViewAction = ActionMenuItem<SwitchViewActionType>;

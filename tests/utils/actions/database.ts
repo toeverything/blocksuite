@@ -2,6 +2,7 @@ import type { ColumnType } from '@blocksuite/global/database';
 import { type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
+import { getBoundingClientRect, waitNextFrame } from './misc.js';
 
 export async function performColumnAction(
   page: Page,
@@ -84,4 +85,28 @@ export async function performSelectColumnTagAction(
 export async function clickDatabaseOutside(page: Page) {
   const pageTitle = page.locator('.affine-default-page-block-title');
   await pageTitle.click();
+}
+
+export async function waitSearchTransitionEnd(page: Page) {
+  await waitNextFrame(page, 400);
+}
+
+export async function focusDatabaseSearch(page: Page) {
+  (await getDatabaseMouse(page)).mouseOver();
+  const searchIcon = page.locator('.affine-database-search-input-icon');
+  await searchIcon.click();
+  await waitSearchTransitionEnd(page);
+  return searchIcon;
+}
+
+export async function getDatabaseMouse(page: Page) {
+  const databaseRect = await getBoundingClientRect(page, 'affine-database');
+  return {
+    mouseOver: async () => {
+      await page.mouse.move(databaseRect.x, databaseRect.y);
+    },
+    mouseLeave: async () => {
+      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
+    },
+  };
 }

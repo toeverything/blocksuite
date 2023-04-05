@@ -1,5 +1,6 @@
 import {
   DatabaseDone,
+  DatabaseSearchClose,
   DeleteIcon,
   MoreHorizontalIcon,
   PenIcon,
@@ -17,9 +18,9 @@ import { html, literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-import type { SelectTagAction, SelectTagActionName } from '../../types.js';
-import { getTagColor, onClickOutside } from '../../utils.js';
-import { actionStyles, isDivider } from '../edit-column-popup.js';
+import type { SelectTagAction, SelectTagActionType } from '../../types.js';
+import { getTagColor, isDivider, onClickOutside } from '../../utils.js';
+import { actionStyles } from '../edit-column-popup.js';
 
 export const enum SelectMode {
   Multi = 'multi',
@@ -218,7 +219,7 @@ class SelectAction extends LitElement {
   index!: number;
 
   @property()
-  onAction!: (type: SelectTagActionName, index: number) => void;
+  onAction!: (type: SelectTagActionType, index: number) => void;
 
   render() {
     return html`
@@ -285,6 +286,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     }
     .select-option-container {
       padding: 8px;
+      color: rgba(0, 0, 0, 0.9);
     }
     .select-option-container-header {
       padding: 8px 0px;
@@ -298,6 +300,12 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       height: 28px;
       background: #f5f5f5;
       border-radius: 4px;
+      color: rgba(0, 0, 0, 0.9);
+      background: #f3f0ff;
+    }
+    .select-selected > .close-icon {
+      display: flex;
+      align-items: center;
     }
 
     .select-option-new {
@@ -516,7 +524,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     });
   };
 
-  private _onSelectAction = (type: SelectTagActionName, index: number) => {
+  private _onSelectAction = (type: SelectTagActionType, index: number) => {
     if (type === 'rename') {
       this._editingIndex = index;
       return;
@@ -623,7 +631,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
             return html`<span class="select-selected" style=${style}>
               ${item.value}
               <span @click=${() => this._onDeleteSelected(selectedTag, item)}
-                >x</span
+                >${DatabaseSearchClose}</span
               >
             </span>`;
           })}

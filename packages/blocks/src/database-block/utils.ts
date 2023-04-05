@@ -1,3 +1,5 @@
+import type { DatabaseAction, Divider } from './types.js';
+
 // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
 function isVisible(elem: HTMLElement) {
   return (
@@ -55,3 +57,7 @@ function tagColorHelper() {
 }
 
 export const getTagColor = tagColorHelper();
+
+export function isDivider(action: DatabaseAction): action is Divider {
+  return action.type === 'divider';
+}
