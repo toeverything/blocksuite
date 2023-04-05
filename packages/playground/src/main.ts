@@ -121,4 +121,12 @@ async function main() {
   document.body.prepend(exampleList);
 }
 
-main();
+main().then(async () => {
+  if (!import.meta.env.SENTRY_DSN) return;
+  const Sentry = await import('@sentry/browser');
+  Sentry.init({
+    dsn: import.meta.env.SENTRY_DSN,
+    integrations: [new Sentry.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
+});
