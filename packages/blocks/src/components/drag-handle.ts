@@ -381,7 +381,7 @@ export class DragHandle extends LitElement {
 
     // document
     if (isFirefox) {
-      disposables.addFromEvent(document, 'dragover', this.onDragOverDocument);
+      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
     }
 
     // document.body
@@ -559,7 +559,7 @@ export class DragHandle extends LitElement {
     this._removeDragPreview();
   };
 
-  onDragOverDocument = (e: DragEvent) => {
+  private _onDragOverDocument = (e: DragEvent) => {
     if (!isFirefox) {
       throw new Error('FireFox only');
     }
