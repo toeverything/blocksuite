@@ -175,6 +175,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       (pageName.length > DISPLAY_LENGTH ? '..' : '');
     return [
       ...this._pageList.map((page, idx) => ({
+        key: page.id,
         name: page.title,
         active: idx === this._activatedItemIndex,
         icon: PageIcon,
@@ -182,12 +183,14 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       })),
       // The active condition is a bit tricky here
       {
+        key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
         active: this._pageList.length === this._activatedItemIndex,
         icon: NewPageIcon,
         action: () => this._createPage(),
       },
       {
+        key: 'create-subpage',
         name: `Create "${displayPageName}" subpage`,
         active: this._pageList.length + 1 === this._activatedItemIndex,
         icon: DualLinkIcon,
@@ -223,6 +226,30 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         this._activatedItemIndex =
           (this._actionList.length + this._activatedItemIndex + step) %
           this._actionList.length;
+
+        // Scroll to the active item
+        const item = this._actionList[this._activatedItemIndex];
+        if (
+          item.key === 'create-linked-page' ||
+          item.key === 'create-subpage'
+        ) {
+          return;
+        }
+        const shadowRoot = this.shadowRoot;
+        if (!shadowRoot) {
+          console.warn('Failed to find the shadow root!', this);
+          return;
+        }
+        const ele = shadowRoot.querySelector(
+          `icon-button[data-id="${item.key}"]`
+        );
+        if (!ele) {
+          console.warn('Failed to find the active item!', item);
+          return;
+        }
+        ele.scrollIntoView({
+          block: 'nearest',
+        });
       },
       onConfirm: () => {
         this._actionList[this._activatedItemIndex].action();
@@ -298,9 +325,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const pageList = this._actionList
       .slice(0, -2)
       .map(
-        ({ name, action, active, icon }) => html`<icon-button
+        ({ key, name, action, active, icon }) => html`<icon-button
           width="280px"
           height="32px"
+          data-id=${key}
           text=${name}
           ?hover=${active}
           @click=${action}
@@ -311,9 +339,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const createList = this._actionList
       .slice(-2)
       .map(
-        ({ name, action, active, icon }) => html`<icon-button
+        ({ key, name, action, active, icon }) => html`<icon-button
           width="280px"
           height="32px"
+          data-id=${key}
           text=${name}
           ?hover=${active}
           @click=${action}
@@ -323,7 +352,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
     return html`<div class="linked-page-popover" style="${style}">
       <div class="group-title">Link to page</div>
-      ${pageList}
+      <div class="group" style="overflow-y: scroll; max-height: 224px;">
+        ${pageList}
+      </div>
       <div class="divider"></div>
       <div class="group-title">New page</div>
       ${createList}
