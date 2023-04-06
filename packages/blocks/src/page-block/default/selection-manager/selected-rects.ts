@@ -57,7 +57,6 @@ export class AffinePageSelectedRects extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-
     // trigger click of editor container
     this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
   }
@@ -77,7 +76,7 @@ export class AffinePageSelectedRects extends LitElement {
       this.style.top = `${startTop}px`;
       this.style.left = `${startLeft}px`;
     }
-    this.toggleAttribute('data-grab', grab);
+    this.toggleAttribute('data-grab', Boolean(firstRect && grab));
   }
 
   render() {
