@@ -1363,6 +1363,32 @@ export const DatabaseAddColumn = html`
     ></path>
   </svg>
 `;
+
+export const DatabaseDragIcon = html`
+  <svg
+    width="10"
+    height="14"
+    viewBox="0 0 10 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="10" height="14" rx="2" fill="white" />
+    <rect width="10" height="14" rx="2" fill="black" fill-opacity="0.08" />
+    <g clip-path="url(#clip0_179_9218)">
+      <circle cx="3" cy="3" r="1" fill="#9096A5" />
+      <circle cx="3" cy="6.79163" r="1" fill="#9096A5" />
+      <circle cx="3" cy="10.5833" r="1" fill="#9096A5" />
+      <circle cx="7" cy="3" r="1" fill="#9096A5" />
+      <circle cx="7" cy="6.79163" r="1" fill="#9096A5" />
+      <circle cx="7" cy="10.5833" r="1" fill="#9096A5" />
+    </g>
+    <defs>
+      <clipPath id="clip0_179_9218">
+        <rect width="6" height="10" fill="white" transform="translate(2 2)" />
+      </clipPath>
+    </defs>
+  </svg>
+`;
 // Linked Page
 
 export const PageIconSVG = svg`

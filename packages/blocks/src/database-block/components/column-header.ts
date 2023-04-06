@@ -1,5 +1,6 @@
 import {
   DatabaseAddColumn,
+  DatabaseDragIcon,
   DatabaseMultiSelect,
   DatabaseNumber,
   DatabaseProgress,
@@ -152,16 +153,17 @@ const styles = css`
   .affine-database-column-input:focus {
     outline: none;
   }
-  .affine-database-column-drag {
+  .affine-database-column-move {
     display: flex;
     align-items: center;
     visibility: hidden;
   }
-  .affine-database-column-drag svg {
+  .affine-database-column-move svg {
     width: 10px;
     height: 14px;
+    cursor: move;
   }
-  .affine-database-column-content:hover .affine-database-column-drag {
+  .affine-database-column-content:hover .affine-database-column-move {
     visibility: visible;
   }
 
@@ -223,7 +225,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   private _widthChangingIndex = -1;
 
   private _disposables: DisposableGroup = new DisposableGroup();
-  private _changeColumnWidthDisposable: DisposableGroup = new DisposableGroup();
+  private _columnDisposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
   private _isHeaderHover = false;
 
@@ -266,7 +268,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
-    this._changeColumnWidthDisposable.dispose();
+    this._columnDisposables.dispose();
   }
 
   private _initResizeEffect(element: HTMLElement) {
@@ -344,25 +346,25 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   };
 
   private _initChangeColumnWidthEvent() {
-    this._changeColumnWidthDisposable.dispose();
+    this._columnDisposables.dispose();
 
-    const columns = this._headerContainer.querySelectorAll<HTMLDivElement>(
-      '.affine-database-column'
+    const dragHandles = this._headerContainer.querySelectorAll<HTMLDivElement>(
+      '.affine-database-column-drag-handle'
     );
-    columns.forEach((column, index) => {
-      this._changeColumnWidthDisposable.addFromEvent(
-        column,
+    dragHandles.forEach((dragHandle, index) => {
+      this._columnDisposables.addFromEvent(
+        dragHandle,
         'mousedown',
         (event: MouseEvent) => this._onColumnWidthMousedown(event, index)
       );
     });
 
-    this._changeColumnWidthDisposable.addFromEvent(
+    this._columnDisposables.addFromEvent(
       document,
       'mousemove',
       this._onColumnWidthMousemove
     );
-    this._changeColumnWidthDisposable.addFromEvent(
+    this._columnDisposables.addFromEvent(
       document,
       'mouseup',
       this._onColumnWidthMouseup
@@ -372,7 +374,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     // all rows cell in current column
     const currentColumnCells = Array.from(
       this.tableContainer.querySelectorAll<HTMLElement>(
-        `.database-cell:nth-child(${index})`
+        `.database-cell:nth-child(${index + 1})`
       )
     );
 
@@ -384,7 +386,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     const parentElement = this.tableContainer.parentElement;
     assertExists(parentElement);
     this._changeColumnWidthConfig = {
-      index: index - 1,
+      index,
       rowCells: currentColumnCells,
       scrollLeft: parentElement.scrollLeft,
       lastClientX: event.clientX,
@@ -394,7 +396,6 @@ export class DatabaseColumnHeader extends ShadowlessElement {
       rafId: undefined,
     };
   };
-
   private _onColumnWidthMousemove = (event: MouseEvent) => {
     event.preventDefault();
     if (!this._changeColumnWidthConfig) return;
@@ -607,8 +608,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                   : this.targetModel.titleColumnName}
               </div>
             </div>
-            <!-- TODO: change icon -->
-            <div class="affine-database-column-drag">${TextIcon}</div>
+            <div class="affine-database-column-move">${DatabaseDragIcon}</div>
           </div>
         </div>
         ${repeat(
@@ -646,8 +646,9 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                         : column.name}
                     </div>
                   </div>
-                  <!-- TODO: change icon -->
-                  <div class="affine-database-column-drag">${TextIcon}</div>
+                  <div class="affine-database-column-move">
+                    ${DatabaseDragIcon}
+                  </div>
                 </div>
                 <div
                   class="affine-database-column-drag-handle ${this
