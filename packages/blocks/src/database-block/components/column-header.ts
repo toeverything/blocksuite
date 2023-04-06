@@ -235,6 +235,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
 
   firstUpdated() {
     this._initChangeColumnWidthEvent();
+    this._initMoveColumnEvent();
     this.setDragHandleHeight();
 
     const databaseElement = this.closest('affine-database');
@@ -502,6 +503,42 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     }
   };
 
+  private _initMoveColumnEvent() {
+    const disposables = this._columnDisposables;
+    disposables.dispose();
+
+    const columnMoveElements =
+      this._headerContainer.querySelectorAll<HTMLDivElement>(
+        '.affine-database-column-move'
+      );
+    columnMoveElements.forEach((moveElement, index) => {
+      // prevent block selection
+      disposables.addFromEvent(moveElement, 'mousedown', e => {
+        e.stopPropagation();
+      });
+      disposables.addFromEvent(moveElement, 'mouseup', e => {
+        e.stopPropagation();
+      });
+
+      disposables.addFromEvent(moveElement, 'dragstart', (event: MouseEvent) =>
+        this._onColumnMoveMousedown(event, index)
+      );
+    });
+
+    // disposables.addFromEvent(document, 'drag', this._onColumnMoveMousemove);
+    // disposables.addFromEvent(document, 'dragend', this._onColumnMoveMouseup);
+  }
+  private _onColumnMoveMousedown = (event: MouseEvent, index: number) => {
+    console.log('mousedown', index);
+  };
+  private _onColumnMoveMousemove = (event: MouseEvent) => {
+    event.preventDefault();
+    console.log('mousemove');
+  };
+  private _onColumnMoveMouseup = (event: MouseEvent) => {
+    console.log('mouseup');
+  };
+
   private _onShowEditColumnPopup = (
     target: Element,
     column: Column | string,
@@ -608,7 +645,6 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                   : this.targetModel.titleColumnName}
               </div>
             </div>
-            <div class="affine-database-column-move">${DatabaseDragIcon}</div>
           </div>
         </div>
         ${repeat(
@@ -646,7 +682,10 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                         : column.name}
                     </div>
                   </div>
-                  <div class="affine-database-column-move">
+                  <div
+                    class="affine-database-column-move"
+                    @click=${(event: MouseEvent) => event.stopPropagation()}
+                  >
                     ${DatabaseDragIcon}
                   </div>
                 </div>
