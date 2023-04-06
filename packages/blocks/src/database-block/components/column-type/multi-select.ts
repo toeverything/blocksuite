@@ -14,13 +14,14 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
     }
   `;
   static tag = literal`affine-database-multi-select-cell`;
-  override render() {
+
+  render() {
     return html`
       <affine-database-select-cell
         .rowHost=${this.rowHost}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
+        .column=${this.column}
         .cell=${this.cell}
       ></affine-database-select-cell>
     `;
@@ -31,14 +32,14 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
 class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   static tag = literal`affine-database-multi-select-cell-editing`;
 
-  override render() {
+  render() {
     return html`
       <affine-database-select-cell-editing
         data-is-editing-cell="true"
         .rowHost=${this.rowHost}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
+        .column=${this.column}
         .cell=${this.cell}
         .mode=${SelectMode.Multi}
       ></affine-database-select-cell-editing>

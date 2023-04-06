@@ -55,8 +55,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const columnSchemaIds = block.columns as string[];
-    const columnIds = block.children.map(child => child.id);
+    const columnIds = block.columns as string[];
+    const rowIds = block.children.map(child => child.id);
 
     return {
       flavour: block.flavour,
@@ -65,8 +65,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         title: block.title.toString(),
         titleColumnName: block.titleColumnName,
         titleColumnWidth: block.titleColumnWidth,
+        rowIds,
         columnIds,
-        columnSchemaIds,
       },
       children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
@@ -81,33 +81,31 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     model: BlockModels['affine:database'],
     props: Record<string, string[]>
   ) {
-    const { columnIds, columnSchemaIds } = props;
+    const { rowIds, columnIds } = props;
 
-    // add ext:columnSchema
-    const columnSchemas = columnSchemaIds
+    const columns = columnIds
       .map(id => model.page.db.getColumn(id))
       .filter((s: Column | null): s is Column => s !== null);
-    const newColumnSchemaIds = columnSchemas.map(schema => {
+    const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.page.db.updateColumn(nonIdProps);
     });
     model.page.updateBlock(model, {
-      columns: newColumnSchemaIds,
+      columns: newColumnIds,
     });
 
-    // add ext:columns
-    const newColumnIds = model.children.map(child => child.id);
-    columnIds.forEach((columnId, columnIndex) => {
-      const newColumnId = newColumnIds[columnIndex];
-      columnSchemaIds.forEach((columnSchemaId, columnSchemaIndex) => {
-        const cellData = model.page.db.getCell(columnId, columnSchemaId);
+    const newRowIds = model.children.map(child => child.id);
+    rowIds.forEach((rowId, rowIndex) => {
+      const newRowId = newRowIds[rowIndex];
+      columnIds.forEach((columnId, columnIndex) => {
+        const cellData = model.page.db.getCell(rowId, columnId);
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {
           value = value.clone();
         }
-        model.page.db.updateCell(newColumnId, {
-          columnId: newColumnSchemaIds[columnSchemaIndex],
+        model.page.db.updateCell(newRowId, {
+          columnId: newColumnIds[columnIndex],
           value,
         });
       });

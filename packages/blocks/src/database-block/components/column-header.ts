@@ -492,10 +492,10 @@ export class DatabaseColumnHeader extends ShadowlessElement {
         titleColumnWidth: columnWidth,
       });
     } else {
-      const schemaId = this.targetModel.columns[index - 1];
-      const schemaProps = this.targetModel.page.db.getColumn(schemaId);
+      const columnId = this.targetModel.columns[index - 1];
+      const columnProps = this.targetModel.page.db.getColumn(columnId);
       this.targetModel.page.db.updateColumn({
-        ...schemaProps,
+        ...columnProps,
         width: columnWidth,
       });
     }
@@ -517,7 +517,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     const editColumn = new EditColumnPopup();
     editColumn.setTitleColumnEditId = this.setEditingColumnId;
     editColumn.targetModel = this.targetModel;
-    editColumn.targetColumnSchema = column;
+    editColumn.targetColumn = column;
     editColumn.columnIndex = index - 1;
     editColumn.closePopup = () => {
       editColumn.remove();
