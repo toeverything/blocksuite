@@ -435,9 +435,7 @@ export class DefaultSelectionManager {
       // clear `drag preview`
       if (type === 'block:drag') {
         this._container.components.dragHandle?.onDragEnd(
-          new DragEvent('dragend', {
-            dataTransfer: new DataTransfer(),
-          })
+          createDragEvent('dragend')
         );
       }
     } else if (type === 'embed') {
