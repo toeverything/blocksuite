@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   type BlockHost,
   isPageMode,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
@@ -60,7 +60,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends NonShadowLitElement {
+export class ParagraphBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-paragraph-block-container {
       position: relative;

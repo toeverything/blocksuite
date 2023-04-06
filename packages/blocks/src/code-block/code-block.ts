@@ -4,7 +4,7 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { assertExists, DisposableGroup, Slot } from '@blocksuite/store';
+import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -14,8 +14,9 @@ import { z } from 'zod';
 import {
   type BlockHost,
   getViewportElement,
-  NonShadowLitElement,
   queryCurrentMode,
+  ShadowlessElement,
+  WithDisposable,
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
@@ -26,7 +27,7 @@ import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends NonShadowLitElement {
+export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   static styles = css`
     code-block {
       position: relative;
@@ -164,9 +165,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   private _showLangList = false;
 
   @state()
-  private _disposables = new DisposableGroup();
-
-  @state()
   private _optionPosition: { x: number; y: number } | null = null;
 
   @state()
@@ -288,7 +286,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposables.dispose();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
     this._documentMutationObserver.disconnect();

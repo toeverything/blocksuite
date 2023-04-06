@@ -7,7 +7,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import {
   type BlockHost,
   getDefaultPageBlock,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
@@ -20,7 +20,7 @@ import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends NonShadowLitElement {
+export class ListBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-list-block-container {
       box-sizing: border-box;

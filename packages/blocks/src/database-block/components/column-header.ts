@@ -16,7 +16,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDefaultPage } from '../../__internal__/index.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../../__internal__/utils/lit.js';
 import { EditColumnPopup } from '../components/edit-column-popup.js';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
@@ -186,7 +186,7 @@ const styles = css`
 `;
 
 @customElement('affine-database-column-header')
-export class DatabaseColumnHeader extends NonShadowLitElement {
+export class DatabaseColumnHeader extends ShadowlessElement {
   static styles = styles;
 
   @property()

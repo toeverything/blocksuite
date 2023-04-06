@@ -2,7 +2,7 @@
 import '../declare-test-window.js';
 
 import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
@@ -617,6 +617,12 @@ export const getBoundingClientRect: (
     return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
   }, selector);
 };
+
+export async function getBoundingBox(locator: Locator) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Missing column box');
+  return box;
+}
 
 export async function getBlockModel<Model extends BaseBlockModel>(
   page: Page,

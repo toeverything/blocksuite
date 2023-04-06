@@ -19,7 +19,6 @@ import {
 import {
   assertExists,
   type BaseBlockModel,
-  DisposableGroup,
   type Page,
   Slot,
 } from '@blocksuite/store';
@@ -29,7 +28,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import type {
   DragHandle,
   FrameBlockModel,
@@ -75,7 +77,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends NonShadowLitElement
+  extends WithDisposable(ShadowlessElement)
   implements EdgelessContainer, BlockHost
 {
   static styles = css`
@@ -159,7 +161,6 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
   // FIXME: Many parts of code assume that the `selection` is used in page mode
   getSelection() {
@@ -417,9 +418,8 @@ export class EdgelessPageBlockComponent
   }
 
   disconnectedCallback() {
-    this.clipboard.dispose();
     super.disconnectedCallback();
-    this._disposables.dispose();
+    this.clipboard.dispose();
     this.components.dragHandle?.remove();
   }
 

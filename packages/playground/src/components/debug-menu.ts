@@ -17,8 +17,8 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import {
   createEvent,
   getCurrentBlockRange,
-  NonShadowLitElement,
   SelectionUtils,
+  ShadowlessElement,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -44,7 +44,7 @@ const basePath = import.meta.env.DEV
 setBasePath(basePath);
 
 @customElement('debug-menu')
-export class DebugMenu extends NonShadowLitElement {
+export class DebugMenu extends ShadowlessElement {
   static styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);

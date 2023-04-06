@@ -1,6 +1,6 @@
 import '@shoelace-style/shoelace';
 
-import { NonShadowLitElement } from '@blocksuite/blocks';
+import { ShadowlessElement } from '@blocksuite/blocks';
 import {
   type BaseTextAttributes,
   type DeltaInsert,
@@ -118,7 +118,7 @@ function toggleStyle(
 }
 
 @customElement('virgo-test-rich-text')
-export class RichText extends NonShadowLitElement {
+export class RichText extends ShadowlessElement {
   vEditor: VEditor;
 
   @query('.rich-text-container')
@@ -159,7 +159,7 @@ export class RichText extends NonShadowLitElement {
 }
 
 @customElement('tool-bar')
-export class ToolBar extends NonShadowLitElement {
+export class ToolBar extends ShadowlessElement {
   static styles = css`
     .tool-bar {
       display: grid;
@@ -271,7 +271,7 @@ export class ToolBar extends NonShadowLitElement {
 }
 
 @customElement('test-page')
-export class TestPage extends NonShadowLitElement {
+export class TestPage extends ShadowlessElement {
   static styles = css`
     .container {
       display: grid;

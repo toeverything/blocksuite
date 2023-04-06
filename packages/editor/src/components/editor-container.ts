@@ -1,18 +1,18 @@
-import type {
-  CommonSlots,
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
-  MouseMode,
-  PageBlockModel,
-  SurfaceBlockModel,
+import {
+  type CommonSlots,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
+  type MouseMode,
+  type PageBlockModel,
+  type SurfaceBlockModel,
+  WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '@blocksuite/blocks';
 import { type Page, Slot } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -30,7 +30,7 @@ function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
 }
 
 @customElement('editor-container')
-export class EditorContainer extends NonShadowLitElement {
+export class EditorContainer extends WithDisposable(ShadowlessElement) {
   @property()
   page!: Page;
 
@@ -64,8 +64,6 @@ export class EditorContainer extends NonShadowLitElement {
       ? (this.model[1] as SurfaceBlockModel)
       : null;
   }
-
-  private _disposables = new DisposableGroup();
 
   @query('affine-default-page')
   private _defaultPageBlock?: DefaultPageBlockComponent;
@@ -151,7 +149,6 @@ export class EditorContainer extends NonShadowLitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
-    this._disposables.dispose();
   }
 
   firstUpdated() {

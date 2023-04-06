@@ -3,12 +3,12 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
-export class LangList extends NonShadowLitElement {
+export class LangList extends ShadowlessElement {
   static get styles() {
     return css`
       lang-list {

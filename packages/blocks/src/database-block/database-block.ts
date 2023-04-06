@@ -26,7 +26,7 @@ import { html } from 'lit/static-html.js';
 import { copy } from '../__internal__/clipboard/utils.js';
 import { asyncFocusRichText, type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
-import { NonShadowLitElement } from '../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { toast } from '../components/toast.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -620,42 +620,6 @@ const styles = css`
   .affine-database-block-footer {
     display: flex;
     width: 100%;
-    height: 42px;
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-
-  .affine-database-block-add-row {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    user-select: none;
-    font-size: 14px;
-  }
-  .affine-database-block-add-row svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-  }
-
-  .affine-database-block-footer {
-    display: flex;
-    width: 100%;
     height: 28px;
     background: #fff;
   }
@@ -683,27 +647,12 @@ const styles = css`
     height: 16px;
   }
 
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-  }
-
   ${tooltipStyle}
-  .invisible {
-    display: none;
-  }
 `;
 
 @customElement('affine-database')
 export class DatabaseBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;
