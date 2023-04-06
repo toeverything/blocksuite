@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 
 import {
   activeFrameInEdgeless,
+  addBasicConnectorElement,
   clickComponentToolbarMoreMenuButton,
   decreaseZoomLevel,
   getEdgelessBlockChild,
@@ -13,6 +14,7 @@ import {
   getFrameBoundBoxInEdgeless,
   getFrameRect,
   increaseZoomLevel,
+  locatorEdgelessComponentToolButton,
   locatorEdgelessToolButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
@@ -21,6 +23,7 @@ import {
   selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
+  triggerComponentToolbarAction,
   updateExistedBrushElementSize,
   zoomByMouseWheel,
 } from './utils/actions/edgeless.js';
@@ -417,7 +420,7 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
   const toolbarLocator = page.locator('edgeless-toolbar');
   await expect(toolbarLocator).toBeVisible();
 
-  const shapeTool = page.locator('.icon-container[data-test-id="shape"]');
+  const shapeTool = locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
 
   assertExists(shapeToolBox);
@@ -1071,4 +1074,134 @@ test('format quick bar should show up when double-clicking on text', async ({
   await page.waitForTimeout(200);
   const formatQuickBar = page.locator('.format-quick-bar');
   await expect(formatQuickBar).toBeVisible();
+});
+
+test('bring to front', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // should be rect0
+  await page.mouse.click(110, 110);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  // bring rect0 to front
+  await triggerComponentToolbarAction(page, 'bring to front');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+});
+
+test('send to back', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 150, y: 150 },
+    end: { x: 250, y: 250 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  // should be rect1
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
+
+  // bring rect1 to back
+  await triggerComponentToolbarAction(page, 'send to back');
+
+  // should be rect0
+  await page.mouse.click(175, 175);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+});
+
+test('the tooltip of shape tool button should be hidden when the shape menu is shown', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const shapeTool = locatorEdgelessToolButton(page, 'shape');
+  const shapeToolBox = await shapeTool.boundingBox();
+  const tooltip = shapeTool.locator('tool-tip');
+
+  assertExists(shapeToolBox);
+
+  await page.mouse.move(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await expect(tooltip).toBeVisible();
+
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await expect(tooltip).toBeHidden();
+
+  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await expect(tooltip).toBeVisible();
+});
+
+test('the tooltip of more button should be hidden when the action menu is shown', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicBrushElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+
+  const moreButton = locatorEdgelessComponentToolButton(page, 'more');
+  await expect(moreButton).toBeVisible();
+
+  const moreButtonBox = await moreButton.boundingBox();
+  const tooltip = moreButton.locator('tool-tip');
+
+  assertExists(moreButtonBox);
+
+  await page.mouse.move(moreButtonBox.x + 10, moreButtonBox.y + 10);
+  await expect(tooltip).toBeVisible();
+
+  await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
+  await expect(tooltip).toBeHidden();
+
+  await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
+  await expect(tooltip).toBeVisible();
+});
+
+test('add connector element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });

@@ -1,6 +1,6 @@
 import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type {
   BaseBlockModel,
   DeltaOperation,
@@ -17,7 +17,8 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   type BlockHost,
   getModelByElement,
-  NonShadowLitElement,
+  ShadowlessElement,
+  WithDisposable,
 } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
@@ -46,7 +47,7 @@ function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
 }
 
 @customElement('affine-reference')
-export class AffineReference extends NonShadowLitElement {
+export class AffineReference extends WithDisposable(ShadowlessElement) {
   static styles = css`
     .affine-reference {
       white-space: nowrap;
@@ -93,8 +94,6 @@ export class AffineReference extends NonShadowLitElement {
     type: 'LinkedPage',
     pageId: '0',
   };
-
-  private _disposables = new DisposableGroup();
 
   connectedCallback() {
     super.connectedCallback();

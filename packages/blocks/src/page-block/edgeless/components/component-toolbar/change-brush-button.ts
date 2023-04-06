@@ -1,11 +1,11 @@
 import '../tool-icon-button.js';
 import '../../toolbar/brush-tool/color-panel.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
@@ -31,7 +31,7 @@ function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
 }
 
 @customElement('edgeless-change-brush-button')
-export class EdgelessChangeBrushButton extends LitElement {
+export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: flex;
@@ -107,13 +107,14 @@ export class EdgelessChangeBrushButton extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @state()
+  private _popperShow = false;
+
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
 
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   private _setBrushSize(size: BrushSize) {
     this.page.captureSync();
@@ -138,7 +139,13 @@ export class EdgelessChangeBrushButton extends LitElement {
   firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
+    this._colorPanelPopper = createButtonPopper(
+      this,
+      this._colorPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
     _disposables.add(this._colorPanelPopper);
     super.firstUpdated(changedProperties);
   }
@@ -176,7 +183,7 @@ export class EdgelessChangeBrushButton extends LitElement {
       </edgeless-tool-icon-button>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
-        .tooltip=${'Color'}
+        .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
         @tool.click=${() => this._colorPanelPopper?.toggle()}
       >

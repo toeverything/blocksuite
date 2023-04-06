@@ -1,12 +1,12 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -14,16 +14,20 @@ import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
 
-type Action = { name: string; value: string; disabled: boolean };
+type Action = {
+  name: string;
+  value: 'delete' | 'moveToBack' | 'moveToFront';
+  disabled?: boolean;
+};
 const ACTIONS: Action[] = [
   // FIXME: should implement these function
   // { name: 'Copy', value: 'copy', disabled: true },
   // { name: 'Paste', value: 'paste', disabled: true },
   // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  // { name: 'Bring to front', value: 'bring to front', disabled: true },
-  // { name: 'Send to back', value: 'send to back', disabled: true },
+  { name: 'Bring to front', value: 'moveToFront' },
+  { name: 'Send to back', value: 'moveToBack' },
   // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
-  { name: 'Delete', value: 'delete', disabled: false },
+  { name: 'Delete', value: 'delete' },
 ];
 
 function Actions(onClick: (action: Action) => void) {
@@ -42,7 +46,7 @@ function Actions(onClick: (action: Action) => void) {
 }
 
 @customElement('edgeless-more-button')
-export class EdgelessMoreButton extends LitElement {
+export class EdgelessMoreButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -100,13 +104,14 @@ export class EdgelessMoreButton extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @state()
+  private _popperShow = false;
+
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
 
   private _actionsMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   private _delete() {
     this.page.captureSync();
@@ -124,15 +129,33 @@ export class EdgelessMoreButton extends LitElement {
   }
 
   private _runAction = (action: Action) => {
-    if (action.value === 'delete') {
-      this._delete();
+    switch (action.value) {
+      case 'delete': {
+        this._delete();
+        break;
+      }
+      case 'moveToBack': {
+        this.surface.moveToBack(this.elements.map(ele => ele.id));
+        break;
+      }
+      case 'moveToFront': {
+        this.surface.moveToFront(this.elements.map(ele => ele.id));
+        break;
+      }
     }
+    this._actionsMenuPopper?.hide();
   };
 
   firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._actionsMenuPopper = createButtonPopper(this, this._actionsMenu);
+    this._actionsMenuPopper = createButtonPopper(
+      this,
+      this._actionsMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
     _disposables.add(this._actionsMenuPopper);
     super.firstUpdated(changedProperties);
   }
@@ -141,7 +164,7 @@ export class EdgelessMoreButton extends LitElement {
     const actions = Actions(this._runAction);
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'More'}
+        .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
         @tool.click=${() => this._actionsMenuPopper?.toggle()}
       >

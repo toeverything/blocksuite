@@ -9,8 +9,7 @@ import * as Y from 'yjs';
 
 function testClick(surface: SurfaceManager, e: MouseEvent) {
   const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
-  // @ts-expect-error
-  const elements = surface._pickByPoint(modelX, modelY);
+  const elements = surface.pickByPoint(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
     `picked elements count: ${elements.length}, top element type: ${
@@ -83,6 +82,65 @@ function addShapeElements(surface: SurfaceManager) {
   });
 }
 
+function addConnectorElements(surface: SurfaceManager) {
+  surface.addConnectorElement(new Bound(500, 0, 100, 100), [
+    { x: 0, y: 0 },
+    { x: 30, y: 0 },
+    { x: 30, y: 50 },
+    { x: 60, y: 50 },
+    { x: 60, y: 100 },
+    { x: 100, y: 100 },
+  ]);
+
+  // right
+  surface.addConnectorElement(new Bound(500, 120, 100, 10), [
+    { x: 0, y: 0 },
+    { x: 100, y: 0 },
+  ]);
+
+  // left
+  surface.addConnectorElement(new Bound(500, 260, 100, 10), [
+    { x: 100, y: 0 },
+    { x: 0, y: 0 },
+  ]);
+
+  // top
+  surface.addConnectorElement(new Bound(480, 140, 10, 100), [
+    { x: 0, y: 100 },
+    { x: 0, y: 0 },
+  ]);
+
+  // bottom
+  surface.addConnectorElement(new Bound(620, 140, 10, 100), [
+    { x: 0, y: 0 },
+    { x: 0, y: 100 },
+  ]);
+
+  // right-bottom
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
+    { x: 0, y: 0 },
+    { x: 100, y: 100 },
+  ]);
+
+  // left-top
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
+    { x: 100, y: 100 },
+    { x: 0, y: 0 },
+  ]);
+
+  // left-bottom
+  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
+    { x: 100, y: 0 },
+    { x: 0, y: 100 },
+  ]);
+
+  // right-top
+  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
+    { x: 0, y: 100 },
+    { x: 100, y: 0 },
+  ]);
+}
+
 function main() {
   const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
@@ -96,6 +154,7 @@ function main() {
 
   addBrushElements(surface);
   addShapeElements(surface);
+  addConnectorElements(surface);
 
   // Uncomment to batch load mock data
   // initMockData(surface, 100, 1000, 1000);

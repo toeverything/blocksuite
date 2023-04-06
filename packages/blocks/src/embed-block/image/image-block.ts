@@ -7,15 +7,12 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  NonShadowLitElement,
-} from '../../__internal__/index.js';
+import { type BlockHost, ShadowlessElement } from '../../__internal__/index.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends NonShadowLitElement {
+export class ImageBlockComponent extends ShadowlessElement {
   static styles = css`
     affine-image > affine-embed {
       display: block;

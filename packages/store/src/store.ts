@@ -91,7 +91,7 @@ const flagsPreset = {
 
 export class Store {
   readonly id: string;
-  readonly doc = new BlockSuiteDoc();
+  readonly doc: BlockSuiteDoc;
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
@@ -109,6 +109,7 @@ export class Store {
     }: StoreOptions = { id: nanoid() }
   ) {
     this.id = id;
+    this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       this,
       awareness ?? new Awareness<RawAwarenessState>(this.doc),

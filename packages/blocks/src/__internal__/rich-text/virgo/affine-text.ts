@@ -3,7 +3,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NonShadowLitElement } from '../../index.js';
+import { ShadowlessElement } from '../../index.js';
 import type { AffineTextAttributes } from './types.js';
 
 export function affineTextStyles(
@@ -39,7 +39,7 @@ export function affineTextStyles(
 }
 
 @customElement('affine-text')
-export class AffineText extends NonShadowLitElement {
+export class AffineText extends ShadowlessElement {
   static styles = css`
     affine-text {
       white-space: pre-wrap;

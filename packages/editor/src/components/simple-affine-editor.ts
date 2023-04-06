@@ -1,4 +1,4 @@
-import { NonShadowLitElement } from '@blocksuite/blocks';
+import { ShadowlessElement } from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
@@ -14,7 +14,7 @@ import { EditorContainer } from './editor-container.js';
  * You can use `editor.importMarkdown` to load markdown content.
  */
 @customElement('simple-affine-editor')
-export class SimpleAffineEditor extends NonShadowLitElement {
+export class SimpleAffineEditor extends ShadowlessElement {
   readonly workspace: Workspace;
   readonly page: Page;
 

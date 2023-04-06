@@ -6,14 +6,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
-import { NonShadowLitElement, queryCurrentMode } from '../std.js';
+import { queryCurrentMode, ShadowlessElement } from '../std.js';
 import {
   highlightCache,
   type highlightCacheKey,
 } from './utils/highlight-cache.js';
 
 @customElement('affine-code-line')
-export class AffineCodeLine extends NonShadowLitElement {
+export class AffineCodeLine extends ShadowlessElement {
   @property({ type: Object })
   delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,

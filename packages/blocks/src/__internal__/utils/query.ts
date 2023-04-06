@@ -803,11 +803,10 @@ export function getRectByBlockElement(
 export function getSelectedStateRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
-  if (isImage(element)) {
+  if (isImage(element))
     return (
       element.querySelector('.resizable-img') ?? element
     ).getBoundingClientRect();
-  }
   return getRectByBlockElement(element);
 }
 

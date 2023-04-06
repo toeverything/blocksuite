@@ -1,14 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { generateKeyBetween } from 'fractional-indexing';
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
 import type { Color, IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
+import type { ConnectorProps, Controller } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
+  ConnectorElement,
   DebugElement,
   ElementCtors,
   type PhasorElement,
@@ -16,6 +18,7 @@ import {
   ShapeElement,
   type ShapeType,
 } from './elements/index.js';
+import { compare } from './grid.js';
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
@@ -26,6 +29,7 @@ export class SurfaceManager {
   private _renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, PhasorElement>();
+  private _bindings = new Map<string, Set<string>>();
   private _lastIndex = 'a0';
 
   constructor(yContainer: Y.Map<unknown>) {
@@ -91,6 +95,21 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
+  addConnectorElement(
+    bound: IBound,
+    controllers: Controller[],
+    properties: ConnectorProps = {}
+  ) {
+    const id = nanoid(10);
+    const element = new ConnectorElement(id);
+
+    setXYWH(element, bound);
+    element.controllers = controllers;
+    ConnectorElement.updateProps(element, properties);
+
+    return this._addElement(element);
+  }
+
   updateBrushElementPoints(id: string, bound: IBound, points: number[][]) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
@@ -100,7 +119,35 @@ export class SurfaceManager {
     });
   }
 
-  updateElementProps(id: string, rawProps: ShapeProps | BrushProps) {
+  updateConnectorElement(
+    id: string,
+    bound: IBound,
+    controllers: Controller[],
+    properties: ConnectorProps = {}
+  ) {
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      yElement.set('controllers', JSON.stringify(controllers));
+      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
+      for (const [key, value] of Object.entries(properties)) {
+        yElement.set(key, value);
+      }
+    });
+    if (properties.startElement) {
+      this._addBinding(properties.startElement.id, id);
+      this._addBinding(id, properties.startElement.id);
+    }
+    if (properties.endElement) {
+      this._addBinding(properties.endElement.id, id);
+      this._addBinding(id, properties.endElement.id);
+    }
+  }
+
+  updateElementProps(
+    id: string,
+    rawProps: ShapeProps | BrushProps | ConnectorProps
+  ) {
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
@@ -151,11 +198,11 @@ export class SurfaceManager {
     return this._renderer.toViewCoord(modelX, modelY);
   }
 
-  private _pickByPoint(
-    x: number,
-    y: number,
-    options?: HitTestOptions
-  ): PhasorElement[] {
+  pickById(id: string) {
+    return this._elements.get(id);
+  }
+
+  pickByPoint(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
@@ -166,7 +213,7 @@ export class SurfaceManager {
   }
 
   pickTop(x: number, y: number): PhasorElement | null {
-    const results = this._pickByPoint(x, y);
+    const results = this.pickByPoint(x, y);
     return results[results.length - 1] ?? null;
   }
 
@@ -183,6 +230,75 @@ export class SurfaceManager {
     elements.forEach(element => this._addElement(element));
   }
 
+  moveToBack(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    let startIndex = this._lastIndex;
+    this._elements.forEach(element => {
+      if (elementIds.includes(element.id)) {
+        return;
+      }
+      if (element.index < startIndex) {
+        startIndex = element.index;
+      }
+    });
+
+    const keys = generateNKeysBetween(null, startIndex, elementIds.length);
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as PhasorElement[]
+    ).sort(compare);
+
+    this._transact(() => {
+      sortedElements.forEach((ele, index) => {
+        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  moveToFront(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const keys = generateNKeysBetween(this._lastIndex, null, elementIds.length);
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as PhasorElement[]
+    ).sort(compare);
+
+    this._transact(() => {
+      sortedElements.forEach((ele, index) => {
+        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  getBindingElements(id: string) {
+    const bindingIds = this._bindings.get(id);
+    if (!bindingIds?.size) {
+      return [];
+    }
+    return [...bindingIds.values()]
+      .map(bindingId => this.pickById(bindingId))
+      .filter(e => !!e) as PhasorElement[];
+  }
+
+  private _addBinding(id0: string, id1: string) {
+    if (!this._bindings.has(id0)) {
+      this._bindings.set(id0, new Set());
+    }
+    this._bindings.get(id0)?.add(id1);
+  }
+
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
@@ -193,6 +309,21 @@ export class SurfaceManager {
 
     this._renderer.addElement(element);
     this._elements.set(element.id, element);
+
+    if (element.index > this._lastIndex) {
+      this._lastIndex = element.index;
+    }
+
+    if (element.type === 'connector') {
+      if (element.startElement) {
+        this._addBinding(element.startElement.id, element.id);
+        this._addBinding(element.id, element.startElement.id);
+      }
+      if (element.endElement) {
+        this._addBinding(element.endElement.id, element.id);
+        this._addBinding(element.id, element.endElement.id);
+      }
+    }
   }
 
   private _syncFromExistingContainer() {
@@ -201,7 +332,6 @@ export class SurfaceManager {
 
   private _addElement(element: PhasorElement) {
     element.index = generateKeyBetween(this._lastIndex, null);
-    this._lastIndex = element.index as string;
 
     this._transact(() => {
       const yElement = this._createYElement(element);
@@ -276,6 +406,13 @@ export class SurfaceManager {
           case 'points': {
             const points: number[][] = JSON.parse(yElement.get(key) as string);
             (element as BrushElement).points = points;
+            break;
+          }
+          case 'controllers': {
+            const controllers: Controller[] = JSON.parse(
+              yElement.get(key) as string
+            );
+            (element as ConnectorElement).controllers = controllers;
             break;
           }
           default: {

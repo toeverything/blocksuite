@@ -15,7 +15,8 @@ import {
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
+import type { ConnectorElement, PhasorElement, XYWH } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
@@ -27,6 +28,8 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
+  generateConnectorPath,
+  getConnectorAttachedInfo,
   getXYWH,
   isPhasorElement,
   isTopLevelBlock,
@@ -44,6 +47,32 @@ enum DragType {
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
+}
+
+function isConnectorAndBindingsAllSelected(
+  connector: ConnectorElement,
+  selected: Selectable[]
+) {
+  const connectorSelected = selected.find(s => s.id === connector.id);
+  if (!connectorSelected) {
+    return false;
+  }
+  const { startElement, endElement } = connector;
+  const startSelected = selected.find(s => s.id === startElement?.id);
+  const endSelected = selected.find(s => s.id === endElement?.id);
+  if (!startElement && !endElement) {
+    return true;
+  }
+  if (!startElement && endSelected) {
+    return true;
+  }
+  if (!endElement && startSelected) {
+    return true;
+  }
+  if (startSelected && endSelected) {
+    return true;
+  }
+  return false;
 }
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
@@ -119,24 +148,87 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
   }
 
-  private _handleSurfaceDragMove(selected: SurfaceElement, e: SelectionEvent) {
+  private _handleSurfaceDragMove(selected: PhasorElement, e: SelectionEvent) {
     if (!this._lock) {
       this._lock = true;
       this._page.captureSync();
     }
-    const { zoom } = this._edgeless.surface.viewport;
+    const { surface } = this._edgeless;
+    const { zoom } = surface.viewport;
     const deltaX = this._dragLastPos.x - e.x;
     const deltaY = this._dragLastPos.y - e.y;
     const boundX = selected.x - deltaX / zoom;
     const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
     const boundH = selected.h;
-    this._edgeless.surface.setElementBound(selected.id, {
-      x: boundX,
-      y: boundY,
-      w: boundW,
-      h: boundH,
-    });
+
+    if (
+      selected.type !== 'connector' ||
+      (selected.type === 'connector' &&
+        isConnectorAndBindingsAllSelected(
+          selected,
+          this._blockSelectionState.selected
+        ))
+    ) {
+      surface.setElementBound(selected.id, {
+        x: boundX,
+        y: boundY,
+        w: boundW,
+        h: boundH,
+      });
+    }
+
+    if (selected.type !== 'connector') {
+      const bindingElements = surface.getBindingElements(selected.id);
+      bindingElements.forEach(bindingElement => {
+        if (bindingElement.type === 'connector') {
+          if (
+            isConnectorAndBindingsAllSelected(
+              bindingElement,
+              this._blockSelectionState.selected
+            )
+          ) {
+            return;
+          }
+          const { startElement, endElement, id, x, y, controllers, mode } =
+            bindingElement;
+          const { start, end } = getConnectorAttachedInfo(
+            bindingElement,
+            surface,
+            this._page
+          );
+          const fixed =
+            startElement?.id === selected.id
+              ? 'end'
+              : endElement?.id === selected.id
+              ? 'start'
+              : undefined;
+
+          const routes = generateConnectorPath(
+            start.rect,
+            end.rect,
+            start.point,
+            end.point,
+            controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+            mode,
+            fixed
+          );
+
+          const bound = getBrushBoundFromPoints(
+            routes.map(r => [r.x, r.y]),
+            0
+          );
+          const newControllers = routes.map(v => {
+            return {
+              ...v,
+              x: v.x - bound.x,
+              y: v.y - bound.y,
+            };
+          });
+          surface.updateConnectorElement(id, bound, newControllers);
+        }
+      });
+    }
   }
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {

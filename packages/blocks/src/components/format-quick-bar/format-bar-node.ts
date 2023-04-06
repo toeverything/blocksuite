@@ -8,14 +8,17 @@ import {
   paragraphConfig,
 } from '@blocksuite/global/config';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
+import { Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import {
+  getRichTextByModel,
+  WithDisposable,
+} from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   getCurrentCombinedFormat,
@@ -28,7 +31,7 @@ import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
 
 @customElement('format-quick-bar')
-export class FormatQuickBar extends LitElement {
+export class FormatQuickBar extends WithDisposable(LitElement) {
   static styles = formatQuickBarStyle;
 
   @property()
@@ -70,9 +73,7 @@ export class FormatQuickBar extends LitElement {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
-  private _disposables = new DisposableGroup();
-
-  override connectedCallback(): void {
+  connectedCallback() {
     super.connectedCallback();
 
     const startModel = this.models[0];
@@ -112,11 +113,6 @@ export class FormatQuickBar extends LitElement {
       });
     });
     this._disposables.add(() => mutationObserver.disconnect());
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
   }
 
   private _onHover() {

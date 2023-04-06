@@ -117,6 +117,9 @@ importers:
 
   packages/blocks:
     dependencies:
+      '@blocksuite/connector':
+        specifier: workspace:*
+        version: link:../connector
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
@@ -160,6 +163,8 @@ importers:
       '@types/turndown':
         specifier: ^5.0.1
         version: 5.0.1
+
+  packages/connector: {}
 
   packages/docs:
     dependencies:
@@ -248,6 +253,9 @@ importers:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
+      '@blocksuite/connector':
+        specifier: workspace:*
+        version: link:../connector
       '@blocksuite/editor':
         specifier: workspace:*
         version: link:../editor
@@ -268,10 +276,10 @@ importers:
         version: 1.1.1
       '@rich-data/json-plugin':
         specifier: ^3.0.0-20230329005843-d296129
-        version: 3.0.0-20230329010830-10f12e5(@rich-data/viewer@3.0.0-20230329010830-10f12e5)(react-dom@18.2.0)(react@18.2.0)
+        version: 3.0.0-20230329033420-e331425(@rich-data/viewer@3.0.0-20230329033420-e331425)(react-dom@18.2.0)(react@18.2.0)
       '@rich-data/viewer':
         specifier: ^3.0.0-20230329005843-d296129
-        version: 3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0)
+        version: 3.0.0-20230329033420-e331425(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
@@ -2335,22 +2343,22 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@rich-data/json-plugin@3.0.0-20230329010830-10f12e5(@rich-data/viewer@3.0.0-20230329010830-10f12e5)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-5+Y0sx0o8dk0RelU2zX7s6D47rGHDezquYM4CHRoNZvjNfJOLK3LoYVc8U3Wq0VK6Eq3zV1PWHjvZyFP7MxWjQ==}
+  /@rich-data/json-plugin@3.0.0-20230329033420-e331425(@rich-data/viewer@3.0.0-20230329033420-e331425)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-237kiGhP6y0pYcafzIMHLDoyyAXXWRWzCdXvH2XpY11CcC6H+IrVh84q8bNNQASX6osjTrkjTJBvoNhgkyoaOg==}
     peerDependencies:
-      '@rich-data/viewer': ^3.0.0-20230329010830-10f12e5
+      '@rich-data/viewer': ^3.0.0-20230329033420-e331425
       react: ^18
       react-dom: ^18
     dependencies:
-      '@rich-data/viewer': 3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0)
+      '@rich-data/viewer': 3.0.0-20230329033420-e331425(react-dom@18.2.0)(react@18.2.0)
       '@tabler/icons-react': 2.12.0(react@18.2.0)
       clsx: 1.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@rich-data/viewer@3.0.0-20230329010830-10f12e5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tpm6peOBGBcu4o633/1foqzsMTmH0cP4U84sF6neYEK8JPhDnChQqQDjuOssKi3FET15GKe0li6IAV1L5BhJZw==}
+  /@rich-data/viewer@3.0.0-20230329033420-e331425(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-0QuZICgH4KteV+89kxLWgCmmN/Az9kIC4oxdftnoejbt3sYx8CGImVlLZEXLj+4bSRO6skgY7UTddShQ3PfRBA==}
     peerDependencies:
       react: ^18
       react-dom: ^18

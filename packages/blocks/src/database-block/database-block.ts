@@ -1,39 +1,48 @@
 // related component
-import './components/add-column-type-popup.js';
+import './components/column-header.js';
 import './components/cell-container.js';
 
 import {
-  DatabaseMultiSelect,
-  DatabaseNumber,
-  DatabaseProgress,
+  ArrowDownIcon,
+  CopyIcon,
+  DatabaseKanbanViewIcon,
+  DatabaseSearchClose,
   DatabaseSearchIcon,
-  DatabaseSelect,
+  DatabaseTableViewIcon,
+  DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
-  TextIcon,
 } from '@blocksuite/global/config';
-import {
-  ColumnInsertPosition,
-  type ColumnSchema,
-} from '@blocksuite/global/database';
+import { type Column } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { VEditor } from '@blocksuite/virgo';
 import { createPopper } from '@popperjs/core';
-import { css, type TemplateResult } from 'lit';
+import { css, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { type BlockHost } from '../__internal__/index.js';
+import { copy } from '../__internal__/clipboard/utils.js';
+import { asyncFocusRichText, type BlockHost } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
-import { NonShadowLitElement } from '../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
+import { toast } from '../components/toast.js';
+import { tooltipStyle } from '../components/tooltip/tooltip.js';
+import type { DatabaseColumnHeader } from './components/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import { EditColumnPopup } from './components/edit-column-popup.js';
+import { actionStyles } from './components/edit-column-popup.js';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnSchemaRenderer } from './register.js';
-import { onClickOutside } from './utils.js';
+import { getColumnRenderer } from './register.js';
+import type {
+  SwitchViewAction,
+  SwitchViewActionType,
+  ToolbarAction,
+  ToolbarActionType,
+} from './types.js';
+import { isDivider, onClickOutside } from './utils.js';
 
 type CellValues = string[];
 
@@ -52,18 +61,9 @@ const enum SearchState {
   SearchIcon = 'icon',
   /** searching */
   Searching = 'searching',
+  /** show more action */
+  Action = 'action',
 }
-
-const FIRST_LINE_TEXT_WIDTH = 200;
-const ADD_COLUMN_BUTTON_WIDTH = 40;
-
-const columnTypeIconMap: Record<string, TemplateResult> = {
-  select: DatabaseSelect,
-  number: DatabaseNumber,
-  progress: DatabaseProgress,
-  'rich-text': TextIcon,
-  'multi-select': DatabaseMultiSelect,
-};
 
 let once = true;
 if (once) {
@@ -71,283 +71,242 @@ if (once) {
   once = false;
 }
 
-@customElement('affine-database-column-header')
-class DatabaseColumnHeader extends NonShadowLitElement {
+const toolbarActions: ToolbarAction[] = [
+  {
+    type: 'database-type',
+    text: 'Database type',
+    icon: DatabaseTableViewIcon,
+  },
+  {
+    type: 'copy',
+    text: 'Copy',
+    icon: CopyIcon,
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'delete-database',
+    text: 'Delete database',
+    icon: DeleteIcon,
+  },
+];
+
+const databaseTypes: SwitchViewAction[] = [
+  {
+    type: 'table-view',
+    text: 'Table view',
+    icon: DatabaseTableViewIcon,
+  },
+  {
+    type: 'kanban-view',
+    text: 'Kanban view',
+    icon: DatabaseKanbanViewIcon,
+  },
+];
+
+@customElement('affine-database-type-popup')
+class DatabaseTypePopup extends LitElement {
   static styles = css`
+    :host {
+      width: 200px;
+      padding: 8px;
+      border: 1px solid #e3e2e4;
+      border-radius: 4px;
+      background: var(--affine-popover-background);
+      box-shadow: var(--affine-popover-shadow);
+    }
     :host * {
       box-sizing: border-box;
     }
-    .affine-database-column-header {
-      display: flex;
-      flex-direction: row;
-      height: 44px;
-    }
-
-    .affine-database-column {
-      display: flex;
-      align-items: center;
-      width: 145px;
-      padding: 8px;
-      border-right: 1px solid var(--affine-border-color);
-    }
-    .affine-database-column:hover {
-      background: linear-gradient(
-          0deg,
-          rgba(0, 0, 0, 0.04),
-          rgba(0, 0, 0, 0.04)
-        ),
-        #ffffff;
-    }
-    .affine-database-column.edit {
-      background: linear-gradient(
-          0deg,
-          rgba(0, 0, 0, 0.08),
-          rgba(0, 0, 0, 0.08)
-        ),
-        #ffffff;
-    }
-    .affine-database-column-text {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      max-width: 173px;
-      color: var(--affine-secondary-text-color);
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .affine-database-column-text svg {
+    ${actionStyles}
+    .action > svg {
       width: 16px;
       height: 16px;
-      fill: var(--affine-icon-color);
+      fill: #77757d;
     }
-    .affine-database-column-text.select svg {
-      fill: none;
-    }
-    .affine-database-column-text-input {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .affine-database-column-input {
-      width: 100%;
-      height: 24px;
+    .database-type {
+      height: 30px;
       padding: 0;
-      border: none;
-      color: inherit;
-      font-weight: 600;
+      color: #8e8d91;
       font-size: 14px;
-      font-family: var(--affine-font-family);
-      background: transparent;
+      cursor: unset;
     }
-    .affine-database-column-input:focus {
-      outline: none;
+    .database-type:hover {
+      background: none;
     }
-    .affine-database-column-drag {
-      display: flex;
-      align-items: center;
-      visibility: hidden;
+    .selected {
+      color: #5438ff;
+      background: rgba(0, 0, 0, 0.02);
     }
-    .affine-database-column-drag svg {
-      width: 10px;
-      height: 14px;
+    .selected svg {
+      color: #5438ff;
     }
-    .affine-database-column:hover .affine-database-column-drag {
-      visibility: visible;
+    .selected.table-view svg {
+      fill: #5438ff;
+    }
+    .action.disabled {
+      cursor: not-allowed;
+    }
+    .action.disabled:hover {
+      background: unset;
     }
   `;
 
   @property()
-  targetModel!: DatabaseBlockModel;
-
-  @property()
-  columns!: ColumnSchema[];
-
-  @property()
-  addColumn!: (index: number) => string;
-
-  @state()
-  private _editingColumnId = '';
-
-  @query('.affine-database-column-input')
-  private _titleColumnInput!: HTMLInputElement;
-
-  setEditingColumnId = (id: string) => {
-    this._editingColumnId = id;
-  };
-
-  updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-    if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
-      this._titleColumnInput.focus();
-      const length = this._titleColumnInput.value.length;
-      this._titleColumnInput.setSelectionRange(0, length);
-      onClickOutside(
-        this._titleColumnInput,
-        () => {
-          this.setEditingColumnId('');
-        },
-        'mousedown'
-      );
-    }
-  }
-
-  private _onShowEditColumnPopup = (
-    target: Element,
-    column: ColumnSchema | string,
-    index: number
-  ) => {
-    if (this._editingColumnId) return;
-
-    const currentEl = target as Element;
-    const reference = currentEl.classList.contains('affine-database-column')
-      ? target
-      : target.parentElement;
-    assertExists(reference);
-
-    const editColumn = new EditColumnPopup();
-    editColumn.setTitleColumnEditId = this.setEditingColumnId;
-    editColumn.targetModel = this.targetModel;
-    editColumn.targetColumnSchema = column;
-    editColumn.columnIndex = index - 1;
-    editColumn.closePopup = () => {
-      editColumn.remove();
-    };
-    editColumn.insertColumn = position => {
-      const insertIdex =
-        position === ColumnInsertPosition.Right ? index : index - 1;
-      this.addColumn(insertIdex);
-    };
-    document.body.appendChild(editColumn);
-    requestAnimationFrame(() => {
-      createPopper(reference, editColumn, { placement: 'bottom-start' });
-      onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
-    });
-  };
-
-  private _onKeydown = (
-    event: KeyboardEvent,
-    type: 'title' | 'normal',
-    column?: ColumnSchema
-  ) => {
-    const name = (event.target as HTMLInputElement).value;
-    if (event.key === 'Enter') {
-      this.targetModel.page.captureSync();
-      if (type === 'title') {
-        // title column
-        this._onUpdateTitleColumn(name);
-      } else {
-        // other columns
-        assertExists(column);
-        this._onUpdateNormalColumn(name, column);
-      }
-      this.setEditingColumnId('');
-      return;
-    }
-    if (event.key === 'Escape') {
-      this.setEditingColumnId('');
-      return;
-    }
-  };
-
-  private _onUpdateTitleColumn = (name: string) => {
-    this.targetModel.page.updateBlock(this.targetModel, {
-      titleColumn: name,
-    });
-  };
-
-  private _onUpdateNormalColumn = (name: string, column: ColumnSchema) => {
-    this.targetModel.page.db.updateColumnSchema({
-      ...column,
-      name,
-    });
-    this.targetModel.propsUpdated.emit();
-  };
+  dbType!: SwitchViewActionType;
 
   render() {
     return html`
-      <div class="affine-database-column-header">
-        <div
-          class="affine-database-column ${this._editingColumnId === '-1'
-            ? 'edit'
-            : ''}"
-          data-column-id="-1"
-          style=${styleMap({
-            minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-            maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-          })}
-          @click=${(event: MouseEvent) =>
-            this._onShowEditColumnPopup(
-              event.target as Element,
-              this.targetModel.titleColumn,
-              0
-            )}
-        >
-          <div class="affine-database-column-text">
-            ${TextIcon}
-            <div class="affine-database-column-text-input">
-              ${this._editingColumnId === '-1'
-                ? html`<input
-                    class="affine-database-column-input"
-                    value=${this.targetModel.titleColumn}
-                    @keydown=${(event: KeyboardEvent) =>
-                      this._onKeydown(event, 'title')}
-                  />`
-                : this.targetModel.titleColumn}
-            </div>
-          </div>
-          <!-- TODO: change icon -->
-          <div class="affine-database-column-drag">${TextIcon}</div>
+      <div class="affine-database-type-popup">
+        <div class="action database-type">
+          <div class="action-content"><span>Database type</span></div>
         </div>
-        ${repeat(
-          this.columns,
-          column => column.id,
-          (column, index) => {
-            return html`
-              <div
-                class="affine-database-column  ${this._editingColumnId ===
-                column.id
-                  ? 'edit'
-                  : ''}"
-                data-column-id="${column.id}"
-                style=${styleMap({
-                  minWidth: `${column.width}px`,
-                  maxWidth: `${column.width}px`,
-                })}
-                @click=${(event: MouseEvent) =>
-                  this._onShowEditColumnPopup(
-                    event.target as Element,
-                    column,
-                    index + 1
-                  )}
-              >
-                <div class="affine-database-column-text ${column.type}">
-                  ${columnTypeIconMap[column.type]}
-                  <div class="affine-database-column-text-input">
-                    ${this._editingColumnId === column.id
-                      ? html`<input
-                          class="affine-database-column-input"
-                          value=${column.name}
-                          @keydown=${(event: KeyboardEvent) =>
-                            this._onKeydown(event, 'normal', column)}
-                        />`
-                      : column.name}
-                  </div>
-                </div>
-                <!-- TODO: change icon -->
-                <div class="affine-database-column-drag">${TextIcon}</div>
+        <div class="action-divider"></div>
+        ${databaseTypes.map(column => {
+          const isKanban = column.type === 'kanban-view';
+          const selected = column.type === this.dbType && !isKanban;
+
+          return html`
+            <div
+              class="action ${column.type} ${selected
+                ? 'selected'
+                : ''} ${isKanban ? 'disabled' : ''}"
+            >
+              <div class="action-content">
+                ${column.icon}<span>${column.text}</span>
               </div>
-            `;
-          }
-        )}
+            </div>
+          `;
+        })}
       </div>
     `;
   }
 }
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-database-column-header': DatabaseColumnHeader;
+
+@customElement('affine-database-toolbar-action-popup')
+class ToolbarActionPopup extends LitElement {
+  static styles = css`
+    :host {
+      width: 200px;
+      height: 128px;
+      padding: 8px;
+      border: 1px solid #e3e2e4;
+      border-radius: 4px;
+      box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
+        inset 0px 0px 0px 0.5px #e3e3e4;
+      z-index: var(--affine-z-index-popover);
+      background: var(--affine-page-background);
+    }
+    :host * {
+      box-sizing: border-box;
+    }
+    ${actionStyles}
+    .action-content > svg {
+      width: 20px;
+      height: 20px;
+      fill: #77757d;
+    }
+    .action > svg {
+      width: 16px;
+      height: 16px;
+      fill: #77757d;
+    }
+    .database-type > svg {
+      transform: rotate(-90deg);
+    }
+  `;
+
+  targetModel!: DatabaseBlockModel;
+
+  @property()
+  close!: () => void;
+
+  @query('.affine-database-toolbar-action-popup')
+  private _container!: HTMLDivElement;
+
+  private _databaseTypePopup!: DatabaseTypePopup | null;
+
+  private _onActionClick = (
+    event: MouseEvent,
+    actionType: ToolbarActionType
+  ) => {
+    event.stopPropagation();
+
+    if (actionType === 'delete-database') {
+      const models = [this.targetModel, ...this.targetModel.children];
+      models.forEach(model => this.targetModel.page.deleteBlock(model));
+    } else if (actionType === 'copy') {
+      copy({
+        type: 'Block',
+        models: [this.targetModel],
+        startOffset: 0,
+        endOffset: 0,
+      });
+      toast('Copied Database to clipboard');
+    }
+
+    this.close();
+  };
+
+  private _onShowDatabaseType = () => {
+    if (this._databaseTypePopup) return;
+    this._databaseTypePopup = new DatabaseTypePopup();
+    this._databaseTypePopup.dbType = 'table-view';
+    this._container.appendChild(this._databaseTypePopup);
+    createPopper(this._container, this._databaseTypePopup, {
+      placement: 'right-start',
+      modifiers: [
+        {
+          name: 'offset',
+          options: {
+            offset: [-9, 12],
+          },
+        },
+      ],
+    });
+  };
+
+  private _onHideDatabaseType = () => {
+    if (this._databaseTypePopup) {
+      this._databaseTypePopup?.remove();
+      this._databaseTypePopup = null;
+    }
+  };
+
+  private _renderActions = () => {
+    return html`
+      ${toolbarActions.map(action => {
+        if (isDivider(action)) {
+          return html`<div class="action-divider"></div>`;
+        }
+
+        const onMouseOver =
+          action.type === 'database-type'
+            ? this._onShowDatabaseType
+            : this._onHideDatabaseType;
+
+        return html`
+          <div
+            class="action ${action.type}"
+            @mouseover=${onMouseOver}
+            @click=${(event: MouseEvent) =>
+              this._onActionClick(event, action.type)}
+          >
+            <div class="action-content">
+              ${action.icon}<span>${action.text}</span>
+            </div>
+            ${action.type === 'database-type' ? ArrowDownIcon : html``}
+          </div>
+        `;
+      })}
+    `;
+  };
+
+  render() {
+    return html`<div class="affine-database-toolbar-action-popup">
+      ${this._renderActions()}
+    </div>`;
   }
 }
 
@@ -357,6 +316,9 @@ function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
+  const columns = databaseModel.columns.map(id =>
+    databaseModel.page.db.getColumn(id)
+  ) as Column[];
 
   const filteredChildren =
     searchState === SearchState.Searching
@@ -381,20 +343,26 @@ function DataBaseRowContainer(
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
       }
-      .affine-database-block-row:nth-of-type(1) {
-        border-top: 1px solid var(--affine-border-color);
+      .affine-database-block-row > .affine-database-block-row-cell:first-child {
+        background: rgba(0, 0, 0, 0.04);
       }
 
-      .affine-database-block-row-cell {
+      .affine-database-block-row-cell-content {
         display: flex;
         align-items: center;
-        width: 145px;
         min-height: 44px;
         padding: 0 8px;
         border-right: 1px solid var(--affine-border-color);
+        transform: translateX(0);
       }
-      .affine-database-block-row-cell > affine-paragraph > .text {
+      .affine-database-block-row-cell-content > affine-paragraph > .text {
         margin-top: unset;
+      }
+      .database-cell {
+        min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+      }
+      .database-cell:last-child affine-database-cell-container {
+        border-right: none;
       }
     </style>
     <div class="affine-database-block-rows">
@@ -402,29 +370,42 @@ function DataBaseRowContainer(
         filteredChildren,
         child => child.id,
         (child, idx) => {
+          const style = styleMap({
+            width: `${databaseModel.titleColumnWidth}px`,
+          });
           return html`
-            <div class="affine-database-block-row" data-row-id="${idx}">
+            <div
+              class="affine-database-block-row database-row"
+              data-row-id="${idx}"
+            >
               <div
-                class="affine-database-block-row-cell"
-                style=${styleMap({
-                  minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-                  maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
-                })}
+                class="affine-database-block-row-cell database-cell"
+                style=${style}
               >
-                ${BlockElementWithService(child, databaseBlock, () => {
-                  databaseBlock.requestUpdate();
-                })}
+                <div class="affine-database-block-row-cell-content">
+                  ${BlockElementWithService(child, databaseBlock, () => {
+                    databaseBlock.requestUpdate();
+                  })}
+                </div>
               </div>
-              ${repeat(databaseBlock.columns, column => {
+              ${repeat(columns, column => {
                 return html`
-                  <affine-database-cell-container
-                    .databaseModel=${databaseModel}
-                    .rowModel=${child}
-                    .columnSchema=${column}
+                  <div
+                    class="database-cell"
+                    style=${styleMap({
+                      width: `${column.width}px`,
+                    })}
                   >
-                  </affine-database-cell-container>
+                    <affine-database-cell-container
+                      .databaseModel=${databaseModel}
+                      .rowModel=${child}
+                      .columnSchema=${column}
+                    >
+                    </affine-database-cell-container>
+                  </div>
                 `;
               })}
+              <div class="database-cell add-column-button"></div>
             </div>
           `;
         }
@@ -468,6 +449,29 @@ const styles = css`
     overflow: hidden;
   }
 
+  .affine-database-block-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    margin: 12px 0px;
+  }
+  .database-title-container {
+    flex: 1;
+    max-width: 300px;
+    min-width: 300px;
+    height: 30px;
+  }
+
+  .affine-database-block-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #424149;
+    font-family: inherit;
+    overflow: hidden;
+    cursor: text;
+  }
   .affine-database-block-title:focus {
     outline: none;
   }
@@ -483,6 +487,16 @@ const styles = css`
     opacity: 0.5;
   }
 
+  .affine-database-toolbar-item.search {
+    overflow: hidden;
+  }
+  .affine-database-block-table {
+    position: relative;
+    width: 100%;
+    overflow-x: scroll;
+    border-top: 1.5px solid var(--affine-border-color);
+  }
+
   .affine-database-toolbar {
     display: flex;
     align-items: center;
@@ -496,20 +510,29 @@ const styles = css`
   .affine-database-toolbar-item {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
-  .affine-database-toolbar-item.search {
+  .affine-database-toolbar-item.search-container {
     overflow: hidden;
+  }
+  .affine-database-toolbar-item.more-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+  }
+  .affine-database-toolbar-item.more-action:hover,
+  .more-action.active {
+    background: rgba(0, 0, 0, 0.04);
   }
   .affine-database-search-container {
     display: flex;
     align-items: center;
     gap: 8px;
-    width: 138px;
+    width: 16px;
     height: 32px;
-    padding: 8px 12px;
+    padding: 8px 0;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0);
-    transform: translate(110px, 0px);
     transition: all 0.3s ease;
   }
   .affine-database-search-container > svg {
@@ -517,12 +540,24 @@ const styles = css`
     min-height: 16px;
   }
   .search-container-expand {
-    transform: translate(0px, 0px);
+    width: 138px;
+    padding: 8px 12px;
     background-color: rgba(0, 0, 0, 0.04);
   }
   .search-input-container {
     display: flex;
     align-items: center;
+  }
+  .search-input-container > .close-icon {
+    display: flex;
+    align-items: center;
+  }
+  .close-icon .code {
+    width: 31px;
+    height: 18px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
   }
   .affine-database-search-input-icon {
     display: inline-flex;
@@ -560,12 +595,11 @@ const styles = css`
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
       #ffffff;
   }
-
-  .affine-database-block-table {
-    position: relative;
-    width: 100%;
-    overflow-x: scroll;
-    border-top: 1.5px solid var(--affine-border-color);
+  .new-record > tool-tip {
+    max-width: 280px;
+  }
+  .affine-database-table-container {
+    width: fit-content;
   }
 
   .affine-database-block-tag-circle {
@@ -586,13 +620,19 @@ const styles = css`
   .affine-database-block-footer {
     display: flex;
     width: 100%;
-    height: 42px;
+    height: 28px;
+    background: #fff;
+  }
+  .affine-database-block-footer:hover {
     background-color: rgba(0, 0, 0, 0.04);
+  }
+  .affine-database-block-footer:hover .affine-database-block-add-row {
+    display: flex;
   }
 
   .affine-database-block-add-row {
+    display: none;
     flex: 1;
-    display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
@@ -607,22 +647,12 @@ const styles = css`
     height: 16px;
   }
 
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-  }
+  ${tooltipStyle}
 `;
 
 @customElement('affine-database')
 export class DatabaseBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;
@@ -649,14 +679,25 @@ export class DatabaseBlockComponent
   @property()
   host!: BlockHost;
 
+  @query('.affine-database-table-container')
+  private _tableContainer!: HTMLDivElement;
+
   @query('.affine-database-block-title')
-  private _container!: HTMLDivElement;
+  private _titleContainer!: HTMLDivElement;
 
   @query('.affine-database-search-input')
   private _searchInput!: HTMLInputElement;
 
   @query('affine-database-column-header')
   private _columnHeaderComponent!: DatabaseColumnHeader;
+
+  @query('.more-action')
+  private _moreActionContainer!: HTMLDivElement;
+
+  @query('.search-container')
+  private _searchContainer!: HTMLDivElement;
+
+  private _toolbarAction!: ToolbarActionPopup | undefined;
 
   @state()
   private _searchState: SearchState = SearchState.SearchIcon;
@@ -670,10 +711,10 @@ export class DatabaseBlockComponent
   private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  get columns(): ColumnSchema[] {
+  get columns(): Column[] {
     return this.model.columns.map(id =>
-      this.model.page.db.getColumnSchema(id)
-    ) as ColumnSchema[];
+      this.model.page.db.getColumn(id)
+    ) as Column[];
   }
 
   connectedCallback() {
@@ -690,12 +731,32 @@ export class DatabaseBlockComponent
 
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    const tableContent = this._tableContainer.parentElement;
+    assertExists(tableContent);
+    this._disposables.addFromEvent(
+      tableContent,
+      'scroll',
+      this._onDatabaseScroll
+    );
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
   }
+
+  private _resetSearchState() {
+    this._searchState = SearchState.SearchIcon;
+  }
+
+  private _resetHoverState() {
+    this._hoverState = false;
+  }
+
+  private _onShowTitleTooltip = () => {
+    // TODO: show tooltip according to title content(vEditor)
+  };
 
   private get _databaseMap() {
     const databaseMap: DatabaseMap = {};
@@ -713,14 +774,22 @@ export class DatabaseBlockComponent
       if (!columnMap) return;
 
       // Flatten the columnMap into a list of values
-      const columnValues = Object.keys(columnMap).map(
-        key => columnMap[key].value + ''
-      );
-      databaseMap[rowId].push(...columnValues);
+      const columnValues = Object.keys(columnMap).map(key => {
+        const value = columnMap[key].value;
+        if (Array.isArray(value)) {
+          return value.map(item => item.value);
+        }
+        return columnMap[key].value + '';
+      });
+      databaseMap[rowId].push(...columnValues.flat());
     });
 
     return databaseMap;
   }
+
+  private _onDatabaseScroll = (event: Event) => {
+    this._columnHeaderComponent.showAddColumnButton();
+  };
 
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
@@ -750,35 +819,75 @@ export class DatabaseBlockComponent
 
   private _onSearchKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      this._resetSearchStatus();
+      if (this._searchInput.value) {
+        this._searchInput.value = '';
+        this._searchState = SearchState.SearchInput;
+      } else {
+        this._resetSearchStatus();
+      }
     }
   };
 
   private _clearSearch = (event: MouseEvent) => {
     event.stopPropagation();
-    this._resetSearchStatus();
+    this._searchInput.value = '';
+    this._searchState = SearchState.SearchInput;
   };
 
   private _resetSearchStatus = () => {
     this._searchInput.value = '';
     this._filteredRowIds = [];
-    this._searchState = SearchState.SearchIcon;
+    this._resetSearchState();
+    this._searchContainer.style.overflow = 'hidden';
   };
 
   private _onShowSearch = () => {
     this._searchState = SearchState.SearchInput;
-    setTimeout(() => {
+    onClickOutside(
+      this._searchInput,
+      () => {
+        if (this._searchState !== SearchState.Searching) {
+          this._resetSearchState();
+        }
+      },
+      'mousedown'
+    );
+  };
+
+  private _onFocusSearchInput = () => {
+    if (this._searchState === SearchState.SearchInput) {
       this._searchInput.focus();
-      onClickOutside(
-        this._searchInput,
-        () => {
-          if (this._searchState !== SearchState.Searching) {
-            this._searchState = SearchState.SearchIcon;
-          }
-        },
-        'mousedown'
-      );
+      this._searchContainer.style.overflow = 'unset';
+    } else {
+      this._searchInput.blur();
+    }
+  };
+
+  private _onShowAction = () => {
+    if (this._toolbarAction) {
+      this._closeToolbarAction();
+      return;
+    }
+    this._searchState = SearchState.Action;
+    this._toolbarAction = new ToolbarActionPopup();
+    this._toolbarAction.targetModel = this.model;
+    this._toolbarAction.close = this._closeToolbarAction;
+    this._moreActionContainer.appendChild(this._toolbarAction);
+    createPopper(this._moreActionContainer, this._toolbarAction, {
+      placement: 'bottom',
     });
+    onClickOutside(
+      this._moreActionContainer,
+      () => {
+        this._closeToolbarAction();
+      },
+      'mousedown'
+    );
+  };
+
+  private _closeToolbarAction = () => {
+    this._toolbarAction?.remove();
+    this._toolbarAction = undefined;
   };
 
   private _onMouseOver = () => {
@@ -787,7 +896,7 @@ export class DatabaseBlockComponent
 
   private _onMouseLeave = () => {
     if (this._searchState === SearchState.SearchIcon) {
-      this._hoverState = false;
+      this._resetHoverState();
     }
   };
 
@@ -797,7 +906,8 @@ export class DatabaseBlockComponent
         this,
         () => {
           if (this._searchState !== SearchState.Searching) {
-            this._hoverState = false;
+            this._resetHoverState();
+            this._resetSearchState();
           }
         },
         'mousedown'
@@ -805,27 +915,32 @@ export class DatabaseBlockComponent
     });
   };
 
-  private _addRow = () => {
-    this._searchState = SearchState.SearchIcon;
-    this._hoverState = false;
+  private _addRow = (index?: number) => {
+    this._resetSearchState();
+    this._resetHoverState();
 
-    this.model.page.captureSync();
-    this.model.page.addBlock('affine:paragraph', {}, this.model.id);
+    const page = this.model.page;
+    page.captureSync();
+    const id = page.addBlock('affine:paragraph', {}, this.model.id, index);
+    asyncFocusRichText(page, id);
+    requestAnimationFrame(() => {
+      this._columnHeaderComponent.setDragHandleHeight();
+    });
   };
 
   private _addColumn = (index: number) => {
     this.model.page.captureSync();
     const defaultColumnType = 'multi-select';
-    const renderer = getColumnSchemaRenderer(defaultColumnType);
-    const schema: Omit<ColumnSchema, 'id'> = {
+    const renderer = getColumnRenderer(defaultColumnType);
+    const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
       // TODO: change to dynamic number
       name: 'Column n',
-      width: 200,
+      width: DEFAULT_COLUMN_WIDTH,
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumnSchema(schema);
+    const id = this.model.page.db.updateColumn(schema);
     const newColumns = [...this.model.columns];
     newColumns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
@@ -840,7 +955,7 @@ export class DatabaseBlockComponent
   private _initTitleVEditor() {
     this._vEditor = new VEditor(this.model.title.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
-    this._vEditor.mount(this._container);
+    this._vEditor.mount(this._titleContainer);
     this._vEditor.setReadonly(this.model.page.readonly);
 
     // for title placeholder
@@ -855,18 +970,18 @@ export class DatabaseBlockComponent
   }
 
   private _renderToolbar = () => {
-    if (!this._hoverState)
-      return html`<div class="affine-database-toolbar-search">
-        ${DatabaseSearchIcon}
-      </div>`;
-
+    if (!this._hoverState) return null;
+    const expandSearch =
+      this._searchState === SearchState.SearchInput ||
+      this._searchState === SearchState.Searching;
+    const isActiveMoreAction = this._searchState === SearchState.Action;
     const searchTool = html`
       <div
-        class="affine-database-search-container ${this._searchState !==
-        SearchState.SearchIcon
+        class="affine-database-search-container ${expandSearch
           ? 'search-container-expand'
           : ''}"
         @click=${this._onShowSearch}
+        @transitionend=${this._onFocusSearchInput}
       >
         <div class="affine-database-search-input-icon">
           ${DatabaseSearchIcon}
@@ -876,88 +991,89 @@ export class DatabaseBlockComponent
             placeholder="Search..."
             class="affine-database-search-input"
             @input=${this._onSearch}
+            @click=${(event: MouseEvent) => event.stopPropagation()}
             @keydown=${this._onSearchKeydown}
           />
-          <span class="close-icon" @click=${this._clearSearch}>x</span>
+          <div class="has-tool-tip close-icon" @click=${this._clearSearch}>
+            ${DatabaseSearchClose}
+            <tool-tip inert arrow tip-position="top" role="tooltip">
+              <span class="code">Esc</span> to clear all
+            </tool-tip>
+          </div>
         </div>
       </div>
     `;
 
     return html`<div class="affine-database-toolbar">
-      <div class="affine-database-toolbar-item search">${searchTool}</div>
-      <div class="affine-database-toolbar-item">${MoreHorizontalIcon}</div>
-      <div class="affine-database-toolbar-item new-record">
+      <div class="affine-database-toolbar-item search-container">
+        ${searchTool}
+      </div>
+      <div
+        class="affine-database-toolbar-item more-action ${isActiveMoreAction
+          ? 'active'
+          : ''}"
+        @click=${this._onShowAction}
+      >
+        ${MoreHorizontalIcon}
+      </div>
+      <div
+        class="has-tool-tip affine-database-toolbar-item new-record"
+        @click=${() => this._addRow(0)}
+      >
         ${PlusIcon}<span>New Record</span>
+        <tool-tip inert arrow tip-position="top" role="tooltip"
+          >You can drag this button to the desired location and add a record
+        </tool-tip>
       </div>
     </div>`;
   };
 
   render() {
-    const totalWidth =
-      this.columns.map(column => column.width).reduce((t, x) => t + x, 0) +
-      FIRST_LINE_TEXT_WIDTH +
-      ADD_COLUMN_BUTTON_WIDTH;
-
     const isEmpty = !this.model.title || !this.model.title.length;
 
     return html`
       <div class="affine-database-block-container">
         <div class="affine-database-block-title-container">
           <div
-            class="affine-database-block-title ${isEmpty
-              ? 'affine-database-block-title-empty'
-              : ''}"
-            data-block-is-database-title="true"
-          ></div>
+            class="has-tool-tip database-title-container"
+            @mouseover=${this._onShowTitleTooltip}
+          >
+            <div
+              class="affine-database-block-title ${isEmpty
+                ? 'affine-database-block-title-empty'
+                : ''}"
+              data-block-is-database-title="true"
+            ></div>
+            <tool-tip inert arrow tip-position="top" role="tooltip"
+              >Database hello new work is not only
+            </tool-tip>
+          </div>
           ${this._renderToolbar()}
         </div>
         <div class="affine-database-block-table">
-          <div
-            style=${styleMap({
-              width: `${totalWidth}px`,
-            })}
-          >
+          <div class="affine-database-table-container">
             <affine-database-column-header
               .columns=${this.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
+              .tableContainer=${this._tableContainer}
             ></affine-database-column-header>
             ${DataBaseRowContainer(
               this,
               this._filteredRowIds,
               this._searchState
             )}
-            <div class="affine-database-block-footer">
-              <div
-                class="affine-database-block-add-row"
-                data-test-id="affine-database-add-row-button"
-                role="button"
-                @click=${this._addRow}
-              >
-                ${PlusIcon}<span>New Record</span>
-              </div>
-            </div>
           </div>
         </div>
-
-        <div
-          class="affine-database-add-column-button"
-          data-test-id="affine-database-add-column-button"
-          @click=${() => this._addColumn(this.columns.length)}
-        >
-          <!-- Fix move to icon -->
-          <svg
-            viewBox="0 0 16 16"
-            style=${styleMap({
-              width: '12px',
-              height: '100%',
-              fill: 'var(--affine-text-color)',
-            })}
+        <div class="affine-database-block-footer">
+          <div
+            class="affine-database-block-add-row"
+            data-test-id="affine-database-add-row-button"
+            role="button"
+            @click=${() => this._addRow()}
           >
-            <path
-              d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
-            ></path>
-          </svg>
+            ${PlusIcon}<span>New Record</span>
+          </div>
         </div>
       </div>
     `;

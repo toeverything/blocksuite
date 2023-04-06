@@ -4,7 +4,7 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { type BlockHost } from '../utils/index.js';
-import { NonShadowLitElement } from '../utils/lit.js';
+import { ShadowlessElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
@@ -13,7 +13,7 @@ import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
 
 @customElement('rich-text')
-export class RichText extends NonShadowLitElement {
+export class RichText extends ShadowlessElement {
   static styles = css`
     .affine-rich-text {
       height: 100%;

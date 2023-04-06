@@ -1,19 +1,18 @@
+import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
+import type { Point as ConnectorPoint } from '@blocksuite/connector';
+import { Rectangle } from '@blocksuite/connector';
+import { simplifyPath } from '@blocksuite/connector';
+import { route } from '@blocksuite/connector';
 import type {
-  BlockComponentElement,
-  EditingState,
-  MouseMode,
-  Point,
-  TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import {
-  doesInSamePath,
-  getClosestBlockElementByPoint,
-  getHoveringFrame,
-  isInEmptyDatabaseByPoint,
-  Rect,
-} from '@blocksuite/blocks/std';
-import { assertExists } from '@blocksuite/global/utils';
-import type { Bound, PhasorElement, SurfaceViewport } from '@blocksuite/phasor';
+  AttachedElementDirection,
+  Bound,
+  ConnectorElement,
+  Controller,
+  PhasorElement,
+  SurfaceManager,
+  SurfaceViewport,
+} from '@blocksuite/phasor';
+import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
@@ -21,13 +20,10 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import type { Page } from '@blocksuite/store';
 
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
-import { DragHandle } from '../../components/index.js';
-import type {
-  EdgelessContainer,
-  EdgelessPageBlockComponent,
-} from './edgeless-page-block.js';
+import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export const FRAME_MIN_WIDTH = 200;
@@ -155,6 +151,7 @@ export function getCursorMode(mouseMode: MouseMode) {
       return mouseMode.panning ? 'grabbing' : 'grab';
     case 'brush':
     case 'shape':
+    case 'connector':
       return 'crosshair';
     case 'text':
       return 'text';
@@ -163,71 +160,155 @@ export function getCursorMode(mouseMode: MouseMode) {
   }
 }
 
-export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
-  return new DragHandle({
-    // Drag handle should be at the same level with EditorContainer
-    container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blocks, editingState) {
-      const page = pageBlock.page;
-      if (editingState) {
-        const { rect, model, element } = editingState;
-        const models = blocks.map(b => b.model);
-        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
-          return;
-        }
+export function pickBy(
+  surface: SurfaceManager,
+  page: Page,
+  x: number,
+  y: number,
+  filter: (element: Selectable) => boolean
+): Selectable | null {
+  const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
+  const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
 
-        let parentId;
-
-        page.captureSync();
-
-        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
-          page.moveBlocks(models, model);
-          parentId = model.id;
-        } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
-          const parent = page.getParent(model);
-          assertExists(parent);
-          page.moveBlocks(
-            models,
-            parent,
-            model,
-            distanceToTop < distanceToBottom
-          );
-          parentId = parent.id;
-        }
-
-        pageBlock.setSelectionByBlockId(parentId, true);
-        return;
-      }
-
-      // blank area
-      page.captureSync();
-      pageBlock.moveBlocksToNewFrame(
-        blocks.map(b => b.model),
-        point
+  return selectedShapes.length
+    ? selectedShapes[selectedShapes.length - 1]
+    : pickTopBlock(
+        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        modelX,
+        modelY
       );
-    },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ) {
-      return;
-    },
-    getSelectedBlocks() {
-      return [];
-    },
-    getFocusedBlock() {
-      return null;
-    },
-    getClosestBlockElement(point: Point) {
-      if (pageBlock.mouseMode.type !== 'default') return null;
-      const hoveringFrame = getHoveringFrame(point);
-      if (!hoveringFrame) return null;
-      return getClosestBlockElementByPoint(
-        point,
-        { container: hoveringFrame, rect: Rect.fromDOM(hoveringFrame) },
-        pageBlock.surface.viewport.zoom
-      );
-    },
+}
+
+function pickById(surface: SurfaceManager, page: Page, id: string) {
+  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const element = surface.pickById(id) || blocks.find(b => b.id === id);
+  return element;
+}
+
+export function generateConnectorPath(
+  startRect: Rectangle | null,
+  endRect: Rectangle | null,
+  startPoint: ConnectorPoint,
+  endPoint: ConnectorPoint,
+  originControllers: Controller[],
+  mode: ConnectorMode = ConnectorMode.Orthogonal,
+  // this indicating which part of the path is fixed when there are customized control points
+  fixed?: 'start' | 'end'
+) {
+  if (mode !== ConnectorMode.Orthogonal) {
+    return [startPoint, endPoint];
+  }
+  let customizedStart = Infinity;
+  let customizedEnd = -1;
+  originControllers.forEach((c, index) => {
+    if (c.customized) {
+      customizedStart = Math.min(customizedStart, index);
+      customizedEnd = Math.max(customizedEnd, index);
+    }
   });
+  if (customizedEnd > -1) {
+    const part0EndPoint = originControllers[customizedStart];
+    const part0 =
+      fixed === 'start'
+        ? originControllers.slice(0, customizedStart + 1)
+        : route(startRect ? [startRect] : [], [startPoint, part0EndPoint]);
+
+    const part1 = originControllers.slice(customizedStart, customizedEnd + 1);
+
+    const part2StartPoint = originControllers[customizedEnd];
+    const part2 =
+      fixed === 'end'
+        ? originControllers.slice(customizedEnd)
+        : route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
+
+    const finalPath = simplifyPath([
+      ...part0.slice(0, -1),
+      ...part1,
+      ...part2.slice(1),
+    ]);
+
+    return finalPath;
+  }
+
+  return route([startRect, endRect].filter(r => !!r) as Rectangle[], [
+    startPoint,
+    endPoint,
+  ]);
+}
+
+export function getAttachedPointByDirection(
+  { x, y, w, h }: Rectangle,
+  direction: AttachedElementDirection
+) {
+  switch (direction) {
+    case 'top': {
+      return { x: x + w / 2, y };
+    }
+    case 'right': {
+      return { x: x + w, y: y + h / 2 };
+    }
+    case 'bottom': {
+      return { x: x + w / 2, y: y + h };
+    }
+    case 'left': {
+      return { x, y: y + h / 2 };
+    }
+  }
+}
+
+export function getAttachedPoint(
+  x: number,
+  y: number,
+  rect?: Rectangle | null
+) {
+  if (!rect) {
+    return { point: { x, y }, direction: 'left' as const };
+  }
+  const direction = rect.relativeDirection(x, y);
+  const point = getAttachedPointByDirection(rect, direction);
+  return { point, direction };
+}
+
+export function getConnectorAttachedInfo(
+  element: ConnectorElement,
+  surface: SurfaceManager,
+  page: Page
+) {
+  const { startElement, endElement } = element;
+  const start = startElement?.id
+    ? pickById(surface, page, startElement.id)
+    : null;
+  const startRect = start
+    ? new Rectangle(...deserializeXYWH(getXYWH(start)))
+    : null;
+  const startPoint =
+    startRect && startElement
+      ? getAttachedPointByDirection(startRect, startElement.direction)
+      : {
+          x: element.x + element.controllers[0].x,
+          y: element.y + element.controllers[0].y,
+        };
+
+  const end = endElement?.id ? pickById(surface, page, endElement.id) : null;
+  const endRect = end ? new Rectangle(...deserializeXYWH(getXYWH(end))) : null;
+  const endPoint =
+    endRect && endElement
+      ? getAttachedPointByDirection(endRect, endElement.direction)
+      : {
+          x: element.x + element.controllers[element.controllers.length - 1].x,
+          y: element.y + element.controllers[element.controllers.length - 1].y,
+        };
+
+  return {
+    start: {
+      element: startElement,
+      rect: startRect,
+      point: startPoint,
+    },
+    end: {
+      element: endElement,
+      rect: endRect,
+      point: endPoint,
+    },
+  };
 }

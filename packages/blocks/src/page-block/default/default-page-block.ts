@@ -10,13 +10,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-  Slot,
-  Utils,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -24,7 +18,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -55,7 +52,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends NonShadowLitElement
+  extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
   static styles = css`
@@ -491,8 +488,6 @@ export class DefaultPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
   }
-
-  private _disposables = new DisposableGroup();
 
   override connectedCallback() {
     super.connectedCallback();

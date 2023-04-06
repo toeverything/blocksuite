@@ -16,6 +16,7 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
+    "@blocksuite/connector": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "@rich-data/json-plugin": "^3.0.0-20230329005843-d296129",
     "@rich-data/viewer": "^3.0.0-20230329005843-d296129",

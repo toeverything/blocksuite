@@ -2,7 +2,7 @@
 import '../declare-test-window.js';
 
 import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
@@ -141,8 +141,11 @@ export async function waitEmbedLoaded(page: Page) {
   await page.waitForSelector('.resizable-img');
 }
 
-export async function waitNextFrame(page: Page) {
-  await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
+export async function waitNextFrame(
+  page: Page,
+  frameTimeout = NEXT_FRAME_TIMEOUT
+) {
+  await page.waitForTimeout(frameTimeout);
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {
@@ -261,7 +264,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumn: 'Title',
+        titleColumnName: 'Title',
       },
       frameId
     );
@@ -271,8 +274,41 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyDatabaseWithParagraphState(
+  page: Page,
+  pageId?: string
+) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+        titleColumnName: 'Title',
+      },
+      frameId
+    );
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.captureSync();
+    return { pageId, frameId, databaseId };
+  }, pageId);
+  return ids;
+}
+
 export async function initDatabaseColumn(page: Page, title = '') {
-  const columnAddBtn = page.locator('.affine-database-add-column-button');
+  const header = page.locator('.affine-database-column-header');
+  const box = await header.boundingBox();
+  if (!box) throw new Error('Missing column type rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  const columnAddBtn = page.locator('.header-add-column-button');
   await columnAddBtn.click();
 
   if (title) {
@@ -284,6 +320,10 @@ export async function initDatabaseColumn(page: Page, title = '') {
 }
 
 export async function initDatabaseRow(page: Page) {
+  const footer = page.locator('.affine-database-block-footer');
+  const box = await footer.boundingBox();
+  if (!box) throw new Error('Missing database footer rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   const columnAddBtn = page.locator(
     '[data-test-id="affine-database-add-row-button"]'
   );
@@ -309,29 +349,11 @@ export async function initDatabaseDynamicRowWithData(
     await initDatabaseRow(page);
   }
   const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-database-cell-container').nth(index);
+  const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await cell.click();
   await type(page, data);
   await pressEnter(page);
-}
-
-export async function getDatabaseMouse(page: Page) {
-  const databaseRect = await getBoundingClientRect(page, 'affine-database');
-  return {
-    mouseOver: async () => {
-      await page.mouse.move(databaseRect.x, databaseRect.y);
-    },
-    mouseLeave: async () => {
-      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
-    },
-  };
-}
-
-export async function focusDatabaseSearch(page: Page) {
-  const searchIcon = page.locator('.affine-database-search-input-icon');
-  await searchIcon.click();
-  return searchIcon;
 }
 
 export async function focusDatabaseTitle(page: Page) {
@@ -595,6 +617,12 @@ export const getBoundingClientRect: (
     return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
   }, selector);
 };
+
+export async function getBoundingBox(locator: Locator) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Missing column box');
+  return box;
+}
 
 export async function getBlockModel<Model extends BaseBlockModel>(
   page: Page,

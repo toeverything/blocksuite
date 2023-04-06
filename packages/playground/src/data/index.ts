@@ -136,21 +136,21 @@ export const database: InitFn = (workspace: Workspace) => {
     { value: 'TODO', color: '#FFE1E1' },
     { value: 'WIP', color: '#E1EFFF' },
   ];
-  const col1 = page.db.updateColumnSchema({
+  const col1 = page.db.updateColumn({
     name: 'Number',
     type: 'number',
     width: 200,
     hide: false,
     decimal: 0,
   });
-  const col2 = page.db.updateColumnSchema({
+  const col2 = page.db.updateColumn({
     name: 'Single Select',
     type: 'select',
     width: 200,
     hide: false,
     selection,
   });
-  const col3 = page.db.updateColumnSchema({
+  const col3 = page.db.updateColumn({
     name: 'Rich Text',
     type: 'rich-text',
     width: 200,
@@ -161,7 +161,8 @@ export const database: InitFn = (workspace: Workspace) => {
     'affine:database',
     {
       columns: [col1, col2, col3],
-      titleColumn: 'Title',
+      titleColumnName: 'Title',
+      titleColumnWidth: 200,
     },
     frameId
   );

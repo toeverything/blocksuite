@@ -1,12 +1,18 @@
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
+  assertColumnWidth,
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
+  dragBetweenCoords,
   enterPlaygroundRoom,
+  focusDatabaseHeader,
   focusDatabaseSearch,
   focusDatabaseTitle,
   focusRichText,
+  getBlockModel,
+  getBoundingBox,
   getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -14,6 +20,8 @@ import {
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
+  initEmptyDatabaseWithParagraphState,
+  pasteByKeyboard,
   performColumnAction,
   performSelectColumnTagAction,
   pressArrowLeft,
@@ -33,6 +41,7 @@ import {
   assertBlockProps,
   assertDatabaseCellRichTexts,
   assertDatabaseTitleText,
+  assertLocatorVisible,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -58,9 +67,8 @@ test('edit database block title and create new rows', async ({ page }) => {
   await assertBlockProps(page, '2', {
     title: 'Database 1',
   });
-  const button = page.locator('.affine-database-block-add-row[role="button"]');
-  await button.click();
-  await button.click();
+  await initDatabaseRowWithData(page, '');
+  await initDatabaseRowWithData(page, '');
   await assertBlockProps(page, '3', {
     flavour: 'affine:paragraph',
   });
@@ -158,7 +166,7 @@ test('should show or hide database toolbar', async ({ page }) => {
   await expect(toolbar).toBeHidden();
 
   await db.mouseOver();
-  const searchIcon = await focusDatabaseSearch(page);
+  await focusDatabaseSearch(page);
   await db.mouseLeave();
   await expect(toolbar).toBeVisible();
 
@@ -166,13 +174,13 @@ test('should show or hide database toolbar', async ({ page }) => {
   await expect(toolbar).toBeHidden();
 
   await db.mouseOver();
-  await searchIcon.click();
+  await focusDatabaseSearch(page);
   await type(page, '1');
   await clickDatabaseOutside(page);
   await expect(toolbar).toBeVisible();
 });
 
-test.skip('should database search work', async ({ page }) => {
+test('should database search work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -180,7 +188,7 @@ test.skip('should database search work', async ({ page }) => {
   await initDatabaseRowWithData(page, 'text1');
   await initDatabaseDynamicRowWithData(page, '123', false);
   await initDatabaseRowWithData(page, 'text2');
-  await initDatabaseDynamicRowWithData(page, '', false);
+  await initDatabaseDynamicRowWithData(page, 'a', false);
   await initDatabaseRowWithData(page, 'text3');
   await initDatabaseDynamicRowWithData(page, '26', false);
 
@@ -193,7 +201,7 @@ test.skip('should database search work', async ({ page }) => {
   // search for '23'
   await type(page, '3');
   expect(await rows.count()).toBe(1);
-  const cell = page.locator('affine-database-number-cell > span');
+  const cell = page.locator('.select-selected');
   expect(await cell.innerText()).toBe('123');
 
   // clear search input
@@ -270,7 +278,7 @@ test('should support right insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-right');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['3', '4']);
 });
@@ -283,7 +291,7 @@ test('should support left insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-left');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['4', '3']);
 });
@@ -295,10 +303,10 @@ test('should support delete column', async ({ page }) => {
   await initDatabaseColumn(page);
 
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(2);
+  expect(await columns.count()).toBe(3);
 
   await performColumnAction(page, '3', 'delete');
-  expect(await columns.count()).toBe(1);
+  expect(await columns.count()).toBe(2);
 });
 
 test('should support duplicate column', async ({ page }) => {
@@ -444,6 +452,26 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
     expect(await cell.innerText()).toBe('');
   });
+
+  test('switch number to select', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await switchColumnType(page, 'number');
+
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    const cell = getFirstColumnCell(page, 'number');
+    expect(await cell.innerText()).toBe('123');
+
+    await switchColumnType(page, 'select');
+    await initDatabaseDynamicRowWithData(page, 'abc');
+    const selectCell = getFirstColumnCell(page, 'select-selected');
+    expect(await selectCell.innerText()).toBe('abc');
+
+    await switchColumnType(page, 'number');
+    expect(await cell.innerText()).toBe('');
+  });
 });
 
 test.describe('select column tag action', () => {
@@ -484,4 +512,117 @@ test.describe('select column tag action', () => {
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
   });
+});
+
+test('should support delete database through action menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await focusDatabaseSearch(page);
+  const moreAction = page.locator('.more-action');
+  await moreAction.click();
+  const actionPopup = page.locator('affine-database-toolbar-action-popup');
+  expect(actionPopup).toBeVisible();
+
+  const deleteDb = page.locator('.delete-database');
+  await deleteDb.click();
+  const db = page.locator('affine-database');
+  expect(await db.count()).toBe(0);
+
+  await undoByClick(page);
+  expect(await db.count()).toBe(1);
+});
+
+test('should support copy database through action menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseWithParagraphState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, '123', true);
+  await initDatabaseDynamicRowWithData(page, 'abc');
+
+  await focusDatabaseSearch(page);
+  const moreAction = page.locator('.more-action');
+  await moreAction.click();
+  const actionPopup = page.locator('affine-database-toolbar-action-popup');
+  await assertLocatorVisible(page, actionPopup);
+
+  const copyDb = page.locator('.copy');
+  await copyDb.click();
+  expect(await actionPopup.count()).toBe(0);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+
+  await assertBlockCount(page, 'database', 2);
+  const db1Model = (await getBlockModel(page, '2')) as DatabaseBlockModel;
+  const db2Model = (await getBlockModel(page, '6')) as DatabaseBlockModel;
+  expect(db1Model.title.toString()).toEqual(db2Model.title.toString());
+});
+
+test('should support drag to change column width', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  const headerColumns = page.locator('.affine-database-column');
+  const titleColumn = headerColumns.nth(0);
+  const normalColumn = headerColumns.nth(1);
+
+  const dragDistance = 100;
+  const titleColumnWidth = 432;
+  const normalColumnWidth = 200;
+
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  const box = await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await dragBetweenCoords(
+    page,
+    { x: box.x, y: box.y },
+    { x: box.x + dragDistance, y: box.y },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+      },
+    }
+  );
+
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await undoByClick(page);
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
+});
+
+test('should display the add column button on the right side of database correctly', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  const normalColumn = page.locator('.affine-database-column').nth(1);
+
+  const addColumnBtn = page.locator('.affine-database-add-column-button');
+  await expect(addColumnBtn).toBeHidden();
+
+  const box = await getBoundingBox(normalColumn);
+  await dragBetweenCoords(
+    page,
+    { x: box.x, y: box.y },
+    { x: box.x + 100, y: box.y },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+      },
+    }
+  );
+  await focusDatabaseHeader(page);
+  await expect(addColumnBtn).toBeVisible();
+
+  await undoByClick(page);
+  await expect(addColumnBtn).toBeHidden();
 });
