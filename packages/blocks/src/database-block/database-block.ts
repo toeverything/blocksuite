@@ -1309,42 +1309,6 @@ const styles = css`
   .affine-database-block-footer {
     display: flex;
     width: 100%;
-    height: 42px;
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-
-  .affine-database-block-add-row {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    user-select: none;
-    font-size: 14px;
-  }
-  .affine-database-block-add-row svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-  }
-
-  .affine-database-block-footer {
-    display: flex;
-    width: 100%;
     height: 28px;
     background: #fff;
   }
@@ -1372,22 +1336,7 @@ const styles = css`
     height: 16px;
   }
 
-  .affine-database-add-column-button {
-    position: absolute;
-    top: 58px;
-    right: -40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-  }
-
   ${tooltipStyle}
-  .invisible {
-    display: none;
-  }
 `;
 
 @customElement('affine-database')

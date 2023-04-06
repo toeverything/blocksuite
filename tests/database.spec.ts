@@ -5,11 +5,14 @@ import {
   assertColumnWidth,
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
+  dragBetweenCoords,
   enterPlaygroundRoom,
+  focusDatabaseHeader,
   focusDatabaseSearch,
   focusDatabaseTitle,
   focusRichText,
   getBlockModel,
+  getBoundingBox,
   getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -573,13 +576,17 @@ test('should support drag to change column width', async ({ page }) => {
   await assertColumnWidth(titleColumn, titleColumnWidth);
   const box = await assertColumnWidth(normalColumn, normalColumnWidth);
 
-  await page.mouse.move(box.x, box.y);
-  await page.mouse.down();
-  await page.mouse.move(box.x + dragDistance, box.y, {
-    steps: 50,
-  });
-  await waitNextFrame(page);
-  await page.mouse.up();
+  await dragBetweenCoords(
+    page,
+    { x: box.x, y: box.y },
+    { x: box.x + dragDistance, y: box.y },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+      },
+    }
+  );
 
   await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
   await assertColumnWidth(normalColumn, normalColumnWidth);
@@ -587,4 +594,35 @@ test('should support drag to change column width', async ({ page }) => {
   await undoByClick(page);
   await assertColumnWidth(titleColumn, titleColumnWidth);
   await assertColumnWidth(normalColumn, normalColumnWidth);
+});
+
+test('should display the add column button on the right side of database correctly', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  const normalColumn = page.locator('.affine-database-column').nth(1);
+
+  const addColumnBtn = page.locator('.affine-database-add-column-button');
+  await expect(addColumnBtn).toBeHidden();
+
+  const box = await getBoundingBox(normalColumn);
+  await dragBetweenCoords(
+    page,
+    { x: box.x, y: box.y },
+    { x: box.x + 100, y: box.y },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+      },
+    }
+  );
+  await focusDatabaseHeader(page);
+  await expect(addColumnBtn).toBeVisible();
+
+  await undoByClick(page);
+  await expect(addColumnBtn).toBeHidden();
 });
