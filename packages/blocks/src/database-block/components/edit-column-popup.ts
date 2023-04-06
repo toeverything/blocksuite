@@ -154,8 +154,8 @@ const titleColumnActions: TitleColumnAction[] = [
   },
 ];
 
-function isTitleColumn(columnSchema: Column | string): columnSchema is string {
-  return typeof columnSchema === 'string';
+function isTitleColumn(_column: Column | string): _column is string {
+  return typeof _column === 'string';
 }
 
 @customElement('affine-database-column-type-popup')

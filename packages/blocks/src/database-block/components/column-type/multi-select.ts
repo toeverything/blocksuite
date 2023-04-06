@@ -20,7 +20,7 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
         .rowHost=${this.rowHost}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
+        ._column=${this._column}
         .cell=${this.cell}
       ></affine-database-select-cell>
     `;
@@ -38,7 +38,7 @@ class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         .rowHost=${this.rowHost}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
+        ._column=${this._column}
         .cell=${this.cell}
         .mode=${SelectMode.Multi}
       ></affine-database-select-cell-editing>

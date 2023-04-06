@@ -140,7 +140,7 @@ export type SerializedBlock = {
     titleColumnName: string;
     titleColumnWidth: number;
     columnIds: string[];
-    columnSchemaIds: string[];
+    _columnIds: string[];
   };
 };
 

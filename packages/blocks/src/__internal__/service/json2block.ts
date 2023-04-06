@@ -184,7 +184,7 @@ export async function addSerializedBlocks(
     const service = await getServiceOrRegister(flavour);
     service.onBlockPasted(model, {
       columnIds: json.databaseProps?.columnIds,
-      columnSchemaIds: json.databaseProps?.columnSchemaIds,
+      _columnIds: json.databaseProps?._columnIds,
     });
   }
 

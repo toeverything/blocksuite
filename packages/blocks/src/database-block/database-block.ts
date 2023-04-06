@@ -399,7 +399,7 @@ function DataBaseRowContainer(
                     <affine-database-cell-container
                       .databaseModel=${databaseModel}
                       .rowModel=${child}
-                      .columnSchema=${column}
+                      ._column=${column}
                     >
                     </affine-database-cell-container>
                   </div>

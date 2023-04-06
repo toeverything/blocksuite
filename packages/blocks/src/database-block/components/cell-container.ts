@@ -33,7 +33,7 @@ export class DatabaseCellContainer
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
       this.databaseModel.page.db.updateCell(this.rowModel.id, {
-        columnId: this.columnSchema.id,
+        columnId: this._column.id,
         value,
       });
       this.requestUpdate();
@@ -53,10 +53,10 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.columnSchema);
+    const newProperty = apply(this._column);
     this.databaseModel.page.captureSync();
     this.databaseModel.page.db.updateColumn({
-      ...this.columnSchema,
+      ...this._column,
       ...newProperty,
     });
   }
@@ -68,7 +68,7 @@ export class DatabaseCellContainer
   protected firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
-    this.setAttribute('data-column-id', this.columnSchema.id);
+    this.setAttribute('data-column-id', this._column.id);
   }
 
   _onClick = (event: Event) => {
@@ -98,10 +98,10 @@ export class DatabaseCellContainer
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
-    const renderer = getColumnRenderer(this.columnSchema.type);
+    const renderer = getColumnRenderer(this._column.type);
     const cell = this.databaseModel.page.db.getCell(
       this.rowModel.id,
-      this.columnSchema.id
+      this._column.id
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
@@ -111,7 +111,7 @@ export class DatabaseCellContainer
           .rowHost=${this}
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
-          .columnSchema=${this.columnSchema}
+          ._column=${this._column}
           .cell=${cell}
         ></${editingTag}>
       `;
@@ -122,7 +122,7 @@ export class DatabaseCellContainer
         .rowHost=${this}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
+        ._column=${this._column}
         .cell=${cell}
       ></${previewTag}>
     `;
