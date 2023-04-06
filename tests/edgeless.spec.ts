@@ -1206,7 +1206,7 @@ test('add connector element', async ({ page }) => {
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
 
-test.only('connector attached element', async ({ page }) => {
+test('connector attached element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -1272,4 +1272,31 @@ test('drag element which attaches connector', async ({ page }) => {
 
   await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
   await assertEdgelessHoverRect(page, [180, 230, 120, 70]);
+});
+
+test('resize element which attaches connector', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect.start, rect.end);
+
+  const connector = {
+    start: { x: 150, y: 200 },
+    end: { x: 300, y: 300 },
+  };
+  await addBasicConnectorElement(page, connector.start, connector.end);
+
+  await page.mouse.move(connector.start.x + 5, connector.start.y + 5);
+  await assertEdgelessHoverRect(page, [150, 200, 150, 100]);
+
+  await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
+  await resizeElementByTopLeftHandle(page, { x: 20, y: 0 });
+
+  await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
+  await assertEdgelessHoverRect(page, [160, 200, 140, 100]);
 });
