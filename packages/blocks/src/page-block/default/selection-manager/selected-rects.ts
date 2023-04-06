@@ -1,3 +1,4 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -17,7 +18,7 @@ export class PageSelectedRects extends LitElement {
       pointer-events: auto;
     }
 
-    :host([draggable='true']:hover) {
+    :host([enable]:hover) {
       cursor: grab;
     }
 
@@ -28,8 +29,24 @@ export class PageSelectedRects extends LitElement {
     }
   `;
 
+  private _disposables: DisposableGroup = new DisposableGroup();
+
+  private _onMouseUp({ clientX, clientY }: MouseEvent) {
+    this.style.pointerEvents = 'none';
+    this.mouseRoot.dispatchEvent(
+      new MouseEvent('mouseup', {
+        bubbles: true,
+        clientX,
+        clientY,
+      })
+    );
+  }
+
   @property()
   draggingArea: DOMRect | null = null;
+
+  @property()
+  mouseRoot!: HTMLElement;
 
   @property()
   viewport!: PageViewport;
@@ -37,9 +54,22 @@ export class PageSelectedRects extends LitElement {
   @property()
   rects: DOMRect[] = [];
 
+  connectedCallback() {
+    super.connectedCallback();
+
+    const disposables = this._disposables;
+    // trigger editor click
+    disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposables.dispose();
+  }
+
   protected willUpdate(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('draggingArea')) {
-      this.draggable = !this.draggingArea;
+      this.toggleAttribute('enable', !this.draggingArea);
     }
     if (changedProperties.has('rects')) {
       const firstRect = this.rects[0];
@@ -50,8 +80,9 @@ export class PageSelectedRects extends LitElement {
         this.style.top = `${startTop}px`;
         this.style.left = `${startLeft}px`;
       } else {
-        this.draggable = true;
         this.draggingArea = null;
+        this.setAttribute('enable', '');
+        this.style.pointerEvents = 'auto';
       }
     }
   }

@@ -381,8 +381,28 @@ export class DragHandle extends LitElement {
 
     // document
     if (isFirefox) {
-      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
+      disposables.addFromEvent(
+        this._container,
+        'dragover',
+        this._onDragOverDocument
+      );
     }
+
+    disposables.addFromEvent(this._container, 'dragover', (e: DragEvent) => {
+      console.log(e.dataTransfer);
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
+      console.log('dragover', e.dataTransfer?.dropEffect);
+    });
+
+    disposables.addFromEvent(this._container, 'drop', (e: DragEvent) => {
+      console.log(e.dataTransfer);
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
+      console.log('drop', e.dataTransfer?.dropEffect);
+    });
 
     // document.body
     disposables.addFromEvent(document.body, 'wheel', this._onWheel);
@@ -598,7 +618,7 @@ export class DragHandle extends LitElement {
   };
 
   // TODO: automatic scrolling when top and bottom boundaries are reached
-  onDrag = (e: DragEvent, passed = false) => {
+  onDrag = (e: DragEvent, passed?: boolean) => {
     this._dragHandle.style.cursor = 'grabbing';
     let x = e.clientX;
     let y = e.clientY;
@@ -654,8 +674,9 @@ export class DragHandle extends LitElement {
     this._indicator.cursorPosition = point;
   };
 
-  onDragEnd = (e: DragEvent, passed = false) => {
+  onDragEnd = (e: DragEvent, passed?: boolean) => {
     this._stopPropagation = false;
+
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
     this._removeDragPreview();

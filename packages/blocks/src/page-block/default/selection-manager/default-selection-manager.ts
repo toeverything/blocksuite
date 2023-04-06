@@ -168,6 +168,7 @@ export class DefaultSelectionManager {
     this._container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'block:drag') {
+      console.log(2333);
       this._container.components.dragHandle?.onDragEnd(
         createDragEvent('dragend', e.raw),
         true
@@ -429,7 +430,7 @@ export class DefaultSelectionManager {
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
 
-      // clear `format-bar-node`
+      // clear `format quick bar`
       document.dispatchEvent(new Event('selectionchange'));
       // clear `drag preview`
       if (type === 'block:drag') {

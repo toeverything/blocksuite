@@ -6,7 +6,6 @@ import {
   DownloadIcon,
 } from '@blocksuite/global/config';
 import { html } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
@@ -67,36 +66,6 @@ export function EmbedSelectedRectsContainer(
             <div class="resize bottom-right"></div>
           </div>
         `;
-      })}
-    </div>
-  `;
-}
-
-export function SelectedRectsContainer(
-  rects: DOMRect[],
-  viewport: PageViewport
-) {
-  const { left, top, scrollLeft, scrollTop } = viewport;
-  return html`
-    <style>
-      .affine-page-selected-rects-container > div {
-        position: absolute;
-        display: block;
-        background: var(--affine-selected-color);
-        z-index: 1;
-        pointer-events: none;
-        border-radius: 5px;
-      }
-    </style>
-    <div class="affine-page-selected-rects-container">
-      ${repeat(rects, rect => {
-        const style = {
-          left: rect.left - left + scrollLeft + 'px',
-          top: rect.top - top + scrollTop + 'px',
-          width: rect.width + 'px',
-          height: rect.height + 'px',
-        };
-        return html` <div style=${styleMap(style)}></div>`;
       })}
     </div>
   `;
