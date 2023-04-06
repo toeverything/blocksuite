@@ -57,7 +57,7 @@ export class AffinePageSelectedRects extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // trigger click of editor container
+    // trigger click event on editor container
     this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
   }
 
