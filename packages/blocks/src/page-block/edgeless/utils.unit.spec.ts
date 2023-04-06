@@ -84,5 +84,16 @@ describe('page-block edgeless utils', () => {
       'end'
     );
     expect(pathStraight).toMatchObject([startPoint, endPoint]);
+
+    const pathFallback = generateConnectorPath(
+      startRect,
+      endRect,
+      startPoint,
+      startPoint,
+      controllers,
+      ConnectorMode.Straight,
+      'end'
+    );
+    expect(pathFallback).toMatchObject([startPoint, startPoint]);
   });
 });
