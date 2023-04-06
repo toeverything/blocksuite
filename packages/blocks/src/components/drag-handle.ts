@@ -178,7 +178,7 @@ export class DragHandle extends LitElement {
     container: HTMLElement;
     onDropCallback: (
       point: Point,
-      dragged: BlockComponentElement[],
+      draggingBlockElements: BlockComponentElement[],
       lastModelState: EditingState | null
     ) => void;
     setSelectedBlocks: (
@@ -483,12 +483,12 @@ export class DragHandle extends LitElement {
 
   private _createDragPreview(
     e: DragEvent,
-    draggingBlockElements: BlockComponentElement[],
+    blockElements: BlockComponentElement[],
     grabbing = false
   ) {
     const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
-    const rect = draggingBlockElements[0].getBoundingClientRect();
+    const rect = blockElements[0].getBoundingClientRect();
 
     dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
     dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
@@ -499,11 +499,7 @@ export class DragHandle extends LitElement {
 
     const fragment = document.createDocumentFragment();
 
-    draggingBlockElements = getBlockElementsExcludeSubtrees(
-      draggingBlockElements
-    ) as BlockComponentElement[];
-
-    draggingBlockElements.forEach(e => {
+    blockElements.forEach(e => {
       const c = document.createElement('div');
       c.classList.add('affine-block-element');
       render(e.render(), c);
@@ -601,9 +597,7 @@ export class DragHandle extends LitElement {
     // }
 
     const draggingBlockElements = (
-      included
-        ? getBlockElementsExcludeSubtrees(this.selectedBlocks)
-        : [this._handleAnchorState.element]
+      included ? this.selectedBlocks : [this._handleAnchorState.element]
     ) as BlockComponentElement[];
 
     this._createDragPreview(

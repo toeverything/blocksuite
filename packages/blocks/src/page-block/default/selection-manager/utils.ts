@@ -5,6 +5,7 @@ import type { IPoint } from '../../../__internal__/utils/gesture.js';
 import {
   type BlockComponentElement,
   contains,
+  getBlockElementsExcludeSubtrees,
   getRectByBlockElement,
 } from '../../../__internal__/utils/query.js';
 import type { DefaultSelectionSlots } from '../default-page-block.js';
@@ -149,7 +150,7 @@ export function setSelectedBlocks(
   }
 
   const calculatedRects = [] as DOMRect[];
-  for (const block of selectedBlocks) {
+  for (const block of getBlockElementsExcludeSubtrees(selectedBlocks)) {
     calculatedRects.push(getRectByBlockElement(block));
   }
 

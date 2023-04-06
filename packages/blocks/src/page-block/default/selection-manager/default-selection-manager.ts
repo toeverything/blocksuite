@@ -521,7 +521,7 @@ export class DefaultSelectionManager {
 
   refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
     this.state.selectedBlocks = models
-      .map(model => getBlockElementByModel(model))
+      .map(getBlockElementByModel)
       .filter((block): block is BlockComponentElement => block !== null);
     this.refreshSelectedBlocksRects();
   }
@@ -636,8 +636,11 @@ export class DefaultSelectionManager {
     );
   }
 
-  setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
-    setSelectedBlocks(this.state, this.slots, selectedBlocks);
+  setSelectedBlocks(
+    selectedBlocks: BlockComponentElement[],
+    rects?: DOMRect[]
+  ) {
+    setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
   }
 
   setFocusedBlock(blockElement: Element) {

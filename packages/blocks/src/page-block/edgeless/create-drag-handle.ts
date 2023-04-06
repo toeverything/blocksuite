@@ -5,8 +5,10 @@ import type {
 } from '@blocksuite/blocks/std';
 import {
   doesInSamePath,
+  getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getHoveringFrame,
+  getModelByBlockElement,
   isInEmptyDatabaseByPoint,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -19,11 +21,15 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
     // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blocks, editingState) {
+    onDropCallback(point, blockElements, editingState) {
       const page = pageBlock.page;
+      const models = (
+        getBlockElementsExcludeSubtrees(
+          blockElements
+        ) as BlockComponentElement[]
+      ).map(getModelByBlockElement);
       if (editingState) {
         const { rect, model, element } = editingState;
-        const models = blocks.map(b => b.model);
         if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
@@ -55,10 +61,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
       // blank area
       page.captureSync();
-      pageBlock.moveBlocksToNewFrame(
-        blocks.map(b => b.model),
-        point
-      );
+      pageBlock.moveBlocksToNewFrame(models, point);
     },
     setSelectedBlocks(
       selectedBlocks: EditingState | BlockComponentElement[] | null
