@@ -531,11 +531,13 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
-        defaultPageBlock.selection.setSelectedBlocks(
-          blocks
-            .map(b => getBlockElementById(b.model.id))
-            .filter((b): b is BlockComponentElement => !!b)
-        );
+        requestAnimationFrame(() => {
+          defaultPageBlock.selection.setSelectedBlocks(
+            blocks
+              .map(b => getBlockElementById(b.model.id))
+              .filter((b): b is BlockComponentElement => !!b)
+          );
+        });
       });
     },
     setSelectedBlocks(

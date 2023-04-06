@@ -110,6 +110,14 @@ export class DragPreview extends LitElement {
         z-index: 2;
       }
 
+      affine-drag-preview > .affine-block-element {
+        pointer-events: none;
+      }
+
+      affine-drag-preview > .affine-block-element:first-child > *:first-child {
+        margin-top: 0;
+      }
+
       affine-drag-preview .affine-rich-text {
         user-modify: read-only;
         -webkit-user-modify: read-only;
@@ -118,14 +126,6 @@ export class DragPreview extends LitElement {
       affine-drag-preview.grabbing {
         cursor: grabbing;
         pointer-events: auto;
-      }
-
-      affine-drag-preview.grabbing .affine-rich-text {
-        cursor: grabbing;
-      }
-
-      affine-drag-preview > .affine-block-element:first-child > *:first-child {
-        margin-top: 0;
       }
     </style>`;
   }
