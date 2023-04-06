@@ -154,8 +154,8 @@ const titleColumnActions: TitleColumnAction[] = [
   },
 ];
 
-function isTitleColumn(columnSchema: Column | string): columnSchema is string {
-  return typeof columnSchema === 'string';
+function isTitleColumn(column: Column | string): column is string {
+  return typeof column === 'string';
 }
 
 @customElement('affine-database-column-type-popup')
@@ -286,7 +286,7 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  targetColumnSchema!: Column | string;
+  targetColumn!: Column | string;
 
   /** base on database column index */
   @property()
@@ -314,8 +314,8 @@ export class EditColumnPopup extends LitElement {
     this._columnTypePopup.changeColumnType = this._changeColumnType;
     this._columnTypePopup.columnId = columnId;
 
-    if (!isTitleColumn(this.targetColumnSchema)) {
-      this._columnTypePopup.columnType = this.targetColumnSchema.type;
+    if (!isTitleColumn(this.targetColumn)) {
+      this._columnTypePopup.columnType = this.targetColumn.type;
     }
     this._container.appendChild(this._columnTypePopup);
     createPopper(this._container, this._columnTypePopup, {
@@ -338,7 +338,7 @@ export class EditColumnPopup extends LitElement {
     }
   };
 
-  private _updateColumnSchema = (
+  private _updateColumn = (
     columnId: string,
     schemaProperties: Partial<Column>
   ) => {
@@ -349,28 +349,28 @@ export class EditColumnPopup extends LitElement {
   };
 
   private _changeColumnType = (columnId: string, targetType: ColumnType) => {
-    if (isTitleColumn(this.targetColumnSchema)) return;
+    if (isTitleColumn(this.targetColumn)) return;
 
-    const currentType = this.targetColumnSchema.type;
+    const currentType = this.targetColumn.type;
     this.targetModel.page.captureSync();
 
     // select -> multi-select
     if (currentType === 'select' && targetType === 'multi-select') {
-      this._updateColumnSchema(columnId, { type: targetType });
+      this._updateColumn(columnId, { type: targetType });
     }
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
-      this._updateColumnSchema(columnId, { type: targetType });
+      this._updateColumn(columnId, { type: targetType });
       this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
-      this._updateColumnSchema(columnId, { type: targetType });
+      this._updateColumn(columnId, { type: targetType });
       this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnRenderer(targetType);
-      this._updateColumnSchema(columnId, {
+      this._updateColumn(columnId, {
         ...renderer.propertyCreator(),
         type: targetType,
       });
@@ -445,7 +445,7 @@ export class EditColumnPopup extends LitElement {
   };
 
   private _renderActions = () => {
-    const actions = isTitleColumn(this.targetColumnSchema)
+    const actions = isTitleColumn(this.targetColumn)
       ? titleColumnActions
       : columnActions;
 
@@ -464,11 +464,11 @@ export class EditColumnPopup extends LitElement {
           return null;
         }
 
-        const columnId = isTitleColumn(this.targetColumnSchema)
+        const columnId = isTitleColumn(this.targetColumn)
           ? '-1'
-          : this.targetColumnSchema.id;
+          : this.targetColumn.id;
 
-        const onMouseOver = isTitleColumn(this.targetColumnSchema)
+        const onMouseOver = isTitleColumn(this.targetColumn)
           ? undefined
           : action.type === 'column-type'
           ? () => this._onShowColumnType(columnId)
