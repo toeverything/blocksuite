@@ -512,10 +512,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPage(workspace: Workspace) {
   const pageName = 'Untitled';
-  // TODO use id generator
-  // const id = workspace.idGenerator();
-  const id = nanoid();
-  const newPage = workspace.createPage(id);
+  const newPage = workspace.createPage();
   const pageBlockId = newPage.addBlock('affine:page', {
     title: new newPage.Text(pageName),
   });

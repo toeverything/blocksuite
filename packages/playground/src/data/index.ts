@@ -17,7 +17,7 @@ export interface InitFn {
 }
 
 export const empty: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -38,7 +38,7 @@ empty.displayName = 'Empty Editor';
 empty.description = 'Start from empty editor';
 
 export const heavy: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -84,7 +84,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export const preset: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -119,7 +119,7 @@ preset.displayName = 'BlockSuite Starter';
 preset.description = 'Start from friendly introduction';
 
 export const database: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage();
   page.awarenessStore.setFlag('enable_database', true);
 
   // Add page block and surface block at root level

@@ -61,7 +61,7 @@ async function initEmptyEditor(
 ) {
   await page.evaluate(flags => {
     const { workspace } = window;
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage();
 
     for (const [key, value] of Object.entries(flags)) {
       page.awarenessStore.setFlag(key as keyof typeof flags, value);

@@ -11,13 +11,9 @@ import {
 import { Workspace } from '../workspace.js';
 import type { TestApp } from './test-app.js';
 
-let i = 0;
-
 async function testBasic() {
   testSerial('can create page', async () => {
-    i++;
-    const id = `${i}`;
-    workspace.createPage(id);
+    workspace.createPage();
     workspace.setPageMeta(id, { title: 'hello' });
     await nextFrame();
 

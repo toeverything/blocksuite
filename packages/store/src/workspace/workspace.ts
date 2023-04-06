@@ -444,7 +444,8 @@ export class Workspace {
     });
   }
 
-  createPage(pageId: string, parentId?: string) {
+  createPage(parentId?: string) {
+    const pageId = this.idGenerator();
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }

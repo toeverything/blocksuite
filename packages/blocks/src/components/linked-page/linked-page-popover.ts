@@ -266,9 +266,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _createPage() {
     const pageName = this._query || DEFAULT_PAGE_NAME;
-    const workspace = this._page.workspace;
-    const id = workspace.idGenerator();
-    const page = this._page.workspace.createPage(id);
+    const page = this._page.workspace.createPage();
 
     initDefaultBlocks(page, pageName);
     this._insertLinkedNode('LinkedPage', page.id);
@@ -276,9 +274,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _createSubpage() {
     const pageName = this._query || DEFAULT_PAGE_NAME;
-    const workspace = this._page.workspace;
-    const id = workspace.idGenerator();
-    const page = this._page.workspace.createPage(id, this._page.id);
+    const page = this._page.workspace.createPage(this._page.id);
 
     initDefaultBlocks(page, pageName);
     this._insertLinkedNode('Subpage', page.id);
