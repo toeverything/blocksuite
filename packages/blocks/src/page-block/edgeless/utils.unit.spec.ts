@@ -2,32 +2,36 @@ import { Rectangle } from '@blocksuite/connector';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { describe, expect, it } from 'vitest';
 
-import {
-  generateConnectorPath,
-  getAttachedPoint,
-  getAttachedPointByDirection,
-} from './utils.js';
+import { generateConnectorPath, getAttachedPoint } from './utils.js';
 
 describe('page-block edgeless utils', () => {
-  it('getAttachedPointByDirection', () => {
-    const rect = new Rectangle(10, 10, 20, 20);
-
-    const left = getAttachedPointByDirection(rect, 'left');
-    expect(left).toMatchObject({ x: 10, y: 20 });
-
-    const right = getAttachedPointByDirection(rect, 'right');
-    expect(right).toMatchObject({ x: 30, y: 20 });
-
-    const top = getAttachedPointByDirection(rect, 'top');
-    expect(top).toMatchObject({ x: 20, y: 10 });
-
-    const bottom = getAttachedPointByDirection(rect, 'bottom');
-    expect(bottom).toMatchObject({ x: 20, y: 30 });
-  });
-
   it('getAttachedPoint with no rect', () => {
     const ret = getAttachedPoint(10, 10);
-    expect(ret).toMatchObject({ point: { x: 10, y: 10 }, direction: 'left' });
+    expect(ret).toMatchObject({ point: { x: 10, y: 10 }, position: null });
+  });
+
+  it('getAttachedPoint with point not in rect', () => {
+    const rect = new Rectangle(10, 10, 100, 100);
+    const ret = getAttachedPoint(0, 0, rect);
+    expect(ret).toMatchObject({ point: { x: 0, y: 0 }, position: null });
+  });
+
+  it('getAttachedPoint return origin point', () => {
+    const rect = new Rectangle(10, 10, 100, 100);
+    const ret = getAttachedPoint(20, 30, rect);
+    expect(ret).toMatchObject({
+      point: { x: 20, y: 30 },
+      position: { x: 0.1, y: 0.2 },
+    });
+  });
+
+  it('getAttachedPoint return fixed point', () => {
+    const rect = new Rectangle(10, 10, 100, 100);
+    const ret = getAttachedPoint(10, 50, rect);
+    expect(ret).toMatchObject({
+      point: { x: 10, y: 60 },
+      position: { x: 0, y: 0.4 },
+    });
   });
 
   it('generateConnectorPath with fixed', () => {

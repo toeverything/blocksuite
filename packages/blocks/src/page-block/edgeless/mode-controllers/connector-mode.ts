@@ -73,7 +73,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       ? new Rectangle(...deserializeXYWH(getXYWH(this._draggingStartElement)))
       : null;
 
-    const { point: startPoint, direction: startDirection } = getAttachedPoint(
+    const { point: startPoint, position: startPosition } = getAttachedPoint(
       modelX,
       modelY,
       this._draggingStartRect
@@ -91,12 +91,13 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       {
         mode,
         color,
-        startElement: this._draggingStartElement
-          ? {
-              id: this._draggingStartElement.id,
-              direction: startDirection,
-            }
-          : undefined,
+        startElement:
+          this._draggingStartElement && startPosition
+            ? {
+                id: this._draggingStartElement.id,
+                position: startPosition,
+              }
+            : undefined,
       }
     );
     this._draggingElementId = id;
@@ -138,7 +139,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     const {
       point: { x: endX, y: endY },
-      direction: endDirection,
+      position: endPosition,
     } = getAttachedPoint(endModelX, endModelY, endRect);
 
     const routes = generateConnectorPath(
@@ -163,7 +164,8 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     });
 
     this._surface.updateConnectorElement(id, bound, controllers, {
-      endElement: end ? { id: end.id, direction: endDirection } : undefined,
+      endElement:
+        end && endPosition ? { id: end.id, position: endPosition } : undefined,
     });
     this._edgeless.slots.surfaceUpdated.emit();
   }

@@ -1,10 +1,8 @@
 import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
 import type { Point as ConnectorPoint, Point } from '@blocksuite/connector';
-import { Rectangle } from '@blocksuite/connector';
-import { simplifyPath } from '@blocksuite/connector';
-import { route } from '@blocksuite/connector';
+import type { Direction } from '@blocksuite/connector';
+import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
 import type {
-  AttachedElementDirection,
   Bound,
   ConnectorElement,
   Controller,
@@ -33,6 +31,8 @@ export const DEFAULT_FRAME_WIDTH = 448;
 export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
+
+const ATTACHED_DISTANCE = 20;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -238,10 +238,10 @@ export function generateConnectorPath(
   return path;
 }
 
-export function getAttachedPointByDirection(
+function getAttachedPointByDirection(
   { x, y, w, h }: Rectangle,
-  direction: AttachedElementDirection
-) {
+  direction: Direction
+): Point {
   switch (direction) {
     case 'top': {
       return { x: x + w / 2, y };
@@ -255,6 +255,9 @@ export function getAttachedPointByDirection(
     case 'left': {
       return { x, y: y + h / 2 };
     }
+    default: {
+      throw new Error(`Unknown direction: ${direction}`);
+    }
   }
 }
 
@@ -262,13 +265,41 @@ export function getAttachedPoint(
   x: number,
   y: number,
   rect?: Rectangle | null
-) {
-  if (!rect) {
-    return { point: { x, y }, direction: 'left' as const };
+): { point: Point; position: Point | null } {
+  if (!rect || !rect.contains(x, y)) {
+    return { point: { x, y }, position: null };
   }
   const direction = rect.relativeDirection(x, y);
-  const point = getAttachedPointByDirection(rect, direction);
-  return { point, direction };
+  const position = {
+    x: (x - rect.x) / rect.w,
+    y: (y - rect.y) / rect.h,
+  };
+
+  const attachedPoint = getAttachedPointByDirection(rect, direction);
+  const distance = Math.sqrt(
+    Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
+  );
+  if (distance < ATTACHED_DISTANCE) {
+    return { point: attachedPoint, position };
+  }
+
+  return { point: { x, y }, position };
+}
+
+function getAttachedPointByPosition(rect: Rectangle, position: Point) {
+  const x = rect.x + rect.w * position.x;
+  const y = rect.y + rect.h * position.y;
+
+  const direction = rect.relativeDirection(x, y);
+  const attachedPoint = getAttachedPointByDirection(rect, direction);
+  const distance = Math.sqrt(
+    Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
+  );
+  if (distance < ATTACHED_DISTANCE) {
+    return attachedPoint;
+  }
+
+  return { x, y };
 }
 
 export function getConnectorAttachedInfo(
@@ -285,7 +316,7 @@ export function getConnectorAttachedInfo(
     : null;
   const startPoint =
     startRect && startElement
-      ? getAttachedPointByDirection(startRect, startElement.direction)
+      ? getAttachedPointByPosition(startRect, startElement.position)
       : {
           x: element.x + element.controllers[0].x,
           y: element.y + element.controllers[0].y,
@@ -295,7 +326,7 @@ export function getConnectorAttachedInfo(
   const endRect = end ? new Rectangle(...deserializeXYWH(getXYWH(end))) : null;
   const endPoint =
     endRect && endElement
-      ? getAttachedPointByDirection(endRect, endElement.direction)
+      ? getAttachedPointByPosition(endRect, endElement.position)
       : {
           x: element.x + element.controllers[element.controllers.length - 1].x,
           y: element.y + element.controllers[element.controllers.length - 1].y,
