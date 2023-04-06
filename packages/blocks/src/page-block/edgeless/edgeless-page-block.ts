@@ -46,6 +46,7 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
 import {
@@ -53,7 +54,6 @@ import {
   type EdgelessSelectionState,
 } from './selection-manager.js';
 import {
-  createDragHandle,
   DEFAULT_FRAME_HEIGHT,
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,

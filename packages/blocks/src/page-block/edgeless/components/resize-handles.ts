@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 export enum HandleDirection {
@@ -52,7 +52,7 @@ function ResizeHandle(
   `;
 }
 
-export type ResizeMode = 'corner' | 'edge';
+export type ResizeMode = 'corner' | 'edge' | 'none';
 export function ResizeHandles(
   rect: DOMRect,
   resizeMode: ResizeMode,
@@ -116,6 +116,9 @@ export function ResizeHandles(
       );
 
       return html` ${handleLeft} ${handleRight} `;
+    }
+    case 'none': {
+      return nothing;
     }
   }
 }

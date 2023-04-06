@@ -1,9 +1,9 @@
 import '../components/tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
 import './brush-tool/brush-tool-button.js';
+import './connector-tool/connector-tool-button.js';
 
 import {
-  ConnectorIcon,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -168,14 +168,10 @@ export class EdgelessToolbar extends LitElement {
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .disabled=${true}
-          .tooltip=${'Connector'}
-          .active=${false}
-          @tool.click=${() => console.log('Connector')}
-        >
-          ${ConnectorIcon}
-        </edgeless-tool-icon-button>
+        <edgeless-connector-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+        ></edgeless-connector-tool-button>
         <edgeless-brush-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}

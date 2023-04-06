@@ -1,6 +1,6 @@
 import { type Disposable, flattenDisposables } from './disposable.js';
 
-// borrowed from blocky-editor
+// Credits to blocky-editor
 // https://github.com/vincentdchan/blocky-editor
 export class Slot<T = void> implements Disposable {
   private _emitting = false;

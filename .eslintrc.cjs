@@ -10,6 +10,7 @@ const allPackages = [
   'react',
   'store',
   'virgo',
+  'connector',
 ];
 
 const createPattern = packageName => [
@@ -59,6 +60,7 @@ module.exports = {
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
+    'packages/connector/dist/*',
   ],
   overrides: [
     {

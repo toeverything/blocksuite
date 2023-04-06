@@ -21,6 +21,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
+    "@blocksuite/connector": "workspace:*",
     "@popperjs/core": "^2.11.6",
     "hotkeys-js": "^3.10.1",
     "lit": "^2.6.1",

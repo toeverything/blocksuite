@@ -1,4 +1,4 @@
-import type { ShapeType } from '@blocksuite/phasor';
+import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
@@ -76,7 +76,7 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  color: `#${string}`;
+  color: Color;
 };
 
 export enum BrushSize {
@@ -86,7 +86,7 @@ export enum BrushSize {
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: `#${string}`;
+  color: Color;
   lineWidth: BrushSize;
 };
 
@@ -99,12 +99,19 @@ export type TextMouseMode = {
   type: 'text';
 };
 
+export type ConnectorMouseMode = {
+  type: 'connector';
+  mode: ConnectorMode;
+  color: Color;
+};
+
 export type MouseMode =
   | DefaultMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode;
+  | TextMouseMode
+  | ConnectorMouseMode;
 
 export type SerializedBlock = {
   flavour: string;

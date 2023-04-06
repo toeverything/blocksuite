@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 
 import {
   activeFrameInEdgeless,
+  addBasicConnectorElement,
   clickComponentToolbarMoreMenuButton,
   decreaseZoomLevel,
   getEdgelessBlockChild,
@@ -1189,4 +1190,18 @@ test('the tooltip of more button should be hidden when the action menu is shown'
 
   await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
   await expect(tooltip).toBeVisible();
+});
+
+test('add connector element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
