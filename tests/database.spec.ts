@@ -2,6 +2,7 @@ import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
+  assertColumnWidth,
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
   enterPlaygroundRoom,
@@ -274,7 +275,7 @@ test('should support right insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-right');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['3', '4']);
 });
@@ -287,7 +288,7 @@ test('should support left insert column', async ({ page }) => {
 
   await performColumnAction(page, '3', 'insert-left');
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(3);
+  expect(await columns.count()).toBe(4);
 
   await assertDatabaseColumnOrder(page, ['4', '3']);
 });
@@ -299,10 +300,10 @@ test('should support delete column', async ({ page }) => {
   await initDatabaseColumn(page);
 
   const columns = page.locator('.affine-database-column');
-  expect(await columns.count()).toBe(2);
+  expect(await columns.count()).toBe(3);
 
   await performColumnAction(page, '3', 'delete');
-  expect(await columns.count()).toBe(1);
+  expect(await columns.count()).toBe(2);
 });
 
 test('should support duplicate column', async ({ page }) => {
@@ -554,4 +555,36 @@ test('should support copy database through action menu', async ({ page }) => {
   const db1Model = (await getBlockModel(page, '2')) as DatabaseBlockModel;
   const db2Model = (await getBlockModel(page, '6')) as DatabaseBlockModel;
   expect(db1Model.title.toString()).toEqual(db2Model.title.toString());
+});
+
+test('should support drag to change column width', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  const headerColumns = page.locator('.affine-database-column');
+  const titleColumn = headerColumns.nth(0);
+  const normalColumn = headerColumns.nth(1);
+
+  const dragDistance = 100;
+  const titleColumnWidth = 432;
+  const normalColumnWidth = 200;
+
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  const box = await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await page.mouse.move(box.x, box.y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + dragDistance, box.y, {
+    steps: 50,
+  });
+  await waitNextFrame(page);
+  await page.mouse.up();
+
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
+
+  await undoByClick(page);
+  await assertColumnWidth(titleColumn, titleColumnWidth);
+  await assertColumnWidth(normalColumn, normalColumnWidth);
 });

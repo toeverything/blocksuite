@@ -1,5 +1,5 @@
 import type { ColumnType } from '@blocksuite/global/database';
-import { type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
 import { getBoundingClientRect, waitNextFrame } from './misc.js';
@@ -87,6 +87,12 @@ export async function clickDatabaseOutside(page: Page) {
   await pageTitle.click();
 }
 
+export async function assertColumnWidth(locator: Locator, width: number) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Missing column box');
+  expect(box.width).toBe(width);
+  return box;
+}
 export async function waitSearchTransitionEnd(page: Page) {
   await waitNextFrame(page, 400);
 }

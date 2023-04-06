@@ -264,7 +264,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumn: 'Title',
+        titleColumnName: 'Title',
       },
       frameId
     );
@@ -291,7 +291,7 @@ export async function initEmptyDatabaseWithParagraphState(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumn: 'Title',
+        titleColumnName: 'Title',
       },
       frameId
     );
@@ -303,7 +303,12 @@ export async function initEmptyDatabaseWithParagraphState(
 }
 
 export async function initDatabaseColumn(page: Page, title = '') {
-  const columnAddBtn = page.locator('.affine-database-add-column-button');
+  const header = page.locator('.affine-database-column-header');
+  const box = await header.boundingBox();
+  if (!box) throw new Error('Missing column type rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  const columnAddBtn = page.locator('.header-add-column-button');
   await columnAddBtn.click();
 
   if (title) {
@@ -344,7 +349,7 @@ export async function initDatabaseDynamicRowWithData(
     await initDatabaseRow(page);
   }
   const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-database-cell-container').nth(index);
+  const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await cell.click();
   await type(page, data);

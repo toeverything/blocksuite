@@ -159,7 +159,8 @@ export async function addSerializedBlocks(
       height: json.height,
       language: json.language,
       title: json.databaseProps?.title,
-      titleColumn: json.databaseProps?.titleColumn,
+      titleColumnName: json.databaseProps?.titleColumnName,
+      titleColumnWidth: json.databaseProps?.titleColumnWidth,
     };
     const id = page.addBlock(flavour, blockProps, parent, index + i);
     addedBlockIds.push(id);
