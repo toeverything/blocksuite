@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  addCodeBlock,
   clickBlockTypeMenuItem,
   dragBetweenCoords,
   dragBetweenIndices,
@@ -1015,4 +1016,68 @@ test('should format quick bar show when double click button', async ({
   await expect(formatQuickBar).toBeVisible();
   await boldBtn.dblclick();
   await expect(formatQuickBar).toBeVisible();
+});
+
+test('should the database action icon show correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const databaseAction = page.getByTestId('convert-to-database');
+  expect(await databaseAction.count()).toBe(0);
+
+  await focusRichText(page);
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+  await expect(databaseAction).toBeVisible();
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await addCodeBlock(page);
+  const codeBlock = page.locator('affine-code');
+  const codeBox = await codeBlock.boundingBox();
+  if (!codeBox) throw new Error('Missing code block box');
+  const position = {
+    startX: codeBox.x,
+    startY: codeBox.y + codeBox.height / 2,
+    endX: codeBox.x + codeBox.width,
+    endY: codeBox.y + codeBox.height / 2,
+  };
+  await page.mouse.click(position.endX + 150, position.endY + 150);
+  await dragBetweenCoords(
+    page,
+    { x: position.startX, y: position.startY },
+    { x: position.endX, y: position.endY },
+    { steps: 10 }
+  );
+  await expect(databaseAction).toBeVisible();
+  await expect(databaseAction).toHaveAttribute('disabled', '');
+});
+
+test('should convert to database work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+  const databaseAction = page.getByTestId('convert-to-database');
+  await databaseAction.click();
+  const tableView = page.locator('.modal-view-item.table');
+  await tableView.click();
+  const database = page.locator('affine-database');
+  await expect(database).toBeVisible();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
 });

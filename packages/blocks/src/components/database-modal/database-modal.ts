@@ -114,7 +114,7 @@ export class DatabaseModal extends LitElement {
             const isSelected = view.type === this._selectedView;
             return html`
               <div
-                class="modal-view-item ${view.isComingSoon
+                class="modal-view-item ${view.type} ${view.isComingSoon
                   ? 'coming-soon'
                   : ''}"
                 @click=${() => this._convertToDatabase(view.type)}
