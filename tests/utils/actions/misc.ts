@@ -748,3 +748,12 @@ export async function initImageState(page: Page) {
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
 }
+
+export async function getCurrentEditorPageId(page: Page) {
+  return await page.evaluate(() => {
+    const editor = document.querySelector('editor-container');
+    if (!editor) throw new Error("Can't find editor-container");
+    const pageId = editor.page.id;
+    return pageId;
+  });
+}
