@@ -30,6 +30,7 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getCurrentEditorPageId,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -456,11 +457,12 @@ export async function assertMatchMarkdown(page: Page, text: string) {
 export async function assertStoreMatchJSX(
   page: Page,
   snapshot: string,
-  id?: string
+  blockId?: string
 ) {
+  const pageId = await getCurrentEditorPageId(page);
   const element = (await page.evaluate(
-    id => window.workspace.exportJSX(id),
-    id
+    ([blockId, pageId]) => window.workspace.exportJSX(blockId, pageId),
+    [blockId, pageId]
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually
