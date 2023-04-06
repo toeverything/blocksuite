@@ -170,7 +170,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
       <div
         class="affine-database-select-cell-container"
         style=${styleMap({
-          maxWidth: `${this._column.width}px`,
+          maxWidth: `${this.column.width}px`,
         })}
       >
         ${values.map(item => {
@@ -411,7 +411,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   }
 
   protected firstUpdated() {
-    // this.style.width = `${this._column.width}px`;
+    // this.style.width = `${this.column.width}px`;
     this.style.width = `${345}px`;
     this._selectInput.focus();
   }
@@ -531,13 +531,13 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     }
 
     if (type === 'delete') {
-      const selection = [...(this._column.selection as SelectTag[])];
+      const selection = [...(this.column.selection as SelectTag[])];
       this.databaseModel.page.db.updateColumn({
-        ...this._column,
+        ...this.column,
         selection: selection.filter((_, i) => i !== index),
       });
       const select = selection[index];
-      this.databaseModel.page.db.deleteSelectedCellTag(this._column.id, select);
+      this.databaseModel.page.db.deleteSelectedCellTag(this.column.id, select);
       return;
     }
   };
@@ -582,16 +582,16 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .querySelectorAll('affine-database-select-option-text')
       .item(index) as SelectOptionText;
 
-    const selection = [...(this._column.selection as SelectTag[])];
+    const selection = [...(this.column.selection as SelectTag[])];
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
     this.databaseModel.page.db.updateColumn({
-      ...this._column,
+      ...this.column,
       selection,
     });
     this.databaseModel.page.db.renameSelectedCellTag(
-      this._column.id,
+      this.column.id,
       oldSelect,
       newSelect
     );
@@ -600,7 +600,7 @@ class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   };
 
   override render() {
-    const selection = this._column.selection as SelectTag[];
+    const selection = this.column.selection as SelectTag[];
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {
         return true;

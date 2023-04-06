@@ -55,8 +55,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const _columnIds = block.columns as string[];
-    const columnIds = block.children.map(child => child.id);
+    const columnIds = block.columns as string[];
+    const rowIds = block.children.map(child => child.id);
 
     return {
       flavour: block.flavour,
@@ -65,8 +65,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         title: block.title.toString(),
         titleColumnName: block.titleColumnName,
         titleColumnWidth: block.titleColumnWidth,
+        rowIds,
         columnIds,
-        _columnIds,
       },
       children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
@@ -81,33 +81,31 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     model: BlockModels['affine:database'],
     props: Record<string, string[]>
   ) {
-    const { columnIds, _columnIds } = props;
+    const { rowIds, columnIds } = props;
 
-    // add ext:_column
-    const _columns = _columnIds
+    const columns = columnIds
       .map(id => model.page.db.getColumn(id))
       .filter((s: Column | null): s is Column => s !== null);
-    const newColumnSchemaIds = _columns.map(schema => {
+    const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.page.db.updateColumn(nonIdProps);
     });
     model.page.updateBlock(model, {
-      columns: newColumnSchemaIds,
+      columns: newColumnIds,
     });
 
-    // add ext:columns
-    const newColumnIds = model.children.map(child => child.id);
-    columnIds.forEach((columnId, columnIndex) => {
-      const newColumnId = newColumnIds[columnIndex];
-      _columnIds.forEach((_columnId, _columnIndex) => {
-        const cellData = model.page.db.getCell(columnId, _columnId);
+    const newRowIds = model.children.map(child => child.id);
+    rowIds.forEach((rowId, rowIndex) => {
+      const newRowId = newRowIds[rowIndex];
+      columnIds.forEach((columnId, columnIndex) => {
+        const cellData = model.page.db.getCell(rowId, columnId);
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {
           value = value.clone();
         }
-        model.page.db.updateCell(newColumnId, {
-          columnId: newColumnSchemaIds[_columnIndex],
+        model.page.db.updateCell(newRowId, {
+          columnId: newColumnIds[columnIndex],
           value,
         });
       });
