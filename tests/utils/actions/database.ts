@@ -2,6 +2,7 @@ import type { ColumnType } from '@blocksuite/global/database';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
+import { getBoundingClientRect, waitNextFrame } from './misc.js';
 
 export async function performColumnAction(
   page: Page,
@@ -91,4 +92,27 @@ export async function assertColumnWidth(locator: Locator, width: number) {
   if (!box) throw new Error('Missing column box');
   expect(box.width).toBe(width);
   return box;
+}
+export async function waitSearchTransitionEnd(page: Page) {
+  await waitNextFrame(page, 400);
+}
+
+export async function focusDatabaseSearch(page: Page) {
+  (await getDatabaseMouse(page)).mouseOver();
+  const searchIcon = page.locator('.affine-database-search-input-icon');
+  await searchIcon.click();
+  await waitSearchTransitionEnd(page);
+  return searchIcon;
+}
+
+export async function getDatabaseMouse(page: Page) {
+  const databaseRect = await getBoundingClientRect(page, 'affine-database');
+  return {
+    mouseOver: async () => {
+      await page.mouse.move(databaseRect.x, databaseRect.y);
+    },
+    mouseLeave: async () => {
+      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
+    },
+  };
 }

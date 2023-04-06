@@ -39,6 +39,7 @@ export function locatorPanButton(page: Page, innerContainer = true) {
 
 type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
   page: Page,
@@ -57,6 +58,27 @@ export function locatorEdgelessToolButton(
   }[type];
   const button = page
     .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export function locatorEdgelessComponentToolButton(
+  page: Page,
+  type: ComponentToolType,
+  innerContainer = true
+) {
+  const text = {
+    shape: 'Shape',
+    brush: 'Color',
+    thin: 'Thin',
+    thick: 'Thick',
+    more: 'More',
+  }[type];
+  const button = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
     .filter({
       hasText: text,
     });
