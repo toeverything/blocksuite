@@ -378,9 +378,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
@@ -474,9 +472,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
@@ -588,9 +584,7 @@ test('should create preview when dragging', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(
@@ -623,51 +617,33 @@ test('should cover all selected blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');
   const dragHandleHover = page.locator('.affine-drag-handle-hover');
 
-  await editors.nth(0).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeVisible();
-
-  await editors.nth(1).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeVisible();
-
-  await editors.nth(2).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeHidden();
-
-  await editors.nth(0).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-
-  await dragHandleHover.hover();
-
   const editorRect0 = await editors.nth(0).boundingBox();
   const editorRect1 = await editors.nth(1).boundingBox();
+  const editorRect2 = await editors.nth(2).boundingBox();
+  if (!editorRect0 || !editorRect1 || !editorRect2) {
+    throw new Error();
+  }
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect1.x + 10, editorRect1.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect2.x + 10, editorRect2.y + 10);
+  await expect(dragHandleHover).toBeHidden();
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await dragHandleHover.hover();
+
   const dragHandleRect = await page.locator('affine-drag-handle').boundingBox();
-  if (!editorRect0 || !editorRect1 || !dragHandleRect) {
+  if (!dragHandleRect) {
     throw new Error();
   }
 

@@ -15,6 +15,11 @@ export class PageSelectedRects extends LitElement {
       top: 0;
       left: 0;
       z-index: 1;
+      pointer-events: none;
+    }
+
+    :host([data-grab]) {
+      pointer-events: auto;
     }
 
     :host([data-grab]:hover) {
@@ -31,7 +36,7 @@ export class PageSelectedRects extends LitElement {
   private _disposables: DisposableGroup = new DisposableGroup();
 
   private _onMouseUp({ clientX, clientY }: MouseEvent) {
-    this.style.pointerEvents = 'none';
+    this.removeAttribute('data-grab');
     this.mouseRoot.dispatchEvent(
       new MouseEvent('mouseup', {
         bubbles: true,
@@ -56,9 +61,8 @@ export class PageSelectedRects extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    const disposables = this._disposables;
-    // trigger editor click
-    disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
+    // trigger click of editor container
+    this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
   }
 
   disconnectedCallback() {
@@ -68,9 +72,7 @@ export class PageSelectedRects extends LitElement {
 
   protected willUpdate(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('draggingArea')) {
-      const isDragging = !!this.draggingArea;
-      this.toggleAttribute('data-grab', !isDragging);
-      this.style.pointerEvents = isDragging ? 'none' : 'auto';
+      this.toggleAttribute('data-grab', !this.draggingArea);
     }
     if (changedProperties.has('rects')) {
       const firstRect = this.rects[0];

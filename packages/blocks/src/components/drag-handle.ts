@@ -397,22 +397,6 @@ export class DragHandle extends LitElement {
       );
     }
 
-    disposables.addFromEvent(this._container, 'dragover', (e: DragEvent) => {
-      console.log(e.dataTransfer);
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = 'move';
-      }
-      console.log('dragover', e.dataTransfer?.dropEffect);
-    });
-
-    disposables.addFromEvent(this._container, 'drop', (e: DragEvent) => {
-      console.log(e.dataTransfer);
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = 'move';
-      }
-      console.log('drop', e.dataTransfer?.dropEffect);
-    });
-
     // document.body
     disposables.addFromEvent(document.body, 'wheel', this._onWheel);
     disposables.addFromEvent(

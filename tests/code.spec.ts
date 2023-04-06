@@ -485,7 +485,7 @@ test('press ArrowDown before code block can select code block', async ({
   await focusRichText(page);
   await page.keyboard.press('ArrowDown');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-page-selected-rects > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -494,9 +494,7 @@ test('press backspace inside should select code block', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
   const codeBlock = page.locator('affine-code');
-  const selectedRects = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const selectedRects = page.locator('affine-page-selected-rects > *');
   await page.keyboard.press('Backspace');
   await expect(selectedRects).toHaveCount(1);
   await expect(codeBlock).toBeVisible();
@@ -516,7 +514,7 @@ test('press backspace after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('Backspace');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-page-selected-rects > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -531,7 +529,7 @@ test('press ArrowUp after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('ArrowUp');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-page-selected-rects > *');
   await expect(locator).toHaveCount(1);
 });
 
