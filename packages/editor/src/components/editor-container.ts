@@ -129,7 +129,9 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
-        this.requestUpdate();
+        // add the 'page' as requesting property to
+        // make sure the `forwardSlot` is called in `updated` lifecycle
+        this.requestUpdate('page');
       })
     );
     this._disposables.add(

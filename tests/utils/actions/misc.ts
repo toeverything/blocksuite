@@ -70,6 +70,13 @@ async function initEmptyEditor(
     const editor = document.createElement('editor-container');
     editor.page = page;
     editor.autofocus = true;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const newPage = workspace.getPage(pageId);
+      if (!newPage) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = newPage;
+    });
 
     const debugMenu = document.createElement('debug-menu');
     debugMenu.workspace = workspace;
