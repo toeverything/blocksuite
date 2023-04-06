@@ -156,7 +156,7 @@ const styles = css`
   .affine-database-column-move {
     display: flex;
     align-items: center;
-    visibility: hidden;
+    /* visibility: hidden; */
   }
   .affine-database-column-move svg {
     width: 10px;
@@ -398,7 +398,6 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     };
   };
   private _onColumnWidthMousemove = (event: MouseEvent) => {
-    event.preventDefault();
     if (!this._changeColumnWidthConfig) return;
 
     const {
@@ -519,20 +518,31 @@ export class DatabaseColumnHeader extends ShadowlessElement {
       disposables.addFromEvent(moveElement, 'mouseup', e => {
         e.stopPropagation();
       });
+      disposables.addFromEvent(moveElement, 'click', e => {
+        e.stopPropagation();
+      });
 
-      disposables.addFromEvent(moveElement, 'dragstart', (event: MouseEvent) =>
+      disposables.addFromEvent(moveElement, 'dragstart', (event: DragEvent) =>
         this._onColumnMoveMousedown(event, index)
       );
+      disposables.addFromEvent(
+        moveElement,
+        'drag',
+        this._onColumnMoveMousemove
+      );
+      disposables.addFromEvent(
+        moveElement,
+        'dragend',
+        this._onColumnMoveMouseup
+      );
     });
-
-    // disposables.addFromEvent(document, 'drag', this._onColumnMoveMousemove);
-    // disposables.addFromEvent(document, 'dragend', this._onColumnMoveMouseup);
   }
-  private _onColumnMoveMousedown = (event: MouseEvent, index: number) => {
+  private _onColumnMoveMousedown = (event: DragEvent, index: number) => {
     console.log('mousedown', index);
+    assertExists(event.dataTransfer);
+    event.dataTransfer.effectAllowed = 'move';
   };
   private _onColumnMoveMousemove = (event: MouseEvent) => {
-    event.preventDefault();
     console.log('mousemove');
   };
   private _onColumnMoveMouseup = (event: MouseEvent) => {
@@ -682,10 +692,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                         : column.name}
                     </div>
                   </div>
-                  <div
-                    class="affine-database-column-move"
-                    @click=${(event: MouseEvent) => event.stopPropagation()}
-                  >
+                  <div draggable="true" class="affine-database-column-move">
                     ${DatabaseDragIcon}
                   </div>
                 </div>
