@@ -1,8 +1,9 @@
 import { getCurrentBlockRange, getDefaultPage } from '@blocksuite/blocks';
 import {
+  DatabaseKanbanViewIcon,
+  DatabaseSearchClose,
   DatabaseTableViewIcon,
   MoreHorizontalIcon,
-  TextIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
@@ -30,7 +31,7 @@ const databaseViews: DatabaseView[] = [
   {
     type: 'kanban',
     text: 'Kanban view',
-    icon: DatabaseTableViewIcon,
+    icon: DatabaseKanbanViewIcon,
     description: 'Coming soon',
     isComingSoon: true,
   },
@@ -58,7 +59,7 @@ export class DatabaseModal extends LitElement {
     assertExists(parentModel);
 
     // default column
-    const tagColumnId = this.page.db.updateColumnSchema({
+    const tagColumnId = this.page.db.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
@@ -70,7 +71,7 @@ export class DatabaseModal extends LitElement {
       'affine:database',
       {
         columns: [tagColumnId],
-        titleColumn: 'Title',
+        titleColumnName: 'Title',
       },
       parentModel,
       parentModel.children.indexOf(models[0])
@@ -104,8 +105,9 @@ export class DatabaseModal extends LitElement {
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
-          <!-- TODO: change icon -->
-          <div class="modal-header-close-icon">${TextIcon}</div>
+          <div class="modal-header-close-icon" @click=${this._hide}>
+            ${DatabaseSearchClose}
+          </div>
         </div>
         <div class="modal-body">
           ${databaseViews.map(view => {

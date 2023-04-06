@@ -10,7 +10,8 @@ export const styles = css`
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: var(--affine-z-index-popover);
+    background: rgba(0, 0, 0, 0.6);
+    z-index: var(--affine-z-index-modal);
   }
   .modal-container {
     position: absolute;
@@ -25,7 +26,7 @@ export const styles = css`
     padding: 10px 18px 14px;
     height: 288px;
     border-radius: 5px;
-    background: #fbfbfc;
+    background: var(--affine-hub-background);
     font-family: 'Avenir Next';
   }
   .modal-header {
@@ -33,7 +34,18 @@ export const styles = css`
     justify-content: space-between;
     align-items: center;
   }
+  .modal-header-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .modal-header-close-icon {
+    display: flex;
+    align-items: center;
+    color: var(--affine-icon-color);
+    cursor: pointer;
+  }
   .modal-footer {
+    color: var(--affine-text-color);
     font-size: 14px;
   }
   .modal-body {
@@ -50,9 +62,15 @@ export const styles = css`
   .modal-view-item.coming-soon {
     cursor: not-allowed;
   }
+  .modal-view-item.more {
+    cursor: default;
+  }
   .modal-view-item.more > .modal-view-item-content {
     justify-content: center;
     width: 142px;
+  }
+  .modal-view-item-content.selected {
+    background: rgba(0, 0, 0, 0.04);
   }
   .modal-view-item-content.selected svg {
     fill: #5438ff;
@@ -68,8 +86,7 @@ export const styles = css`
     gap: 6px;
     width: 108px;
     height: 108px;
-    background: rgba(0, 0, 0, 0.04);
-    border: 2px solid #e3e2e4;
+    border: 2px solid var(--affine-border-color);
     border-radius: 8px;
   }
   .modal-view-item-icon {
@@ -79,7 +96,6 @@ export const styles = css`
   .modal-view-item-icon svg {
     width: 42px;
     height: 42px;
-    fill: var(--affine-icon-color);
   }
   .modal-view-item-text {
     font-size: 14px;
@@ -87,7 +103,7 @@ export const styles = css`
   }
   .modal-view-item-description {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--affine-secondary-text-color);
     text-align: center;
   }
 `;
