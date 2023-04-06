@@ -27,7 +27,7 @@ export const BlockSchemas = [
   DividerBlockSchema,
 ];
 
-const defaultPageId = 'page0';
+const defaultPageId = '0';
 const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
@@ -45,10 +45,10 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage(pageId = defaultPageId, parentId?: string) {
+function createTestPage(parentId?: string) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage(pageId, parentId);
+  return workspace.createPage(parentId);
 }
 
 describe('basic', () => {
@@ -57,7 +57,7 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage();
     const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -70,7 +70,7 @@ describe('basic', () => {
       [spaceMetaId]: {
         pages: [
           {
-            id: 'page0',
+            id: '0',
             subpageIds: [],
             title: '',
           },
@@ -87,8 +87,8 @@ describe('pageMeta', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const parentPage = workspace.createPage(defaultPageId);
-    const subpage = workspace.createPage('subpage0', parentPage.id);
+    const parentPage = workspace.createPage();
+    const subpage = workspace.createPage(parentPage.id);
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 
@@ -96,20 +96,20 @@ describe('pageMeta', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
-    const page2 = workspace.createPage('page2');
+    const page0 = workspace.createPage();
+    const page1 = workspace.createPage();
+    const page2 = workspace.createPage();
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(m => m.id),
-      ['page0', 'page1', 'page2']
+      ['0', '1', '2']
     );
 
     workspace.shiftPage(page1.id, 0);
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(m => m.id),
-      ['page1', 'page0', 'page2']
+      ['1', '0', '2']
     );
   });
 });
@@ -122,13 +122,13 @@ describe('addBlock', () => {
     });
 
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
+        'sys:id': '1',
       },
     });
   });
@@ -138,12 +138,12 @@ describe('addBlock', () => {
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
+        'sys:id': '1',
         'prop:title': 'hello',
       },
     });
@@ -161,32 +161,32 @@ describe('addBlock', () => {
     ]);
 
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
-        'sys:children': ['1', '2', '3'],
+        'sys:children': ['2', '3', '4'],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
-        'prop:title': '',
-      },
-      '1': {
-        'sys:children': [],
-        'sys:flavour': 'affine:paragraph',
         'sys:id': '1',
-        'prop:text': '',
-        'prop:type': 'text',
+        'prop:title': '',
       },
       '2': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
         'prop:text': '',
-        'prop:type': 'h1',
+        'prop:type': 'text',
       },
       '3': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'prop:text': '',
+        'prop:type': 'h1',
+      },
+      '4': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
         'prop:text': '',
         'prop:type': 'h2',
       },
@@ -220,19 +220,19 @@ describe('addBlock', () => {
 
     page.addBlock('affine:paragraph');
     assert.equal(root.children[0].flavour, 'affine:paragraph');
-    assert.equal(root.childMap.get('1'), 0);
+    assert.equal(root.childMap.get('2'), 0);
 
-    const serializedChildren = serialize(page)[spaceId]['0']['sys:children'];
-    assert.deepEqual(serializedChildren, ['1']);
-    assert.equal(root.children[0].id, '1');
+    const serializedChildren = serialize(page)[spaceId]['1']['sys:children'];
+    assert.deepEqual(serializedChildren, ['2']);
+    assert.equal(root.children[0].id, '2');
   });
 
   it('can add and remove multi pages', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
+    const page0 = workspace.createPage();
+    const page1 = workspace.createPage();
     // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
@@ -243,7 +243,7 @@ describe('addBlock', () => {
 
     // @ts-expect-error
     assert.equal(workspace._pages.size, 1);
-    assert.deepEqual(serialize(page0)['space:page0'], {});
+    assert.deepEqual(serialize(page0)['space:0'], {});
 
     workspace.removePage(page1.id);
     // @ts-expect-error
@@ -253,7 +253,7 @@ describe('addBlock', () => {
   it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    workspace.createPage('page0');
+    workspace.createPage();
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title }) => ({
@@ -262,7 +262,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'page0',
+          id: '0',
           title: '',
         },
       ]
@@ -273,7 +273,7 @@ describe('addBlock', () => {
       called = true;
     });
 
-    workspace.setPageMeta('page0', { favorite: true });
+    workspace.setPageMeta('0', { favorite: true });
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
         id,
@@ -282,7 +282,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'page0',
+          id: '0',
           title: '',
           favorite: true,
         },
@@ -313,12 +313,12 @@ describe('deleteBlock', () => {
       title: new page.Text(),
     });
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
+        'sys:id': '1',
         'prop:title': '',
       },
     });
@@ -335,18 +335,18 @@ describe('deleteBlock', () => {
 
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
         'prop:title': '',
-        'sys:children': ['1'],
+        'sys:children': ['2'],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
+        'sys:id': '1',
       },
-      '1': {
+      '2': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
-        'sys:id': '1',
+        'sys:id': '2',
         'prop:text': '',
         'prop:type': 'text',
       },
@@ -356,13 +356,13 @@ describe('deleteBlock', () => {
 
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
-      '0': {
+      '1': {
         'ext:cells': {},
         'ext:columns': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
-        'sys:id': '0',
+        'sys:id': '1',
       },
     });
     assert.equal(root.children.length, 0);
@@ -377,7 +377,7 @@ describe('getBlock', () => {
     page.addBlock('affine:paragraph');
     page.addBlock('affine:paragraph');
 
-    const text = page.getBlockById('2') as BaseBlockModel;
+    const text = page.getBlockById('3') as BaseBlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
     assert.equal(root.children.indexOf(text), 1);
 
@@ -419,7 +419,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage();
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -433,7 +433,7 @@ describe('workspace.exportJSX works', () => {
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    workspace.createPage('page0');
+    workspace.createPage();
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
@@ -441,7 +441,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage();
 
     page.addBlock('affine:page', {
       title: new page.Text(),
@@ -466,7 +466,7 @@ describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage();
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -485,8 +485,8 @@ describe('workspace.search works', () => {
     const id = page.id.replace('space:', '');
 
     queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(new Map([['1', id]]));
-      expect(workspace.search('索尼')).toStrictEqual(new Map([['2', id]]));
+      expect(workspace.search('处理器')).toStrictEqual(new Map([['2', id]]));
+      expect(workspace.search('索尼')).toStrictEqual(new Map([['3', id]]));
     });
   });
 });
