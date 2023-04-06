@@ -15,6 +15,7 @@ import markdownUtils from './markdown-utils.js';
 export enum CLIPBOARD_MIMETYPE {
   HTML = 'text/html',
   TEXT = 'text/plain',
+  BLOCKSUITE_SURFACE = 'blocksuite/surface',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',

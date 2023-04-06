@@ -1,13 +1,28 @@
+import type { PhasorElement } from '@blocksuite/phasor';
+import { ElementCtors, generateElementId } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import { isTopLevelBlock } from '../../page-block/edgeless/utils.js';
 import { ClipboardItem } from './clipboard-item.js';
 import type { Clipboard } from './type.js';
-import { performNativeCopy } from './utils.js';
+import { CLIPBOARD_MIMETYPE, performNativeCopy } from './utils.js';
+
+function serialize(data: object) {
+  return JSON.stringify(data);
+}
+
+function deserialize(data: string) {
+  return JSON.parse(data);
+}
 
 export class EdgelessClipboard implements Clipboard {
   private _page!: Page;
-  constructor(page: Page) {
+  private _edgeless: EdgelessPageBlockComponent;
+
+  constructor(page: Page, edgeless: EdgelessPageBlockComponent) {
     this._page = page;
+    this._edgeless = edgeless;
   }
 
   init(page: Page = this._page) {
@@ -25,28 +40,73 @@ export class EdgelessClipboard implements Clipboard {
 
   private _onCut = (e: ClipboardEvent) => {
     e.preventDefault();
-    // TODO: Implement cut
+    const selection = this._edgeless.getSelection().blockSelectionState;
+    const data = selection.selected
+      .map(selected => {
+        if (isTopLevelBlock(selected)) {
+          // TODO:
+          return '';
+        } else {
+          return selected.serialize();
+        }
+      })
+      .filter(d => !!d);
+    const custom = new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
+      serialize(data)
+    );
+    performNativeCopy([custom]);
+
+    this._page.transact(() => {
+      selection.selected.forEach(selected => {
+        if (isTopLevelBlock(selected)) {
+          // TODO:
+        } else {
+          this._edgeless.surface.removeElement(selected.id);
+        }
+      });
+    });
+    this._edgeless.slots.selectionUpdated.emit({ active: false, selected: [] });
   };
+
   private _onCopy = (e: ClipboardEvent) => {
     e.preventDefault();
-    // TODO: Implement copy
-    // console.log('onCopy', e);
-    const text = new ClipboardItem('text/plain', 'test1');
-    const html = new ClipboardItem('text/html', '<div>aaa</div>');
-    const custom = new ClipboardItem('affine/surface', '{"data":"aaa"}');
-    performNativeCopy([text, html, custom]);
+    const selection = this._edgeless.getSelection().blockSelectionState;
+    const data = selection.selected
+      .map(selected => {
+        if (isTopLevelBlock(selected)) {
+          // TODO
+          return '';
+        } else {
+          return selected.serialize();
+        }
+      })
+      .filter(d => !!d);
+    const custom = new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
+      serialize(data)
+    );
+    performNativeCopy([custom]);
   };
+
   private _onPaste = (e: ClipboardEvent) => {
     e.preventDefault();
-    //TODO: Implement paste
-    const data = e.clipboardData;
-    const text = data?.getData('text/plain');
-    const html = data?.getData('text/html');
-    const custom = data?.getData('affine/surface');
-    // console.log('text', text);
-    // console.log('html', html);
-    // console.log('custom', custom);
-    // @ts-expect-error global variable for test
-    window.__wxl = { text, html, custom };
+    const custom = e.clipboardData?.getData(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
+    );
+    if (!custom) {
+      return;
+    }
+    const elementsRawData = deserialize(custom) as {
+      type: PhasorElement['type'];
+    }[];
+    const elements = elementsRawData
+      .map(d => {
+        const element = ElementCtors[d.type]?.deserialize(d);
+        element.id = generateElementId();
+        return element;
+      })
+      .filter(e => !!e) as PhasorElement[];
+    this._edgeless.surface.addElements(elements);
   };
 }
