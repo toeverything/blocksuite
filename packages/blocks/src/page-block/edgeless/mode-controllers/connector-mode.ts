@@ -1,8 +1,7 @@
-import { Rectangle, route } from '@blocksuite/connector';
+import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
-  ConnectorMode,
   deserializeXYWH,
   getBrushBoundFromPoints,
 } from '@blocksuite/phasor';
@@ -13,7 +12,12 @@ import type {
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import type { Selectable, SelectionArea } from '../selection-manager.js';
-import { getAttachedPoint, getXYWH, pickBy } from '../utils.js';
+import {
+  generateConnectorPath,
+  getAttachedPoint,
+  getXYWH,
+  pickBy,
+} from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
@@ -137,19 +141,14 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       direction: endDirection,
     } = getAttachedPoint(endModelX, endModelY, endRect);
 
-    const routes =
-      mode === ConnectorMode.Orthogonal
-        ? route(
-            [this._draggingStartRect, endRect].filter(r => !!r) as Rectangle[],
-            [
-              { x: startX, y: startY },
-              { x: endX, y: endY },
-            ]
-          )
-        : [
-            { x: startX, y: startY },
-            { x: endX, y: endY },
-          ];
+    const routes = generateConnectorPath(
+      this._draggingStartRect,
+      endRect,
+      { x: startX, y: startY },
+      { x: endX, y: endY },
+      [],
+      mode
+    );
 
     const bound = getBrushBoundFromPoints(
       routes.map(r => [r.x, r.y]),

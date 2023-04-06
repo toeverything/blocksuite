@@ -1,5 +1,5 @@
 import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
-import type { Point as ConnectorPoint } from '@blocksuite/connector';
+import type { Point as ConnectorPoint, Point } from '@blocksuite/connector';
 import { Rectangle } from '@blocksuite/connector';
 import { simplifyPath } from '@blocksuite/connector';
 import { route } from '@blocksuite/connector';
@@ -206,7 +206,9 @@ export function generateConnectorPath(
       customizedEnd = Math.max(customizedEnd, index);
     }
   });
-  if (customizedEnd > -1) {
+
+  let path: Point[] = [];
+  if (fixed && customizedEnd > -1) {
     const part0EndPoint = originControllers[customizedStart];
     const part0 =
       fixed === 'start'
@@ -221,19 +223,19 @@ export function generateConnectorPath(
         ? originControllers.slice(customizedEnd)
         : route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
 
-    const finalPath = simplifyPath([
-      ...part0.slice(0, -1),
-      ...part1,
-      ...part2.slice(1),
+    path = simplifyPath([...part0.slice(0, -1), ...part1, ...part2.slice(1)]);
+  } else {
+    path = route([startRect, endRect].filter(r => !!r) as Rectangle[], [
+      startPoint,
+      endPoint,
     ]);
-
-    return finalPath;
   }
 
-  return route([startRect, endRect].filter(r => !!r) as Rectangle[], [
-    startPoint,
-    endPoint,
-  ]);
+  if (path.length < 3) {
+    path = [startPoint, endPoint];
+  }
+
+  return path;
 }
 
 export function getAttachedPointByDirection(
