@@ -419,13 +419,6 @@ const styles = css`
     position: relative;
   }
 
-  .affine-database-block-title-container {
-    display: flex;
-    align-items: center;
-    height: 44px;
-    margin: 12px 0px;
-  }
-
   .affine-database-block-title {
     flex: 1;
     position: sticky;
@@ -463,15 +456,6 @@ const styles = css`
     height: 30px;
   }
 
-  .affine-database-block-title {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 24px;
-    color: #424149;
-    font-family: inherit;
-    overflow: hidden;
-    cursor: text;
-  }
   .affine-database-block-title:focus {
     outline: none;
   }

@@ -1,4 +1,9 @@
 import {
+  type DragIndicator,
+  DragIndicatorMode,
+  DragPreview,
+} from '@blocksuite/blocks';
+import {
   DatabaseAddColumn,
   DatabaseDragIcon,
   DatabaseMultiSelect,
@@ -16,7 +21,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getDefaultPage } from '../../__internal__/index.js';
+import {
+  type BlockComponentElement,
+  getClosestBlockElementByPoint,
+  getDefaultPage,
+  getDropRectByPoint,
+  getModelByBlockElement,
+  Point,
+} from '../../__internal__/index.js';
 import { ShadowlessElement } from '../../__internal__/utils/lit.js';
 import { EditColumnPopup } from '../components/edit-column-popup.js';
 import {
@@ -156,7 +168,7 @@ const styles = css`
   .affine-database-column-move {
     display: flex;
     align-items: center;
-    visibility: hidden;
+    /* visibility: hidden; */
   }
   .affine-database-column-move svg {
     width: 10px;
@@ -184,6 +196,14 @@ const styles = css`
     width: 100%;
     height: 100%;
     cursor: pointer;
+  }
+
+  .affine-database-column-move-preview {
+    position: fixed;
+    z-index: 100;
+    width: 100px;
+    height: 100px;
+    background: #5438ff;
   }
 `;
 
@@ -228,6 +248,10 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   private _columnDisposables: DisposableGroup = new DisposableGroup();
   private _changeColumnWidthConfig: ColumnWidthConfig | null = null;
   private _isHeaderHover = false;
+  private _dragPreview: DragPreview | null = null;
+  private _indicator: DragIndicator | null = null;
+  private _dragIndex = 0;
+  private _headerColumns: HTMLElement[] = [];
 
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
@@ -242,6 +266,17 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     assertExists(databaseElement);
     this._initResizeEffect(databaseElement);
     this._initHeaderMousemoveEvent();
+
+    this._indicator = document.querySelector<DragIndicator>(
+      'affine-drag-indicator'
+    );
+    if (!this._indicator) {
+      this._indicator = document.createElement(
+        'affine-drag-indicator'
+      ) as DragIndicator;
+      document.body.appendChild(this._indicator);
+    }
+    this._indicator.mode = DragIndicatorMode.Vertical;
   }
 
   updated(changedProperties: Map<string, unknown>) {
@@ -270,6 +305,11 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     super.disconnectedCallback();
     this._disposables.dispose();
     this._columnDisposables.dispose();
+
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
+    }
   }
 
   private _initResizeEffect(element: HTMLElement) {
@@ -398,7 +438,6 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     };
   };
   private _onColumnWidthMousemove = (event: MouseEvent) => {
-    event.preventDefault();
     if (!this._changeColumnWidthConfig) return;
 
     const {
@@ -507,36 +546,150 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     const disposables = this._columnDisposables;
     disposables.dispose();
 
+    const stopPropagation = (e: Event) => e.stopPropagation();
     const columnMoveElements =
       this._headerContainer.querySelectorAll<HTMLDivElement>(
         '.affine-database-column-move'
       );
     columnMoveElements.forEach((moveElement, index) => {
-      // prevent block selection
-      disposables.addFromEvent(moveElement, 'mousedown', e => {
-        e.stopPropagation();
-      });
-      disposables.addFromEvent(moveElement, 'mouseup', e => {
-        e.stopPropagation();
-      });
+      // prevent block selection and drag-handle
+      disposables.addFromEvent(moveElement, 'mousedown', stopPropagation);
+      disposables.addFromEvent(moveElement, 'mousemove', stopPropagation);
+      disposables.addFromEvent(moveElement, 'mouseup', stopPropagation);
+      disposables.addFromEvent(moveElement, 'click', stopPropagation);
 
-      disposables.addFromEvent(moveElement, 'dragstart', (event: MouseEvent) =>
+      // init drag event
+      disposables.addFromEvent(moveElement, 'dragstart', (event: DragEvent) =>
         this._onColumnMoveMousedown(event, index)
       );
+      disposables.addFromEvent(
+        moveElement,
+        'drag',
+        this._onColumnMoveMousemove
+      );
+      disposables.addFromEvent(
+        moveElement,
+        'dragend',
+        this._onColumnMoveMouseup
+      );
     });
-
-    // disposables.addFromEvent(document, 'drag', this._onColumnMoveMousemove);
-    // disposables.addFromEvent(document, 'dragend', this._onColumnMoveMouseup);
   }
-  private _onColumnMoveMousedown = (event: MouseEvent, index: number) => {
-    console.log('mousedown', index);
+  private _onColumnMoveMousedown = (event: DragEvent, index: number) => {
+    assertExists(event.dataTransfer);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', index + 1 + '');
+
+    // this._dragIndex = index + 1;
+    this._headerColumns = Array.from<HTMLElement>(
+      this._headerContainer.querySelectorAll('.affine-database-column')
+    ).filter(column => !column.classList.contains('add-column-button'));
+    this._createDragPreview(event);
   };
-  private _onColumnMoveMousemove = (event: MouseEvent) => {
-    event.preventDefault();
-    console.log('mousemove');
+  private _createDragPreview(event: DragEvent) {
+    const dragPreview = (this._dragPreview = new DragPreview());
+    // dragPreview.classList.add('affine-database-column-move-preview');
+    dragPreview.innerText = 'xxxx';
+    // preview.style.top = `${event.clientY}px`;
+    // preview.style.left = `${event.clientX}px`;
+    // const columns = this.tableContainer.querySelectorAll<HTMLDivElement>(
+    //   `.database-cell:nth-child(${index + 2})`
+    // );
+    // const fragment = document.createDocumentFragment();
+    // columns.forEach(column => {
+    //   const clone = column.cloneNode(true) as HTMLDivElement;
+    //   clone.style.width = `${column.offsetWidth}px`;
+    //   fragment.appendChild(clone);
+    // });
+    // preview.appendChild(fragment);
+    this.tableContainer.appendChild(dragPreview);
+
+    // reset default drag preview
+    // const img = new Image();
+    // img.src =
+    //   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    // img.style.opacity = '0';
+    // event.dataTransfer.setDragImage(img, 0, 0);
+    this._dragPreview = dragPreview;
+  }
+  private _onColumnMoveMousemove = (event: DragEvent) => {
+    const x = event.clientX;
+    const y = event.clientY;
+    if (
+      !this._indicator ||
+      (this._indicator.cursorPosition &&
+        this._indicator.cursorPosition.x === x &&
+        this._indicator.cursorPosition.y === y)
+    ) {
+      return;
+    }
+
+    if (this._dragPreview && event.screenY) {
+      const { x: offsetX, y: offsetY } = this._dragPreview.offset;
+      this._dragPreview.style.transform = `translate(${x + offsetX}px, ${
+        y + offsetY
+      }px)`;
+    }
+
+    assertExists(this._dragPreview);
+    const point = new Point(x, y);
+
+    const { element, index: targetIndex } = this._getClosestElement(point);
+    const elementRect = element.getBoundingClientRect();
+    const dragIndex = event.dataTransfer?.getData('text/plain');
+    assertExists(dragIndex);
+    const rect =
+      +dragIndex === targetIndex
+        ? null
+        : new DOMRect(elementRect.right, elementRect.top, 1, 100);
+
+    console.log(dragIndex, targetIndex);
+
+    this._indicator.cursorPosition = point;
+    this._indicator.targetRect = rect;
   };
-  private _onColumnMoveMouseup = (event: MouseEvent) => {
+  private _getClosestElement(point: Point): {
+    element: HTMLElement;
+    index: number;
+  } {
+    let element: HTMLElement | null = null;
+    let index = -1;
+    const headerColumns = this._headerColumns;
+    const length = headerColumns.length;
+
+    for (let i = 0; i < length; i++) {
+      const column = headerColumns[i];
+      const rect = column.getBoundingClientRect();
+      if (point.x >= rect.left && point.x <= rect.right) {
+        element = column;
+        index = i;
+        break;
+      }
+    }
+
+    // boundary check
+    if (!element) {
+      const firstColumnRect = headerColumns[0].getBoundingClientRect();
+      if (point.x <= firstColumnRect.left) {
+        // left boundary
+        element = headerColumns[0];
+        index = 0;
+      } else {
+        // right boundary
+        element = headerColumns[length - 1];
+        index = length - 1;
+      }
+    }
+    return {
+      element,
+      index,
+    };
+  }
+  private _onColumnMoveMouseup = (event: DragEvent) => {
     console.log('mouseup');
+    if (this._dragPreview) {
+      this._dragPreview.remove();
+      this._dragPreview = null;
+    }
   };
 
   private _onShowEditColumnPopup = (
@@ -682,10 +835,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
                         : column.name}
                     </div>
                   </div>
-                  <div
-                    class="affine-database-column-move"
-                    @click=${(event: MouseEvent) => event.stopPropagation()}
-                  >
+                  <div draggable="true" class="affine-database-column-move">
                     ${DatabaseDragIcon}
                   </div>
                 </div>
