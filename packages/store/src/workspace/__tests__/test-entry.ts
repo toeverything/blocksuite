@@ -13,13 +13,13 @@ import type { TestApp } from './test-app.js';
 
 async function testBasic() {
   testSerial('can create page', async () => {
-    workspace.createPage();
-    workspace.setPageMeta(id, { title: 'hello' });
+    const page = workspace.createPage();
+    workspace.setPageMeta(page.id, { title: 'hello' });
     await nextFrame();
 
     const pageMeta = workspace.meta.pageMetas.pop();
     assertExists(pageMeta);
-    return pageMeta.id === `${i}` && pageMeta.title === 'hello';
+    return pageMeta.id === `${page.id}` && pageMeta.title === 'hello';
   });
 
   await runOnce();
