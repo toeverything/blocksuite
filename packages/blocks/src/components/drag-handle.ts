@@ -103,20 +103,29 @@ export class DragPreview extends LitElement {
         top: 0;
         left: 0;
         opacity: 0.843;
-        cursor: grabbing;
+        cursor: none;
         user-select: none;
+        pointer-events: none;
         caret-color: transparent;
         z-index: 2;
       }
 
-      affine-drag-preview > .affine-block-element:first-child > *:first-child {
-        margin-top: 0;
-      }
-
       affine-drag-preview .affine-rich-text {
-        cursor: grabbing;
         user-modify: read-only;
         -webkit-user-modify: read-only;
+      }
+
+      affine-drag-preview.grabbing {
+        cursor: grabbing;
+        pointer-events: auto;
+      }
+
+      affine-drag-preview.grabbing .affine-rich-text {
+        cursor: grabbing;
+      }
+
+      affine-drag-preview > .affine-block-element:first-child > *:first-child {
+        margin-top: 0;
       }
     </style>`;
   }
@@ -490,7 +499,8 @@ export class DragHandle extends LitElement {
 
   private _createDragPreview(
     e: DragEvent,
-    draggingBlockElements: BlockComponentElement[]
+    draggingBlockElements: BlockComponentElement[],
+    grabbing = false
   ) {
     const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
@@ -518,6 +528,10 @@ export class DragHandle extends LitElement {
 
     dragPreview.appendChild(fragment);
     this._container.appendChild(dragPreview);
+
+    if (grabbing) {
+      dragPreview.classList.add('grabbing');
+    }
 
     requestAnimationFrame(() => {
       dragPreview.querySelector('rich-text')?.vEditor?.rootElement.blur();
@@ -587,7 +601,7 @@ export class DragHandle extends LitElement {
     this._currentClientY = e.clientY;
   };
 
-  onDragStart = (e: DragEvent) => {
+  onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !this._handleAnchorState || !e.dataTransfer) {
       return;
     }
@@ -612,7 +626,8 @@ export class DragHandle extends LitElement {
       e,
       getBlockElementsExcludeSubtrees(
         draggingBlockElements
-      ) as BlockComponentElement[]
+      ) as BlockComponentElement[],
+      draggable
     );
     this._draggingElements = draggingBlockElements;
   };

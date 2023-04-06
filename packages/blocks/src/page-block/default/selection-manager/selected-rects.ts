@@ -15,10 +15,9 @@ export class PageSelectedRects extends LitElement {
       top: 0;
       left: 0;
       z-index: 1;
-      pointer-events: auto;
     }
 
-    :host([enable]:hover) {
+    :host([data-grab]:hover) {
       cursor: grab;
     }
 
@@ -69,7 +68,9 @@ export class PageSelectedRects extends LitElement {
 
   protected willUpdate(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('draggingArea')) {
-      this.toggleAttribute('enable', !this.draggingArea);
+      const isDragging = !!this.draggingArea;
+      this.toggleAttribute('data-grab', !isDragging);
+      this.style.pointerEvents = isDragging ? 'none' : 'auto';
     }
     if (changedProperties.has('rects')) {
       const firstRect = this.rects[0];
@@ -79,10 +80,6 @@ export class PageSelectedRects extends LitElement {
         const startLeft = firstRect.left - left + scrollLeft;
         this.style.top = `${startTop}px`;
         this.style.left = `${startLeft}px`;
-      } else {
-        this.draggingArea = null;
-        this.setAttribute('enable', '');
-        this.style.pointerEvents = 'auto';
       }
     }
   }

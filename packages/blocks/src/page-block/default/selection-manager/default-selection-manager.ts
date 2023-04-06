@@ -121,7 +121,8 @@ export class DefaultSelectionManager {
     if (isPageSelectedRects(e.raw.target)) {
       this.state.type = 'block:drag';
       this._container.components.dragHandle?.onDragStart(
-        createDragEvent('dragstart', e.raw)
+        createDragEvent('dragstart', e.raw),
+        true
       );
       return;
     }
