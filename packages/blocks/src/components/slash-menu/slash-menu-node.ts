@@ -1,5 +1,4 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -8,6 +7,7 @@ import {
   getRichTextByModel,
   isControlledKeyboardEvent,
   isPrintableKeyEvent,
+  WithDisposable,
 } from '../../__internal__/utils/index.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
@@ -17,7 +17,7 @@ function escapeRegExp(input: string) {
 }
 
 @customElement('slash-menu')
-export class SlashMenu extends LitElement {
+export class SlashMenu extends WithDisposable(LitElement) {
   static styles = styles;
 
   @property()
@@ -52,8 +52,6 @@ export class SlashMenu extends LitElement {
    */
   private _searchString = '';
 
-  private _disposables = new DisposableGroup();
-
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
@@ -75,11 +73,6 @@ export class SlashMenu extends LitElement {
       capture: true,
     });
     // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
   }
 
   updatePosition(position: { x: string; y: string; height: number }) {

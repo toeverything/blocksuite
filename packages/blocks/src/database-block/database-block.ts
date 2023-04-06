@@ -36,7 +36,7 @@ import {
   getDefaultPage,
 } from '../__internal__/index.js';
 import { BlockElementWithService } from '../__internal__/service/components.js';
-import { NonShadowLitElement } from '../__internal__/utils/lit.js';
+import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { toast } from '../components/toast.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
@@ -349,7 +349,7 @@ class ToolbarActionPopup extends LitElement {
 }
 
 @customElement('affine-database-column-header')
-class DatabaseColumnHeader extends NonShadowLitElement {
+class DatabaseColumnHeader extends ShadowlessElement {
   static styles = css`
     .affine-database-column-header {
       position: relative;
@@ -1341,7 +1341,7 @@ const styles = css`
 
 @customElement('affine-database')
 export class DatabaseBlockComponent
-  extends NonShadowLitElement
+  extends ShadowlessElement
   implements BlockHost
 {
   flavour = 'affine:database' as const;

@@ -1,8 +1,8 @@
+import { WithDisposable } from '@blocksuite/blocks/std';
 import type { Page } from '@blocksuite/store';
 import {
   assertExists,
   type BaseBlockModel,
-  DisposableGroup,
   type PageMeta,
 } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
@@ -144,11 +144,8 @@ const createKeydownObserver = ({
 };
 
 @customElement('affine-linked-page-popover')
-export class LinkedPagePopover extends LitElement {
+export class LinkedPagePopover extends WithDisposable(LitElement) {
   static styles = styles;
-
-  // @property()
-  // model!: BaseBlockModel;
 
   @state()
   private _position: {
@@ -172,8 +169,6 @@ export class LinkedPagePopover extends LitElement {
   private get _page() {
     return this.model.page;
   }
-
-  private _disposables = new DisposableGroup();
 
   constructor(
     private model: BaseBlockModel,
@@ -213,11 +208,6 @@ export class LinkedPagePopover extends LitElement {
         this._pageList = this._page.workspace.meta.pageMetas;
       })
     );
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
   }
 
   updatePosition(position: { height: number; x: string; y: string }) {

@@ -1,9 +1,9 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -26,7 +26,7 @@ function getMostCommonShape(
 }
 
 @customElement('edgeless-change-shape-button')
-export class EdgelessChangeShapeButton extends LitElement {
+export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -60,8 +60,6 @@ export class EdgelessChangeShapeButton extends LitElement {
   private _shapeMenu!: EdgelessShapeMenu;
 
   private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;

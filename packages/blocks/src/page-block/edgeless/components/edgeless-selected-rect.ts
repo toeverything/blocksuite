@@ -1,8 +1,9 @@
 import './component-toolbar/component-toolbar.js';
 
+import { WithDisposable } from '@blocksuite/blocks/std';
 import type { Bound } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
-import { DisposableGroup, Page } from '@blocksuite/store';
+import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
@@ -31,7 +32,7 @@ import {
 } from './utils.js';
 
 @customElement('edgeless-selected-rect')
-export class EdgelessSelectedRect extends LitElement {
+export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -66,7 +67,6 @@ export class EdgelessSelectedRect extends LitElement {
 
   private _lock = false;
   private _resizeManager: HandleResizeManager;
-  private _disposables = new DisposableGroup();
 
   constructor() {
     super();
@@ -169,10 +169,6 @@ export class EdgelessSelectedRect extends LitElement {
     // when viewport updates, popper should update too.
     this._componentToolbarPopper?.update();
     super.updated(changedProperties);
-  }
-
-  disconnectedCallback() {
-    this._disposables.dispose();
   }
 
   render() {

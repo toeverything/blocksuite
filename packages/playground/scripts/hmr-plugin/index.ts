@@ -25,7 +25,7 @@ export const hmrPlugin = process.env.WC_HMR
         decorators: [{ name: 'customElement', import: 'lit/decorators.js' }],
         baseClasses: [
           {
-            name: 'NonShadowLitElement',
+            name: 'ShadowlessElement',
             import: customLitPath,
           },
         ],

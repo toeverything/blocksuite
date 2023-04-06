@@ -1,11 +1,11 @@
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { NonShadowLitElement } from '../__internal__/index.js';
+import { ShadowlessElement } from '../__internal__/index.js';
 import type { EmbedBlockModel } from './embed-model.js';
 
 @customElement('affine-embed')
-export class EmbedBlockComponent extends NonShadowLitElement {
+export class EmbedBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-embed-wrapper {
       text-align: center;

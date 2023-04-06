@@ -6,12 +6,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import { getModelByElement, NonShadowLitElement } from '../../utils/index.js';
+import { getModelByElement, ShadowlessElement } from '../../utils/index.js';
 import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
 @customElement('affine-link')
-export class AffineLink extends NonShadowLitElement {
+export class AffineLink extends ShadowlessElement {
   @property({ type: Object })
   delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
