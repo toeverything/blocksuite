@@ -534,6 +534,11 @@ function getTabGroupTemplate({
 }) {
   workspace.slots.pagesUpdated.on(requestUpdate);
   const pageList = workspace.meta.pageMetas;
+  editor.slots.pageLinkClicked.on(({ pageId }) => {
+    const tabGroup = document.querySelector<SlTabGroup>('.tabs-closable');
+    if (!tabGroup) throw new Error('tab group not found');
+    tabGroup.show(pageId);
+  });
 
   return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
       <sl-button
