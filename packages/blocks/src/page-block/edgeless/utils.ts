@@ -10,6 +10,7 @@ import type {
   SurfaceManager,
   SurfaceViewport,
 } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
@@ -344,4 +345,88 @@ export function getConnectorAttachedInfo(
       point: endPoint,
     },
   };
+}
+
+export function isConnectorAndBindingsAllSelected(
+  connector: ConnectorElement,
+  selected: Selectable[]
+) {
+  const connectorSelected = selected.find(s => s.id === connector.id);
+  if (!connectorSelected) {
+    return false;
+  }
+  const { startElement, endElement } = connector;
+  const startSelected = selected.find(s => s.id === startElement?.id);
+  const endSelected = selected.find(s => s.id === endElement?.id);
+  if (!startElement && !endElement) {
+    return true;
+  }
+  if (!startElement && endSelected) {
+    return true;
+  }
+  if (!endElement && startSelected) {
+    return true;
+  }
+  if (startSelected && endSelected) {
+    return true;
+  }
+  return false;
+}
+
+export function handleElementChangedEffectForConnector(
+  element: Selectable,
+  selected: Selectable[],
+  surface: SurfaceManager,
+  page: Page
+) {
+  if (element.type !== 'connector') {
+    const bindingElements = surface.getBindingElements(element.id);
+    bindingElements.forEach(bindingElement => {
+      if (bindingElement.type === 'connector') {
+        // if all connector and binding element are selected, they will process in common method.
+        // like:
+        // mode-controllers/default-mode: _handleSurfaceDragMove
+        // components/edgeless-selected-rect: _onDragMove
+        if (isConnectorAndBindingsAllSelected(bindingElement, selected)) {
+          return;
+        }
+        const { startElement, endElement, id, x, y, controllers, mode } =
+          bindingElement;
+        const { start, end } = getConnectorAttachedInfo(
+          bindingElement,
+          surface,
+          page
+        );
+        const fixed =
+          startElement?.id === element.id
+            ? 'end'
+            : endElement?.id === element.id
+            ? 'start'
+            : undefined;
+
+        const routes = generateConnectorPath(
+          start.rect,
+          end.rect,
+          start.point,
+          end.point,
+          controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+          mode,
+          fixed
+        );
+
+        const bound = getBrushBoundFromPoints(
+          routes.map(r => [r.x, r.y]),
+          0
+        );
+        const newControllers = routes.map(v => {
+          return {
+            ...v,
+            x: v.x - bound.x,
+            y: v.y - bound.y,
+          };
+        });
+        surface.updateConnectorElement(id, bound, newControllers);
+      }
+    });
+  }
 }
