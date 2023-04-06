@@ -551,9 +551,11 @@ export class DefaultPageBlockComponent
         </div>
         <affine-page-selected-rects
           .viewport=${viewport}
-          .rects=${this._selectedRects}
           .mouseRoot=${this.mouseRoot}
-          .draggingArea=${this._draggingArea}
+          .state=${{
+            rects: this._selectedRects,
+            grab: !this._draggingArea,
+          }}
         ></affine-page-selected-rects>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>

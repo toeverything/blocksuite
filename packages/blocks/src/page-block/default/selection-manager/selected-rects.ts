@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { PageViewport } from './selection-state.js';
 
 @customElement('affine-page-selected-rects')
-export class PageSelectedRects extends LitElement {
+export class AffinePageSelectedRects extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -47,16 +47,13 @@ export class PageSelectedRects extends LitElement {
   }
 
   @property()
-  draggingArea: DOMRect | null = null;
-
-  @property()
   mouseRoot!: HTMLElement;
 
   @property()
   viewport!: PageViewport;
 
   @property()
-  rects: DOMRect[] = [];
+  state: { rects: DOMRect[]; grab: boolean } = { rects: [], grab: false };
 
   connectedCallback() {
     super.connectedCallback();
@@ -70,27 +67,25 @@ export class PageSelectedRects extends LitElement {
     this._disposables.dispose();
   }
 
-  protected willUpdate(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('draggingArea')) {
-      this.toggleAttribute('data-grab', !this.draggingArea);
+  protected willUpdate() {
+    const { rects, grab } = this.state;
+    const firstRect = rects[0];
+    if (firstRect) {
+      const { left, top, scrollLeft, scrollTop } = this.viewport;
+      const startTop = firstRect.top - top + scrollTop;
+      const startLeft = firstRect.left - left + scrollLeft;
+      this.style.top = `${startTop}px`;
+      this.style.left = `${startLeft}px`;
     }
-    if (changedProperties.has('rects')) {
-      const firstRect = this.rects[0];
-      if (firstRect) {
-        const { left, top, scrollLeft, scrollTop } = this.viewport;
-        const startTop = firstRect.top - top + scrollTop;
-        const startLeft = firstRect.left - left + scrollLeft;
-        this.style.top = `${startTop}px`;
-        this.style.left = `${startLeft}px`;
-      }
-    }
+    this.toggleAttribute('data-grab', grab);
   }
 
-  override render() {
-    const firstRect = this.rects[0];
+  render() {
+    const { rects } = this.state;
+    const firstRect = rects[0];
     return firstRect
       ? repeat(
-          this.rects,
+          rects,
           rect => html`<div
             style=${styleMap({
               width: `${rect.width}px`,
@@ -106,6 +101,6 @@ export class PageSelectedRects extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-page-selected-rects': PageSelectedRects;
+    'affine-page-selected-rects': AffinePageSelectedRects;
   }
 }

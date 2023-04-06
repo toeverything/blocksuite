@@ -169,7 +169,6 @@ export class DefaultSelectionManager {
     this._container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'block:drag') {
-      console.log(2333);
       this._container.components.dragHandle?.onDragEnd(
         createDragEvent('dragend', e.raw),
         true
