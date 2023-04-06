@@ -14,7 +14,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { restoreSelection } from '../../__internal__/utils/block-range.js';
+import {
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import {
   getRichTextByModel,
   WithDisposable,
@@ -29,6 +32,8 @@ import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import { showDatabaseModal } from '../database-modal/index.js';
 import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
+
+const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
@@ -212,10 +217,39 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     </div>`;
   }
 
-  private _showDatabaseModal() {
-    showDatabaseModal({
-      page: this.page,
-    });
+  private renderDatabaseAction() {
+    const range = getCurrentBlockRange(this.page);
+
+    const isShow = range?.type === 'Block';
+    if (!isShow) return null;
+
+    const enabled = range.models.every(
+      model => DATABASE_WHITE_LIST.indexOf(model.flavour) > -1
+    );
+
+    const onClick = () => {
+      if (enabled) {
+        showDatabaseModal({
+          page: this.page,
+        });
+      }
+    };
+
+    // TODO: add `Learn more` link
+    const toolTip = enabled
+      ? html` <tool-tip inert role="tooltip">To Database</tool-tip>`
+      : html`<tool-tip tip-position="top" inert role="tooltip"
+          >Contains Block types that cannot be converted to Database. Learn
+          more</tool-tip
+        >`;
+    return html`<format-bar-button
+      ?disabled=${!enabled}
+      class="has-tool-tip database-button"
+      data-testid="convert-to-database"
+      @click=${onClick}
+    >
+      ${DatabaseTableViewIcon}${toolTip}
+    </format-bar-button>`;
   }
 
   override render() {
@@ -275,14 +309,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         ${CopyIcon}
         <tool-tip inert role="tooltip">Copy</tool-tip>
       </format-bar-button>
-      <format-bar-button
-        class="has-tool-tip"
-        data-testid="convert-to-database"
-        @click=${() => this._showDatabaseModal()}
-      >
-        ${DatabaseTableViewIcon}
-        <tool-tip inert role="tooltip">To Database</tool-tip>
-      </format-bar-button>
+      ${this.renderDatabaseAction()}
     `;
 
     const styles = styleMap({

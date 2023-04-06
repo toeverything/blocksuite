@@ -48,6 +48,11 @@ export const formatQuickBarStyle = css`
     background-color: var(--affine-border-color);
   }
 
+  .database-button:is([disabled]) {
+    color: rgba(0, 0, 0, 0.2);
+    fill: rgba(0, 0, 0, 0.2);
+  }
+
   ${paragraphPanelStyle}
   ${tooltipStyle}
 `;
