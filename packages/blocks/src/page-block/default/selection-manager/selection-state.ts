@@ -14,6 +14,7 @@ import type { RichText } from '../../../__internal__/rich-text/rich-text.js';
 export type PageSelectionType =
   | 'native'
   | 'block'
+  | 'block:drag'
   | 'none'
   | 'embed'
   | 'database';

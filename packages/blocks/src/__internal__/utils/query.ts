@@ -976,3 +976,14 @@ export function isInEmptyDatabaseByPoint(
 
   return false;
 }
+
+/**
+ * Returns `true` if the target is `affine-page-selected-rects`.
+ */
+export function isPageSelectedRects(target: EventTarget | null) {
+  return (
+    target &&
+    target instanceof HTMLElement &&
+    target.tagName === 'AFFINE-PAGE-SELECTED-RECTS'
+  );
+}

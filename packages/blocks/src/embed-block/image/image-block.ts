@@ -225,12 +225,10 @@ export class ImageBlockComponent extends ShadowlessElement {
       width: 'unset',
       height: 'unset',
     };
-    if (this._imageState === 'ready') {
-      const { width, height } = this.model;
-      if (width && height) {
-        resizeImgStyle.width = `${width}px`;
-        resizeImgStyle.height = `${height}px`;
-      }
+    const { width, height } = this.model;
+    if (width && height) {
+      resizeImgStyle.width = `${width}px`;
+      resizeImgStyle.height = `${height}px`;
     }
 
     const img = {

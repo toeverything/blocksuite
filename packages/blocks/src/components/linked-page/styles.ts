@@ -38,4 +38,13 @@ export const styles = css`
     height: 1px;
     background: var(--affine-border-color);
   }
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #b1b1b1;
+  }
 `;

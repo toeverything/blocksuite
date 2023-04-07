@@ -709,9 +709,7 @@ test('should format quick bar work in single block selection', async ({
     { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(1);
 
   const formatQuickBar = page.locator(`.format-quick-bar`);
@@ -781,9 +779,7 @@ test('should format quick bar work in multiple block selection', async ({
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);
@@ -866,9 +862,7 @@ test('should format quick bar with block selection works when update block type'
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);
@@ -942,7 +936,7 @@ test('should format quick bar show after convert to code block', async ({
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatQuickBar).toBeVisible();
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(1);
   await formatBarController.assertBoundingBox(395, 99);
   await assertStoreMatchJSX(

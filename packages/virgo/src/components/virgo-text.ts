@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { DirectiveResult } from 'lit/directive.js';
 import { styleMap, type StyleMapDirective } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 
 @customElement('v-text')
 export class VText extends LitElement {
