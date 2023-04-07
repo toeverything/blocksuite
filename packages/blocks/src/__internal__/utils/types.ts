@@ -142,6 +142,8 @@ export type SerializedBlock = {
     rowIds: string[];
     columnIds: string[];
   };
+  // frame block
+  xywh?: string;
 };
 
 declare global {
