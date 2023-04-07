@@ -541,8 +541,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
           defaultPageBlock.selection.setSelectedBlocks(
             blockElements
               .map(b => getBlockElementById(b.model.id))
-              .filter((b): b is BlockComponentElement => !!b),
-            blockElementsExcludeSubtrees.map(getRectByBlockElement)
+              .filter((b): b is BlockComponentElement => !!b)
           );
         });
       });
