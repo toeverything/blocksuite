@@ -6,15 +6,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
+  isFuzzyMatch,
   isPrintableKeyEvent,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
-
-function escapeRegExp(input: string) {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 @customElement('slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
@@ -236,23 +233,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     }
     return menuGroups
       .flatMap(group => group.items)
-      .filter(({ name }) => {
-        const pureName = name
-          .trim()
-          .toLowerCase()
-          .split('')
-          .filter(char => /[A-Za-z0-9]/.test(char))
-          .join('');
-
-        const regex = new RegExp(
-          searchStr
-            .split('')
-            .map(item => `${escapeRegExp(item)}.*`)
-            .join(''),
-          'i'
-        );
-        return regex.test(pureName);
-      });
+      .filter(({ name }) => isFuzzyMatch(name, searchStr));
   }
 
   private _scrollToItem(item: SlashItem, force = true) {

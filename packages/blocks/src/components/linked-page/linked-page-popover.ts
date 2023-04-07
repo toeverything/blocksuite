@@ -18,6 +18,7 @@ import {
 } from '../../__internal__/utils/query.js';
 import {
   isControlledKeyboardEvent,
+  isFuzzyMatch,
   isPrintableKeyEvent,
 } from '../../__internal__/utils/std.js';
 import { styles } from './styles.js';
@@ -174,13 +175,15 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       pageName.slice(0, DISPLAY_LENGTH) +
       (pageName.length > DISPLAY_LENGTH ? '..' : '');
     return [
-      ...this._pageList.map((page, idx) => ({
-        key: page.id,
-        name: page.title,
-        active: idx === this._activatedItemIndex,
-        icon: PageIcon,
-        action: () => this._insertLinkedNode('LinkedPage', page.id),
-      })),
+      ...this._pageList
+        .filter(({ title }) => isFuzzyMatch(title, this._query))
+        .map((page, idx) => ({
+          key: page.id,
+          name: page.title,
+          active: idx === this._activatedItemIndex,
+          icon: PageIcon,
+          action: () => this._insertLinkedNode('LinkedPage', page.id),
+        })),
       // The active condition is a bit tricky here
       {
         key: 'create-linked-page',
@@ -275,6 +278,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _updateQuery(str: string) {
     this._query = str;
+    this._activatedItemIndex = 0;
   }
 
   private _insertLinkedNode(type: 'Subpage' | 'LinkedPage', pageId: string) {
