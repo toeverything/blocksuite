@@ -25,6 +25,7 @@ import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
+import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
@@ -201,13 +202,13 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   private async _startHighlight(lang: Lang) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
-      theme: mode === 'dark' ? 'github-dark' : 'github-light',
-      themes: ['github-light', 'github-dark'],
+      theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
+      themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang],
       paths: {
         // TODO: use local path
         wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
-        themes: 'https://cdn.jsdelivr.net/npm/shiki/themes',
+        themes: 'https://cdn.jsdelivr.net/',
         languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
       },
     });
