@@ -1,6 +1,8 @@
 import type { PhasorElement } from '@blocksuite/phasor';
+import { getCommonBound } from '@blocksuite/phasor';
 import { ElementCtors, generateElementId } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { isTopLevelBlock } from '../../page-block/edgeless/utils.js';
@@ -97,9 +99,11 @@ export class EdgelessClipboard implements Clipboard {
     if (!custom) {
       return;
     }
+
     const elementsRawData = deserialize(custom) as {
       type: PhasorElement['type'];
     }[];
+
     const elements = elementsRawData
       .map(d => {
         const element = ElementCtors[d.type]?.deserialize(d);
@@ -107,6 +111,28 @@ export class EdgelessClipboard implements Clipboard {
         return element;
       })
       .filter(e => !!e) as PhasorElement[];
+
+    const commonBound = getCommonBound(elements);
+    assertExists(commonBound);
+
+    const lastMousePos = this._edgeless.getSelection().lastMousePos;
+    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+    const pasteX = modelX - commonBound.w / 2;
+    const pasteY = modelY - commonBound.h / 2;
+    elements.forEach(ele => {
+      ele.x = pasteX + ele.x - commonBound.x;
+      ele.y = pasteY + ele.y - commonBound.y;
+    });
+
     this._edgeless.surface.addElements(elements);
+    this._edgeless.slots.selectionUpdated.emit({
+      active: false,
+      selected: elements
+        .map(ele => this._edgeless.surface.pickById(ele.id))
+        .filter(e => !!e) as PhasorElement[],
+    });
   };
 }

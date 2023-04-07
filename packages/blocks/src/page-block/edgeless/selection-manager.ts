@@ -59,6 +59,10 @@ export class EdgelessSelectionManager {
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
+
   get isActive() {
     return this.currentController.isActive;
   }
