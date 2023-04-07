@@ -5,17 +5,18 @@ import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  NonShadowLitElement,
-} from '../../__internal__/index.js';
+import { type BlockHost, ShadowlessElement } from '../../__internal__/index.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends NonShadowLitElement {
+export class ImageBlockComponent extends ShadowlessElement {
   static styles = css`
+    affine-image > affine-embed {
+      display: block;
+    }
     .affine-image-wrapper {
       padding: 8px;
       width: 100%;
@@ -219,19 +220,15 @@ export class ImageBlockComponent extends NonShadowLitElement {
       this.host,
       () => this.requestUpdate()
     );
-    const { width, height } = this.model;
 
-    if (this.resizeImg) {
-      if (this._imageState !== 'ready') {
-        this.resizeImg.style.width = 'unset';
-        this.resizeImg.style.height = 'unset';
-      } else if (width && height) {
-        this.resizeImg.style.width = width + 'px';
-        this.resizeImg.style.height = height + 'px';
-      } else {
-        this.resizeImg.style.width = 'unset';
-        this.resizeImg.style.height = 'unset';
-      }
+    const resizeImgStyle = {
+      width: 'unset',
+      height: 'unset',
+    };
+    const { width, height } = this.model;
+    if (width && height) {
+      resizeImgStyle.width = `${width}px`;
+      resizeImgStyle.height = `${height}px`;
     }
 
     const img = {
@@ -250,7 +247,9 @@ export class ImageBlockComponent extends NonShadowLitElement {
     return html`
       <affine-embed .model=${this.model}>
         <div class="affine-image-wrapper">
-          <div class="resizable-img">${img}</div>
+          <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
+            ${img}
+          </div>
           ${childrenContainer}
         </div>
       </affine-embed>

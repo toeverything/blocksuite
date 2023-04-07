@@ -1,6 +1,13 @@
-const isVisible = (elem: HTMLElement) =>
-  !!elem &&
-  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+import type { DatabaseAction, Divider } from './types.js';
+
+// source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+function isVisible(elem: HTMLElement) {
+  return (
+    !!elem &&
+    !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length)
+  );
+}
+
 export function onClickOutside(
   element: HTMLElement,
   callback: (element: HTMLElement) => void,
@@ -21,4 +28,36 @@ export function onClickOutside(
   };
 
   return removeClickListener;
+}
+
+/** select tag color poll */
+const tagColorPoll: string[] = [
+  '#F5F5F5',
+  '#E3E2E0',
+  '#FFE1E1',
+  '#FFEACA',
+  '#FFF4D8',
+  '#DFF4E8',
+  '#DFF4F3',
+  '#E1EFFF',
+  '#F3F0FF',
+  '#FCE8FF',
+];
+
+function tagColorHelper() {
+  let colors = [...tagColorPoll];
+  return () => {
+    if (colors.length === 0) {
+      colors = [...tagColorPoll];
+    }
+    const index = Math.floor(Math.random() * colors.length);
+    const color = colors.splice(index, 1)[0];
+    return color;
+  };
+}
+
+export const getTagColor = tagColorHelper();
+
+export function isDivider(action: DatabaseAction): action is Divider {
+  return action.type === 'divider';
 }

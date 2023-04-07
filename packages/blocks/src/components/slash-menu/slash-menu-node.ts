@@ -1,39 +1,27 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
+  isFuzzyMatch,
   isPrintableKeyEvent,
+  WithDisposable,
 } from '../../__internal__/utils/index.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
 
-function escapeRegExp(input: string) {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 @customElement('slash-menu')
-export class SlashMenu extends LitElement {
+export class SlashMenu extends WithDisposable(LitElement) {
   static styles = styles;
-
-  @property()
-  transform: string | null = null;
-
-  @property()
-  maxHeight: number | null = null;
 
   @property()
   model!: BaseBlockModel;
 
-  @property()
-  abortController = new AbortController();
-
   @query('.slash-menu')
-  slashMenuElement!: HTMLElement;
+  slashMenuElement?: HTMLElement;
 
   @state()
   private _leftPanelActivated = false;
@@ -47,20 +35,23 @@ export class SlashMenu extends LitElement {
   @state()
   private _hide = false;
 
+  @state()
+  private _position: {
+    x: string;
+    y: string;
+    height: number;
+  } | null = null;
+
+  abortController = new AbortController();
+
   /**
    * Does not include the slash character
    */
   private _searchString = '';
 
-  private _disposables = new DisposableGroup();
-
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
-    this._disposables.addFromEvent(window, 'keydown', this._keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
-      capture: true,
-    });
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -81,9 +72,8 @@ export class SlashMenu extends LitElement {
     // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
+  updatePosition(position: { x: string; y: string; height: number }) {
+    this._position = position;
   }
 
   // Handle click outside
@@ -213,6 +203,8 @@ export class SlashMenu extends LitElement {
       }
 
       case 'ArrowLeft':
+        // If the left panel is hidden, should not activate it
+        if (this._searchString.length) return;
         this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
@@ -231,29 +223,17 @@ export class SlashMenu extends LitElement {
 
   private _updateItem(): SlashItem[] {
     this._activatedItemIndex = 0;
+    // Activate the right panel when search string is not empty
+    if (this._leftPanelActivated) {
+      this._leftPanelActivated = false;
+    }
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
       return menuGroups.flatMap(group => group.items);
     }
     return menuGroups
       .flatMap(group => group.items)
-      .filter(({ name }) => {
-        const pureName = name
-          .trim()
-          .toLowerCase()
-          .split('')
-          .filter(char => /[A-Za-z0-9]/.test(char))
-          .join('');
-
-        const regex = new RegExp(
-          searchStr
-            .split('')
-            .map(item => `${escapeRegExp(item)}.*`)
-            .join(''),
-          'i'
-        );
-        return regex.test(pureName);
-      });
+      .filter(({ name }) => isFuzzyMatch(name, searchStr));
   }
 
   private _scrollToItem(item: SlashItem, force = true) {
@@ -272,21 +252,9 @@ export class SlashMenu extends LitElement {
       ele.scrollIntoView(true);
       return;
     }
-
-    // `scrollIntoViewIfNeeded` is not a standard API,
-    // it is not supported by Firefox.
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
-    if (
-      'scrollIntoViewIfNeeded' in ele &&
-      ele.scrollIntoViewIfNeeded instanceof Function
-    ) {
-      ele.scrollIntoViewIfNeeded();
-      return;
-    } else {
-      // fallback to `scrollIntoView`
-      // TODO remove this fallback when we add polyfill
-      ele.scrollIntoView();
-    }
+    ele.scrollIntoView({
+      block: 'nearest',
+    });
   }
 
   private _handleClickItem(index: number) {
@@ -344,23 +312,24 @@ export class SlashMenu extends LitElement {
 
   override render() {
     if (this._hide) {
-      return html``;
+      return nothing;
     }
 
     const MAX_HEIGHT_WITH_CATEGORY = 408;
     const MAX_HEIGHT = 344;
     const showCategory = !this._searchString.length;
 
-    const slashMenuStyles = styleMap({
-      visibility: this.transform ? null : 'hidden',
-      transform: this.transform,
-      maxHeight: this.maxHeight
-        ? `${Math.min(
-            this.maxHeight,
+    const slashMenuStyles = this._position
+      ? styleMap({
+          transform: `translate(${this._position.x}, ${this._position.y})`,
+          maxHeight: `${Math.min(
+            this._position.height,
             showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
-          )}px`
-        : null,
-    });
+          )}px`,
+        })
+      : styleMap({
+          visibility: 'hidden',
+        });
 
     const filterItems = this.model.page.awarenessStore.getFlag(
       'enable_database'

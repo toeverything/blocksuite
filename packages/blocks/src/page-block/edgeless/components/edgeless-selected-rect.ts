@@ -1,8 +1,9 @@
 import './component-toolbar/component-toolbar.js';
 
-import type { Bound } from '@blocksuite/phasor';
+import { WithDisposable } from '@blocksuite/blocks/std';
+import type { Bound, ConnectorElement } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
-import { DisposableGroup, Page } from '@blocksuite/store';
+import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
@@ -17,6 +18,7 @@ import type {
 import {
   FRAME_MIN_HEIGHT,
   FRAME_MIN_WIDTH,
+  handleElementChangedEffectForConnector,
   isTopLevelBlock,
   stopPropagation,
 } from '../utils.js';
@@ -24,6 +26,7 @@ import type { EdgelessComponentToolbar } from './component-toolbar/component-too
 import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
+import { SingleConnectorHandles } from './single-connector-handles.js';
 import {
   getCommonRectStyle,
   getSelectableBounds,
@@ -31,7 +34,7 @@ import {
 } from './utils.js';
 
 @customElement('edgeless-selected-rect')
-export class EdgelessSelectedRect extends LitElement {
+export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -66,7 +69,6 @@ export class EdgelessSelectedRect extends LitElement {
 
   private _lock = false;
   private _resizeManager: HandleResizeManager;
-  private _disposables = new DisposableGroup();
 
   constructor() {
     super();
@@ -82,6 +84,12 @@ export class EdgelessSelectedRect extends LitElement {
   }
 
   get resizeMode(): ResizeMode {
+    if (
+      this.state.selected.length === 1 &&
+      this.state.selected[0].type === 'connector'
+    ) {
+      return 'none';
+    }
     const hasBlockElement = this.state.selected.find(elem =>
       isTopLevelBlock(elem)
     );
@@ -117,6 +125,12 @@ export class EdgelessSelectedRect extends LitElement {
       } else {
         this.surface.setElementBound(element.id, bound);
       }
+      handleElementChangedEffectForConnector(
+        element,
+        [element],
+        this.surface,
+        this.page
+      );
     });
 
     this.requestUpdate();
@@ -171,10 +185,6 @@ export class EdgelessSelectedRect extends LitElement {
     super.updated(changedProperties);
   }
 
-  disconnectedCallback() {
-    this._disposables.dispose();
-  }
-
   render() {
     if (this.state.selected.length === 0) return null;
 
@@ -199,9 +209,23 @@ export class EdgelessSelectedRect extends LitElement {
       }
     );
 
+    const connectorHandles =
+      selected.length === 1 && selected[0].type === 'connector'
+        ? SingleConnectorHandles(
+            selected[0] as ConnectorElement,
+            this.surface,
+            this.page,
+            () => {
+              this.slots.selectionUpdated.emit({ ...this.state });
+            }
+          )
+        : null;
+
     return html`
       ${hasResizeHandles ? resizeHandles : null}
-      <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+      <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
+        ${connectorHandles}
+      </div>
       <edgeless-component-toolbar
         .selected=${selected}
         .page=${this.page}

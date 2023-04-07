@@ -1,5 +1,6 @@
 import {
   ArrowDownIcon,
+  DatabaseDone,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -13,27 +14,25 @@ import {
   PenIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import type { ColumnSchema } from '@blocksuite/global/database';
+import {
+  type Column,
+  ColumnInsertPosition,
+  type ColumnType,
+} from '@blocksuite/global/database';
+import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../database-model.js';
-
-type ColumnType = {
-  text: string;
-  icon: TemplateResult;
-};
-
-type NormalAction = {
-  type: string;
-  text: string;
-  icon: TemplateResult;
-};
-type Divider = {
-  type: 'divider';
-};
-export type ColumnAction = NormalAction | Divider;
+import { getColumnRenderer } from '../register.js';
+import type {
+  ColumnAction,
+  ColumnActionType,
+  ColumnHeader,
+  TitleColumnAction,
+} from '../types.js';
+import { isDivider } from '../utils.js';
 
 export const actionStyles = css`
   .action {
@@ -56,6 +55,7 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
+    color: #77757d;
   }
   .action-divider {
     height: 0.5px;
@@ -64,24 +64,29 @@ export const actionStyles = css`
   }
 `;
 
-const columnTypes: ColumnType[] = [
+const columnTypes: ColumnHeader[] = [
   {
+    type: 'rich-text',
     text: 'Text',
     icon: TextIcon,
   },
   {
+    type: 'select',
     text: 'Select',
     icon: DatabaseSelect,
   },
   {
+    type: 'multi-select',
     text: 'Multi-select',
     icon: DatabaseMultiSelect,
   },
   {
+    type: 'number',
     text: 'Number',
     icon: DatabaseNumber,
   },
   {
+    type: 'progress',
     text: 'Progress',
     icon: DatabaseProgress,
   },
@@ -136,7 +141,7 @@ const columnActions: ColumnAction[] = [
   },
 ];
 
-const titleColumnActions: ColumnAction[] = [
+const titleColumnActions: TitleColumnAction[] = [
   {
     type: 'rename',
     text: 'Rename',
@@ -149,9 +154,9 @@ const titleColumnActions: ColumnAction[] = [
   },
 ];
 
-export const isDivider = (action: ColumnAction): action is Divider => {
-  return action.type === 'divider';
-};
+function isTitleColumn(column: Column | string): column is string {
+  return typeof column === 'string';
+}
 
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {
@@ -169,6 +174,10 @@ class ColumnTypePopup extends LitElement {
       width: 16px;
       height: 16px;
     }
+    /* TODO: svg color */
+    .rich-text {
+      fill: #77757d;
+    }
     .column-type {
       padding: 0;
       color: #8e8d91;
@@ -180,26 +189,59 @@ class ColumnTypePopup extends LitElement {
     }
     .selected {
       color: #5438ff;
-      fill: #5438ff;
       background: rgba(0, 0, 0, 0.02);
     }
+    .selected svg {
+      color: #5438ff;
+    }
+    .selected.rich-text svg {
+      fill: #5438ff;
+    }
+    .action.disabled {
+      cursor: not-allowed;
+    }
+    .action.disabled:hover {
+      background: unset;
+    }
   `;
+
+  @property()
+  columnType: ColumnType | undefined;
+
+  @property()
+  columnId!: string;
+
+  @property()
+  changeColumnType!: (columnId: string, type: ColumnType) => void;
 
   render() {
     return html`
       <div class="affine-database-column-type-popup">
         <div class="action column-type">
           <div class="action-content"><span>Column type</span></div>
-          <!-- TODO: update icon -->
         </div>
         <div class="action-divider"></div>
-        ${columnTypes.map((type, index) => {
+        ${columnTypes.map(column => {
+          const isProgress = column.type === 'progress';
+          const selected = column.type === this.columnType && !isProgress;
+          const onChangeColumnType = () => {
+            if (isProgress) return;
+            if (!selected) {
+              this.changeColumnType(this.columnId, column.type);
+            }
+          };
+
           return html`
-            <div class="action ${index === 0 ? 'selected' : ''}">
+            <div
+              class="action ${column.type} ${selected
+                ? 'selected'
+                : ''} ${isProgress ? 'disabled' : ''}"
+              @click=${onChangeColumnType}
+            >
               <div class="action-content">
-                ${type.icon}<span>${type.text}</span>
+                ${column.icon}<span>${column.text}</span>
               </div>
-              ${TextIcon}
+              ${selected ? DatabaseDone : null}
             </div>
           `;
         })}
@@ -217,6 +259,7 @@ export class EditColumnPopup extends LitElement {
       padding: 8px;
       border: 1px solid #e3e2e4;
       border-radius: 4px;
+      z-index: 1;
     }
 
     .affine-database-edit-column-popup {
@@ -243,13 +286,20 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  targetColumnSchema!: ColumnSchema | string;
+  targetColumn!: Column | string;
+
+  /** base on database column index */
+  @property()
+  columnIndex!: number;
 
   @property()
   closePopup!: () => void;
 
   @property()
-  setTitleColumnEditId!: (titleId: string) => void;
+  setTitleColumnEditId!: (columnId: string) => void;
+
+  @property()
+  insertColumn!: (position: ColumnInsertPosition) => void;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -258,13 +308,15 @@ export class EditColumnPopup extends LitElement {
   private _container!: HTMLDivElement;
   private _columnTypePopup!: ColumnTypePopup | null;
 
-  get isTitleColumn() {
-    return typeof this.targetColumnSchema === 'string';
-  }
-
-  private _onShowColumnType = () => {
+  private _onShowColumnType = (columnId: string) => {
     if (this._columnTypePopup) return;
     this._columnTypePopup = new ColumnTypePopup();
+    this._columnTypePopup.changeColumnType = this._changeColumnType;
+    this._columnTypePopup.columnId = columnId;
+
+    if (!isTitleColumn(this.targetColumn)) {
+      this._columnTypePopup.columnType = this.targetColumn.type;
+    }
     this._container.appendChild(this._columnTypePopup);
     createPopper(this._container, this._columnTypePopup, {
       placement: 'right-start',
@@ -286,15 +338,116 @@ export class EditColumnPopup extends LitElement {
     }
   };
 
-  private _onActionClick = (action: NormalAction, titleId: string) => {
-    if (action.type === 'rename') {
-      this.setTitleColumnEditId(titleId);
+  private _updateColumn = (
+    columnId: string,
+    schemaProperties: Partial<Column>
+  ) => {
+    const currentSchema = this.targetModel.page.db.getColumn(columnId);
+    assertExists(currentSchema);
+    const schema = { ...currentSchema, ...schemaProperties };
+    this.targetModel.page.db.updateColumn(schema);
+  };
+
+  private _changeColumnType = (columnId: string, targetType: ColumnType) => {
+    if (isTitleColumn(this.targetColumn)) return;
+
+    const currentType = this.targetColumn.type;
+    this.targetModel.page.captureSync();
+
+    // select -> multi-select
+    if (currentType === 'select' && targetType === 'multi-select') {
+      this._updateColumn(columnId, { type: targetType });
+    }
+    // multi-select -> select
+    else if (currentType === 'multi-select' && targetType === 'select') {
+      this._updateColumn(columnId, { type: targetType });
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
+    }
+    // number -> rich-text
+    else if (currentType === 'number' && targetType === 'rich-text') {
+      this._updateColumn(columnId, { type: targetType });
+      this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
+    } else {
+      // incompatible types: clear the value of the column
+      const renderer = getColumnRenderer(targetType);
+      this._updateColumn(columnId, {
+        ...renderer.propertyCreator(),
+        type: targetType,
+      });
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
+    }
+
+    this.closePopup();
+  };
+
+  private _onActionClick = (actionType: ColumnActionType, columnId: string) => {
+    if (actionType === 'rename') {
+      this.setTitleColumnEditId(columnId);
       this.closePopup();
+      return;
+    }
+    if (actionType === 'insert-right' || actionType === 'insert-left') {
+      if (actionType === 'insert-right') {
+        this.insertColumn(ColumnInsertPosition.Right);
+      } else {
+        this.insertColumn(ColumnInsertPosition.Left);
+      }
+      this.closePopup();
+      return;
+    }
+
+    if (actionType === 'delete') {
+      this.targetModel.page.captureSync();
+      this.targetModel.page.db.deleteColumn(columnId);
+      this.targetModel.page.db.deleteCellsByColumn(columnId);
+      const columns = this.targetModel.columns.filter(id => id !== columnId);
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns,
+      });
+      this.closePopup();
+      return;
+    }
+
+    if (actionType === 'move-left' || actionType === 'move-right') {
+      this.targetModel.page.captureSync();
+      const targetIndex =
+        actionType === 'move-left'
+          ? this.columnIndex - 1
+          : this.columnIndex + 1;
+      const columns = [...this.targetModel.columns];
+      [columns[this.columnIndex], columns[targetIndex]] = [
+        columns[targetIndex],
+        columns[this.columnIndex],
+      ];
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns,
+      });
+      this.closePopup();
+      return;
+    }
+
+    if (actionType === 'duplicate') {
+      this.targetModel.page.captureSync();
+      const currentSchema = this.targetModel.page.db.getColumn(columnId);
+      assertExists(currentSchema);
+      const { id: copyId, ...nonIdProps } = currentSchema;
+      const schema = { ...nonIdProps };
+      const id = this.targetModel.page.db.updateColumn(schema);
+      const newColumns = [...this.targetModel.columns];
+      newColumns.splice(this.columnIndex + 1, 0, id);
+      this.targetModel.page.updateBlock(this.targetModel, {
+        columns: newColumns,
+      });
+      this.targetModel.page.db.copyCellsByColumn(copyId, id);
+      this.closePopup();
+      return;
     }
   };
 
   private _renderActions = () => {
-    const actions = this.isTitleColumn ? titleColumnActions : columnActions;
+    const actions = isTitleColumn(this.targetColumn)
+      ? titleColumnActions
+      : columnActions;
 
     return html`
       ${actions.map(action => {
@@ -302,22 +455,30 @@ export class EditColumnPopup extends LitElement {
           return html`<div class="action-divider"></div>`;
         }
 
-        const onMouseOver = this.isTitleColumn
+        // boundary
+        if (
+          (this.columnIndex === 0 && action.type === 'move-left') ||
+          (this.columnIndex === this.targetModel.columns.length - 1 &&
+            action.type === 'move-right')
+        ) {
+          return null;
+        }
+
+        const columnId = isTitleColumn(this.targetColumn)
+          ? '-1'
+          : this.targetColumn.id;
+
+        const onMouseOver = isTitleColumn(this.targetColumn)
           ? undefined
           : action.type === 'column-type'
-          ? this._onShowColumnType
+          ? () => this._onShowColumnType(columnId)
           : this._onHideColumnType;
-
-        const titleId =
-          typeof this.targetColumnSchema === 'string'
-            ? '-1'
-            : this.targetColumnSchema.id;
 
         return html`
           <div
             class="action ${action.type}"
             @mouseover=${onMouseOver}
-            @click=${() => this._onActionClick(action, titleId)}
+            @click=${() => this._onActionClick(action.type, columnId)}
           >
             <div class="action-content">
               ${action.icon}<span>${action.text}</span>

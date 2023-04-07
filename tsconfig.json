@@ -32,7 +32,9 @@
       "@blocksuite/phasor": ["./packages/phasor/src"],
       "@blocksuite/phasor/*": ["./packages/phasor/src/*"],
       "@blocksuite/virgo": ["./packages/virgo/src"],
-      "@blocksuite/virgo/*": ["./packages/virgo/src/*"]
+      "@blocksuite/virgo/*": ["./packages/virgo/src/*"],
+      "@blocksuite/connector": ["./packages/connector/src"],
+      "@blocksuite/connector/*": ["./packages/connector/src/*"]
     }
   },
   "files": [],

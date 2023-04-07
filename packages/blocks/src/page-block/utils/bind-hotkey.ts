@@ -448,5 +448,6 @@ export function removeHotkeys() {
     HOTKEYS.RIGHT,
     HOTKEYS.ENTER,
     HOTKEYS.TAB,
+    HOTKEYS.SPACE,
   ]);
 }

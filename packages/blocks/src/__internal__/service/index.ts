@@ -14,7 +14,7 @@ import { getService } from '../service.js';
 import type {
   BlockRange,
   BlockTransformContext,
-  OpenBlockInfo,
+  SerializedBlock,
 } from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
 import { json2block } from './json2block.js';
@@ -38,7 +38,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + BaseService.deltaLeaf2Html(item);
+      return html + BaseService.deltaLeaf2Html(block, item);
     }, '');
     return `${text}${childText}`;
   }
@@ -47,11 +47,14 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
-    const text = (block.text?.toString() || '').slice(begin || 0, end);
+    const text = (block.text?.toString() || '').slice(
+      begin || 0,
+      end || undefined
+    );
     return `${text}${childText}`;
   }
 
-  block2Json(block: BlockModel, begin?: number, end?: number): OpenBlockInfo {
+  block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     return {
       flavour: block.flavour,
@@ -73,13 +76,22 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   // this is the common handler for most block, but like code block, it should be overridden this
   async json2Block(
     focusedBlockModel: BlockModel,
-    pastedBlocks: OpenBlockInfo[],
+    pastedBlocks: SerializedBlock[],
     range?: BlockRange
   ) {
-    return json2block(focusedBlockModel, pastedBlocks, range);
+    return json2block(focusedBlockModel, pastedBlocks, { range });
   }
 
-  private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+  async onBlockPasted(
+    model: BlockModel,
+    clipboardData: Record<string, unknown>
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ) {}
+
+  private static deltaLeaf2Html(
+    block: BaseBlockModel,
+    deltaLeaf: DeltaOperation
+  ) {
     let text: string = deltaLeaf.insert;
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
@@ -102,6 +114,18 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     }
     if (attributes.link) {
       text = `<a href="${attributes.link}">${text}</a>`;
+    }
+    if (attributes.reference) {
+      const refPageId = attributes.reference.pageId;
+      const workspace = block.page.workspace;
+      const pageMeta = workspace.meta.pageMetas.find(
+        page => page.id === refPageId
+      );
+      const host = window.location.origin;
+      // maybe should use public link at here?
+      const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
+      const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
+      text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
   }

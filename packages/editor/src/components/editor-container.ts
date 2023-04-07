@@ -1,23 +1,36 @@
-import type {
-  MouseMode,
-  PageBlockModel,
-  SurfaceBlockModel,
+import {
+  type CommonSlots,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
+  type MouseMode,
+  type PageBlockModel,
+  type SurfaceBlockModel,
+  WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '@blocksuite/blocks';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
+import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
+  Object.entries(from).forEach(([key, slot]) => {
+    if (key in to) {
+      slot.pipe(to[key]);
+    }
+  });
+}
+
 @customElement('editor-container')
-export class EditorContainer extends NonShadowLitElement {
+export class EditorContainer extends WithDisposable(ShadowlessElement) {
   @property()
   page!: Page;
 
@@ -52,25 +65,22 @@ export class EditorContainer extends NonShadowLitElement {
       : null;
   }
 
-  private _disposables = new DisposableGroup();
+  @query('affine-default-page')
+  private _defaultPageBlock?: DefaultPageBlockComponent;
 
-  firstUpdated() {
-    // todo: refactor to a better solution
-    getServiceOrRegister('affine:code');
+  @query('affine-edgeless-page')
+  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
-    setTimeout(() => {
-      const defaultPage = this.querySelector('affine-default-page');
-      if (this.autofocus) {
-        defaultPage?.titleVEditor.focusEnd();
-      }
-    });
-  }
+  slots: CommonSlots = {
+    pageLinkClicked: new Slot(),
+    subpageLinked: new Slot(),
+    subpageUnlinked: new Slot(),
+  };
 
   connectedCallback() {
     super.connectedCallback();
 
-    // Question: Why do we prevent this?
-    this._disposables.addFromEvent(window, 'keydown', e => {
+    const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
         e.preventDefault();
       }
@@ -92,7 +102,14 @@ export class EditorContainer extends NonShadowLitElement {
         return;
       }
       selection.removeAllRanges();
-    });
+    };
+
+    // Question: Why do we prevent this?
+    if (isFirefox) {
+      this._disposables.addFromEvent(document.body, 'keydown', keydown);
+    } else {
+      this._disposables.addFromEvent(window, 'keydown', keydown);
+    }
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
@@ -118,7 +135,9 @@ export class EditorContainer extends NonShadowLitElement {
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
-        this.requestUpdate();
+        // add the 'page' as requesting property to
+        // make sure the `forwardSlot` is called in `updated` lifecycle
+        this.requestUpdate('page');
       })
     );
     this._disposables.add(
@@ -135,6 +154,37 @@ export class EditorContainer extends NonShadowLitElement {
     );
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.page.awarenessStore.setLocalRange(this.page, null);
+  }
+
+  firstUpdated() {
+    // todo: refactor to a better solution
+    getServiceOrRegister('affine:code');
+
+    if (this.mode === 'page') {
+      setTimeout(() => {
+        const defaultPage = this.querySelector('affine-default-page');
+        if (this.autofocus) {
+          defaultPage?.titleVEditor.focusEnd();
+        }
+      });
+    }
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    if (!changedProperties.has('page') && !changedProperties.has('mode')) {
+      return;
+    }
+    if (this._defaultPageBlock) {
+      forwardSlot(this._defaultPageBlock.slots, this.slots);
+    }
+    if (this._edgelessPageBlock) {
+      forwardSlot(this._edgelessPageBlock.slots, this.slots);
+    }
+  }
+
   async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
@@ -143,33 +193,33 @@ export class EditorContainer extends NonShadowLitElement {
     return createBlockHub(this, this.page);
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.page.awarenessStore.setLocalRange(this.page, null);
-    this._disposables.dispose();
-  }
-
   render() {
     if (!this.model || !this.pageBlockModel) return null;
 
-    const pageContainer = html`
-      <affine-default-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.pageBlockModel}
-      ></affine-default-page>
-    `;
+    const pageContainer = keyed(
+      'page-' + this.pageBlockModel.id,
+      html`
+        <affine-default-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+        ></affine-default-page>
+      `
+    );
 
-    const edgelessContainer = html`
-      <affine-edgeless-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.pageBlockModel}
-        .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
-        .mouseMode=${this.mouseMode}
-        .showGrid=${this.showGrid}
-      ></affine-edgeless-page>
-    `;
+    const edgelessContainer = keyed(
+      'edgeless-' + this.pageBlockModel.id,
+      html`
+        <affine-edgeless-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+          .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
+          .mouseMode=${this.mouseMode}
+          .showGrid=${this.showGrid}
+        ></affine-edgeless-page>
+      `
+    );
 
     const remoteSelectionContainer = html`
       <remote-selection .page=${this.page}></remote-selection>

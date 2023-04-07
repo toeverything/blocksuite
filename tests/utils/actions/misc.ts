@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
   pressEnter,
+  pressEscape,
   pressSpace,
   pressTab,
   SHORT_KEY,
   type,
 } from './keyboard.js';
 
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
+const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.virgo-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
@@ -67,6 +70,13 @@ async function initEmptyEditor(
     const editor = document.createElement('editor-container');
     editor.page = page;
     editor.autofocus = true;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const newPage = workspace.getPage(pageId);
+      if (!newPage) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = newPage;
+    });
 
     const debugMenu = document.createElement('debug-menu');
     debugMenu.workspace = workspace;
@@ -138,8 +148,11 @@ export async function waitEmbedLoaded(page: Page) {
   await page.waitForSelector('.resizable-img');
 }
 
-export async function waitNextFrame(page: Page) {
-  await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
+export async function waitNextFrame(
+  page: Page,
+  frameTimeout = NEXT_FRAME_TIMEOUT
+) {
+  await page.waitForTimeout(frameTimeout);
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {
@@ -258,6 +271,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       'affine:database',
       {
         title: new page.Text('Database 1'),
+        titleColumnName: 'Title',
       },
       frameId
     );
@@ -267,17 +281,56 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
-export async function initDatabaseColumn(page: Page, columnType = 'number') {
-  const columnAddBtn = page.locator('.affine-database-add-column-button');
+export async function initEmptyDatabaseWithParagraphState(
+  page: Page,
+  pageId?: string
+) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+        titleColumnName: 'Title',
+      },
+      frameId
+    );
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.captureSync();
+    return { pageId, frameId, databaseId };
+  }, pageId);
+  return ids;
+}
+
+export async function initDatabaseColumn(page: Page, title = '') {
+  const header = page.locator('.affine-database-column-header');
+  const box = await header.boundingBox();
+  if (!box) throw new Error('Missing column type rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+  const columnAddBtn = page.locator('.header-add-column-button');
   await columnAddBtn.click();
 
-  const columnAddPopup = page.locator('affine-database-add-column-type-popup');
-  expect(columnAddPopup).toBeVisible();
-  const columnTypeItem = columnAddPopup.locator(`[data-type="${columnType}"]`);
-  await columnTypeItem.click();
+  if (title) {
+    await type(page, title);
+    await pressEnter(page);
+  } else {
+    await pressEscape(page);
+  }
 }
 
 export async function initDatabaseRow(page: Page) {
+  const footer = page.locator('.affine-database-block-footer');
+  const box = await footer.boundingBox();
+  if (!box) throw new Error('Missing database footer rect');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   const columnAddBtn = page.locator(
     '[data-test-id="affine-database-add-row-button"]'
   );
@@ -303,33 +356,24 @@ export async function initDatabaseDynamicRowWithData(
     await initDatabaseRow(page);
   }
   const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-database-cell-container').nth(index);
+  const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await cell.click();
   await type(page, data);
-}
-
-export async function getDatabaseMouse(page: Page) {
-  const databaseRect = await getBoundingClientRect(page, 'affine-database');
-  return {
-    mouseOver: async () => {
-      await page.mouse.move(databaseRect.x, databaseRect.y);
-    },
-    mouseLeave: async () => {
-      await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
-    },
-  };
-}
-
-export async function focusDatabaseSearch(page: Page) {
-  const searchIcon = page.locator('.affine-database-search-input-icon');
-  await searchIcon.click();
-  return searchIcon;
+  await pressEnter(page);
 }
 
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();
+}
+
+export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
+  const columns = await page.evaluate(async () => {
+    const database = window.page?.getBlockById('2') as DatabaseBlockModel;
+    return database.columns;
+  });
+  expect(columns).toEqual(order);
 }
 
 export async function initEmptyCodeBlockState(page: Page) {
@@ -349,7 +393,17 @@ export async function initEmptyCodeBlockState(page: Page) {
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  await locator.click();
+  // need to set `force` to true when clicking on `affine-page-selected-rects`
+  await locator.click({ force: true });
+}
+
+export async function focusRichTextEnd(page: Page, i = 0) {
+  await page.evaluate(i => {
+    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+
+    richTexts[i].vEditor?.focusEnd();
+  }, i);
+  await waitNextFrame(page);
 }
 
 export async function initThreeParagraphs(page: Page) {
@@ -583,6 +637,12 @@ export const getBoundingClientRect: (
   }, selector);
 };
 
+export async function getBoundingBox(locator: Locator) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Missing column box');
+  return box;
+}
+
 export async function getBlockModel<Model extends BaseBlockModel>(
   page: Page,
   blockId: string
@@ -706,4 +766,13 @@ export async function initImageState(page: Page) {
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
+}
+
+export async function getCurrentEditorPageId(page: Page) {
+  return await page.evaluate(() => {
+    const editor = document.querySelector('editor-container');
+    if (!editor) throw new Error("Can't find editor-container");
+    const pageId = editor.page.id;
+    return pageId;
+  });
 }

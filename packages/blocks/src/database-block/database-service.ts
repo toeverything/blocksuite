@@ -1,10 +1,14 @@
+import type { Column } from '@blocksuite/global/database';
+import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
   type BaseBlockModel,
   type Page,
 } from '@blocksuite/store';
 
+import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
+import type { SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
@@ -32,22 +36,79 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
 
     // default column
-    const tagColumnId = page.setColumnSchema({
-      internalProperty: {
-        color: '#ff0000',
-        width: 200,
-        hide: false,
-      },
-      property: {
-        selection: [],
-      },
+    const tagColumnId = page.db.updateColumn({
       name: 'Tag',
       type: 'multi-select',
+      width: 200,
+      hide: false,
+      selection: [],
     });
     const blockModel = page.getBlockById(databaseId);
     assertExists(blockModel);
     page.updateBlock(blockModel, {
       columns: [tagColumnId],
+    });
+  }
+
+  override block2Json(
+    block: BlockModels['affine:database'],
+    begin?: number,
+    end?: number
+  ): SerializedBlock {
+    const columnIds = block.columns as string[];
+    const rowIds = block.children.map(child => child.id);
+
+    return {
+      flavour: block.flavour,
+      databaseProps: {
+        id: block.id,
+        title: block.title.toString(),
+        titleColumnName: block.titleColumnName,
+        titleColumnWidth: block.titleColumnWidth,
+        rowIds,
+        columnIds,
+      },
+      children: block.children?.map((child, index) => {
+        if (index === block.children.length - 1) {
+          return getService(child.flavour).block2Json(child, 0, end);
+        }
+        return getService(child.flavour).block2Json(child);
+      }),
+    };
+  }
+
+  async onBlockPasted(
+    model: BlockModels['affine:database'],
+    props: Record<string, string[]>
+  ) {
+    const { rowIds, columnIds } = props;
+
+    const columns = columnIds
+      .map(id => model.page.db.getColumn(id))
+      .filter((s: Column | null): s is Column => s !== null);
+    const newColumnIds = columns.map(schema => {
+      const { id, ...nonIdProps } = schema;
+      return model.page.db.updateColumn(nonIdProps);
+    });
+    model.page.updateBlock(model, {
+      columns: newColumnIds,
+    });
+
+    const newRowIds = model.children.map(child => child.id);
+    rowIds.forEach((rowId, rowIndex) => {
+      const newRowId = newRowIds[rowIndex];
+      columnIds.forEach((columnId, columnIndex) => {
+        const cellData = model.page.db.getCell(rowId, columnId);
+        let value = cellData?.value;
+        if (!value) return;
+        if (value instanceof model.page.YText) {
+          value = value.clone();
+        }
+        model.page.db.updateCell(newRowId, {
+          columnId: newColumnIds[columnIndex],
+          value,
+        });
+      });
     });
   }
 }

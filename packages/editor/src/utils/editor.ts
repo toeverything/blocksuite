@@ -7,7 +7,12 @@ import {
   tryUpdateFrameSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
-import { getHoveringFrame, Point, Rect } from '@blocksuite/blocks/std';
+import {
+  getHoveringFrame,
+  isInEmptyDatabaseByPoint,
+  Point,
+  Rect,
+} from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -29,11 +34,10 @@ export const createBlockHub: (
       const data = dataTransfer.getData('affine/block-hub');
       const blocks = [];
       const props = JSON.parse(data);
-      if (props.flavour === 'affine:database') {
-        if (!page.awarenessStore.getFlag('enable_database')) {
-          console.warn('database block is not enabled');
-          return;
-        }
+      const isDatabase = props.flavour === 'affine:database';
+      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
+        console.warn('database block is not enabled');
+        return;
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
         blocks.push(...(await uploadImageFromLocal(page)));
@@ -42,23 +46,31 @@ export const createBlockHub: (
       }
 
       if (end) {
-        const { model, rect } = end;
-        page.captureSync();
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
-        const ids = page.addSiblingBlocks(
-          model,
-          blocks,
-          distanceToTop < distanceToBottom ? 'before' : 'after'
-        );
+        const { rect, model, element } = end;
 
-        // database init basic structure
-        if (props.flavour === 'affine:database') {
-          const service = await getServiceOrRegister(props.flavour);
-          service.initDatabaseBlock(page, model, ids[0]);
+        let ids: string[] = [];
+
+        page.captureSync();
+
+        if (isInEmptyDatabaseByPoint(point, model, element, blocks)) {
+          ids = page.addBlocks(blocks, model);
+        } else {
+          const distanceToTop = Math.abs(rect.top - point.y);
+          const distanceToBottom = Math.abs(rect.bottom - point.y);
+          ids = page.addSiblingBlocks(
+            model,
+            blocks,
+            distanceToTop < distanceToBottom ? 'before' : 'after'
+          );
         }
 
         if (ids.length) {
+          // database init basic structure
+          if (isDatabase) {
+            const service = await getServiceOrRegister(props.flavour);
+            service.initDatabaseBlock(page, model, ids[0]);
+          }
+
           asyncFocusRichText(page, ids[0]);
         }
       }

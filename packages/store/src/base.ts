@@ -111,9 +111,8 @@ export class BaseBlockModel<Props = unknown>
 
   type?: string;
   children: BaseBlockModel[];
-  // TODO use schema
-  columns?: Y.Map<Y.Map<unknown>>;
-  columnSchema?: Y.Map<unknown>;
+  cells?: Y.Map<Y.Map<unknown>>;
+  columns?: Y.Map<unknown>;
   text?: Text;
   sourceId?: string;
 
@@ -126,12 +125,12 @@ export class BaseBlockModel<Props = unknown>
     this.children = [];
   }
 
-  firstChild() {
-    const children = this.children;
-    if (!children?.length) {
-      return null;
-    }
-    return children[0];
+  isEmpty() {
+    return this.children.length === 0;
+  }
+
+  firstChild(): BaseBlockModel | null {
+    return this.children[0] || null;
   }
 
   lastChild(): BaseBlockModel | null {

@@ -4,10 +4,7 @@ import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  DatabaseCellLitElement,
-  getColumnSchemaRenderer,
-} from '../register.js';
+import { DatabaseCellElement, getColumnRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
@@ -15,13 +12,15 @@ const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
-  extends DatabaseCellLitElement<unknown>
+  extends DatabaseCellElement<unknown>
   implements RowHost
 {
   static styles = css`
     :host {
       display: flex;
       align-items: center;
+      width: 100%;
+      height: 100%;
       padding: 10px ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
@@ -31,15 +30,14 @@ export class DatabaseCellContainer
   private _isEditing = false;
 
   setValue(value: unknown) {
-    if (value !== undefined) {
-      setTimeout(() => {
-        this.databaseModel.page.captureSync();
-        this.databaseModel.page.updateBlockColumn(this.rowModel.id, {
-          schemaId: this.columnSchema.id,
-          value,
-        });
+    queueMicrotask(() => {
+      this.databaseModel.page.captureSync();
+      this.databaseModel.page.db.updateCell(this.rowModel.id, {
+        columnId: this.column.id,
+        value,
       });
-    }
+      this.requestUpdate();
+    });
   }
 
   setEditing = (isEditing: boolean) => {
@@ -55,11 +53,11 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.columnSchema.property);
+    const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setColumnSchema({
-      ...this.columnSchema,
-      property: newProperty,
+    this.databaseModel.page.db.updateColumn({
+      ...this.column,
+      ...newProperty,
     });
   }
 
@@ -68,22 +66,9 @@ export class DatabaseCellContainer
   };
 
   protected firstUpdated() {
-    this.databaseModel.propsUpdated.on(() => this.requestUpdate());
-    this.databaseModel.childrenUpdated.on(() => this.requestUpdate());
-    this.rowModel.propsUpdated.on(() => this.requestUpdate());
-    this.rowModel.childrenUpdated.on(() => this.requestUpdate());
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
-    this.setAttribute('data-column-id', this.columnSchema.id);
-  }
-
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('columnSchema')) {
-      requestAnimationFrame(() => {
-        this.style.minWidth = `${this.columnSchema.internalProperty.width}px`;
-        this.style.maxWidth = `${this.columnSchema.internalProperty.width}px`;
-      });
-    }
+    this.setAttribute('data-column-id', this.column.id);
   }
 
   _onClick = (event: Event) => {
@@ -112,11 +97,11 @@ export class DatabaseCellContainer
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  protected render() {
-    const renderer = getColumnSchemaRenderer(this.columnSchema.type);
-    const column = this.databaseModel.page.getBlockColumnBySchema(
-      this.rowModel,
-      this.columnSchema
+  render() {
+    const renderer = getColumnRenderer(this.column.type);
+    const cell = this.databaseModel.page.db.getCell(
+      this.rowModel.id,
+      this.column.id
     );
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
@@ -126,8 +111,8 @@ export class DatabaseCellContainer
           .rowHost=${this}
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
-          .columnSchema=${this.columnSchema}
-          .column=${column}
+          .column=${this.column}
+          .cell=${cell}
         ></${editingTag}>
       `;
     }
@@ -137,8 +122,8 @@ export class DatabaseCellContainer
         .rowHost=${this}
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
-        .columnSchema=${this.columnSchema}
-        .column=${column}
+        .column=${this.column}
+        .cell=${cell}
       ></${previewTag}>
     `;
   }

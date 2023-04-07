@@ -88,9 +88,13 @@ export function showSlashMenu({
 
   // Handle position
   const updatePosition = throttle(() => {
-    const position = getPopperPosition(slashMenu.slashMenuElement, range);
-    slashMenu.transform = `translate(${position.x}, ${position.y})`;
-    slashMenu.maxHeight = position.height;
+    const slashMenuElement = slashMenu.slashMenuElement;
+    assertExists(
+      slashMenuElement,
+      'You should render the slash menu node even if no position'
+    );
+    const position = getPopperPosition(slashMenuElement, range);
+    slashMenu.updatePosition(position);
   }, 10);
 
   window.addEventListener('resize', updatePosition);

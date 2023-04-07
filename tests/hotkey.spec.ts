@@ -68,6 +68,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
   // redo
   await redoByKeyboard(page);
+  await waitNextFrame(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
   // the format should be removed after trigger the hotkey again
@@ -702,6 +703,23 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(50);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+d`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="text"
+  />
+  <affine:divider />
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 });
 
 test('format list to h1', async ({ page }) => {
@@ -884,6 +902,7 @@ test('pressing enter when selecting multiple blocks should create new block', as
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await waitNextFrame(page);
   await pressEnter(page);
   await assertRichTexts(page, ['1', '89']);
   await assertSelection(page, 1, 0, 0);

@@ -40,6 +40,19 @@ function subscribePage(workspace: Workspace) {
     const editor = new EditorContainer();
     editor.page = page;
     editor.autofocus = true;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const page = workspace.getPage(pageId);
+      if (!page) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = page;
+    });
+    editor.slots.subpageLinked.on(({ pageId }) => {
+      console.log('subpageLinked', page);
+    });
+    editor.slots.subpageUnlinked.on(({ pageId }) => {
+      console.log('subpageUnlinked', page);
+    });
 
     document.getElementById('app')?.append(editor);
 

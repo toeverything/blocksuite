@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AttributesRenderer } from '../types.js';
+import type { AttributeRenderer } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 function virgoTextStyles(
@@ -30,7 +30,8 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -39,11 +40,12 @@ function virgoTextStyles(
 }
 
 export const getDefaultAttributeRenderer =
-  <T extends BaseTextAttributes>(): AttributesRenderer<T> =>
-  (unitText, attributes) => {
-    const style = attributes
-      ? virgoTextStyles(attributes)
-      : styleMap({ 'white-space': 'pre-wrap' });
-
-    return html`<span style=${style}>${unitText}</span>`;
+  <T extends BaseTextAttributes>(): AttributeRenderer<T> =>
+  delta => {
+    const style = delta.attributes
+      ? virgoTextStyles(delta.attributes)
+      : styleMap({});
+    return html`<span style=${style}
+      ><v-text .str=${delta.insert}></v-text
+    ></span>`;
   };

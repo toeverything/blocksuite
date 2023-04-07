@@ -3,7 +3,6 @@ import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
-  DividerIcon,
   DuplicateIcon,
   ImageIcon20,
   NowIcon,
@@ -64,19 +63,6 @@ function insertContent(model: BaseBlockModel, text: string) {
   });
 }
 
-const dividerItem: SlashItem = {
-  name: 'Divider',
-  icon: DividerIcon,
-  action({ page, model }) {
-    const parent = page.getParent(model);
-    if (!parent) {
-      return;
-    }
-    const index = parent.children.indexOf(model);
-    page.addBlock('affine:divider', {}, parent, index + 1);
-  },
-};
-
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
   {
     name: 'Text',
@@ -107,7 +93,6 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
           },
         })),
-      dividerItem,
     ],
   },
   {

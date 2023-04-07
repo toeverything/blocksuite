@@ -1,12 +1,12 @@
-import { VText } from '@blocksuite/virgo';
-import { html } from 'lit';
+import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NonShadowLitElement } from '../../index.js';
+import { ShadowlessElement } from '../../index.js';
 import type { AffineTextAttributes } from './types.js';
 
-function affineTextStyles(
+export function affineTextStyles(
   props: AffineTextAttributes
 ): ReturnType<typeof styleMap> {
   let textDecorations = '';
@@ -31,7 +31,6 @@ function affineTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -40,18 +39,28 @@ function affineTextStyles(
 }
 
 @customElement('affine-text')
-export class AffineText extends NonShadowLitElement {
-  @property({ type: Object })
-  textAttributes: AffineTextAttributes = {};
+export class AffineText extends ShadowlessElement {
+  static styles = css`
+    affine-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  `;
 
   @property({ type: Object })
-  vText: VText = new VText();
+  delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 
   render() {
-    const style = affineTextStyles(this.textAttributes);
+    const style = this.delta.attributes
+      ? affineTextStyles(this.delta.attributes)
+      : styleMap({});
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
-    return html`<span style=${style}>${this.vText}</span>`;
+    return html`<span style=${style}
+      ><v-text .str=${this.delta.insert}></v-text
+    ></span>`;
   }
 }
 

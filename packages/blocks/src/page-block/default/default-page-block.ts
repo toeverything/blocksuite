@@ -10,13 +10,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-  Slot,
-  Utils,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -24,8 +18,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { setupVirgoAutofocus } from '../../__internal__/utils/virgo.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -34,7 +30,6 @@ import {
   DraggingArea,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
-  SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
@@ -44,6 +39,9 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
+  /**
+   * @deprecated Not used yet
+   */
   codeBlockOptionUpdated?: Slot;
   /**
    * @deprecated Not used yet
@@ -53,7 +51,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends NonShadowLitElement
+  extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
   static styles = css`
@@ -78,6 +76,10 @@ export class DefaultPageBlockComponent
 
       min-height: calc(100% - 78px);
       padding-bottom: 150px;
+
+      /* Leave a place for drag-handle */
+      padding-left: 24px;
+      padding-right: 24px;
     }
 
     .affine-default-page-block-title {
@@ -163,12 +165,16 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots: DefaultSelectionSlots = {
+  slots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
+
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -196,7 +202,6 @@ export class DefaultPageBlockComponent
     const title = model.title;
 
     this._titleVEditor = new VEditor(title.yText);
-    setupVirgoAutofocus(this.page, this._titleVEditor);
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
@@ -483,8 +488,6 @@ export class DefaultPageBlockComponent
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
   }
 
-  private _disposables = new DisposableGroup();
-
   override connectedCallback() {
     super.connectedCallback();
     this.clipboard.init(this.page);
@@ -510,6 +513,10 @@ export class DefaultPageBlockComponent
   }
 
   render() {
+    requestAnimationFrame(() => {
+      this.selection.refreshRemoteSelection();
+    });
+
     const { page, selection } = this;
     const { viewport } = selection.state;
 
@@ -517,10 +524,6 @@ export class DefaultPageBlockComponent
       this.requestUpdate()
     );
     const draggingArea = DraggingArea(this._draggingArea);
-    const selectedRectsContainer = SelectedRectsContainer(
-      this._selectedRects,
-      viewport
-    );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
       viewport
@@ -546,8 +549,15 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${draggingArea} ${selectedEmbedContainer}
-        ${embedEditingContainer}
+        <affine-page-selected-rects
+          .viewport=${viewport}
+          .mouseRoot=${this.mouseRoot}
+          .state=${{
+            rects: this._selectedRects,
+            grab: !this._draggingArea,
+          }}
+        ></affine-page-selected-rects>
+        ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>
     `;
   }

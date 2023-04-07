@@ -1,7 +1,10 @@
-import type { BlockTransformContext } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/index.js';
-import type { ListBlockModel } from './list-model.js';
+import type { BaseBlockModel } from '@blocksuite/store';
 
+import type { BlockTransformContext } from '../__internal__/index.js';
+import type { BlockRange, SerializedBlock } from '../__internal__/index.js';
+import { BaseService } from '../__internal__/service/index.js';
+import { json2block } from '../__internal__/service/json2block.js';
+import type { ListBlockModel } from './list-model.js';
 export class ListBlockService extends BaseService<ListBlockModel> {
   override block2html(
     block: ListBlockModel,
@@ -65,5 +68,17 @@ export class ListBlockService extends BaseService<ListBlockModel> {
       }
     }
     return text;
+  }
+
+  override async json2Block(
+    focusedBlockModel: BaseBlockModel,
+    pastedBlocks: SerializedBlock[],
+    range?: BlockRange
+  ) {
+    const convertToPastedIfEmpty = pastedBlocks[0].flavour !== 'affine:list';
+    return json2block(focusedBlockModel, pastedBlocks, {
+      range,
+      convertToPastedIfEmpty,
+    });
   }
 }

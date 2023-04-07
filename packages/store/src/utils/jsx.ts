@@ -30,13 +30,13 @@ function isValidRecord(data: unknown): data is DocRecord {
   return true;
 }
 
-const IGNORE_PROPS = [
+const IGNORED_PROPS = [
   'sys:id',
   'sys:flavour',
   'sys:children',
   'prop:xywh',
+  'ext:cells',
   'ext:columns',
-  'ext:columnSchema',
 ];
 
 export function yDocToJSXNode(
@@ -57,7 +57,7 @@ export function yDocToJSXNode(
   // TODO maybe need check children recursively nested
   const children = node['sys:children'];
   const props = Object.fromEntries(
-    Object.entries(node).filter(([key]) => !IGNORE_PROPS.includes(key))
+    Object.entries(node).filter(([key]) => !IGNORED_PROPS.includes(key))
   );
 
   if ('prop:text' in props && props['prop:text'] instanceof Array) {

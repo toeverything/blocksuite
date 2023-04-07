@@ -8,7 +8,13 @@ import {
   matchFlavours,
 } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
-import { css, html, type LitElement, type ReactiveController } from 'lit';
+import {
+  css,
+  html,
+  type LitElement,
+  nothing,
+  type ReactiveController,
+} from 'lit';
 
 import { debounce } from '../utils/index.js';
 import { getCurrentNativeRange } from '../utils/selection.js';
@@ -37,7 +43,7 @@ export class InlineSuggestionController implements ReactiveController {
   private provider?: InlineSuggestionProvider;
 
   private _abortController = new AbortController();
-  private _disposableGroup = new DisposableGroup();
+  private _disposables = new DisposableGroup();
 
   private _suggestionState = {
     show: false,
@@ -51,12 +57,12 @@ export class InlineSuggestionController implements ReactiveController {
     this.host = host;
   }
 
-  hostConnected(): void {
-    this._disposableGroup = new DisposableGroup();
+  hostConnected() {
+    this._disposables = new DisposableGroup();
   }
 
   hostDisconnected() {
-    this._disposableGroup.dispose();
+    this._disposables.dispose();
   }
 
   init({
@@ -98,7 +104,7 @@ export class InlineSuggestionController implements ReactiveController {
 
     const editor = this.vEditor;
     assertExists(editor);
-    this._disposableGroup.add(
+    this._disposables.add(
       editor.slots.vRangeUpdated.on(async ([vRange, type]) => {
         this._updateSuggestions(vRange);
       })
@@ -108,8 +114,8 @@ export class InlineSuggestionController implements ReactiveController {
   readonly onFocusOut = (e: FocusEvent) => {
     this._abortController.abort();
     // We should not observe text change when focus out
-    this._disposableGroup.dispose();
-    this._disposableGroup = new DisposableGroup();
+    this._disposables.dispose();
+    this._disposables = new DisposableGroup();
   };
 
   private _updateSuggestions = debounce(
@@ -212,12 +218,12 @@ export class InlineSuggestionController implements ReactiveController {
   };
 
   render() {
-    if (!this._suggestionState.show) return html``;
+    if (!this._suggestionState.show) return nothing;
     const text = this._suggestionState.loading
       ? '...'
       : this._suggestionState.text;
     const position = this._suggestionState.position;
-    if (!text) return html``;
+    if (!text) return nothing;
     return html`<div
       class="inline-suggestion"
       style="text-indent: ${position.x + 2}px;"

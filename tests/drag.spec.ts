@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  dragBetweenCoords,
   dragBetweenIndices,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
@@ -62,7 +63,7 @@ test('move drag handle in paragraphs', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '2', '4');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
@@ -72,7 +73,7 @@ test('move drag handle in list', async ({ page }) => {
   await initThreeLists(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '5', '3', false);
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['789', '123', '456']);
 });
 
@@ -102,11 +103,11 @@ test('move drag handle in nested block', async ({ page }) => {
   await assertRichTexts(page, ['1', '2', '21', '22', '23', '3']);
 
   await dragHandleFromBlockToBlockBottomById(page, '5', '7');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['1', '2', '22', '23', '21', '3']);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['2', '22', '23', '21', '3', '1']);
 });
 
@@ -182,7 +183,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   );
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '9');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -237,7 +238,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     true,
     1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
   );
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -293,7 +294,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     true,
     2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
   );
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertStoreMatchJSX(
     page,
@@ -354,7 +355,7 @@ test('should sync selected-blocks to session-manager when clicking drag handle',
 
   await focusRichText(page, 1);
 
-  const handle = await page.locator('affine-drag-handle');
+  const handle = page.locator('affine-drag-handle');
   await handle.click();
 
   await page.keyboard.press('Backspace');
@@ -378,13 +379,11 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
 
   await assertRichTexts(page, ['789', '123', '456']);
 
@@ -474,9 +473,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
@@ -539,7 +536,7 @@ test('should blur rich-text first on starting block selection', async ({
   await expect(page.locator('*:focus')).toHaveCount(1);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4');
-  expect(await page.locator('affine-drag-indicator').isHidden()).toBe(true);
+  await expect(page.locator('affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('*:focus')).toHaveCount(0);
@@ -556,13 +553,190 @@ test('hide drag handle when mouse is hovering over the title', async ({
     page,
     '.affine-frame-block-container'
   );
-  const dragHandle = await page.locator('affine-drag-handle');
+  const dragHandle = page.locator('affine-drag-handle');
   // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
   // when the mouse is over the gap. Therefore, we use rect.y - 20 to make the Y offset greater than the gap between the
   // paragraph blocks.
   await page.mouse.move(rect.x, rect.y - 20, { steps: 2 });
-  expect(await dragHandle.isVisible()).toBe(false);
+  await expect(dragHandle).toBeHidden();
 
   await page.mouse.move(rect.x, rect.y, { steps: 2 });
   expect(await dragHandle.isVisible()).toBe(true);
+  await expect(dragHandle).toBeVisible();
+});
+
+test('should create preview when dragging', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const dragPreview = page.locator('affine-drag-preview');
+  await expect(dragPreview).toHaveCount(0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+
+  await dragHandleFromBlockToBlockBottomById(
+    page,
+    '2',
+    '4',
+    true,
+    undefined,
+    async () => {
+      await expect(dragPreview).toBeVisible();
+      await expect(dragPreview.locator('.affine-block-element')).toHaveCount(2);
+    }
+  );
+});
+
+test('should cover all selected blocks', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+
+  const editors = page.locator('rich-text');
+  const dragHandleHover = page.locator('.affine-drag-handle-hover');
+
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect1 = await editors.nth(1).boundingBox();
+  const editorRect2 = await editors.nth(2).boundingBox();
+  if (!editorRect0 || !editorRect1 || !editorRect2) {
+    throw new Error();
+  }
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect1.x + 10, editorRect1.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect2.x + 10, editorRect2.y + 10);
+  await expect(dragHandleHover).toBeHidden();
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await dragHandleHover.hover();
+
+  const dragHandleRect = await page.locator('affine-drag-handle').boundingBox();
+  if (!dragHandleRect) {
+    throw new Error();
+  }
+
+  expect(dragHandleRect.y).toBeLessThanOrEqual(editorRect0.y);
+  expect(dragHandleRect.y + dragHandleRect.height).toBeGreaterThanOrEqual(
+    editorRect1.y + editorRect1.height
+  );
+});
+
+test('should drag and drop blocks under block-level selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect2 = await editors.nth(2).boundingBox();
+  if (!editorRect0 || !editorRect2) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: editorRect0.x + editorRect0.width / 2,
+      y: editorRect0.y + editorRect0.height / 2,
+    },
+    {
+      x: editorRect2.x + editorRect2.width / 2,
+      y: editorRect2.y + editorRect2.height / 2 + 1,
+    },
+    {
+      steps: 50,
+    }
+  );
+
+  await assertRichTexts(page, ['789', '123', '456']);
+  await expect(blockSelections).toHaveCount(2);
+});
+
+test('should trigger click event on editor container when clicking on blocks under block-level selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+  await expect(page.locator('*:focus')).toHaveCount(0);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  if (!editorRect0) {
+    throw new Error();
+  }
+
+  await page.mouse.move(
+    editorRect0.x + 5,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+  await expect(blockSelections).toHaveCount(0);
+  await expect(page.locator('*:focus')).toHaveCount(1);
 });

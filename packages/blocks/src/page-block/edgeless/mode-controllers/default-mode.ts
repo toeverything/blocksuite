@@ -15,10 +15,11 @@ import {
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { SurfaceElement, XYWH } from '@blocksuite/phasor';
+import type { PhasorElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import { showFormatQuickBarByDoubleClick } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -27,6 +28,8 @@ import {
 import type { Selectable } from '../selection-manager.js';
 import {
   getXYWH,
+  handleElementChangedEffectForConnector,
+  isConnectorAndBindingsAllSelected,
   isPhasorElement,
   isTopLevelBlock,
   pickBlocksByBound,
@@ -118,24 +121,46 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
   }
 
-  private _handleSurfaceDragMove(selected: SurfaceElement, e: SelectionEvent) {
+  private _handleDragMoveEffect(element: Selectable) {
+    handleElementChangedEffectForConnector(
+      element,
+      this._blockSelectionState.selected,
+      this._edgeless.surface,
+      this._page
+    );
+  }
+
+  private _handleSurfaceDragMove(selected: PhasorElement, e: SelectionEvent) {
     if (!this._lock) {
       this._lock = true;
       this._page.captureSync();
     }
-    const { zoom } = this._edgeless.surface.viewport;
+    const { surface } = this._edgeless;
+    const { zoom } = surface.viewport;
     const deltaX = this._dragLastPos.x - e.x;
     const deltaY = this._dragLastPos.y - e.y;
     const boundX = selected.x - deltaX / zoom;
     const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
     const boundH = selected.h;
-    this._edgeless.surface.setElementBound(selected.id, {
-      x: boundX,
-      y: boundY,
-      w: boundW,
-      h: boundH,
-    });
+
+    if (
+      selected.type !== 'connector' ||
+      (selected.type === 'connector' &&
+        isConnectorAndBindingsAllSelected(
+          selected,
+          this._blockSelectionState.selected
+        ))
+    ) {
+      surface.setElementBound(selected.id, {
+        x: boundX,
+        y: boundY,
+        w: boundW,
+        h: boundH,
+      });
+    }
+
+    this._handleDragMoveEffect(selected);
   }
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {
@@ -148,6 +173,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       modelH,
     ]);
     this._page.updateBlock(block, { xywh });
+    this._handleDragMoveEffect(block);
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
@@ -245,8 +271,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     repairContextMenuRange(e);
   }
 
-  onContainerDblClick(_: SelectionEvent) {
-    noop();
+  onContainerDblClick(e: SelectionEvent) {
+    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {
@@ -327,6 +353,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       showFormatQuickBar({
         page: this._page,
+        container: this._edgeless,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {

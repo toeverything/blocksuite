@@ -1,6 +1,40 @@
-import { html, svg } from 'lit';
+import { html, svg, type TemplateResult } from 'lit';
 
 // Use icons from `@blocksuite/icons`
+
+function fontIcon(svg: TemplateResult<2>, baseSize = 20) {
+  // assume 1em = 16px
+  const size = baseSize / 16;
+  // Control Icons with Font Size
+  // Set the width and height to be 1em, which will be the font-size of its parent element
+  // See https://css-tricks.com/control-icons-with-font-size/
+  const fontIconStyle = `
+    width: ${size}em;
+    height: ${size}em;
+    vertical-align: middle;
+    font-size: inherit;
+    margin-bottom: 0.1em;
+  `;
+
+  return html`<svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    style=${fontIconStyle}
+  >
+    ${svg}
+  </svg>`;
+}
+
+function icon(svg: TemplateResult<2>, size = 24) {
+  return html`<svg
+    width="${size}"
+    height="${size}"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    ${svg}
+  </svg>`;
+}
 
 // Paragraph icons
 
@@ -10,27 +44,13 @@ const TextSVG = svg`<path
   d="M3.25 4C3.25 3.58579 3.58579 3.25 4 3.25H20C20.4142 3.25 20.75 3.58579 20.75 4V6.66667C20.75 7.08088 20.4142 7.41667 20 7.41667C19.5858 7.41667 19.25 7.08088 19.25 6.66667V4.75H12.75V19.25H16C16.4142 19.25 16.75 19.5858 16.75 20C16.75 20.4142 16.4142 20.75 16 20.75H8C7.58579 20.75 7.25 20.4142 7.25 20C7.25 19.5858 7.58579 19.25 8 19.25H11.25V4.75H4.75V6.66667C4.75 7.08088 4.41421 7.41667 4 7.41667C3.58579 7.41667 3.25 7.08088 3.25 6.66667V4Z"
 />`;
 
-export const TextIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${TextSVG}
-</svg>`;
+export const TextIcon = icon(TextSVG, 20);
 
 /**
  * When icons with same shape with have multiple sizes, mark them as Small, _, Large size
  * For example: TextIconSmall, TextIcon, TextIconLarge
  */
-export const TextIconLarge = html`<svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${TextSVG}
-</svg> `;
+export const TextIconLarge = icon(TextSVG);
 
 export const H1Icon = html`<svg
   width="20"
@@ -146,23 +166,9 @@ const BulletedListSVG = svg`<path
   d="M3 6.5C3 5.83266 3.54099 5.29167 4.20833 5.29167C4.87568 5.29167 5.41667 5.83265 5.41667 6.5C5.41667 7.16734 4.87568 7.70833 4.20833 7.70833C3.54099 7.70833 3 7.16734 3 6.5ZM7.58333 6.50057C7.58336 6.08636 7.91916 5.75059 8.33337 5.75061L20.25 5.75127C20.6642 5.7513 21 6.0871 21 6.50131C21 6.91553 20.6641 7.2513 20.2499 7.25127L8.33329 7.25061C7.91908 7.25059 7.58331 6.91478 7.58333 6.50057ZM3 12C3 11.3327 3.54099 10.7917 4.20833 10.7917C4.87568 10.7917 5.41667 11.3327 5.41667 12C5.41667 12.6673 4.87568 13.2083 4.20833 13.2083C3.54099 13.2083 3 12.6673 3 12ZM7.58333 12.0006C7.58336 11.5864 7.91916 11.2506 8.33338 11.2507L20.2501 11.2514C20.6643 11.2514 21.0001 11.5872 21 12.0014C21 12.4156 20.6642 12.7514 20.25 12.7514L8.33329 12.7507C7.91907 12.7506 7.58331 12.4148 7.58333 12.0006ZM3 17.5C3 16.8327 3.54099 16.2917 4.20833 16.2917C4.87568 16.2917 5.41667 16.8327 5.41667 17.5C5.41667 18.1673 4.87568 18.7083 4.20833 18.7083C3.54099 18.7083 3 18.1673 3 17.5ZM7.58333 17.5006C7.58336 17.0864 7.91916 16.7506 8.33338 16.7507L20.2501 16.7514C20.6643 16.7514 21 17.0872 21 17.5014C21 17.9156 20.6642 18.2514 20.25 18.2514L8.33329 18.2507C7.91907 18.2506 7.58331 17.9148 7.58333 17.5006Z"
 />`;
 
-export const BulletedListIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${BulletedListSVG}
-</svg>`;
+export const BulletedListIcon = icon(BulletedListSVG, 20);
 
-export const BulletedListIconLarge = html`<svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${BulletedListSVG}
-</svg>`;
+export const BulletedListIconLarge = icon(BulletedListSVG, 24);
 
 export const NumberedListIconLarge = html`<svg
   width="24"
@@ -396,35 +402,9 @@ const LinkSVG = svg`<path
   d="M12.8423 4.60675C14.6513 2.79775 17.5842 2.79775 19.3932 4.60676C21.2023 6.41576 21.2023 9.34874 19.3932 11.1577L17.3344 13.2166C17.0415 13.5095 16.5666 13.5095 16.2737 13.2166C15.9808 12.9237 15.9808 12.4489 16.2737 12.156L18.3326 10.0971C19.5558 8.87387 19.5558 6.89064 18.3326 5.66742C17.1094 4.4442 15.1261 4.44419 13.9029 5.66741L11.1577 8.41258C9.93453 9.6358 9.93453 11.619 11.1577 12.8423C11.3498 13.0343 11.5596 13.1955 11.7816 13.3266C12.1382 13.5373 12.2566 13.9971 12.046 14.3538C11.8353 14.7104 11.3754 14.8288 11.0188 14.6182C10.6891 14.4235 10.379 14.1849 10.0971 13.9029C8.28808 12.0939 8.28808 9.16093 10.0971 7.35192L12.8423 4.60675ZM11.954 9.64621C12.1647 9.28955 12.6246 9.17119 12.9812 9.38183C13.3109 9.57652 13.621 9.81515 13.9029 10.0971C15.7119 11.9061 15.7119 14.8391 13.9029 16.6481L11.1577 19.3932C9.34874 21.2023 6.41576 21.2023 4.60675 19.3932C2.79775 17.5842 2.79775 14.6513 4.60675 12.8423L6.66563 10.7834C6.95852 10.4905 7.4334 10.4905 7.72629 10.7834C8.01918 11.0763 8.01918 11.5511 7.72629 11.844L5.66741 13.9029C4.4442 15.1261 4.4442 17.1094 5.66742 18.3326C6.89064 19.5558 8.87387 19.5558 10.0971 18.3326L12.8423 15.5874C14.0655 14.3642 14.0655 12.381 12.8423 11.1577C12.6502 10.9657 12.4404 10.8045 12.2184 10.6734C11.8618 10.4627 11.7434 10.0029 11.954 9.64621Z"
 />`;
 
-export const LinkIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  ${LinkSVG}
-</svg>`;
+export const LinkIcon = icon(LinkSVG, 20);
 
-// Control Icons with Font Size
-// Set the width and height to be 1em, which will be the font-size of its parent element
-// See https://css-tricks.com/control-icons-with-font-size/
-const iconStyle = `
-  width: 1em;
-  height: 1em;
-  vertical-align: middle;
-  font-size: inherit;
-  margin-bottom: 0.1em;
-`;
-
-export const FontLinkIcon = html`<svg
-  width="16"
-  height="16"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
-  style="${iconStyle}"
->
-  ${LinkSVG}
-</svg>`;
+export const FontLinkIcon = fontIcon(LinkSVG);
 
 // Slash menu action icons
 export const CopyIcon = html`<svg
@@ -708,7 +688,7 @@ export const DownloadIcon = html`<svg
   />
 </svg>`;
 
-export const LineWrapIcon = html`<svg
+export const WrapIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -718,6 +698,34 @@ export const LineWrapIcon = html`<svg
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M3.16665 2.5C3.53484 2.5 3.83331 2.79848 3.83331 3.16667L3.83331 16.8333C3.83331 17.2015 3.53484 17.5 3.16665 17.5C2.79846 17.5 2.49998 17.2015 2.49998 16.8333L2.49998 3.16667C2.49998 2.79848 2.79846 2.5 3.16665 2.5ZM9.31209 14.6598C9.58453 14.4121 9.60461 13.9905 9.35694 13.7181L8.85553 13.1665H11.8939C13.5757 13.1665 14.8333 11.6875 14.8333 9.99983C14.8333 8.31215 13.5757 6.83317 11.8939 6.83317H5.83334C5.46515 6.83317 5.16668 7.13164 5.16668 7.49983C5.16668 7.86802 5.46515 8.1665 5.83334 8.1665H11.8939C12.7226 8.1665 13.5 8.92609 13.5 9.99983C13.5 11.0736 12.7226 11.8332 11.8939 11.8332H8.85553L9.35694 11.2816C9.60461 11.0092 9.58453 10.5875 9.31209 10.3399C9.03966 10.0922 8.61802 10.1123 8.37035 10.3847L6.8552 12.0514C6.62404 12.3057 6.62404 12.694 6.8552 12.9483L8.37035 14.6149C8.61802 14.8874 9.03966 14.9075 9.31209 14.6598ZM16.1666 16.8333C16.1666 17.2015 16.4651 17.5 16.8333 17.5C17.2015 17.5 17.5 17.2015 17.5 16.8333L17.5 3.16667C17.5 2.79848 17.2015 2.5 16.8333 2.5C16.4651 2.5 16.1666 2.79848 16.1666 3.16667V16.8333Z"
+  />
+</svg>`;
+
+export const CancelWrapIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M4 3.25C4.41421 3.25 4.75 3.58579 4.75 4L4.75 20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20L3.25 4C3.25 3.58579 3.58579 3.25 4 3.25Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20 3.25C20.4142 3.25 20.75 3.58579 20.75 4V20C20.75 20.4142 20.4142 20.75 20 20.75C19.5858 20.75 19.25 20.4142 19.25 20V4C19.25 3.58579 19.5858 3.25 20 3.25Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M10.6437 12.408C10.3168 12.7053 10.2927 13.2112 10.5899 13.5381L11.1916 14.2H7C6.55817 14.2 6.2 14.5582 6.2 15C6.2 15.4418 6.55817 15.8 7 15.8L11.1916 15.8L10.5899 16.4619C10.2927 16.7888 10.3168 17.2947 10.6437 17.592C10.9706 17.8892 11.4766 17.8651 11.7738 17.5381L13.592 15.5381C13.8693 15.233 13.8693 14.767 13.592 14.4619L11.7738 12.4619C11.4766 12.1349 10.9706 12.1108 10.6437 12.408Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M14.6437 6.40805C14.3168 6.70525 14.2927 7.21121 14.5899 7.53814L15.1916 8.2H7C6.55817 8.2 6.2 8.55817 6.2 9C6.2 9.44183 6.55817 9.8 7 9.8H15.1916L14.5899 10.4619C14.2927 10.7888 14.3168 11.2947 14.6437 11.592C14.9706 11.8892 15.4766 11.8651 15.7738 11.5381L17.592 9.53814C17.8693 9.233 17.8693 8.767 17.592 8.46186L15.7738 6.46186C15.4766 6.13494 14.9706 6.11084 14.6437 6.40805Z"
   />
 </svg>`;
 
@@ -1021,7 +1029,7 @@ export const DatabasePen = html`
   >
     <path
       d="M14 6.20314L5.5 15L4 20L9 18.5L17.7969 10M14 6.20314L15.3595 4.79619C16.4211 3.73461 18.1422 3.7346 19.2038 4.79619C20.2654 5.85777 20.2654 7.57894 19.2038 8.64052L17.7969 10M14 6.20314L17.7969 10"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1039,7 +1047,7 @@ export const DatabaseDelete = html`
   >
     <path
       d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1057,14 +1065,14 @@ export const DatabaseDuplicate = html`
   >
     <path
       d="M8 8H7.2C6.0799 8 5.51984 8 5.09202 8.21799C4.71569 8.40973 4.40973 8.71569 4.21799 9.09202C4 9.51984 4 10.0799 4 11.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H12.8C13.9201 20 14.4802 20 14.908 19.782C15.2843 19.5903 15.5903 19.2843 15.782 18.908C16 18.4802 16 17.9201 16 16.8V16M13 16H16.8C17.9201 16 18.4802 16 18.908 15.782C19.2843 15.5903 19.5903 15.2843 19.782 14.908C20 14.4802 20 13.9201 20 12.8V7.2C20 6.0799 20 5.51984 19.782 5.09202C19.5903 4.71569 19.2843 4.40973 18.908 4.21799C18.4802 4 17.9201 4 16.8 4H11.2C10.0799 4 9.51984 4 9.09202 4.21799C8.71569 4.40973 8.40973 4.71569 8.21799 5.09202C8 5.51984 8 6.07989 8 7.2V11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <path
       d="M12 9H14.9C14.9552 9 15 9.04477 15 9.1V12M15 9L8 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1085,18 +1093,18 @@ export const DatabaseInsertLeft = html`
       width="7"
       height="16"
       rx="2"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M4 12L10 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M7 15L7 9"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1116,18 +1124,18 @@ export const DatabaseInsertRight = html`
       height="16"
       rx="2"
       transform="matrix(-1 0 0 1 11 4)"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M20 12L14 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M17 15L17 9"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1144,7 +1152,7 @@ export const DatabaseMoveLeft = html`
   >
     <path
       d="M4 4V20M8 12H20M8 12L12 8M8 12L12 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1162,7 +1170,7 @@ export const DatabaseMoveRight = html`
   >
     <path
       d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -1180,37 +1188,37 @@ export const DatabaseMultiSelect = html`
   >
     <path
       d="M4 5L6.42929 7.42929C6.46834 7.46834 6.53166 7.46834 6.57071 7.42929L9 5"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M4 11L6.42929 13.4293C6.46834 13.4683 6.53166 13.4683 6.57071 13.4293L9 11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M4 17L6.42929 19.4293C6.46834 19.4683 6.53166 19.4683 6.57071 19.4293L9 17"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 6L20 6"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 12L20 12"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 18L20 18"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1227,25 +1235,25 @@ export const DatabaseNumber = html`
   >
     <path
       d="M18.5 4L12.5 20"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 4L6 20"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M20 8.5H5.5"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M19 15L4 15"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1260,10 +1268,10 @@ export const DatabaseSelect = html`
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle cx="12" cy="12" r="9" stroke="#77757D" stroke-width="1.5" />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
     <path
       d="M8 11L11.9293 14.9293C11.9683 14.9683 12.0317 14.9683 12.0707 14.9293L16 11"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
@@ -1284,32 +1292,195 @@ export const DatabaseProgress = html`
       width="18"
       height="10"
       rx="3"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
     />
     <path
       d="M15 5V19"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M12 10L12 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M9 10L9 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
     <path
       d="M6 10L6 14"
-      stroke="#77757D"
+      stroke="currentColor"
       stroke-width="1.5"
       stroke-linecap="round"
     />
   </svg>
 `;
+
+export const DatabaseSearchClose = html`
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M4.22872 4.22878C4.42398 4.03352 4.74057 4.03352 4.93583 4.22878L7.99996 7.29291L11.0641 4.22878C11.2593 4.03352 11.5759 4.03352 11.7712 4.22878C11.9665 4.42405 11.9665 4.74063 11.7712 4.93589L8.70707 8.00002L11.7712 11.0641C11.9665 11.2594 11.9665 11.576 11.7712 11.7713C11.5759 11.9665 11.2593 11.9665 11.0641 11.7713L7.99996 8.70713L4.93583 11.7713C4.74057 11.9665 4.42398 11.9665 4.22872 11.7713C4.03346 11.576 4.03346 11.2594 4.22872 11.0641L7.29285 8.00002L4.22872 4.93589C4.03346 4.74063 4.03346 4.42405 4.22872 4.22878Z"
+      fill="currentColor"
+    />
+  </svg>
+`;
+
+export const DatabaseDone = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M20.5322 5.97152C20.824 6.26543 20.8224 6.7403 20.5285 7.03217L9.45156 18.0322C9.15909 18.3226 8.68706 18.3226 8.3946 18.0322L3.47152 13.1433C3.17761 12.8514 3.17595 12.3765 3.46783 12.0826C3.7597 11.7887 4.23457 11.7871 4.52848 12.0789L8.92308 16.443L19.4715 5.96783C19.7654 5.67595 20.2403 5.67761 20.5322 5.97152Z"
+    />
+  </svg>
+`;
+
+const addColumnStyle = `
+  width: 12px;
+  height: 12px;
+  fill: var(--affine-text-color);
+`;
+export const DatabaseAddColumn = html`
+  <svg viewBox="0 0 16 16" style=${addColumnStyle}>
+    <path
+      d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+    ></path>
+  </svg>
+`;
+// Linked Page
+
+const PageIconSVG = svg`
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20.75 18C20.75 19.5188 19.5188 20.75 18 20.75H10C9.58579 20.75 9.25 20.4142 9.25 20C9.25 19.5858 9.58579 19.25 10 19.25L18 19.25C18.6904 19.25 19.25 18.6904 19.25 18L19.25 4C19.25 3.58579 19.5858 3.25 20 3.25C20.4142 3.25 20.75 3.58579 20.75 4L20.75 18Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 9C8.25 8.0335 9.0335 7.25 10 7.25H14C14.9665 7.25 15.75 8.0335 15.75 9V11C15.75 11.9665 14.9665 12.75 14 12.75H10C9.0335 12.75 8.25 11.9665 8.25 11V9ZM10 8.75C9.86193 8.75 9.75 8.86193 9.75 9V11C9.75 11.1381 9.86193 11.25 10 11.25H14C14.1381 11.25 14.25 11.1381 14.25 11V9C14.25 8.86193 14.1381 8.75 14 8.75H10Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 16C8.25 15.5858 8.58579 15.25 9 15.25H15C15.4142 15.25 15.75 15.5858 15.75 16C15.75 16.4142 15.4142 16.75 15 16.75H9C8.58579 16.75 8.25 16.4142 8.25 16Z"
+  />
+`;
+
+const PageSubpageSVG = svg`<path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20 10.75C19.5858 10.75 19.25 10.4142 19.25 10V4C19.25 3.58579 19.5858 3.25 20 3.25C20.4142 3.25 20.75 3.58579 20.75 4V10C20.75 10.4142 20.4142 10.75 20 10.75Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 9C8.25 8.0335 9.0335 7.25 10 7.25H14C14.9665 7.25 15.75 8.0335 15.75 9V11C15.75 11.9665 14.9665 12.75 14 12.75H10C9.0335 12.75 8.25 11.9665 8.25 11V9ZM10 8.75C9.86193 8.75 9.75 8.86193 9.75 9V11C9.75 11.1381 9.86193 11.25 10 11.25H14C14.1381 11.25 14.25 11.1381 14.25 11V9C14.25 8.86193 14.1381 8.75 14 8.75H10Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.25 16C8.25 15.5858 8.58579 15.25 9 15.25H12C12.4142 15.25 12.75 15.5858 12.75 16C12.75 16.4142 12.4142 16.75 12 16.75H9C8.58579 16.75 8.25 16.4142 8.25 16Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M18 14.75C17.5858 14.75 17.25 14.4142 17.25 14C17.25 13.5858 17.5858 13.25 18 13.25H20.9C20.9174 13.25 20.9346 13.2505 20.9517 13.2515C21.1594 13.2382 21.3716 13.3109 21.5303 13.4697C21.6891 13.6284 21.7618 13.8406 21.7485 14.0483C21.7495 14.0654 21.75 14.0826 21.75 14.1V17C21.75 17.4142 21.4142 17.75 21 17.75C20.5858 17.75 20.25 17.4142 20.25 17V15.8107L14.5303 21.5303C14.2374 21.8232 13.7626 21.8232 13.4697 21.5303C13.1768 21.2374 13.1768 20.7626 13.4697 20.4697L19.1893 14.75H18Z"
+  />`;
+
+export const ConnectorXIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M11.25 7C11.25 5.48122 12.4812 4.25 14 4.25H21C21.4142 4.25 21.75 4.58579 21.75 5C21.75 5.41421 21.4142 5.75 21 5.75H14C13.3096 5.75 12.75 6.30964 12.75 7V17C12.75 18.5188 11.5188 19.75 10 19.75H3C2.58579 19.75 2.25 19.4142 2.25 19C2.25 18.5858 2.58579 18.25 3 18.25H10C10.6904 18.25 11.25 17.6904 11.25 17V7Z"
+    fill="#77757D"
+  />
+</svg> `;
+
+export const ConnectorLIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M20.5303 3.53034C20.8232 3.82323 20.8232 4.29811 20.5303 4.591L4.591 20.5303C4.29811 20.8232 3.82323 20.8232 3.53034 20.5303C3.23745 20.2374 3.23745 19.7626 3.53034 19.4697L19.4697 3.53034C19.7626 3.23745 20.2374 3.23745 20.5303 3.53034Z"
+    fill="#77757D"
+  />
+</svg> `;
+
+export const FontPageIcon = fontIcon(PageIconSVG);
+export const FontPageSubpageIcon = fontIcon(PageSubpageSVG);
+
+export const PageIcon = icon(PageIconSVG, 20);
+export const PageSubpageIcon = icon(PageSubpageSVG, 20);
+
+export const NewPageIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M12 3.25C12.4142 3.25 12.75 3.58579 12.75 4V20C12.75 20.4142 12.4142 20.75 12 20.75C11.5858 20.75 11.25 20.4142 11.25 20V4C11.25 3.58579 11.5858 3.25 12 3.25Z"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H20C20.4142 11.25 20.75 11.5858 20.75 12C20.75 12.4142 20.4142 12.75 20 12.75H4C3.58579 12.75 3.25 12.4142 3.25 12Z"
+  />
+</svg>`;
+
+export const DualLinkIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M11 4.75C10.5858 4.75 10.25 4.41421 10.25 4C10.25 3.58579 10.5858 3.25 11 3.25H19.9C19.9174 3.25 19.9346 3.25052 19.9517 3.25155C20.1594 3.23823 20.3716 3.31093 20.5303 3.46967C20.6891 3.62841 20.7618 3.84059 20.7485 4.04829C20.7495 4.0654 20.75 4.08264 20.75 4.1V13C20.75 13.4142 20.4142 13.75 20 13.75C19.5858 13.75 19.25 13.4142 19.25 13V5.81066L4.53033 20.5303C4.23744 20.8232 3.76256 20.8232 3.46967 20.5303C3.17678 20.2374 3.17678 19.7626 3.46967 19.4697L18.1893 4.75H11Z"
+  />
+</svg>`;

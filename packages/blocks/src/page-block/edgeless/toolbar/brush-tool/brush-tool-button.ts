@@ -4,7 +4,7 @@ import './brush-menu.js';
 import { PenIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
@@ -54,16 +54,21 @@ export class EdgelessBrushToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @state()
+  private _popperShow = false;
+
   private _brushMenu: BrushMenuPopper | null = null;
 
   private _toggleBrushMenu() {
     if (this._brushMenu) {
       this._brushMenu.dispose();
       this._brushMenu = null;
+      this._popperShow = false;
     } else {
       this._brushMenu = createBrushMenuPopper(this);
       this._brushMenu.element.mouseMode = this.mouseMode;
       this._brushMenu.element.edgeless = this.edgeless;
+      this._popperShow = true;
     }
   }
 
@@ -101,7 +106,7 @@ export class EdgelessBrushToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @tool.click=${() => {
           this._trySetBrushMode();

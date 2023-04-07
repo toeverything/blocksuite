@@ -109,7 +109,10 @@ const ATTR_SHOW = 'data-show';
  */
 export function createButtonPopper(
   reference: HTMLElement,
-  popperElement: HTMLElement
+  popperElement: HTMLElement,
+  stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
+    /** DEFAULT EMPTY FUNCTION */
+  }
 ) {
   const popper = createPopper(reference, popperElement, {
     placement: 'top',
@@ -133,6 +136,7 @@ export function createButtonPopper(
       ],
     }));
     popper.update();
+    stateUpdated({ display: 'show' });
   };
 
   const hide = () => {
@@ -145,6 +149,7 @@ export function createButtonPopper(
         { name: 'eventListeners', enabled: false },
       ],
     }));
+    stateUpdated({ display: 'hidden' });
   };
 
   const toggle = () => {

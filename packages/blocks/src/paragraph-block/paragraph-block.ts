@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
 import { BlockHubIcon20 } from '@blocksuite/global/config';
@@ -11,8 +10,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   type BlockHost,
   isPageMode,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
+import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
@@ -56,7 +60,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends NonShadowLitElement {
+export class ParagraphBlockComponent extends ShadowlessElement {
   static styles = css`
     .affine-paragraph-block-container {
       position: relative;
@@ -174,6 +178,12 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   private _isComposing = false;
   @state()
   private _isFocus = false;
+
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
+
   private _placeholderDisposables = new DisposableGroup();
 
   override connectedCallback() {
@@ -250,6 +260,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
         <rich-text
           .host=${this.host}
           .model=${this.model}
+          .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}
           @focusout=${this._onFocusOut}
           style=${styleMap({

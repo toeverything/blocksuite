@@ -1,4 +1,4 @@
-import type { ShapeType } from '@blocksuite/phasor';
+import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
@@ -7,6 +7,7 @@ import type {
   ServiceFlavour,
 } from '../../models.js';
 import type { Clipboard } from '../clipboard/index.js';
+import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -36,12 +37,18 @@ export interface BlockHostContext {
   ) => BlockServiceInstanceByKey<Key>;
 }
 
+export type CommonSlots = RefNodeSlots;
+
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   clipboard: Clipboard;
+  readonly slots: CommonSlots;
 }
 
+/**
+ * @deprecated Not used yet
+ */
 export interface CommonBlockElement extends HTMLElement {
   host: BlockHost;
   model: BaseBlockModel;
@@ -69,7 +76,7 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  color: `#${string}`;
+  color: Color;
 };
 
 export enum BrushSize {
@@ -79,7 +86,7 @@ export enum BrushSize {
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: `#${string}`;
+  color: Color;
   lineWidth: BrushSize;
 };
 
@@ -92,14 +99,21 @@ export type TextMouseMode = {
   type: 'text';
 };
 
+export type ConnectorMouseMode = {
+  type: 'connector';
+  mode: ConnectorMode;
+  color: Color;
+};
+
 export type MouseMode =
   | DefaultMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode;
+  | TextMouseMode
+  | ConnectorMouseMode;
 
-export type OpenBlockInfo = {
+export type SerializedBlock = {
   flavour: string;
   type?: string;
   text?: {
@@ -114,12 +128,20 @@ export type OpenBlockInfo = {
     retain?: number;
   }[];
   checked?: boolean;
-  children: OpenBlockInfo[];
+  children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
   width?: number;
   height?: number;
   language?: string;
+  databaseProps?: {
+    id: string;
+    title: string;
+    titleColumnName: string;
+    titleColumnWidth: number;
+    rowIds: string[];
+    columnIds: string[];
+  };
 };
 
 declare global {

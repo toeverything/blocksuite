@@ -3,6 +3,7 @@ import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
 } from '../utils/index.js';
+import { transformInput } from '../utils/transform-input.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
@@ -27,7 +28,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._editor = editor;
   }
 
-  private _defaultHandlers: VirgoEventService<TextAttributes>['_handlers'] = {
+  defaultHandlers: VirgoEventService<TextAttributes>['_handlers'] = {
     paste: (event: ClipboardEvent) => {
       const data = event.clipboardData?.getData('text/plain');
       if (data) {
@@ -85,12 +86,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       this._handlerAbortController = null;
     }
 
-    this._handlers = this._defaultHandlers;
+    this._handlers = this.defaultHandlers;
   };
 
   bindHandlers = (
     handlers: VirgoEventService<TextAttributes>['_handlers'] = this
-      ._defaultHandlers
+      .defaultHandlers
   ) => {
     this._handlers = handlers;
 
@@ -211,141 +212,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (!vRange) return;
 
     const { inputType, data } = event;
-    const currentVRange = vRange;
 
-    // You can find explanation of inputType here:
-    // [Input Events Level 2](https://w3c.github.io/input-events/#interface-InputEvent-Attributes)
-    if (inputType === 'insertText' && currentVRange.index >= 0 && data) {
-      this._editor.slots.vRangeUpdated.emit([
-        {
-          index: currentVRange.index + data.length,
-          length: 0,
-        },
-        'input',
-      ]);
-
-      this._editor.insertText(currentVRange, data);
-    } else if (inputType === 'insertParagraph' && currentVRange.index >= 0) {
-      this._editor.slots.vRangeUpdated.emit([
-        {
-          index: currentVRange.index + 1,
-          length: 0,
-        },
-        'input',
-      ]);
-
-      this._editor.insertLineBreak(currentVRange);
-    } else if (
-      // Chrome and Safari on Mac: Backspace or Ctrl + H
-      (inputType === 'deleteContentBackward' || inputType === 'deleteByCut') &&
-      currentVRange.index >= 0
-    ) {
-      if (currentVRange.length > 0) {
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: currentVRange.index,
-            length: 0,
-          },
-          'input',
-        ]);
-
-        this._editor.deleteText(currentVRange);
-      } else if (currentVRange.index > 0) {
-        // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-        const tmpString = this._editor.yText
-          .toString()
-          .slice(0, currentVRange.index);
-        const deletedCharacter = [...tmpString].slice(-1).join('');
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: currentVRange.index - deletedCharacter.length,
-            length: 0,
-          },
-          'input',
-        ]);
-
-        this._editor.deleteText({
-          index: currentVRange.index - deletedCharacter.length,
-          length: deletedCharacter.length,
-        });
-      }
-    } else if (
-      // On Mac: Option + Backspace
-      // On iOS: Hold the backspace for a while and the whole words will start to disappear
-      inputType === 'deleteWordBackward'
-    ) {
-      const matchs = /\S+\s*$/.exec(
-        this._editor.yText.toString().slice(0, currentVRange.index)
-      );
-      if (!matchs) return;
-      const deleteLength = matchs[0].length;
-
-      this._editor.slots.vRangeUpdated.emit([
-        {
-          index: currentVRange.index - deleteLength,
-          length: 0,
-        },
-        'input',
-      ]);
-
-      this._editor.deleteText({
-        index: currentVRange.index - deleteLength,
-        length: deleteLength,
-      });
-    } else if (
-      // Safari on Mac: Cmd + Backspace
-      inputType === 'deleteHardLineBackward' ||
-      // Chrome on Mac: Cmd + Backspace
-      inputType === 'deleteSoftLineBackward'
-    ) {
-      if (currentVRange.length > 0) {
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: currentVRange.index,
-            length: 0,
-          },
-          'input',
-        ]);
-
-        this._editor.deleteText(currentVRange);
-      } else if (currentVRange.index > 0) {
-        const str = this._editor.yText.toString();
-        const deleteLength =
-          currentVRange.index -
-          Math.max(0, str.slice(0, currentVRange.index).lastIndexOf('\n'));
-
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: currentVRange.index - deleteLength,
-            length: 0,
-          },
-          'input',
-        ]);
-
-        this._editor.deleteText({
-          index: currentVRange.index - deleteLength,
-          length: deleteLength,
-        });
-      }
-    } else if (
-      // Chrome on Mac: Fn + Backspace or Ctrl + D
-      // Safari on Mac: Ctrl + K or Ctrl + D
-      inputType === 'deleteContentForward'
-    ) {
-      if (currentVRange.index < this._editor.yText.length) {
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: currentVRange.index,
-            length: 0,
-          },
-          'input',
-        ]);
-
-        this._editor.deleteText({
-          index: currentVRange.index,
-          length: 1,
-        });
-      }
-    }
+    transformInput(inputType, data, vRange, this._editor as VEditor);
   };
 }

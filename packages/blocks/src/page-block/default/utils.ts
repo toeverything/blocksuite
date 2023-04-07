@@ -1,12 +1,17 @@
+import type {
+  BlockComponentElement,
+  EditingState,
+  Point,
+  SerializedBlock,
+} from '@blocksuite/blocks/std';
 import {
-  type BlockComponentElement,
   doesInSamePath,
-  type EditingState,
   getBlockElementById,
   getBlockElementByModel,
+  getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
-  type OpenBlockInfo,
-  type Point,
+  getModelByBlockElement,
+  isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -394,7 +399,7 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData: { data: OpenBlockInfo[] } = {
+  const copyData: { data: SerializedBlock[] } = {
     data: [
       {
         type: model.type,
@@ -496,36 +501,47 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(p, blocks, editingState): void {
+    onDropCallback(point, blockElements, editingState): void {
       if (!editingState) return;
-      const { rect, model } = editingState;
+      const { rect, model, element } = editingState;
       const page = defaultPageBlock.page;
-      if (blocks.length === 1 && doesInSamePath(page, model, blocks[0].model)) {
+      const models = getBlockElementsExcludeSubtrees(blockElements).map(
+        getModelByBlockElement
+      );
+      if (models.length === 1 && doesInSamePath(page, model, models[0])) {
         return;
       }
+
       page.captureSync();
 
-      const distanceToTop = Math.abs(rect.top - p.y);
-      const distanceToBottom = Math.abs(rect.bottom - p.y);
-      const parent = page.getParent(model);
-      assertExists(parent);
-      page.moveBlocks(
-        blocks.map(b => b.model),
-        parent,
-        model,
-        distanceToTop < distanceToBottom
-      );
+      if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+        page.moveBlocks(models, model);
+      } else {
+        const distanceToTop = Math.abs(rect.top - point.y);
+        const distanceToBottom = Math.abs(rect.bottom - point.y);
+        const parent = page.getParent(model);
+        assertExists(parent);
+        page.moveBlocks(
+          models,
+          parent,
+          model,
+          distanceToTop < distanceToBottom
+        );
+      }
+
       defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = 'block';
 
       defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
-        defaultPageBlock.selection.setSelectedBlocks(
-          blocks
-            .map(b => getBlockElementById(b.model.id))
-            .filter((b): b is BlockComponentElement => !!b)
-        );
+        requestAnimationFrame(() => {
+          defaultPageBlock.selection.setSelectedBlocks(
+            blockElements
+              .map(b => getBlockElementById(b.model.id))
+              .filter((b): b is BlockComponentElement => !!b)
+          );
+        });
       });
     },
     setSelectedBlocks(
@@ -540,9 +556,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     },
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
-    },
-    getFocusedBlock() {
-      return defaultPageBlock.selection.state.focusedBlock;
     },
     // clearSelection() {
     //   defaultPageBlock.selection.clear();

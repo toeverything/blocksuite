@@ -25,6 +25,9 @@ export function createLink(page: Page) {
     index: blockRange.startOffset,
     length: blockRange.endOffset - blockRange.startOffset,
   };
+  if (vRange.length === 0) {
+    return;
+  }
 
   // User can cancel link by pressing shortcut again
   const format = vEditor.getFormat(vRange);

@@ -1,6 +1,7 @@
-import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
+
+const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
 export async function type(page: Page, content: string) {
   await page.keyboard.type(content, { delay: 50 });
@@ -11,10 +12,7 @@ export async function press(page: Page, content: string) {
 }
 
 export async function enterVirgoPlayground(page: Page) {
-  const url = new URL(
-    'examples/virgo/index.html',
-    getDefaultPlaygroundURL(!!process.env.CI)
-  );
+  const url = new URL('examples/virgo/index.html', defaultPlaygroundURL);
   await page.goto(url.toString());
 }
 
@@ -37,7 +35,7 @@ export async function getDeltaFromVirgoRichText(
   page: Page,
   index = 0
 ): Promise<DeltaInsert> {
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(100);
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')

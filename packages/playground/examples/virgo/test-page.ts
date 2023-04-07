@@ -1,7 +1,11 @@
 import '@shoelace-style/shoelace';
 
-import { NonShadowLitElement } from '@blocksuite/blocks';
-import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
+import { ShadowlessElement } from '@blocksuite/blocks';
+import {
+  type BaseTextAttributes,
+  type DeltaInsert,
+  VEditor,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -33,7 +37,8 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -41,26 +46,27 @@ function virgoTextStyles(
   });
 }
 
-const attributeRenderer = (
-  vText: VText,
-  attributes: BaseTextAttributes = {}
-) => {
-  const style = attributes ? virgoTextStyles(attributes) : styleMap({});
+const attributeRenderer = (delta: DeltaInsert) => {
+  const style = delta.attributes
+    ? virgoTextStyles(delta.attributes)
+    : styleMap({
+        'white-space': 'break-spaces',
+        'word-wrap': 'break-word',
+      });
 
   // just for test
-  if (vText.str.length > 4) {
-    const leftStr = vText.str.slice(0, 3);
-    const rightStr = vText.str.slice(3);
+  if (delta.insert.length > 4) {
+    const leftStr = delta.insert.slice(0, 3);
+    const rightStr = delta.insert.slice(3);
 
-    const leftVText = new VText();
-    leftVText.str = leftStr;
-    const rightVText = new VText();
-    rightVText.str = rightStr;
-
-    return html`<span style=${style}>${leftVText}${rightVText}</span>`;
+    return html`<span style=${style}
+      ><v-text .str=${leftStr}></v-text><v-text .str=${rightStr}></v-text
+    ></span>`;
   }
 
-  return html`<span style=${style}>${vText}</span>`;
+  return html`<span style=${style}
+    ><v-text .str=${delta.insert}></v-text
+  ></span>`;
 };
 
 function toggleStyle(
@@ -112,7 +118,7 @@ function toggleStyle(
 }
 
 @customElement('virgo-test-rich-text')
-export class RichText extends NonShadowLitElement {
+export class RichText extends ShadowlessElement {
   vEditor: VEditor;
 
   @query('.rich-text-container')
@@ -133,6 +139,8 @@ export class RichText extends NonShadowLitElement {
           width: 100%;
           height: 100%;
           outline: none;
+          word-break: break-word;
+          white-space: break-spaces;
         }
 
         code {
@@ -151,7 +159,7 @@ export class RichText extends NonShadowLitElement {
 }
 
 @customElement('tool-bar')
-export class ToolBar extends NonShadowLitElement {
+export class ToolBar extends ShadowlessElement {
   static styles = css`
     .tool-bar {
       display: grid;
@@ -167,7 +175,7 @@ export class ToolBar extends NonShadowLitElement {
     this.vEditor = vEditor;
   }
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const boldButton = this.querySelector('.bold');
     const italicButton = this.querySelector('.italic');
     const underlineButton = this.querySelector('.underline');
@@ -246,7 +254,7 @@ export class ToolBar extends NonShadowLitElement {
     });
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="tool-bar">
         <sl-button class="bold">bold</sl-button>
@@ -263,7 +271,7 @@ export class ToolBar extends NonShadowLitElement {
 }
 
 @customElement('test-page')
-export class TestPage extends NonShadowLitElement {
+export class TestPage extends ShadowlessElement {
   static styles = css`
     .container {
       display: grid;
@@ -292,7 +300,7 @@ export class TestPage extends NonShadowLitElement {
     }
   `;
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     const TEXT_ID = 'virgo';
     const yDocA = new Y.Doc();
     const yDocB = new Y.Doc();
@@ -307,7 +315,7 @@ export class TestPage extends NonShadowLitElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA);
-    editorA.setAttributesRenderer(attributeRenderer);
+    editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
     const editorB = new VEditor(textB);
@@ -335,7 +343,7 @@ export class TestPage extends NonShadowLitElement {
     docB.appendChild(richTextB);
   }
 
-  protected render(): unknown {
+  render() {
     return html`
       <div class="container">
         <div class="editors">

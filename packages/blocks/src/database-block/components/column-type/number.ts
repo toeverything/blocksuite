@@ -2,13 +2,10 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellLitElement,
-  defineColumnSchemaRenderer,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 @customElement('affine-database-number-cell')
-class NumberCell extends DatabaseCellLitElement<number> {
+class NumberCell extends DatabaseCellElement<number> {
   static styles = css`
     :host {
       display: flex;
@@ -22,12 +19,12 @@ class NumberCell extends DatabaseCellLitElement<number> {
   static tag = literal`affine-database-number-cell`;
 
   render() {
-    return html` <span>${this.column?.value}</span> `;
+    return html` <span class="number">${this.cell?.value}</span> `;
   }
 }
 
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellLitElement<number> {
+class NumberCellEditing extends DatabaseCellElement<number> {
   static styles = css`
     :host {
       width: 100%;
@@ -62,7 +59,6 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
       if (event.key === 'Enter' && this.value) {
-        this.rowHost.setValue(this.value);
         this.rowHost.setEditing(false);
       }
     });
@@ -81,17 +77,17 @@ class NumberCellEditing extends DatabaseCellLitElement<number> {
           }
         }}
         type="number"
-        value=${this.column?.value ?? ''}
+        value=${this.cell?.value ?? ''}
       />
     `;
   }
 }
 
 @customElement('affine-database-number-column-property-editing')
-class NumberColumnPropertyEditing extends DatabaseCellLitElement<number> {
+class NumberColumnPropertyEditing extends DatabaseCellElement<number> {
   static tag = literal`affine-database-number-column-property-editing`;
 }
-export const NumberColumnSchemaRenderer = defineColumnSchemaRenderer(
+export const NumberColumnRenderer = defineColumnRenderer(
   'number',
   () => ({
     decimal: 0,

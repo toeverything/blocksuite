@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-toolbar.js';
 import './components/edgeless-selected-rect.js';
+import './toolbar/edgeless-toolbar.js';
 
 import {
   almostEqual,
@@ -19,7 +19,6 @@ import {
 import {
   assertExists,
   type BaseBlockModel,
-  DisposableGroup,
   type Page,
   Slot,
 } from '@blocksuite/store';
@@ -29,7 +28,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { getService } from '../../__internal__/service.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import type {
   DragHandle,
   FrameBlockModel,
@@ -44,6 +46,7 @@ import {
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
 import {
@@ -51,7 +54,6 @@ import {
   type EdgelessSelectionState,
 } from './selection-manager.js';
 import {
-  createDragHandle,
   DEFAULT_FRAME_HEIGHT,
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
@@ -75,7 +77,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends NonShadowLitElement
+  extends WithDisposable(ShadowlessElement)
   implements EdgelessContainer, BlockHost
 {
   static styles = css`
@@ -143,19 +145,22 @@ export class EdgelessPageBlockComponent
 
   clipboard = new EdgelessClipboard(this.page);
 
-  slots: EdgelessSelectionSlots = {
+  slots = {
     viewportUpdated: new Slot(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   surface!: SurfaceManager;
 
   getService = getService;
 
-  private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
   // FIXME: Many parts of code assume that the `selection` is used in page mode
   getSelection() {
@@ -347,7 +352,7 @@ export class EdgelessPageBlockComponent
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
     const frameId = this._addFrameWithPoint(point);
-    const ids = this.page.addBlocksByFlavour(
+    const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
         return {
@@ -413,9 +418,8 @@ export class EdgelessPageBlockComponent
   }
 
   disconnectedCallback() {
-    this.clipboard.dispose();
     super.disconnectedCallback();
-    this._disposables.dispose();
+    this.clipboard.dispose();
     this.components.dragHandle?.remove();
   }
 

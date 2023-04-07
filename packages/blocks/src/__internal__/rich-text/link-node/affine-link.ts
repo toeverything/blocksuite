@@ -1,62 +1,24 @@
-import { onModelTextUpdated } from '@blocksuite/blocks';
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { VEditor, VText } from '@blocksuite/virgo';
+import { type DeltaInsert, VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import {
-  getModelByElement,
-  NonShadowLitElement,
-  resetNativeSelection,
-} from '../../utils/index.js';
+import { getModelByElement, ShadowlessElement } from '../../utils/index.js';
+import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
-function affineLinkStyles(
-  props: AffineTextAttributes
-): ReturnType<typeof styleMap> {
-  let textDecorations = '';
-  if (props.underline) {
-    textDecorations += 'underline';
-  }
-  if (props.strike) {
-    textDecorations += ' line-through';
-  }
-
-  let inlineCodeStyle = {};
-  if (props.code) {
-    inlineCodeStyle = {
-      'font-family':
-        '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
-      'line-height': 'normal',
-      background: 'rgba(135,131,120,0.15)',
-      color: '#EB5757',
-      'border-radius': '3px',
-      'font-size': '85%',
-      padding: '0.2em 0.4em',
-    };
-  }
-
-  return styleMap({
-    'font-weight': props.bold ? 'bold' : 'normal',
-    'font-style': props.italic ? 'italic' : 'normal',
-    'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
-    ...inlineCodeStyle,
-  });
-}
-
 @customElement('affine-link')
-export class AffineLink extends NonShadowLitElement {
+export class AffineLink extends ShadowlessElement {
   @property({ type: Object })
-  textAttributes: AffineTextAttributes = {};
-
-  @property({ type: Object })
-  vText: VText = new VText();
+  delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 
   get link() {
-    const link = this.textAttributes?.link;
+    const link = this.delta.attributes?.link;
     if (!link) {
       return '';
     }
@@ -74,6 +36,7 @@ export class AffineLink extends NonShadowLitElement {
   static styles = css`
     a {
       white-space: nowrap;
+      word-break: break-word;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
       text-decoration: none;
@@ -108,8 +71,6 @@ export class AffineLink extends NonShadowLitElement {
       this._isHovering = true;
     }
 
-    resetNativeSelection(null);
-
     const model = getModelByElement(this);
     if (model.page.readonly) return;
 
@@ -123,7 +84,7 @@ export class AffineLink extends NonShadowLitElement {
       return;
     }
 
-    const text = this.vText.str;
+    const text = this.delta.insert;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
       text,
@@ -149,9 +110,9 @@ export class AffineLink extends NonShadowLitElement {
    */
   private _updateLink(link?: string, text?: string) {
     const model = getModelByElement(this);
-    const { page: page } = model;
-    const oldStr = this.vText.str;
-    const oldTextAttributes = this.textAttributes;
+    const { page } = model;
+    const oldStr = this.delta.insert;
+    const oldTextAttributes = this.delta.attributes;
 
     const textElement = this.querySelector('[data-virgo-text="true"]');
     assertExists(textElement);
@@ -185,11 +146,6 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-
-        //FIXME: prevent virgo auto focus
-        onModelTextUpdated(model, richText => {
-          richText.vEditor?.rootElement.blur();
-        });
       } else {
         page.captureSync();
         vEditor.formatText(
@@ -199,11 +155,6 @@ export class AffineLink extends NonShadowLitElement {
           },
           { link }
         );
-
-        //FIXME: prevent virgo auto focus
-        onModelTextUpdated(model, richText => {
-          richText.vEditor?.rootElement.blur();
-        });
       }
     } else {
       page.captureSync();
@@ -219,11 +170,6 @@ export class AffineLink extends NonShadowLitElement {
           mode: 'replace',
         }
       );
-
-      //FIXME: prevent virgo auto focus
-      onModelTextUpdated(model, richText => {
-        richText.vEditor?.rootElement.blur();
-      });
     }
   }
 
@@ -251,7 +197,9 @@ export class AffineLink extends NonShadowLitElement {
   }
 
   render() {
-    const style = affineLinkStyles(this.textAttributes);
+    const style = this.delta.attributes
+      ? affineTextStyles(this.delta.attributes)
+      : styleMap({});
 
     return html`<a
       href=${this.link}
@@ -259,8 +207,8 @@ export class AffineLink extends NonShadowLitElement {
       target="_blank"
       style=${style}
       @mouseup=${this._onMouseUp}
-      >${FontLinkIcon}${this.vText}</a
-    >`;
+      >${FontLinkIcon}<v-text .str=${this.delta.insert}></v-text
+    ></a>`;
   }
 }
 

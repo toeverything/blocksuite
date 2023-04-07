@@ -1,4 +1,9 @@
-import { CopyIcon, DeleteIcon, LineWrapIcon } from '@blocksuite/global/config';
+import {
+  CancelWrapIcon,
+  CopyIcon,
+  DeleteIcon,
+  WrapIcon,
+} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
@@ -62,7 +67,7 @@ export function CodeOptionTemplate({
         ?active=${wrap}
         @click=${onClickWrap}
       >
-        ${LineWrapIcon}
+        ${wrap ? CancelWrapIcon : WrapIcon}
         <tool-tip inert tip-position="right-start" role="tooltip"
           >Wrap code</tool-tip
         >

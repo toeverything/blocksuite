@@ -1,11 +1,32 @@
-import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
+import type {
+  AttributeRenderer,
+  BaseTextAttributes,
+  DeltaInsert,
+  VEditor,
+} from '@blocksuite/virgo';
 import { baseTextAttributes } from '@blocksuite/virgo';
-import type { z } from 'zod';
+import { z, type ZodTypeDef } from 'zod';
 
-export const affineTextAttributes = baseTextAttributes.extend({});
+import type { BlockHost } from '../../utils/types.js';
+
+export const affineTextAttributes = baseTextAttributes.extend({
+  reference: z
+    .object({
+      type: z.enum(['Subpage', 'LinkedPage']),
+      pageId: z.string(),
+    })
+    .optional(),
+});
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
 
 export type AffineDeltaInsert = DeltaInsert<AffineTextAttributes>;
 
 export type AffineVEditor = VEditor<AffineTextAttributes>;
+
+export type AffineTextSchema<
+  TextAttributes extends BaseTextAttributes = AffineTextAttributes
+> = {
+  attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
+  textRenderer: (host: BlockHost) => AttributeRenderer<TextAttributes>;
+};

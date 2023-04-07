@@ -21,6 +21,10 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Page } from './page.js';
 import { Indexer, type QueryContent } from './search.js';
 
+export type WorkspaceOptions = {
+  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
+} & StoreOptions;
+
 export interface PageMeta {
   id: string;
   title: string;
@@ -283,19 +287,21 @@ export class Workspace {
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
   flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
-  inlineSuggestionProvider?: InlineSuggestionProvider;
+  readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
-  constructor(options: StoreOptions) {
-    this.inlineSuggestionProvider =
-      options.experimentalInlineSuggestionProvider;
-    this._store = new Store(options);
+  constructor({
+    experimentalInlineSuggestionProvider,
+    ...storeOptions
+  }: WorkspaceOptions) {
+    this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+    this._store = new Store(storeOptions);
     this._indexer = new Indexer(this.doc);
-    if (options.blobOptionsGetter) {
-      this._blobOptionsGetter = options.blobOptionsGetter;
+    if (storeOptions.blobOptionsGetter) {
+      this._blobOptionsGetter = storeOptions.blobOptionsGetter;
     }
 
-    if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.id, k => {
+    if (!storeOptions.isSSR) {
+      this._blobStorage = getBlobStorage(storeOptions.id, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._initBlobStorage();
@@ -356,11 +362,15 @@ export class Workspace {
 
   private get _pages() {
     // the meta space is not included
-    return this._store.spaces as Map<string, Page>;
+    return this._store.spaces as Map<`space:${string}`, Page>;
   }
 
   get doc() {
     return this._store.doc;
+  }
+
+  get idGenerator() {
+    return this._store.idGenerator;
   }
 
   register(blockSchema: z.infer<typeof BlockSchema>[]) {
@@ -376,15 +386,15 @@ export class Workspace {
   }
 
   private _hasPage(pageId: string) {
-    return this._pages.has('space:' + pageId);
+    return this._pages.has(`space:${pageId}`);
   }
 
   getPage(pageId: string): Page | null {
-    if (!pageId.startsWith('space:')) {
-      pageId = 'space:' + pageId;
-    }
+    const prefixedPageId = pageId.startsWith('space:')
+      ? (pageId as `space:${string}`)
+      : (`space:${pageId}` as const);
 
-    return this._pages.get(pageId) ?? null;
+    return this._pages.get(prefixedPageId) ?? null;
   }
 
   private _initBlobStorage() {
@@ -544,7 +554,8 @@ export class Workspace {
   /**
    * @internal Only for testing
    */
-  exportJSX(id = '0') {
-    return this._store.exportJSX(id);
+  exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
+    assertExists(pageId);
+    return this._store.exportJSX(pageId, blockId);
   }
 }

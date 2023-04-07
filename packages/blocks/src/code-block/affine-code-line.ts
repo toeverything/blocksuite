@@ -1,23 +1,26 @@
 import { assertExists } from '@blocksuite/store';
-import { VText } from '@blocksuite/virgo';
+import { type DeltaInsert, VText, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
-import { NonShadowLitElement, queryCurrentMode } from '../std.js';
+import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
+import { queryCurrentMode, ShadowlessElement } from '../std.js';
 import {
   highlightCache,
   type highlightCacheKey,
 } from './utils/highlight-cache.js';
 
 @customElement('affine-code-line')
-export class AffineCodeLine extends NonShadowLitElement {
+export class AffineCodeLine extends ShadowlessElement {
   @property({ type: Object })
-  vText: VText = new VText();
+  delta: DeltaInsert<AffineTextAttributes> = {
+    insert: ZERO_WIDTH_SPACE,
+  };
 
   @property()
-  getHighlightOptions:
+  highlightOptionsGetter:
     | (() => {
         lang: Lang;
         highlighter: Highlighter | null;
@@ -25,29 +28,32 @@ export class AffineCodeLine extends NonShadowLitElement {
     | null = null;
 
   render() {
-    assertExists(this.getHighlightOptions, 'getHighlightOptions is not set');
-    const { lang, highlighter } = this.getHighlightOptions();
+    assertExists(
+      this.highlightOptionsGetter,
+      'highlightOptionsGetter is not set'
+    );
+    const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
       const vText = new VText();
-      vText.str = this.vText.str;
+      vText.str = this.delta.insert;
       return html`<span>${vText}</span>`;
     }
 
     const mode = queryCurrentMode();
-    const cacheKey: highlightCacheKey = `${this.vText.str}-${lang}-${mode}`;
+    const cacheKey: highlightCacheKey = `${this.delta.insert}-${lang}-${mode}`;
     const cache = highlightCache.get(cacheKey);
 
     let tokens: IThemedToken[] = [
       {
-        content: this.vText.str,
+        content: this.delta.insert,
       },
     ];
     if (cache) {
       tokens = cache;
     } else {
       tokens = highlighter.codeToThemedTokens(
-        this.vText.str,
+        this.delta.insert,
         lang,
         mode === 'dark' ? 'github-dark' : 'github-light'
       )[0];
