@@ -1,8 +1,11 @@
 import type { Bound, PhasorElement } from '@blocksuite/phasor';
-import { serializeXYWH } from '@blocksuite/phasor';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import { getCommonBound } from '@blocksuite/phasor';
-import { ElementCtors, generateElementId } from '@blocksuite/phasor';
+import {
+  deserializeXYWH,
+  ElementCtors,
+  generateElementId,
+  getCommonBound,
+  serializeXYWH,
+} from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
@@ -13,13 +16,18 @@ import {
   DEFAULT_FRAME_WIDTH,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils.js';
+import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
 import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
+import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/std.js';
 import { ClipboardItem } from './clipboard-item.js';
 import type { Clipboard } from './type.js';
 import {
   CLIPBOARD_MIMETYPE,
+  clipboardData2Blocks,
+  copy,
   getBlockClipboardInfo,
   performNativeCopy,
 } from './utils.js';
@@ -56,21 +64,13 @@ export class EdgelessClipboard implements Clipboard {
 
   private _onCut = (e: ClipboardEvent) => {
     e.preventDefault();
+    this._onCopy(e);
+
     const selection = this._edgeless.getSelection().blockSelectionState;
-    const data = selection.selected
-      .map(selected => {
-        if (isTopLevelBlock(selected)) {
-          return getBlockClipboardInfo(selected).json;
-        } else {
-          return selected.serialize();
-        }
-      })
-      .filter(d => !!d);
-    const custom = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
-      serialize(data)
-    );
-    performNativeCopy([custom]);
+    if (selection.active) {
+      deleteModelsByRange(this._page);
+      return;
+    }
 
     this._page.transact(() => {
       selection.selected.forEach(selected => {
@@ -87,6 +87,13 @@ export class EdgelessClipboard implements Clipboard {
   private _onCopy = (e: ClipboardEvent) => {
     e.preventDefault();
     const selection = this._edgeless.getSelection().blockSelectionState;
+    // when frame active, handle copy like page mode
+    if (selection.active) {
+      const range = getCurrentBlockRange(this._page);
+      assertExists(range);
+      copy(range);
+      return;
+    }
     const data = selection.selected
       .map(selected => {
         if (isTopLevelBlock(selected)) {
@@ -105,6 +112,26 @@ export class EdgelessClipboard implements Clipboard {
 
   private _onPaste = async (e: ClipboardEvent) => {
     e.preventDefault();
+    const selection = this._edgeless.getSelection().blockSelectionState;
+    if (selection.active) {
+      const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+      if (!blocks.length) {
+        return;
+      }
+      this._page.captureSync();
+
+      await deleteModelsByRange(this._page);
+
+      const range = getCurrentBlockRange(this._page);
+
+      const focusedBlockModel = range?.models[0];
+      assertExists(focusedBlockModel);
+      const service = getService(focusedBlockModel.flavour);
+      assertExists(range);
+      await service.json2Block(focusedBlockModel, blocks, range);
+
+      return;
+    }
     const custom = e.clipboardData?.getData(
       CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
     );
@@ -117,23 +144,24 @@ export class EdgelessClipboard implements Clipboard {
     const groupedByType = groupBy(elementsRawData, data =>
       isTopLevelBlock(data) ? 'frames' : 'elements'
     ) as unknown as {
-      frames: SerializedBlock[];
-      elements: { type: PhasorElement['type'] }[];
+      frames?: SerializedBlock[];
+      elements?: { type: PhasorElement['type'] }[];
     };
 
-    const elements = groupedByType.elements
-      .map(d => {
-        const type = (d as PhasorElement).type;
-        const element = ElementCtors[type]?.deserialize(d);
-        element.id = generateElementId();
-        return element;
-      })
-      .filter(e => !!e) as PhasorElement[];
+    const elements =
+      (groupedByType.elements
+        ?.map(d => {
+          const type = (d as PhasorElement).type;
+          const element = ElementCtors[type]?.deserialize(d);
+          element.id = generateElementId();
+          return element;
+        })
+        .filter(e => !!e) as PhasorElement[]) || [];
 
     const commonBound = getCommonBound([
       ...elements,
       ...(groupedByType.frames
-        .map(({ xywh }) => {
+        ?.map(({ xywh }) => {
           if (!xywh) {
             return;
           }
@@ -163,7 +191,7 @@ export class EdgelessClipboard implements Clipboard {
 
     this._edgeless.surface.addElements(elements);
     const frameIds = await Promise.all(
-      groupedByType.frames.map(async ({ xywh, children }) => {
+      (groupedByType.frames || []).map(async ({ xywh, children }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
