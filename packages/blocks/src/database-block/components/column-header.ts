@@ -130,7 +130,12 @@ type ColumnWidthConfig = {
 type ColumnDragConfig = {
   dragIndex: number;
   targetIndex: number;
+  indicatorHeight: number;
   headerColumns: HTMLElement[];
+  previewBoundaries: {
+    left: number;
+    right: number;
+  };
 };
 
 const styles = css`
@@ -367,6 +372,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
 
     if (changedProperties.has('columns')) {
       // bind event when new column is added
+      this._initMoveColumnEvent();
       this._initChangeColumnWidthEvent();
       this.setDragHandleHeight();
     }
@@ -640,22 +646,35 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   }
   private _onColumnDragStart = (event: DragEvent) => {
     event.stopPropagation();
-    if (!this._dragColumnConfig) return;
 
     assertExists(event.dataTransfer);
     event.dataTransfer.effectAllowed = 'move';
 
-    this._dragColumnConfig.headerColumns = Array.from<HTMLElement>(
+    const headerColumns = Array.from<HTMLElement>(
       this._headerContainer.querySelectorAll('.affine-database-column')
     ).filter(column => !column.classList.contains('add-column-button'));
 
     const dragIcon = event.target as HTMLElement;
-    const headerColumn = dragIcon.closest<HTMLElement>(
+    const dragHeaderColumn = dragIcon.closest<HTMLElement>(
       '.affine-database-column'
     );
-    assertExists(headerColumn);
-    this._dragColumnConfig.dragIndex =
-      this._dragColumnConfig.headerColumns.indexOf(headerColumn) - 1;
+    assertExists(dragHeaderColumn);
+    const dragIndex = headerColumns.indexOf(dragHeaderColumn) - 1;
+
+    const database = this.tableContainer.closest('affine-database');
+    assertExists(database);
+    const { left, right } = database.getBoundingClientRect();
+
+    this._dragColumnConfig = {
+      dragIndex,
+      headerColumns,
+      targetIndex: -1,
+      indicatorHeight: this.tableContainer.clientHeight,
+      previewBoundaries: {
+        left,
+        right,
+      },
+    };
 
     this._createDragPreview(event);
   };
@@ -701,15 +720,23 @@ export class DatabaseColumnHeader extends ShadowlessElement {
       y + offsetY
     }px)`;
 
-    const { dragIndex } = this._dragColumnConfig;
+    const { dragIndex, previewBoundaries, indicatorHeight } =
+      this._dragColumnConfig;
     const point = new Point(x, y);
     const { element, index: targetIndex } = this._getClosestElement(point);
     const elementRect = element.getBoundingClientRect();
+
+    const outOfBoundaries =
+      elementRect.right < previewBoundaries.left ||
+      elementRect.right > previewBoundaries.right;
+
     // both side of drag element should hide the indicator
     const rect =
-      dragIndex === targetIndex || dragIndex === targetIndex - 1
+      dragIndex === targetIndex ||
+      dragIndex === targetIndex - 1 ||
+      outOfBoundaries
         ? null
-        : new DOMRect(elementRect.right, elementRect.top, 1, 100);
+        : new DOMRect(elementRect.right, elementRect.top, 1, indicatorHeight);
 
     assertExists(this._indicator);
     this._indicator.targetRect = rect;
@@ -757,6 +784,17 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     if (!this._dragColumnConfig) return;
 
     const { dragIndex: fromIndex, targetIndex } = this._dragColumnConfig;
+
+    // clear data
+    this._dragColumnConfig = null;
+    if (this._indicator) {
+      this._indicator.targetRect = null;
+    }
+    if (this._dragPreview) {
+      this._dragPreview.remove();
+      this._dragPreview = null;
+    }
+
     const toIndex = targetIndex + 1;
     if (
       // self
@@ -777,16 +815,6 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     this.targetModel.page.updateBlock(this.targetModel, {
       columns,
     });
-
-    // clear data
-    this._dragColumnConfig = null;
-    if (this._indicator) {
-      this._indicator.targetRect = null;
-    }
-    if (this._dragPreview) {
-      this._dragPreview.remove();
-      this._dragPreview = null;
-    }
   };
 
   private _onShowEditColumnPopup = (
