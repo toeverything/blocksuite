@@ -7,7 +7,7 @@ import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { queryCurrentMode, ShadowlessElement } from '../std.js';
-import { DARK_THEME, LIGHT_THEME } from './utils/constant.js';
+import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,
   type highlightCacheKey,

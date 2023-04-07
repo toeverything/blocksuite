@@ -25,7 +25,7 @@ import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
-import { DARK_THEME, LIGHT_THEME } from './utils/constant.js';
+import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {

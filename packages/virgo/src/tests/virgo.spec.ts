@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { VEditor } from '../virgo.js';
 import {
   enterVirgoPlayground,
