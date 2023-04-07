@@ -39,6 +39,9 @@ type ParagraphPanelType = 'top' | 'bottom' | 'hidden';
 const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
 
 function DatabaseAction(page: Page) {
+  const showDatabase = page.awarenessStore.getFlag('enable_database');
+  if (!showDatabase) return null;
+
   const range = getCurrentBlockRange(page);
 
   const isShow = range?.type === 'Block';

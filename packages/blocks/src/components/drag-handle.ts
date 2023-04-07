@@ -34,17 +34,11 @@ const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   event.preventDefault();
 };
 
-export const enum DragIndicatorMode {
-  Vertical = 'vertical',
-  Horizontal = 'horizontal',
-}
-
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
       position: fixed;
-      z-index: 10;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
@@ -57,9 +51,6 @@ export class DragIndicator extends LitElement {
   `;
 
   @property()
-  mode: DragIndicatorMode = DragIndicatorMode.Horizontal;
-
-  @property()
   targetRect: DOMRect | null = null;
 
   @property()
@@ -68,34 +59,19 @@ export class DragIndicator extends LitElement {
   @property()
   scale = 1;
 
-  private _getHorizontalStyle = (rect: DOMRect, position: Point) => {
-    const distanceToTop = Math.abs(rect.top - position.y);
-    const distanceToBottom = Math.abs(rect.bottom - position.y);
+  render() {
+    if (!this.targetRect || !this.cursorPosition) {
+      return null;
+    }
+    const rect = this.targetRect;
+    const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
+    const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
-    return styleMap({
+    const style = styleMap({
       width: `${rect.width}px`,
       height: `${3 * this.scale}px`,
       transform: `translate(${rect.left}px, ${offsetY}px)`,
     });
-  };
-  private _getVerticalStyle = (rect: DOMRect) => {
-    return styleMap({
-      width: `${3 * this.scale}px`,
-      height: `${rect.height}px`,
-      transform: `translate(${rect.left}px, ${rect.top}px)`,
-    });
-  };
-
-  override render() {
-    if (!this.targetRect || !this.cursorPosition) {
-      return null;
-    }
-    const rect = this.targetRect ?? this.getBoundingClientRect();
-    const style =
-      this.mode === DragIndicatorMode.Horizontal
-        ? this._getHorizontalStyle(rect, this.cursorPosition)
-        : this._getVerticalStyle(rect);
-
     return html` <div class="affine-drag-indicator" style=${style}></div> `;
   }
 }
