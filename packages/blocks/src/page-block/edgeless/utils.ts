@@ -1,10 +1,8 @@
 import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
-import type { Point as ConnectorPoint } from '@blocksuite/connector';
-import { Rectangle } from '@blocksuite/connector';
-import { simplifyPath } from '@blocksuite/connector';
-import { route } from '@blocksuite/connector';
+import type { Point as ConnectorPoint, Point } from '@blocksuite/connector';
+import type { Direction } from '@blocksuite/connector';
+import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
 import type {
-  AttachedElementDirection,
   Bound,
   ConnectorElement,
   Controller,
@@ -12,6 +10,7 @@ import type {
   SurfaceManager,
   SurfaceViewport,
 } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
@@ -33,6 +32,8 @@ export const DEFAULT_FRAME_WIDTH = 448;
 export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
+
+const ATTACHED_DISTANCE = 20;
 
 export function isTopLevelBlock(
   selectable: Selectable | null
@@ -206,7 +207,9 @@ export function generateConnectorPath(
       customizedEnd = Math.max(customizedEnd, index);
     }
   });
-  if (customizedEnd > -1) {
+
+  let path: Point[] = [];
+  if (fixed && customizedEnd > -1) {
     const part0EndPoint = originControllers[customizedStart];
     const part0 =
       fixed === 'start'
@@ -221,25 +224,25 @@ export function generateConnectorPath(
         ? originControllers.slice(customizedEnd)
         : route(endRect ? [endRect] : [], [part2StartPoint, endPoint]);
 
-    const finalPath = simplifyPath([
-      ...part0.slice(0, -1),
-      ...part1,
-      ...part2.slice(1),
+    path = simplifyPath([...part0.slice(0, -1), ...part1, ...part2.slice(1)]);
+  } else {
+    path = route([startRect, endRect].filter(r => !!r) as Rectangle[], [
+      startPoint,
+      endPoint,
     ]);
-
-    return finalPath;
   }
 
-  return route([startRect, endRect].filter(r => !!r) as Rectangle[], [
-    startPoint,
-    endPoint,
-  ]);
+  if (path.length < 3) {
+    path = [startPoint, endPoint];
+  }
+
+  return path;
 }
 
-export function getAttachedPointByDirection(
+function getAttachedPointByDirection(
   { x, y, w, h }: Rectangle,
-  direction: AttachedElementDirection
-) {
+  direction: Direction
+): Point {
   switch (direction) {
     case 'top': {
       return { x: x + w / 2, y };
@@ -253,6 +256,9 @@ export function getAttachedPointByDirection(
     case 'left': {
       return { x, y: y + h / 2 };
     }
+    default: {
+      throw new Error(`Unknown direction: ${direction}`);
+    }
   }
 }
 
@@ -260,13 +266,41 @@ export function getAttachedPoint(
   x: number,
   y: number,
   rect?: Rectangle | null
-) {
-  if (!rect) {
-    return { point: { x, y }, direction: 'left' as const };
+): { point: Point; position: Point | null } {
+  if (!rect || !rect.contains(x, y)) {
+    return { point: { x, y }, position: null };
   }
   const direction = rect.relativeDirection(x, y);
-  const point = getAttachedPointByDirection(rect, direction);
-  return { point, direction };
+  const position = {
+    x: (x - rect.x) / rect.w,
+    y: (y - rect.y) / rect.h,
+  };
+
+  const attachedPoint = getAttachedPointByDirection(rect, direction);
+  const distance = Math.sqrt(
+    Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
+  );
+  if (distance < ATTACHED_DISTANCE) {
+    return { point: attachedPoint, position };
+  }
+
+  return { point: { x, y }, position };
+}
+
+function getAttachedPointByPosition(rect: Rectangle, position: Point) {
+  const x = rect.x + rect.w * position.x;
+  const y = rect.y + rect.h * position.y;
+
+  const direction = rect.relativeDirection(x, y);
+  const attachedPoint = getAttachedPointByDirection(rect, direction);
+  const distance = Math.sqrt(
+    Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
+  );
+  if (distance < ATTACHED_DISTANCE) {
+    return attachedPoint;
+  }
+
+  return { x, y };
 }
 
 export function getConnectorAttachedInfo(
@@ -283,7 +317,7 @@ export function getConnectorAttachedInfo(
     : null;
   const startPoint =
     startRect && startElement
-      ? getAttachedPointByDirection(startRect, startElement.direction)
+      ? getAttachedPointByPosition(startRect, startElement.position)
       : {
           x: element.x + element.controllers[0].x,
           y: element.y + element.controllers[0].y,
@@ -293,7 +327,7 @@ export function getConnectorAttachedInfo(
   const endRect = end ? new Rectangle(...deserializeXYWH(getXYWH(end))) : null;
   const endPoint =
     endRect && endElement
-      ? getAttachedPointByDirection(endRect, endElement.direction)
+      ? getAttachedPointByPosition(endRect, endElement.position)
       : {
           x: element.x + element.controllers[element.controllers.length - 1].x,
           y: element.y + element.controllers[element.controllers.length - 1].y,
@@ -311,4 +345,88 @@ export function getConnectorAttachedInfo(
       point: endPoint,
     },
   };
+}
+
+export function isConnectorAndBindingsAllSelected(
+  connector: ConnectorElement,
+  selected: Selectable[]
+) {
+  const connectorSelected = selected.find(s => s.id === connector.id);
+  if (!connectorSelected) {
+    return false;
+  }
+  const { startElement, endElement } = connector;
+  const startSelected = selected.find(s => s.id === startElement?.id);
+  const endSelected = selected.find(s => s.id === endElement?.id);
+  if (!startElement && !endElement) {
+    return true;
+  }
+  if (!startElement && endSelected) {
+    return true;
+  }
+  if (!endElement && startSelected) {
+    return true;
+  }
+  if (startSelected && endSelected) {
+    return true;
+  }
+  return false;
+}
+
+export function handleElementChangedEffectForConnector(
+  element: Selectable,
+  selected: Selectable[],
+  surface: SurfaceManager,
+  page: Page
+) {
+  if (element.type !== 'connector') {
+    const bindingElements = surface.getBindingElements(element.id);
+    bindingElements.forEach(bindingElement => {
+      if (bindingElement.type === 'connector') {
+        // if all connector and binding element are selected, they will process in common method.
+        // like:
+        // mode-controllers/default-mode: _handleSurfaceDragMove
+        // components/edgeless-selected-rect: _onDragMove
+        if (isConnectorAndBindingsAllSelected(bindingElement, selected)) {
+          return;
+        }
+        const { startElement, endElement, id, x, y, controllers, mode } =
+          bindingElement;
+        const { start, end } = getConnectorAttachedInfo(
+          bindingElement,
+          surface,
+          page
+        );
+        const fixed =
+          startElement?.id === element.id
+            ? 'end'
+            : endElement?.id === element.id
+            ? 'start'
+            : undefined;
+
+        const routes = generateConnectorPath(
+          start.rect,
+          end.rect,
+          start.point,
+          end.point,
+          controllers.map(c => ({ ...c, x: c.x + x, y: c.y + y })),
+          mode,
+          fixed
+        );
+
+        const bound = getBrushBoundFromPoints(
+          routes.map(r => [r.x, r.y]),
+          0
+        );
+        const newControllers = routes.map(v => {
+          return {
+            ...v,
+            x: v.x - bound.x,
+            y: v.y - bound.y,
+          };
+        });
+        surface.updateConnectorElement(id, bound, newControllers);
+      }
+    });
+  }
 }
