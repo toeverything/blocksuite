@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/blocks/std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { PageViewport } from './selection-state.js';
 
 @customElement('affine-page-selected-rects')
-export class AffinePageSelectedRects extends LitElement {
+export class AffinePageSelectedRects extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -32,8 +32,6 @@ export class AffinePageSelectedRects extends LitElement {
       background: var(--affine-selected-color);
     }
   `;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   private _onMouseUp({ clientX, clientY }: MouseEvent) {
     this.removeAttribute('data-grab');
@@ -61,12 +59,7 @@ export class AffinePageSelectedRects extends LitElement {
     this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-  }
-
-  protected willUpdate() {
+  willUpdate() {
     const { rects, grab } = this.state;
     const firstRect = rects[0];
     if (firstRect) {

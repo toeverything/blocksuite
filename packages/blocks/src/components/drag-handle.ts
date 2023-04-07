@@ -1,7 +1,9 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  SelectionEvent,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type SelectionEvent,
+  ShadowlessElement,
+  WithDisposable,
 } from '@blocksuite/blocks/std';
 import {
   getBlockElementsExcludeSubtrees,
@@ -12,11 +14,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
-import {
-  assertExists,
-  DisposableGroup,
-  isFirefox,
-} from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -61,7 +59,7 @@ export class DragIndicator extends LitElement {
   @property()
   scale = 1;
 
-  override render() {
+  render() {
     if (!this.targetRect || !this.cursorPosition) {
       return null;
     }
@@ -79,13 +77,9 @@ export class DragIndicator extends LitElement {
 }
 
 @customElement('affine-drag-preview')
-export class DragPreview extends LitElement {
+export class DragPreview extends ShadowlessElement {
   @property()
   offset = { x: 0, y: 0 };
-
-  createRenderRoot() {
-    return this;
-  }
 
   render() {
     return html`<style>
@@ -135,7 +129,7 @@ const DRAG_HANDLE_HEIGHT = 16; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
-export class DragHandle extends LitElement {
+export class DragHandle extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       top: 0;
@@ -255,8 +249,6 @@ export class DragHandle extends LitElement {
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
   private _dragPreview: DragPreview | null = null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   private readonly _getClosestBlockElement: (point: Point) => Element | null;
 
@@ -424,7 +416,6 @@ export class DragHandle extends LitElement {
     // cleanup
     this.hide();
 
-    this._disposables.dispose();
     this._handleAnchorDisposable?.dispose();
   }
 
