@@ -17,16 +17,10 @@ export function showDatabaseModal({
 
   const databaseModal = new DatabaseModal();
   databaseModal.page = page;
+  databaseModal.abortController = abortController;
   // Mount
   container.appendChild(databaseModal);
   disposables.add(() => databaseModal.remove());
-
-  databaseModal.addEventListener('hide', () => {
-    if (abortController.signal.aborted) {
-      return;
-    }
-    databaseModal.remove();
-  });
 
   return databaseModal;
 }

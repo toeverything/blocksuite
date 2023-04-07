@@ -47,6 +47,9 @@ export class DatabaseModal extends LitElement {
   @state()
   private _selectedView: DatabaseViewName = 'table';
 
+  @property()
+  abortController!: AbortController;
+
   private _convertToDatabase(viewType: DatabaseViewName) {
     this._hide();
     this.page.captureSync();
@@ -92,11 +95,7 @@ export class DatabaseModal extends LitElement {
   }
 
   private _hide() {
-    this.dispatchEvent(
-      new CustomEvent<DatabaseDetail>('hide', {
-        detail: { type: 'hide' },
-      })
-    );
+    this.abortController.abort();
   }
 
   render() {

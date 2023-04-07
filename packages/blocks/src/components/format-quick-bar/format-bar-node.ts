@@ -223,8 +223,8 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     const isShow = range?.type === 'Block';
     if (!isShow) return null;
 
-    const enabled = range.models.every(
-      model => DATABASE_WHITE_LIST.indexOf(model.flavour) > -1
+    const enabled = range.models.every(model =>
+      DATABASE_WHITE_LIST.includes(model.flavour)
     );
 
     const onClick = () => {
