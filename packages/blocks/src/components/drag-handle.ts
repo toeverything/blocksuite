@@ -101,6 +101,7 @@ export class DragPreview extends ShadowlessElement {
         user-select: none;
         pointer-events: none;
         caret-color: transparent;
+        transform-origin: 0 0;
         z-index: 2;
       }
 
@@ -480,13 +481,14 @@ export class DragHandle extends WithDisposable(LitElement) {
     const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
     const rect = blockElements[0].getBoundingClientRect();
+    const s = this._scale;
 
     dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
     dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
-    dragPreview.style.width = `${rect.width}px`;
-    dragPreview.style.transform = `translate(${
-      rect.left - containerRect.left
-    }px, ${rect.top - containerRect.top}px)`;
+    dragPreview.style.width = `${rect.width / s}px`;
+    const l = rect.left - containerRect.left;
+    const t = rect.top - containerRect.top;
+    dragPreview.style.transform = `translate(${l}px, ${t}px) scale(${s})`;
 
     const fragment = document.createDocumentFragment();
 
@@ -626,9 +628,10 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     if (this._dragPreview && e.screenY) {
       const { x: offsetX, y: offsetY } = this._dragPreview.offset;
-      this._dragPreview.style.transform = `translate(${x + offsetX}px, ${
-        y + offsetY
-      }px)`;
+      const l = x + offsetX;
+      const t = y + offsetY;
+      const s = this._scale;
+      this._dragPreview.style.transform = `translate(${l}px, ${t}px) scale(${s})`;
     }
 
     const point = new Point(x, y);
