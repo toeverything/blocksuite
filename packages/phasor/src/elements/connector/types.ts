@@ -5,11 +5,17 @@ export enum ConnectorMode {
   Orthogonal,
 }
 
-export type AttachedElementDirection = 'left' | 'top' | 'right' | 'bottom';
+// x/y is in range of [0,1] relative to element's left-top
+// real x = element.x + element.w * x
+// real y = element.y + element.h * y
+export type AttachedElementPosition = {
+  x: number;
+  y: number;
+};
 
 export interface AttachedElement {
   id: string;
-  direction: AttachedElementDirection;
+  position: AttachedElementPosition;
 }
 
 export type Controller = {

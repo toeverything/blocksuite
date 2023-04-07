@@ -18,6 +18,7 @@ import type {
 import {
   FRAME_MIN_HEIGHT,
   FRAME_MIN_WIDTH,
+  handleElementChangedEffectForConnector,
   isTopLevelBlock,
   stopPropagation,
 } from '../utils.js';
@@ -124,6 +125,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         this.surface.setElementBound(element.id, bound);
       }
+      handleElementChangedEffectForConnector(
+        element,
+        [element],
+        this.surface,
+        this.page
+      );
     });
 
     this.requestUpdate();

@@ -3,7 +3,7 @@
 export type { Color, StrokeStyle } from './consts.js';
 export type {
   AttachedElement,
-  AttachedElementDirection,
+  AttachedElementPosition,
   Controller,
 } from './elements/connector/types.js';
 export { ConnectorMode } from './elements/connector/types.js';
