@@ -573,6 +573,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   };
 
   onDragStart = (e: DragEvent, draggable = false) => {
+    if (this._dragPreview || !e.dataTransfer) return;
+
     let draggingBlockElements = this.selectedBlocks;
 
     if (
@@ -582,9 +584,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       draggingBlockElements = [this._handleAnchorState.element];
     }
 
-    if (!draggingBlockElements.length || this._dragPreview || !e.dataTransfer) {
-      return;
-    }
+    if (!draggingBlockElements.length) return;
 
     e.dataTransfer.effectAllowed = 'move';
 
