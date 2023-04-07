@@ -597,7 +597,7 @@ test('selection on heavy page', async ({ page }) => {
       },
     }
   );
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(5);
 });
 
@@ -1093,7 +1093,7 @@ test('should keep selection state when scrolling backward', async ({
     return viewport.scrollTop;
   });
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(3 + 5 + 3);
   expect(scrollTop).toBe(0);
 });
@@ -1167,7 +1167,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     }
     return viewport.scrollTop;
   });
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(3 + 5 + 3);
   // See https://jestjs.io/docs/expect#tobeclosetonumber-numdigits
   // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2 = 0.511646496140377
@@ -1241,7 +1241,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   );
 
   // get count with scroll wheel
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1355,7 +1355,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   );
 
   // get count with scroll wheel
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1459,7 +1459,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1542,7 +1542,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1578,8 +1578,9 @@ test('should not clear selected rects when scrolling the wheel', async ({
       throw new Error();
     }
     return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
+      viewport
+        .querySelector('affine-page-selected-rects')
+        ?.shadowRoot?.querySelectorAll('*').length,
       viewport.scrollTop,
     ] as const;
   });
@@ -1644,7 +1645,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1710,7 +1711,7 @@ test('should clear block selection before native selection', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
 
   await dragBetweenIndices(
@@ -1776,7 +1777,7 @@ test('should clear native selection before block selection', async ({
 
   expect(text0).toBe('456');
   expect(textCount).toBe(0);
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(1);
 });
 
@@ -1827,7 +1828,7 @@ test('should not be misaligned when the editor container has padding or margin',
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(3);
 });
 
@@ -1994,9 +1995,7 @@ test('undo should clear block selection', async ({ page }) => {
   );
 
   await redoByKeyboard(page);
-  const selectedBlocks = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const selectedBlocks = page.locator('affine-page-selected-rects > *');
   await expect(selectedBlocks).toHaveCount(1);
 
   await undoByKeyboard(page);
@@ -2047,7 +2046,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await page.mouse.click(coord.x - 40, coord.y - 40);
   await pressTab(page);
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(1);
 });
 
@@ -2110,9 +2109,7 @@ test('should not show option menu of image on block selection', async ({
   await expect(
     page.locator('.affine-embed-editing-state-container')
   ).toHaveCount(0);
-  await expect(
-    page.locator('.affine-page-selected-rects-container > *')
-  ).toHaveCount(2);
+  await expect(page.locator('affine-page-selected-rects > *')).toHaveCount(2);
 });
 
 test('should not show option menu of image on native selection', async ({

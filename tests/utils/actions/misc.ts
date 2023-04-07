@@ -393,7 +393,8 @@ export async function initEmptyCodeBlockState(page: Page) {
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  await locator.click();
+  // need to set `force` to true when clicking on `affine-page-selected-rects`
+  await locator.click({ force: true });
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {

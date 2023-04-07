@@ -257,3 +257,22 @@ export function isPinchEvent(e: WheelEvent) {
   }
   return e.ctrlKey;
 }
+
+/**
+ * Returns a `DragEvent` via `MouseEvent`.
+ */
+export function createDragEvent(type: string, event?: MouseEvent) {
+  const options = {
+    dataTransfer: new DataTransfer(),
+  };
+  if (event) {
+    const { clientX, clientY, screenX, screenY } = event;
+    Object.assign(options, {
+      clientX,
+      clientY,
+      screenX,
+      screenY,
+    });
+  }
+  return new DragEvent(type, options);
+}
