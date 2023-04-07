@@ -2,6 +2,7 @@ import '../../../components/drag-handle.js';
 
 import {
   type BlockComponentElement,
+  createDragEvent,
   type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -21,6 +22,7 @@ import {
   isEmbed,
   isImage,
   isInsidePageTitle,
+  isPageSelectedRects,
   Point,
   Rect,
   type SelectionEvent,
@@ -116,6 +118,15 @@ export class DefaultSelectionManager {
       return;
     }
 
+    if (isPageSelectedRects(e.raw.target)) {
+      this.state.type = 'block:drag';
+      this._container.components.dragHandle?.onDragStart(
+        createDragEvent('dragstart', e.raw),
+        true
+      );
+      return;
+    }
+
     // disable dragHandle button
     this._container.components.dragHandle?.setPointerEvents('none');
 
@@ -137,6 +148,14 @@ export class DefaultSelectionManager {
 
     if (this.page.readonly) return;
 
+    if (this.state.type === 'block:drag') {
+      this._container.components.dragHandle?.onDrag(
+        createDragEvent('drag', e.raw),
+        true
+      );
+      return;
+    }
+
     if (this.state.type === 'block') {
       BlockDragHandlers.onMove(this, e);
       return;
@@ -149,6 +168,14 @@ export class DefaultSelectionManager {
   private _onContainerDragEnd = (e: SelectionEvent) => {
     this._container.components.dragHandle?.setPointerEvents('auto');
 
+    if (this.state.type === 'block:drag') {
+      this._container.components.dragHandle?.onDragEnd(
+        createDragEvent('dragend', e.raw),
+        true
+      );
+      this.state.type = 'block';
+      return;
+    }
     if (this.state.type === 'native') {
       NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
@@ -286,6 +313,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    if (this.state.type === 'block:drag') return;
+
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     const point = new Point(e.raw.clientX, e.raw.clientY);
@@ -392,14 +421,23 @@ export class DefaultSelectionManager {
     return this._container.viewportElement;
   }
 
-  // clear selection: `block`, `embed`, `native`
+  // clear selection: `block`, `block:drag`, `embed`, `native`
   clear() {
     const { state, slots } = this;
     const { type } = state;
-    if (type === 'block') {
+    if (type.startsWith('block')) {
       state.clearBlockSelection();
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
+
+      // clear `format quick bar`
+      document.dispatchEvent(new Event('selectionchange'));
+      // clear `drag preview`
+      if (type === 'block:drag') {
+        this._container.components.dragHandle?.onDragEnd(
+          createDragEvent('dragend')
+        );
+      }
     } else if (type === 'embed') {
       state.clearEmbedSelection();
       slots.embedRectsUpdated.emit([]);
@@ -483,7 +521,7 @@ export class DefaultSelectionManager {
 
   refreshSelectedBlocksRectsByModels(models: BaseBlockModel[]) {
     this.state.selectedBlocks = models
-      .map(model => getBlockElementByModel(model))
+      .map(getBlockElementByModel)
       .filter((block): block is BlockComponentElement => block !== null);
     this.refreshSelectedBlocksRects();
   }
@@ -598,8 +636,11 @@ export class DefaultSelectionManager {
     );
   }
 
-  setSelectedBlocks(selectedBlocks: BlockComponentElement[]) {
-    setSelectedBlocks(this.state, this.slots, selectedBlocks);
+  setSelectedBlocks(
+    selectedBlocks: BlockComponentElement[],
+    rects?: DOMRect[]
+  ) {
+    setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
   }
 
   setFocusedBlock(blockElement: Element) {

@@ -1,7 +1,7 @@
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import { getDefaultAttributeRenderer } from '../utils/attribute-renderer.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';

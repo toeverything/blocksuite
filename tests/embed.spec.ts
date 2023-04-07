@@ -345,7 +345,7 @@ test('select image should not show format bar', async ({ page }) => {
     { x: rect.x + 20, y: rect.y + 20 },
     { x: rect.x - 20, y: rect.y - 20 }
   );
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-page-selected-rects > *');
   await expect(rects).toHaveCount(1);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).not.toBeVisible();

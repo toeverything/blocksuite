@@ -24,6 +24,7 @@ export const HOTKEYS = {
   ENTER: 'enter',
   TAB: 'tab',
   SPACE: 'space',
+  ESC: 'esc',
 };
 
 export const MOVE_DETECT_THRESHOLD = 2;

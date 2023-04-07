@@ -30,7 +30,6 @@ import {
   DraggingArea,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
-  SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
@@ -525,10 +524,6 @@ export class DefaultPageBlockComponent
       this.requestUpdate()
     );
     const draggingArea = DraggingArea(this._draggingArea);
-    const selectedRectsContainer = SelectedRectsContainer(
-      this._selectedRects,
-      viewport
-    );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
       viewport
@@ -554,8 +549,15 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${draggingArea} ${selectedEmbedContainer}
-        ${embedEditingContainer}
+        <affine-page-selected-rects
+          .viewport=${viewport}
+          .mouseRoot=${this.mouseRoot}
+          .state=${{
+            rects: this._selectedRects,
+            grab: !this._draggingArea,
+          }}
+        ></affine-page-selected-rects>
+        ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>
     `;
   }
