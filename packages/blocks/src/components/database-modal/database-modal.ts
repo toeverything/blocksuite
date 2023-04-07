@@ -154,9 +154,4 @@ declare global {
   interface HTMLElementTagNameMap {
     'affine-database-modal': DatabaseModal;
   }
-  interface HTMLElementEventMap {
-    hide: CustomEvent<DatabaseDetail>;
-  }
 }
-
-export type DatabaseDetail = { type: 'hide' };
