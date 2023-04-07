@@ -506,10 +506,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (!editingState) return;
       const { rect, model, element } = editingState;
       const page = defaultPageBlock.page;
-      const blockElementsExcludeSubtrees = getBlockElementsExcludeSubtrees(
-        blockElements
-      ) as BlockComponentElement[];
-      const models = blockElementsExcludeSubtrees.map(getModelByBlockElement);
+      const models = getBlockElementsExcludeSubtrees(blockElements).map(
+        getModelByBlockElement
+      );
       if (models.length === 1 && doesInSamePath(page, model, models[0])) {
         return;
       }

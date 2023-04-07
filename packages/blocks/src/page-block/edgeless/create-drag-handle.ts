@@ -23,11 +23,9 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     container: pageBlock.mouseRoot as HTMLElement,
     onDropCallback(point, blockElements, editingState) {
       const page = pageBlock.page;
-      const models = (
-        getBlockElementsExcludeSubtrees(
-          blockElements
-        ) as BlockComponentElement[]
-      ).map(getModelByBlockElement);
+      const models = getBlockElementsExcludeSubtrees(blockElements).map(
+        getModelByBlockElement
+      );
       if (editingState) {
         const { rect, model, element } = editingState;
         if (models.length === 1 && doesInSamePath(page, model, models[0])) {
