@@ -294,7 +294,8 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    if (type === 'block') {
+    if (type.startsWith('block')) {
+      e.preventDefault();
       const { viewportElement } = this;
       const { scrollTop, scrollHeight, clientHeight } = viewport;
       const max = scrollHeight - clientHeight;
@@ -309,16 +310,16 @@ export class DefaultPageBlockComponent
         top = Math.max(top, -scrollTop);
       }
 
-      const { draggingArea } = state;
-      if (draggingArea) {
-        e.preventDefault();
+      viewport.scrollTop += top;
+      // FIXME: need smooth
+      viewportElement.scrollTop += top;
 
-        viewport.scrollTop += top;
-        // FIXME: need smooth
-        viewportElement.scrollTop += top;
-
-        draggingArea.end.y += top;
-        selection.updateDraggingArea(draggingArea);
+      if (type === 'block') {
+        const { draggingArea } = state;
+        if (draggingArea) {
+          draggingArea.end.y += top;
+          selection.updateDraggingArea(draggingArea);
+        }
       }
     }
 
@@ -482,7 +483,7 @@ export class DefaultPageBlockComponent
     this._initFrameSizeEffect();
     this._initResizeEffect();
 
-    this.viewportElement.addEventListener('wheel', this._onWheel);
+    this.mouseRoot.addEventListener('wheel', this._onWheel);
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
@@ -508,7 +509,7 @@ export class DefaultPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.viewportElement.removeEventListener('wheel', this._onWheel);
+    this.mouseRoot.removeEventListener('wheel', this._onWheel);
     this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 

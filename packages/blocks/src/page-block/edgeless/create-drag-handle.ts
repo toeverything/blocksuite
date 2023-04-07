@@ -85,9 +85,10 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         getRectByBlockElement(blockElementsExcludeSubtrees[0])
       );
     },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ) {
+    setSelectionType() {
+      return;
+    },
+    setSelectedBlock(_: EditingState) {
       return;
     },
     getSelectedBlocks() {

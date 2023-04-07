@@ -177,12 +177,10 @@ export class DragHandle extends WithDisposable(LitElement) {
       draggingBlockElements: BlockComponentElement[],
       lastModelState: EditingState | null
     ) => void;
-    setSelectedBlocks: (
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ) => void;
+    setSelectionType: () => void;
+    setSelectedBlock: (selectedBlock: EditingState) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getClosestBlockElement: (point: Point) => Element | null;
-    // clearSelection: () => void;
   }) {
     super();
     this.getDropAllowedBlocks = () => {
@@ -190,7 +188,8 @@ export class DragHandle extends WithDisposable(LitElement) {
       return [];
     };
     this.onDropCallback = options.onDropCallback;
-    this.setSelectedBlocks = options.setSelectedBlocks;
+    this.setSelectionType = options.setSelectionType;
+    this.setSelectedBlock = options.setSelectedBlock;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
     options.container.appendChild(this);
@@ -203,22 +202,19 @@ export class DragHandle extends WithDisposable(LitElement) {
    * If there is `draggingBlock`, the user is dragging a block to another place
    *
    */
-  @property()
   public getDropAllowedBlocks: (
     draggingBlockIds: string[] | null
   ) => BaseBlockModel[];
 
-  @property()
   public onDropCallback: (
     point: Point,
     draggingBlockElements: BlockComponentElement[],
     lastModelState: EditingState | null
   ) => void;
 
-  @property()
-  public setSelectedBlocks: (
-    selectedBlock: EditingState | BlockComponentElement[] | null
-  ) => void;
+  public setSelectionType: () => void;
+
+  public setSelectedBlock: (selectedBlock: EditingState) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
 
@@ -379,8 +375,6 @@ export class DragHandle extends WithDisposable(LitElement) {
     const disposables = this._disposables;
 
     // event bindings
-    // window
-    disposables.addFromEvent(window, 'resize', this._onResize);
 
     // document
     if (isFirefox) {
@@ -392,7 +386,6 @@ export class DragHandle extends WithDisposable(LitElement) {
     }
 
     // document.body
-    disposables.addFromEvent(document.body, 'wheel', this._onWheel);
     disposables.addFromEvent(
       document.body,
       'dragover',
@@ -401,6 +394,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     // host
+    disposables.addFromEvent(this, 'wheel', this._onWheel);
     disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
 
     // drag handle
@@ -519,27 +513,8 @@ export class DragHandle extends WithDisposable(LitElement) {
     }
   }
 
-  // fixme: handle multiple blocks case
-  private _onResize = (_: UIEvent) => {
-    if (this._handleAnchorState) {
-      const { rect } = this._handleAnchorState;
-      const element = this._getClosestBlockElement(new Point(rect.x, rect.y));
-      if (element) {
-        const rect = getRectByBlockElement(element);
-        this._handleAnchorState = {
-          rect,
-          element: element as BlockComponentElement,
-          model: getModelByBlockElement(element),
-        };
-        this.style.display = 'block';
-        const containerRect = this._container.getBoundingClientRect();
-        this.style.left = `${rect.left - containerRect.left - 20}px`;
-        this.style.top = `${rect.top - containerRect.top + 8}px`;
-      }
-    }
-  };
-
-  private _onWheel = (_: MouseEvent) => {
+  private _onWheel = (e: MouseEvent) => {
+    e.stopPropagation();
     this.hide();
   };
 
@@ -547,7 +522,7 @@ export class DragHandle extends WithDisposable(LitElement) {
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
     if (this._handleAnchorState) {
-      this.setSelectedBlocks(this._handleAnchorState);
+      this.setSelectedBlock(this._handleAnchorState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
@@ -576,22 +551,17 @@ export class DragHandle extends WithDisposable(LitElement) {
   onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !e.dataTransfer) return;
 
+    const anchor = this._handleAnchorState && this._handleAnchorState.element;
     let draggingBlockElements = this.selectedBlocks;
 
-    if (
-      this._handleAnchorState &&
-      !draggingBlockElements.includes(this._handleAnchorState.element)
-    ) {
-      draggingBlockElements = [this._handleAnchorState.element];
+    if (anchor && !draggingBlockElements.includes(anchor)) {
+      draggingBlockElements = [anchor];
     }
 
     if (!draggingBlockElements.length) return;
 
     e.dataTransfer.effectAllowed = 'move';
-
-    // TODO: clear selection
-    // if (!included) {
-    // }
+    this.setSelectionType();
 
     this._createDragPreview(
       e,
@@ -673,7 +643,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
       this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY),
-      // make sure clear subtrees!
+      // blockElements includes subtrees
       this._draggingElements,
       this._lastDroppingTarget
     );

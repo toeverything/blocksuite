@@ -544,22 +544,15 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         });
       });
     },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ): void {
-      if (Array.isArray(selectedBlocks)) {
-        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
-      } else if (selectedBlocks) {
-        const { element } = selectedBlocks;
-        defaultPageBlock.selection.selectOneBlock(element);
-      }
+    setSelectionType() {
+      defaultPageBlock.selection.state.type = 'block:drag';
+    },
+    setSelectedBlock({ element }: EditingState) {
+      defaultPageBlock.selection.selectOneBlock(element);
     },
     getSelectedBlocks() {
       return defaultPageBlock.selection.state.selectedBlocks;
     },
-    // clearSelection() {
-    //   defaultPageBlock.selection.clear();
-    // },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPoint(point, {
         rect: defaultPageBlock.innerRect,
