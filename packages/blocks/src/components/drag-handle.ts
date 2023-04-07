@@ -573,23 +573,23 @@ export class DragHandle extends WithDisposable(LitElement) {
   };
 
   onDragStart = (e: DragEvent, draggable = false) => {
-    if (this._dragPreview || !this._handleAnchorState || !e.dataTransfer) {
+    let draggingBlockElements = this.selectedBlocks;
+
+    if (this._handleAnchorState) {
+      if (!draggingBlockElements.includes(this._handleAnchorState.element)) {
+        draggingBlockElements = [this._handleAnchorState.element];
+      }
+    }
+
+    if (!draggingBlockElements.length || this._dragPreview || !e.dataTransfer) {
       return;
     }
 
     e.dataTransfer.effectAllowed = 'move';
 
-    const selectedBlocks = this.selectedBlocks;
-
-    const included = selectedBlocks.includes(this._handleAnchorState.element);
-
     // TODO: clear selection
     // if (!included) {
     // }
-
-    const draggingBlockElements = (
-      included ? this.selectedBlocks : [this._handleAnchorState.element]
-    ) as BlockComponentElement[];
 
     this._createDragPreview(
       e,
