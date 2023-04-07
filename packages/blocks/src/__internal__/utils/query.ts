@@ -194,7 +194,7 @@ export function getEditorContainer(page: Page) {
     page.root,
     'Failed to check page mode! Page root is not exists!'
   );
-  const pageBlock = document.querySelector(`[${ATTR}="${page.root.id}"]`);
+  const pageBlock = getBlockElementById(page.root.id);
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
   assertExists(editorContainer);

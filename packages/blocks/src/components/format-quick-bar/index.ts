@@ -155,7 +155,7 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mouseup', mouseDownHandler);
+    document.removeEventListener('mousedown', mouseDownHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSlot.dispose();

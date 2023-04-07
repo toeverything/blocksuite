@@ -431,7 +431,7 @@ export class DefaultSelectionManager {
       slots.draggingAreaUpdated.emit(null);
 
       // clear `format quick bar`
-      document.dispatchEvent(new Event('selectionchange'));
+      document.dispatchEvent(new MouseEvent('mousedown'));
       // clear `drag preview`
       if (type === 'block:drag') {
         this._container.components.dragHandle?.onDragEnd(
