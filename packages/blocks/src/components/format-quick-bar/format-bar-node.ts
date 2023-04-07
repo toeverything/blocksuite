@@ -80,7 +80,9 @@ function ParagraphPanel(
   models: BaseBlockModel[],
   positionUpdated: Slot,
   onHover: () => void,
-  onHoverEnd: () => void
+  onHoverEnd: () => void,
+  onUpdateModels: (models: BaseBlockModel[]) => void,
+  onParagraphTypeChange: (type: ParagraphType) => void
 ) {
   if (showParagraphPanel === 'hidden') {
     return html``;
@@ -117,8 +119,8 @@ function ParagraphPanel(
         });
       });
     }
-    models = newModels;
-    paragraphType = `${targetFlavour}/${targetType}`;
+    onUpdateModels(newModels);
+    onParagraphTypeChange(`${targetFlavour}/${targetType}`);
     positionUpdated.emit();
   };
 
@@ -274,15 +276,6 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     }
 
     const databaseAction = DatabaseAction(this.page);
-    const paragraphPanel = ParagraphPanel(
-      this._showParagraphPanel,
-      this.paragraphPanelMaxHeight,
-      this._paragraphType,
-      this.models,
-      this.positionUpdated,
-      this._onHover,
-      this._onHoverEnd
-    );
 
     const paragraphIcon =
       paragraphConfig.find(
@@ -297,6 +290,17 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
+    const paragraphPanel = ParagraphPanel(
+      this._showParagraphPanel,
+      this.paragraphPanelMaxHeight,
+      this._paragraphType,
+      this.models,
+      this.positionUpdated,
+      this._onHover,
+      this._onHoverEnd,
+      newModels => (this.models = newModels),
+      paragraphType => (this._paragraphType = paragraphType)
+    );
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
