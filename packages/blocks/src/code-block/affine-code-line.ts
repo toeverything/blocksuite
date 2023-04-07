@@ -7,6 +7,7 @@ import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { queryCurrentMode, ShadowlessElement } from '../std.js';
+import { DARK_THEME, LIGHT_THEME } from './utils/constant.js';
 import {
   highlightCache,
   type highlightCacheKey,
@@ -55,7 +56,7 @@ export class AffineCodeLine extends ShadowlessElement {
       tokens = highlighter.codeToThemedTokens(
         this.delta.insert,
         lang,
-        mode === 'dark' ? 'github-dark' : 'github-light'
+        mode === 'dark' ? DARK_THEME : LIGHT_THEME
       )[0];
       highlightCache.set(cacheKey, tokens);
     }
