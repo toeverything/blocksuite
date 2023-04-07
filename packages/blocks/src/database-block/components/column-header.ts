@@ -251,6 +251,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
   private _dragPreview: DragPreview | null = null;
   private _indicator: DragIndicator | null = null;
   private _dragIndex = 0;
+  private _targetIndex = 0;
   private _headerColumns: HTMLElement[] = [];
 
   setEditingColumnId = (id: string) => {
@@ -533,10 +534,10 @@ export class DatabaseColumnHeader extends ShadowlessElement {
         titleColumnWidth: columnWidth,
       });
     } else {
-      const schemaId = this.targetModel.columns[index - 1];
-      const schemaProps = this.targetModel.page.db.getColumn(schemaId);
+      const columnId = this.targetModel.columns[index - 1];
+      const columnProps = this.targetModel.page.db.getColumn(columnId);
       this.targetModel.page.db.updateColumn({
-        ...schemaProps,
+        ...columnProps,
         width: columnWidth,
       });
     }
@@ -560,29 +561,21 @@ export class DatabaseColumnHeader extends ShadowlessElement {
 
       // init drag event
       disposables.addFromEvent(moveElement, 'dragstart', (event: DragEvent) =>
-        this._onColumnMoveMousedown(event, index)
+        this._onColumnDragStart(event, index)
       );
-      disposables.addFromEvent(
-        moveElement,
-        'drag',
-        this._onColumnMoveMousemove
-      );
-      disposables.addFromEvent(
-        moveElement,
-        'dragend',
-        this._onColumnMoveMouseup
-      );
+      disposables.addFromEvent(moveElement, 'drag', this._onColumnDrag);
+      disposables.addFromEvent(moveElement, 'dragend', this._onColumnDragEnd);
     });
   }
-  private _onColumnMoveMousedown = (event: DragEvent, index: number) => {
+  private _onColumnDragStart = (event: DragEvent, index: number) => {
     assertExists(event.dataTransfer);
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', index + 1 + '');
 
-    // this._dragIndex = index + 1;
+    this._dragIndex = index;
     this._headerColumns = Array.from<HTMLElement>(
       this._headerContainer.querySelectorAll('.affine-database-column')
     ).filter(column => !column.classList.contains('add-column-button'));
+    console.log(this._headerColumns);
     this._createDragPreview(event);
   };
   private _createDragPreview(event: DragEvent) {
@@ -611,7 +604,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     // event.dataTransfer.setDragImage(img, 0, 0);
     this._dragPreview = dragPreview;
   }
-  private _onColumnMoveMousemove = (event: DragEvent) => {
+  private _onColumnDrag = (event: DragEvent) => {
     const x = event.clientX;
     const y = event.clientY;
     if (
@@ -632,20 +625,17 @@ export class DatabaseColumnHeader extends ShadowlessElement {
 
     assertExists(this._dragPreview);
     const point = new Point(x, y);
-
     const { element, index: targetIndex } = this._getClosestElement(point);
     const elementRect = element.getBoundingClientRect();
-    const dragIndex = event.dataTransfer?.getData('text/plain');
-    assertExists(dragIndex);
+    // both side of drag element should hide the indicator
     const rect =
-      +dragIndex === targetIndex
+      this._dragIndex === targetIndex || this._dragIndex === targetIndex - 1
         ? null
         : new DOMRect(elementRect.right, elementRect.top, 1, 100);
 
-    console.log(dragIndex, targetIndex);
-
     this._indicator.cursorPosition = point;
     this._indicator.targetRect = rect;
+    this._targetIndex = targetIndex - 1;
   };
   private _getClosestElement(point: Point): {
     element: HTMLElement;
@@ -684,11 +674,41 @@ export class DatabaseColumnHeader extends ShadowlessElement {
       index,
     };
   }
-  private _onColumnMoveMouseup = (event: DragEvent) => {
-    console.log('mouseup');
+  private _onColumnDragEnd = (event: DragEvent) => {
     if (this._dragPreview) {
       this._dragPreview.remove();
       this._dragPreview = null;
+    }
+
+    const fromIndex = this._dragIndex;
+    const toIndex = this._targetIndex + 1;
+    if (
+      // self
+      fromIndex === toIndex - 1 ||
+      // same position
+      fromIndex === toIndex
+    ) {
+      return;
+    }
+    // console.log('from', fromIndex, 'to', toIndex);
+
+    this.targetModel.page.captureSync();
+    const columns = [...this.targetModel.columns];
+    // move column
+    const column = columns[fromIndex];
+    columns.splice(fromIndex, 1);
+    columns.splice(toIndex, 0, column);
+
+    this.targetModel.page.updateBlock(this.targetModel, {
+      columns,
+    });
+
+    this._dragIndex = -1;
+    this._targetIndex = -1;
+    this._headerColumns = [];
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
     }
   };
 
@@ -708,7 +728,7 @@ export class DatabaseColumnHeader extends ShadowlessElement {
     const editColumn = new EditColumnPopup();
     editColumn.setTitleColumnEditId = this.setEditingColumnId;
     editColumn.targetModel = this.targetModel;
-    editColumn.targetColumnSchema = column;
+    editColumn.targetColumn = column;
     editColumn.columnIndex = index - 1;
     editColumn.closePopup = () => {
       editColumn.remove();

@@ -21,7 +21,7 @@ export abstract class DatabaseCellElement<Value> extends LitElement {
   @property()
   rowModel!: BaseBlockModel;
   @property()
-  columnSchema!: Column;
+  column!: Column;
   @property()
   cell!: Cell | null;
 }

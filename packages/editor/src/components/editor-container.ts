@@ -12,7 +12,7 @@ import {
   getServiceOrRegister,
   ShadowlessElement,
 } from '@blocksuite/blocks';
-import { type Page, Slot } from '@blocksuite/store';
+import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -80,8 +80,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   connectedCallback() {
     super.connectedCallback();
 
-    // Question: Why do we prevent this?
-    this._disposables.addFromEvent(window, 'keydown', e => {
+    const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
         e.preventDefault();
       }
@@ -103,7 +102,14 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
         return;
       }
       selection.removeAllRanges();
-    });
+    };
+
+    // Question: Why do we prevent this?
+    if (isFirefox) {
+      this._disposables.addFromEvent(document.body, 'keydown', keydown);
+    } else {
+      this._disposables.addFromEvent(window, 'keydown', keydown);
+    }
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
@@ -129,7 +135,9 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
-        this.requestUpdate();
+        // add the 'page' as requesting property to
+        // make sure the `forwardSlot` is called in `updated` lifecycle
+        this.requestUpdate('page');
       })
     );
     this._disposables.add(

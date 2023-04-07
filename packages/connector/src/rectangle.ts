@@ -1,3 +1,5 @@
+export type Direction = 'left' | 'top' | 'right' | 'bottom';
+
 export class Rectangle {
   readonly id = Math.random().toString(16).slice(2);
   x: number;
@@ -41,26 +43,29 @@ export class Rectangle {
     return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
   }
 
-  relativeDirection(x: number, y: number): 'left' | 'top' | 'right' | 'bottom' {
-    const c = {
+  relativeDirection(x: number, y: number) {
+    const directionValues: Record<Direction, number> = {
       left: Math.abs(x - this.x),
       right: Math.abs(x - this.x - this.w),
       top: Math.abs(y - this.y),
       bottom: Math.abs(y - this.y - this.h),
     };
-    let min: number;
-    let d = 'top';
-    Object.entries(c).forEach(([k, v]) => {
-      if (min === undefined) {
-        min = v;
-        d = k;
-      } else {
-        if (v < min) {
+
+    let min!: number;
+    let d = 'top' as Direction;
+    (Object.entries(directionValues) as [Direction, number][]).forEach(
+      ([k, v]) => {
+        if (min === undefined) {
           min = v;
           d = k;
+        } else {
+          if (v < min) {
+            min = v;
+            d = k;
+          }
         }
       }
-    });
-    return d as 'left' | 'top' | 'right' | 'bottom';
+    );
+    return d;
   }
 }

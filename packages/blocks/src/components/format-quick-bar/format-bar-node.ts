@@ -4,6 +4,7 @@ import {
   ArrowDownIcon,
   type BlockConfig,
   CopyIcon,
+  DatabaseTableViewIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -13,7 +14,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { restoreSelection } from '../../__internal__/utils/block-range.js';
+import {
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import {
   getRichTextByModel,
   WithDisposable,
@@ -25,8 +29,120 @@ import {
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
+import { showDatabaseModal } from '../database-modal/index.js';
 import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
+
+type ParagraphType = `${string}/${string}`;
+type ParagraphPanelType = 'top' | 'bottom' | 'hidden';
+
+const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
+
+function DatabaseAction(page: Page) {
+  const range = getCurrentBlockRange(page);
+
+  const isShow = range?.type === 'Block';
+  if (!isShow) return null;
+
+  const enabled = range.models.every(model =>
+    DATABASE_WHITE_LIST.includes(model.flavour)
+  );
+
+  const onClick = () => {
+    if (enabled) {
+      showDatabaseModal({
+        page,
+      });
+    }
+  };
+
+  // TODO: add `Learn more` link
+  const toolTip = enabled
+    ? html` <tool-tip inert role="tooltip">To Database</tool-tip>`
+    : html`<tool-tip tip-position="top" inert role="tooltip"
+        >Contains Block types that cannot be converted to Database. Learn
+        more</tool-tip
+      >`;
+  return html`<format-bar-button
+    ?disabled=${!enabled}
+    class="has-tool-tip"
+    data-testid="convert-to-database"
+    @click=${onClick}
+  >
+    ${DatabaseTableViewIcon}${toolTip}
+  </format-bar-button>`;
+}
+
+function ParagraphPanel(
+  showParagraphPanel: ParagraphPanelType,
+  paragraphPanelMaxHeight: string | null,
+  paragraphType: ParagraphType,
+  models: BaseBlockModel[],
+  positionUpdated: Slot,
+  onHover: () => void,
+  onHoverEnd: () => void,
+  onUpdateModels: (models: BaseBlockModel[]) => void,
+  onParagraphTypeChange: (type: ParagraphType) => void
+) {
+  if (showParagraphPanel === 'hidden') {
+    return html``;
+  }
+  const styles = styleMap({
+    left: '0',
+    top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
+    bottom: showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
+    maxHeight: paragraphPanelMaxHeight,
+  });
+  const updateParagraphType = (
+    flavour: BlockConfig['flavour'],
+    type?: string
+  ) => {
+    // Already in the target format, should convert back to text
+    const alreadyTargetType = paragraphType === `${flavour}/${type}`;
+    const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+    const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
+    const targetType = alreadyTargetType ? defaultType : type;
+    const newModels = updateBlockType(models, targetFlavour, targetType);
+
+    // Reset selection if the target is code block
+    if (targetFlavour === 'affine:code') {
+      if (newModels.length !== 1) {
+        throw new Error("Failed to reset selection! New model length isn't 1");
+      }
+      const codeModel = newModels[0];
+      onModelElementUpdated(codeModel, () => {
+        restoreSelection({
+          type: 'Block',
+          startOffset: 0,
+          endOffset: codeModel.text?.length ?? 0,
+          models: [codeModel],
+        });
+      });
+    }
+    onUpdateModels(newModels);
+    onParagraphTypeChange(`${targetFlavour}/${targetType}`);
+    positionUpdated.emit();
+  };
+
+  return html` <div
+    class="paragraph-panel"
+    style="${styles}"
+    @mouseover="${onHover}"
+    @mouseout="${onHoverEnd}"
+  >
+    ${paragraphConfig.map(
+      ({ flavour, type, name, icon }) => html`<format-bar-button
+        width="100%"
+        style="padding-left: 12px; justify-content: flex-start;"
+        text="${name}"
+        data-testid="${flavour}/${type}"
+        @click="${() => updateParagraphType(flavour, type)}"
+      >
+        ${icon}
+      </format-bar-button>`
+    )}
+  </div>`;
+}
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
@@ -52,7 +168,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   models: BaseBlockModel[] = [];
 
   @state()
-  private _paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
+  private _paragraphType: ParagraphType = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
   private _paragraphPanelHoverDelay = 150;
@@ -61,7 +177,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   private _paragraphPanelTimer = 0;
 
   @state()
-  private _showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+  private _showParagraphPanel: ParagraphPanelType = 'hidden';
 
   paragraphPanelMaxHeight: string | null = null;
 
@@ -147,69 +263,6 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     toast('Copied to clipboard');
   }
 
-  private _paragraphPanelTemplate() {
-    if (this._showParagraphPanel === 'hidden') {
-      return html``;
-    }
-    const styles = styleMap({
-      left: '0',
-      top: this._showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: this._showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
-      maxHeight: this.paragraphPanelMaxHeight,
-    });
-    const updateParagraphType = (
-      flavour: BlockConfig['flavour'],
-      type?: string
-    ) => {
-      // Already in the target format, should convert back to text
-      const alreadyTargetType = this._paragraphType === `${flavour}/${type}`;
-      const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
-      const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
-      const targetType = alreadyTargetType ? defaultType : type;
-      const newModels = updateBlockType(this.models, targetFlavour, targetType);
-
-      // Reset selection if the target is code block
-      if (targetFlavour === 'affine:code') {
-        if (newModels.length !== 1) {
-          throw new Error(
-            "Failed to reset selection! New model length isn't 1"
-          );
-        }
-        const codeModel = newModels[0];
-        onModelElementUpdated(codeModel, () => {
-          restoreSelection({
-            type: 'Block',
-            startOffset: 0,
-            endOffset: codeModel.text?.length ?? 0,
-            models: [codeModel],
-          });
-        });
-      }
-      this.models = newModels;
-      this._paragraphType = `${targetFlavour}/${targetType}`;
-      this.positionUpdated.emit();
-    };
-
-    return html` <div
-      class="paragraph-panel"
-      style="${styles}"
-      @mouseover="${this._onHover}"
-      @mouseout="${this._onHoverEnd}"
-    >
-      ${paragraphConfig.map(
-        ({ flavour, type, name, icon }) => html` <format-bar-button
-          width="100%"
-          style="padding-left: 12px; justify-content: flex-start;"
-          text="${name}"
-          data-testid="${flavour}/${type}"
-          @click="${() => updateParagraphType(flavour, type)}"
-        >
-          ${icon}
-        </format-bar-button>`
-      )}
-    </div>`;
-  }
-
   override render() {
     const page = this.page;
 
@@ -221,6 +274,9 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       );
       return html``;
     }
+
+    const databaseAction = DatabaseAction(this.page);
+
     const paragraphIcon =
       paragraphConfig.find(
         ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
@@ -234,7 +290,17 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
-    const paragraphPanel = this._paragraphPanelTemplate();
+    const paragraphPanel = ParagraphPanel(
+      this._showParagraphPanel,
+      this.paragraphPanelMaxHeight,
+      this._paragraphType,
+      this.models,
+      this.positionUpdated,
+      this._onHover,
+      this._onHoverEnd,
+      newModels => (this.models = newModels),
+      paragraphType => (this._paragraphType = paragraphType)
+    );
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
@@ -258,14 +324,17 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         </format-bar-button>`
       );
 
-    const actionItems = html` <format-bar-button
-      class="has-tool-tip"
-      data-testid="copy"
-      @click=${() => this._onCopy()}
-    >
-      ${CopyIcon}
-      <tool-tip inert role="tooltip">Copy</tool-tip>
-    </format-bar-button>`;
+    const actionItems = html`
+      <format-bar-button
+        class="has-tool-tip"
+        data-testid="copy"
+        @click=${() => this._onCopy()}
+      >
+        ${CopyIcon}
+        <tool-tip inert role="tooltip">Copy</tool-tip>
+      </format-bar-button>
+      ${databaseAction}
+    `;
 
     const styles = styleMap({
       left: this.left,

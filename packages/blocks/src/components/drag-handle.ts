@@ -1,7 +1,9 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  SelectionEvent,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type SelectionEvent,
+  ShadowlessElement,
+  WithDisposable,
 } from '@blocksuite/blocks/std';
 import {
   getBlockElementsExcludeSubtrees,
@@ -12,11 +14,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
-import {
-  assertExists,
-  DisposableGroup,
-  isFirefox,
-} from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -103,13 +101,9 @@ export class DragIndicator extends LitElement {
 }
 
 @customElement('affine-drag-preview')
-export class DragPreview extends LitElement {
+export class DragPreview extends ShadowlessElement {
   @property()
   offset = { x: 0, y: 0 };
-
-  createRenderRoot() {
-    return this;
-  }
 
   render() {
     return html`<style>
@@ -131,10 +125,25 @@ export class DragPreview extends LitElement {
         user-select: none;
         pointer-events: none;
         caret-color: transparent;
+        z-index: 2;
+      }
+
+      affine-drag-preview > .affine-block-element {
+        pointer-events: none;
       }
 
       affine-drag-preview > .affine-block-element:first-child > *:first-child {
         margin-top: 0;
+      }
+
+      affine-drag-preview .affine-rich-text {
+        user-modify: read-only;
+        -webkit-user-modify: read-only;
+      }
+
+      affine-drag-preview.grabbing {
+        cursor: grabbing;
+        pointer-events: auto;
       }
     </style>`;
   }
@@ -144,7 +153,7 @@ const DRAG_HANDLE_HEIGHT = 16; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
-export class DragHandle extends LitElement {
+export class DragHandle extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       top: 0;
@@ -187,7 +196,7 @@ export class DragHandle extends LitElement {
     container: HTMLElement;
     onDropCallback: (
       point: Point,
-      dragged: BlockComponentElement[],
+      draggingBlockElements: BlockComponentElement[],
       lastModelState: EditingState | null
     ) => void;
     setSelectedBlocks: (
@@ -264,8 +273,6 @@ export class DragHandle extends LitElement {
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
   private _dragPreview: DragPreview | null = null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
 
   private readonly _getClosestBlockElement: (point: Point) => Element | null;
 
@@ -399,7 +406,11 @@ export class DragHandle extends LitElement {
 
     // document
     if (isFirefox) {
-      disposables.addFromEvent(document, 'dragover', this._onDragOverDocument);
+      disposables.addFromEvent(
+        this._container,
+        'dragover',
+        this._onDragOverDocument
+      );
     }
 
     // document.body
@@ -418,9 +429,9 @@ export class DragHandle extends LitElement {
     disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
     disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
     disposables.addFromEvent(this._dragHandle, 'mouseup', this._onMouseUp);
-    disposables.addFromEvent(this._dragHandle, 'dragstart', this._onDragStart);
-    disposables.addFromEvent(this._dragHandle, 'drag', this._onDrag);
-    disposables.addFromEvent(this._dragHandle, 'dragend', this._onDragEnd);
+    disposables.addFromEvent(this._dragHandle, 'dragstart', this.onDragStart);
+    disposables.addFromEvent(this._dragHandle, 'drag', this.onDrag);
+    disposables.addFromEvent(this._dragHandle, 'dragend', this.onDragEnd);
   }
 
   disconnectedCallback() {
@@ -429,7 +440,6 @@ export class DragHandle extends LitElement {
     // cleanup
     this.hide();
 
-    this._disposables.dispose();
     this._handleAnchorDisposable?.dispose();
   }
 
@@ -488,11 +498,12 @@ export class DragHandle extends LitElement {
 
   private _createDragPreview(
     e: DragEvent,
-    draggingBlockElements: BlockComponentElement[]
+    blockElements: BlockComponentElement[],
+    grabbing = false
   ) {
     const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
-    const rect = draggingBlockElements[0].getBoundingClientRect();
+    const rect = blockElements[0].getBoundingClientRect();
 
     dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
     dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
@@ -503,11 +514,7 @@ export class DragHandle extends LitElement {
 
     const fragment = document.createDocumentFragment();
 
-    draggingBlockElements = getBlockElementsExcludeSubtrees(
-      draggingBlockElements
-    ) as BlockComponentElement[];
-
-    draggingBlockElements.forEach(e => {
+    blockElements.forEach(e => {
       const c = document.createElement('div');
       c.classList.add('affine-block-element');
       render(e.render(), c);
@@ -516,6 +523,10 @@ export class DragHandle extends LitElement {
 
     dragPreview.appendChild(fragment);
     this._container.appendChild(dragPreview);
+
+    if (grabbing) {
+      dragPreview.classList.add('grabbing');
+    }
 
     requestAnimationFrame(() => {
       dragPreview.querySelector('rich-text')?.vEditor?.rootElement.blur();
@@ -585,37 +596,42 @@ export class DragHandle extends LitElement {
     this._currentClientY = e.clientY;
   };
 
-  private _onDragStart = (e: DragEvent) => {
-    if (this._dragPreview || !this._handleAnchorState || !e.dataTransfer) {
-      return;
+  onDragStart = (e: DragEvent, draggable = false) => {
+    if (this._dragPreview || !e.dataTransfer) return;
+
+    let draggingBlockElements = this.selectedBlocks;
+
+    if (
+      this._handleAnchorState &&
+      !draggingBlockElements.includes(this._handleAnchorState.element)
+    ) {
+      draggingBlockElements = [this._handleAnchorState.element];
     }
 
+    if (!draggingBlockElements.length) return;
+
     e.dataTransfer.effectAllowed = 'move';
-
-    const selectedBlocks = this.selectedBlocks;
-
-    const included = selectedBlocks.includes(this._handleAnchorState.element);
 
     // TODO: clear selection
     // if (!included) {
     // }
 
-    const draggingBlockElements = (
-      included
-        ? getBlockElementsExcludeSubtrees(this.selectedBlocks)
-        : [this._handleAnchorState.element]
-    ) as BlockComponentElement[];
-
-    this._createDragPreview(e, draggingBlockElements);
+    this._createDragPreview(
+      e,
+      getBlockElementsExcludeSubtrees(
+        draggingBlockElements
+      ) as BlockComponentElement[],
+      draggable
+    );
     this._draggingElements = draggingBlockElements;
   };
 
   // TODO: automatic scrolling when top and bottom boundaries are reached
-  private _onDrag = (e: DragEvent) => {
+  onDrag = (e: DragEvent, passed?: boolean) => {
     this._dragHandle.style.cursor = 'grabbing';
     let x = e.clientX;
     let y = e.clientY;
-    if (isFirefox) {
+    if (!passed && isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
       x = this._currentClientX;
@@ -667,14 +683,15 @@ export class DragHandle extends LitElement {
     this._indicator.cursorPosition = point;
   };
 
-  private _onDragEnd = (e: DragEvent) => {
+  onDragEnd = (e: DragEvent, passed?: boolean) => {
     this._stopPropagation = false;
+
     const dropEffect = e.dataTransfer?.dropEffect ?? 'none';
 
     this._removeDragPreview();
 
     // `Esc`
-    if (dropEffect === 'none') {
+    if (!passed && dropEffect === 'none') {
       this.hide();
       return;
     }

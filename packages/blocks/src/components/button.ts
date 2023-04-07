@@ -30,6 +30,12 @@ export class IconButton extends LitElement {
       pointer-events: auto;
     }
 
+    :host > span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
     :host(:hover) {
       background: var(--affine-hover-background);
       fill: var(--affine-primary-color);
@@ -45,7 +51,7 @@ export class IconButton extends LitElement {
     :host([disabled]),
     :host(:disabled) {
       background: transparent;
-      color: var(--affine-popover-color);
+      color: var(--affine-disable-color);
       fill: var(--affine-icon-color);
       cursor: not-allowed;
     }
@@ -125,7 +131,7 @@ export class IconButton extends LitElement {
 
   override render() {
     return html`<slot></slot>${this.text
-        ? html`<span style="margin-left: 12px;">${this.text}</span>`
+        ? html`<span>${this.text}</span>`
         : ''}`;
   }
 }

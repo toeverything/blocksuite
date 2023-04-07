@@ -14,6 +14,7 @@ export class FormatBarButton extends IconButton {
       fill: var(--affine-icon-color);
       white-space: nowrap;
       user-select: none;
+      gap: 8px;
     }
   `;
 

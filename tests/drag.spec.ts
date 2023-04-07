@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  dragBetweenCoords,
   dragBetweenIndices,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
@@ -378,9 +379,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
@@ -474,9 +473,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
@@ -588,9 +585,7 @@ test('should create preview when dragging', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(
@@ -623,51 +618,33 @@ test('should cover all selected blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const blockSelections = page.locator('affine-page-selected-rects > *');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');
   const dragHandleHover = page.locator('.affine-drag-handle-hover');
 
-  await editors.nth(0).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeVisible();
-
-  await editors.nth(1).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeVisible();
-
-  await editors.nth(2).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-  await expect(dragHandleHover).toBeHidden();
-
-  await editors.nth(0).hover({
-    position: {
-      x: 10,
-      y: 10,
-    },
-  });
-
-  await dragHandleHover.hover();
-
   const editorRect0 = await editors.nth(0).boundingBox();
   const editorRect1 = await editors.nth(1).boundingBox();
+  const editorRect2 = await editors.nth(2).boundingBox();
+  if (!editorRect0 || !editorRect1 || !editorRect2) {
+    throw new Error();
+  }
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect1.x + 10, editorRect1.y + 10);
+  await expect(dragHandleHover).toBeVisible();
+
+  await page.mouse.move(editorRect2.x + 10, editorRect2.y + 10);
+  await expect(dragHandleHover).toBeHidden();
+
+  await page.mouse.move(editorRect0.x + 10, editorRect0.y + 10);
+  await dragHandleHover.hover();
+
   const dragHandleRect = await page.locator('affine-drag-handle').boundingBox();
-  if (!editorRect0 || !editorRect1 || !dragHandleRect) {
+  if (!dragHandleRect) {
     throw new Error();
   }
 
@@ -675,4 +652,91 @@ test('should cover all selected blocks', async ({ page }) => {
   expect(dragHandleRect.y + dragHandleRect.height).toBeGreaterThanOrEqual(
     editorRect1.y + editorRect1.height
   );
+});
+
+test('should drag and drop blocks under block-level selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect2 = await editors.nth(2).boundingBox();
+  if (!editorRect0 || !editorRect2) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: editorRect0.x + editorRect0.width / 2,
+      y: editorRect0.y + editorRect0.height / 2,
+    },
+    {
+      x: editorRect2.x + editorRect2.width / 2,
+      y: editorRect2.y + editorRect2.height / 2 + 1,
+    },
+    {
+      steps: 50,
+    }
+  );
+
+  await assertRichTexts(page, ['789', '123', '456']);
+  await expect(blockSelections).toHaveCount(2);
+});
+
+test('should trigger click event on editor container when clicking on blocks under block-level selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -80, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(2);
+  await expect(page.locator('*:focus')).toHaveCount(0);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  if (!editorRect0) {
+    throw new Error();
+  }
+
+  await page.mouse.move(
+    editorRect0.x + 5,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+  await expect(blockSelections).toHaveCount(0);
+  await expect(page.locator('*:focus')).toHaveCount(1);
 });

@@ -8,7 +8,9 @@ import {
   doesInSamePath,
   getBlockElementById,
   getBlockElementByModel,
+  getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
+  getModelByBlockElement,
   isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
@@ -499,11 +501,13 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blocks, editingState): void {
+    onDropCallback(point, blockElements, editingState): void {
       if (!editingState) return;
       const { rect, model, element } = editingState;
       const page = defaultPageBlock.page;
-      const models = blocks.map(b => b.model);
+      const models = getBlockElementsExcludeSubtrees(blockElements).map(
+        getModelByBlockElement
+      );
       if (models.length === 1 && doesInSamePath(page, model, models[0])) {
         return;
       }
@@ -531,11 +535,13 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
-        defaultPageBlock.selection.setSelectedBlocks(
-          blocks
-            .map(b => getBlockElementById(b.model.id))
-            .filter((b): b is BlockComponentElement => !!b)
-        );
+        requestAnimationFrame(() => {
+          defaultPageBlock.selection.setSelectedBlocks(
+            blockElements
+              .map(b => getBlockElementById(b.model.id))
+              .filter((b): b is BlockComponentElement => !!b)
+          );
+        });
       });
     },
     setSelectedBlocks(

@@ -70,6 +70,13 @@ async function initEmptyEditor(
     const editor = document.createElement('editor-container');
     editor.page = page;
     editor.autofocus = true;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const newPage = workspace.getPage(pageId);
+      if (!newPage) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = newPage;
+    });
 
     const debugMenu = document.createElement('debug-menu');
     debugMenu.workspace = workspace;
@@ -386,7 +393,8 @@ export async function initEmptyCodeBlockState(page: Page) {
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  await locator.click();
+  // need to set `force` to true when clicking on `affine-page-selected-rects`
+  await locator.click({ force: true });
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {
@@ -747,4 +755,13 @@ export async function initImageState(page: Page) {
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
+}
+
+export async function getCurrentEditorPageId(page: Page) {
+  return await page.evaluate(() => {
+    const editor = document.querySelector('editor-container');
+    if (!editor) throw new Error("Can't find editor-container");
+    const pageId = editor.page.id;
+    return pageId;
+  });
 }

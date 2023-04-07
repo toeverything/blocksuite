@@ -51,11 +51,8 @@ function capMousedown(
       ? new Rectangle(...deserializeXYWH(getXYWH(picked)))
       : null;
 
-    const { point: newPoint, direction: startDirection } = getAttachedPoint(
-      modelX,
-      modelY,
-      newRect
-    );
+    const { point: newPoint, position: attachedPointPosition } =
+      getAttachedPoint(modelX, modelY, newRect);
 
     let routes: Point[];
     if (position === 'start') {
@@ -94,15 +91,17 @@ function capMousedown(
 
     if (position === 'start') {
       surface.updateConnectorElement(element.id, bound, controllers, {
-        startElement: picked
-          ? { id: picked.id, direction: startDirection }
-          : undefined,
+        startElement:
+          picked && attachedPointPosition
+            ? { id: picked.id, position: attachedPointPosition }
+            : undefined,
       });
     } else {
       surface.updateConnectorElement(element.id, bound, controllers, {
-        endElement: picked
-          ? { id: picked.id, direction: startDirection }
-          : undefined,
+        endElement:
+          picked && attachedPointPosition
+            ? { id: picked.id, position: attachedPointPosition }
+            : undefined,
       });
     }
 
