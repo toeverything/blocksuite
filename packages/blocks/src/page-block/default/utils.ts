@@ -11,7 +11,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
-  getRectByBlockElement,
   isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
