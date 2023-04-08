@@ -163,6 +163,15 @@ export class DebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
+  private _toggleDarkMode() {
+    const html = document.documentElement;
+    const colorScheme = html.getAttribute('data-color-scheme');
+    html.setAttribute(
+      'data-color-scheme',
+      colorScheme === 'default' ? 'dark' : 'default'
+    );
+  }
+
   private _addFrame() {
     const root = this.page.root;
     if (!root) return;
@@ -235,6 +244,10 @@ export class DebugMenu extends ShadowlessElement {
       });
     });
     this._styleMenu.hide();
+
+    const darkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+    const colorScheme = darkMQL.matches ? 'dark' : 'default';
+    document.documentElement.setAttribute('data-color-scheme', colorScheme);
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -481,6 +494,17 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
+
+          <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Toggle Dark Mode"
+              @click=${this._toggleDarkMode}
+            >
+              <sl-icon name="back"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,

@@ -23,14 +23,12 @@
         margin-top: 78px;
       }
 
-      @media (prefers-color-scheme: dark) {
-        :root {
-          filter: invert(1) hue-rotate(180deg);
-        }
-        img,
-        video {
-          filter: invert(1) hue-rotate(-180deg);
-        }
+      :root[data-color-scheme='dark'] {
+        filter: invert(1) hue-rotate(180deg);
+      }
+      :root[data-color-scheme='dark'] img,
+      :root[data-color-scheme='dark'] video {
+        filter: invert(1) hue-rotate(-180deg);
       }
     </style>
   </head>
