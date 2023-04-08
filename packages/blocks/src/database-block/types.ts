@@ -49,3 +49,14 @@ export type SelectTagAction = ActionMenuItem<SelectTagActionType> | Divider;
 export type ToolbarAction = ActionMenuItem<ToolbarActionType> | Divider;
 
 export type SwitchViewAction = ActionMenuItem<SwitchViewActionType>;
+
+export const enum SearchState {
+  /** show search input */
+  SearchInput = 'input',
+  /** show search icon */
+  SearchIcon = 'icon',
+  /** searching */
+  Searching = 'searching',
+  /** show more action */
+  Action = 'action',
+}
