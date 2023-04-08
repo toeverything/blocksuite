@@ -1,9 +1,10 @@
 import {
+  handleNativeRangeAtPoint,
+  noop,
   Point,
   type SelectionEvent,
   type TextMouseMode,
 } from '@blocksuite/blocks/std';
-import { handleNativeRangeAtPoint, noop } from '@blocksuite/blocks/std';
 
 import { DEFAULT_FRAME_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
