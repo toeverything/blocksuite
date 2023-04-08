@@ -4,7 +4,7 @@ import {
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
-  getSelectedStateRectByBlockElement,
+  getRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
   noop,
@@ -246,7 +246,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
-        rect: getSelectedStateRectByBlockElement(element),
+        rect: getRectByBlockElement(element),
       };
       this._edgeless.components.dragHandle?.onContainerMouseMove(
         e,

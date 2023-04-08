@@ -1,15 +1,15 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  Point,
-} from '@blocksuite/blocks/std';
 import {
+  type BlockComponentElement,
   doesInSamePath,
+  type EditingState,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
+  getClosestFrameBlockElementById,
   getHoveringFrame,
   getModelByBlockElement,
+  getRectByBlockElement,
   isInEmptyDatabaseByPoint,
+  type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/store';
@@ -22,23 +22,37 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
     onDropCallback(point, blockElements, editingState) {
+      const blockElementsExcludeSubtrees =
+        getBlockElementsExcludeSubtrees(blockElements);
+      if (!blockElementsExcludeSubtrees.length) return;
+
+      const models = blockElementsExcludeSubtrees.map(getModelByBlockElement);
+      if (!models.length) return;
+
       const page = pageBlock.page;
-      const models = getBlockElementsExcludeSubtrees(blockElements).map(
-        getModelByBlockElement
-      );
+
       if (editingState) {
         const { rect, model, element } = editingState;
         if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
 
-        let parentId;
+        const focusId = models[0].id;
+        const targetFrameBlock = getClosestFrameBlockElementById(
+          model.id,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(targetFrameBlock);
+        const frameBlock = getClosestFrameBlockElementById(
+          focusId,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(frameBlock);
 
         page.captureSync();
 
         if (isInEmptyDatabaseByPoint(point, model, element, models)) {
           page.moveBlocks(models, model);
-          parentId = model.id;
         } else {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
@@ -50,16 +64,26 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
             model,
             distanceToTop < distanceToBottom
           );
-          parentId = parent.id;
         }
 
-        pageBlock.setSelectionByBlockId(parentId, true);
+        if (targetFrameBlock !== frameBlock) {
+          pageBlock.setSelection(
+            targetFrameBlock.model.id,
+            true,
+            focusId,
+            point
+          );
+        }
         return;
       }
 
       // blank area
       page.captureSync();
-      pageBlock.moveBlocksToNewFrame(models, point);
+      pageBlock.moveBlocksToNewFrame(
+        models,
+        point,
+        getRectByBlockElement(blockElementsExcludeSubtrees[0])
+      );
     },
     setSelectedBlocks(
       selectedBlocks: EditingState | BlockComponentElement[] | null
