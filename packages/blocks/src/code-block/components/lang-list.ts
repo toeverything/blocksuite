@@ -1,7 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
@@ -52,6 +51,13 @@ export class LangList extends ShadowlessElement {
         margin-bottom: 5px;
       }
 
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        margin-top: 8px;
+        margin-left: 4px;
+      }
+
       #filter-input {
         display: flex;
         align-items: center;
@@ -79,9 +85,12 @@ export class LangList extends ShadowlessElement {
       }
 
       .search-icon {
-        left: 13.65px;
         position: absolute;
-        top: 16px;
+        left: 8px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        fill: var(--affine-icon-color);
       }
     `;
   }
@@ -138,15 +147,9 @@ export class LangList extends ShadowlessElement {
       return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
-    const styles = styleMap({
-      display: 'flex',
-      'padding-top': '8px',
-      'padding-left': '4px',
-    });
-
     return html`
       <div class="lang-list-container">
-        <div style="${styles}">
+        <div class="input-wrapper">
           <div class="search-icon">${SearchIcon}</div>
           <input
             id="filter-input"

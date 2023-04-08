@@ -18,8 +18,15 @@
       * {
         box-sizing: border-box;
       }
+
       .affine-default-page-block-title-container {
         margin-top: 78px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          filter: invert(1) hue-rotate(180deg);
+        }
       }
     </style>
   </head>
