@@ -58,8 +58,8 @@ class ColumnDragPreview extends ShadowlessElement {
           border-bottom: 1px solid #e3e2e4;
           background: #f3f0ff;
         }
-        .preview-column-header .affine-database-column-move {
-          visibility: visible;
+        .preview-column-header .affine-database-column-move svg {
+          opacity: 1;
         }
         .preview-column-header .affine-database-column-move circle {
           fill: #5438ff;
@@ -256,15 +256,15 @@ const styles = css`
   .affine-database-column-move {
     display: flex;
     align-items: center;
-    visibility: hidden;
   }
   .affine-database-column-move svg {
     width: 10px;
     height: 14px;
     cursor: move;
+    opacity: 0;
   }
-  .affine-database-column-content:hover .affine-database-column-move {
-    visibility: visible;
+  .affine-database-column-content:hover svg {
+    opacity: 1;
   }
 
   .affine-database-add-column-button {
