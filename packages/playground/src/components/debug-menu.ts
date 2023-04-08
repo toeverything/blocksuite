@@ -523,7 +523,6 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-button size="small" @click=${this._toggleDarkMode}>
-            ${this._dark ? 'dark' : 'light'}
             <sl-icon
               name=${this._dark ? 'brightness-high' : 'moon'}
               label=${this._dark ? 'light' : 'dark'}
