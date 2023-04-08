@@ -628,7 +628,7 @@ test('should display the add column button on the right side of database correct
   await expect(addColumnBtn).toBeHidden();
 });
 
-test.only('should support drag and drop to move columns', async ({ page }) => {
+test('should support drag and drop to move columns', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
