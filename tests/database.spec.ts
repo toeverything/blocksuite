@@ -13,6 +13,7 @@ import {
   focusRichText,
   getBlockModel,
   getBoundingBox,
+  getDatabaseHeaderColumn,
   getDatabaseMouse,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -625,4 +626,42 @@ test('should display the add column button on the right side of database correct
 
   await undoByClick(page);
   await expect(addColumnBtn).toBeHidden();
+});
+
+test.only('should support drag and drop to move columns', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page, 'column1');
+  await initDatabaseColumn(page, 'column2');
+  await initDatabaseColumn(page, 'column3');
+
+  const column1 = await focusDatabaseHeader(page, 1);
+  const moveIcon = column1.locator('.affine-database-column-move');
+  const moveIconBox = await getBoundingBox(moveIcon);
+  const x = moveIconBox.x + moveIconBox.width / 2;
+  const y = moveIconBox.y + moveIconBox.height / 2;
+
+  await dragBetweenCoords(
+    page,
+    { x, y },
+    { x: x + 100, y },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+        const indicator = page.locator(
+          '.affine-database-column-drag-indicator'
+        );
+        await expect(indicator).toBeVisible();
+
+        const { box } = await getDatabaseHeaderColumn(page, 2);
+        const indicatorBox = await getBoundingBox(indicator);
+        expect(box.x + box.width).toBe(indicatorBox.x);
+      },
+    }
+  );
+
+  const { text } = await getDatabaseHeaderColumn(page, 3);
+  expect(text).toBe('column1');
 });
