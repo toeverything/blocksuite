@@ -234,15 +234,16 @@ export function SingleConnectorHandles(
   const { controllers, mode } = element;
   const controllerHandles =
     mode === ConnectorMode.Orthogonal ? getControllerHandles(controllers) : [];
+  const zoom = surface.viewport.zoom;
   const start = {
     position: 'absolute',
-    left: `${controllers[0].x}px`,
-    top: `${controllers[0].y}px`,
+    left: `${controllers[0].x * zoom}px`,
+    top: `${controllers[0].y * zoom}px`,
   };
   const end = {
     position: 'absolute',
-    left: `${controllers[controllers.length - 1].x}px`,
-    top: `${controllers[controllers.length - 1].y}px`,
+    left: `${controllers[controllers.length - 1].x * zoom}px`,
+    top: `${controllers[controllers.length - 1].y * zoom}px`,
   };
   return html`
     <style>
@@ -279,8 +280,8 @@ export function SingleConnectorHandles(
       c => Math.random(),
       c => {
         const style = {
-          left: `${c.x}px`,
-          top: `${c.y}px`,
+          left: `${c.x * zoom}px`,
+          top: `${c.y * zoom}px`,
           cursor: c.isVertical ? 'col-resize' : 'row-resize',
         };
         return html`<div
