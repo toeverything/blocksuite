@@ -109,10 +109,11 @@ export async function focusDatabaseSearch(page: Page) {
   return searchIcon;
 }
 
-export async function focusDatabaseHeader(page: Page) {
-  const header = page.locator('.affine-database-column-header');
-  const box = await getBoundingBox(header);
+export async function focusDatabaseHeader(page: Page, columnIndex = 0) {
+  const column = page.locator('.affine-database-column').nth(columnIndex);
+  const box = await getBoundingBox(column);
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  return column;
 }
 
 export async function getDatabaseMouse(page: Page) {
@@ -124,5 +125,19 @@ export async function getDatabaseMouse(page: Page) {
     mouseLeave: async () => {
       await page.mouse.move(databaseRect.x - 1, databaseRect.y - 1);
     },
+  };
+}
+
+export async function getDatabaseHeaderColumn(page: Page, index = 0) {
+  const column = page.locator('.affine-database-column').nth(index);
+  const box = await getBoundingBox(column);
+  const text = await column
+    .locator('.affine-database-column-text-input')
+    .innerText();
+
+  return {
+    column,
+    box,
+    text,
   };
 }

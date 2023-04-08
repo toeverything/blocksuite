@@ -311,8 +311,7 @@ export async function initEmptyDatabaseWithParagraphState(
 
 export async function initDatabaseColumn(page: Page, title = '') {
   const header = page.locator('.affine-database-column-header');
-  const box = await header.boundingBox();
-  if (!box) throw new Error('Missing column type rect');
+  const box = await getBoundingBox(header);
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 
   const columnAddBtn = page.locator('.header-add-column-button');
