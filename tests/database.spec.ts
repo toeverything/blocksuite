@@ -88,11 +88,11 @@ test('edit column title', async ({ page }) => {
   await initDatabaseColumn(page, '1');
 
   // first added column
-  const columnTitle = page.locator('.affine-database-column').nth(1);
-  expect(await columnTitle.innerText()).toBe('1');
+  const { column } = await getDatabaseHeaderColumn(page, 1);
+  expect(await column.innerText()).toBe('1');
 
   await undoByClick(page);
-  expect(await columnTitle.innerText()).toBe('Column n');
+  expect(await column.innerText()).toBe('Column n');
 });
 
 test('should modify the value when the input loses focus', async ({ page }) => {
@@ -243,8 +243,7 @@ test('should support rename column', async ({ page }) => {
 
   await initDatabaseColumn(page, 'abc');
 
-  const columnTitle = page.locator('[data-column-id="3"]');
-  const title = columnTitle.locator('.affine-database-column-text-input');
+  const { textElement: title } = await getDatabaseHeaderColumn(page, 1);
   expect(await title.innerText()).toBe('abc');
 
   await performColumnAction(page, '3', 'rename');
@@ -413,7 +412,7 @@ test.describe('switch column type', () => {
     const cell = getFirstColumnCell(page, 'select-selected');
     expect(await cell.count()).toBe(2);
 
-    await switchColumnType(page, 'select', '3', true);
+    await switchColumnType(page, 'select', 1, true);
     expect(await cell.count()).toBe(1);
     expect(await cell.innerText()).toBe('123');
 

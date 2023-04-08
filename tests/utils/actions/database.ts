@@ -2,11 +2,27 @@ import type { ColumnType } from '@blocksuite/global/database';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import { assertClassName } from '../asserts.js';
+import { pressEnter, pressEscape, type } from './keyboard.js';
 import {
   getBoundingBox,
   getBoundingClientRect,
   waitNextFrame,
 } from './misc.js';
+
+export async function initDatabaseColumn(page: Page, title = '') {
+  await focusDatabaseHeader(page);
+  const columnAddBtn = page.locator('.header-add-column-button');
+  await columnAddBtn.click();
+  await waitNextFrame(page);
+
+  if (title) {
+    await type(page, title);
+    await waitNextFrame(page);
+    await pressEnter(page);
+  } else {
+    await pressEscape(page);
+  }
+}
 
 export async function performColumnAction(
   page: Page,
@@ -24,17 +40,17 @@ export async function performColumnAction(
 export async function switchColumnType(
   page: Page,
   columnType: ColumnType,
-  columnId = '3',
+  columnIndex = 1,
   isDefault = false
 ) {
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator(`[data-column-id="${columnId}"]`);
-  await columnTitle.click();
+  const { column } = await getDatabaseHeaderColumn(page, columnIndex);
+  await column.click();
 
+  await waitNextFrame(page);
   const action = page.locator('.column-type');
-  const box = await action.boundingBox();
-  if (!box) throw new Error('Missing column type rect');
-  page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const box = await getBoundingBox(action);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await waitNextFrame(page, 300);
 
   if (isDefault) {
     await assertClassName(
@@ -44,9 +60,7 @@ export async function switchColumnType(
     );
   }
 
-  const typeMenu = page.locator(
-    `.affine-database-column-type-popup .${columnType}`
-  );
+  const typeMenu = page.locator(`.action.${columnType}`);
   await typeMenu.click();
 }
 
@@ -113,6 +127,7 @@ export async function focusDatabaseHeader(page: Page, columnIndex = 0) {
   const column = page.locator('.affine-database-column').nth(columnIndex);
   const box = await getBoundingBox(column);
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await waitNextFrame(page);
   return column;
 }
 
@@ -131,13 +146,13 @@ export async function getDatabaseMouse(page: Page) {
 export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const column = page.locator('.affine-database-column').nth(index);
   const box = await getBoundingBox(column);
-  const text = await column
-    .locator('.affine-database-column-text-input')
-    .innerText();
+  const textElement = column.locator('.affine-database-column-text-input');
+  const text = await textElement.innerText();
 
   return {
     column,
     box,
     text,
+    textElement,
   };
 }
