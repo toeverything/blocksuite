@@ -42,3 +42,9 @@ export class ColumnDragIndicator extends LitElement {
     `;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-column-drag-indicator': ColumnDragIndicator;
+  }
+}

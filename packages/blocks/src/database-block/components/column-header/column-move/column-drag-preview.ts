@@ -1,4 +1,4 @@
-import { ShadowlessElement } from '@blocksuite/blocks/std.js';
+import { ShadowlessElement } from '@blocksuite/blocks/std';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -47,5 +47,11 @@ export class ColumnDragPreview extends ShadowlessElement {
         }
       </style>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-column-drag-preview': ColumnDragPreview;
   }
 }

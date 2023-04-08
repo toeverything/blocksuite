@@ -1,5 +1,5 @@
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import { Point } from '@blocksuite/blocks/std.js';
+import { Point } from '@blocksuite/blocks/std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
