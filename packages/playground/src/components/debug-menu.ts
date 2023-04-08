@@ -522,13 +522,14 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-button size="small" @click=${this._toggleDarkMode}>
-            <sl-icon
-              name=${this._dark ? 'brightness-high' : 'moon'}
-              label=${this._dark ? 'light' : 'dark'}
-            >
-            </sl-icon>
-          </sl-button>
+          <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
+            <sl-button size="small" @click=${this._toggleDarkMode}>
+              <sl-icon
+                name=${this._dark ? 'moon' : 'brightness-high'}
+              ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,
