@@ -1,5 +1,5 @@
 // related component
-import './components/column-header.js';
+import './components/column-header/column-header.js';
 import './components/cell-container.js';
 
 import {
@@ -30,7 +30,7 @@ import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { toast } from '../components/toast.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
-import type { DatabaseColumnHeader } from './components/column-header.js';
+import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { actionStyles } from './components/edit-column-popup.js';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_WIDTH } from './consts.js';
