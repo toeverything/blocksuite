@@ -68,7 +68,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-reference > span {
-      white-space: pre-wrap;
+      white-space: break-spaces;
     }
 
     .affine-reference-title::before {

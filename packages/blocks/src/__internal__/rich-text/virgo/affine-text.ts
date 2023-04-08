@@ -42,7 +42,7 @@ export function affineTextStyles(
 export class AffineText extends ShadowlessElement {
   static styles = css`
     affine-text {
-      white-space: pre-wrap;
+      white-space: break-spaces;
       word-break: break-word;
     }
   `;

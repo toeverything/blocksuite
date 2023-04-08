@@ -54,7 +54,7 @@ export class AffineLink extends ShadowlessElement {
     }
 
     a > v-text {
-      white-space: pre-wrap;
+      white-space: break-spaces;
     }
   `;
 

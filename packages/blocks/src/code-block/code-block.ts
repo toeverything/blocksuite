@@ -135,7 +135,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-code-block-container.wrap affine-code-line span {
-      white-space: pre-wrap;
+      white-space: break-spaces;
     }
 
     .affine-code-block-container .virgo-editor::-webkit-scrollbar {
