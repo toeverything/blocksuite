@@ -58,3 +58,4 @@ Example:
 - zhangyi, @hanchayi, 2023/03/16
 - Victor Nanka, @victornanka, 2023/03/21
 - Aditya Sharma, @adityash1, 2023/03/31
+- yuusheng, @yuusheng, 2023/04/04

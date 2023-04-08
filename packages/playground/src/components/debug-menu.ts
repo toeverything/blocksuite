@@ -95,12 +95,29 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _showTabMenu = false;
 
+  @state()
+  private _dark = false;
+
   get page() {
     return this.editor.page;
   }
 
   createRenderRoot() {
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    this._dark = matchMedia.matches;
+    if (this._dark) {
+      document.querySelector('html')?.classList.add('dark');
+    }
+    matchMedia.addEventListener('change', this._darkModeChange);
+
     return this;
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.removeEventListener('change', this._darkModeChange);
   }
 
   private _toggleConnection() {
@@ -208,6 +225,29 @@ export class DebugMenu extends ShadowlessElement {
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
+
+  private _toggleDarkMode() {
+    const html = document.querySelector('html');
+
+    this._dark = !this._dark;
+    if (this._dark) {
+      html?.classList.add('dark');
+    } else {
+      html?.classList.remove('dark');
+    }
+  }
+
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    const html = document.querySelector('html');
+
+    if (e.matches) {
+      this._dark = true;
+      html?.classList.add('dark');
+    } else {
+      this._dark = false;
+      html?.classList.remove('dark');
+    }
+  };
 
   firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
@@ -481,6 +521,14 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
+
+          <sl-button size="small" @click=${this._toggleDarkMode}>
+            <sl-icon
+              name=${this._dark ? 'brightness-high' : 'moon'}
+              label=${this._dark ? 'light' : 'dark'}
+            >
+            </sl-icon>
+          </sl-button>
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,
