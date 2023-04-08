@@ -200,7 +200,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _setChangingColumnIndex = (index: number) => {
-    console.log('setChangingColumnIndex', index);
     if (this._widthChangingIndex !== index) {
       this._widthChangingIndex = index;
     }
