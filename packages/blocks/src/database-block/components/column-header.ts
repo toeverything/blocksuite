@@ -55,8 +55,16 @@ class ColumnDragPreview extends ShadowlessElement {
 
         .preview-column-header {
           opacity: 0.8;
+          border-bottom: 1px solid #e3e2e4;
           background: #f3f0ff;
         }
+        .preview-column-header .affine-database-column-move {
+          visibility: visible;
+        }
+        .preview-column-header .affine-database-column-move circle {
+          fill: #5438ff;
+        }
+
         .preview-column-content {
           flex: 1;
           opacity: 0.8;
@@ -248,7 +256,7 @@ const styles = css`
   .affine-database-column-move {
     display: flex;
     align-items: center;
-    /* visibility: hidden; */
+    visibility: hidden;
   }
   .affine-database-column-move svg {
     width: 10px;
