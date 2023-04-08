@@ -1,13 +1,11 @@
-import type { SelectionEvent, TextMouseMode } from '@blocksuite/blocks/std';
-import { handleNativeRangeAtPoint, noop } from '@blocksuite/blocks/std';
-import { serializeXYWH } from '@blocksuite/phasor';
-
 import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_OFFSET_X,
-  DEFAULT_FRAME_OFFSET_Y,
-  DEFAULT_FRAME_WIDTH,
-} from '../utils.js';
+  Point,
+  type SelectionEvent,
+  type TextMouseMode,
+} from '@blocksuite/blocks/std';
+import { handleNativeRangeAtPoint, noop } from '@blocksuite/blocks/std';
+
+import { DEFAULT_FRAME_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class TextModeController extends MouseModeController<TextMouseMode> {
@@ -18,18 +16,9 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   private _dragStartEvent: SelectionEvent | null = null;
 
   private _addText(e: SelectionEvent, width = DEFAULT_FRAME_WIDTH) {
-    const [modelX, modelY] = this._surface.toModelCoord(e.x, e.y);
-    const frameId = this._page.addBlock(
-      'affine:frame',
-      {
-        xywh: serializeXYWH(
-          modelX - DEFAULT_FRAME_OFFSET_X,
-          modelY - DEFAULT_FRAME_OFFSET_Y,
-          width,
-          DEFAULT_FRAME_HEIGHT
-        ),
-      },
-      this._page.root?.id
+    const frameId = this._edgeless.addFrameWithPoint(
+      new Point(e.x, e.y),
+      width
     );
     this._page.addBlock('affine:paragraph', {}, frameId);
     this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });

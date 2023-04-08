@@ -4,8 +4,9 @@ import './toolbar/edgeless-toolbar.js';
 
 import {
   almostEqual,
+  asyncFocusRichText,
   type BlockHost,
-  getClosestFrameBlockElementById,
+  handleNativeRangeAtPoint,
   type Point,
   resetNativeSelection,
   type TopLevelBlockModel,
@@ -182,9 +183,9 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-    const frame = this.model.children[0] as FrameBlockModel;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-    this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
+    // const frame = this.model.children[0] as FrameBlockModel;
+    // const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+    // this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
   private _handleToolbarFlag() {
@@ -307,7 +308,11 @@ export class EdgelessPageBlockComponent
     );
   }
 
-  private _addFrameWithPoint(point: Point) {
+  addFrameWithPoint(
+    point: Point,
+    width = DEFAULT_FRAME_WIDTH,
+    height = DEFAULT_FRAME_HEIGHT
+  ) {
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.page.addBlock(
       'affine:frame',
@@ -315,43 +320,22 @@ export class EdgelessPageBlockComponent
         xywh: serializeXYWH(
           x - DEFAULT_FRAME_OFFSET_X,
           y - DEFAULT_FRAME_OFFSET_Y,
-          DEFAULT_FRAME_WIDTH,
-          DEFAULT_FRAME_HEIGHT
+          width,
+          height
         ),
       },
       this.page.root?.id
     );
   }
 
-  private _setSelectionByFrameId(frameId: string, active = true) {
-    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
-    assertExists(frameBlock);
-    this.slots.selectionUpdated.emit({
-      selected: [frameBlock as TopLevelBlockModel],
-      active,
-    });
-  }
-
-  /** Moves selected blocks into a new frame at the given point. */
-  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point) {
-    this.page.captureSync();
-    const frameId = this._addFrameWithPoint(point);
-    this.page.moveBlocks(
-      blocks,
-      this.page.getBlockById(frameId) as FrameBlockModel
-    );
-    this._setSelectionByFrameId(frameId);
-  }
-
   /**
    * Adds a new frame with the given blocks and point.
    * @param blocks Array<Partial<BaseBlockModel>>
    * @param point Point
-   * @returns string[]
    */
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
-    const frameId = this._addFrameWithPoint(point);
+    const frameId = this.addFrameWithPoint(point);
     const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
@@ -362,23 +346,50 @@ export class EdgelessPageBlockComponent
       }),
       frameId
     );
-    this._setSelectionByFrameId(frameId);
-    return ids;
+    return {
+      frameId,
+      ids,
+    };
+  }
+
+  /** Moves selected blocks into a new frame at the given point. */
+  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point, rect?: DOMRect) {
+    this.page.captureSync();
+    const width = rect?.width
+      ? rect.width / this.surface.viewport.zoom +
+        EDGELESS_BLOCK_CHILD_PADDING * 2
+      : DEFAULT_FRAME_WIDTH;
+    const frameId = this.addFrameWithPoint(point, width);
+    this.page.moveBlocks(
+      blocks,
+      this.page.getBlockById(frameId) as FrameBlockModel
+    );
+    this.setSelection(frameId, true, blocks[0].id, point);
   }
 
   /*
-   * Set selection state to closest frameBlock in DOM by giving blockId.
+   * Set selection state by giving frameId & blockId.
    * Not supports surface elements.
    */
-  setSelectionByBlockId(blockId: string, active = true) {
-    const frame = getClosestFrameBlockElementById(blockId, this.mouseRoot);
-    if (!frame) return;
-
-    const frameId = frame?.getAttribute(BLOCK_ID_ATTR);
-    assertExists(frameId);
+  setSelection(frameId: string, active = true, blockId: string, point?: Point) {
+    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+    assertExists(frameBlock);
 
     requestAnimationFrame(() => {
-      this._setSelectionByFrameId(frameId, active);
+      this.slots.selectionUpdated.emit({
+        selected: [frameBlock as TopLevelBlockModel],
+        active,
+      });
+      // Waiting dom updated, `frame mask` is removed
+      this.updateComplete.then(() => {
+        if (blockId) {
+          asyncFocusRichText(this.page, blockId);
+        } else if (point) {
+          // Cannot reuse `handleNativeRangeClick` directly here,
+          // since `retargetClick` will re-target to pervious editor
+          handleNativeRangeAtPoint(point.x, point.y);
+        }
+      });
     });
   }
 
@@ -403,6 +414,11 @@ export class EdgelessPageBlockComponent
       // Should be called in requestAnimationFrame,
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
+
+      const frame = this.model.children[0] as FrameBlockModel;
+      const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+      this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
+
       // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();
       this.requestUpdate();

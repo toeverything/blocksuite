@@ -8,6 +8,8 @@ import {
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
+  type BlockComponentElement,
+  getClosestFrameBlockElementById,
   getHoveringFrame,
   isInEmptyDatabaseByPoint,
   Point,
@@ -45,57 +47,68 @@ export const createBlockHub: (
         blocks.push(props);
       }
 
+      let parentId;
+      let focusId;
       if (end) {
         const { rect, model, element } = end;
-
-        let ids: string[] = [];
 
         page.captureSync();
 
         if (isInEmptyDatabaseByPoint(point, model, element, blocks)) {
-          ids = page.addBlocks(blocks, model);
+          const ids = page.addBlocks(blocks, model);
+          focusId = ids[0];
+          parentId = model.id;
         } else {
           const distanceToTop = Math.abs(rect.top - point.y);
           const distanceToBottom = Math.abs(rect.bottom - point.y);
-          ids = page.addSiblingBlocks(
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const ids = page.addSiblingBlocks(
             model,
             blocks,
             distanceToTop < distanceToBottom ? 'before' : 'after'
           );
+          focusId = ids[0];
+          parentId = parent.id;
         }
 
-        if (ids.length) {
+        if (focusId) {
           // database init basic structure
           if (isDatabase) {
             const service = await getServiceOrRegister(props.flavour);
-            service.initDatabaseBlock(page, model, ids[0]);
+            service.initDatabaseBlock(page, model, focusId);
           }
-
-          asyncFocusRichText(page, ids[0]);
         }
-      }
 
-      if (editor.mode === 'page') {
-        tryUpdateFrameSize(page, 1);
-        return;
+        if (editor.mode === 'page') {
+          asyncFocusRichText(page, focusId);
+          tryUpdateFrameSize(page, 1);
+          return;
+        }
       }
 
       // In edgeless mode.
-      const edgelessPageBlock = getEdgelessPage(page);
-      assertExists(edgelessPageBlock);
+      const pageBlock = getEdgelessPage(page);
+      assertExists(pageBlock);
 
-      // Creates new frame block.
-      if (!end) {
-        const ids = edgelessPageBlock.addNewFrame(
+      let frameId;
+      if (focusId && parentId) {
+        const targetFrameBlock = getClosestFrameBlockElementById(
+          parentId,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(targetFrameBlock);
+        frameId = targetFrameBlock.model.id;
+      } else {
+        // Creates new frame block on blank area.
+        const result = pageBlock.addNewFrame(
           blocks,
           new Point(e.clientX, e.clientY)
         );
-        if (ids.length) {
-          asyncFocusRichText(page, ids[0]);
-        }
+        frameId = result.frameId;
+        focusId = result.ids[0];
       }
-
-      tryUpdateFrameSize(page, edgelessPageBlock.surface.viewport.zoom);
+      pageBlock.setSelection(frameId, true, focusId, point);
     },
     onDragStarted: () => {
       if (editor.mode === 'page') {
