@@ -740,3 +740,56 @@ test('should trigger click event on editor container when clicking on blocks und
   await expect(blockSelections).toHaveCount(0);
   await expect(page.locator('*:focus')).toHaveCount(1);
 });
+
+test('should get to selected block when dragging unselected block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '456');
+  await assertRichTexts(page, ['123', '456']);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect1 = await editors.nth(1).boundingBox();
+
+  if (!editorRect0 || !editorRect1) {
+    throw new Error();
+  }
+
+  await page.mouse.move(
+    editorRect1.x + 5,
+    editorRect1.y + editorRect1.height / 2
+  );
+
+  await page.mouse.move(
+    editorRect1.x - 20,
+    editorRect1.y + editorRect1.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+
+  const blockSelections = page.locator('affine-page-selected-rects > *');
+  await expect(blockSelections).toHaveCount(1);
+
+  await page.mouse.move(
+    editorRect0.x - 20,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    editorRect1.x - 20,
+    editorRect1.y + editorRect1.height / 2 + 1,
+    {
+      steps: 10,
+    }
+  );
+  await page.mouse.up();
+
+  await expect(blockSelections).toHaveCount(1);
+
+  await assertRichTexts(page, ['456', '123']);
+});
