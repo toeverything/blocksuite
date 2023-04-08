@@ -356,7 +356,6 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Undo"
                 .disabled=${!this._canUndo}
                 @click=${() => {
                   SelectionUtils.clearSelection(this.page);
@@ -370,7 +369,6 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Redo"
                 .disabled=${!this._canRedo}
                 @click=${() => {
                   SelectionUtils.clearSelection(this.page);
@@ -503,21 +501,13 @@ export class DebugMenu extends ShadowlessElement {
           </sl-dropdown>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Editor Mode"
-              @click=${this._switchEditorMode}
-            >
+            <sl-button size="small" @click=${this._switchEditorMode}>
               <sl-icon name="phone-flip"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
           <sl-tooltip content="Add container offset" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Add container offset"
-              @click=${this._switchOffsetMode}
-            >
+            <sl-button size="small" @click=${this._switchOffsetMode}>
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -543,11 +533,7 @@ export class DebugMenu extends ShadowlessElement {
           style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
         >
           <sl-tooltip content="Show Grid" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Show Grid"
-              @click=${this._switchShowGrid}
-            >
+            <sl-button size="small" @click=${this._switchShowGrid}>
               <sl-icon name=${!this._showGrid ? 'square' : 'grid-3x3'}>
               </sl-icon>
             </sl-button>
@@ -589,11 +575,7 @@ function getTabGroupTemplate({
   });
 
   return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
-      <sl-button
-        size="small"
-        content="Add New Page"
-        @click=${() => createPage(workspace)}
-      >
+      <sl-button size="small" @click=${() => createPage(workspace)}>
         <sl-icon name="file-earmark-plus"></sl-icon>
       </sl-button>
     </sl-tooltip>
