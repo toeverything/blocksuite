@@ -528,6 +528,13 @@ export function contains(parent: Element, node: Element) {
 }
 
 /**
+ * Returns `true` if node is contained in the elements.
+ */
+export function isContainedIn(elements: Element[], node: Element) {
+  return elements.some(parent => contains(parent, node));
+}
+
+/**
  * Returns `true` if element has `data-block-id` attribute.
  */
 export function hasBlockId(element: Element) {
@@ -925,7 +932,10 @@ export function getDropRectByPoint(
   model: BaseBlockModel,
   element: Element
 ) {
-  let rect = getRectByBlockElement(element);
+  const result = {
+    rect: getRectByBlockElement(element),
+    isEmptyDatabase: false,
+  };
   // If the database is empty and the point is inside the database
   if (isEmptyDatabase(model)) {
     const table = getDatabaseBlockTableElement(element);
@@ -935,16 +945,17 @@ export function getDropRectByPoint(
       const header = getDatabaseBlockColumnHeaderElement(element);
       assertExists(header);
       const headerBounds = header.getBoundingClientRect();
-      rect = new DOMRect(
+      result.rect = new DOMRect(
         headerBounds.left,
-        headerBounds.bottom + 1,
-        rect.width,
+        headerBounds.bottom,
+        result.rect.width,
         1
       );
+      result.isEmptyDatabase = true;
     }
   }
 
-  return rect;
+  return result;
 }
 
 /**
@@ -978,12 +989,22 @@ export function isInEmptyDatabaseByPoint(
 }
 
 /**
+ * Returns `true` if the target is `Element`.
+ */
+export function isElement(target: EventTarget | null) {
+  return target && target instanceof Element;
+}
+
+/**
  * Returns `true` if the target is `affine-page-selected-rects`.
  */
-export function isPageSelectedRects(target: EventTarget | null) {
-  return (
-    target &&
-    target instanceof HTMLElement &&
-    target.tagName === 'AFFINE-PAGE-SELECTED-RECTS'
-  );
+export function isPageSelectedRects(target: Element) {
+  return target.tagName === 'AFFINE-PAGE-SELECTED-RECTS';
+}
+
+/**
+ * Returns `true` if the target is `affine-drag-handle`.
+ */
+export function isDragHandle(target: Element) {
+  return target.tagName === 'AFFINE-DRAG-HANDLE';
 }

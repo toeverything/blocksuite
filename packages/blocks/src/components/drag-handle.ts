@@ -5,7 +5,9 @@ import {
   getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
+  isContainedIn,
   Point,
+  Rect,
   type SelectionEvent,
   ShadowlessElement,
   WithDisposable,
@@ -39,41 +41,34 @@ const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
 export class DragIndicator extends LitElement {
   static styles = css`
     .affine-drag-indicator {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       background: var(--affine-primary-color);
-      transition-property: width, transform;
+      transition-property: width, height, transform;
       transition-duration: 100ms;
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       transition-delay: 0s;
+      transform-origin: 0 0;
       pointer-events: none;
+      z-index: 1;
     }
   `;
 
   @property()
-  targetRect: DOMRect | null = null;
-
-  @property()
-  cursorPosition: Point | null = null;
-
-  @property()
-  scale = 1;
+  rect: Rect | null = null;
 
   render() {
-    if (!this.targetRect || !this.cursorPosition) {
+    if (!this.rect) {
       return null;
     }
-    const rect = this.targetRect;
-    const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
-    const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
-    const offsetY = distanceToTop < distanceToBottom ? rect.top : rect.bottom;
+    const { left, top, width, height } = this.rect;
     const style = styleMap({
-      width: `${rect.width}px`,
-      height: `${3 * this.scale}px`,
-      transform: `translate(${rect.left}px, ${offsetY}px)`,
+      width: `${width}px`,
+      height: `${height}px`,
+      transform: `translate(${left}px, ${top}px)`,
     });
-    return html` <div class="affine-drag-indicator" style=${style}></div> `;
+    return html`<div class="affine-drag-indicator" style=${style}></div>`;
   }
 }
 
@@ -85,11 +80,12 @@ export class DragPreview extends ShadowlessElement {
   render() {
     return html`<style>
       affine-drag-preview {
+        --x: 0px;
+        --y: 0px;
         height: auto;
         display: block;
         position: absolute;
         box-sizing: border-box;
-        overflow: hidden;
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-base);
         line-height: var(--affine-line-height);
@@ -104,6 +100,17 @@ export class DragPreview extends ShadowlessElement {
         caret-color: transparent;
         transform-origin: 0 0;
         z-index: 2;
+      }
+
+      affine-drag-preview:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        transform: translate(var(--x), var(--y));
       }
 
       affine-drag-preview > .affine-block-element {
@@ -337,8 +344,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     this._lastDroppingTarget = null;
 
     if (this._indicator) {
-      this._indicator.cursorPosition = null;
-      this._indicator.targetRect = null;
+      this._indicator.rect = null;
     }
 
     this._draggingElements.forEach(e => {
@@ -354,9 +360,6 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   setScale(value = 1) {
     this._scale = value;
-    if (this._indicator) {
-      this._indicator.scale = value;
-    }
   }
 
   firstUpdated() {
@@ -369,7 +372,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._indicator = <DragIndicator>(
         document.createElement('affine-drag-indicator')
       );
-      document.body.appendChild(this._indicator);
+      this._container.appendChild(this._indicator);
     }
 
     const disposables = this._disposables;
@@ -394,13 +397,12 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     // host
-    disposables.addFromEvent(this, 'wheel', this._onWheel);
     disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
 
     // drag handle
     disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
-    disposables.addFromEvent(this._dragHandle, 'mousedown', this._onMouseDown);
-    disposables.addFromEvent(this._dragHandle, 'mouseup', this._onMouseUp);
+    // 1. In edgeless, native DnD will work fine.
+    // 2. In page, hosted with editor-container mouse events and scroll wheel support.
     disposables.addFromEvent(this._dragHandle, 'dragstart', this.onDragStart);
     disposables.addFromEvent(this._dragHandle, 'drag', this.onDrag);
     disposables.addFromEvent(this._dragHandle, 'dragend', this.onDragEnd);
@@ -416,13 +418,13 @@ export class DragHandle extends WithDisposable(LitElement) {
   }
 
   private _onMouseMoveOnHost(e: MouseEvent) {
+    if (this._stopPropagation) {
+      e.stopPropagation();
+    }
+
     if (isFirefox) {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
-    }
-
-    if (this._stopPropagation) {
-      e.stopPropagation();
     }
 
     if (!this._handleAnchorState) {
@@ -468,6 +470,93 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
   }
 
+  private _clacTarget(
+    point: Point,
+    model: BaseBlockModel,
+    element: Element,
+    draggingElements: BlockComponentElement[],
+    scale: number
+  ) {
+    const height = 3 * scale;
+    const { rect: domRect, isEmptyDatabase } = getDropRectByPoint(
+      point,
+      model,
+      element
+    );
+
+    if (isEmptyDatabase) {
+      const rect = Rect.fromDOMRect(domRect);
+      rect.top -= height / 2;
+      rect.height = height;
+      return {
+        flag: 2, // in empty database
+        rect,
+        lastModelState: {
+          model,
+          rect: domRect,
+          element: element as BlockComponentElement,
+        },
+      };
+    }
+
+    const distanceToTop = Math.abs(domRect.top - point.y);
+    const distanceToBottom = Math.abs(domRect.bottom - point.y);
+    const before = distanceToTop < distanceToBottom;
+
+    // -1: do nothing, 0: after, 1: before, 2: in empty database
+    let flag = Number(before);
+    let offsetY = 4;
+
+    if (flag === 1) {
+      // before
+      const prev = element.previousElementSibling;
+      if (prev) {
+        if (prev === draggingElements[draggingElements.length - 1]) {
+          flag = -1;
+        } else {
+          const prevRect = getRectByBlockElement(prev);
+          offsetY = (domRect.top - prevRect.bottom) / 2;
+        }
+      }
+    } else {
+      // after
+      const next = element.nextElementSibling;
+      if (next) {
+        if (next === draggingElements[0]) {
+          flag = -1;
+        } else {
+          const nextRect = getRectByBlockElement(next);
+          offsetY = (nextRect.top - domRect.bottom) / 2;
+        }
+      }
+    }
+
+    if (flag !== -1) {
+      let top = domRect.top;
+      if (flag === 1) {
+        top -= offsetY;
+      } else {
+        top += domRect.height + offsetY;
+      }
+      return {
+        flag,
+        rect: Rect.fromLWTH(
+          domRect.left,
+          domRect.width,
+          top - height / 2,
+          height
+        ),
+        lastModelState: {
+          model,
+          rect: domRect,
+          element: element as BlockComponentElement,
+        },
+      };
+    }
+
+    return null;
+  }
+
   private _createDragPreview(
     e: DragEvent,
     blockElements: BlockComponentElement[],
@@ -476,14 +565,17 @@ export class DragHandle extends WithDisposable(LitElement) {
     const dragPreview = (this._dragPreview = new DragPreview());
     const containerRect = this._container.getBoundingClientRect();
     const rect = blockElements[0].getBoundingClientRect();
+    const { clientX, clientY } = e;
     const s = this._scale;
 
-    dragPreview.offset.x = rect.left - containerRect.left - e.clientX;
-    dragPreview.offset.y = rect.top - containerRect.top - e.clientY;
+    dragPreview.offset.x = rect.left - containerRect.left - clientX;
+    dragPreview.offset.y = rect.top - containerRect.top - clientY;
     dragPreview.style.width = `${rect.width / s}px`;
     const l = rect.left - containerRect.left;
     const t = rect.top - containerRect.top;
     dragPreview.style.transform = `translate(${l}px, ${t}px) scale(${s})`;
+    dragPreview.style.setProperty('--x', `${-dragPreview.offset.x - 24 / 2}px`);
+    dragPreview.style.setProperty('--y', `${-dragPreview.offset.y - 24 / 2}px`);
 
     const fragment = document.createDocumentFragment();
 
@@ -513,11 +605,6 @@ export class DragHandle extends WithDisposable(LitElement) {
     }
   }
 
-  private _onWheel = (e: MouseEvent) => {
-    e.stopPropagation();
-    this.hide();
-  };
-
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
@@ -527,17 +614,6 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._dragHandleNormal.style.display = 'none';
     }
     e.stopPropagation();
-  };
-
-  private _onMouseDown = (e: MouseEvent) => {
-    this._stopPropagation = true;
-    e.stopPropagation();
-  };
-
-  private _onMouseUp = (e: MouseEvent) => {
-    e.stopPropagation();
-    this._stopPropagation = false;
-    this._removeDragPreview();
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
@@ -551,6 +627,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !e.dataTransfer) return;
 
+    this.setSelectionType();
+
     const anchor = this._handleAnchorState && this._handleAnchorState.element;
     let draggingBlockElements = this.selectedBlocks;
 
@@ -558,10 +636,8 @@ export class DragHandle extends WithDisposable(LitElement) {
       draggingBlockElements = [anchor];
     }
 
-    if (!draggingBlockElements.length) return;
-
+    this._draggingElements = draggingBlockElements;
     e.dataTransfer.effectAllowed = 'move';
-    this.setSelectionType();
 
     this._createDragPreview(
       e,
@@ -570,11 +646,9 @@ export class DragHandle extends WithDisposable(LitElement) {
       ) as BlockComponentElement[],
       draggable
     );
-    this._draggingElements = draggingBlockElements;
   };
 
-  // TODO: automatic scrolling when top and bottom boundaries are reached
-  onDrag = (e: DragEvent, passed?: boolean) => {
+  onDrag = (e: DragEvent, passed?: boolean, isScrolling?: boolean) => {
     this._dragHandle.style.cursor = 'grabbing';
     let x = e.clientX;
     let y = e.clientY;
@@ -587,9 +661,10 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     if (
       !this._indicator ||
-      (this._indicator.cursorPosition &&
-        this._indicator.cursorPosition.x === x &&
-        this._indicator.cursorPosition.y === y)
+      (!passed &&
+        this._indicator.rect &&
+        this._indicator.rect.left === x &&
+        this._indicator.rect.top === y)
     ) {
       return;
     }
@@ -602,27 +677,38 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._dragPreview.style.transform = `translate(${l}px, ${t}px) scale(${s})`;
     }
 
+    if (isScrolling) return;
+
     const point = new Point(x, y);
     const element = this._getClosestBlockElement(point.clone());
     let rect = null;
     let lastModelState = null;
 
     if (element) {
-      if (!this._draggingElements.includes(element as BlockComponentElement)) {
+      // Array: array does not contains the target
+      // DOM: elements does not contains the target
+      if (
+        !this._draggingElements.includes(element as BlockComponentElement) &&
+        !isContainedIn(this._draggingElements, element)
+      ) {
         const model = getModelByBlockElement(element);
-        rect = getDropRectByPoint(point, model, element);
-
-        lastModelState = {
-          rect,
+        const result = this._clacTarget(
+          point,
           model,
-          element: element as BlockComponentElement,
-        };
+          element,
+          this._draggingElements,
+          this._scale
+        );
+
+        if (result) {
+          rect = result.rect;
+          lastModelState = result.lastModelState;
+        }
       }
     }
 
+    this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
-    this._indicator.targetRect = rect;
-    this._indicator.cursorPosition = point;
   };
 
   onDragEnd = (e: DragEvent, passed?: boolean) => {
@@ -642,8 +728,8 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     // `drag.clientY` !== `dragend.clientY` in chrome.
     this.onDropCallback?.(
-      this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY),
-      // blockElements includes subtrees
+      this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY),
+      // blockElements include subtrees
       this._draggingElements,
       this._lastDroppingTarget
     );

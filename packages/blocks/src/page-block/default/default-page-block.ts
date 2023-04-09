@@ -335,18 +335,29 @@ export class DefaultPageBlockComponent
 
     if (type === 'block') {
       selection.refreshDraggingArea(viewport);
-    } else if (type === 'embed') {
+      return;
+    }
+
+    if (type === 'embed') {
       selection.refreshEmbedRects(this._embedEditingState);
-    } else if (type === 'native') {
-      const { startRange, rangePoint } = selection.state;
-      if (startRange && rangePoint) {
-        // Create a synthetic `mousemove` MouseEvent
-        const evt = new MouseEvent('mousemove', {
-          clientX: rangePoint.x,
-          clientY: rangePoint.y,
-        });
-        this.mouseRoot.dispatchEvent(evt);
-      }
+      return;
+    }
+
+    let point;
+
+    if (type === 'native') {
+      point = selection.state.startRange && selection.state.lastPoint;
+    } else if (type === 'block:drag') {
+      point = selection.state.lastPoint;
+    }
+
+    if (point) {
+      // Create a synthetic `mousemove` MouseEvent
+      const evt = new MouseEvent('mousemove', {
+        clientX: point.x,
+        clientY: point.y,
+      });
+      this.mouseRoot.dispatchEvent(evt);
     }
   };
 
@@ -479,6 +490,7 @@ export class DefaultPageBlockComponent
     bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
+    this._initDragHandle();
     this._initSlotEffects();
     this._initFrameSizeEffect();
     this._initResizeEffect();
@@ -492,8 +504,6 @@ export class DefaultPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
     this.clipboard.init(this.page);
-
-    this._initDragHandle();
   }
 
   override disconnectedCallback() {

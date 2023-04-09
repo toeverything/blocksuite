@@ -1,5 +1,6 @@
 import {
   handleNativeRangeDragMove,
+  Point,
   type SelectionEvent,
 } from '@blocksuite/blocks/std';
 
@@ -13,7 +14,7 @@ export const NativeDragHandlers = {
   },
 
   onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
-    selection.state.updateRangePoint(e.raw.clientX, e.raw.clientY);
+    selection.state.lastPoint = new Point(e.raw.clientX, e.raw.clientY);
     handleNativeRangeDragMove(selection.state.startRange, e);
   },
 
