@@ -10,6 +10,9 @@ import { INPUT_MAX_LENGTH } from '../../../consts.js';
 @customElement('affine-database-select-option')
 export class SelectOption extends LitElement {
   static styles = css`
+    :host * {
+      box-sizing: border-box;
+    }
     .select-option-text {
       display: inline-block;
       min-width: 2px;
