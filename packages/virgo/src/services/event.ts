@@ -186,13 +186,16 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const { data } = event;
     if (vRange.index >= 0 && data) {
       this._editor.insertText(vRange, data);
-      this._editor.slots.vRangeUpdated.emit([
-        {
-          index: vRange.index + data.length,
-          length: 0,
-        },
-        'input',
-      ]);
+
+      this._editor.slots.updated.once(() => {
+        this._editor.slots.vRangeUpdated.emit([
+          {
+            index: vRange.index + data.length,
+            length: 0,
+          },
+          'input',
+        ]);
+      });
     }
   };
 
