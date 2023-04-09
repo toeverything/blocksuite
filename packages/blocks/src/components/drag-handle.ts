@@ -372,7 +372,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._indicator = <DragIndicator>(
         document.createElement('affine-drag-indicator')
       );
-      this._container.appendChild(this._indicator);
+      document.body.appendChild(this._indicator);
     }
 
     const disposables = this._disposables;
