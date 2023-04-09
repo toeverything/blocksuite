@@ -2,18 +2,17 @@
 import './components/column-header/column-header.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
+import './components/database-title.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { type Column } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText, type BlockHost } from '../__internal__/index.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
-import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
@@ -35,56 +34,12 @@ const styles = css`
     position: relative;
   }
 
-  .affine-database-block-title {
-    flex: 1;
-    position: sticky;
-    width: 300px;
-    height: 30px;
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 24px;
-    color: #424149;
-    font-family: inherit;
-    overflow: hidden;
-    cursor: text;
-  }
-
-  .affine-database-block-title [data-virgo-text='true'] {
-    display: inline-block;
-    width: 300px;
-    max-width: 300px;
-    white-space: nowrap !important;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
   .affine-database-block-title-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 44px;
     margin: 12px 0px;
-  }
-  .database-title-container {
-    flex: 1;
-    max-width: 300px;
-    min-width: 300px;
-    height: 30px;
-  }
-
-  .affine-database-block-title:focus {
-    outline: none;
-  }
-
-  .affine-database-block-title:disabled {
-    background-color: transparent;
-  }
-
-  .affine-database-block-title-empty::before {
-    content: 'Database';
-    color: var(--affine-placeholder-color);
-    position: absolute;
-    opacity: 0.5;
   }
 
   .affine-database-block-table {
@@ -178,9 +133,6 @@ export class DatabaseBlockComponent
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
 
-  @query('.affine-database-block-title')
-  private _titleContainer!: HTMLDivElement;
-
   @query('affine-database-column-header')
   private _columnHeaderComponent!: DatabaseColumnHeader;
 
@@ -193,7 +145,6 @@ export class DatabaseBlockComponent
   @state()
   private _hoverState = false;
 
-  private _vEditor: VEditor | null = null;
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): Column[] {
@@ -212,8 +163,6 @@ export class DatabaseBlockComponent
   }
 
   firstUpdated() {
-    this._initTitleVEditor();
-
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
 
@@ -246,10 +195,6 @@ export class DatabaseBlockComponent
   private _resetHoverState() {
     this._hoverState = false;
   }
-
-  private _onShowTitleTooltip = () => {
-    // TODO: show tooltip according to title content(vEditor)
-  };
 
   private _onDatabaseScroll = (event: Event) => {
     this._columnHeaderComponent.showAddColumnButton();
@@ -317,26 +262,7 @@ export class DatabaseBlockComponent
     });
   };
 
-  private _initTitleVEditor() {
-    this._vEditor = new VEditor(this.model.title.yText);
-    setupVirgoScroll(this.model.page, this._vEditor);
-    this._vEditor.mount(this._titleContainer);
-    this._vEditor.setReadonly(this.model.page.readonly);
-
-    // for title placeholder
-    this.model.title.yText.observe(() => {
-      this.requestUpdate();
-    });
-
-    // after the database structure is created
-    requestAnimationFrame(() => {
-      this._vEditor?.focusEnd();
-    });
-  }
-
   render() {
-    const isEmpty = !this.model.title || !this.model.title.length;
-
     const rows = DataBaseRowContainer(
       this,
       this._filteredRowIds,
@@ -346,20 +272,10 @@ export class DatabaseBlockComponent
     return html`
       <div class="affine-database-block-container">
         <div class="affine-database-block-title-container">
-          <div
-            class="has-tool-tip database-title-container"
-            @mouseover=${this._onShowTitleTooltip}
-          >
-            <div
-              class="affine-database-block-title ${isEmpty
-                ? 'affine-database-block-title-empty'
-                : ''}"
-              data-block-is-database-title="true"
-            ></div>
-            <tool-tip inert arrow tip-position="top" role="tooltip"
-              >Database hello new work is not only
-            </tool-tip>
-          </div>
+          <affine-database-title
+            .addRow=${this._addRow}
+            .targetModel=${this.model}
+          ></affine-database-title>
           <affine-database-toolbar
             .addRow=${this._addRow}
             .targetModel=${this.model}
