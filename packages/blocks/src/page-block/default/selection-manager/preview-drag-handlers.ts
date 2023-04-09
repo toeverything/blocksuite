@@ -101,17 +101,16 @@ export const PreviewDragHandlers = {
 
   onEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
     const { container, state } = selection;
+    state.clearRaf();
     state.lastPoint = null;
     container.components.dragHandle?.onDragEnd(
       createDragEvent('dragend', e.raw),
       true
     );
-    state.type = 'block';
   },
 
   clear(selection: DefaultSelectionManager) {
-    const { container, state } = selection;
+    const { container } = selection;
     container.components.dragHandle?.onDragEnd(createDragEvent('dragend'));
-    state.type = 'block';
   },
 };

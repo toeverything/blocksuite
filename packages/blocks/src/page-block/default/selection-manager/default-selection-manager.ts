@@ -420,8 +420,15 @@ export class DefaultSelectionManager {
   // clear selection: `block`, `block:drag`, `embed`, `native`
   clear() {
     const { state, slots } = this;
-    const { type } = state;
-    if (type.startsWith('block')) {
+    let { type } = state;
+
+    if (type === 'block:drag') {
+      // clear `drag preview`
+      PreviewDragHandlers.clear(this);
+      type = 'block';
+    }
+
+    if (type === 'block') {
       state.clearBlockSelection();
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
@@ -429,10 +436,6 @@ export class DefaultSelectionManager {
       // clear `format quick bar`
       // document.dispatchEvent(new MouseEvent('mousedown'));
       this.container.querySelector('format-quick-bar')?.remove();
-      // clear `drag preview`
-      if (type === 'block:drag') {
-        PreviewDragHandlers.clear(this);
-      }
     } else if (type === 'embed') {
       state.clearEmbedSelection();
       slots.embedRectsUpdated.emit([]);

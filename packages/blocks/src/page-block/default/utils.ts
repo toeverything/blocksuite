@@ -529,7 +529,8 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         );
       }
 
-      defaultPageBlock.selection.clear();
+      // unneed
+      // defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = 'block';
 
       defaultPageBlock.updateComplete.then(() => {
