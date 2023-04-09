@@ -7,13 +7,15 @@ function handleInsertText(
   editor: VEditor
 ) {
   if (vRange.index >= 0 && data) {
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index + data.length,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index + data.length,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.insertText(vRange, data);
   }
@@ -21,13 +23,15 @@ function handleInsertText(
 
 function handleInsertParagraph(vRange: VRange, editor: VEditor) {
   if (vRange.index >= 0) {
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index + 1,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index + 1,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.insertLineBreak(vRange);
   }
@@ -36,13 +40,15 @@ function handleInsertParagraph(vRange: VRange, editor: VEditor) {
 function handleDelete(vRange: VRange, editor: VEditor) {
   if (vRange.index >= 0) {
     if (vRange.length > 0) {
-      editor.slots.vRangeUpdated.emit([
-        {
-          index: vRange.index,
-          length: 0,
-        },
-        'input',
-      ]);
+      editor.slots.updated.once(() => {
+        editor.slots.vRangeUpdated.emit([
+          {
+            index: vRange.index,
+            length: 0,
+          },
+          'input',
+        ]);
+      });
 
       editor.deleteText(vRange);
       return;
@@ -52,13 +58,15 @@ function handleDelete(vRange: VRange, editor: VEditor) {
       // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
       const tmpString = editor.yText.toString().slice(0, vRange.index);
       const deletedCharacter = [...tmpString].slice(-1).join('');
-      editor.slots.vRangeUpdated.emit([
-        {
-          index: vRange.index - deletedCharacter.length,
-          length: 0,
-        },
-        'input',
-      ]);
+      editor.slots.updated.once(() => {
+        editor.slots.vRangeUpdated.emit([
+          {
+            index: vRange.index - deletedCharacter.length,
+            length: 0,
+          },
+          'input',
+        ]);
+      });
 
       editor.deleteText({
         index: vRange.index - deletedCharacter.length,
@@ -75,13 +83,15 @@ function handleWordDelete(editor: VEditor, vRange: VRange) {
   if (matches) {
     const deleteLength = matches[0].length;
 
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index - deleteLength,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.deleteText({
       index: vRange.index - deleteLength,
@@ -92,13 +102,15 @@ function handleWordDelete(editor: VEditor, vRange: VRange) {
 
 function handleLineDelete(editor: VEditor, vRange: VRange) {
   if (vRange.length > 0) {
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.deleteText(vRange);
     return;
@@ -109,13 +121,15 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
     const deleteLength =
       vRange.index - Math.max(0, str.slice(0, vRange.index).lastIndexOf('\n'));
 
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index - deleteLength,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.deleteText({
       index: vRange.index - deleteLength,
@@ -126,13 +140,15 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
 
 function handleForwardDelete(editor: VEditor, vRange: VRange) {
   if (vRange.index < editor.yText.length) {
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index,
-        length: 0,
-      },
-      'input',
-    ]);
+    editor.slots.updated.once(() => {
+      editor.slots.vRangeUpdated.emit([
+        {
+          index: vRange.index,
+          length: 0,
+        },
+        'input',
+      ]);
+    });
 
     editor.deleteText({
       index: vRange.index,
