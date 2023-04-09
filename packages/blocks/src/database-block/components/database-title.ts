@@ -1,9 +1,10 @@
-import { setupVirgoScroll } from '@blocksuite/blocks/__internal__/utils/virgo.js';
-import { ShadowlessElement, tooltipStyle } from '@blocksuite/blocks/index.js';
-import { VEditor } from '@blocksuite/virgo/virgo.js';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { ShadowlessElement } from '../../__internal__/utils/lit.js';
+import { setupVirgoScroll } from '../../__internal__/utils/virgo.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 
 @customElement('affine-database-title')
