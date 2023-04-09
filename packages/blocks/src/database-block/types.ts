@@ -60,3 +60,8 @@ export const enum SearchState {
   /** show more action */
   Action = 'action',
 }
+
+export const enum SelectMode {
+  Multi = 'multi',
+  Single = 'single',
+}

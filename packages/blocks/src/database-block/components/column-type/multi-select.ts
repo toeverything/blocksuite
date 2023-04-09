@@ -4,7 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-import { SelectMode } from './select.js';
+import { SelectMode } from '../../types.js';
 
 @customElement('affine-database-multi-select-cell')
 class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
