@@ -6,3 +6,6 @@ export const DEFAULT_COLUMN_MIN_WIDTH = 100;
 export const DEFAULT_COLUMN_TITLE_HEIGHT = 40;
 /** column title height */
 export const DEFAULT_ADD_BUTTON_WIDTH = 40;
+
+/** database title length */
+export const DATABASE_TITLE_LENGTH = 50;

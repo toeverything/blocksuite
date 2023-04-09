@@ -1,11 +1,12 @@
-import { VEditor } from '@blocksuite/virgo';
+import type { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../../__internal__/utils/lit.js';
-import { setupVirgoScroll } from '../../__internal__/utils/virgo.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { DATABASE_TITLE_LENGTH } from '../consts.js';
 import type { DatabaseBlockModel } from '../database-model.js';
+import { initLimitedLengthVEditor } from '../utils.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends ShadowlessElement {
@@ -78,13 +79,15 @@ export class DatabaseTitle extends ShadowlessElement {
   };
 
   private _initTitleVEditor() {
-    this._vEditor = new VEditor(this.targetModel.title.yText);
-    setupVirgoScroll(this.targetModel.page, this._vEditor);
-    this._vEditor.mount(this._titleContainer);
-    this._vEditor.bindHandlers({
-      keydown: this._handleKeyDown,
+    this._vEditor = initLimitedLengthVEditor({
+      yText: this.targetModel.title.yText,
+      container: this._titleContainer,
+      targetModel: this.targetModel,
+      maxLength: DATABASE_TITLE_LENGTH,
+      handlers: {
+        keydown: this._handleKeyDown,
+      },
     });
-    this._vEditor.setReadonly(this.targetModel.page.readonly);
 
     // for title placeholder
     this.targetModel.title.yText.observe(() => {
