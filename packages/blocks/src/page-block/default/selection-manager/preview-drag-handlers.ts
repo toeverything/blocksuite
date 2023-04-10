@@ -14,6 +14,7 @@ const threshold = SCROLL_THRESHOLD / 2;
 export const PreviewDragHandlers = {
   onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     const { container, state } = selection;
+    state.blur();
     state.type = 'block:drag';
     container.components.dragHandle?.onDragStart(
       createDragEvent('dragstart', e.raw),
