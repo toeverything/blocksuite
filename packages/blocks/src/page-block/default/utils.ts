@@ -521,7 +521,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         page.moveBlocks(models, parent, model, type === 'before');
       }
 
-      // unneed
+      // unneeded
       // defaultPageBlock.selection.clear();
       defaultPageBlock.selection.state.type = 'block';
 
