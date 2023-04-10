@@ -82,7 +82,8 @@ const createKeydownObserver = ({
     if (
       // Abort when press modifier key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
-      isControlledKeyboardEvent(e)
+      isControlledKeyboardEvent(e) ||
+      e.key === 'Escape'
     ) {
       abortController.abort();
       return;

@@ -123,7 +123,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
       // Abort when press modifier key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
       isControlledKeyboardEvent(e) ||
-      e.key === ' '
+      e.key === ' ' ||
+      e.key === 'Escape'
     ) {
       this.abortController.abort();
       return;
