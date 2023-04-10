@@ -262,12 +262,21 @@ test('should support add new column', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-
   await initDatabaseDynamicRowWithData(page, '123', true);
-  const multiSelect = page.locator('affine-database-multi-select-cell');
-  expect(multiSelect).toBeVisible();
-  const selected = multiSelect.locator('.select-selected');
+
+  const { text: title1 } = await getDatabaseHeaderColumn(page, 1);
+  expect(title1).toBe('Column 1');
+
+  const selected = getFirstColumnCell(page, 'select-selected');
   expect(await selected.innerText()).toBe('123');
+
+  await initDatabaseColumn(page, 'abc');
+  const { text: title2 } = await getDatabaseHeaderColumn(page, 2);
+  expect(title2).toBe('abc');
+
+  await initDatabaseColumn(page);
+  const { text: title3 } = await getDatabaseHeaderColumn(page, 3);
+  expect(title3).toBe('Column 3');
 });
 
 test('should support right insert column', async ({ page }) => {
