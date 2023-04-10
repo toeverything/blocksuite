@@ -406,7 +406,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 
       const mainElement = matchFlavours(block.model, ['affine:page'] as const)
         ? element?.querySelector('.affine-default-page-block-title-container')
-        : element?.querySelector('rich-text');
+        : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
