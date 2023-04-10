@@ -521,7 +521,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       // unneeded
       // pageBlock.selection.clear();
-      pageBlock.selection.state.type = 'block';
+      // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
         // update selection rects
@@ -536,7 +536,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       });
     },
     setDragType(dragging: boolean) {
-      pageBlock.selection.state.type = dragging ? 'block:drag' : 'none';
+      pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock({ element }: EditingState) {
       pageBlock.selection.selectOneBlock(element);

@@ -750,9 +750,10 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     this._removeDragPreview();
 
+    this.setDragType(false);
+
     // `Esc`
     if (!passed && dropEffect === 'none') {
-      this.setDragType(false);
       this.hide(true);
       return;
     }
@@ -768,7 +769,6 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._lastDroppingType
     );
 
-    this.setDragType(false);
     this.hide(true);
   };
 
