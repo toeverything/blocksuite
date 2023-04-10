@@ -97,7 +97,7 @@ export class DebugMenu extends ShadowlessElement {
   private _showTabMenu = false;
 
   @state()
-  private _dark = false;
+  private _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
   get page() {
     return this.editor.page;
@@ -105,8 +105,7 @@ export class DebugMenu extends ShadowlessElement {
 
   createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    this._dark = matchMedia.matches;
-    if (this._dark) {
+    if (this._dark && matchMedia.matches) {
       document.querySelector('html')?.classList.add('dark');
       document.querySelector('html')?.classList.add('sl-theme-dark');
     }
@@ -233,9 +232,11 @@ export class DebugMenu extends ShadowlessElement {
 
     this._dark = !this._dark;
     if (this._dark) {
+      localStorage.setItem('blocksuite:dark', 'true');
       html?.classList.add('dark');
       html?.classList.add('sl-theme-dark');
     } else {
+      localStorage.setItem('blocksuite:dark', 'false');
       html?.classList.remove('dark');
       html?.classList.remove('sl-theme-dark');
     }
@@ -246,9 +247,11 @@ export class DebugMenu extends ShadowlessElement {
 
     if (e.matches) {
       this._dark = true;
+      localStorage.setItem('blocksuite:dark', 'true');
       html?.classList.add('dark');
       html?.classList.add('sl-theme-dark');
     } else {
+      localStorage.setItem('blocksuite:dark', 'false');
       this._dark = false;
       html?.classList.remove('dark');
       html?.classList.remove('sl-theme-dark');
