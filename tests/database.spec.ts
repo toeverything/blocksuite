@@ -59,6 +59,7 @@ test('edit database block title and create new rows', async ({ page }) => {
   await assertBlockProps(page, '2', {
     title: dbTitle,
   });
+  await focusDatabaseTitle(page);
   for (let i = 0; i < dbTitle.length; i++) {
     await pressBackspace(page);
   }
