@@ -92,7 +92,7 @@ test('edit column title', async ({ page }) => {
   expect(await column.innerText()).toBe('1');
 
   await undoByClick(page);
-  expect(await column.innerText()).toBe('Column n');
+  expect(await column.innerText()).toBe('Column 1');
 });
 
 test('should modify the value when the input loses focus', async ({ page }) => {
