@@ -482,14 +482,18 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
   }
 
-  static clacTarget(
+  static calcTarget(
     point: Point,
     model: BaseBlockModel,
     element: Element,
     draggingElements: BlockComponentElement[],
     scale: number,
     force = false
-  ) {
+  ): {
+    type: DroppingType;
+    rect: Rect;
+    modelState: EditingState;
+  } | null {
     const includingDatabase = hasDatabase(draggingElements) || force;
 
     if (includingDatabase) {
@@ -516,7 +520,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       return {
         type,
         rect,
-        lastModelState: {
+        modelState: {
           model,
           rect: domRect,
           element: element as BlockComponentElement,
@@ -572,7 +576,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         top - height / 2,
         height
       ),
-      lastModelState: {
+      modelState: {
         model,
         rect: domRect,
         element: element as BlockComponentElement,
@@ -718,7 +722,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         !isContainedIn(this._draggingElements, element)
       ) {
         const model = getModelByBlockElement(element);
-        const result = DragHandle.clacTarget(
+        const result = DragHandle.calcTarget(
           point,
           model,
           element,
@@ -729,7 +733,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         if (result) {
           type = result.type;
           rect = result.rect;
-          lastModelState = result.lastModelState;
+          lastModelState = result.modelState;
         }
       }
     }
