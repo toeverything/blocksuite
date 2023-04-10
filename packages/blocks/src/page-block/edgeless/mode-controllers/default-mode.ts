@@ -46,7 +46,7 @@ export enum DefaultModeDragType {
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
-  /** Moving preview */
+  /** Dragging preview */
   PreviewDragging = 'preview-dragging',
 }
 
