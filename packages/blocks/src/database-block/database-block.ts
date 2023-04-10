@@ -240,21 +240,21 @@ export class DatabaseBlockComponent
 
   private _addColumn = (index: number) => {
     this.model.page.captureSync();
+    const currentColumns = this.model.columns;
     const defaultColumnType = 'multi-select';
     const renderer = getColumnRenderer(defaultColumnType);
     const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
-      // TODO: change to dynamic number
-      name: 'Column n',
+      name: `Column ${currentColumns.length + 1}`,
       width: DEFAULT_COLUMN_WIDTH,
       hide: false,
       ...renderer.propertyCreator(),
     };
     const id = this.model.page.db.updateColumn(schema);
-    const newColumns = [...this.model.columns];
-    newColumns.splice(index, 0, id);
+    const columns = [...currentColumns];
+    columns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
-      columns: newColumns,
+      columns,
     });
 
     requestAnimationFrame(() => {

@@ -1,13 +1,14 @@
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { ShadowlessElement } from '../../index.js';
 import type { AffineTextAttributes } from './types.js';
 
 export function affineTextStyles(
-  props: AffineTextAttributes
+  props: AffineTextAttributes,
+  override?: Readonly<StyleInfo>
 ): ReturnType<typeof styleMap> {
   let textDecorations = '';
   if (props.underline) {
@@ -35,6 +36,7 @@ export function affineTextStyles(
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
     ...inlineCodeStyle,
+    ...override,
   });
 }
 
