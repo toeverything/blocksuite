@@ -21,8 +21,6 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
     onDropCallback(point, blockElements, editingState, type) {
-      if (type === 'none') return;
-
       const blockElementsExcludeSubtrees =
         getBlockElementsExcludeSubtrees(blockElements);
       if (!blockElementsExcludeSubtrees.length) return;
@@ -32,8 +30,8 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
       const page = pageBlock.page;
 
-      if (editingState) {
-        const { rect, model } = editingState;
+      if (editingState && type !== 'none') {
+        const { model } = editingState;
         if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
@@ -55,16 +53,9 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         if (type === 'database') {
           page.moveBlocks(models, model);
         } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
-          page.moveBlocks(
-            models,
-            parent,
-            model,
-            distanceToTop < distanceToBottom
-          );
+          page.moveBlocks(models, parent, model, type === 'before');
         }
 
         if (targetFrameBlock !== frameBlock) {

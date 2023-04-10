@@ -500,9 +500,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blockElements, editingState, type): void {
+    onDropCallback(_point, blockElements, editingState, type): void {
       if (!editingState || type === 'none') return;
-      const { rect, model } = editingState;
+      const { model } = editingState;
       const page = defaultPageBlock.page;
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
@@ -516,16 +516,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
         const parent = page.getParent(model);
         assertExists(parent);
-        page.moveBlocks(
-          models,
-          parent,
-          model,
-          distanceToTop < distanceToBottom
-        );
+        page.moveBlocks(models, parent, model, type === 'before');
       }
 
       // unneed

@@ -30,8 +30,6 @@ export const createBlockHub: (
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onDropCallback: async (e, point, end, type) => {
-      if (type === 'none') return;
-
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -50,8 +48,8 @@ export const createBlockHub: (
 
       let parentId;
       let focusId;
-      if (end) {
-        const { rect, model } = end;
+      if (end && type !== 'none') {
+        const { model } = end;
 
         page.captureSync();
 
@@ -60,15 +58,9 @@ export const createBlockHub: (
           focusId = ids[0];
           parentId = model.id;
         } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
-          const ids = page.addSiblingBlocks(
-            model,
-            models,
-            distanceToTop < distanceToBottom ? 'before' : 'after'
-          );
+          const ids = page.addSiblingBlocks(model, models, type);
           focusId = ids[0];
           parentId = parent.id;
         }
