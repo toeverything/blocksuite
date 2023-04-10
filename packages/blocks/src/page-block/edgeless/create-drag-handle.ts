@@ -15,6 +15,10 @@ import { assertExists } from '@blocksuite/store';
 
 import { DragHandle } from '../../components/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import {
+  type DefaultModeController,
+  DefaultModeDragType,
+} from './mode-controllers/default-mode.js';
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
@@ -32,9 +36,8 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
       if (editingState && type !== 'none') {
         const { model } = editingState;
-        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
+        if (models.length === 1 && doesInSamePath(page, model, models[0]))
           return;
-        }
 
         const focusId = models[0].id;
         const targetFrameBlock = getClosestFrameBlockElementById(
@@ -77,9 +80,16 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         getRectByBlockElement(blockElementsExcludeSubtrees[0])
       );
     },
-    setSelectionType() {
-      return;
+    setDragType(dragging: boolean) {
+      const selection = pageBlock.getSelection();
+      if (selection.mouseMode.type === 'default') {
+        (selection.currentController as DefaultModeController).dragType =
+          dragging
+            ? DefaultModeDragType.PreviewDragging
+            : DefaultModeDragType.None;
+      }
     },
+
     setSelectedBlock(_: EditingState) {
       return;
     },

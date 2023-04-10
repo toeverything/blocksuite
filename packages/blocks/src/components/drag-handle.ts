@@ -106,17 +106,6 @@ export class DragPreview extends ShadowlessElement {
         z-index: 2;
       }
 
-      affine-drag-preview:after {
-        content: '';
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 24px;
-        height: 24px;
-        transform: translate(var(--x), var(--y));
-      }
-
       affine-drag-preview > .affine-block-element {
         pointer-events: none;
       }
@@ -133,6 +122,17 @@ export class DragPreview extends ShadowlessElement {
       affine-drag-preview.grabbing {
         cursor: grabbing;
         pointer-events: auto;
+      }
+
+      affine-drag-preview.grabbing:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        transform: translate(var(--x), var(--y));
       }
     </style>`;
   }
@@ -189,7 +189,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       lastModelState: EditingState | null,
       lastType: DroppingType
     ) => void;
-    setSelectionType: () => void;
+    setDragType: (dragging: boolean) => void;
     setSelectedBlock: (selectedBlock: EditingState) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getClosestBlockElement: (point: Point) => Element | null;
@@ -200,7 +200,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       return [];
     };
     this.onDropCallback = options.onDropCallback;
-    this.setSelectionType = options.setSelectionType;
+    this.setDragType = options.setDragType;
     this.setSelectedBlock = options.setSelectedBlock;
     this._getSelectedBlocks = options.getSelectedBlocks;
     this._getClosestBlockElement = options.getClosestBlockElement;
@@ -225,7 +225,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     lastType: DroppingType
   ) => void;
 
-  public setSelectionType: () => void;
+  public setDragType: (dragging: boolean) => void;
 
   public setSelectedBlock: (selectedBlock: EditingState) => void;
 
@@ -345,8 +345,12 @@ export class DragHandle extends WithDisposable(LitElement) {
     this.hide();
   }
 
-  hide() {
+  hide(force = false) {
     this.style.display = 'none';
+    if (force) this.reset();
+  }
+
+  reset() {
     this._handleAnchorState = null;
     this._lastDroppingType = 'none';
     this._lastDroppingTarget = null;
@@ -420,19 +424,19 @@ export class DragHandle extends WithDisposable(LitElement) {
     super.disconnectedCallback();
 
     // cleanup
-    this.hide();
+    this.hide(true);
 
     this._handleAnchorDisposable?.dispose();
   }
 
   private _onMouseMoveOnHost(e: MouseEvent) {
-    if (this._stopPropagation) {
-      e.stopPropagation();
-    }
-
     if (isFirefox) {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
+    }
+
+    if (this._stopPropagation) {
+      e.stopPropagation();
     }
 
     if (!this._handleAnchorState) {
@@ -648,8 +652,6 @@ export class DragHandle extends WithDisposable(LitElement) {
   onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !e.dataTransfer) return;
 
-    this.setSelectionType();
-
     const anchor = this._handleAnchorState && this._handleAnchorState.element;
     let draggingBlockElements = this.selectedBlocks;
 
@@ -667,6 +669,8 @@ export class DragHandle extends WithDisposable(LitElement) {
       ) as BlockComponentElement[],
       draggable
     );
+
+    this.setDragType(true);
   };
 
   onDrag = (e: DragEvent, passed?: boolean, isScrolling?: boolean) => {
@@ -744,7 +748,8 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     // `Esc`
     if (!passed && dropEffect === 'none') {
-      this.hide();
+      this.setDragType(false);
+      this.hide(true);
       return;
     }
 
@@ -759,7 +764,8 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._lastDroppingType
     );
 
-    this.hide();
+    this.setDragType(false);
+    this.hide(true);
   };
 
   render() {

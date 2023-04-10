@@ -496,20 +496,18 @@ export function getAllowSelectedBlocks(
   return result;
 }
 
-export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
+export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
-    container: defaultPageBlock.mouseRoot as HTMLElement,
+    container: pageBlock.mouseRoot as HTMLElement,
     onDropCallback(_point, blockElements, editingState, type): void {
       if (!editingState || type === 'none') return;
       const { model } = editingState;
-      const page = defaultPageBlock.page;
+      const page = pageBlock.page;
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
       );
-      if (models.length === 1 && doesInSamePath(page, model, models[0])) {
-        return;
-      }
+      if (models.length === 1 && doesInSamePath(page, model, models[0])) return;
 
       page.captureSync();
 
@@ -522,14 +520,14 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       }
 
       // unneeded
-      // defaultPageBlock.selection.clear();
-      defaultPageBlock.selection.state.type = 'block';
+      // pageBlock.selection.clear();
+      pageBlock.selection.state.type = 'block';
 
-      defaultPageBlock.updateComplete.then(() => {
+      pageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
-          defaultPageBlock.selection.setSelectedBlocks(
+          pageBlock.selection.setSelectedBlocks(
             blockElements
               .map(b => getBlockElementById(b.model.id))
               .filter((b): b is BlockComponentElement => !!b)
@@ -537,18 +535,18 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         });
       });
     },
-    setSelectionType() {
-      defaultPageBlock.selection.state.type = 'block:drag';
+    setDragType(dragging: boolean) {
+      pageBlock.selection.state.type = dragging ? 'block:drag' : 'none';
     },
     setSelectedBlock({ element }: EditingState) {
-      defaultPageBlock.selection.selectOneBlock(element);
+      pageBlock.selection.selectOneBlock(element);
     },
     getSelectedBlocks() {
-      return defaultPageBlock.selection.state.selectedBlocks;
+      return pageBlock.selection.state.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPoint(point, {
-        rect: defaultPageBlock.innerRect,
+        rect: pageBlock.innerRect,
       });
     },
   });
