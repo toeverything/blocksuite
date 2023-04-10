@@ -1,12 +1,12 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import { initLimitedLengthVEditor } from '@blocksuite/blocks/database-block/utils.js';
 import type { SelectTag } from '@blocksuite/global/database';
 import type { VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { INPUT_MAX_LENGTH } from '../../../consts.js';
+import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
+import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
 export class SelectOption extends LitElement {
@@ -58,7 +58,7 @@ export class SelectOption extends LitElement {
       yText: this.select.value,
       container: this._container,
       targetModel: this.databaseModel,
-      maxLength: INPUT_MAX_LENGTH,
+      maxLength: SELECT_TAG_NAME_MAX_LENGTH,
       // When editing the current select, other sibling selects should not be edited
       readonly: !this.editing,
     });

@@ -1,10 +1,11 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import { type DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
   assertColumnWidth,
   assertDatabaseColumnOrder,
   clickDatabaseOutside,
+  copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusDatabaseHeader,
@@ -26,11 +27,13 @@ import {
   performColumnAction,
   performSelectColumnTagAction,
   pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
+  selectAllByKeyboard,
   switchColumnType,
   type,
   undoByClick,
@@ -501,12 +504,28 @@ test.describe('select column tag action', () => {
     // The maximum length of the tag name is 10
     expect((await input.innerText()).length).toBe(10);
     expect(await input.innerText()).toBe('1234567abc');
-    await saveIcon.click();
 
+    await selectAllByKeyboard(page);
+    await copyByKeyboard(page);
+    await pressArrowRight(page);
+    // 1234567|abc
+    for (let i = 0; i < 3; i++) {
+      await pressArrowLeft(page);
+    }
+    // 1234|abc
+    for (let i = 0; i < 3; i++) {
+      await pressBackspace(page);
+    }
+    // 1234123|abc
+    await pasteByKeyboard(page);
+    expect((await input.innerText()).length).toBe(10);
+    expect(await input.innerText()).toBe('1234123abc');
+
+    await saveIcon.click();
     await clickDatabaseOutside(page);
     const selected1 = cellSelected.nth(0);
     const selected2 = cellSelected.nth(1);
-    expect(await selected1.innerText()).toBe('1234567abc');
+    expect(await selected1.innerText()).toBe('1234123abc');
     expect(await selected2.innerText()).toBe('abc');
   });
 
