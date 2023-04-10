@@ -69,6 +69,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
       // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
+    this._disposables.addFromEvent(window, 'keydown', e => {
+      if (e.key === 'Escape') {
+        this.abortController.abort();
+      }
+    });
     // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
   }
 
@@ -118,8 +123,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       // Abort when press modifier key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
       isControlledKeyboardEvent(e) ||
-      e.key === ' ' ||
-      e.key === 'Escape'
+      e.key === ' '
     ) {
       this.abortController.abort();
       return;

@@ -60,6 +60,7 @@ const createKeydownObserver = ({
   onUpdateQuery,
   onMove,
   onConfirm,
+  onEsc,
   ignoreKeys = [],
   abortController,
 }: {
@@ -67,7 +68,7 @@ const createKeydownObserver = ({
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
-  onClickAway?: () => void;
+  onEsc?: () => void;
   ignoreKeys?: string[];
   abortController: AbortController;
 }) => {
@@ -81,8 +82,7 @@ const createKeydownObserver = ({
     if (
       // Abort when press modifier key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
-      isControlledKeyboardEvent(e) ||
-      e.key === 'Escape'
+      isControlledKeyboardEvent(e)
     ) {
       abortController.abort();
       return;
@@ -146,6 +146,18 @@ const createKeydownObserver = ({
   abortController.signal.addEventListener('abort', () => {
     target.removeEventListener('keydown', keyDownListener, { capture: true });
   });
+
+  if (onEsc) {
+    const escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onEsc();
+      }
+    };
+    window.addEventListener('keydown', escListener);
+    abortController.signal.addEventListener('abort', () =>
+      window.removeEventListener('keydown', escListener)
+    );
+  }
 };
 
 @customElement('affine-linked-page-popover')
@@ -257,8 +269,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onConfirm: () => {
         this._actionList[this._activatedItemIndex].action();
       },
+      onEsc: () => {
+        this.abortController.abort();
+      },
     });
-    // this._disposables.addFromEvent(richText, 'keydown', keyDownListener);
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
