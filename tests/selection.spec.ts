@@ -1553,7 +1553,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   await page.mouse.wheel(viewport.right, -distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
@@ -1570,7 +1570,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   expect(scrollTop0).toBeCloseTo(scrollTop1 + distance / 4, -0.01);
 
   await page.mouse.wheel(viewport.right, distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
   const [count2, scrollTop2] = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
