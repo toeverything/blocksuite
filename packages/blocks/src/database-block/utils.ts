@@ -76,7 +76,8 @@ type InitLimitedLengthVEditorConfig = {
   container: HTMLElement;
   targetModel: BaseBlockModel;
   maxLength: number;
-  handlers: VirgoEventService<BaseTextAttributes>['_handlers'];
+  readonly?: boolean;
+  handlers?: VirgoEventService<BaseTextAttributes>['_handlers'];
   options?: VEditorOptions;
 };
 export function initLimitedLengthVEditor({
@@ -84,7 +85,8 @@ export function initLimitedLengthVEditor({
   container,
   targetModel,
   maxLength,
-  handlers,
+  readonly,
+  handlers = {},
   options = {
     defaultMode: 'rich',
   },
@@ -154,7 +156,9 @@ export function initLimitedLengthVEditor({
     virgoCompositionEnd: handleCompositionEnd,
     ...handlers,
   });
-  vEditor.setReadonly(targetModel.page.readonly);
+  vEditor.setReadonly(
+    readonly === undefined ? targetModel.page.readonly : readonly
+  );
 
   return vEditor;
 }
