@@ -483,9 +483,10 @@ export class DragHandle extends WithDisposable(LitElement) {
     model: BaseBlockModel,
     element: Element,
     draggingElements: BlockComponentElement[],
-    scale: number
+    scale: number,
+    force = false
   ) {
-    const includingDatabase = hasDatabase(draggingElements);
+    const includingDatabase = hasDatabase(draggingElements) || force;
 
     if (includingDatabase) {
       if (!matchFlavours(model, ['affine:database'] as const)) {
