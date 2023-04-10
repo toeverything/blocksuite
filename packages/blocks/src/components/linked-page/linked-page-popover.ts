@@ -60,6 +60,7 @@ const createKeydownObserver = ({
   onUpdateQuery,
   onMove,
   onConfirm,
+  onEsc,
   ignoreKeys = [],
   abortController,
 }: {
@@ -67,7 +68,7 @@ const createKeydownObserver = ({
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
-  onClickAway?: () => void;
+  onEsc?: () => void;
   ignoreKeys?: string[];
   abortController: AbortController;
 }) => {
@@ -146,6 +147,18 @@ const createKeydownObserver = ({
   abortController.signal.addEventListener('abort', () => {
     target.removeEventListener('keydown', keyDownListener, { capture: true });
   });
+
+  if (onEsc) {
+    const escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onEsc();
+      }
+    };
+    window.addEventListener('keydown', escListener);
+    abortController.signal.addEventListener('abort', () =>
+      window.removeEventListener('keydown', escListener)
+    );
+  }
 };
 
 @customElement('affine-linked-page-popover')
@@ -174,28 +187,30 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const displayPageName =
       pageName.slice(0, DISPLAY_LENGTH) +
       (pageName.length > DISPLAY_LENGTH ? '..' : '');
+    const filteredPageList = this._pageList.filter(({ title }) =>
+      isFuzzyMatch(title, this._query)
+    );
+
     return [
-      ...this._pageList
-        .filter(({ title }) => isFuzzyMatch(title, this._query))
-        .map((page, idx) => ({
-          key: page.id,
-          name: page.title,
-          active: idx === this._activatedItemIndex,
-          icon: PageIcon,
-          action: () => this._insertLinkedNode('LinkedPage', page.id),
-        })),
+      ...filteredPageList.map((page, idx) => ({
+        key: page.id,
+        name: page.title,
+        active: idx === this._activatedItemIndex,
+        icon: PageIcon,
+        action: () => this._insertLinkedNode('LinkedPage', page.id),
+      })),
       // The active condition is a bit tricky here
       {
         key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
-        active: this._pageList.length === this._activatedItemIndex,
+        active: filteredPageList.length === this._activatedItemIndex,
         icon: NewPageIcon,
         action: () => this._createPage(),
       },
       {
         key: 'create-subpage',
         name: `Create "${displayPageName}" subpage`,
-        active: this._pageList.length + 1 === this._activatedItemIndex,
+        active: filteredPageList.length + 1 === this._activatedItemIndex,
         icon: DualLinkIcon,
         action: () => this._createSubpage(),
       },
@@ -257,8 +272,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onConfirm: () => {
         this._actionList[this._activatedItemIndex].action();
       },
+      onEsc: () => {
+        this.abortController.abort();
+      },
     });
-    // this._disposables.addFromEvent(richText, 'keydown', keyDownListener);
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
@@ -296,7 +313,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   }
 
   private _createPage() {
-    const pageName = this._query || DEFAULT_PAGE_NAME;
+    const pageName = this._query;
     const workspace = this._page.workspace;
     const id = workspace.idGenerator();
     const page = this._page.workspace.createPage(id);
@@ -306,7 +323,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   }
 
   private _createSubpage() {
-    const pageName = this._query || DEFAULT_PAGE_NAME;
+    const pageName = this._query;
     const workspace = this._page.workspace;
     const id = workspace.idGenerator();
     const page = this._page.workspace.createPage(id, this._page.id);
@@ -326,40 +343,47 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._actionList
-      .slice(0, -2)
-      .map(
-        ({ key, name, action, active, icon }) => html`<icon-button
-          width="280px"
-          height="32px"
-          data-id=${key}
-          text=${name}
-          ?hover=${active}
-          @click=${action}
-          >${icon}</icon-button
-        >`
-      );
+    const pageList = this._actionList.slice(0, -2).map(
+      ({ key, name, action, active, icon }, index) => html`<icon-button
+        width="280px"
+        height="32px"
+        data-id=${key}
+        text=${name}
+        ?hover=${active}
+        @click=${action}
+        @mousemove=${() => {
+          // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
+          this._activatedItemIndex = index;
+        }}
+        >${icon}</icon-button
+      >`
+    );
 
-    const createList = this._actionList
-      .slice(-2)
-      .map(
-        ({ key, name, action, active, icon }) => html`<icon-button
-          width="280px"
-          height="32px"
-          data-id=${key}
-          text=${name}
-          ?hover=${active}
-          @click=${action}
-          >${icon}</icon-button
-        >`
-      );
+    const createList = this._actionList.slice(-2).map(
+      ({ key, name, action, active, icon }, index) => html`<icon-button
+        width="280px"
+        height="32px"
+        data-id=${key}
+        text=${name}
+        ?hover=${active}
+        @click=${action}
+        @mousemove=${() => {
+          // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
+          this._activatedItemIndex = this._actionList.length - 2 + index;
+        }}
+        >${icon}</icon-button
+      >`
+    );
 
     return html`<div class="linked-page-popover" style="${style}">
-      <div class="group-title">Link to page</div>
-      <div class="group" style="overflow-y: scroll; max-height: 224px;">
-        ${pageList}
-      </div>
-      <div class="divider"></div>
+      ${pageList.length
+        ? html`<div class="group-title">Link to page</div>
+            <div class="group" style="overflow-y: scroll; max-height: 224px;">
+              ${pageList}
+            </div>
+            <div class="divider"></div>`
+        : null}
+
       <div class="group-title">New page</div>
       ${createList}
     </div>`;

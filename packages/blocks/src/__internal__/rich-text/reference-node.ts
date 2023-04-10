@@ -24,14 +24,19 @@ import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
+const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   /**
    * Emit when the subpage is linked to the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageLinked: Slot<{ pageId: string }>;
   /**
    * Emit when the subpage is unlinked from the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string }>;
@@ -58,6 +63,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       text-decoration: none;
       cursor: pointer;
       user-select: none;
+      margin: 0 4px;
     }
     .affine-reference:hover {
       background: var(--affine-hover-background);
@@ -128,8 +134,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         // TODO remove this node since the subpage not exists.
         return;
       }
+
       // User may create a subpage ref node by paste or undo/redo.
       this.host.slots.subpageLinked.emit({ pageId: refAttribute.pageId });
+      if (process.env.NODE_ENV === 'development') {
+        // Strict mode
+        this.host.slots.subpageLinked.emit({
+          pageId: refAttribute.pageId,
+          // @ts-expect-error
+          __dev:
+            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
+        });
+      }
     }
   }
 
@@ -150,6 +166,15 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       this.host.slots.subpageUnlinked.emit({
         pageId: this._refAttribute.pageId,
       });
+      if (process.env.NODE_ENV === 'development') {
+        // Strict mode
+        this.host.slots.subpageUnlinked.emit({
+          pageId: this._refAttribute.pageId,
+          // @ts-expect-error
+          __dev:
+            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
+        });
+      }
     }
   }
 
@@ -175,6 +200,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     if (isDisabled && this._refAttribute.type === 'Subpage') {
       return html`<v-text .str=${this.delta.insert}></v-text>`;
     }
+
     const title = isDisabled
       ? // Maybe the page is deleted
         'Deleted page'
@@ -183,7 +209,16 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     assertExists(attributes, 'Failed to get attributes!');
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
-    const style = affineTextStyles(attributes);
+
+    const style = affineTextStyles(
+      attributes,
+      isDisabled
+        ? {
+            color: 'var(--affine-disable-color)',
+            fill: 'var(--affine-disable-color)',
+          }
+        : {}
+    );
 
     // Sine reference title should not be edit by user,
     // we set it into the `::before` pseudo element.
@@ -205,7 +240,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       @click=${this._onClick}
       >${type === 'LinkedPage' ? FontPageSubpageIcon : FontPageIcon}<span
         class="affine-reference-title"
-        data-title=${title}
+        data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
         >${ZERO_WIDTH_NON_JOINER}</span
       ></span
