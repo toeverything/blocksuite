@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
@@ -107,6 +108,7 @@ export class DebugMenu extends ShadowlessElement {
     this._dark = matchMedia.matches;
     if (this._dark) {
       document.querySelector('html')?.classList.add('dark');
+      document.querySelector('html')?.classList.add('sl-theme-dark');
     }
     matchMedia.addEventListener('change', this._darkModeChange);
 
@@ -232,8 +234,10 @@ export class DebugMenu extends ShadowlessElement {
     this._dark = !this._dark;
     if (this._dark) {
       html?.classList.add('dark');
+      html?.classList.add('sl-theme-dark');
     } else {
       html?.classList.remove('dark');
+      html?.classList.remove('sl-theme-dark');
     }
   }
 
@@ -243,9 +247,11 @@ export class DebugMenu extends ShadowlessElement {
     if (e.matches) {
       this._dark = true;
       html?.classList.add('dark');
+      html?.classList.add('sl-theme-dark');
     } else {
       this._dark = false;
       html?.classList.remove('dark');
+      html?.classList.remove('sl-theme-dark');
     }
   };
 

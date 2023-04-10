@@ -872,7 +872,7 @@ export function queryCurrentMode(): 'light' | 'dark' {
     '--affine-theme-mode'
   );
 
-  if (mode === 'dark') {
+  if (mode.trim() === 'dark') {
     return 'dark';
   } else {
     return 'light';
