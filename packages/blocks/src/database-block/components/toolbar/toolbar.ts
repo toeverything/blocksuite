@@ -108,7 +108,7 @@ const styles = css`
     outline: none;
   }
   .affine-database-search-input::placeholder {
-    color: #888a9e;
+    color: var(--affine-placeholder-color);
     font-size: var(--affine-font-sm);
   }
 
@@ -124,7 +124,7 @@ const styles = css`
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
       0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
-      #ffffff;
+      var(--affine-white);
   }
   .new-record > tool-tip {
     max-width: 280px;

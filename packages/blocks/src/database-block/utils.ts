@@ -32,16 +32,16 @@ export function onClickOutside(
 
 /** select tag color poll */
 const tagColorPoll: string[] = [
-  '#F5F5F5',
-  '#E3E2E0',
-  '#FFE1E1',
-  '#FFEACA',
-  '#FFF4D8',
-  '#DFF4E8',
-  '#DFF4F3',
-  '#E1EFFF',
-  '#F3F0FF',
-  '#FCE8FF',
+  'var(--affine-tag-blue)',
+  'var(--affine-tag-green)',
+  'var(--affine-tag-teal)',
+  'var(--affine-tag-white)',
+  'var(--affine-tag-purple)',
+  'var(--affine-tag-red)',
+  'var(--affine-tag-pink)',
+  'var(--affine-tag-yellow)',
+  'var(--affine-tag-orange)',
+  'var(--affine-tag-gray)',
 ];
 
 function tagColorHelper() {

@@ -72,7 +72,6 @@ const styles = css`
     display: flex;
     width: 100%;
     height: 28px;
-    background: #fff;
   }
   .affine-database-block-footer:hover {
     background-color: rgba(0, 0, 0, 0.04);

@@ -31,15 +31,15 @@ export class SelectActionPopup extends LitElement {
     .affine-database-select-action {
       width: 200px;
       padding: 8px;
-      border: 1px solid #e3e2e4;
+      border: 1px solid var(--affine-border-color);
       border-radius: 4px;
-      background: #fff;
+      background: var(--affine-white);
       box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
-        inset 0px 0px 0px 0.5px #e3e3e4;
+        inset 0px 0px 0px 0.5px var(--affine-white);
     }
     ${actionStyles}
     .action {
-      color: #424149;
+      color: var(--affine-text-primary-color);
     }
     .action svg {
       width: 20px;
@@ -47,7 +47,7 @@ export class SelectActionPopup extends LitElement {
     }
     .rename,
     .delete {
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
   `;
 

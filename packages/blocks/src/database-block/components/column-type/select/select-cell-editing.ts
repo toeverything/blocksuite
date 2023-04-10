@@ -57,7 +57,7 @@ const styles = css`
     outline: none;
   }
   .select-input::placeholder {
-    color: #888a9e;
+    color: var(--affine-placeholder-color);
   }
   .select-option-container {
     padding: 8px;
@@ -73,10 +73,10 @@ const styles = css`
     padding: 2px 10px;
     gap: 10px;
     height: 28px;
-    background: #f5f5f5;
+    background: var(--affine-tag-white);
     border-radius: 4px;
     color: rgba(0, 0, 0, 0.9);
-    background: #f3f0ff;
+    background: var(--affine-tertiary-color);
   }
   .select-selected > .close-icon {
     display: flex;
@@ -97,14 +97,14 @@ const styles = css`
     height: 28px;
     padding: 2px 10px;
     border-radius: 4px;
-    background: #ffe1e1;
+    background: var(--affine-tag-red);
   }
   .select-option-new-icon {
     display: flex;
     align-items: center;
     gap: 6px;
     height: 28px;
-    color: #424149;
+    color: var(--affine-text-primary-color);
   }
   .select-option-new-icon svg {
     width: 16px;
@@ -134,7 +134,7 @@ const styles = css`
     display: inline-block;
     height: 100%;
     padding: 2px 10px;
-    background: #f5f5f5;
+    background: var(--affine-tag-white);
     border-radius: 4px;
     outline: none;
   }

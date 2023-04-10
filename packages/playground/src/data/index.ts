@@ -132,9 +132,9 @@ export const database: InitFn = (workspace: Workspace) => {
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
   const selection = [
-    { value: 'Done', color: '#F5F5F5' },
-    { value: 'TODO', color: '#FFE1E1' },
-    { value: 'WIP', color: '#E1EFFF' },
+    { value: 'Done', color: 'var(--affine-tag-white)' },
+    { value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
   const col1 = page.db.updateColumn({
     name: 'Number',

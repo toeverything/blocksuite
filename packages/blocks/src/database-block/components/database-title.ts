@@ -25,7 +25,7 @@ export class DatabaseTitle extends ShadowlessElement {
       font-size: 18px;
       font-weight: 600;
       line-height: 24px;
-      color: #424149;
+      color: var(--affine-text-primary-color);
       font-family: inherit;
       overflow: hidden;
       cursor: text;

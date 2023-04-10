@@ -18,7 +18,7 @@ export class SelectOption extends LitElement {
       min-width: 2px;
       height: 100%;
       padding: 2px 10px;
-      background: #fce8ff;
+      background: var(--affine-tag-pink);
       border-radius: 4px;
     }
     .select-option-text:focus {
