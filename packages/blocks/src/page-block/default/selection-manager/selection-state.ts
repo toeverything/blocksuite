@@ -142,6 +142,7 @@ export class PageSelectionState {
   }
 
   clearNativeSelection() {
+    this.clearRaf();
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
