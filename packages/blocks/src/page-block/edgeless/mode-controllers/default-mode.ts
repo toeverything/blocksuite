@@ -56,6 +56,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   };
   enableHover = true;
   dragType = DefaultModeDragType.None;
+  selectedBlocks: BlockComponentElement[] = [];
 
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };

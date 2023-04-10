@@ -83,17 +83,27 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     setDragType(dragging: boolean) {
       const selection = pageBlock.getSelection();
       if (selection.mouseMode.type === 'default') {
-        (selection.currentController as DefaultModeController).dragType =
-          dragging
-            ? DefaultModeDragType.PreviewDragging
-            : DefaultModeDragType.None;
+        const currentController =
+          selection.currentController as DefaultModeController;
+        currentController.dragType = dragging
+          ? DefaultModeDragType.PreviewDragging
+          : DefaultModeDragType.None;
+        currentController.selectedBlocks = [];
       }
     },
-
-    setSelectedBlock(_: EditingState) {
-      return;
+    setSelectedBlock(modelState: EditingState) {
+      const selection = pageBlock.getSelection();
+      if (selection.mouseMode.type === 'default') {
+        (selection.currentController as DefaultModeController).selectedBlocks =
+          [modelState.element];
+      }
     },
     getSelectedBlocks() {
+      const selection = pageBlock.getSelection();
+      if (selection.mouseMode.type === 'default') {
+        return (selection.currentController as DefaultModeController)
+          .selectedBlocks;
+      }
       return [];
     },
     getClosestBlockElement(point: Point) {
