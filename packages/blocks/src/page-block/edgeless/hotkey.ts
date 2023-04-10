@@ -3,7 +3,12 @@ import { HOTKEYS } from '@blocksuite/global/config';
 import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
-import { bindCommonHotkey, handleDown, handleUp } from '../utils/index.js';
+import {
+  bindCommonHotkey,
+  deleteModelsByRange,
+  handleDown,
+  handleUp,
+} from '../utils/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
 
@@ -57,6 +62,9 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
 
   hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
+    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shap`, etc.
+    deleteModelsByRange(edgeless.page);
+
     const { selected } = edgeless.getSelection().blockSelectionState;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
