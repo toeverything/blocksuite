@@ -5,6 +5,7 @@ import {
   getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
+  hasDatabase,
   isContainedIn,
   Point,
   Rect,
@@ -17,6 +18,7 @@ import {
   assertExists,
   type Disposable,
   isFirefox,
+  matchFlavours,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
@@ -36,6 +38,8 @@ const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
   event.preventDefault();
 };
+
+export type DroppingType = 'none' | 'before' | 'after' | 'database';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
@@ -182,7 +186,8 @@ export class DragHandle extends WithDisposable(LitElement) {
     onDropCallback: (
       point: Point,
       draggingBlockElements: BlockComponentElement[],
-      lastModelState: EditingState | null
+      lastModelState: EditingState | null,
+      lastType: DroppingType
     ) => void;
     setSelectionType: () => void;
     setSelectedBlock: (selectedBlock: EditingState) => void;
@@ -216,7 +221,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   public onDropCallback: (
     point: Point,
     draggingBlockElements: BlockComponentElement[],
-    lastModelState: EditingState | null
+    lastModelState: EditingState | null,
+    lastType: DroppingType
   ) => void;
 
   public setSelectionType: () => void;
@@ -253,6 +259,7 @@ export class DragHandle extends WithDisposable(LitElement) {
    * Last drag handle dropping target state
    */
   private _lastDroppingTarget: EditingState | null = null;
+  private _lastDroppingType: DroppingType = 'none';
   private _indicator: DragIndicator | null = null;
   private _container: HTMLElement;
   private _dragPreview: DragPreview | null = null;
@@ -341,6 +348,7 @@ export class DragHandle extends WithDisposable(LitElement) {
   hide() {
     this.style.display = 'none';
     this._handleAnchorState = null;
+    this._lastDroppingType = 'none';
     this._lastDroppingTarget = null;
 
     if (this._indicator) {
@@ -470,26 +478,38 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
   }
 
-  private _clacTarget(
+  static clacTarget(
     point: Point,
     model: BaseBlockModel,
     element: Element,
     draggingElements: BlockComponentElement[],
     scale: number
   ) {
-    const height = 3 * scale;
-    const { rect: domRect, isEmptyDatabase } = getDropRectByPoint(
-      point,
-      model,
-      element
-    );
+    const includingDatabase = hasDatabase(draggingElements);
 
-    if (isEmptyDatabase) {
+    if (includingDatabase) {
+      if (!matchFlavours(model, ['affine:database'] as const)) {
+        const databaseBlockElement = element.closest('affine-database');
+        if (databaseBlockElement) {
+          element = databaseBlockElement;
+          model = getModelByBlockElement(element);
+        }
+      }
+    }
+
+    let type: DroppingType = 'none';
+    const height = 3 * scale;
+    const { rect: domRect, flag } = getDropRectByPoint(point, model, element);
+
+    // empty database
+    if (flag === 1) {
       const rect = Rect.fromDOMRect(domRect);
       rect.top -= height / 2;
       rect.height = height;
+      type = 'database';
+
       return {
-        flag: 2, // in empty database
+        type,
         rect,
         lastModelState: {
           model,
@@ -503,16 +523,15 @@ export class DragHandle extends WithDisposable(LitElement) {
     const distanceToBottom = Math.abs(domRect.bottom - point.y);
     const before = distanceToTop < distanceToBottom;
 
-    // -1: do nothing, 0: after, 1: before, 2: in empty database
-    let flag = Number(before);
+    type = before ? 'before' : 'after';
     let offsetY = 4;
 
-    if (flag === 1) {
+    if (type === 'before') {
       // before
       const prev = element.previousElementSibling;
       if (prev) {
         if (prev === draggingElements[draggingElements.length - 1]) {
-          flag = -1;
+          type = 'none';
         } else {
           const prevRect = getRectByBlockElement(prev);
           offsetY = (domRect.top - prevRect.bottom) / 2;
@@ -523,7 +542,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       const next = element.nextElementSibling;
       if (next) {
         if (next === draggingElements[0]) {
-          flag = -1;
+          type = 'none';
         } else {
           const nextRect = getRectByBlockElement(next);
           offsetY = (nextRect.top - domRect.bottom) / 2;
@@ -531,30 +550,29 @@ export class DragHandle extends WithDisposable(LitElement) {
       }
     }
 
-    if (flag !== -1) {
-      let top = domRect.top;
-      if (flag === 1) {
-        top -= offsetY;
-      } else {
-        top += domRect.height + offsetY;
-      }
-      return {
-        flag,
-        rect: Rect.fromLWTH(
-          domRect.left,
-          domRect.width,
-          top - height / 2,
-          height
-        ),
-        lastModelState: {
-          model,
-          rect: domRect,
-          element: element as BlockComponentElement,
-        },
-      };
+    if (type === 'none') return null;
+
+    let top = domRect.top;
+    if (type === 'before') {
+      top -= offsetY;
+    } else {
+      top += domRect.height + offsetY;
     }
 
-    return null;
+    return {
+      type,
+      rect: Rect.fromLWTH(
+        domRect.left,
+        domRect.width,
+        top - height / 2,
+        height
+      ),
+      lastModelState: {
+        model,
+        rect: domRect,
+        element: element as BlockComponentElement,
+      },
+    };
   }
 
   private _createDragPreview(
@@ -568,14 +586,16 @@ export class DragHandle extends WithDisposable(LitElement) {
     const { clientX, clientY } = e;
     const s = this._scale;
 
-    dragPreview.offset.x = rect.left - containerRect.left - clientX;
-    dragPreview.offset.y = rect.top - containerRect.top - clientY;
-    dragPreview.style.width = `${rect.width / s}px`;
     const l = rect.left - containerRect.left;
     const t = rect.top - containerRect.top;
+    dragPreview.offset.x = l - clientX;
+    dragPreview.offset.y = t - clientY;
+    dragPreview.style.width = `${rect.width / s}px`;
     dragPreview.style.transform = `translate(${l}px, ${t}px) scale(${s})`;
-    dragPreview.style.setProperty('--x', `${-dragPreview.offset.x - 24 / 2}px`);
-    dragPreview.style.setProperty('--y', `${-dragPreview.offset.y - 24 / 2}px`);
+    const x = -dragPreview.offset.x - containerRect.left - 24 / 2;
+    const y = -dragPreview.offset.y - containerRect.top - 24 / 2;
+    dragPreview.style.setProperty('--x', `${x}px`);
+    dragPreview.style.setProperty('--y', `${y}px`);
 
     const fragment = document.createDocumentFragment();
 
@@ -681,6 +701,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     const point = new Point(x, y);
     const element = this._getClosestBlockElement(point.clone());
+    let type: DroppingType = 'none';
     let rect = null;
     let lastModelState = null;
 
@@ -692,7 +713,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         !isContainedIn(this._draggingElements, element)
       ) {
         const model = getModelByBlockElement(element);
-        const result = this._clacTarget(
+        const result = DragHandle.clacTarget(
           point,
           model,
           element,
@@ -701,6 +722,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         );
 
         if (result) {
+          type = result.type;
           rect = result.rect;
           lastModelState = result.lastModelState;
         }
@@ -708,6 +730,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     }
 
     this._indicator.rect = rect;
+    this._lastDroppingType = type;
     this._lastDroppingTarget = lastModelState;
   };
 
@@ -731,7 +754,8 @@ export class DragHandle extends WithDisposable(LitElement) {
       this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY),
       // blockElements include subtrees
       this._draggingElements,
-      this._lastDroppingTarget
+      this._lastDroppingTarget,
+      this._lastDroppingType
     );
 
     this.hide();

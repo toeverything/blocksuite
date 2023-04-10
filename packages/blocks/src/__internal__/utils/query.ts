@@ -591,7 +591,7 @@ function isEmbed({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is codeblock.
+ * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
   return tagName === 'AFFINE-DATABASE';
@@ -934,58 +934,29 @@ export function getDropRectByPoint(
 ) {
   const result = {
     rect: getRectByBlockElement(element),
-    isEmptyDatabase: false,
+    // 0: others, 1: empty database
+    flag: 0,
   };
+
   // If the database is empty and the point is inside the database
   if (isEmptyDatabase(model)) {
+    result.flag = 1;
     const table = getDatabaseBlockTableElement(element);
     assertExists(table);
     const bounds = table.getBoundingClientRect();
-    if (bounds.top <= point.y && point.y <= bounds.bottom) {
-      const header = getDatabaseBlockColumnHeaderElement(element);
-      assertExists(header);
-      const headerBounds = header.getBoundingClientRect();
-      result.rect = new DOMRect(
-        headerBounds.left,
-        headerBounds.bottom,
-        result.rect.width,
-        1
-      );
-      result.isEmptyDatabase = true;
-    }
+    if (point.y < bounds.top) return result;
+    const header = getDatabaseBlockColumnHeaderElement(element);
+    assertExists(header);
+    const headerBounds = header.getBoundingClientRect();
+    result.rect = new DOMRect(
+      headerBounds.left,
+      headerBounds.bottom,
+      result.rect.width,
+      1
+    );
   }
 
   return result;
-}
-
-/**
- * Returns `true` if the point is inside the empty database.
- */
-export function isInEmptyDatabaseByPoint(
-  point: Point,
-  model: BaseBlockModel,
-  element: Element,
-  blocks: BaseBlockModel[]
-) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
-    // Currently, nested databases are not supported
-    if (
-      blocks.some(block => matchFlavours(block, ['affine:database'] as const))
-    ) {
-      return false;
-    }
-
-    if (model.isEmpty()) {
-      const table = getDatabaseBlockTableElement(element);
-      assertExists(table);
-      const bounds = table.getBoundingClientRect();
-      if (bounds.top <= point.y && point.y <= bounds.bottom) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
 
 /**
@@ -1007,4 +978,11 @@ export function isPageSelectedRects(target: Element) {
  */
 export function isDragHandle(target: Element) {
   return target.tagName === 'AFFINE-DRAG-HANDLE';
+}
+
+/**
+ * Returns `true` if block elements have database block element.
+ */
+export function hasDatabase(elements: Element[]) {
+  return elements.some(isDatabase);
 }

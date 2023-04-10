@@ -11,7 +11,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
-  isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -501,9 +500,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blockElements, editingState): void {
-      if (!editingState) return;
-      const { rect, model, element } = editingState;
+    onDropCallback(point, blockElements, editingState, type): void {
+      if (!editingState || type === 'none') return;
+      const { rect, model } = editingState;
       const page = defaultPageBlock.page;
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
@@ -514,7 +513,7 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 
       page.captureSync();
 
-      if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+      if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
         const distanceToTop = Math.abs(rect.top - point.y);

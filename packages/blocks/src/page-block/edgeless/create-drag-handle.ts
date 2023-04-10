@@ -8,7 +8,6 @@ import {
   getHoveringFrame,
   getModelByBlockElement,
   getRectByBlockElement,
-  isInEmptyDatabaseByPoint,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -21,7 +20,9 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
     // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blockElements, editingState) {
+    onDropCallback(point, blockElements, editingState, type) {
+      if (type === 'none') return;
+
       const blockElementsExcludeSubtrees =
         getBlockElementsExcludeSubtrees(blockElements);
       if (!blockElementsExcludeSubtrees.length) return;
@@ -32,7 +33,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       const page = pageBlock.page;
 
       if (editingState) {
-        const { rect, model, element } = editingState;
+        const { rect, model } = editingState;
         if (models.length === 1 && doesInSamePath(page, model, models[0])) {
           return;
         }
@@ -51,7 +52,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
         page.captureSync();
 
-        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+        if (type === 'database') {
           page.moveBlocks(models, model);
         } else {
           const distanceToTop = Math.abs(rect.top - point.y);
