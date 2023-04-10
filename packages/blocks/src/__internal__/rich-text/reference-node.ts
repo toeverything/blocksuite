@@ -28,10 +28,14 @@ export const REFERENCE_NODE = ' ';
 export type RefNodeSlots = {
   /**
    * Emit when the subpage is linked to the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageLinked: Slot<{ pageId: string }>;
   /**
    * Emit when the subpage is unlinked from the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string }>;
@@ -129,8 +133,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         // TODO remove this node since the subpage not exists.
         return;
       }
+
       // User may create a subpage ref node by paste or undo/redo.
       this.host.slots.subpageLinked.emit({ pageId: refAttribute.pageId });
+      if (process.env.NODE_ENV === 'development') {
+        // Strict mode
+        this.host.slots.subpageLinked.emit({
+          pageId: refAttribute.pageId,
+          // @ts-expect-error
+          __dev:
+            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
+        });
+      }
     }
   }
 
@@ -151,6 +165,15 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       this.host.slots.subpageUnlinked.emit({
         pageId: this._refAttribute.pageId,
       });
+      if (process.env.NODE_ENV === 'development') {
+        // Strict mode
+        this.host.slots.subpageUnlinked.emit({
+          pageId: this._refAttribute.pageId,
+          // @ts-expect-error
+          __dev:
+            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
+        });
+      }
     }
   }
 
