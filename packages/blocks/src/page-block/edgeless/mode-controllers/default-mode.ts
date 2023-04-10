@@ -55,23 +55,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     type: 'default',
   };
   enableHover = true;
+  dragType = DefaultModeDragType.None;
 
-  private _dragType = DefaultModeDragType.None;
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
 
-  get dragType() {
-    return this._dragType;
-  }
-
-  set dragType(type: DefaultModeDragType) {
-    this._dragType = type;
-  }
-
   get draggingArea() {
-    if (this._dragType === DefaultModeDragType.Selecting) {
+    if (this.dragType === DefaultModeDragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
         end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
@@ -288,16 +280,16 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragStart(e: SelectionEvent) {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      this._dragType = this._blockSelectionState.active
+      this.dragType = this._blockSelectionState.active
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        this._dragType = DefaultModeDragType.ContentMoving;
+        this.dragType = DefaultModeDragType.ContentMoving;
       } else {
-        this._dragType = DefaultModeDragType.Selecting;
+        this.dragType = DefaultModeDragType.Selecting;
       }
     }
 
@@ -308,7 +300,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    switch (this._dragType) {
+    switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
@@ -372,14 +364,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     }
-    this._dragType = DefaultModeDragType.None;
+    this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._forceUpdateSelection();
   }
 
   onContainerMouseMove(e: SelectionEvent) {
-    if (this._dragType === DefaultModeDragType.PreviewDragging) return;
+    if (this.dragType === DefaultModeDragType.PreviewDragging) return;
     this._updateDragHandle(e);
   }
 
