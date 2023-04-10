@@ -301,6 +301,9 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
+    // switch native selection
+    NativeDragHandlers.onStart(this, e);
+
     showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
   };
 
