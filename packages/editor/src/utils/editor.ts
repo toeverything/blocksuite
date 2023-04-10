@@ -11,7 +11,7 @@ import {
   type BlockComponentElement,
   getClosestFrameBlockElementById,
   getHoveringFrame,
-  Point,
+  type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -94,10 +94,7 @@ export const createBlockHub: (
         frameId = targetFrameBlock.model.id;
       } else {
         // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(
-          models,
-          new Point(e.clientX, e.clientY)
-        );
+        const result = pageBlock.addNewFrame(models, point);
         frameId = result.frameId;
         focusId = result.ids[0];
       }
