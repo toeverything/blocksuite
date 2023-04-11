@@ -53,7 +53,9 @@ export class EdgelessColorPanel extends LitElement {
     }
 
     .color-unit {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 16px;
       height: 16px;
       border-radius: 50%;
@@ -64,10 +66,22 @@ export class EdgelessColorPanel extends LitElement {
     .color-unit[bordered] {
       border: 1px solid #e5e5e5;
     }
+
+    .color-unit::before {
+      content: attr(data-letter);
+      display: block;
+      font-size: 12px;
+    }
   `;
 
   @property()
   value?: Color;
+
+  @property()
+  options: Color[] = colors;
+
+  @property()
+  showLetterMark = false;
 
   private _onSelect(value: Color) {
     this.dispatchEvent(
@@ -82,7 +96,7 @@ export class EdgelessColorPanel extends LitElement {
 
   render() {
     return repeat(
-      colors,
+      this.options,
       color => color,
       color => {
         const style = { background: color };
@@ -100,6 +114,7 @@ export class EdgelessColorPanel extends LitElement {
               aria-label=${color.toLowerCase()}
               ?bordered=${color === '#ffffff'}
               style=${styleMap(style)}
+              data-letter=${this.showLetterMark ? 'A' : ''}
             >
               ${additionalIcon}
             </div>

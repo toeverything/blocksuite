@@ -19,6 +19,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
+import { FRAME_BACKGROUND_COLORS } from '../components/component-toolbar/change-frame-button.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -152,7 +153,11 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
-          @tool.click=${() => this._setMouseMode({ type: 'text' })}
+          @tool.click=${() =>
+            this._setMouseMode({
+              type: 'text',
+              background: FRAME_BACKGROUND_COLORS[0],
+            })}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>

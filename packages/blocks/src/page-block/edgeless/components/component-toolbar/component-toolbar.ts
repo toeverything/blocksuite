@@ -2,6 +2,7 @@ import '../tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
+import './change-frame-button.js';
 import './more-button.js';
 
 import type {
@@ -117,9 +118,22 @@ export class EdgelessComponentToolbar extends LitElement {
       : null;
   }
 
+  private _getFrameButton(blocks?: TopLevelBlockModel[]) {
+    return blocks?.length
+      ? html`<edgeless-change-frame-button
+          .elements=${blocks}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
+        >
+        </edgeless-change-frame-button>`
+      : null;
+  }
+
   render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector } = groupedSelected;
+    const { shape, brush, connector, frame } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -134,6 +148,7 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getShapeButton(shape),
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
+          this._getFrameButton(frame),
         ].filter(b => !!b);
 
     const divider = !buttons.length
