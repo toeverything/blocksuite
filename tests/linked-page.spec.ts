@@ -1,8 +1,15 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { addNewPage, switchToPage } from 'utils/actions/click.js';
-import { pressBackspace, pressEnter, type } from 'utils/actions/keyboard.js';
 import {
+  pressBackspace,
+  pressEnter,
+  redoByKeyboard,
+  type,
+  undoByKeyboard,
+} from 'utils/actions/keyboard.js';
+import {
+  captureHistory,
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
@@ -221,9 +228,8 @@ test.describe('reference node', () => {
 
     await type(page, '4');
     await assertRichTexts(page, ['14 32']);
-    await assertStoreMatchJSX(
-      page,
-      `
+
+    const snapshot = `
 <affine:paragraph
   prop:text={
     <>
@@ -245,12 +251,24 @@ test.describe('reference node', () => {
     </>
   }
   prop:type="text"
+/>`;
+    await assertStoreMatchJSX(page, snapshot, paragraphId);
+
+    await page.keyboard.press('ArrowRight');
+    await captureHistory(page);
+    await pressBackspace(page);
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text="1432"
+  prop:type="text"
 />`,
       paragraphId
     );
-
-    await page.keyboard.press('ArrowRight');
-    await pressBackspace(page);
+    await undoByKeyboard(page);
+    await assertStoreMatchJSX(page, snapshot, paragraphId);
+    await redoByKeyboard(page);
     await assertStoreMatchJSX(
       page,
       `
