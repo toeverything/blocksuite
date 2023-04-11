@@ -1,6 +1,3 @@
-import { showDatabaseModal } from '@blocksuite/blocks/components/database-modal/index.js';
-import { toast } from '@blocksuite/blocks/components/toast.js';
-import { getCurrentBlockRange } from '@blocksuite/blocks/std.js';
 import {
   BoldIcon,
   CopyIcon,
@@ -15,10 +12,13 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { showDatabaseModal } from '../../components/database-modal/index.js';
+import { toast } from '../../components/toast.js';
 import {
   getCurrentCombinedFormat,
   handleFormat,
 } from '../../page-block/utils/index.js';
+import { getCurrentBlockRange } from '../../std.js';
 
 type ActionProps = {
   page: Page;
