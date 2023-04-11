@@ -1,4 +1,3 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import type { SelectTag } from '@blocksuite/global/database';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
@@ -6,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { INPUT_MAX_LENGTH } from '../../../consts.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
 
 @customElement('affine-database-select-option')
 export class SelectOption extends LitElement {
