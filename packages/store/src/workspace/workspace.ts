@@ -4,7 +4,8 @@ import type { z } from 'zod';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BlobUploadState } from '../awareness.js';
-import { BlockSchema, internalPrimitives } from '../base.js';
+import type { BlockSchemaType } from '../base.js';
+import { BlockSchema } from '../base.js';
 import type { BlobStorage } from '../persistence/blob/index.js';
 import {
   type BlobOptionsGetter,
@@ -285,7 +286,6 @@ export class Workspace {
   };
 
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
-  flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
   readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
@@ -373,14 +373,10 @@ export class Workspace {
     return this._store.idGenerator;
   }
 
-  register(blockSchema: z.infer<typeof BlockSchema>[]) {
+  register(blockSchema: BlockSchemaType[]) {
     blockSchema.forEach(schema => {
       BlockSchema.parse(schema);
       this.flavourSchemaMap.set(schema.model.flavour, schema);
-      this.flavourInitialPropsMap.set(
-        schema.model.flavour,
-        schema.model.props(internalPrimitives)
-      );
     });
     return this;
   }
@@ -423,13 +419,13 @@ export class Workspace {
 
   private _bindPageMetaEvents() {
     this.meta.pageMetaAdded.on(pageId => {
-      const page = new Page(
-        this,
-        pageId,
-        this.doc,
-        this.awarenessStore,
-        this._store.idGenerator
-      );
+      const page = new Page({
+        id: pageId,
+        workspace: this,
+        doc: this.doc,
+        awarenessStore: this.awarenessStore,
+        idGenerator: this._store.idGenerator,
+      });
       this._store.addSpace(page);
       page.trySyncFromExistingDoc();
     });
