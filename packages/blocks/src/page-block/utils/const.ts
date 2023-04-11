@@ -1,5 +1,10 @@
+import { showDatabaseModal } from '@blocksuite/blocks/components/database-modal/index.js';
+import { toast } from '@blocksuite/blocks/components/toast.js';
+import { getCurrentBlockRange } from '@blocksuite/blocks/std.js';
 import {
   BoldIcon,
+  CopyIcon,
+  DatabaseTableViewIcon,
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
@@ -98,6 +103,50 @@ export const formatConfig = [
       if (format && abortController && !('link' in format)) {
         abortController.abort();
       }
+    },
+  },
+];
+
+const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
+
+export const actionConfig = [
+  {
+    id: 'copy',
+    name: 'Copy',
+    disabledToolTip: undefined,
+    icon: CopyIcon,
+    hotkey: undefined,
+    showWhen: () => true,
+    enabledWhen: () => true,
+    action: () => {
+      // Will forward to the `CopyCutManager`
+      window.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+      toast('Copied to clipboard');
+    },
+  },
+  {
+    id: 'database',
+    name: 'To Database',
+    disabledToolTip:
+      'Contains Block types that cannot be converted to Database. Learn more',
+    icon: DatabaseTableViewIcon,
+    hotkey: 'command+g,ctrl+g',
+    showWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      const isShow = range?.type === 'Block';
+      return isShow;
+    },
+    enabledWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      if (!range) return false;
+      return range.models.every(model =>
+        DATABASE_WHITE_LIST.includes(model.flavour)
+      );
+    },
+    action: ({ page }: ActionProps) => {
+      showDatabaseModal({
+        page,
+      });
     },
   },
 ];

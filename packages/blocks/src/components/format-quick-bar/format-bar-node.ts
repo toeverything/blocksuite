@@ -3,86 +3,31 @@ import './button.js';
 import {
   ArrowDownIcon,
   type BlockConfig,
-  CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type Page,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import {
-  getCurrentBlockRange,
-  restoreSelection,
-} from '../../__internal__/utils/block-range.js';
+import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   getRichTextByModel,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
-import { formatConfig } from '../../page-block/utils/const.js';
+import { actionConfig, formatConfig } from '../../page-block/utils/const.js';
 import {
   getCurrentCombinedFormat,
   onModelElementUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
-import { showDatabaseModal } from '../database-modal/index.js';
-import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
 
 type ParagraphType = `${string}/${string}`;
 type ParagraphPanelType = 'top' | 'bottom' | 'hidden';
-
-const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
-
-function DatabaseAction(page: Page) {
-  const showDatabase = page.awarenessStore.getFlag('enable_database');
-  if (!showDatabase) return null;
-
-  const range = getCurrentBlockRange(page);
-
-  const isShow = range?.type === 'Block';
-  if (!isShow) return null;
-
-  const enabled = range.models.every(model =>
-    DATABASE_WHITE_LIST.includes(model.flavour)
-  );
-
-  const onClick = () => {
-    if (enabled) {
-      showDatabaseModal({
-        page,
-      });
-    }
-  };
-
-  const databaseConfig = paragraphConfig.find(
-    item => item.flavour === 'affine:database'
-  );
-  assertExists(databaseConfig);
-
-  // TODO: add `Learn more` link
-  const toolTip = enabled
-    ? html` <tool-tip inert role="tooltip">${databaseConfig.name}</tool-tip>`
-    : html`<tool-tip tip-position="top" inert role="tooltip"
-        >Contains Block types that cannot be converted to Database. Learn
-        more</tool-tip
-      >`;
-  return html`<format-bar-button
-    ?disabled=${!enabled}
-    class="has-tool-tip"
-    data-testid="convert-to-database"
-    @click=${onClick}
-  >
-    ${databaseConfig.icon}${toolTip}
-  </format-bar-button>`;
-}
 
 function ParagraphPanel(
   showParagraphPanel: ParagraphPanelType,
@@ -135,17 +80,13 @@ function ParagraphPanel(
     positionUpdated.emit();
   };
 
-  const filteredParagraphConfig = paragraphConfig.filter(
-    item => item.flavour !== 'affine:database'
-  );
-
   return html` <div
     class="paragraph-panel"
     style="${styles}"
     @mouseover="${onHover}"
     @mouseout="${onHoverEnd}"
   >
-    ${filteredParagraphConfig.map(
+    ${paragraphConfig.map(
       ({ flavour, type, name, icon }) => html`<format-bar-button
         width="100%"
         style="padding-left: 12px; justify-content: flex-start;"
@@ -272,12 +213,6 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     clearTimeout(this._paragraphPanelTimer);
   }
 
-  private _onCopy() {
-    // Will forward to the `CopyCutManager`
-    this.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
-    toast('Copied to clipboard');
-  }
-
   override render() {
     const page = this.page;
 
@@ -289,8 +224,6 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       );
       return html``;
     }
-
-    const databaseAction = DatabaseAction(this.page);
 
     const paragraphIcon =
       paragraphConfig.find(
@@ -339,17 +272,26 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         </format-bar-button>`
       );
 
-    const actionItems = html`
-      <format-bar-button
-        class="has-tool-tip"
-        data-testid="copy"
-        @click=${() => this._onCopy()}
-      >
-        ${CopyIcon}
-        <tool-tip inert role="tooltip">Copy</tool-tip>
-      </format-bar-button>
-      ${databaseAction}
-    `;
+    const actionItems = actionConfig
+      .filter(({ showWhen = () => true }) => showWhen(page))
+      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
+        const enabled = enabledWhen(page);
+        const toolTip = enabled
+          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
+          : html`<tool-tip tip-position="top" inert role="tooltip"
+              >${disabledToolTip}</tool-tip
+            >`;
+        return html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?disabled=${!enabled}
+          @click=${() => {
+            if (enabled) action({ page });
+          }}
+        >
+          ${icon}${toolTip}
+        </format-bar-button>`;
+      });
 
     const styles = styleMap({
       left: this.left,
