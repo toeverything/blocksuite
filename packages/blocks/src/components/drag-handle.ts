@@ -1,18 +1,3 @@
-import {
-  type BlockComponentElement,
-  type EditingState,
-  getBlockElementsExcludeSubtrees,
-  getDropRectByPoint,
-  getModelByBlockElement,
-  getRectByBlockElement,
-  hasDatabase,
-  isContainedIn,
-  Point,
-  Rect,
-  type SelectionEvent,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/blocks/std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -24,6 +9,24 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type {
+  BlockComponentElement,
+  EditingState,
+  SelectionEvent,
+} from '../__internal__/index.js';
+import {
+  getBlockElementsExcludeSubtrees,
+  getDropRectByPoint,
+  getModelByBlockElement,
+  getRectByBlockElement,
+  hasDatabase,
+  isContainedIn,
+  Point,
+  Rect,
+  ShadowlessElement,
+  WithDisposable,
+} from '../__internal__/index.js';
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"

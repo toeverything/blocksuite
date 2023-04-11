@@ -3,15 +3,6 @@ import './components/edgeless-selected-rect.js';
 import './toolbar/edgeless-toolbar.js';
 
 import {
-  almostEqual,
-  asyncFocusRichText,
-  type BlockHost,
-  handleNativeRangeAtPoint,
-  type Point,
-  resetNativeSelection,
-  type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/global/config';
@@ -31,12 +22,20 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import type { Point, TopLevelBlockModel } from '../../__internal__/index.js';
+import {
+  almostEqual,
+  asyncFocusRichText,
+  handleNativeRangeAtPoint,
+  resetNativeSelection,
+} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import {
   ShadowlessElement,
   WithDisposable,
 } from '../../__internal__/utils/lit.js';
 import type {
+  BlockHost,
   DragHandle,
   FrameBlockModel,
   MouseMode,

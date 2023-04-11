@@ -1,4 +1,3 @@
-import { WithDisposable } from '@blocksuite/blocks/std';
 import { DualLinkIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import {
@@ -10,6 +9,7 @@ import { html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { WithDisposable } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import {

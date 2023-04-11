@@ -1,6 +1,11 @@
+import { assertExists } from '@blocksuite/store';
+
+import type {
+  BlockComponentElement,
+  EditingState,
+  Point,
+} from '../../__internal__/index.js';
 import {
-  type BlockComponentElement,
-  type EditingState,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getClosestFrameBlockElementById,
@@ -8,11 +13,8 @@ import {
   getModelByBlockElement,
   getRectByBlockElement,
   isInSamePath,
-  type Point,
   Rect,
-} from '@blocksuite/blocks/std';
-import { assertExists } from '@blocksuite/store';
-
+} from '../../__internal__/index.js';
 import { DragHandle } from '../../components/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {

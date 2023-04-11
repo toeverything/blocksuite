@@ -1,8 +1,8 @@
-import type { SerializedBlock } from '@blocksuite/blocks';
 import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, Page } from '@blocksuite/store';
 
+import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
 
 // There are these uncommon in-line tags that have not been added

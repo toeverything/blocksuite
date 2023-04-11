@@ -1,9 +1,9 @@
-import { WithDisposable } from '@blocksuite/blocks/std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { WithDisposable } from '../../../__internal__/index.js';
 import type { PageViewport } from './selection-state.js';
 
 @customElement('affine-page-selected-rects')

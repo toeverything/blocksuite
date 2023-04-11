@@ -1,15 +1,17 @@
-import type { EmbedBlockComponent } from '@blocksuite/blocks';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
+
+import type {
+  BlockComponentElement,
+  SelectionEvent,
+} from '../../../__internal__/index.js';
 import {
-  type BlockComponentElement,
   getBlockElementsByElement,
   getRectByBlockElement,
   Point,
   resetNativeSelection,
-  type SelectionEvent,
-} from '@blocksuite/blocks/std';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
-
+} from '../../../__internal__/index.js';
 import type { RichText } from '../../../__internal__/rich-text/rich-text.js';
+import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 
 export type PageSelectionType =
   | 'native'

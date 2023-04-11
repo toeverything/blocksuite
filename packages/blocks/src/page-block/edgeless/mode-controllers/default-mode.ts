@@ -1,6 +1,14 @@
+import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { PhasorElement, XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
+
+import type {
+  BlockComponentElement,
+  DefaultMouseMode,
+  SelectionEvent,
+  TopLevelBlockModel,
+} from '../../../__internal__/index.js';
 import {
-  type BlockComponentElement,
-  type DefaultMouseMode,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -11,13 +19,7 @@ import {
   Point,
   Rect,
   resetNativeSelection,
-  type SelectionEvent,
-  type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PhasorElement, XYWH } from '@blocksuite/phasor';
-import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
-
+} from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import { showFormatQuickBarByDoubleClick } from '../../index.js';
 import {

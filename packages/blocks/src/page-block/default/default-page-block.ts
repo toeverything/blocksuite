@@ -1,13 +1,4 @@
 /// <reference types="vite/client" />
-import {
-  asyncFocusRichText,
-  type BlockHost,
-  type EditingState,
-  hotkey,
-  HOTKEY_SCOPE,
-  Rect,
-  type SelectionPosition,
-} from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
@@ -16,6 +7,17 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockHost,
+  EditingState,
+  SelectionPosition,
+} from '../../__internal__/index.js';
+import {
+  asyncFocusRichText,
+  hotkey,
+  HOTKEY_SCOPE,
+  Rect,
+} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import {

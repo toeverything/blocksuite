@@ -1,10 +1,9 @@
+import type { SelectionEvent } from '../../../__internal__/index.js';
 import {
   handleNativeRangeDragMove,
   noop,
   Point,
-  type SelectionEvent,
-} from '@blocksuite/blocks/std';
-
+} from '../../../__internal__/index.js';
 import type { DefaultSelectionManager } from './default-selection-manager.js';
 import { autoScroll } from './utils.js';
 

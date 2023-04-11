@@ -1,15 +1,4 @@
 import {
-  type EditingState,
-  type Rect,
-  WithDisposable,
-} from '@blocksuite/blocks/std';
-import {
-  getClosestBlockElementByPoint,
-  getModelByBlockElement,
-  Point,
-  ShadowlessElement,
-} from '@blocksuite/blocks/std';
-import {
   BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
@@ -33,6 +22,14 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EditingState, Rect } from '../__internal__/index.js';
+import {
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  Point,
+  ShadowlessElement,
+  WithDisposable,
+} from '../__internal__/index.js';
 import {
   DragHandle,
   type DragIndicator,
