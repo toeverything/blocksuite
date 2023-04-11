@@ -1,8 +1,8 @@
-import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import { Point } from '@blocksuite/blocks/std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { Point } from '../../../../__internal__/index.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
 import { ColumnDragIndicator } from './column-drag-indicator.js';
 import { ColumnDragPreview } from './column-drag-preview.js';
 

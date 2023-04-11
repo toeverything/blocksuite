@@ -1,3 +1,4 @@
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -11,7 +12,6 @@ import type {
   FrameBlockModel,
   TopLevelBlockModel,
 } from '../../../index.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 
 function EdgelessMask() {
   const style = {
