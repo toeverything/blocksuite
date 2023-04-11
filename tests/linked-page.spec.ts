@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { addNewPage, switchToPage } from 'utils/actions/click.js';
 import {
+  copyByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
@@ -386,6 +387,16 @@ test.describe('linked page popover', () => {
     await type(page, '@');
     await expect(linkedPagePopover).toBeVisible();
     await page.mouse.click(0, 0);
+    await expect(linkedPagePopover).toBeHidden();
+
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await page.keyboard.press('ArrowRight');
+    await expect(linkedPagePopover).toBeHidden();
+
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await copyByKeyboard(page);
     await expect(linkedPagePopover).toBeHidden();
   });
 
