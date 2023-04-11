@@ -203,7 +203,7 @@ export class Page extends Space<FlatBlockMap> {
     this._history.clear();
   }
 
-  createId() {
+  generateId() {
     return this._idGenerator();
   }
 

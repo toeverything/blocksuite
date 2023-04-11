@@ -1,6 +1,5 @@
 import {
   type BlockComponentElement,
-  doesInSamePath,
   type EditingState,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
@@ -8,6 +7,7 @@ import {
   getHoveringFrame,
   getModelByBlockElement,
   getRectByBlockElement,
+  isInSamePath,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -36,8 +36,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
       if (editingState && type !== 'none') {
         const { model } = editingState;
-        if (models.length === 1 && doesInSamePath(page, model, models[0]))
-          return;
+        if (models.length === 1 && isInSamePath(page, model, models[0])) return;
 
         const focusId = models[0].id;
         const targetFrameBlock = getClosestFrameBlockElementById(

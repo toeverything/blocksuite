@@ -43,7 +43,7 @@ export class DatabaseManager {
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
-    const id = column.id ?? this.page.createId();
+    const id = column.id ?? this.page.generateId();
     this.page.transact(() => this.yColumns.set(id, { ...column, id }));
     return id;
   }

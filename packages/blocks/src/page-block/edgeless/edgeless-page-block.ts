@@ -144,7 +144,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
-  clipboard = new EdgelessClipboard(this.page);
+  clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
     viewportUpdated: new Slot(),

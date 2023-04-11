@@ -5,12 +5,12 @@ import type {
   SerializedBlock,
 } from '@blocksuite/blocks/std';
 import {
-  doesInSamePath,
   getBlockElementById,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
+  isInSamePath,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -20,7 +20,7 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { copy } from '../../__internal__/clipboard/index.js';
+import { copyBlocks } from '../../__internal__/clipboard/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -377,7 +377,7 @@ export async function downloadImage(model: BaseBlockModel) {
 }
 
 export async function copyImage(model: EmbedBlockModel) {
-  copy({
+  copyBlocks({
     type: 'Block',
     models: [model],
     startOffset: 0,
@@ -468,7 +468,7 @@ async function getUrlByModel(model: BaseBlockModel) {
 }
 
 export function copyCode(codeBlockModel: CodeBlockModel) {
-  copy({
+  copyBlocks({
     type: 'Block',
     models: [codeBlockModel],
     startOffset: 0,
@@ -507,7 +507,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
       );
-      if (models.length === 1 && doesInSamePath(page, model, models[0])) return;
+      if (models.length === 1 && isInSamePath(page, model, models[0])) return;
 
       page.captureSync();
 

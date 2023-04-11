@@ -126,7 +126,7 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }
 
-export function doesInsideBlockByFlavour(
+export function isInsideBlockByFlavour(
   page: Page,
   block: BaseBlockModel | string,
   flavour: keyof BlockModels
@@ -137,5 +137,5 @@ export function doesInsideBlockByFlavour(
   } else if (matchFlavours(parent, [flavour])) {
     return true;
   }
-  return doesInsideBlockByFlavour(page, parent, flavour);
+  return isInsideBlockByFlavour(page, parent, flavour);
 }
