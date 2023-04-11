@@ -1,15 +1,22 @@
-import type { Page, UserRange } from '@blocksuite/store';
-
-import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
-import type { IPoint } from '../../../__internal__/utils/gesture.js';
 import {
   type BlockComponentElement,
   contains,
   getBlockElementsExcludeSubtrees,
   getRectByBlockElement,
-} from '../../../__internal__/utils/query.js';
+} from '@blocksuite/blocks/std';
+import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import type { Page, UserRange } from '@blocksuite/store';
+
+import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
+import type {
+  IPoint,
+  SelectionEvent,
+} from '../../../__internal__/utils/gesture.js';
 import type { DefaultSelectionSlots } from '../default-page-block.js';
-import type { PageSelectionState } from './index.js';
+import type { DefaultSelectionManager, PageSelectionState } from './index.js';
+
+// distance to the upper and lower boundaries of the viewport
+const threshold = SCROLL_THRESHOLD / 2;
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -155,4 +162,64 @@ export function setSelectedBlocks(
   }
 
   slots.selectedRectsUpdated.emit(calculatedRects);
+}
+
+export interface AutoScrollHooks {
+  init(): void;
+  onMove(): void;
+  onScroll(val: number): void;
+}
+
+export function autoScroll(
+  selection: DefaultSelectionManager,
+  e: SelectionEvent,
+  hooks: AutoScrollHooks
+) {
+  const { state } = selection;
+  const { y } = e;
+
+  const { viewportElement } = selection;
+  const { viewport } = state;
+  const { scrollHeight, clientHeight } = viewport;
+  let { scrollTop } = viewport;
+  const max = scrollHeight - clientHeight;
+
+  hooks.init();
+
+  let auto = true;
+  const autoScroll = () => {
+    if (!auto) {
+      state.clearRaf();
+      return;
+    } else {
+      state.rafID = requestAnimationFrame(autoScroll);
+    }
+
+    // TODO: for the behavior of scrolling, see the native selection
+    // speed easeOutQuad + easeInQuad
+    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
+      // ↓
+      const d = (threshold - (clientHeight - y)) * 0.25;
+      scrollTop += d;
+      auto = Math.ceil(scrollTop) < max;
+      viewportElement.scrollTop = scrollTop;
+
+      hooks.onScroll(d);
+    } else if (scrollTop > 0 && y < threshold) {
+      // ↑
+      const d = (y - threshold) * 0.25;
+      scrollTop += d;
+      auto = scrollTop > 0;
+      viewportElement.scrollTop = scrollTop;
+
+      hooks.onScroll(d);
+    } else {
+      auto = false;
+
+      hooks.onMove();
+    }
+  };
+
+  state.clearRaf();
+  state.rafID = requestAnimationFrame(autoScroll);
 }

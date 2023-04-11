@@ -1,12 +1,10 @@
 import {
-  type BlockComponentElement,
   type EditingState,
   type Rect,
   WithDisposable,
 } from '@blocksuite/blocks/std';
 import {
   getClosestBlockElementByPoint,
-  getDropRectByPoint,
   getModelByBlockElement,
   Point,
   ShadowlessElement,
@@ -35,7 +33,11 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DragIndicator } from './drag-handle.js';
+import {
+  DragHandle,
+  type DragIndicator,
+  type DroppingType,
+} from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
@@ -491,15 +493,18 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   private readonly _onDropCallback: (
     e: DragEvent,
+    point: Point,
     lastModelState: EditingState | null,
-    point: Point
+    lastType: DroppingType
   ) => Promise<void>;
 
   private _currentClientX = 0;
   private _currentClientY = 0;
   private _isCardListVisible = false;
   private _indicator!: DragIndicator;
-  private _lastModelState: EditingState | null = null;
+  private _lastDroppingTarget: EditingState | null = null;
+  private _lastDroppingType: DroppingType = 'none';
+  private _lastDraggingType: DroppingType = 'none';
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
@@ -518,8 +523,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     onDragStarted: () => void;
     onDropCallback: (
       e: DragEvent,
+      point: Point,
       lastModelState: EditingState | null,
-      point: Point
+      lastType: DroppingType
     ) => Promise<void>;
   }) {
     super();
@@ -675,6 +681,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
+    this._lastDraggingType =
+      data.flavour === 'affine:database' ? 'database' : 'none';
     this.onDragStarted();
   };
 
@@ -698,42 +706,52 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     if (
       !this._indicator ||
-      (this._indicator.cursorPosition &&
-        this._indicator.cursorPosition.x === x &&
-        this._indicator.cursorPosition.y === y)
+      (this._indicator.rect &&
+        this._indicator.rect.left === x &&
+        this._indicator.rect.top === y)
     ) {
       return;
     }
 
     const point = new Point(x, y);
-    const { container, rect, scale } = this.getHoveringFrameState(
-      point.clone()
-    );
+    const {
+      container,
+      rect: frameRect,
+      scale,
+    } = this.getHoveringFrameState(point.clone());
     let element = null;
-    if (rect) {
+    if (frameRect) {
       element = getClosestBlockElementByPoint(
         point,
-        { container, rect },
+        { container, rect: frameRect },
         scale
       );
     }
 
-    let targetRect = null;
+    let type: DroppingType = 'none';
+    let rect = null;
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      targetRect = getDropRectByPoint(point, model, element);
-
-      lastModelState = {
+      const result = DragHandle.calcTarget(
+        point,
         model,
-        rect: targetRect,
-        element: element as BlockComponentElement,
-      };
+        element,
+        [],
+        scale,
+        this._lastDraggingType === 'database'
+      );
+
+      if (result) {
+        type = result.type;
+        rect = result.rect;
+        lastModelState = result.modelState;
+      }
     }
 
-    this._lastModelState = lastModelState;
-    this._indicator.targetRect = targetRect;
-    this._indicator.cursorPosition = point;
+    this._indicator.rect = rect;
+    this._lastDroppingType = type;
+    this._lastDroppingTarget = lastModelState;
   };
 
   private _onDragOver = (e: DragEvent) => {
@@ -751,11 +769,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    this._lastModelState = null;
+    this._lastDraggingType = 'none';
+    this._lastDroppingType = 'none';
+    this._lastDroppingTarget = null;
 
     if (this._indicator) {
-      this._indicator.cursorPosition = null;
-      this._indicator.targetRect = null;
+      this._indicator.rect = null;
     }
   };
 
@@ -765,9 +784,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     this._onDropCallback(
       e,
-      this._lastModelState,
       // `drag.clientY` !== `dragend.clientY` in chrome.
-      this._indicator?.cursorPosition ?? new Point(e.clientX, e.clientY)
+      this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY),
+      this._lastDroppingTarget,
+      this._lastDroppingType
     );
   };
 

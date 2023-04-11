@@ -2,7 +2,6 @@ import '../../../components/drag-handle.js';
 
 import {
   type BlockComponentElement,
-  createDragEvent,
   type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -19,6 +18,8 @@ import {
   isBlankArea,
   isDatabase,
   isDatabaseInput,
+  isDragHandle,
+  isElement,
   isEmbed,
   isImage,
   isInsidePageTitle,
@@ -49,6 +50,7 @@ import type {
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
+import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
   filterBlocksExcludeSubtrees,
@@ -63,7 +65,7 @@ export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  private readonly _container: DefaultPageBlockComponent;
+  readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
 
@@ -80,7 +82,7 @@ export class DefaultSelectionManager {
   }) {
     this.page = page;
     this.slots = slots;
-    this._container = container;
+    this.container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
     this._disposables.add(
@@ -103,7 +105,8 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    const target = e.raw.target;
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
       return;
     }
@@ -118,17 +121,17 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (isPageSelectedRects(e.raw.target)) {
-      this.state.type = 'block:drag';
-      this._container.components.dragHandle?.onDragStart(
-        createDragEvent('dragstart', e.raw),
-        true
-      );
+    if (
+      isElement(target) &&
+      (isDragHandle(target as Element) ||
+        isPageSelectedRects(target as Element))
+    ) {
+      PreviewDragHandlers.onStart(this, e);
       return;
     }
 
     // disable dragHandle button
-    this._container.components.dragHandle?.setPointerEvents('none');
+    this.container.components.dragHandle?.setPointerEvents('none');
 
     // clear selection first
     this.clear();
@@ -149,10 +152,7 @@ export class DefaultSelectionManager {
     if (this.page.readonly) return;
 
     if (this.state.type === 'block:drag') {
-      this._container.components.dragHandle?.onDrag(
-        createDragEvent('drag', e.raw),
-        true
-      );
+      PreviewDragHandlers.onMove(this, e);
       return;
     }
 
@@ -166,14 +166,10 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    this._container.components.dragHandle?.setPointerEvents('auto');
+    this.container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'block:drag') {
-      this._container.components.dragHandle?.onDragEnd(
-        createDragEvent('dragend', e.raw),
-        true
-      );
-      this.state.type = 'block';
+      PreviewDragHandlers.onEnd(this, e);
       return;
     }
     if (this.state.type === 'native') {
@@ -191,7 +187,7 @@ export class DefaultSelectionManager {
       if (selectedType === 'Caret') return;
       showFormatQuickBar({
         page: this.page,
-        container: this._container,
+        container: this.container,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {
@@ -214,7 +210,7 @@ export class DefaultSelectionManager {
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
-        container: this._container,
+        container: this.container,
         direction,
         anchorEl: {
           // After update block type, the block selection will be cleared and refreshed.
@@ -251,7 +247,7 @@ export class DefaultSelectionManager {
     const element = getClosestBlockElementByPoint(
       new Point(e.raw.clientX, e.raw.clientY),
       {
-        rect: this._container.innerRect,
+        rect: this.container.innerRect,
       }
     );
 
@@ -305,7 +301,10 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
-    showFormatQuickBarByDoubleClick(e, this.page, this._container, this.state);
+    // switch native selection
+    NativeDragHandlers.onStart(this, e);
+
+    showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -321,7 +320,7 @@ export class DefaultSelectionManager {
     let hoverEditingState = null;
 
     const element = getClosestBlockElementByPoint(point.clone(), {
-      rect: this._container.innerRect,
+      rect: this.container.innerRect,
     });
 
     // dont show option menu of image on selecting
@@ -333,7 +332,7 @@ export class DefaultSelectionManager {
       };
     }
 
-    this._container.components.dragHandle?.onContainerMouseMove(
+    this.container.components.dragHandle?.onContainerMouseMove(
       e,
       hoverEditingState
     );
@@ -382,7 +381,7 @@ export class DefaultSelectionManager {
     }
 
     // Exclude selection change outside the editor
-    if (!selection.containsNode(this._container, true)) {
+    if (!selection.containsNode(this.container, true)) {
       return;
     }
 
@@ -403,7 +402,7 @@ export class DefaultSelectionManager {
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      container: this._container,
+      container: this.container,
       direction,
       anchorEl: {
         getBoundingClientRect: () => {
@@ -418,27 +417,28 @@ export class DefaultSelectionManager {
   };
 
   get viewportElement() {
-    return this._container.viewportElement;
+    return this.container.viewportElement;
   }
 
   // clear selection: `block`, `block:drag`, `embed`, `native`
   clear() {
     const { state, slots } = this;
-    const { type } = state;
-    if (type.startsWith('block')) {
+    let { type } = state;
+
+    if (type === 'block:drag') {
+      // clear `drag preview`
+      PreviewDragHandlers.clear(this);
+      type = 'block';
+    }
+
+    if (type === 'block') {
       state.clearBlockSelection();
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
 
       // clear `format quick bar`
       // document.dispatchEvent(new MouseEvent('mousedown'));
-      this._container.querySelector('format-quick-bar')?.remove();
-      // clear `drag preview`
-      if (type === 'block:drag') {
-        this._container.components.dragHandle?.onDragEnd(
-          createDragEvent('dragend')
-        );
-      }
+      this.container.querySelector('format-quick-bar')?.remove();
     } else if (type === 'embed') {
       state.clearEmbedSelection();
       slots.embedRectsUpdated.emit([]);
@@ -461,7 +461,7 @@ export class DefaultSelectionManager {
   }
 
   updateViewport() {
-    const { viewportElement } = this._container;
+    const { viewportElement } = this.container;
     const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
       viewportElement;
     const { top, left } = viewportElement.getBoundingClientRect();
@@ -547,7 +547,7 @@ export class DefaultSelectionManager {
   }
 
   refreshRemoteSelection() {
-    const element = this._container.querySelector('remote-selection');
+    const element = this.container.querySelector('remote-selection');
     if (element) {
       element.requestUpdate();
     }
@@ -585,7 +585,7 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
     this.state.focusedBlock = null;
 
-    const selectedBlocks = getBlockElementsByElement(this._container);
+    const selectedBlocks = getBlockElementsByElement(this.container);
 
     // clear subtrees
     const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(

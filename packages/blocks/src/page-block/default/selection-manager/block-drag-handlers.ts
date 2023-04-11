@@ -1,11 +1,8 @@
 import type { SelectionEvent } from '@blocksuite/blocks/std';
-import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DefaultSelectionManager } from './default-selection-manager.js';
-
-// distance to the upper and lower boundaries of the viewport
-const threshold = SCROLL_THRESHOLD / 2;
+import { autoScroll } from './utils.js';
 
 export const BlockDragHandlers = {
   onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
@@ -24,58 +21,36 @@ export const BlockDragHandlers = {
   },
 
   onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
-    const { state } = selection;
-    const { x, y } = e;
+    autoScroll(selection, e, {
+      init() {
+        const { x, y } = e;
+        const {
+          draggingArea,
+          viewport: { scrollLeft, scrollTop },
+        } = selection.state;
 
-    const { viewportElement } = selection;
-    const { viewport } = state;
-    const { scrollHeight, clientHeight, scrollLeft } = viewport;
-    let { scrollTop } = viewport;
-    const max = scrollHeight - clientHeight;
+        assertExists(draggingArea);
 
-    const { draggingArea } = state;
+        draggingArea.end.x = x + scrollLeft;
+        draggingArea.end.y = y + scrollTop;
+      },
+      onScroll(d) {
+        const { draggingArea } = selection.state;
 
-    assertExists(draggingArea);
+        assertExists(draggingArea);
 
-    draggingArea.end.x = x + scrollLeft;
-    draggingArea.end.y = y + scrollTop;
-
-    let auto = true;
-    const autoScroll = () => {
-      if (!auto) {
-        state.clearRaf();
-        return;
-      } else {
-        state.rafID = requestAnimationFrame(autoScroll);
-      }
-
-      // TODO: for the behavior of scrolling, see the native selection
-      // speed easeOutQuad + easeInQuad
-      if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-        // ↓
-        const d = (threshold - (clientHeight - y)) * 0.25;
-        scrollTop += d;
         draggingArea.end.y += d;
-        auto = Math.ceil(scrollTop) < max;
-        viewportElement.scrollTop = scrollTop;
         selection.updateDraggingArea(draggingArea);
-      } else if (scrollTop > 0 && y < threshold) {
-        // ↑
-        const d = (y - threshold) * 0.25;
-        scrollTop += d;
-        draggingArea.end.y += d;
-        auto = scrollTop > 0;
-        viewportElement.scrollTop = scrollTop;
-        selection.updateDraggingArea(draggingArea);
-      } else {
-        auto = false;
+      },
+      onMove() {
+        const { blockCache, draggingArea, viewport } = selection.state;
+
+        assertExists(draggingArea);
+
         const rect = selection.updateDraggingArea(draggingArea);
-        selection.selectBlocksByDraggingArea(state.blockCache, rect, viewport);
-      }
-    };
-
-    state.clearRaf();
-    state.rafID = requestAnimationFrame(autoScroll);
+        selection.selectBlocksByDraggingArea(blockCache, rect, viewport);
+      },
+    });
   },
 
   onEnd(selection: DefaultSelectionManager, _: SelectionEvent) {

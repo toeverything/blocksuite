@@ -11,7 +11,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
-  isInEmptyDatabaseByPoint,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -497,46 +496,38 @@ export function getAllowSelectedBlocks(
   return result;
 }
 
-export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
+export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
-    container: defaultPageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blockElements, editingState): void {
-      if (!editingState) return;
-      const { rect, model, element } = editingState;
-      const page = defaultPageBlock.page;
+    container: pageBlock.mouseRoot as HTMLElement,
+    onDropCallback(_point, blockElements, editingState, type): void {
+      if (!editingState || type === 'none') return;
+      const { model } = editingState;
+      const page = pageBlock.page;
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
       );
-      if (models.length === 1 && doesInSamePath(page, model, models[0])) {
-        return;
-      }
+      if (models.length === 1 && doesInSamePath(page, model, models[0])) return;
 
       page.captureSync();
 
-      if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+      if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const distanceToTop = Math.abs(rect.top - point.y);
-        const distanceToBottom = Math.abs(rect.bottom - point.y);
         const parent = page.getParent(model);
         assertExists(parent);
-        page.moveBlocks(
-          models,
-          parent,
-          model,
-          distanceToTop < distanceToBottom
-        );
+        page.moveBlocks(models, parent, model, type === 'before');
       }
 
-      defaultPageBlock.selection.clear();
-      defaultPageBlock.selection.state.type = 'block';
+      // unneeded
+      // pageBlock.selection.clear();
+      // pageBlock.selection.state.type = 'block';
 
-      defaultPageBlock.updateComplete.then(() => {
+      pageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
-          defaultPageBlock.selection.setSelectedBlocks(
+          pageBlock.selection.setSelectedBlocks(
             blockElements
               .map(b => getBlockElementById(b.model.id))
               .filter((b): b is BlockComponentElement => !!b)
@@ -544,25 +535,18 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         });
       });
     },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ): void {
-      if (Array.isArray(selectedBlocks)) {
-        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
-      } else if (selectedBlocks) {
-        const { element } = selectedBlocks;
-        defaultPageBlock.selection.selectOneBlock(element);
-      }
+    setDragType(dragging: boolean) {
+      pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
+    },
+    setSelectedBlock({ element }: EditingState) {
+      pageBlock.selection.selectOneBlock(element);
     },
     getSelectedBlocks() {
-      return defaultPageBlock.selection.state.selectedBlocks;
+      return pageBlock.selection.state.selectedBlocks;
     },
-    // clearSelection() {
-    //   defaultPageBlock.selection.clear();
-    // },
     getClosestBlockElement(point: Point) {
       return getClosestBlockElementByPoint(point, {
-        rect: defaultPageBlock.innerRect,
+        rect: pageBlock.innerRect,
       });
     },
   });
