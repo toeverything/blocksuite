@@ -1,6 +1,7 @@
 import type { ColumnType } from '@blocksuite/global/database';
 import { expect, type Locator, type Page } from '@playwright/test';
 
+import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import { assertClassName } from '../asserts.js';
 import { pressEnter, pressEscape, type } from './keyboard.js';
 import {
@@ -64,10 +65,31 @@ export async function switchColumnType(
   await typeMenu.click();
 }
 
-export function getFirstColumnCell(page: Page, cellClass: string) {
-  const cellSelector = '[data-row-id="4"][data-column-id="3"]';
-  const cell = page.locator(cellSelector);
+export function getDatabaseBodyCell(
+  page: Page,
+  {
+    rowIndex,
+    columnIndex,
+    cellClass,
+  }: {
+    rowIndex: number;
+    columnIndex: number;
+    cellClass: string;
+  }
+) {
+  const rows = page.locator('.affine-database-block-rows');
+  const row = rows.locator('.database-row').nth(rowIndex);
+  const cell = row.locator('.database-cell').nth(columnIndex);
   const cellContent = cell.locator(`.${cellClass}`);
+  return cellContent;
+}
+
+export function getFirstColumnCell(page: Page, cellClass: string) {
+  const cellContent = getDatabaseBodyCell(page, {
+    rowIndex: 0,
+    columnIndex: 1,
+    cellClass,
+  });
   return cellContent;
 }
 
@@ -109,6 +131,46 @@ export async function assertColumnWidth(locator: Locator, width: number) {
   const box = await getBoundingBox(locator);
   expect(box.width).toBe(width);
   return box;
+}
+
+export async function assertDatabaseCellRichTexts(
+  page: Page,
+  {
+    rowIndex = 0,
+    columnIndex = 1,
+    text,
+  }: {
+    rowIndex?: number;
+    columnIndex?: number;
+    text: string;
+  }
+) {
+  const actualTexts = await page.evaluate(
+    ({ rowIndex, columnIndex }) => {
+      const rows = document.querySelector('.affine-database-block-rows');
+      const row = rows?.querySelector(
+        `.database-row:nth-child(${rowIndex + 1})`
+      );
+      const cell = row?.querySelector(
+        `.database-cell:nth-child(${columnIndex + 1})`
+      );
+      const cellEditContainer = cell?.querySelector(
+        'affine-database-cell-container'
+      );
+      const richText = cellEditContainer?.shadowRoot?.querySelector<RichText>(
+        'affine-database-rich-text-cell'
+      );
+      if (!richText) throw new Error('Missing database rich text cell');
+      return richText.vEditor.yText.toString();
+    },
+    { rowIndex, columnIndex }
+  );
+  expect(actualTexts).toEqual(text);
+}
+
+export async function assertDatabaseTitleText(page: Page, text: string) {
+  const dbTitle = page.locator('[data-block-is-database-title="true"]');
+  expect(await dbTitle.textContent()).toEqual(text);
 }
 
 export async function waitSearchTransitionEnd(page: Page) {
