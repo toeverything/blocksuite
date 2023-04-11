@@ -1,3 +1,5 @@
+import './toolbar-action-popup.js';
+
 import { ShadowlessElement } from '@blocksuite/blocks';
 import {
   DatabaseSearchClose,
