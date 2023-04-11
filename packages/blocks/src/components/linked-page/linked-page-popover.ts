@@ -194,7 +194,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     return [
       ...filteredPageList.map((page, idx) => ({
         key: page.id,
-        name: page.title,
+        name: page.title || DEFAULT_PAGE_NAME,
         active: idx === this._activatedItemIndex,
         icon: PageIcon,
         action: () => this._insertLinkedNode('LinkedPage', page.id),
