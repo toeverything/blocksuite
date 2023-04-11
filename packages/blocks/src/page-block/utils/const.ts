@@ -131,7 +131,7 @@ export const actionConfig = [
     },
   },
   {
-    id: 'database',
+    id: 'convert-to-database',
     name: 'To Database',
     disabledToolTip:
       'Contains Block types that cannot be converted to Database. Learn more',
