@@ -29,13 +29,16 @@ export function assertValidChildren(
   });
 }
 
-export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function initInternalProps(
+  yBlock: YBlock,
+  props: Partial<BlockProps>,
+  ext: Record<string, unknown>
+) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
-  if (props.flavour === 'affine:page') {
-    yBlock.set('ext:cells', new Y.Map());
-    yBlock.set('ext:columns', new Y.Map());
-  }
+  Object.entries(ext).forEach(([key, value]) => {
+    yBlock.set(`ext:${key}`, value);
+  });
 
   const yChildren = new Y.Array();
   yBlock.set('sys:children', yChildren);

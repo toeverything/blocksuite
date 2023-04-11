@@ -1,6 +1,6 @@
 import type { BlockModels } from '@blocksuite/global/types';
 import { Slot } from '@blocksuite/global/utils';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 import { z } from 'zod';
 
 import { Text } from './text-adapter.js';
@@ -19,13 +19,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Cast: <T>() => T;
+  Map: <T>() => Y.Map<T>;
 }
 
-const castSlot = Symbol('castSlot');
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Cast: <T>() => castSlot as T,
+  Map: <T>() => new Y.Map<T>(),
 });
 
 export const BlockSchema = z.object({
