@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { atLeastNMatches, countBy, groupBy, maxBy } from './std.js';
+import { atLeastNMatches, countBy, groupBy, maxBy, toHex } from './std.js';
 
 describe('countBy', () => {
   it('basic', () => {
@@ -78,5 +78,19 @@ describe('groupBy', () => {
     const emptyArray: string[] = [];
     const groupedEmptyArray = groupBy(emptyArray, item => item);
     expect(Object.keys(groupedEmptyArray).length).toBe(0);
+  });
+});
+
+describe('toHex', () => {
+  it('basic', () => {
+    expect(toHex('#AABBCC')).toEqual('#aabbcc');
+    expect(toHex('#0f0')).toEqual('#00ff00');
+    expect(toHex('rgb(1,1,1)')).toEqual('#010101');
+    expect(toHex('rgba(2,2,2,0.5)')).toEqual('#020202');
+  });
+
+  it('throw error', () => {
+    expect(() => toHex('fa')).toThrowError('Invalid color format');
+    expect(() => toHex('rgb()')).toThrowError('Invalid color format');
   });
 });
