@@ -8,7 +8,6 @@
 :root {
   --affine-theme-mode: light;
   --affine-editor-mode: page;
-  --affine-primary-color: #5438ff;
   --affine-page-background: #fff;
   --affine-popover-background: #fff;
   --affine-hover-background: rgba(0, 0, 0, 0.04);
@@ -19,17 +18,12 @@
   --affine-text-color: #424149;
   --affine-secondary-text-color: #8e8d91;
   --affine-edgeless-text-color: #3a4c5c;
-  --affine-link-color: #5438ff;
   --affine-link-color2: #5438ff;
   --affine-link-visited-color: #5438ff;
-  --affine-icon-color: #77757d;
   --affine-block-handle-color: #c7c3d9;
   --affine-code-color: #77757d;
   --affine-code-block-background: #fafbfd;
-  --affine-quote-color: #645f82;
   --affine-selected-color: rgba(84, 56, 255, 0.04);
-  --affine-placeholder-color: #c0bfc1;
-  --affine-border-color: #e3e2e4;
   --affine-disable-color: #a9a9ad;
   --affine-tooltip-color: #fff;
   --affine-line-number-color: #77757d;

@@ -14,13 +14,14 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
   }
   .affine-database-column-header > .affine-database-column:first-child {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
 
   .affine-database-column {
     position: relative;
     z-index: 1;
     transform: translateX(0);
+    background: var(--affine-white);
   }
   .database-cell {
     min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
@@ -28,7 +29,7 @@ export const styles = css`
   .database-cell.add-column-button {
     width: auto;
     min-width: ${DEFAULT_ADD_BUTTON_WIDTH}px;
-    height: 100%;
+    min-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,7 +69,11 @@ export const styles = css`
     display: block;
   }
   .affine-database-column-content:hover {
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
+    background: linear-gradient(
+        0deg,
+        var(--affine-hover-background),
+        var(--affine-hover-background)
+      ),
       var(--affine-white);
   }
   .affine-database-column-content.edit {

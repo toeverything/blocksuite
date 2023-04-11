@@ -42,7 +42,10 @@ export function DataBaseRowContainer(
         border-bottom: 1px solid var(--affine-border-color);
       }
       .affine-database-block-row > .affine-database-block-row-cell:first-child {
-        background: rgba(0, 0, 0, 0.04);
+        background: var(--affine-hover-background);
+      }
+      .affine-database-block-row > .database-cell {
+        background: var(--affine-white);
       }
 
       .affine-database-block-row-cell-content {

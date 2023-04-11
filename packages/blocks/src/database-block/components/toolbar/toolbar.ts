@@ -53,7 +53,7 @@ const styles = css`
   }
   .affine-database-toolbar-item.more-action:hover,
   .more-action.active {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .affine-database-search-container {
     display: flex;
@@ -63,7 +63,6 @@ const styles = css`
     height: 32px;
     padding: 8px 0;
     border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0);
     transition: all 0.3s ease;
   }
   .affine-database-search-container > svg {
@@ -73,7 +72,7 @@ const styles = css`
   .search-container-expand {
     width: 138px;
     padding: 8px 12px;
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--affine-hover-background);
   }
   .search-input-container {
     display: flex;
@@ -88,7 +87,7 @@ const styles = css`
     height: 18px;
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--affine-white-10);
   }
   .affine-database-search-input-icon {
     display: inline-flex;
@@ -122,8 +121,12 @@ const styles = css`
     border-radius: 8px;
     font-size: 14px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-      0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
+      0px 0px 0px 0.5px var(--affine-black-10);
+    background: linear-gradient(
+        0deg,
+        var(--affine-hover-background),
+        var(--affine-hover-background)
+      ),
       var(--affine-white);
   }
   .new-record > tool-tip {
@@ -244,6 +247,7 @@ export class DatabaseToolbar extends ShadowlessElement {
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
+          this._searchContainer.style.overflow = 'hidden';
         }
       },
       'mousedown'

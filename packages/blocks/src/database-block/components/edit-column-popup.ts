@@ -45,7 +45,7 @@ export const actionStyles = css`
     cursor: pointer;
   }
   .action:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .action-content {
     display: flex;
@@ -55,7 +55,7 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
-    color: var(--affine-icon-color);
+    fill: var(--affine-icon-color);
   }
   .action-divider {
     height: 0.5px;
@@ -266,7 +266,6 @@ export class EditColumnPopup extends LitElement {
       display: flex;
       flex-direction: column;
       color: var(--affine-text-color);
-      font-family: 'Avenir Next';
     }
     .affine-database-edit-column-popup * {
       box-sizing: border-box;

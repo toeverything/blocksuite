@@ -3,7 +3,6 @@ import {
   DatabaseKanbanViewIcon,
   DatabaseSearchClose,
   DatabaseTableViewIcon,
-  MoreHorizontalIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
@@ -51,6 +50,7 @@ export class DatabaseModal extends LitElement {
   abortController!: AbortController;
 
   private _convertToDatabase(viewType: DatabaseViewName) {
+    if (viewType !== 'table') return;
     this._hide();
     this.page.captureSync();
 
@@ -132,19 +132,8 @@ export class DatabaseModal extends LitElement {
               </div>
             `;
           })}
-          <div class="modal-view-item more">
-            <div class="modal-view-item-content">
-              <div class="modal-view-item-icon">${MoreHorizontalIcon}</div>
-            </div>
-            <div class="modal-view-item-description">
-              More views are on the way.
-            </div>
-          </div>
         </div>
-        <div class="modal-footer">
-          Group as Database can quickly convert selected blocks into Database
-          for easy structuring of data.
-        </div>
+        <div class="modal-footer">More views are on the way.</div>
       </div>
     </div>`;
   }

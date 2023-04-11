@@ -42,7 +42,7 @@ const styles = css`
     min-height: 44px;
     width: 345px;
     padding: 10px 8px;
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .select-input {
     flex: 1 1 0%;
@@ -65,7 +65,7 @@ const styles = css`
   }
   .select-option-container-header {
     padding: 8px 0px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--affine-black-60);
   }
   .select-input-container .select-selected {
     display: flex;
@@ -121,7 +121,7 @@ const styles = css`
     margin-bottom: 4px;
   }
   .select-option:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .select-option:hover .select-option-icon {
     display: flex;
@@ -148,7 +148,7 @@ const styles = css`
     cursor: pointer;
   }
   .select-option-icon:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .select-option-icon svg {
     width: 16px;
@@ -156,7 +156,7 @@ const styles = css`
     pointer-events: none;
   }
   .editing {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .editing .select-option-icon {
     display: flex;
