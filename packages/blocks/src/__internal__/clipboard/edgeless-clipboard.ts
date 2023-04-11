@@ -110,99 +110,56 @@ export class EdgelessClipboard implements Clipboard {
     performNativeCopy([custom]);
   };
 
-  private _onPaste = async (e: ClipboardEvent) => {
-    e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
-      const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
-      if (!blocks.length) {
-        return;
-      }
-      this._page.captureSync();
-
-      await deleteModelsByRange(this._page);
-
-      const range = getCurrentBlockRange(this._page);
-
-      const focusedBlockModel = range?.models[0];
-      assertExists(focusedBlockModel);
-      const service = getService(focusedBlockModel.flavour);
-      assertExists(range);
-      await service.json2Block(focusedBlockModel, blocks, range);
-
+  private async _pasteInTextFrame(e: ClipboardEvent) {
+    const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+    if (!blocks.length) {
       return;
     }
-    const custom = e.clipboardData?.getData(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
-    );
-    if (!custom) {
-      return;
-    }
+    this._page.captureSync();
 
-    const elementsRawData = deserialize(custom) as Selectable[];
+    await deleteModelsByRange(this._page);
 
-    const groupedByType = groupBy(elementsRawData, data =>
-      isTopLevelBlock(data) ? 'frames' : 'elements'
-    ) as unknown as {
-      frames?: SerializedBlock[];
-      elements?: { type: PhasorElement['type'] }[];
-    };
+    const range = getCurrentBlockRange(this._page);
 
-    const elements =
-      (groupedByType.elements
+    const focusedBlockModel = range?.models[0];
+    assertExists(focusedBlockModel);
+    const service = getService(focusedBlockModel.flavour);
+    assertExists(range);
+    await service.json2Block(focusedBlockModel, blocks, range);
+  }
+
+  private _createPhasorElements(elements: Record<string, unknown>[]) {
+    const phasorElements =
+      (elements
         ?.map(d => {
-          const type = (d as PhasorElement).type;
+          const type = (d as unknown as PhasorElement).type;
           const element = ElementCtors[type]?.deserialize(d);
           element.id = generateElementId();
           return element;
         })
         .filter(e => !!e) as PhasorElement[]) || [];
+    return phasorElements;
+  }
 
-    const commonBound = getCommonBound([
-      ...elements,
-      ...(groupedByType.frames
-        ?.map(({ xywh }) => {
-          if (!xywh) {
-            return;
-          }
-          const [x, y, w, h] = deserializeXYWH(xywh);
-          return {
-            x,
-            y,
-            w,
-            h,
-          };
-        })
-        .filter(b => !!b) as Bound[]),
-    ]);
-    assertExists(commonBound);
-
-    const lastMousePos = this._edgeless.getSelection().lastMousePos;
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
-      lastMousePos.x,
-      lastMousePos.y
-    );
-    const pasteX = modelX - commonBound.w / 2;
-    const pasteY = modelY - commonBound.h / 2;
-    elements.forEach(ele => {
-      ele.x = pasteX + ele.x - commonBound.x;
-      ele.y = pasteY + ele.y - commonBound.y;
-    });
-
-    this._edgeless.surface.addElements(elements);
+  private async _createFrameBlocks(
+    frames: SerializedBlock[],
+    pasteX: number,
+    pasteY: number,
+    oldCommonBound: Bound
+  ) {
     const frameIds = await Promise.all(
-      (groupedByType.frames || []).map(async ({ xywh, children }) => {
+      frames.map(async ({ xywh, children }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
-              commonBound.x,
-              commonBound.y,
+              oldCommonBound.x,
+              oldCommonBound.y,
               DEFAULT_FRAME_WIDTH,
               DEFAULT_FRAME_HEIGHT,
             ];
         const newXywh = serializeXYWH(
-          pasteX + oldX - commonBound.x,
-          pasteY + oldY - commonBound.y,
+          pasteX + oldX - oldCommonBound.x,
+          pasteY + oldY - oldCommonBound.y,
           oldW,
           oldH
         );
@@ -220,10 +177,41 @@ export class EdgelessClipboard implements Clipboard {
         return frameId;
       })
     );
+    return frameIds;
+  }
 
+  private _getOldCommonBound(
+    phasorElements: PhasorElement[],
+    frames: SerializedBlock[]
+  ) {
+    const commonBound = getCommonBound([
+      ...phasorElements,
+      ...(frames
+        .map(({ xywh }) => {
+          if (!xywh) {
+            return;
+          }
+          const [x, y, w, h] = deserializeXYWH(xywh);
+          return {
+            x,
+            y,
+            w,
+            h,
+          };
+        })
+        .filter(b => !!b) as Bound[]),
+    ]);
+    assertExists(commonBound);
+    return commonBound;
+  }
+
+  private _emitSelectionChangeAfterPaste(
+    phasorElementIds: string[],
+    frameIds: string[]
+  ) {
     const newSelected = [
-      ...(elements
-        .map(ele => this._edgeless.surface.pickById(ele.id))
+      ...(phasorElementIds
+        .map(id => this._edgeless.surface.pickById(id))
         .filter(e => !!e) as PhasorElement[]),
       ...(frameIds
         .map(id => this._page.getBlockById(id))
@@ -234,5 +222,71 @@ export class EdgelessClipboard implements Clipboard {
       active: false,
       selected: newSelected,
     });
+  }
+
+  private async _pasteShapesAndFrames(
+    elementsRawData: Record<string, unknown>[]
+  ) {
+    const groupedByType = groupBy(elementsRawData, data =>
+      isTopLevelBlock(data as unknown as Selectable) ? 'frames' : 'elements'
+    ) as unknown as {
+      frames?: SerializedBlock[];
+      elements?: { type: PhasorElement['type'] }[];
+    };
+
+    const elements = this._createPhasorElements(groupedByType.elements || []);
+
+    const oldCommonBound = this._getOldCommonBound(
+      elements,
+      groupedByType.frames || []
+    );
+
+    const lastMousePos = this._edgeless.getSelection().lastMousePos;
+    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+    const pasteX = modelX - oldCommonBound.w / 2;
+    const pasteY = modelY - oldCommonBound.h / 2;
+
+    // update phasor elements' position to mouse position
+    elements.forEach(ele => {
+      ele.x = pasteX + ele.x - oldCommonBound.x;
+      ele.y = pasteY + ele.y - oldCommonBound.y;
+    });
+
+    // add phasor element to surface
+    this._edgeless.surface.addElements(elements);
+    // create and add blocks to page
+    const frameIds = await this._createFrameBlocks(
+      groupedByType.frames || [],
+      pasteX,
+      pasteY,
+      oldCommonBound
+    );
+
+    this._emitSelectionChangeAfterPaste(
+      elements.map(ele => ele.id),
+      frameIds
+    );
+  }
+
+  private _onPaste = async (e: ClipboardEvent) => {
+    e.preventDefault();
+    const selection = this._edgeless.getSelection().blockSelectionState;
+    if (selection.active) {
+      this._pasteInTextFrame(e);
+      return;
+    }
+
+    const custom = e.clipboardData?.getData(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
+    );
+    if (!custom) {
+      return;
+    }
+
+    const elementsRawData = deserialize(custom) as Record<string, unknown>[];
+    this._pasteShapesAndFrames(elementsRawData);
   };
 }
