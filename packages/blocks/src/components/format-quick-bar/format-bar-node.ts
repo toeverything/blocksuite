@@ -4,10 +4,13 @@ import {
   ArrowDownIcon,
   type BlockConfig,
   CopyIcon,
-  DatabaseTableViewIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -59,9 +62,14 @@ function DatabaseAction(page: Page) {
     }
   };
 
+  const databaseConfig = paragraphConfig.find(
+    item => item.flavour === 'affine:database'
+  );
+  assertExists(databaseConfig);
+
   // TODO: add `Learn more` link
   const toolTip = enabled
-    ? html` <tool-tip inert role="tooltip">To Database</tool-tip>`
+    ? html` <tool-tip inert role="tooltip">${databaseConfig.name}</tool-tip>`
     : html`<tool-tip tip-position="top" inert role="tooltip"
         >Contains Block types that cannot be converted to Database. Learn
         more</tool-tip
@@ -72,7 +80,7 @@ function DatabaseAction(page: Page) {
     data-testid="convert-to-database"
     @click=${onClick}
   >
-    ${DatabaseTableViewIcon}${toolTip}
+    ${databaseConfig.icon}${toolTip}
   </format-bar-button>`;
 }
 
@@ -127,13 +135,17 @@ function ParagraphPanel(
     positionUpdated.emit();
   };
 
+  const filteredParagraphConfig = paragraphConfig.filter(
+    item => item.flavour !== 'affine:database'
+  );
+
   return html` <div
     class="paragraph-panel"
     style="${styles}"
     @mouseover="${onHover}"
     @mouseout="${onHoverEnd}"
   >
-    ${paragraphConfig.map(
+    ${filteredParagraphConfig.map(
       ({ flavour, type, name, icon }) => html`<format-bar-button
         width="100%"
         style="padding-left: 12px; justify-content: flex-start;"

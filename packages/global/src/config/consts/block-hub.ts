@@ -4,6 +4,7 @@ import type { BlockModelProps } from '../../types.js';
 import {
   BulletedListIcon,
   CodeBlockIcon,
+  DatabaseTableViewIcon,
   DividerIcon,
   H1Icon,
   H2Icon,
@@ -121,6 +122,13 @@ export const paragraphConfig = [
     name: 'Divider',
     hotkey: 'command+option+d,ctrl+shift+d',
     icon: DividerIcon,
+  },
+  {
+    flavour: 'affine:database',
+    type: 'database',
+    name: 'To Database',
+    hotkey: 'command+g,ctrl+g',
+    icon: DatabaseTableViewIcon,
   },
   // {
   //   flavour: 'affine:',

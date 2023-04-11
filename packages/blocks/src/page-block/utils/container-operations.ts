@@ -36,6 +36,7 @@ import {
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { showDatabaseModal } from '../../components/database-modal/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { BlockSchemas } from '../../models.js';
 import type {
@@ -218,6 +219,13 @@ export function updateBlockType(
     }
     return [newModel];
   }
+  if (flavour === 'affine:database') {
+    showDatabaseModal({
+      page,
+    });
+    return [];
+  }
+
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
   models.forEach(model => {

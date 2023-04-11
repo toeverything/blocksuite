@@ -57,7 +57,9 @@ export function bindCommonHotkey(page: Page) {
     if (!hotkeyStr) {
       return;
     }
-    hotkey.addListener(hotkeyStr, () => {
+    hotkey.addListener(hotkeyStr, e => {
+      // Prevent default behavior
+      e.preventDefault();
       const blockRange = getCurrentBlockRange(page);
       if (!blockRange) {
         return;
