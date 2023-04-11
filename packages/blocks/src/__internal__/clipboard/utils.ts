@@ -2,7 +2,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service.js';
-import type { BlockRange, SerializedBlock } from '../utils/index.js';
+import type { BlockRange } from '../utils/index.js';
 import {
   getCurrentBlockRange,
   getCurrentNativeRange,
