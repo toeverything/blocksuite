@@ -376,9 +376,10 @@ export class Page extends Space<FlatBlockMap> {
       this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initInternalProps(yBlock, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
+      const ext = schema.model.ext?.(internalPrimitives) ?? {};
+      initInternalProps(yBlock, clonedProps, ext);
 
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
@@ -703,9 +704,9 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
     const exts = schema.model.ext?.(internalPrimitives) ?? {};
-    Object.keys(exts).forEach(key => {
+    Object.entries(exts).forEach(([key, value]) => {
       // @ts-ignore
-      blockModel[key] = block.get(`ext:${key}`);
+      blockModel[key] = block.get(`ext:${key}`) ?? value;
     });
 
     schema.model.toModel?.({

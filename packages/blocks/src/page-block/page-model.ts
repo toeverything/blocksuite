@@ -13,8 +13,8 @@ export const PageBlockSchema = defineBlockSchema({
     tag: literal`affine-page`,
   },
   ext: internal => ({
-    cells: internal.Cast<Y.Map<Y.Map<unknown>>>(),
-    columns: internal.Cast<Y.Map<unknown>>(),
+    cells: internal.Map<Y.Map<unknown>>(),
+    columns: internal.Map<unknown>(),
   }),
 });
 
