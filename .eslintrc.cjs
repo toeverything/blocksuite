@@ -73,7 +73,7 @@ module.exports = {
       },
     },
     ...allPackages.map(pkg => ({
-      files: [`packages/${pkg}/src/*.ts`],
+      files: [`packages/${pkg}/**/*.ts`],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
           'error',
