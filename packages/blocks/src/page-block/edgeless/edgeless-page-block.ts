@@ -11,7 +11,10 @@ import {
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import {
+  BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '@blocksuite/global/config';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -40,10 +43,7 @@ import type {
   PageBlockModel,
 } from '../../index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import {
-  EDGELESS_BLOCK_CHILD_PADDING,
-  tryUpdateFrameSize,
-} from '../utils/index.js';
+import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
