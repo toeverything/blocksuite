@@ -4,8 +4,6 @@ import type { NativePoint, VRange } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
-  getTextNodesFromElement,
-  nativePointToTextPoint,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
 import type { VEditor } from '../virgo.js';
