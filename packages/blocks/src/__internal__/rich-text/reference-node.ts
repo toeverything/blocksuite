@@ -31,6 +31,8 @@ export type RefNodeSlots = {
    * Emit when the subpage is linked to the current page.
    *
    * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
+   *
+   * @deprecated
    */
   subpageLinked: Slot<{ pageId: string }>;
   /**
@@ -133,6 +135,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         console.warn('The subpage is deleted', refAttribute.pageId);
         // TODO remove this node since the subpage not exists.
         return;
+      }
+
+      const thisMeta = model.page.workspace.meta.pageMetas.find(
+        page => page.id === model.page.id
+      );
+      // the ref page may no longer be a subpage of the current page,
+      // for example, if it is moved to the trash.
+      const isValidSubpage = thisMeta?.subpageIds.includes(refAttribute.pageId);
+      if (!isValidSubpage) {
+        this._refMeta = undefined;
+        // TODO remove warn
+        console.warn('The subpage is not a valid subpage', refAttribute.pageId);
       }
 
       // User may create a subpage ref node by paste or undo/redo.
