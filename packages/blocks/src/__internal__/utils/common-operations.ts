@@ -33,7 +33,7 @@ export function isCollapsedAtBlockStart(vEditor: VEditor) {
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-export function doesInSamePath(
+export function isInSamePath(
   page: Page,
   children: BaseBlockModel,
   father: BaseBlockModel

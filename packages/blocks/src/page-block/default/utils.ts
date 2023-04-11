@@ -5,12 +5,12 @@ import type {
   SerializedBlock,
 } from '@blocksuite/blocks/std';
 import {
-  doesInSamePath,
   getBlockElementById,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
+  isInSamePath,
 } from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -507,7 +507,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       const models = getBlockElementsExcludeSubtrees(blockElements).map(
         getModelByBlockElement
       );
-      if (models.length === 1 && doesInSamePath(page, model, models[0])) return;
+      if (models.length === 1 && isInSamePath(page, model, models[0])) return;
 
       page.captureSync();
 

@@ -389,7 +389,7 @@ export class DefaultPageBlockComponent
         if (
           draggingBlockIds &&
           draggingBlockIds.length === 1 &&
-          Utils.doesInsideBlockByFlavour(
+          Utils.isInsideBlockByFlavour(
             this.page,
             draggingBlockIds[0],
             'affine:database'

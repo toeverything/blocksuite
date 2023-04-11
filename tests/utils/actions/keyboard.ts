@@ -114,18 +114,20 @@ export async function strikethrough(page: Page) {
 export async function copyByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
 }
+
 export async function cutByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
 }
+
 /**
  * Notice: this method will try to click closest editor by default
  */
-export async function pasteByKeyboard(page: Page, nonClick = false) {
-  if (!nonClick) {
-    const doesEditorActive = await page.evaluate(() =>
+export async function pasteByKeyboard(page: Page, forceFocus = true) {
+  if (forceFocus) {
+    const isEditorActive = await page.evaluate(() =>
       document.activeElement?.closest('editor-container')
     );
-    if (!doesEditorActive) {
+    if (!isEditorActive) {
       await page.click('editor-container');
     }
   }

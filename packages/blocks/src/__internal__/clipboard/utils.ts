@@ -39,7 +39,7 @@ function extractCustomDataFromHTMLString(
   return ele?.innerHTML;
 }
 
-export const performNativeCopy = (items: ClipboardItem[]): boolean => {
+export function performNativeCopy(items: ClipboardItem[]): boolean {
   let success = false;
   const tempElem = document.createElement('textarea');
   tempElem.value = 'temp';
@@ -68,7 +68,7 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
     document.body.removeChild(tempElem);
   }
   return success;
-};
+}
 
 export function getSurfaceClipboardData(e: ClipboardEvent) {
   const clipboardData = e.clipboardData;
@@ -115,7 +115,7 @@ export function createSurfaceClipboardItems(data: unknown) {
   return [surfaceItem, htmlFallback];
 }
 
-export const isPureFileInClipboard = (clipboardData: DataTransfer) => {
+export function isPureFileInClipboard(clipboardData: DataTransfer) {
   const types = clipboardData.types;
   return (
     (types.length === 1 && types[0] === 'Files') ||
@@ -123,7 +123,7 @@ export const isPureFileInClipboard = (clipboardData: DataTransfer) => {
       (types.includes('text/plain') || types.includes('text/html')) &&
       types.includes('Files'))
   );
-};
+}
 
 // TODO: support more file types, now is just image
 export function getFileFromClipboard(clipboardData: DataTransfer) {
@@ -265,10 +265,12 @@ export function copyBlocks(range: BlockRange) {
 
   performNativeCopy(clipboardItems);
 
-  savedRange && resetNativeSelection(savedRange);
+  if (savedRange) {
+    resetNativeSelection(savedRange);
+  }
 }
 
-const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
+function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
   for (let i = 0; i < blocks.length; i++) {
     const parentBlock = blocks[i];
     if (parentBlock.children) {
@@ -285,4 +287,4 @@ const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
     }
   }
   return false;
-};
+}

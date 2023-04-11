@@ -691,7 +691,7 @@ test('copy phasor element and text frame in edgeless mode', async ({
 
   await page.mouse.move(400, 400);
 
-  await pasteByKeyboard(page, true);
+  await pasteByKeyboard(page, false);
 
   await assertEdgelessSelectedRect(page, [40, 266, 720, 268]);
 });
@@ -709,6 +709,6 @@ test('copy when text frame active in edgeless', async ({ page }) => {
   await setVirgoSelection(page, 0, 4);
   await copyByKeyboard(page);
   await type(page, '555');
-  await pasteByKeyboard(page, true);
+  await pasteByKeyboard(page, false);
   await assertText(page, '5551234');
 });
