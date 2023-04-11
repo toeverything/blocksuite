@@ -1,10 +1,12 @@
 import type { VRange } from '../types.js';
 import type { VEditor } from '../virgo.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
-function handleInsertText(
+function handleInsertText<TextAttributes extends BaseTextAttributes>(
   vRange: VRange,
   data: string | null,
-  editor: VEditor
+  editor: VEditor,
+  attributes: TextAttributes
 ) {
   if (vRange.index >= 0 && data) {
     editor.slots.updated.once(() => {
@@ -17,7 +19,7 @@ function handleInsertText(
       ]);
     });
 
-    editor.insertText(vRange, data);
+    editor.insertText(vRange, data, attributes);
   }
 }
 
@@ -157,9 +159,10 @@ function handleForwardDelete(editor: VEditor, vRange: VRange) {
   }
 }
 
-export function transformInput(
+export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
   data: string | null,
+  attributes: TextAttributes,
   vRange: VRange,
   editor: VEditor
 ) {
@@ -167,7 +170,7 @@ export function transformInput(
   // [Input Events Level 2](https://w3c.github.io/input-events/#interface-InputEvent-Attributes)
   switch (inputType) {
     case 'insertText': {
-      handleInsertText(vRange, data, editor);
+      handleInsertText(vRange, data, editor, attributes);
       return;
     }
 

@@ -1,10 +1,12 @@
 import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import type { SelectTag } from '@blocksuite/global/database';
+import type { VHandlerContext } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
 import { INPUT_MAX_LENGTH } from '../../../consts.js';
 
 @customElement('affine-database-select-option')
@@ -58,20 +60,22 @@ export class SelectOption extends LitElement {
     });
     this._vEditor.mount(this._container);
     this._vEditor.bindHandlers({
-      virgoInput: this._handleInput,
+      virgoInput: this._handleVInput,
       paste: this._handlePaste,
     });
     // When editing the current select, other sibling selects should not be edited
     this._vEditor.setReadonly(!this.editing);
   }
 
-  private _handleInput = (event: InputEvent) => {
+  private _handleVInput = (
+    ctx: VHandlerContext<AffineTextAttributes, InputEvent>
+  ) => {
     const length = this._vEditor.yText.length;
-    if (length >= INPUT_MAX_LENGTH && event.data) {
+    if (length >= INPUT_MAX_LENGTH && ctx.event.data) {
       // prevent input
-      return true;
+      ctx.skipDefault = true;
     }
-    return false;
+    return ctx;
   };
 
   private _handlePaste = (event: ClipboardEvent) => {

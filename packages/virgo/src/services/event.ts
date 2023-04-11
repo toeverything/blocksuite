@@ -1,10 +1,25 @@
-import type { NativePoint } from '../types.js';
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { NativePoint, VRange } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
+  getTextNodesFromElement,
+  nativePointToTextPoint,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
 import type { VEditor } from '../virgo.js';
+
+export interface VHandlerContext<
+  T extends BaseTextAttributes,
+  E extends Event = Event
+> {
+  event: E;
+  data: string | null;
+  vRange: VRange;
+  skipDefault: boolean;
+  attributes: T | null;
+}
 
 export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private readonly _editor: VEditor<TextAttributes>;
@@ -17,8 +32,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _handlers: {
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
-    virgoInput?: (event: InputEvent) => boolean;
-    virgoCompositionEnd?: (event: CompositionEvent) => boolean;
+    virgoInput?: (
+      ctx: VHandlerContext<TextAttributes, InputEvent>
+    ) => VHandlerContext<TextAttributes, InputEvent>;
+    virgoCompositionEnd?: (
+      ctx: VHandlerContext<TextAttributes, CompositionEvent>
+    ) => VHandlerContext<TextAttributes, CompositionEvent>;
   } = {};
 
   private _previousAnchor: NativePoint | null = null;
@@ -174,23 +193,62 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _onCompositionEnd = (event: CompositionEvent) => {
     this._isComposing = false;
 
-    let ifSkip = false;
-    if (this._handlers.virgoCompositionEnd) {
-      ifSkip = this._handlers.virgoCompositionEnd(event);
-    }
+    if (this._editor.isReadonly) return;
 
-    if (ifSkip) return;
     const vRange = this._editor.getVRange();
     if (!vRange) return;
 
-    const { data } = event;
-    if (vRange.index >= 0 && data) {
-      this._editor.insertText(vRange, data);
+    let ctx: VHandlerContext<TextAttributes, CompositionEvent> = {
+      event,
+      data: event.data,
+      vRange,
+      skipDefault: false,
+      attributes: null,
+    };
+    if (this._handlers.virgoCompositionEnd) {
+      ctx = this._handlers.virgoCompositionEnd(ctx);
+    }
+
+    if (ctx.skipDefault) return;
+
+    const { data, vRange: newVRange } = ctx;
+    if (newVRange.index >= 0 && data && data.length > 0) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount !== 0) {
+        const range = selection.getRangeAt(0);
+        const container = range.startContainer;
+
+        // https://github.com/w3c/input-events/issues/137
+        // IME will directly modify the DOM and is difficult to hijack and cancel.
+        // We need to delete this part of the content and restore the selection.
+        if (container instanceof Text) {
+          if (container.parentElement?.dataset.virgoText !== 'true') {
+            container.remove();
+          } else {
+            const [text] = this._editor.getTextPoint(newVRange.index);
+            const vText = text.parentElement?.closest('v-text');
+            if (vText && vText.str !== text.textContent) {
+              text.textContent = vText.str;
+            }
+          }
+
+          const newRange = this._editor.toDomRange(newVRange);
+          assertExists(newRange);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+
+      this._editor.insertText(
+        newVRange,
+        data,
+        ctx.attributes ?? ({} as TextAttributes)
+      );
 
       this._editor.slots.updated.once(() => {
         this._editor.slots.vRangeUpdated.emit([
           {
-            index: vRange.index + data.length,
+            index: newVRange.index + data.length,
             length: 0,
           },
           'input',
@@ -202,20 +260,32 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
-    if (this._isComposing) return;
+    if (this._editor.isReadonly || this._isComposing) return;
 
-    let ifSkip = false;
-    if (this._handlers.virgoInput) {
-      ifSkip = this._handlers.virgoInput(event);
-    }
-
-    if (this._editor.isReadonly) return;
-    if (ifSkip) return;
     const vRange = this._editor.getVRange();
     if (!vRange) return;
 
-    const { inputType, data } = event;
+    let ctx: VHandlerContext<TextAttributes, InputEvent> = {
+      event,
+      data: event.data,
+      vRange,
+      skipDefault: false,
+      attributes: null,
+    };
+    if (this._handlers.virgoInput) {
+      ctx = this._handlers.virgoInput(ctx);
+    }
 
-    transformInput(inputType, data, vRange, this._editor as VEditor);
+    if (ctx.skipDefault) return;
+
+    const { event: newEvent, data, vRange: newVRange } = ctx;
+
+    transformInput<TextAttributes>(
+      newEvent.inputType,
+      data,
+      ctx.attributes ?? ({} as TextAttributes),
+      newVRange,
+      this._editor as VEditor
+    );
   };
 }
