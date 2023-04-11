@@ -27,15 +27,15 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           {
-            text: '🚧 Fundamental Concepts',
+            text: 'Fundamental Concepts',
             link: '/concepts',
             items: [
               {
-                text: '🚧 Workspaces and Pages',
+                text: 'Workspaces and Pages',
                 link: '/concepts#workspaces-and-pages',
               },
               {
-                text: '🚧 Flavoured Blocks',
+                text: 'Flavoured Blocks',
                 link: '/concepts#flavoured-blocks',
               },
             ],
