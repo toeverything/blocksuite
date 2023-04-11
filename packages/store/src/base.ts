@@ -5,32 +5,60 @@ import { z } from 'zod';
 
 import { Text } from './text-adapter.js';
 import type { Page } from './workspace/index.js';
+import type { YBlock } from './workspace/page.js';
 
 const FlavourSchema = z.string();
 const ElementTagSchema = z.object({
   _$litStatic$: z.string(),
   r: z.symbol(),
 });
+const role = ['root', 'hub', 'content'] as const;
+const RoleSchema = z.enum(role);
+
+export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
+  Cast: <T>() => T;
 }
 
+const castSlot = Symbol('castSlot');
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
+  Cast: <T>() => castSlot as T,
 });
 
 export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
+    role: RoleSchema,
     flavour: FlavourSchema,
     tag: ElementTagSchema,
     props: z
       .function()
       .args(z.custom<InternalPrimitives>())
-      .returns(z.record(z.any())),
+      .returns(z.record(z.any()))
+      .optional(),
+    ext: z
+      .function()
+      .args(z.custom<InternalPrimitives>())
+      .returns(z.record(z.any()))
+      .optional(),
+    toModel: z
+      .function()
+      .args(
+        z.custom<{
+          model: BaseBlockModel;
+          block: YBlock;
+          internal: InternalPrimitives;
+        }>()
+      )
+      .returns(z.void())
+      .optional(),
   }),
 });
+
+export type BlockSchemaType = z.infer<typeof BlockSchema>;
 
 export type PropsSetter<Props extends Record<string, unknown>> = (
   props: Props
@@ -59,37 +87,66 @@ export type SchemaToModel<
 
 export function defineBlockSchema<
   Flavour extends string,
+  Role extends RoleType,
   Props extends Record<string, unknown>,
+  Ext extends Record<string, unknown>,
   Metadata extends Readonly<{
     version: number;
     tag: StaticValue;
-  }>
->(
-  flavour: Flavour,
-  props: (internalPrimitives: InternalPrimitives) => Props,
-  metadata: Metadata
-): {
+  }>,
+  Model extends BaseBlockModel & Props & Ext & { flavour: Flavour }
+>(options: {
+  flavour: Flavour;
+  role: Role;
+  metadata: Metadata;
+  props?: (internalPrimitives: InternalPrimitives) => Props;
+  ext?: (internalPrimitives: InternalPrimitives) => Ext;
+  toModel?: (options: {
+    model: Model;
+    block: YBlock;
+    internal: InternalPrimitives;
+  }) => void;
+}): {
   version: number;
   model: {
+    role: Role;
     props: PropsGetter<Props>;
+    ext: PropsGetter<Ext>;
     flavour: Flavour;
   } & Metadata;
 };
 
-export function defineBlockSchema(
-  flavour: string,
-  props: (internalPrimitives: InternalPrimitives) => Record<string, unknown>,
+export function defineBlockSchema({
+  flavour,
+  role,
+  props,
+  metadata,
+  ext,
+  toModel,
+}: {
+  flavour: string;
+  role: RoleType;
   metadata: {
     version: number;
     tag: StaticValue;
-  }
-): z.infer<typeof BlockSchema> {
+  };
+  props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
+  ext?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
+  toModel?: (options: {
+    model: BaseBlockModel;
+    block: YBlock;
+    internal: InternalPrimitives;
+  }) => void;
+}): BlockSchemaType {
   const schema = {
     version: metadata.version,
     model: {
-      flavour,
       tag: metadata.tag,
+      flavour,
+      role,
       props,
+      ext,
+      toModel,
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
@@ -102,6 +159,7 @@ export class BaseBlockModel<Props = unknown>
   static version: number;
   flavour!: keyof BlockModels & string;
   tag!: StaticValue;
+  role!: RoleType;
   id: string;
 
   page: Page;
@@ -111,8 +169,8 @@ export class BaseBlockModel<Props = unknown>
 
   type?: string;
   children: BaseBlockModel[];
-  cells?: Y.Map<Y.Map<unknown>>;
-  columns?: Y.Map<unknown>;
+  // cells?: Y.Map<Y.Map<unknown>>;
+  // columns?: Y.Map<unknown>;
   text?: Text;
   sourceId?: string;
 

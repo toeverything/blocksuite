@@ -21,12 +21,16 @@ export class DatabaseManager {
   }
 
   protected get yCells() {
+    // @ts-ignore
     assertExists(this.page.root?.cells);
+    // @ts-ignore
     return this.page.root.cells as Y.Map<Y.Map<unknown>>;
   }
 
   protected get yColumns() {
+    // @ts-ignore
     assertExists(this.page.root?.columns);
+    // @ts-ignore
     return this.page.root.columns as Y.Map<unknown>;
   }
 

@@ -1,6 +1,6 @@
 import { debug } from '@blocksuite/global/debug';
 import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
@@ -47,6 +47,14 @@ type FlatBlockMap = {
   [key: string]: YBlock;
 };
 
+type PageOptions = {
+  id: string;
+  workspace: Workspace;
+  doc: BlockSuiteDoc;
+  awarenessStore: AwarenessStore;
+  idGenerator?: IdGenerator;
+};
+
 export class Page extends Space<FlatBlockMap> {
   private _workspace: Workspace;
   private _idGenerator: IdGenerator;
@@ -79,13 +87,13 @@ export class Page extends Space<FlatBlockMap> {
   };
   readonly db: DatabaseManager;
 
-  constructor(
-    workspace: Workspace,
-    id: string,
-    doc: BlockSuiteDoc,
-    awarenessStore: AwarenessStore,
-    idGenerator: IdGenerator = uuidv4
-  ) {
+  constructor({
+    id,
+    workspace,
+    doc,
+    awarenessStore,
+    idGenerator = uuidv4,
+  }: PageOptions) {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
@@ -119,7 +127,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get root() {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    if (root && root.flavour !== 'affine:page') {
+    if (!root) return root;
+
+    const rootSchema = this._workspace.flavourSchemaMap.get(root.flavour);
+    if (rootSchema?.model.role !== 'root') {
       console.error('data broken');
     }
     return root;
@@ -291,8 +302,10 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.flavourSchemaMap.get(flavour);
   }
 
-  getInitialPropsMapByFlavour(flavour: string) {
-    return this.workspace.flavourInitialPropsMap.get(flavour);
+  getInitialPropsByFlavour(flavour: string) {
+    const schema = this.workspace.flavourSchemaMap.get(flavour);
+    assertExists(schema);
+    return schema.model.props?.(internalPrimitives) ?? {};
   }
 
   @debug('CRUD')
@@ -364,17 +377,10 @@ export class Page extends Space<FlatBlockMap> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
-      assertExists(defaultProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      syncBlockProps(
-        schema,
-        defaultProps,
-        yBlock,
-        clonedProps,
-        this._ignoredKeys
-      );
+
+      syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent) ?? null;
@@ -476,13 +482,9 @@ export class Page extends Space<FlatBlockMap> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(
-        model.flavour
-      );
-      assertExists(defaultProps);
       const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
-      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, yBlock, props, this._ignoredKeys);
     });
 
     model.propsUpdated.emit();
@@ -672,7 +674,10 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(props: Omit<BlockProps, 'children'>) {
+  private _createBlockModel(
+    props: Omit<BlockProps, 'children'>,
+    block: YBlock
+  ) {
     const schema = this.workspace.flavourSchemaMap.get(props.flavour);
     if (!schema) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
@@ -683,14 +688,32 @@ export class Page extends Space<FlatBlockMap> {
       this,
       props as PropsWithId<Omit<BlockProps, 'children'>>
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    blockModel.flavour = schema.model.flavour as any;
+
+    blockModel.flavour = schema.model.flavour as never;
+    blockModel.role = schema.model.role;
     blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.props(internalPrimitives);
+    const modelProps = schema.model.props?.(internalPrimitives) ?? {};
     Object.entries(modelProps).forEach(([key, value]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (blockModel as any)[key] = props[key] ?? value;
+      // @ts-ignore
+      blockModel[key] = props[key] ?? value;
+
+      if (value instanceof Text) {
+        const yText = block.get(`prop:${key}`) as Y.Text;
+        Object.assign(blockModel, { [key]: new Text(yText) });
+      }
     });
+    const exts = schema.model.ext?.(internalPrimitives) ?? {};
+    Object.keys(exts).forEach(key => {
+      // @ts-ignore
+      blockModel[key] = block.get(`ext:${key}`);
+    });
+
+    schema.model.toModel?.({
+      model: blockModel,
+      block,
+      internal: internalPrimitives,
+    });
+
     return blockModel;
   }
 
@@ -700,7 +723,7 @@ export class Page extends Space<FlatBlockMap> {
     let isSurface = false;
 
     const props = toBlockProps(yBlock) as BlockProps;
-    const model = this._createBlockModel({ ...props, id });
+    const model = this._createBlockModel({ ...props, id }, yBlock);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
@@ -708,33 +731,6 @@ export class Page extends Space<FlatBlockMap> {
       isRoot = true;
     }
     this._blockMap.set(props.id, model);
-
-    const initialProps = this.workspace.flavourInitialPropsMap.get(
-      model.flavour
-    );
-    assertExists(initialProps);
-    Object.entries(initialProps).forEach(([key, value]) => {
-      if (value instanceof Text) {
-        const yText = yBlock.get(`prop:${key}`) as Y.Text;
-        Object.assign(model, { [key]: new Text(yText) });
-      }
-    });
-
-    if (matchFlavours(model, ['affine:page'] as const)) {
-      model.cells = yBlock.get('ext:cells') as Y.Map<Y.Map<unknown>>;
-      model.columns = yBlock.get('ext:columns') as Y.Map<unknown>;
-
-      const titleText = yBlock.get('prop:title') as Y.Text;
-      model.title = new Text(titleText);
-    }
-
-    // TODO use schema
-    if (model.flavour === 'affine:database') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<string>
-      ).toArray();
-    }
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
