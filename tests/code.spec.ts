@@ -293,7 +293,9 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:code
       prop:language="Plain Text"
       prop:text="use
@@ -337,7 +339,9 @@ test.skip('use code block copy menu of code block copy whole code block', async 
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:code
       prop:language="Plain Text"
       prop:text="use

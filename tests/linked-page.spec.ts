@@ -102,7 +102,9 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title0"
 >
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="page0"
       prop:type="text"
@@ -125,7 +127,9 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title1"
 >
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="page1"
       prop:type="text"
@@ -325,7 +329,9 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page1"
 >
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:type="text"
     />
@@ -344,7 +350,9 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page0"
 >
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text={
         <>
