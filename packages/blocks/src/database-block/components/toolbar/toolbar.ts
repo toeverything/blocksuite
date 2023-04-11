@@ -1,5 +1,3 @@
-import './toolbar-action-popup.js';
-
 import {
   DatabaseSearchClose,
   DatabaseSearchIcon,
