@@ -63,7 +63,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
 
   hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
-    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shap`, etc.
+    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
     const { selected } = edgeless.getSelection().blockSelectionState;

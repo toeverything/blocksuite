@@ -257,12 +257,7 @@ export class EdgelessPageBlockComponent
           this.components.dragHandle?.setScale(newZoom);
         }
         if (this._selection.selectedBlocks.length) {
-          // TODO: remove `requestAnimationFrame`
-          requestAnimationFrame(() => {
-            this._rectsOfSelectedBlocks = this._selection.selectedBlocks.map(
-              getRectByBlockElement
-            );
-          });
+          slots.selectedBlocksUpdated.emit(this._selection.selectedBlocks);
         }
         this.requestUpdate();
       })
@@ -270,8 +265,13 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       slots.selectedBlocksUpdated.on(selectedBlocks => {
         this._selection.selectedBlocks = selectedBlocks;
-        this._rectsOfSelectedBlocks = selectedBlocks.map(getRectByBlockElement);
-        this.requestUpdate();
+        // TODO: remove `requestAnimationFrame`
+        requestAnimationFrame(() => {
+          this._rectsOfSelectedBlocks = selectedBlocks.map(
+            getRectByBlockElement
+          );
+        });
+        // this.requestUpdate();
       })
     );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));

@@ -121,6 +121,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           this._blockSelectionState.active;
         this._setSelectionState([selected], active);
       }
+      this._edgeless.slots.selectedBlocksUpdated.emit([]);
       handleNativeRangeClick(this._page, e);
     }
   }
@@ -178,6 +179,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     ]);
     this._page.updateBlock(block, { xywh });
     this._handleDragMoveEffect(block);
+
+    // TODO: refactor
+    if (this._edgeless.getSelection().selectedBlocks.length) {
+      this._edgeless.slots.selectedBlocksUpdated.emit(
+        this._edgeless.getSelection().selectedBlocks
+      );
+    }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
