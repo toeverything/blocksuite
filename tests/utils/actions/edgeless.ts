@@ -327,13 +327,13 @@ function locatorComponentToolbarMoreButton(page: Page) {
     .locator('edgeless-more-button');
   return moreButton;
 }
-type Action = 'bring to front' | 'send to back';
+type Action = 'bringToFront' | 'sendToBack' | 'changeFrameColor';
 export async function triggerComponentToolbarAction(
   page: Page,
   action: Action
 ) {
   switch (action) {
-    case 'bring to front': {
+    case 'bringToFront': {
       const moreButton = locatorComponentToolbarMoreButton(page);
       await moreButton.click();
 
@@ -345,7 +345,7 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
-    case 'send to back': {
+    case 'sendToBack': {
       const moreButton = locatorComponentToolbarMoreButton(page);
       await moreButton.click();
 
@@ -357,5 +357,22 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
+    case 'changeFrameColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-frame-button');
+      await button.click();
+      break;
+    }
   }
+}
+
+export async function changeEdgelessFrameBackground(
+  page: Page,
+  color: `#${string}`
+) {
+  const colorButton = page.locator(
+    `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
+  );
+  await colorButton.click();
 }

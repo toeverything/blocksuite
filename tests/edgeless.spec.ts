@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 import {
   activeFrameInEdgeless,
   addBasicConnectorElement,
+  changeEdgelessFrameBackground,
   clickComponentToolbarMoreMenuButton,
   decreaseZoomLevel,
   getEdgelessBlockChild,
@@ -54,6 +55,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertEdgelessFrameBackground,
   assertEdgelessHoverRect,
   assertEdgelessNonHoverRect,
   assertEdgelessNonSelectedRect,
@@ -1103,7 +1105,7 @@ test('bring to front', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
   // bring rect0 to front
-  await triggerComponentToolbarAction(page, 'bring to front');
+  await triggerComponentToolbarAction(page, 'bringToFront');
 
   // should be rect0
   await page.mouse.click(175, 175);
@@ -1132,7 +1134,7 @@ test('send to back', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
 
   // bring rect1 to back
-  await triggerComponentToolbarAction(page, 'send to back');
+  await triggerComponentToolbarAction(page, 'sendToBack');
 
   // should be rect0
   await page.mouse.click(175, 175);
@@ -1301,4 +1303,19 @@ test('resize element which attaches connector', async ({ page }) => {
 
   await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
   await assertEdgelessHoverRect(page, [160, 200, 140, 100]);
+});
+
+test('change frame color', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+
+  await assertEdgelessFrameBackground(page, ids.frameId, '#fbfafc');
+
+  await selectFrameInEdgeless(page, ids.frameId);
+  await triggerComponentToolbarAction(page, 'changeFrameColor');
+  const color = '#dff4e8';
+  await changeEdgelessFrameBackground(page, color);
+  await assertEdgelessFrameBackground(page, ids.frameId, color);
 });
