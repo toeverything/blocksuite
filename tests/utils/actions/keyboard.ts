@@ -117,13 +117,19 @@ export async function copyByKeyboard(page: Page) {
 export async function cutByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
 }
-export async function pasteByKeyboard(page: Page) {
-  const doesEditorActive = await page.evaluate(() =>
-    document.activeElement?.closest('editor-container')
-  );
-  if (!doesEditorActive) {
-    await page.click('editor-container');
+/**
+ * Notice: this method will try to click closest editor by default
+ */
+export async function pasteByKeyboard(page: Page, nonClick = false) {
+  if (!nonClick) {
+    const doesEditorActive = await page.evaluate(() =>
+      document.activeElement?.closest('editor-container')
+    );
+    if (!doesEditorActive) {
+      await page.click('editor-container');
+    }
   }
+
   await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
 }
 
