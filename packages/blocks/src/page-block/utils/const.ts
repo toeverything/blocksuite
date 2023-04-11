@@ -8,8 +8,13 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 
+import { copy } from '../../__internal__/clipboard/utils.js';
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { showDatabaseModal } from '../../components/database-modal/index.js';
@@ -118,9 +123,10 @@ export const actionConfig = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: () => {
-      // Will forward to the `CopyCutManager`
-      window.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+    action: ({ page }: ActionProps) => {
+      const range = getCurrentBlockRange(page);
+      assertExists(range);
+      copy(range);
       toast('Copied to clipboard');
     },
   },
