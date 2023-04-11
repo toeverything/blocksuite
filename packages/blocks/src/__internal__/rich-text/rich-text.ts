@@ -75,16 +75,17 @@ export class RichText extends ShadowlessElement {
     this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
       keydown: keyDownHandler,
-      virgoInput: e => {
+      virgoInput: ctx => {
         const vEditor = this._vEditor;
         assertExists(vEditor);
         const vRange = vEditor.getVRange();
         if (!vRange || vRange.length !== 0) {
-          return false;
+          return ctx;
         }
 
+        const { data } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (e.data && e.data !== '\n') {
+        if (data && data.length > 0 && data !== '\n') {
           if (
             deltas.length > 1 ||
             (deltas.length === 1 && vRange.index !== 0)
@@ -96,26 +97,21 @@ export class RichText extends ShadowlessElement {
               });
             }
 
-            vEditor.insertText(vRange, e.data, attributes);
-            vEditor.setVRange({
-              index: vRange.index + e.data.length,
-              length: 0,
-            });
-            return true;
+            ctx.attributes = attributes ?? null;
           }
         }
 
-        return false;
+        return ctx;
       },
-      virgoCompositionEnd: e => {
-        const { data } = e;
+      virgoCompositionEnd: ctx => {
         const vEditor = this._vEditor;
         assertExists(vEditor);
         const vRange = vEditor.getVRange();
         if (!vRange || vRange.length !== 0) {
-          return false;
+          return ctx;
         }
 
+        const { data } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
         if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
@@ -125,14 +121,9 @@ export class RichText extends ShadowlessElement {
             });
           }
 
-          vEditor.insertText(vRange, data, attributes);
-          vEditor.setVRange({
-            index: vRange.index + data.length,
-            length: 0,
-          });
-          return true;
+          ctx.attributes = attributes ?? null;
         }
-        return false;
+        return ctx;
       },
     });
 
