@@ -22,23 +22,15 @@ import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/std.js';
-import { ClipboardItem } from './clipboard-item.js';
 import type { Clipboard } from './type.js';
 import {
-  CLIPBOARD_MIMETYPE,
   clipboardData2Blocks,
-  copy,
+  copyBlocks,
+  createSurfaceClipboardItems,
   getBlockClipboardInfo,
+  getSurfaceClipboardData,
   performNativeCopy,
 } from './utils.js';
-
-function serialize(data: object) {
-  return JSON.stringify(data);
-}
-
-function deserialize(data: string) {
-  return JSON.parse(data);
-}
 
 export class EdgelessClipboard implements Clipboard {
   private _page!: Page;
@@ -91,7 +83,7 @@ export class EdgelessClipboard implements Clipboard {
     if (selection.active) {
       const range = getCurrentBlockRange(this._page);
       assertExists(range);
-      copy(range);
+      copyBlocks(range);
       return;
     }
     const data = selection.selected
@@ -103,11 +95,25 @@ export class EdgelessClipboard implements Clipboard {
         }
       })
       .filter(d => !!d);
-    const custom = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
-      serialize(data)
-    );
-    performNativeCopy([custom]);
+
+    const clipboardItems = createSurfaceClipboardItems(data);
+    performNativeCopy(clipboardItems);
+  };
+
+  private _onPaste = async (e: ClipboardEvent) => {
+    e.preventDefault();
+    const selection = this._edgeless.getSelection().blockSelectionState;
+    if (selection.active) {
+      this._pasteInTextFrame(e);
+      return;
+    }
+
+    const elementsRawData = getSurfaceClipboardData(e);
+    if (!elementsRawData) {
+      return;
+    }
+
+    this._pasteShapesAndFrames(elementsRawData);
   };
 
   private async _pasteInTextFrame(e: ClipboardEvent) {
@@ -270,23 +276,4 @@ export class EdgelessClipboard implements Clipboard {
       frameIds
     );
   }
-
-  private _onPaste = async (e: ClipboardEvent) => {
-    e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
-      this._pasteInTextFrame(e);
-      return;
-    }
-
-    const custom = e.clipboardData?.getData(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
-    );
-    if (!custom) {
-      return;
-    }
-
-    const elementsRawData = deserialize(custom) as Record<string, unknown>[];
-    this._pasteShapesAndFrames(elementsRawData);
-  };
 }
