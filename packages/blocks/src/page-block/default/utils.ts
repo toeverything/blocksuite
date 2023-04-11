@@ -538,8 +538,8 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setDragType(dragging: boolean) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
-    setSelectedBlock({ element }: EditingState) {
-      pageBlock.selection.selectOneBlock(element);
+    setSelectedBlock(modelState: EditingState | null) {
+      pageBlock.selection.selectOneBlock(modelState?.element ?? null);
     },
     getSelectedBlocks() {
       return pageBlock.selection.state.selectedBlocks;

@@ -33,7 +33,7 @@ import {
   isEmbed,
   isImage,
   isInsidePageTitle,
-  isPageSelectedRects,
+  isSelectedBlocks,
   Point,
   Rect,
 } from '../../../__internal__/index.js';
@@ -125,8 +125,7 @@ export class DefaultSelectionManager {
 
     if (
       isElement(target) &&
-      (isDragHandle(target as Element) ||
-        isPageSelectedRects(target as Element))
+      (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
     ) {
       PreviewDragHandlers.onStart(this, e);
       return;
