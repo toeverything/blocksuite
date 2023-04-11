@@ -123,7 +123,7 @@ test.describe('multiple page', () => {
       page,
       `
 <affine:page
-  prop:title="Untitledtitle1"
+  prop:title="title1"
 >
   <affine:frame>
     <affine:paragraph
@@ -440,18 +440,14 @@ test.describe('linked page popover', () => {
     await page.keyboard.press('Shift+Tab');
     await assertActivePageIdx(0);
 
-    await expect(pageBtn).toHaveText([
-      'page0',
-      'Untitledpage1',
-      'Untitledpage2',
-    ]);
+    await expect(pageBtn).toHaveText(['page0', 'page1', 'page2']);
     // page2
     //  ^  ^
     await type(page, 'a2');
     await expect(pageBtn).toHaveCount(1);
-    await expect(pageBtn).toHaveText(['Untitledpage2']);
+    await expect(pageBtn).toHaveText(['page2']);
     await pressEnter(page);
     await expect(linkedPagePopover).toBeHidden();
-    await assertExistRefText('Untitledpage2');
+    await assertExistRefText('page2');
   });
 });
