@@ -258,12 +258,6 @@ export class DragHandle extends WithDisposable(LitElement) {
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
 
-  @query('.affine-drag-handle-hover')
-  private _dragHandleOver!: HTMLDivElement;
-
-  @query('.affine-drag-handle-normal')
-  private _dragHandleNormal!: HTMLDivElement;
-
   private _draggingElements: BlockComponentElement[] = [];
 
   private _scale = 1;
