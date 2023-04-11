@@ -16,6 +16,7 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '@blocksuite/blocks/std';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -45,7 +46,6 @@ import type {
 import { calcCurrentSelectionPosition } from './position.js';
 
 const DEFAULT_SPACING = 64;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
