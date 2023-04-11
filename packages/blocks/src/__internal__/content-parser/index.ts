@@ -1,10 +1,10 @@
-import type { PageBlockModel } from '@blocksuite/blocks';
-import type { SerializedBlock } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import type { SerializedBlock } from '../../models.js';
+import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils.js';
 import { getServiceOrRegister } from '../service.js';
 import { FileExporter } from './file-exporter/file-exporter.js';

@@ -1,6 +1,6 @@
-import type { SelectionEvent } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { SelectionEvent } from '../../../__internal__/index.js';
 import type { DefaultSelectionManager } from './default-selection-manager.js';
 import { autoScroll } from './utils.js';
 

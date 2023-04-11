@@ -1,4 +1,3 @@
-import type { EditingState } from '@blocksuite/blocks/std';
 import {
   CaptionIcon,
   CopyIcon,
@@ -8,6 +7,7 @@ import {
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EditingState } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultSelectionSlots } from './default-page-block.js';

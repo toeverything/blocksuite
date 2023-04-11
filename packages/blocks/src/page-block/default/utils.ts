@@ -1,17 +1,3 @@
-import type {
-  BlockComponentElement,
-  EditingState,
-  Point,
-  SerializedBlock,
-} from '@blocksuite/blocks/std';
-import {
-  getBlockElementById,
-  getBlockElementByModel,
-  getBlockElementsExcludeSubtrees,
-  getClosestBlockElementByPoint,
-  getModelByBlockElement,
-  isInSamePath,
-} from '@blocksuite/blocks/std';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   BLOCK_SERVICE_LOADING_ATTR,
@@ -21,6 +7,20 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockComponentElement,
+  EditingState,
+  Point,
+  SerializedBlock,
+} from '../../__internal__/index.js';
+import {
+  getBlockElementById,
+  getBlockElementByModel,
+  getBlockElementsExcludeSubtrees,
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  isInSamePath,
+} from '../../__internal__/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';

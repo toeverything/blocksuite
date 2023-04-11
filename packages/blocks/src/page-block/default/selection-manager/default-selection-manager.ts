@@ -1,8 +1,18 @@
 import '../../../components/drag-handle.js';
 
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
-  type BlockComponentElement,
-  type EditingState,
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+} from '@blocksuite/store';
+
+import type {
+  BlockComponentElement,
+  EditingState,
+  SelectionEvent,
+} from '../../../__internal__/index.js';
+import {
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
@@ -26,15 +36,7 @@ import {
   isPageSelectedRects,
   Point,
   Rect,
-  type SelectionEvent,
-} from '@blocksuite/blocks/std';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-} from '@blocksuite/store';
-
+} from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 import { showFormatQuickBarByDoubleClick } from '../../index.js';
