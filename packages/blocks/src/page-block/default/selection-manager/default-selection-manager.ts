@@ -95,6 +95,7 @@ export class DefaultSelectionManager {
         this._onContainerDragEnd,
         this._onContainerClick,
         this._onContainerDblClick,
+        this._onContainerTripleClick,
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
@@ -312,6 +313,14 @@ export class DefaultSelectionManager {
     NativeDragHandlers.onStart(this, e);
 
     showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    // clear selection first
+    // this.clear();
+    // switch native selection
+    // NativeDragHandlers.onStart(this, e);
+    // showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

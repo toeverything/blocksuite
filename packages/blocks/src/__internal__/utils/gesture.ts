@@ -105,6 +105,7 @@ export function initMouseEventHandlers(
   onContainerDragEnd: (e: SelectionEvent) => void,
   onContainerClick: (e: SelectionEvent) => void,
   onContainerDblClick: (e: SelectionEvent) => void,
+  onContainerTripleClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
@@ -157,9 +158,17 @@ export function initMouseEventHandlers(
     };
 
     if (aggregated_clicks === 1) {
-      container.dispatchEvent(new MouseEvent('doubleclick', e));
+      container.dispatchEvent(
+        new CustomEvent('doubleclick', {
+          detail: e,
+        })
+      );
     } else if (aggregated_clicks === 2) {
-      container.dispatchEvent(new MouseEvent('tripleclick', e));
+      container.dispatchEvent(
+        new CustomEvent('tripleclick', {
+          detail: e,
+        })
+      );
     }
 
     document.addEventListener('mouseup', mouseUpHandler);
@@ -237,10 +246,26 @@ export function initMouseEventHandlers(
     );
   };
 
-  const dblClickHandler = (e: MouseEvent) => {
-    if (shouldFilterMouseEvent(e)) return;
+  // const dblClickHandler = (e: MouseEvent) => {
+  //   if (shouldFilterMouseEvent(e)) return;
+  //   onContainerDblClick(
+  //     toSelectionEvent(e, getBoundingClientRect, startX, startY)
+  //   );
+  // };
+
+  const doubleClickHandler = (e: Event) => {
+    const evt = (e as CustomEvent).detail;
+    if (shouldFilterMouseEvent(evt)) return;
     onContainerDblClick(
-      toSelectionEvent(e, getBoundingClientRect, startX, startY)
+      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
+    );
+  };
+
+  const tripleClickHandler = (e: Event) => {
+    const evt = (e as CustomEvent).detail;
+    if (shouldFilterMouseEvent(evt)) return;
+    onContainerTripleClick(
+      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
     );
   };
 
@@ -265,14 +290,8 @@ export function initMouseEventHandlers(
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   // container.addEventListener('dblclick', dblClickHandler);
-  container.addEventListener('doubleclick', e => {
-    console.log(e, 'double');
-    e.preventDefault();
-    dblClickHandler(e);
-  });
-  container.addEventListener('tripleclick', e => {
-    console.log(e, 'triple');
-  });
+  container.addEventListener('doubleclick', doubleClickHandler);
+  container.addEventListener('tripleclick', tripleClickHandler);
   document.addEventListener(
     'selectionchange',
     selectionChangeHandlerWithDebounce
@@ -283,7 +302,9 @@ export function initMouseEventHandlers(
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
-    container.removeEventListener('dblclick', dblClickHandler);
+    // container.removeEventListener('dblclick', dblClickHandler);
+    container.removeEventListener('doubleclick', doubleClickHandler);
+    container.removeEventListener('tripleclick', tripleClickHandler);
     document.removeEventListener(
       'selectionchange',
       selectionChangeHandlerWithDebounce
