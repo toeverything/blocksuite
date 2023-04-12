@@ -74,7 +74,17 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     const { viewport } = this._edgeless.surface;
 
-    this._draggingArea.end = new DOMPoint(e.x, e.y);
+    let endX = e.x;
+    let endY = e.y;
+    if (e.keys.shift) {
+      const { x: startX, y: startY } = this._draggingArea.start;
+      const w = Math.abs(endX - startX) / viewport.zoom;
+      const h = Math.abs(endY - startY) / viewport.zoom;
+      const maxLength = Math.max(w, h);
+      endX = endX > startX ? startX + maxLength : startX - maxLength;
+      endY = endY > startY ? startY + maxLength : startY - maxLength;
+    }
+    this._draggingArea.end = new DOMPoint(endX, endY);
 
     const [x, y] = viewport.toModelCoord(
       Math.min(this._draggingArea.start.x, this._draggingArea.end.x),
