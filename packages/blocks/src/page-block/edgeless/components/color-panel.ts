@@ -57,6 +57,7 @@ function TransparentColor(hollowCircle = false) {
 }
 
 function BorderedHollowCircle(color: Color) {
+  const strokeWidth = isSameColorWithBackground(color) ? 1 : 0;
   return html`<svg
     width="16"
     height="16"
@@ -68,7 +69,7 @@ function BorderedHollowCircle(color: Color) {
       d="M12.3125 8C12.3125 10.3817 10.3817 12.3125 8 12.3125C5.61827 12.3125 3.6875 10.3817 3.6875 8C3.6875 5.61827 5.61827 3.6875 8 3.6875C10.3817 3.6875 12.3125 5.61827 12.3125 8ZM8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
       fill="${color}"
       stroke="#e5e5e5"
-      stroke-width="1"
+      stroke-width="${strokeWidth}"
     />
   </svg> `;
 }
@@ -77,29 +78,10 @@ function AdditionIcon(color: Color, hollowCircle: boolean) {
   if (isTransparent(color)) {
     return TransparentColor(hollowCircle);
   }
-  if (isSameColorWithBackground(color) && hollowCircle) {
+  if (hollowCircle) {
     return BorderedHollowCircle(color);
   }
   return nothing;
-}
-
-function getColorStyle(color: Color, hollowCircle: boolean) {
-  // when color is transparent, will generate transparent icon by AdditionIcon
-  if (isTransparent(color)) {
-    return {};
-  }
-  if (isSameColorWithBackground(color)) {
-    // when color is same with background and hollow circle,
-    // will generate hollow circle icon by AdditionIcon
-    if (hollowCircle) {
-      return {};
-    }
-    return { background: color };
-  }
-  if (hollowCircle) {
-    return { border: `2.5px solid ${color}` };
-  }
-  return { background: color };
 }
 
 export function ColorUnit(
@@ -114,7 +96,7 @@ export function ColorUnit(
 ) {
   const additionIcon = AdditionIcon(color, !!hollowCircle);
 
-  const colorStyle = getColorStyle(color, !!hollowCircle);
+  const colorStyle = !hollowCircle ? { background: color } : {};
 
   const borderStyle =
     isSameColorWithBackground(color) && !hollowCircle
