@@ -1,6 +1,5 @@
 import { assertNotExists } from '@blocksuite/global/utils';
 
-import type { IBound } from './consts.js';
 import { MIN_ZOOM } from './consts.js';
 import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
@@ -175,35 +174,6 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
-  private _renderBackground() {
-    const { ctx, zoom, width, height, viewportX, viewportY } = this;
-
-    const dpr = window.devicePixelRatio;
-    const scale = dpr * zoom;
-    const step = scale < 1 ? 2 : 1 / (Math.floor(scale / 3) || 1);
-    const gap = 20 * step;
-    const dotSize = 2;
-
-    const offsetX =
-      viewportX > 0 ? -viewportX % gap : -(gap + (viewportX % gap));
-    const offsetY =
-      viewportY > 0 ? -viewportY % gap : -(gap + (viewportY % gap));
-
-    ctx.save();
-
-    const path = new Path2D();
-    for (let x = offsetX; x < width / zoom; x += gap) {
-      for (let y = offsetY; y < height / zoom; y += gap) {
-        path.moveTo(x * scale, y * scale);
-        path.ellipse(x * scale, y * scale, dotSize, dotSize, 0, 0, Math.PI * 2);
-      }
-    }
-    ctx.fillStyle = 'rgba(0, 255, 255, 1)';
-    ctx.fill(path);
-
-    ctx.restore();
-  }
-
   private _loop() {
     requestAnimationFrame(() => {
       if (this._shouldUpdate) {
@@ -230,8 +200,6 @@ export class Renderer implements SurfaceViewport {
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
-
-    this._renderBackground();
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
 

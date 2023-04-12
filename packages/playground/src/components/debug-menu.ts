@@ -78,9 +78,6 @@ export class DebugMenu extends ShadowlessElement {
   @property()
   mode: 'page' | 'edgeless' = 'page';
 
-  @state()
-  private _showGrid = false;
-
   @property()
   readonly = false;
 
@@ -196,7 +193,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchShowGrid() {
-    this._showGrid = !this._showGrid;
+    this.editor.showGrid = !this.editor.showGrid;
   }
 
   private _exportHtml() {
@@ -290,11 +287,6 @@ export class DebugMenu extends ShadowlessElement {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
-    }
-    if (changedProperties.has('_showGrid')) {
-      window.dispatchEvent(
-        createEvent('affine:switch-edgeless-display-mode', this._showGrid)
-      );
     }
     if (changedProperties.has('_hasOffset')) {
       const appRoot = document.getElementById('app');
@@ -558,7 +550,7 @@ export class DebugMenu extends ShadowlessElement {
               content="Show Grid"
               @click=${this._switchShowGrid}
             >
-              <sl-icon name=${!this._showGrid ? 'square' : 'grid-3x3'}>
+              <sl-icon name=${!this.editor.showGrid ? 'square' : 'grid-3x3'}>
               </sl-icon>
             </sl-button>
           </sl-tooltip>

@@ -45,8 +45,8 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     type: 'default',
   };
 
-  @state()
-  private showGrid = false;
+  @property()
+  showGrid = true;
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -128,6 +128,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       window,
       'affine:switch-edgeless-display-mode',
       ({ detail }) => {
+        console.log('de', detail);
         this.showGrid = detail;
       }
     );
