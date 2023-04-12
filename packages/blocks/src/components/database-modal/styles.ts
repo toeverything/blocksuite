@@ -27,7 +27,6 @@ export const styles = css`
     height: 288px;
     border-radius: 5px;
     background: var(--affine-hub-background);
-    font-family: 'Avenir Next';
   }
   .modal-header {
     display: flex;
@@ -35,6 +34,7 @@ export const styles = css`
     align-items: center;
   }
   .modal-header-title {
+    color: var(--affine-text-color);
     font-size: 20px;
     font-weight: 600;
   }
@@ -45,8 +45,9 @@ export const styles = css`
     cursor: pointer;
   }
   .modal-footer {
-    color: var(--affine-text-color);
+    color: var(--affine-secondary-text-color);
     font-size: 14px;
+    text-align: center;
   }
   .modal-body {
     display: flex;
@@ -62,21 +63,15 @@ export const styles = css`
   .modal-view-item.coming-soon {
     cursor: not-allowed;
   }
-  .modal-view-item.more {
-    cursor: default;
+  .modal-view-item.coming-soon .modal-view-item-content {
+    pointer-events: none;
   }
-  .modal-view-item.more > .modal-view-item-content {
-    justify-content: center;
-    width: 142px;
+  .modal-view-item-content:hover {
+    background: var(--affine-hover-background);
   }
-  .modal-view-item-content.selected {
-    background: rgba(0, 0, 0, 0.04);
-  }
-  .modal-view-item-content.selected svg {
-    fill: #5438ff;
-  }
-  .modal-view-item-content.selected .modal-view-item-text {
-    color: #5438ff;
+  .modal-view-item-content:hover .modal-view-item-text,
+  .modal-view-item-content:hover svg {
+    color: var(--affine-primary-color);
   }
   .modal-view-item-content {
     display: flex;
@@ -96,10 +91,11 @@ export const styles = css`
   .modal-view-item-icon svg {
     width: 42px;
     height: 42px;
+    color: var(--affine-black-50);
   }
   .modal-view-item-text {
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--affine-black-50);
   }
   .modal-view-item-description {
     font-size: 12px;

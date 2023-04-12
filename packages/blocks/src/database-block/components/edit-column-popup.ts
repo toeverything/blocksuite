@@ -45,7 +45,7 @@ export const actionStyles = css`
     cursor: pointer;
   }
   .action:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--affine-hover-background);
   }
   .action-content {
     display: flex;
@@ -55,11 +55,11 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
-    color: #77757d;
+    fill: var(--affine-icon-color);
   }
   .action-divider {
     height: 0.5px;
-    background: #e3e2e4;
+    background: var(--affine-divider-color);
     margin: 8px 0;
   }
 `;
@@ -164,7 +164,7 @@ class ColumnTypePopup extends LitElement {
     :host {
       width: 200px;
       padding: 8px;
-      border: 1px solid #e3e2e4;
+      border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
@@ -174,13 +174,13 @@ class ColumnTypePopup extends LitElement {
       width: 16px;
       height: 16px;
     }
-    /* TODO: svg color */
+
     .rich-text {
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
     .column-type {
       padding: 0;
-      color: #8e8d91;
+      color: var(--affine-text-secondary-color);
       font-size: 14px;
       cursor: unset;
     }
@@ -188,14 +188,14 @@ class ColumnTypePopup extends LitElement {
       background: none;
     }
     .selected {
-      color: #5438ff;
+      color: var(--affine-text-emphasis-color);
       background: rgba(0, 0, 0, 0.02);
     }
     .selected svg {
-      color: #5438ff;
+      color: var(--affine-text-emphasis-color);
     }
     .selected.rich-text svg {
-      fill: #5438ff;
+      fill: var(--affine-text-emphasis-color);
     }
     .action.disabled {
       cursor: not-allowed;
@@ -257,7 +257,7 @@ export class EditColumnPopup extends LitElement {
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
       padding: 8px;
-      border: 1px solid #e3e2e4;
+      border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       z-index: 1;
     }
@@ -266,7 +266,6 @@ export class EditColumnPopup extends LitElement {
       display: flex;
       flex-direction: column;
       color: var(--affine-text-color);
-      font-family: 'Avenir Next';
     }
     .affine-database-edit-column-popup * {
       box-sizing: border-box;
@@ -274,7 +273,7 @@ export class EditColumnPopup extends LitElement {
     .rename,
     .delete,
     .column-type {
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
     .column-type > svg {
       transform: rotate(-90deg);

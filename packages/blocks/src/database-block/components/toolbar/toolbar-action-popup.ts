@@ -61,7 +61,7 @@ class DatabaseTypePopup extends LitElement {
     :host {
       width: 200px;
       padding: 8px;
-      border: 1px solid #e3e2e4;
+      border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
@@ -73,12 +73,12 @@ class DatabaseTypePopup extends LitElement {
     .action > svg {
       width: 16px;
       height: 16px;
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
     .database-type {
       height: 30px;
       padding: 0;
-      color: #8e8d91;
+      color: var(--affine-text-secondary-color);
       font-size: 14px;
       cursor: unset;
     }
@@ -86,14 +86,14 @@ class DatabaseTypePopup extends LitElement {
       background: none;
     }
     .selected {
-      color: #5438ff;
+      color: var(--affine-text-emphasis-color);
       background: rgba(0, 0, 0, 0.02);
     }
     .selected svg {
-      color: #5438ff;
+      color: var(--affine-text-emphasis-color);
     }
     .selected.table-view svg {
-      fill: #5438ff;
+      fill: var(--affine-text-emphasis-color);
     }
     .action.disabled {
       cursor: not-allowed;
@@ -141,10 +141,10 @@ export class ToolbarActionPopup extends LitElement {
       width: 200px;
       height: 128px;
       padding: 8px;
-      border: 1px solid #e3e2e4;
+      border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
-        inset 0px 0px 0px 0.5px #e3e3e4;
+        inset 0px 0px 0px 0.5px var(--affine-white);
       z-index: var(--affine-z-index-popover);
       background: var(--affine-page-background);
     }
@@ -155,12 +155,12 @@ export class ToolbarActionPopup extends LitElement {
     .action-content > svg {
       width: 20px;
       height: 20px;
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
     .action > svg {
       width: 16px;
       height: 16px;
-      fill: #77757d;
+      fill: var(--affine-icon-color);
     }
     .database-type > svg {
       transform: rotate(-90deg);

@@ -51,6 +51,7 @@ const styles = css`
 
   .affine-database-table-container {
     width: fit-content;
+    min-width: 100%;
   }
 
   .affine-database-block-tag-circle {
@@ -72,10 +73,9 @@ const styles = css`
     display: flex;
     width: 100%;
     height: 28px;
-    background: #fff;
   }
   .affine-database-block-footer:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--affine-hover-background);
   }
   .affine-database-block-footer:hover .affine-database-block-add-row {
     display: flex;

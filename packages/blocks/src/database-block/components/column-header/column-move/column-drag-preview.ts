@@ -19,7 +19,7 @@ export class ColumnDragPreview extends ShadowlessElement {
           left: 0;
           height: 220px;
           width: fit-content;
-          border: 1px solid #e3e2e4;
+          border: 1px solid var(--affine-border-color);
           border-radius: 4px;
           overflow: hidden;
           cursor: none;
@@ -31,20 +31,20 @@ export class ColumnDragPreview extends ShadowlessElement {
 
         .preview-column-header {
           opacity: 0.8;
-          border-bottom: 1px solid #e3e2e4;
-          background: #f3f0ff;
+          border-bottom: 1px solid var(--affine-border-color);
+          background: var(--affine-tertiary-color);
         }
         .preview-column-header .affine-database-column-move svg {
           opacity: 1;
         }
         .preview-column-header .affine-database-column-move circle {
-          fill: #5438ff;
+          fill: var(--affine-text-emphasis-color);
         }
 
         .preview-column-content {
           flex: 1;
           opacity: 0.8;
-          background: #fff;
+          background: var(--affine-white);
         }
       </style>
     `;
