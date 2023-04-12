@@ -22,6 +22,130 @@ const colors: Color[] = [
   '#ffffff',
 ];
 
+export function isTransparent(color: Color) {
+  return color.toLowerCase() === '#00000000';
+}
+
+function isSameColorWithBackground(color: Color) {
+  return color.toLowerCase() === '#ffffff';
+}
+
+function TransparentColor(hollowCircle = false) {
+  const containerStyle = {
+    position: 'relative',
+    width: '16px',
+    height: '16px',
+    stroke: 'none',
+  };
+  const maskStyle = {
+    position: 'absolute',
+    width: '10px',
+    height: '10px',
+    left: '3px',
+    top: '3.5px',
+    borderRadius: '50%',
+    background: 'var(--affine-popover-background)',
+  };
+
+  const mask = hollowCircle
+    ? html`<div style=${styleMap(maskStyle)}></div>`
+    : nothing;
+
+  return html`<div style=${styleMap(containerStyle)}>
+    ${TransparentIcon} ${mask}
+  </div>`;
+}
+
+function BorderedHollowCircle(color: Color) {
+  return html`<svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12.3125 8C12.3125 10.3817 10.3817 12.3125 8 12.3125C5.61827 12.3125 3.6875 10.3817 3.6875 8C3.6875 5.61827 5.61827 3.6875 8 3.6875C10.3817 3.6875 12.3125 5.61827 12.3125 8ZM8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
+      fill="${color}"
+      stroke="#e5e5e5"
+      stroke-width="1"
+    />
+  </svg> `;
+}
+
+function AdditionIcon(color: Color, hollowCircle: boolean) {
+  if (isTransparent(color)) {
+    return TransparentColor(hollowCircle);
+  }
+  if (isSameColorWithBackground(color) && hollowCircle) {
+    return BorderedHollowCircle(color);
+  }
+  return nothing;
+}
+
+function getColorStyle(color: Color, hollowCircle: boolean) {
+  // when color is transparent, will generate transparent icon by AdditionIcon
+  if (isTransparent(color)) {
+    return {};
+  }
+  if (isSameColorWithBackground(color)) {
+    // when color is same with background and hollow circle,
+    // will generate hollow circle icon by AdditionIcon
+    if (hollowCircle) {
+      return {};
+    }
+    return { background: color };
+  }
+  if (hollowCircle) {
+    return { border: `2.5px solid ${color}` };
+  }
+  return { background: color };
+}
+
+export function ColorUnit(
+  color: Color,
+  {
+    hollowCircle,
+    letter,
+  }: {
+    hollowCircle?: boolean;
+    letter?: boolean;
+  } = {}
+) {
+  const additionIcon = AdditionIcon(color, !!hollowCircle);
+
+  const colorStyle = getColorStyle(color, !!hollowCircle);
+
+  const borderStyle =
+    isSameColorWithBackground(color) && !hollowCircle
+      ? {
+          border: '1px solid #e5e5e5',
+        }
+      : {};
+
+  const style = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+    ...borderStyle,
+    ...colorStyle,
+  };
+
+  return html`<div
+    class="color-unit"
+    style=${styleMap(style)}
+    aria-label=${color.toLowerCase()}
+    data-letter=${letter ? 'A' : ''}
+  >
+    ${additionIcon}
+  </div>`;
+}
+
 @customElement('edgeless-color-panel')
 export class EdgelessColorPanel extends LitElement {
   static styles = css`
@@ -50,21 +174,6 @@ export class EdgelessColorPanel extends LitElement {
 
     .color-container[active] {
       border: 1px solid var(--affine-primary-color);
-    }
-
-    .color-unit {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-
-    .color-unit[bordered] {
-      border: 1px solid #e5e5e5;
     }
 
     .color-unit::before {
@@ -102,11 +211,10 @@ export class EdgelessColorPanel extends LitElement {
       this.options,
       color => color,
       color => {
-        const style = this.hollowCircle
-          ? { border: `2.5px solid ${color}` }
-          : { background: color };
-        const isTransparent = color === '#00000000';
-        const additionalIcon = isTransparent ? TransparentIcon : nothing;
+        const unit = ColorUnit(color, {
+          hollowCircle: this.hollowCircle,
+          letter: this.showLetterMark,
+        });
 
         return html`
           <div
@@ -114,15 +222,7 @@ export class EdgelessColorPanel extends LitElement {
             ?active=${color === this.value}
             @click=${() => this._onSelect(color)}
           >
-            <div
-              class="color-unit"
-              aria-label=${color.toLowerCase()}
-              ?bordered=${color === '#ffffff'}
-              style=${styleMap(style)}
-              data-letter=${this.showLetterMark ? 'A' : ''}
-            >
-              ${additionalIcon}
-            </div>
+            ${unit}
           </div>
         `;
       }

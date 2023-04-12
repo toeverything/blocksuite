@@ -86,6 +86,8 @@ export class EdgelessComponentToolbar extends LitElement {
           .elements=${shapeElements}
           .page=${this.page}
           .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
         >
         </edgeless-change-shape-button>`
       : null;
