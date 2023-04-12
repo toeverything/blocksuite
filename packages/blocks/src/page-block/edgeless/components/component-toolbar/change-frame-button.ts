@@ -29,10 +29,10 @@ export const FRAME_BACKGROUND_COLORS: Color[] = [
 ];
 
 function getMostCommonBackground(
-  elements: TopLevelBlockModel[]
+  frames: TopLevelBlockModel[]
 ): TextMouseMode['background'] | undefined {
-  const shapeTypes = countBy(elements, (ele: TopLevelBlockModel) => {
-    return ele.background;
+  const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
+    return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
   return max ? (max[0] as TextMouseMode['background']) : undefined;
@@ -78,7 +78,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   `;
 
   @property()
-  elements: TopLevelBlockModel[] = [];
+  frames: TopLevelBlockModel[] = [];
 
   @property()
   page!: Page;
@@ -108,8 +108,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
   private _setBlockBackground(color: Color) {
     this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.page.updateBlock(ele, { background: color });
+      this.frames.forEach(frame => {
+        this.page.updateBlock(frame, { background: color });
       });
     });
     // FIXME: force update selection, because connector mode changed
@@ -132,7 +132,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
   render() {
     const selectedBackground =
-      getMostCommonBackground(this.elements) || FRAME_BACKGROUND_COLORS[0];
+      getMostCommonBackground(this.frames) || FRAME_BACKGROUND_COLORS[0];
 
     return html`
       <edgeless-tool-icon-button

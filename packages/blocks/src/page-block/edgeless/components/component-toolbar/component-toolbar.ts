@@ -121,7 +121,7 @@ export class EdgelessComponentToolbar extends LitElement {
   private _getFrameButton(blocks?: TopLevelBlockModel[]) {
     return blocks?.length
       ? html`<edgeless-change-frame-button
-          .elements=${blocks}
+          .frames=${blocks}
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
