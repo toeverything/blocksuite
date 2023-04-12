@@ -25,7 +25,7 @@ export const PreviewDragHandlers = {
         } = e;
         state.lastPoint = new Point(clientX, clientY);
       },
-      onScroll(d) {
+      onScroll(_) {
         const {
           container,
           state: { lastPoint },
