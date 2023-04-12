@@ -19,6 +19,11 @@ export interface Bound {
   h: number;
 }
 
+interface ClickState {
+  time: number;
+  pos: IPoint;
+}
+
 export interface SelectionEvent extends IPoint {
   start: IPoint;
   delta: IPoint;
@@ -110,6 +115,8 @@ export function initMouseEventHandlers(
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
+  let lastClickState: ClickState | null = null;
+  let aggregated_clicks = 0;
   const getBoundingClientRect: () => DOMRect = () =>
     container.getBoundingClientRect();
 
@@ -132,6 +139,29 @@ export function initMouseEventHandlers(
     if (!e.button) {
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
+
+    if (
+      lastClickState &&
+      lastClickState.time - e.timeStamp <= 400 &&
+      lastClickState.pos.x === startX &&
+      lastClickState.pos.y === startY
+    ) {
+      aggregated_clicks = (aggregated_clicks % 2) + 1;
+    } else {
+      aggregated_clicks = 0;
+    }
+
+    lastClickState = {
+      time: e.timeStamp,
+      pos: { x: startX, y: startY },
+    };
+
+    if (aggregated_clicks === 1) {
+      container.dispatchEvent(new MouseEvent('doubleclick', e));
+    } else if (aggregated_clicks === 2) {
+      container.dispatchEvent(new MouseEvent('tripleclick', e));
+    }
+
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
   };
@@ -179,14 +209,16 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (isDragging) {
-      onContainerDragEnd(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
-    } else {
-      onContainerClick(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY)
-      );
+    if (aggregated_clicks === 0) {
+      if (isDragging) {
+        onContainerDragEnd(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+        );
+      } else {
+        onContainerClick(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY)
+        );
+      }
     }
 
     startX = startY = -Infinity;
@@ -232,7 +264,15 @@ export function initMouseEventHandlers(
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
-  container.addEventListener('dblclick', dblClickHandler);
+  // container.addEventListener('dblclick', dblClickHandler);
+  container.addEventListener('doubleclick', e => {
+    console.log(e, 'double');
+    e.preventDefault();
+    dblClickHandler(e);
+  });
+  container.addEventListener('tripleclick', e => {
+    console.log(e, 'triple');
+  });
   document.addEventListener(
     'selectionchange',
     selectionChangeHandlerWithDebounce
