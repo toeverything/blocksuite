@@ -5,6 +5,7 @@ import {
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
+  SHORT_KEY,
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
@@ -39,7 +40,7 @@ export const formatConfig = [
     id: 'bold',
     name: 'Bold',
     icon: BoldIcon,
-    hotkey: 'command+b,ctrl+b',
+    hotkey: `${SHORT_KEY}+b`,
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -50,7 +51,7 @@ export const formatConfig = [
     id: 'italic',
     name: 'Italic',
     icon: ItalicIcon,
-    hotkey: 'command+i,ctrl+i',
+    hotkey: `${SHORT_KEY}+i`,
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -61,7 +62,7 @@ export const formatConfig = [
     id: 'underline',
     name: 'Underline',
     icon: UnderlineIcon,
-    hotkey: 'command+u,ctrl+u',
+    hotkey: `${SHORT_KEY}+u`,
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -72,7 +73,7 @@ export const formatConfig = [
     id: 'strike',
     name: 'Strikethrough',
     icon: StrikethroughIcon,
-    hotkey: 'command+shift+s,ctrl+shift+s',
+    hotkey: `${SHORT_KEY}+shift+s`,
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -83,7 +84,7 @@ export const formatConfig = [
     id: 'code',
     name: 'Code',
     icon: InlineCodeIcon,
-    hotkey: 'command+e,ctrl+e',
+    hotkey: `${SHORT_KEY}+e`,
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -94,7 +95,7 @@ export const formatConfig = [
     id: 'link',
     name: 'Link',
     icon: LinkIcon,
-    hotkey: 'command+k,ctrl+k',
+    hotkey: `${SHORT_KEY}+k`,
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) =>
@@ -136,7 +137,7 @@ export const actionConfig = [
     disabledToolTip:
       'Contains Block types that cannot be converted to Database. Learn more',
     icon: DatabaseTableViewIcon,
-    hotkey: 'command+g,ctrl+g',
+    hotkey: `${SHORT_KEY}+g`,
     showWhen: (page: Page) => {
       const range = getCurrentBlockRange(page);
       const isShow = range?.type === 'Block';
