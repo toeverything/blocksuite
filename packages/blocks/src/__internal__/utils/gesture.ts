@@ -19,9 +19,8 @@ export interface Bound {
   h: number;
 }
 
-interface ClickState {
-  time: number;
-  pos: IPoint;
+interface ClickState extends IPoint {
+  timeStamp: number;
 }
 
 export interface SelectionEvent extends IPoint {
@@ -117,7 +116,7 @@ export function initMouseEventHandlers(
   let isDragging = false;
   let last: SelectionEvent | null = null;
   let lastClickState: ClickState | null = null;
-  let aggregated_clicks = 0;
+  let clicks = 0;
   const getBoundingClientRect: () => DOMRect = () =>
     container.getBoundingClientRect();
 
@@ -143,33 +142,33 @@ export function initMouseEventHandlers(
 
     if (
       lastClickState &&
-      lastClickState.time - e.timeStamp <= 400 &&
-      lastClickState.pos.x === startX &&
-      lastClickState.pos.y === startY
+      lastClickState.timeStamp - e.timeStamp <= 400 &&
+      lastClickState.x === startX &&
+      lastClickState.y === startY
     ) {
-      aggregated_clicks = (aggregated_clicks % 2) + 1;
+      if (clicks === 0) {
+        container.dispatchEvent(
+          new CustomEvent('doubleclick', {
+            detail: e,
+          })
+        );
+      } else if (clicks === 1) {
+        container.dispatchEvent(
+          new CustomEvent('tripleclick', {
+            detail: e,
+          })
+        );
+      }
+      clicks = (clicks % 2) + 1;
     } else {
-      aggregated_clicks = 0;
+      clicks = 0;
     }
 
     lastClickState = {
-      time: e.timeStamp,
-      pos: { x: startX, y: startY },
+      timeStamp: e.timeStamp,
+      x: startX,
+      y: startY,
     };
-
-    if (aggregated_clicks === 1) {
-      container.dispatchEvent(
-        new CustomEvent('doubleclick', {
-          detail: e,
-        })
-      );
-    } else if (aggregated_clicks === 2) {
-      container.dispatchEvent(
-        new CustomEvent('tripleclick', {
-          detail: e,
-        })
-      );
-    }
 
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
@@ -218,7 +217,7 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (aggregated_clicks === 0) {
+    if (clicks === 0) {
       if (isDragging) {
         onContainerDragEnd(
           toSelectionEvent(e, getBoundingClientRect, startX, startY, last)

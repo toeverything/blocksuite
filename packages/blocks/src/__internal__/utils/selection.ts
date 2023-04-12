@@ -916,3 +916,19 @@ export function getClosestEditor(clientY: number, container = document.body) {
 export function getClosestFrame(clientY: number) {
   return getHorizontalClosestElement(clientY, 'affine-frame');
 }
+
+export function handleNativeRangeTripleClick(e: SelectionEvent) {
+  const {
+    raw: { clientX, clientY },
+  } = e;
+  const el = document
+    .elementFromPoint(clientX, clientY)
+    ?.closest('[contenteditable]');
+  if (el) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+}
