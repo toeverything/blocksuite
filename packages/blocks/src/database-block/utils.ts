@@ -1,10 +1,10 @@
 import type { BaseBlockModel, Y } from '@blocksuite/store';
+import type { VirgoEventService } from '@blocksuite/virgo';
 import {
   type BaseTextAttributes,
   VEditor,
   type VEditorOptions,
 } from '@blocksuite/virgo';
-import type { VirgoEventService } from '@blocksuite/virgo/services/event';
 
 import { setupVirgoScroll } from '../__internal__/utils/virgo.js';
 import type { DatabaseAction, Divider } from './types.js';
@@ -91,15 +91,6 @@ export function initLimitedLengthVEditor({
     defaultMode: 'rich',
   },
 }: InitLimitedLengthVEditorConfig) {
-  const handleInput = (event: InputEvent) => {
-    const length = vEditor.yText.length;
-    if (length >= maxLength && event.data) {
-      // prevent input
-      return true;
-    }
-    return false;
-  };
-
   const handlePaste = (event: ClipboardEvent) => {
     const length = vEditor.yText.length;
     const restLength = maxLength - length;
@@ -119,41 +110,35 @@ export function initLimitedLengthVEditor({
     }
   };
 
-  const handleCompositionEnd = (event: CompositionEvent) => {
-    const { data } = event;
-    const currentText = vEditor.yText.toString();
-    const vRange = vEditor.getVRange();
-    const length = data.length + currentText.length;
-    if (vRange && vRange.index >= 0 && data && length > maxLength) {
-      // Separate by vRange:
-      // 1. leftText: the text before vRange
-      // 2. rightText: the text after vRange
-      const leftText = currentText.slice(0, vRange.index);
-      const rightText = currentText.slice(vRange.index);
-      const enteredText = data.slice(0, maxLength - currentText.length);
-      const [text] = vEditor.getTextPoint(vRange.index);
-      if (text.textContent && text.textContent !== currentText) {
-        text.textContent = `${leftText}${enteredText}${rightText}`;
-        if (enteredText !== '') {
-          vEditor.insertText(vRange, enteredText);
-        }
-        vEditor.setVRange({
-          index: leftText.length + enteredText.length,
-          length: 0,
-        });
-        return true;
-      }
-    }
-    return false;
-  };
-
   const vEditor = new VEditor(yText, options);
   setupVirgoScroll(targetModel.page, vEditor);
   vEditor.mount(container);
   vEditor.bindHandlers({
-    virgoInput: handleInput,
+    virgoInput: ctx => {
+      const length = vEditor.yText.length;
+      if (length >= maxLength && ctx.event.data) {
+        // prevent input
+        ctx.skipDefault = true;
+      }
+      return ctx;
+    },
     paste: handlePaste,
-    virgoCompositionEnd: handleCompositionEnd,
+    virgoCompositionEnd: ctx => {
+      const { data } = ctx;
+      const vRange = vEditor.getVRange();
+      if (!data || !vRange || vRange.index < 0) return ctx;
+
+      const currentText = vEditor.yText.toString();
+      const length = data.length + currentText.length - vRange.length;
+      if (length > maxLength) {
+        const enteredText = data.slice(
+          0,
+          maxLength - currentText.length - vRange.length
+        );
+        ctx.data = enteredText;
+      }
+      return ctx;
+    },
     ...handlers,
   });
   vEditor.setReadonly(
