@@ -463,7 +463,10 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+  updateBlock<
+    TModel extends BaseBlockModel,
+    TProps extends Partial<keyof TModel>
+  >(model: TModel, props: Partial<Pick<TModel, TProps> & BaseBlockModel>) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
