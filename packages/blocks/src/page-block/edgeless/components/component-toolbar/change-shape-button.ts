@@ -52,6 +52,7 @@ function getMostCommonStrokeColor(
   return max ? (max[0] as ShapeMouseMode['fillColor']) : undefined;
 }
 
+export const DEFAULT_FILL_COLOR = '#00000000';
 const FILL_COLORS: Color[] = [
   '#FFF188',
   '#FFCF88',
@@ -67,6 +68,7 @@ const FILL_COLORS: Color[] = [
   '#00000000',
 ];
 
+export const DEFAULT_STROKE_COLOR = '#000000';
 const STROKE_COLORS: Color[] = [
   '#FFE838',
   '#FFAF38',
