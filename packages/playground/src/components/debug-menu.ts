@@ -16,7 +16,6 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
-  createEvent,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
