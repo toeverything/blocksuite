@@ -1102,6 +1102,9 @@ test('bring to front', async ({ page }) => {
   await page.mouse.click(175, 175);
   await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
 
+  // click outside to clear selection
+  await page.mouse.click(300, 300);
+
   // should be rect0
   await page.mouse.click(110, 110);
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
