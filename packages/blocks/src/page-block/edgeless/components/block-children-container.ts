@@ -32,7 +32,7 @@ function EdgelessBlockChild(
   viewport: SurfaceViewport,
   active: boolean
 ) {
-  const { xywh } = model;
+  const { xywh, background } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
@@ -45,10 +45,11 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: 'white',
+    background,
     pointerEvents: 'all',
     zIndex: '0',
     boxSizing: 'border-box',
+    borderRadius: '4px',
   };
 
   const mask = active ? nothing : EdgelessMask();

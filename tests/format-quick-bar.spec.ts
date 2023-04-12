@@ -209,7 +209,10 @@ test('should format quick bar be able to format text', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:frame>
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -251,7 +254,10 @@ test('should format quick bar be able to format text', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:frame>
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -294,7 +300,9 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -337,7 +345,9 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -375,7 +385,9 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -408,7 +420,9 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -446,7 +460,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -470,7 +486,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -496,7 +514,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -736,7 +756,9 @@ test('should format quick bar work in single block selection', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -803,7 +825,9 @@ test('should format quick bar work in multiple block selection', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -875,7 +899,9 @@ test('should format quick bar with block selection works when update block type'
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:list
     prop:checked={false}
     prop:text="123"
@@ -900,7 +926,9 @@ test('should format quick bar with block selection works when update block type'
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="h1"
@@ -942,7 +970,9 @@ test('should format quick bar show after convert to code block', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:code
     prop:language="Plain Text"
     prop:text="123\n456\n789"

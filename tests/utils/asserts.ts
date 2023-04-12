@@ -12,6 +12,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
+import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
@@ -70,6 +71,7 @@ export const defaultStore: SerializedStore = {
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,72]',
+      'prop:background': '#FBFAFC',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -671,4 +673,25 @@ export async function assertSelectionInFrame(page: Page, frameId: string) {
     return frame?.getAttribute('data-block-id');
   });
   expect(closestFrameId).toEqual(frameId);
+}
+
+export async function assertEdgelessFrameBackground(
+  page: Page,
+  frameId: string,
+  color: `#${string}`
+) {
+  const backgroundColor = await page
+    .locator(`affine-frame[data-block-id="${frameId}"]`)
+    .evaluate(ele => {
+      const frameWrapper = ele.closest('.affine-edgeless-block-child');
+      if (!frameWrapper) {
+        throw new Error(`Could not find frame: ${frameId}`);
+      }
+      return window
+        .getComputedStyle(frameWrapper)
+        .getPropertyValue('background-color') as `rgb(${string})`;
+    });
+
+  const hex = toHex(backgroundColor);
+  expect(hex).toEqual(color);
 }

@@ -960,7 +960,9 @@ test('should indent native multi-selection block', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -999,7 +1001,9 @@ test('should indent multi-selection block', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -2004,7 +2008,9 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     page,
     `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"

@@ -9,6 +9,7 @@ import {
   handleDown,
   handleUp,
 } from '../utils/index.js';
+import { FRAME_BACKGROUND_COLORS } from './components/component-toolbar/change-frame-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
 
@@ -89,7 +90,12 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener('h', () =>
     setMouseMode(edgeless, { type: 'pan', panning: false })
   );
-  hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
+  hotkey.addListener('t', () =>
+    setMouseMode(edgeless, {
+      type: 'text',
+      background: FRAME_BACKGROUND_COLORS[0],
+    })
+  );
   hotkey.addListener('p', () =>
     setMouseMode(edgeless, {
       type: 'brush',
