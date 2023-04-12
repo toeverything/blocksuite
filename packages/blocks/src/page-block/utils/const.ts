@@ -14,7 +14,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import { copy } from '../../__internal__/clipboard/utils.js';
+import { copyBlocks } from '../../__internal__/clipboard/utils.js';
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { showDatabaseModal } from '../../components/database-modal/index.js';
@@ -126,7 +126,7 @@ export const actionConfig = [
     action: ({ page }: ActionProps) => {
       const range = getCurrentBlockRange(page);
       assertExists(range);
-      copy(range);
+      copyBlocks(range);
       toast('Copied to clipboard');
     },
   },
