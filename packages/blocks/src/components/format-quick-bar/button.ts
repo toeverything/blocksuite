@@ -3,6 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { IconButton } from '../button.js';
 
+/**
+ * @deprecated Use {@link IconButton} instead.
+ */
 @customElement('format-bar-button')
 export class FormatBarButton extends IconButton {
   static styles = css`

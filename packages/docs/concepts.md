@@ -1,0 +1,42 @@
+# Fundamental Concepts
+
+BlockSuite is an extensible framework that allows users to create and edit structured content by organizing blocks. In this document, we will introduce the core concepts of BlockSuite, including _workspaces_, _pages_, and _blocks_.
+
+## Workspaces and Pages
+
+BlockSuite is centered around the concept of blocks. However, to handle a large number of blocks efficiently, the blocks are organized into workspaces and pages. Workspace is the highest-level container for managing and organizing pages, and each workspace can hold multiple pages. Page is the sub-container for organizing blocks, and each page contains a strongly typed block tree.
+
+### Workspaces
+
+A `Workspace` in BlockSuite acts as a top-level container for managing and organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
+
+```ts
+import { Workspace } from '@blocksuite/store';
+
+const workspace = new Workspace({ id: 'hello' });
+
+// We can register a batch of blocks to the workspace
+workspace.register(AffineSchemas);
+```
+
+### Pages
+
+A `Page` in BlockSuite serves as the actual container for organizing blocks, allowing users to operate on the block tree through its APIs. In typical scenarios involving rich text documents, one document is represented by a single page within a workspace.
+
+Here is how we create a new page with id `page0` within the workspace:
+
+```ts
+const page = workspace.createPage('page0');
+```
+
+::: info
+🚧 A page within a workspace can also be loaded asynchronously.
+:::
+
+## Flavoured Blocks
+
+TODO
+
+::: tip
+In [BlockSuite playground](https://blocksuite-toeverything.vercel.app/?init), you can run `workspace.doc.toJSON()` in the console to see the basic block structure in BlockSuite.
+:::

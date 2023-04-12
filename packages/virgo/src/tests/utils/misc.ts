@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
 

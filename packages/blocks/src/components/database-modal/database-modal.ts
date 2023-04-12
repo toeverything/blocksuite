@@ -1,4 +1,3 @@
-import { getCurrentBlockRange, getDefaultPage } from '@blocksuite/blocks';
 import {
   DatabaseKanbanViewIcon,
   DatabaseSearchClose,
@@ -9,6 +8,10 @@ import type { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import {
+  getCurrentBlockRange,
+  getDefaultPage,
+} from '../../__internal__/index.js';
 import { styles } from './styles.js';
 
 type DatabaseViewName = 'table' | 'kanban';

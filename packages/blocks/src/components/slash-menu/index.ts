@@ -1,11 +1,9 @@
-import './slash-menu-node.js';
-
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import { getVirgoByModel, throttle } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
-import { SlashMenu } from './slash-menu-node.js';
+import { SlashMenu } from './slash-menu-popover.js';
 
 let globalAbortController = new AbortController();
 

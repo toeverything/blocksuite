@@ -1,12 +1,12 @@
+import type { PhasorElement } from '@blocksuite/phasor';
+import type { Page } from '@blocksuite/store';
+
 import type {
   MouseMode,
   SelectionEvent,
   TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import { initMouseEventHandlers, noop } from '@blocksuite/blocks/std';
-import type { PhasorElement } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-
+} from '../../__internal__/index.js';
+import { initMouseEventHandlers, noop } from '../../__internal__/index.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
@@ -58,6 +58,10 @@ export class EdgelessSelectionManager {
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
+
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
 
   get isActive() {
     return this.currentController.isActive;

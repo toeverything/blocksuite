@@ -1,21 +1,4 @@
-import {
-  almostEqual,
-  asyncGetBlockElementByModel,
-  asyncGetRichTextByModel,
-  type BlockComponentElement,
-  type ExtendedModel,
-  getBlockElementByModel,
-  getClosestBlockElementByElement,
-  getDefaultPageBlock,
-  getVirgoByModel,
-  handleNativeRangeDblClick,
-  hasNativeSelection,
-  isCollapsedNativeSelection,
-  isMultiBlockRange,
-  resetNativeSelection,
-  type SelectionEvent,
-  type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -26,6 +9,26 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
+import type {
+  BlockComponentElement,
+  ExtendedModel,
+  SelectionEvent,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
+import {
+  almostEqual,
+  asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
+  getBlockElementByModel,
+  getClosestBlockElementByElement,
+  getDefaultPageBlock,
+  getVirgoByModel,
+  handleNativeRangeDblClick,
+  hasNativeSelection,
+  isCollapsedNativeSelection,
+  isMultiBlockRange,
+  resetNativeSelection,
+} from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -45,7 +48,6 @@ import type {
 import { calcCurrentSelectionPosition } from './position.js';
 
 const DEFAULT_SPACING = 64;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,

@@ -88,7 +88,7 @@ export class IconButton extends LitElement {
   text: string | null = null;
 
   @property()
-  disabled = false;
+  disabled: false | '' = false;
 
   constructor() {
     super();
@@ -100,6 +100,18 @@ export class IconButton extends LitElement {
         this.click();
       }
     });
+
+    // Prevent click event when disabled
+    this.addEventListener(
+      'click',
+      event => {
+        if (this.disabled === '') {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
   }
 
   override connectedCallback() {

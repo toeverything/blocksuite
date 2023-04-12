@@ -1,7 +1,6 @@
 import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
 import { ShapeIcon } from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -10,6 +9,7 @@ import type {
   MouseMode,
   ShapeMouseMode,
 } from '../../../../__internal__/index.js';
+import { WithDisposable } from '../../../../__internal__/index.js';
 import { createButtonPopper } from '../../components/utils.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

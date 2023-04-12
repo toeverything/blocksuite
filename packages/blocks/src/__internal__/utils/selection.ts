@@ -1,4 +1,3 @@
-import type { FrameBlockComponent } from '@blocksuite/blocks';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -9,6 +8,7 @@ import {
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VirgoLine } from '@blocksuite/virgo';
 
+import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';

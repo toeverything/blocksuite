@@ -1,13 +1,4 @@
 /// <reference types="vite/client" />
-import {
-  asyncFocusRichText,
-  type BlockHost,
-  type EditingState,
-  hotkey,
-  HOTKEY_SCOPE,
-  Rect,
-  type SelectionPosition,
-} from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
@@ -16,6 +7,17 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockHost,
+  EditingState,
+  SelectionPosition,
+} from '../../__internal__/index.js';
+import {
+  asyncFocusRichText,
+  hotkey,
+  HOTKEY_SCOPE,
+  Rect,
+} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import {
@@ -294,7 +296,8 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    if (type === 'block') {
+    if (type.startsWith('block')) {
+      e.preventDefault();
       const { viewportElement } = this;
       const { scrollTop, scrollHeight, clientHeight } = viewport;
       const max = scrollHeight - clientHeight;
@@ -309,16 +312,16 @@ export class DefaultPageBlockComponent
         top = Math.max(top, -scrollTop);
       }
 
-      const { draggingArea } = state;
-      if (draggingArea) {
-        e.preventDefault();
+      viewport.scrollTop += top;
+      // FIXME: need smooth
+      viewportElement.scrollTop += top;
 
-        viewport.scrollTop += top;
-        // FIXME: need smooth
-        viewportElement.scrollTop += top;
-
-        draggingArea.end.y += top;
-        selection.updateDraggingArea(draggingArea);
+      if (type === 'block') {
+        const { draggingArea } = state;
+        if (draggingArea) {
+          draggingArea.end.y += top;
+          selection.updateDraggingArea(draggingArea);
+        }
       }
     }
 
@@ -334,18 +337,29 @@ export class DefaultPageBlockComponent
 
     if (type === 'block') {
       selection.refreshDraggingArea(viewport);
-    } else if (type === 'embed') {
+      return;
+    }
+
+    if (type === 'embed') {
       selection.refreshEmbedRects(this._embedEditingState);
-    } else if (type === 'native') {
-      const { startRange, rangePoint } = selection.state;
-      if (startRange && rangePoint) {
-        // Create a synthetic `mousemove` MouseEvent
-        const evt = new MouseEvent('mousemove', {
-          clientX: rangePoint.x,
-          clientY: rangePoint.y,
-        });
-        this.mouseRoot.dispatchEvent(evt);
-      }
+      return;
+    }
+
+    let point;
+
+    if (type === 'native') {
+      point = selection.state.startRange && selection.state.lastPoint;
+    } else if (type === 'block:drag') {
+      point = selection.state.lastPoint;
+    }
+
+    if (point) {
+      // Create a synthetic `mousemove` MouseEvent
+      const evt = new MouseEvent('mousemove', {
+        clientX: point.x,
+        clientY: point.y,
+      });
+      this.mouseRoot.dispatchEvent(evt);
     }
   };
 
@@ -377,7 +391,7 @@ export class DefaultPageBlockComponent
         if (
           draggingBlockIds &&
           draggingBlockIds.length === 1 &&
-          Utils.doesInsideBlockByFlavour(
+          Utils.isInsideBlockByFlavour(
             this.page,
             draggingBlockIds[0],
             'affine:database'
@@ -478,11 +492,12 @@ export class DefaultPageBlockComponent
     bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
+    this._initDragHandle();
     this._initSlotEffects();
     this._initFrameSizeEffect();
     this._initResizeEffect();
 
-    this.viewportElement.addEventListener('wheel', this._onWheel);
+    this.mouseRoot.addEventListener('wheel', this._onWheel);
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
@@ -491,8 +506,6 @@ export class DefaultPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
     this.clipboard.init(this.page);
-
-    this._initDragHandle();
   }
 
   override disconnectedCallback() {
@@ -508,7 +521,7 @@ export class DefaultPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.viewportElement.removeEventListener('wheel', this._onWheel);
+    this.mouseRoot.removeEventListener('wheel', this._onWheel);
     this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 

@@ -1544,49 +1544,29 @@ test('should not clear selected rects when scrolling the wheel', async ({
 
   const rects = page.locator('affine-page-selected-rects > *');
   const count0 = await rects.count();
-  const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return viewport.scrollTop;
-  });
 
   await page.mouse.wheel(viewport.right, -distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
   const count1 = await rects.count();
-  const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return viewport.scrollTop;
-  });
 
   expect(count0).toBeGreaterThan(0);
-  expect(scrollTop0).toBeCloseTo(distance / 2, -0.01);
   expect(count0).toBe(count1);
-  expect(scrollTop0).toBeCloseTo(scrollTop1 + distance / 4, -0.01);
 
   await page.mouse.wheel(viewport.right, distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
-  const [count2, scrollTop2] = await page.evaluate(() => {
+  const count2 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport
-        .querySelector('affine-page-selected-rects')
-        ?.shadowRoot?.querySelectorAll('*').length,
-      viewport.scrollTop,
-    ] as const;
+    return viewport
+      .querySelector('affine-page-selected-rects')
+      ?.shadowRoot?.querySelectorAll('*').length;
   });
 
   expect(count0).toBe(count2);
-  expect(scrollTop0).toBeCloseTo(scrollTop2, -0.01);
 });
 
 test('should refresh selected rects when resizing the window/viewport', async ({

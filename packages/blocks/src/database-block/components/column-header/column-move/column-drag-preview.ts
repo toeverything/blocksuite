@@ -1,6 +1,7 @@
-import { ShadowlessElement } from '@blocksuite/blocks/std';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import { ShadowlessElement } from '../../../../__internal__/index.js';
 
 @customElement('affine-database-column-drag-preview')
 export class ColumnDragPreview extends ShadowlessElement {

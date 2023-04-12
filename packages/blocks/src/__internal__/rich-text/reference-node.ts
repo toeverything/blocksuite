@@ -4,6 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type {
   BaseBlockModel,
   DeltaOperation,
+  Page,
   PageMeta,
 } from '@blocksuite/store';
 import {
@@ -24,14 +25,21 @@ import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
+const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   /**
    * Emit when the subpage is linked to the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
+   *
+   * @deprecated
    */
   subpageLinked: Slot<{ pageId: string }>;
   /**
    * Emit when the subpage is unlinked from the current page.
+   *
+   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string }>;
@@ -58,6 +66,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       text-decoration: none;
       cursor: pointer;
       user-select: none;
+      padding: 0 2px;
+      margin: 0 2px;
     }
     .affine-reference:hover {
       background: var(--affine-hover-background);
@@ -105,32 +115,16 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
     const model = getModelByElement(this);
     this._model = model;
-    const refAttribute = this.delta.attributes?.reference;
-    assertExists(refAttribute, 'Failed to get reference attribute!');
-    this._refAttribute = refAttribute;
+    const page = model.page;
 
-    this._refMeta = model.page.workspace.meta.pageMetas.find(
-      page => page.id === refAttribute.pageId
-    );
-
+    this._updateRefMeta(page);
     this._disposables.add(
-      model.page.workspace.slots.pagesUpdated.on(() => {
-        this._refMeta = model.page.workspace.meta.pageMetas.find(
-          page => page.id === refAttribute.pageId
-        );
-      })
+      model.page.workspace.slots.pagesUpdated.on(() =>
+        this._updateRefMeta(page)
+      )
     );
 
-    if (refAttribute.type === 'Subpage') {
-      if (!this._refMeta) {
-        // The subpage is deleted
-        console.warn('The subpage is deleted', refAttribute.pageId);
-        // TODO remove this node since the subpage not exists.
-        return;
-      }
-      // User may create a subpage ref node by paste or undo/redo.
-      this.host.slots.subpageLinked.emit({ pageId: refAttribute.pageId });
-    }
+    // TODO fix User may create a subpage ref node by paste or undo/redo.
   }
 
   disconnectedCallback() {
@@ -146,12 +140,57 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const delta = text.toDelta();
 
     if (!isRefPageInDelta(delta, this._refAttribute.pageId)) {
+      // TODO fix event emit logic
       // The subpage is deleted
       this.host.slots.subpageUnlinked.emit({
         pageId: this._refAttribute.pageId,
       });
+      if (process.env.NODE_ENV === 'development') {
+        // Strict mode
+        this.host.slots.subpageUnlinked.emit({
+          pageId: this._refAttribute.pageId,
+          // @ts-expect-error
+          __dev:
+            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
+        });
+      }
     }
   }
+
+  private _updateRefMeta = (page: Page) => {
+    const refAttribute = this.delta.attributes?.reference;
+    assertExists(refAttribute, 'Failed to get reference attribute!');
+    this._refAttribute = refAttribute;
+
+    if (refAttribute.type === 'LinkedPage') {
+      this._refMeta = page.workspace.meta.pageMetas.find(
+        page => page.id === refAttribute.pageId
+      );
+      return;
+    }
+    // Subpage
+    const curMeta = page.workspace.meta.pageMetas.find(
+      page => page.id === page.id
+    );
+
+    assertExists(
+      curMeta,
+      `Failed to get current page meta! pageId: ${page.id}`
+    );
+    // the ref page may no longer be a subpage of the current page,
+    // for example, if it is moved to the trash.
+    const isValidSubpage = curMeta.subpageIds.includes(refAttribute.pageId);
+    if (!isValidSubpage) {
+      // update meta
+      this._refMeta = undefined;
+      // TODO remove warn
+      console.warn('The subpage is not a valid subpage', refAttribute.pageId);
+      return;
+    }
+    this._refMeta = page.workspace.meta.pageMetas.find(
+      page => page.id === refAttribute.pageId
+    );
+  };
 
   private _onClick(e: MouseEvent) {
     const refMeta = this._refMeta;
@@ -175,6 +214,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     if (isDisabled && this._refAttribute.type === 'Subpage') {
       return html`<v-text .str=${this.delta.insert}></v-text>`;
     }
+
     const title = isDisabled
       ? // Maybe the page is deleted
         'Deleted page'
@@ -183,7 +223,16 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     assertExists(attributes, 'Failed to get attributes!');
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
-    const style = affineTextStyles(attributes);
+
+    const style = affineTextStyles(
+      attributes,
+      isDisabled
+        ? {
+            color: 'var(--affine-disable-color)',
+            fill: 'var(--affine-disable-color)',
+          }
+        : {}
+    );
 
     // Sine reference title should not be edit by user,
     // we set it into the `::before` pseudo element.
@@ -205,7 +254,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       @click=${this._onClick}
       >${type === 'LinkedPage' ? FontPageSubpageIcon : FontPageIcon}<span
         class="affine-reference-title"
-        data-title=${title}
+        data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
         >${ZERO_WIDTH_NON_JOINER}</span
       ></span

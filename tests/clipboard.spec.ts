@@ -1,6 +1,8 @@
 import './utils/declare-test-window.js';
 
 import {
+  activeFrameInEdgeless,
+  addBasicRectShapeElement,
   captureHistory,
   copyByKeyboard,
   cutByKeyboard,
@@ -12,7 +14,9 @@ import {
   initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
+  initThreeParagraphs,
   pasteByKeyboard,
   pasteContent,
   pressBackspace,
@@ -25,13 +29,16 @@ import {
   setSelection,
   setVirgoSelection,
   SHORT_KEY,
+  switchEditorMode,
   type,
   undoByClick,
+  waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
   assertClipItems,
+  assertEdgelessSelectedRect,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -654,4 +661,54 @@ test('should copy and paste of database work', async ({ page }) => {
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('copy phasor element and text frame in edgeless mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+
+  await switchEditorMode(page);
+
+  await addBasicRectShapeElement(
+    page,
+    {
+      x: 100,
+      y: 100,
+    },
+    {
+      x: 200,
+      y: 200,
+    }
+  );
+
+  await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
+  await assertEdgelessSelectedRect(page, [90, 100, 720, 268]);
+
+  await copyByKeyboard(page);
+
+  await page.mouse.move(400, 400);
+
+  await pasteByKeyboard(page, false);
+
+  await assertEdgelessSelectedRect(page, [40, 266, 720, 268]);
+});
+
+test('copy when text frame active in edgeless', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await switchEditorMode(page);
+
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
+  await setVirgoSelection(page, 0, 4);
+  await copyByKeyboard(page);
+  await type(page, '555');
+  await pasteByKeyboard(page, false);
+  await assertText(page, '5551234');
 });

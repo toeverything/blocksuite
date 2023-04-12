@@ -70,11 +70,14 @@ export function createKeyboardBindings(
     ...blockKeyBinding,
 
     linkedPage: {
-      key: ['[', '@'],
+      key: ['[', '【', '@'],
       shiftKey: null,
       handler(range, { event, prefix }) {
-        if (event.key === '[' && !prefix.endsWith('[')) {
-          // not end with `[[`
+        if (
+          (event.key === '[' || event.key === '【') &&
+          !prefix.endsWith(event.key)
+        ) {
+          // not end with `[[` or `【【`
           return ALLOW_DEFAULT;
         }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
@@ -84,7 +87,7 @@ export function createKeyboardBindings(
         }
 
         this.vEditor.slots.rangeUpdated.once(() => {
-          if (event.key === '[') {
+          if (event.key === '[' || event.key === '【') {
             // Convert to `@`
             this.vEditor.deleteText({ index: range.index - 1, length: 2 });
             this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');

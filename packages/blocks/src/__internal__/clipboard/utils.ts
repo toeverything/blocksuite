@@ -15,6 +15,8 @@ import markdownUtils from './markdown-utils.js';
 export enum CLIPBOARD_MIMETYPE {
   HTML = 'text/html',
   TEXT = 'text/plain',
+  BLOCKSUITE_PAGE = 'blocksuite/page',
+  BLOCKSUITE_SURFACE = 'blocksuite/surface',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',
@@ -24,9 +26,20 @@ export enum CLIPBOARD_MIMETYPE {
   // IMAGE_WEBP = 'image/webp',
 }
 
-const CUSTOM_CLIPBOARD_FRAGMENT_START = '<blocksuite style="display: none">';
-const CUSTOM_CLIPBOARD_FRAGMENT_END = '</blocksuite>';
-export const performNativeCopy = (items: ClipboardItem[]): boolean => {
+function createHTMLStringForCustomData(data: string, type: CLIPBOARD_MIMETYPE) {
+  return `<blocksuite style="display: none" data-type="${type}">${data}</blocksuite>`;
+}
+
+function extractCustomDataFromHTMLString(
+  type: CLIPBOARD_MIMETYPE,
+  html: string
+) {
+  const dom = new DOMParser().parseFromString(html, 'text/html');
+  const ele = dom.querySelector(`blocksuite[data-type="${type}"]`);
+  return ele?.innerHTML;
+}
+
+export function performNativeCopy(items: ClipboardItem[]): boolean {
   let success = false;
   const tempElem = document.createElement('textarea');
   tempElem.value = 'temp';
@@ -55,9 +68,54 @@ export const performNativeCopy = (items: ClipboardItem[]): boolean => {
     document.body.removeChild(tempElem);
   }
   return success;
-};
+}
 
-export const isPureFileInClipboard = (clipboardData: DataTransfer) => {
+export function getSurfaceClipboardData(e: ClipboardEvent) {
+  const clipboardData = e.clipboardData;
+  if (!clipboardData) {
+    return;
+  }
+
+  // TODO:
+  // Because the edgeless mode does not support inserting images separately,
+  // the files in the clipboard have not been processed here.
+  // if (isPureFileInClipboard(clipboardData) {}
+
+  const data = clipboardData.getData(CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE);
+  if (data) {
+    return JSON.parse(data);
+  }
+
+  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+  const parsedHtmlData = extractCustomDataFromHTMLString(
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
+    HTMLClipboardData
+  );
+  if (parsedHtmlData) {
+    return JSON.parse(parsedHtmlData);
+  }
+}
+
+export function createSurfaceClipboardItems(data: unknown) {
+  const stringifiedData = JSON.stringify(data);
+
+  const surfaceItem = new ClipboardItem(
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE,
+    stringifiedData
+  );
+
+  const htmlFallback = new ClipboardItem(
+    CLIPBOARD_MIMETYPE.HTML,
+    createHTMLStringForCustomData(
+      stringifiedData,
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE
+    )
+  );
+
+  return [surfaceItem, htmlFallback];
+}
+
+export function isPureFileInClipboard(clipboardData: DataTransfer) {
   const types = clipboardData.types;
   return (
     (types.length === 1 && types[0] === 'Files') ||
@@ -65,7 +123,7 @@ export const isPureFileInClipboard = (clipboardData: DataTransfer) => {
       (types.includes('text/plain') || types.includes('text/html')) &&
       types.includes('Files'))
   );
-};
+}
 
 // TODO: support more file types, now is just image
 export function getFileFromClipboard(clipboardData: DataTransfer) {
@@ -91,12 +149,13 @@ export async function clipboardData2Blocks(
 
   const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
   if (HTMLClipboardData) {
-    const blockSuiteClipboardData = detectBlockSuiteClipboardData(
+    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
       clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
     );
 
     if (blockSuiteClipboardData) {
-      return blockSuiteClipboardData;
+      return JSON.parse(blockSuiteClipboardData);
     }
   }
 
@@ -146,7 +205,7 @@ export function getBlockClipboardInfo(
   };
 }
 
-export function copy(range: BlockRange) {
+function createPageClipboardItems(range: BlockRange) {
   const clipGroups = range.models.map((model, index) => {
     if (index === 0) {
       return getBlockClipboardInfo(
@@ -161,9 +220,7 @@ export function copy(range: BlockRange) {
     return getBlockClipboardInfo(model);
   });
 
-  // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
-  // `CUSTOM_CLIPBOARD_FRAGMENT_START` and `CUSTOM_CLIPBOARD_FRAGMENT_END` are used to mark the start and end of the custom clipboard fragment and match the custom clipboard fragment in the paste process
-  const customClipboardFragment = `${CUSTOM_CLIPBOARD_FRAGMENT_START}${JSON.stringify(
+  const stringifiedData = JSON.stringify(
     clipGroups
       .filter(group => {
         if (!group.json) {
@@ -176,7 +233,14 @@ export function copy(range: BlockRange) {
         return !isChildBlock(range.models, group.model);
       })
       .map(group => group.json)
-  )}${CUSTOM_CLIPBOARD_FRAGMENT_END}`;
+  );
+
+  // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
+  // Playwright issue: https://github.com/microsoft/playwright/issues/18013
+  const customClipboardFragment = createHTMLStringForCustomData(
+    stringifiedData,
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
+  );
 
   const textClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.TEXT,
@@ -186,19 +250,27 @@ export function copy(range: BlockRange) {
     CLIPBOARD_MIMETYPE.HTML,
     `${clipGroups.map(group => group.html).join('')}${customClipboardFragment}`
   );
+  const pageClipboardItem = new ClipboardItem(
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
+    stringifiedData
+  );
+
+  return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
+}
+
+export function copyBlocks(range: BlockRange) {
+  const clipboardItems = createPageClipboardItems(range);
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
 
-  performNativeCopy([
-    textClipboardItem,
-    htmlClipboardItem,
-    // customClipboardItem,
-  ]);
+  performNativeCopy(clipboardItems);
 
-  savedRange && resetNativeSelection(savedRange);
+  if (savedRange) {
+    resetNativeSelection(savedRange);
+  }
 }
 
-const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
+function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
   for (let i = 0; i < blocks.length; i++) {
     const parentBlock = blocks[i];
     if (parentBlock.children) {
@@ -215,16 +287,4 @@ const isChildBlock = (blocks: BaseBlockModel[], block: BaseBlockModel) => {
     }
   }
   return false;
-};
-
-function detectBlockSuiteClipboardData(html: string) {
-  const blocksuite = html.match(
-    new RegExp(
-      CUSTOM_CLIPBOARD_FRAGMENT_START + '(.*)' + CUSTOM_CLIPBOARD_FRAGMENT_END
-    )
-  );
-  if (blocksuite) {
-    return JSON.parse(blocksuite[1]);
-  }
-  return null;
 }

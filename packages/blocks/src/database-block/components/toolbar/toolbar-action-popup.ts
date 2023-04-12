@@ -9,7 +9,7 @@ import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { copy } from '../../../__internal__/clipboard/utils.js';
+import { copyBlocks } from '../../../__internal__/clipboard/utils.js';
 import { toast } from '../../../components/toast.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type {
@@ -187,7 +187,7 @@ export class ToolbarActionPopup extends LitElement {
       const models = [this.targetModel, ...this.targetModel.children];
       models.forEach(model => this.targetModel.page.deleteBlock(model));
     } else if (actionType === 'copy') {
-      copy({
+      copyBlocks({
         type: 'Block',
         models: [this.targetModel],
         startOffset: 0,

@@ -46,7 +46,7 @@ export type {
 };
 
 /** Built-in first party block models built for affine */
-export const AffineSchemas = [
+export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   CodeBlockSchema,
   ParagraphBlockSchema,
   PageBlockSchema,
@@ -56,7 +56,7 @@ export const AffineSchemas = [
   EmbedBlockSchema,
   SurfaceBlockSchema,
   // DatabaseBlockSchema,
-] satisfies z.infer<typeof BlockSchema>[];
+];
 
 export const __unstableSchemas = [DatabaseBlockSchema] satisfies z.infer<
   typeof BlockSchema
