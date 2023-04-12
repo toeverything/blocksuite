@@ -1,19 +1,29 @@
 import {
   BoldIcon,
+  CopyIcon,
+  DatabaseTableViewIcon,
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 
+import { copy } from '../../__internal__/clipboard/utils.js';
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { showDatabaseModal } from '../../components/database-modal/index.js';
+import { toast } from '../../components/toast.js';
 import {
   getCurrentCombinedFormat,
   handleFormat,
 } from '../../page-block/utils/index.js';
+import { getCurrentBlockRange } from '../../std.js';
 
 type ActionProps = {
   page: Page;
@@ -98,6 +108,51 @@ export const formatConfig = [
       if (format && abortController && !('link' in format)) {
         abortController.abort();
       }
+    },
+  },
+];
+
+const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
+
+export const actionConfig = [
+  {
+    id: 'copy',
+    name: 'Copy',
+    disabledToolTip: undefined,
+    icon: CopyIcon,
+    hotkey: undefined,
+    showWhen: () => true,
+    enabledWhen: () => true,
+    action: ({ page }: ActionProps) => {
+      const range = getCurrentBlockRange(page);
+      assertExists(range);
+      copy(range);
+      toast('Copied to clipboard');
+    },
+  },
+  {
+    id: 'convert-to-database',
+    name: 'To Database',
+    disabledToolTip:
+      'Contains Block types that cannot be converted to Database. Learn more',
+    icon: DatabaseTableViewIcon,
+    hotkey: 'command+g,ctrl+g',
+    showWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      const isShow = range?.type === 'Block';
+      return isShow;
+    },
+    enabledWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      if (!range) return false;
+      return range.models.every(model =>
+        DATABASE_WHITE_LIST.includes(model.flavour)
+      );
+    },
+    action: ({ page }: ActionProps) => {
+      showDatabaseModal({
+        page,
+      });
     },
   },
 ];
