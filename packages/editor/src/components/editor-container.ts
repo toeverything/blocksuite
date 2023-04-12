@@ -124,15 +124,6 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       }
     );
 
-    this._disposables.addFromEvent(
-      window,
-      'affine:switch-edgeless-display-mode',
-      ({ detail }) => {
-        console.log('de', detail);
-        this.showGrid = detail;
-      }
-    );
-
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
