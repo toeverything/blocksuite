@@ -83,6 +83,9 @@ export class EdgelessColorPanel extends LitElement {
   @property()
   showLetterMark = false;
 
+  @property()
+  hollowCircle = false;
+
   private _onSelect(value: Color) {
     this.dispatchEvent(
       new ColorEvent('select', {
@@ -99,7 +102,9 @@ export class EdgelessColorPanel extends LitElement {
       this.options,
       color => color,
       color => {
-        const style = { background: color };
+        const style = this.hollowCircle
+          ? { border: `2.5px solid ${color}` }
+          : { background: color };
         const isTransparent = color === '#00000000';
         const additionalIcon = isTransparent ? TransparentIcon : nothing;
 
