@@ -42,7 +42,6 @@ export default defineConfig({
           },
           { text: '🚧 Collaboration and Data Persistence', link: '' },
           { text: '🚧 Defining Your Block', link: '' },
-          { text: '🚧 Building Your Framework', link: '' },
           { text: 'Editor Example', link: '/editor-example' },
           // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
         ],
