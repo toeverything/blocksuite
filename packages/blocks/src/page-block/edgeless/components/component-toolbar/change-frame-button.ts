@@ -107,10 +107,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   private _setBlockBackground(color: Color) {
-    this.page.transact(() => {
-      this.frames.forEach(frame => {
-        this.page.updateBlock(frame, { background: color });
-      });
+    this.frames.forEach(frame => {
+      this.page.updateBlock(frame, { background: color });
     });
     // FIXME: force update selection, because connector mode changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
