@@ -179,6 +179,11 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _strokeColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  private _forceUpdateSelection() {
+    // FIXME: force update selection, because connector mode changed
+    this.slots.selectionUpdated.emit({ ...this.selectionState });
+  }
+
   private _setShapeFillColor(color: Color) {
     const filled = !isTransparent(color);
     this.page.transact(() => {
@@ -189,8 +194,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         });
       });
     });
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
+    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeColor(color: Color) {
@@ -201,8 +205,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         });
       });
     });
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
+    this._forceUpdateSelection();
   }
 
   firstUpdated(changedProperties: Map<string, unknown>) {
@@ -227,6 +230,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         this.elements.forEach(element => {
           this.surface.updateElementProps(element.id, updatedProps);
         });
+        this._forceUpdateSelection();
       })
     );
 
@@ -264,7 +268,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         class="change-shape-button"
-        .tooltip=${this._popperShow ? '' : 'Shape'}
+        .tooltip=${this._popperShow ? '' : 'Switch type'}
         .active=${false}
         @tool.click=${() => this._shapeMenuPopper?.toggle()}
       >
@@ -277,7 +281,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Fill'}
+        .tooltip=${this._popperShow ? '' : 'Shape color'}
         .active=${false}
         @tool.click=${() => this._fillColorMenuPopper?.toggle()}
       >
@@ -294,7 +298,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="stroke-color-button"
-        .tooltip=${this._popperShow ? '' : 'Stroke'}
+        .tooltip=${this._popperShow ? '' : 'Border color'}
         .active=${false}
         @tool.click=${() => this._strokeColorMenuPopper?.toggle()}
       >
