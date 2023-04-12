@@ -1,14 +1,17 @@
-import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { ShadowlessElement } from '../../__internal__/utils/lit.js';
-import { setupVirgoScroll } from '../../__internal__/utils/virgo.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { DATABASE_TITLE_LENGTH } from '../consts.js';
 import type { DatabaseBlockModel } from '../database-model.js';
+import { initLimitedLengthVEditor } from '../utils.js';
 
 @customElement('affine-database-title')
-export class DatabaseTitle extends ShadowlessElement {
+export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   static styles = css`
     .affine-database-title {
       flex: 1;
@@ -18,7 +21,6 @@ export class DatabaseTitle extends ShadowlessElement {
     }
 
     .database-title {
-      flex: 1;
       position: sticky;
       width: 300px;
       height: 30px;
@@ -27,14 +29,16 @@ export class DatabaseTitle extends ShadowlessElement {
       line-height: 24px;
       color: var(--affine-text-primary-color);
       font-family: inherit;
+      /* overflow-x: scroll; */
       overflow: hidden;
       cursor: text;
     }
 
     .database-title [data-virgo-text='true'] {
-      display: inline-block;
-      width: 300px;
-      max-width: 300px;
+      white-space: pre;
+    }
+
+    .database-title.ellipsis [data-virgo-text='true'] {
       white-space: nowrap !important;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -67,33 +71,35 @@ export class DatabaseTitle extends ShadowlessElement {
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
 
-  private _vEditor!: VEditor;
-
   firstUpdated() {
     this._initTitleVEditor();
+
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'focus',
+      this._onTitleFocus
+    );
+    this._disposables.addFromEvent(
+      this._titleContainer,
+      'blur',
+      this._onTitleBlur
+    );
   }
 
-  private _onShowTitleTooltip = () => {
-    // TODO: show tooltip according to title content(vEditor)
-  };
-
   private _initTitleVEditor() {
-    this._vEditor = new VEditor(this.targetModel.title.yText);
-    setupVirgoScroll(this.targetModel.page, this._vEditor);
-    this._vEditor.mount(this._titleContainer);
-    this._vEditor.bindHandlers({
-      keydown: this._handleKeyDown,
+    initLimitedLengthVEditor({
+      yText: this.targetModel.title.yText,
+      container: this._titleContainer,
+      targetModel: this.targetModel,
+      maxLength: DATABASE_TITLE_LENGTH,
+      handlers: {
+        keydown: this._handleKeyDown,
+      },
     });
-    this._vEditor.setReadonly(this.targetModel.page.readonly);
 
     // for title placeholder
     this.targetModel.title.yText.observe(() => {
       this.requestUpdate();
-    });
-
-    // after the database structure is created
-    requestAnimationFrame(() => {
-      this._vEditor?.focusEnd();
     });
   }
 
@@ -107,12 +113,17 @@ export class DatabaseTitle extends ShadowlessElement {
     }
   };
 
+  private _onTitleFocus = () => {
+    this._titleContainer.classList.remove('ellipsis');
+  };
+
+  private _onTitleBlur = () => {
+    this._titleContainer.classList.add('ellipsis');
+  };
+
   render() {
     const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
-    return html`<div
-      class="has-tool-tip affine-database-title"
-      @mouseover=${this._onShowTitleTooltip}
-    >
+    return html`<div class="has-tool-tip affine-database-title">
       <div
         class="database-title ${isEmpty ? 'database-title-empty' : ''}"
         data-block-is-database-title="true"

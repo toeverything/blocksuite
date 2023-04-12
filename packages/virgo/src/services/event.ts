@@ -206,11 +206,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (this._handlers.virgoCompositionEnd) {
       ctx = this._handlers.virgoCompositionEnd(ctx);
     }
-
     if (ctx.skipDefault) return;
 
     const { data, vRange: newVRange } = ctx;
-    if (newVRange.index >= 0 && data && data.length > 0) {
+    if (newVRange.index >= 0) {
       const selection = window.getSelection();
       if (selection && selection.rangeCount !== 0) {
         const range = selection.getRangeAt(0);
@@ -237,21 +236,23 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         }
       }
 
-      this._editor.insertText(
-        newVRange,
-        data,
-        ctx.attributes ?? ({} as TextAttributes)
-      );
+      if (data && data.length > 0) {
+        this._editor.insertText(
+          newVRange,
+          data,
+          ctx.attributes ?? ({} as TextAttributes)
+        );
 
-      this._editor.slots.updated.once(() => {
-        this._editor.slots.vRangeUpdated.emit([
-          {
-            index: newVRange.index + data.length,
-            length: 0,
-          },
-          'input',
-        ]);
-      });
+        this._editor.slots.updated.once(() => {
+          this._editor.slots.vRangeUpdated.emit([
+            {
+              index: newVRange.index + data.length,
+              length: 0,
+            },
+            'input',
+          ]);
+        });
+      }
     }
   };
 

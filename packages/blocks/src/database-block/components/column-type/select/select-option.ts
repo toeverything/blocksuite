@@ -1,13 +1,12 @@
 import type { SelectTag } from '@blocksuite/global/database';
-import type { VHandlerContext } from '@blocksuite/virgo';
-import { VEditor } from '@blocksuite/virgo';
+import type { VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
-import { INPUT_MAX_LENGTH } from '../../../consts.js';
+import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
+import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
 export class SelectOption extends LitElement {
@@ -55,47 +54,15 @@ export class SelectOption extends LitElement {
   }
 
   firstUpdated() {
-    this._vEditor = new VEditor(this.select.value, {
-      defaultMode: 'pure',
+    this._vEditor = initLimitedLengthVEditor({
+      yText: this.select.value,
+      container: this._container,
+      targetModel: this.databaseModel,
+      maxLength: SELECT_TAG_NAME_MAX_LENGTH,
+      // When editing the current select, other sibling selects should not be edited
+      readonly: !this.editing,
     });
-    this._vEditor.mount(this._container);
-    this._vEditor.bindHandlers({
-      virgoInput: this._handleVInput,
-      paste: this._handlePaste,
-    });
-    // When editing the current select, other sibling selects should not be edited
-    this._vEditor.setReadonly(!this.editing);
   }
-
-  private _handleVInput = (
-    ctx: VHandlerContext<AffineTextAttributes, InputEvent>
-  ) => {
-    const length = this._vEditor.yText.length;
-    if (length >= INPUT_MAX_LENGTH && ctx.event.data) {
-      // prevent input
-      ctx.skipDefault = true;
-    }
-    return ctx;
-  };
-
-  private _handlePaste = (event: ClipboardEvent) => {
-    const length = this._vEditor.yText.length;
-    const restLength = INPUT_MAX_LENGTH - length;
-    if (restLength <= 0) return;
-
-    const data = event.clipboardData?.getData('text/plain');
-    if (!data) return;
-
-    const vRange = this._vEditor.getVRange();
-    const text = data.length > restLength ? data.slice(0, restLength) : data;
-    if (vRange) {
-      this._vEditor.insertText(vRange, text);
-      this._vEditor.setVRange({
-        index: vRange.index + text.length,
-        length: 0,
-      });
-    }
-  };
 
   render() {
     const style = styleMap({

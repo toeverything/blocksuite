@@ -15,7 +15,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
-import { INPUT_MAX_LENGTH, SELECT_EDIT_POPUP_WIDTH } from '../../../consts.js';
+import {
+  SELECT_EDIT_POPUP_WIDTH,
+  SELECT_TAG_NAME_MAX_LENGTH,
+} from '../../../consts.js';
 import { DatabaseCellElement } from '../../../register.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import { getTagColor, onClickOutside } from '../../../utils.js';
@@ -260,8 +263,8 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   private _onAddSelection = (selectedValue: SelectTag[]) => {
     let value = this._inputValue.trim();
     if (value === '') return;
-    if (value.length > INPUT_MAX_LENGTH) {
-      value = value.slice(0, INPUT_MAX_LENGTH);
+    if (value.length > SELECT_TAG_NAME_MAX_LENGTH) {
+      value = value.slice(0, SELECT_TAG_NAME_MAX_LENGTH);
     }
 
     const tagColor = this._selectColor ?? getTagColor();
@@ -427,7 +430,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
           <input
             class="select-input"
             placeholder="Type here..."
-            maxlength=${INPUT_MAX_LENGTH}
+            maxlength=${SELECT_TAG_NAME_MAX_LENGTH}
             @input=${this._onSelectSearchInput}
             @keydown=${(event: KeyboardEvent) =>
               this._onSelectOrAdd(event, selectedTag)}
