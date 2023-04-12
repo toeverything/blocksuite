@@ -142,33 +142,29 @@ export function initMouseEventHandlers(
 
     if (
       lastClickState &&
-      lastClickState.timeStamp - e.timeStamp <= 400 &&
+      e.timeStamp - lastClickState.timeStamp <= 500 &&
       lastClickState.x === startX &&
       lastClickState.y === startY
     ) {
-      if (clicks === 0) {
-        container.dispatchEvent(
-          new CustomEvent('doubleclick', {
-            detail: e,
-          })
-        );
-      } else if (clicks === 1) {
-        container.dispatchEvent(
-          new CustomEvent('tripleclick', {
-            detail: e,
-          })
-        );
+      if (clicks <= 1) {
+        if (clicks === 0) {
+          container.dispatchEvent(
+            new CustomEvent('doubleclick', {
+              detail: e,
+            })
+          );
+        } else if (clicks === 1) {
+          container.dispatchEvent(
+            new CustomEvent('tripleclick', {
+              detail: e,
+            })
+          );
+        }
+        clicks++;
       }
-      clicks = (clicks % 2) + 1;
     } else {
       clicks = 0;
     }
-
-    lastClickState = {
-      timeStamp: e.timeStamp,
-      x: startX,
-      y: startY,
-    };
 
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
@@ -228,6 +224,12 @@ export function initMouseEventHandlers(
         );
       }
     }
+
+    lastClickState = {
+      timeStamp: e.timeStamp,
+      x: startX,
+      y: startY,
+    };
 
     startX = startY = -Infinity;
     isDragging = false;
