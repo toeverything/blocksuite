@@ -4,6 +4,7 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
+import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import type { Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
@@ -136,36 +137,43 @@ export const database: InitFn = (workspace: Workspace) => {
     { value: 'TODO', color: 'var(--affine-tag-pink)' },
     { value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
-  const col1 = page.db.updateColumn({
+  // Add database block inside frame block
+  const databaseId = page.addBlock(
+    'affine:database',
+    {
+      // columns: [col1, col2, col3],
+      columns: [],
+      titleColumnName: 'Title',
+      titleColumnWidth: 200,
+    },
+    frameId
+  );
+  const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+  const col1 = database.updateColumn({
     name: 'Number',
     type: 'number',
     width: 200,
     hide: false,
     decimal: 0,
   });
-  const col2 = page.db.updateColumn({
+  const col2 = database.updateColumn({
     name: 'Single Select',
     type: 'select',
     width: 200,
     hide: false,
     selection,
   });
-  const col3 = page.db.updateColumn({
+  const col3 = database.updateColumn({
     name: 'Rich Text',
     type: 'rich-text',
     width: 200,
     hide: false,
   });
-  // Add database block inside frame block
-  const databaseId = page.addBlock(
-    'affine:database',
-    {
-      columns: [col1, col2, col3],
-      titleColumnName: 'Title',
-      titleColumnWidth: 200,
-    },
-    frameId
-  );
+
+  page.updateBlock(database, {
+    columns: [col1, col2, col3],
+  });
+
   const p1 = page.addBlock(
     'affine:paragraph',
     {
@@ -181,12 +189,12 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
-  page.db.updateCell(p1, {
+  database.updateCell(p1, {
     columnId: col1,
     value: 0.1,
   });
 
-  page.db.updateCell(p2, {
+  database.updateCell(p2, {
     columnId: col2,
     value: [selection[1]],
   });
@@ -194,7 +202,7 @@ export const database: InitFn = (workspace: Workspace) => {
   const text = new page.YText();
   text.insert(0, '123');
   text.insert(0, 'code');
-  page.db.updateCell(p2, {
+  database.updateCell(p2, {
     columnId: col3,
     value: text,
   });

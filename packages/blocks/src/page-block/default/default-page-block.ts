@@ -222,14 +222,19 @@ export class DefaultPageBlockComponent
       () => (this._isComposing = false)
     );
 
+    this._updateTitleInMeta();
     this.model.title.yText.observe(() => {
-      this.page.workspace.setPageMeta(this.page.id, {
-        title: this.model.title.toString(),
-      });
+      this._updateTitleInMeta();
       this.requestUpdate();
     });
     this._titleVEditor.setReadonly(this.page.readonly);
   }
+
+  private _updateTitleInMeta = () => {
+    this.page.workspace.setPageMeta(this.page.id, {
+      title: this.model.title.toString(),
+    });
+  };
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
     if (e.isComposing || this.page.readonly) return;

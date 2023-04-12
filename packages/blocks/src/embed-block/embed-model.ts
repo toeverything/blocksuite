@@ -3,7 +3,6 @@ import { literal } from 'lit/static-html.js';
 
 export const EmbedBlockSchema = defineBlockSchema({
   flavour: 'affine:embed',
-  role: 'content',
   props: () => ({
     type: 'image',
     caption: '',
@@ -13,6 +12,7 @@ export const EmbedBlockSchema = defineBlockSchema({
   }),
   metadata: {
     version: 1,
+    role: 'content',
     tag: literal`affine-embed`,
   },
 });

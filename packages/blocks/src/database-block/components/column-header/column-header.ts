@@ -304,7 +304,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _onUpdateNormalColumn = (name: string, column: Column) => {
-    this.targetModel.page.db.updateColumn({
+    this.targetModel.updateColumn({
       ...column,
       name,
     });

@@ -262,7 +262,7 @@ function transformBlock(
   const blockProps: {
     type?: string;
     text?: Text;
-    children?: BlockSuiteInternal.IBaseBlockProps[];
+    children?: BaseBlockModel[];
   } = {
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`

@@ -74,14 +74,10 @@ const migrations: Migration[] = [
         const yBlocks = doc.getMap(spaceId);
         const yBlock = new Y.Map() as YBlock;
         const id = uuidv4();
-        initInternalProps(
-          yBlock,
-          {
-            id,
-            flavour: 'affine:surface',
-          },
-          {}
-        );
+        initInternalProps(yBlock, {
+          id,
+          flavour: 'affine:surface',
+        });
         yBlocks.set(id, yBlock);
         // @ts-ignore
         yBlocks.forEach((yBlock: Y.Map<unknown>, id) => {
