@@ -972,3 +972,25 @@ test('should cut in title works', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['hello']);
 });
+
+test('should support ctrl/cmd+g convert to database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+
+  await page.keyboard.press(`${SHORT_KEY}+g`);
+  const tableView = page.locator('.modal-view-item.table');
+  await tableView.click();
+  const database = page.locator('affine-database');
+  await expect(database).toBeVisible();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
+});

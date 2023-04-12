@@ -32,7 +32,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
-import { formatConfig } from './const.js';
+import { actionConfig, formatConfig } from './const.js';
 import {
   deleteModelsByRange,
   updateBlockType,
@@ -49,6 +49,21 @@ export function bindCommonHotkey(page: Page) {
         return;
       }
 
+      action({ page });
+    });
+  });
+
+  actionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
+    // if (!isPrintableKeyEvent(e) || page.readonly) return;
+    if (!hotkeyStr) return;
+
+    hotkey.addListener(hotkeyStr, e => {
+      // Prevent default behavior
+      e.preventDefault();
+      if (!enabledWhen(page)) return;
+      if (page.awarenessStore.isReadonly(page)) {
+        return;
+      }
       action({ page });
     });
   });
