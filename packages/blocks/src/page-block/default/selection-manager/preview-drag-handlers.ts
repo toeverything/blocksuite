@@ -33,7 +33,6 @@ export const PreviewDragHandlers = {
 
         assertExists(lastPoint);
 
-        lastPoint.y += d;
         container.components.dragHandle?.onDrag(
           createDragEvent(
             'drag',

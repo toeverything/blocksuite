@@ -670,11 +670,13 @@ export class DragHandle extends WithDisposable(LitElement) {
   onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !e.dataTransfer) return;
 
-    const anchor = this._handleAnchorState && this._handleAnchorState.element;
+    const modelState = this._handleAnchorState;
     let draggingBlockElements = this.selectedBlocks;
 
-    if (anchor && !draggingBlockElements.includes(anchor)) {
-      draggingBlockElements = [anchor];
+    if (modelState && !draggingBlockElements.includes(modelState.element)) {
+      draggingBlockElements = [modelState.element];
+      // select current block
+      this.setSelectedBlock(modelState);
     }
 
     this._draggingElements = draggingBlockElements;
