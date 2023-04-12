@@ -11,8 +11,7 @@ import {
   type BlockComponentElement,
   getClosestFrameBlockElementById,
   getHoveringFrame,
-  isInEmptyDatabaseByPoint,
-  Point,
+  type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -30,11 +29,11 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: async (e, end, point) => {
+    onDropCallback: async (e, point, end, type) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const blocks = [];
+      const models = [];
       const props = JSON.parse(data);
       const isDatabase = props.flavour === 'affine:database';
       if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
@@ -42,32 +41,26 @@ export const createBlockHub: (
         return;
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        blocks.push(...(await uploadImageFromLocal(page)));
+        models.push(...(await uploadImageFromLocal(page)));
       } else {
-        blocks.push(props);
+        models.push(props);
       }
 
       let parentId;
       let focusId;
-      if (end) {
-        const { rect, model, element } = end;
+      if (end && type !== 'none') {
+        const { model } = end;
 
         page.captureSync();
 
-        if (isInEmptyDatabaseByPoint(point, model, element, blocks)) {
-          const ids = page.addBlocks(blocks, model);
+        if (type === 'database') {
+          const ids = page.addBlocks(models, model);
           focusId = ids[0];
           parentId = model.id;
         } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
-          const ids = page.addSiblingBlocks(
-            model,
-            blocks,
-            distanceToTop < distanceToBottom ? 'before' : 'after'
-          );
+          const ids = page.addSiblingBlocks(model, models, type);
           focusId = ids[0];
           parentId = parent.id;
         }
@@ -101,10 +94,7 @@ export const createBlockHub: (
         frameId = targetFrameBlock.model.id;
       } else {
         // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(
-          blocks,
-          new Point(e.clientX, e.clientY)
-        );
+        const result = pageBlock.addNewFrame(models, point);
         frameId = result.frameId;
         focusId = result.ids[0];
       }

@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
-import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
 import type { Color, IBound } from './consts.js';
@@ -23,6 +22,7 @@ import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
+import { generateElementId } from './utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -53,7 +53,7 @@ export class SurfaceManager {
   }
 
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new ShapeElement(id, shapeType);
 
     setXYWH(element, bound);
@@ -65,7 +65,7 @@ export class SurfaceManager {
   }
 
   addDebugElement(bound: IBound, color: string): string {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new DebugElement(id);
 
     setXYWH(element, bound);
@@ -82,7 +82,7 @@ export class SurfaceManager {
       lineWidth?: number;
     }
   ): string {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new BrushElement(id);
 
     setXYWH(element, bound);
@@ -100,7 +100,7 @@ export class SurfaceManager {
     controllers: Controller[],
     properties: ConnectorProps = {}
   ) {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new ConnectorElement(id);
 
     setXYWH(element, bound);

@@ -83,13 +83,14 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   firstUpdated() {
     this._initChangeColumnWidthHandlers();
+    this._initHeaderMousemoveHandlers();
     this._initMoveColumnHandlers();
     this.setDragHandleHeight();
 
     const databaseElement = this.closest('affine-database');
-    assertExists(databaseElement);
-    this._initResizeEffect(databaseElement);
-    this._initHeaderMousemoveHandlers();
+    if (databaseElement) {
+      this._initResizeEffect(databaseElement);
+    }
   }
 
   updated(changedProperties: Map<string, unknown>) {
@@ -145,15 +146,20 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
 
   setDragHandleHeight() {
-    const db = this.closest('affine-database');
-    const databaseBody = db?.querySelector('.affine-database-block-rows');
+    const databaseElement = this.closest('affine-database');
+    // When dragging to generate a database preview,
+    // the database may not be rendered to the page in time
+    if (!databaseElement) return;
+    const databaseBody = databaseElement.querySelector(
+      '.affine-database-block-rows'
+    );
     assertExists(databaseBody);
     const dragHandleHeight =
       databaseBody.clientHeight + DEFAULT_COLUMN_TITLE_HEIGHT - 1;
-    const allDragHandle = db?.querySelectorAll<HTMLElement>(
+    const allDragHandle = databaseElement.querySelectorAll<HTMLElement>(
       '.affine-database-column-drag-handle'
     );
-    allDragHandle?.forEach(handle => {
+    allDragHandle.forEach(handle => {
       handle.style.height = `${dragHandleHeight}px`;
     });
   }

@@ -1,12 +1,12 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
 import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { WithDisposable } from '../../../../__internal__/index.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { EdgelessShapeMenu } from '../../toolbar/shape-tool/shape-menu.js';

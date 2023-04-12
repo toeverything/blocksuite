@@ -1,7 +1,6 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -9,6 +8,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { WithDisposable } from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';

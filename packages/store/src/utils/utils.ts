@@ -29,13 +29,16 @@ export function assertValidChildren(
   });
 }
 
-export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function initInternalProps(
+  yBlock: YBlock,
+  props: Partial<BlockProps>,
+  ext: Record<string, unknown>
+) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
-  if (props.flavour === 'affine:page') {
-    yBlock.set('ext:cells', new Y.Map());
-    yBlock.set('ext:columns', new Y.Map());
-  }
+  Object.entries(ext).forEach(([key, value]) => {
+    yBlock.set(`ext:${key}`, value);
+  });
 
   const yChildren = new Y.Array();
   yBlock.set('sys:children', yChildren);
@@ -46,12 +49,11 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,
-  defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
 ) {
-  const propSchema = schema.model.props(internalPrimitives);
+  const propSchema = schema.model.props?.(internalPrimitives) ?? {};
   Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
 
@@ -79,7 +81,7 @@ export function syncBlockProps(
   });
 
   // set default value
-  Object.entries(defaultProps).forEach(([key, value]) => {
+  Object.entries(propSchema).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
       if (value instanceof Text) {
         yBlock.set(`prop:${key}`, new Y.Text());
@@ -124,7 +126,7 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }
 
-export function doesInsideBlockByFlavour(
+export function isInsideBlockByFlavour(
   page: Page,
   block: BaseBlockModel | string,
   flavour: keyof BlockModels
@@ -135,5 +137,5 @@ export function doesInsideBlockByFlavour(
   } else if (matchFlavours(parent, [flavour])) {
     return true;
   }
-  return doesInsideBlockByFlavour(page, parent, flavour);
+  return isInsideBlockByFlavour(page, parent, flavour);
 }

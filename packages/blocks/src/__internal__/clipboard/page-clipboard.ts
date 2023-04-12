@@ -7,7 +7,7 @@ import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copy,
+  copyBlocks,
   shouldClipboardHandlerContinue,
 } from './utils.js';
 
@@ -63,7 +63,7 @@ export class PageClipboard implements Clipboard {
 
     const range = getCurrentBlockRange(this._page);
     assertExists(range);
-    copy(range);
+    copyBlocks(range);
 
     this._page.captureSync();
   };

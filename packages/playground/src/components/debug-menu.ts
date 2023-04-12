@@ -30,7 +30,7 @@ import {
   plate,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { nanoid, Utils, type Workspace } from '@blocksuite/store';
+import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
@@ -569,13 +569,10 @@ export class DebugMenu extends ShadowlessElement {
 }
 
 function createPage(workspace: Workspace) {
-  const pageName = 'Untitled';
-  // TODO use id generator
-  // const id = workspace.idGenerator();
-  const id = nanoid();
+  const id = workspace.idGenerator();
   const newPage = workspace.createPage(id);
   const pageBlockId = newPage.addBlock('affine:page', {
-    title: new newPage.Text(pageName),
+    title: new newPage.Text(),
   });
   newPage.addBlock('affine:surface', {}, null);
   newPage.addBlock('affine:frame', {}, pageBlockId);
@@ -639,7 +636,7 @@ function getTabGroupTemplate({
               workspace.removePage(page.id);
             }}
           >
-            ${page.title}
+            ${page.title || 'Untitled'}
           </sl-tab>`
       )}
     </sl-tab-group>`;

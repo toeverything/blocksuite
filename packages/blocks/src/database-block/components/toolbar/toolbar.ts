@@ -1,4 +1,5 @@
-import { ShadowlessElement } from '@blocksuite/blocks';
+import './toolbar-action-popup.js';
+
 import {
   DatabaseSearchClose,
   DatabaseSearchIcon,
@@ -9,6 +10,7 @@ import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { ShadowlessElement } from '../../../__internal__/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { SearchState } from '../../types.js';
 import { onClickOutside } from '../../utils.js';

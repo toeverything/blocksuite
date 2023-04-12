@@ -3,7 +3,9 @@ import { expect } from '@playwright/test';
 
 import {
   assertColumnWidth,
+  assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
+  assertDatabaseTitleText,
   clickDatabaseOutside,
   copyByKeyboard,
   dragBetweenCoords,
@@ -43,8 +45,6 @@ import {
 import {
   assertBlockCount,
   assertBlockProps,
-  assertDatabaseCellRichTexts,
-  assertDatabaseTitleText,
   assertLocatorVisible,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -120,17 +120,16 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  const cellSelector = '[data-row-id="4"][data-column-id="3"]';
   const cell = getFirstColumnCell(page, 'rich-text-container');
   await cell.click();
   await pressArrowLeft(page);
   await pressEnter(page);
-  await assertDatabaseCellRichTexts(page, cellSelector, '123');
+  await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await cell.click();
   await pressArrowLeft(page);
   await pressShiftEnter(page);
-  await assertDatabaseCellRichTexts(page, cellSelector, '12\n3');
+  await assertDatabaseCellRichTexts(page, { text: '12\n3' });
 });
 
 test('should the multi-select mode work correctly', async ({ page }) => {
@@ -227,10 +226,9 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseDynamicRowWithData(page, '123', true);
 
   await undoByKeyboard(page);
-  const cellSelector = '[data-row-id="4"][data-column-id="3"]';
-  await assertDatabaseCellRichTexts(page, cellSelector, '');
+  await assertDatabaseCellRichTexts(page, { text: '' });
   await redoByKeyboard(page);
-  await assertDatabaseCellRichTexts(page, cellSelector, '123');
+  await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await focusDatabaseTitle(page);
   await type(page, 'abc');
@@ -352,9 +350,8 @@ test('should support move column right', async ({ page }) => {
   await assertDatabaseColumnOrder(page, ['5', '3']);
 
   await undoByClick(page);
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator('[data-column-id="5"]');
-  await columnTitle.click();
+  const { column } = await getDatabaseHeaderColumn(page, 2);
+  await column.click();
   const moveLeft = page.locator('.move-right');
   expect(await moveLeft.count()).toBe(0);
 });
@@ -369,9 +366,8 @@ test('should support move column left', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
   await assertDatabaseColumnOrder(page, ['3', '5']);
 
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator('[data-column-id="3"]');
-  await columnTitle.click();
+  const { column } = await getDatabaseHeaderColumn(page, 0);
+  await column.click();
   const moveLeft = page.locator('.move-left');
   expect(await moveLeft.count()).toBe(0);
 
@@ -410,8 +406,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123');
     await initDatabaseDynamicRowWithData(page, 'abc');
-    const cellSelector = '[data-row-id="4"][data-column-id="3"]';
-    await assertDatabaseCellRichTexts(page, cellSelector, '123abc');
+    await assertDatabaseCellRichTexts(page, { text: '123abc' });
   });
 
   test('switch between multi-select and select', async ({ page }) => {
@@ -459,8 +454,7 @@ test.describe('switch column type', () => {
 
     await switchColumnType(page, 'rich-text');
     await initDatabaseDynamicRowWithData(page, 'abc');
-    const cellSelector = '[data-row-id="4"][data-column-id="3"]';
-    await assertDatabaseCellRichTexts(page, cellSelector, '123abc');
+    await assertDatabaseCellRichTexts(page, { text: '123abc' });
 
     await switchColumnType(page, 'number');
     expect(await cell.innerText()).toBe('');

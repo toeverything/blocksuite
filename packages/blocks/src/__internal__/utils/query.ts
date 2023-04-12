@@ -406,7 +406,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 
       const mainElement = matchFlavours(block.model, ['affine:page'] as const)
         ? element?.querySelector('.affine-default-page-block-title-container')
-        : element?.querySelector('rich-text');
+        : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
@@ -528,6 +528,13 @@ export function contains(parent: Element, node: Element) {
 }
 
 /**
+ * Returns `true` if node is contained in the elements.
+ */
+export function isContainedIn(elements: Element[], node: Element) {
+  return elements.some(parent => contains(parent, node));
+}
+
+/**
  * Returns `true` if element has `data-block-id` attribute.
  */
 export function hasBlockId(element: Element) {
@@ -584,7 +591,7 @@ function isEmbed({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is codeblock.
+ * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
   return tagName === 'AFFINE-DATABASE';
@@ -925,65 +932,57 @@ export function getDropRectByPoint(
   model: BaseBlockModel,
   element: Element
 ) {
-  let rect = getRectByBlockElement(element);
+  const result = {
+    rect: getRectByBlockElement(element),
+    // 0: others, 1: empty database
+    flag: 0,
+  };
+
   // If the database is empty and the point is inside the database
   if (isEmptyDatabase(model)) {
+    result.flag = 1;
     const table = getDatabaseBlockTableElement(element);
     assertExists(table);
     const bounds = table.getBoundingClientRect();
-    if (bounds.top <= point.y && point.y <= bounds.bottom) {
-      const header = getDatabaseBlockColumnHeaderElement(element);
-      assertExists(header);
-      const headerBounds = header.getBoundingClientRect();
-      rect = new DOMRect(
-        headerBounds.left,
-        headerBounds.bottom + 1,
-        rect.width,
-        1
-      );
-    }
+    if (point.y < bounds.top) return result;
+    const header = getDatabaseBlockColumnHeaderElement(element);
+    assertExists(header);
+    const headerBounds = header.getBoundingClientRect();
+    result.rect = new DOMRect(
+      headerBounds.left,
+      headerBounds.bottom,
+      result.rect.width,
+      1
+    );
   }
 
-  return rect;
+  return result;
 }
 
 /**
- * Returns `true` if the point is inside the empty database.
+ * Returns `true` if the target is `Element`.
  */
-export function isInEmptyDatabaseByPoint(
-  point: Point,
-  model: BaseBlockModel,
-  element: Element,
-  blocks: BaseBlockModel[]
-) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
-    // Currently, nested databases are not supported
-    if (
-      blocks.some(block => matchFlavours(block, ['affine:database'] as const))
-    ) {
-      return false;
-    }
-
-    if (model.isEmpty()) {
-      const table = getDatabaseBlockTableElement(element);
-      assertExists(table);
-      const bounds = table.getBoundingClientRect();
-      if (bounds.top <= point.y && point.y <= bounds.bottom) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+export function isElement(target: EventTarget | null) {
+  return target && target instanceof Element;
 }
 
 /**
  * Returns `true` if the target is `affine-page-selected-rects`.
  */
-export function isPageSelectedRects(target: EventTarget | null) {
-  return (
-    target &&
-    target instanceof HTMLElement &&
-    target.tagName === 'AFFINE-PAGE-SELECTED-RECTS'
-  );
+export function isPageSelectedRects(target: Element) {
+  return target.tagName === 'AFFINE-PAGE-SELECTED-RECTS';
+}
+
+/**
+ * Returns `true` if the target is `affine-drag-handle`.
+ */
+export function isDragHandle(target: Element) {
+  return target.tagName === 'AFFINE-DRAG-HANDLE';
+}
+
+/**
+ * Returns `true` if block elements have database block element.
+ */
+export function hasDatabase(elements: Element[]) {
+  return elements.some(isDatabase);
 }

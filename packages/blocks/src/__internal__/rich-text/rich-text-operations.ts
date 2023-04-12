@@ -32,7 +32,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (!parent) {
     return;
   }
-  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+  if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
     // todo: jump into next row
     return;
   }
@@ -350,7 +350,7 @@ function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!Utils.doesInsideBlockByFlavour(page, model, 'affine:database'))
+  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
     return false;
 
   return true;

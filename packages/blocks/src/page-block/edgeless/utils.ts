@@ -1,4 +1,3 @@
-import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
 import type { Point as ConnectorPoint, Point } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
@@ -21,6 +20,10 @@ import {
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
+import type {
+  MouseMode,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/gesture.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';

@@ -3,15 +3,9 @@ import './components/edgeless-selected-rect.js';
 import './toolbar/edgeless-toolbar.js';
 
 import {
-  almostEqual,
-  asyncFocusRichText,
-  type BlockHost,
-  handleNativeRangeAtPoint,
-  type Point,
-  resetNativeSelection,
-  type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+  BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '@blocksuite/global/config';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -28,22 +22,27 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import type { Point, TopLevelBlockModel } from '../../__internal__/index.js';
+import {
+  almostEqual,
+  asyncFocusRichText,
+  handleNativeRangeAtPoint,
+  resetNativeSelection,
+} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import {
   ShadowlessElement,
   WithDisposable,
 } from '../../__internal__/utils/lit.js';
 import type {
+  BlockHost,
   DragHandle,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
 } from '../../index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import {
-  EDGELESS_BLOCK_CHILD_PADDING,
-  tryUpdateFrameSize,
-} from '../utils/index.js';
+import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
@@ -144,7 +143,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
-  clipboard = new EdgelessClipboard(this.page);
+  clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
     viewportUpdated: new Slot(),

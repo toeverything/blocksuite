@@ -21,12 +21,16 @@ export class DatabaseManager {
   }
 
   protected get yCells() {
+    // @ts-ignore
     assertExists(this.page.root?.cells);
+    // @ts-ignore
     return this.page.root.cells as Y.Map<Y.Map<unknown>>;
   }
 
   protected get yColumns() {
+    // @ts-ignore
     assertExists(this.page.root?.columns);
+    // @ts-ignore
     return this.page.root.columns as Y.Map<unknown>;
   }
 
@@ -39,7 +43,7 @@ export class DatabaseManager {
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
-    const id = column.id ?? this.page.createId();
+    const id = column.id ?? this.page.generateId();
     this.page.transact(() => this.yColumns.set(id, { ...column, id }));
     return id;
   }

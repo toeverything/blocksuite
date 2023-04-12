@@ -27,11 +27,17 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           {
-            text: '🚧 Fundamental Concepts',
-            link: '',
+            text: 'Fundamental Concepts',
+            link: '/concepts',
             items: [
-              { text: '🚧 Workspaces and Pages', link: '' },
-              { text: '🚧 Flavoured Blocks', link: '' },
+              {
+                text: 'Workspaces and Pages',
+                link: '/concepts#workspaces-and-pages',
+              },
+              {
+                text: 'Flavoured Blocks',
+                link: '/concepts#flavoured-blocks',
+              },
             ],
           },
           { text: '🚧 Collaboration and Data Persistence', link: '' },
