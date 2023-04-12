@@ -7,6 +7,8 @@ import {
   activeFrameInEdgeless,
   addBasicConnectorElement,
   changeEdgelessFrameBackground,
+  changeShapeFillColor,
+  changeShapeStrokeColor,
   clickComponentToolbarMoreMenuButton,
   decreaseZoomLevel,
   getEdgelessBlockChild,
@@ -1318,4 +1320,50 @@ test('change frame color', async ({ page }) => {
   const color = '#dff4e8';
   await changeEdgelessFrameBackground(page, color);
   await assertEdgelessFrameBackground(page, ids.frameId, color);
+});
+
+test('change shape fill color', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect.start, rect.end);
+
+  await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  const color = '#897ce0';
+  await changeShapeFillColor(page, color);
+  await page.waitForTimeout(50);
+  const [picked] = await pickColorAtPoints(page, [
+    [rect.start.x + 20, rect.start.y + 20],
+  ]);
+
+  assertSameColor(picked, color);
+});
+
+test('change shape stroke color', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const rect = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect.start, rect.end);
+
+  await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+  const color = '#3b25cc';
+  await changeShapeStrokeColor(page, color);
+  await page.waitForTimeout(50);
+  const [picked] = await pickColorAtPoints(page, [
+    [rect.start.x + 2, rect.start.y + 2],
+  ]);
+
+  assertSameColor(picked, color);
 });
