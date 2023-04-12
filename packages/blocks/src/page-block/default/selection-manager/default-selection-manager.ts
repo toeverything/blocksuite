@@ -107,19 +107,10 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
+
     const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
-      return;
-    }
-    if (isEmbed(e)) {
-      this.state.type = 'embed';
-      this._embedResizeManager.onStart(e);
-      return;
-    }
-    if (isDatabase(e)) {
-      this.state.type = 'database';
-      // todo: add manager
       return;
     }
 
@@ -128,6 +119,17 @@ export class DefaultSelectionManager {
       (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
     ) {
       PreviewDragHandlers.onStart(this, e);
+      return;
+    }
+
+    if (isEmbed(e)) {
+      this.state.type = 'embed';
+      this._embedResizeManager.onStart(e);
+      return;
+    }
+    if (isDatabase(e)) {
+      this.state.type = 'database';
+      // todo: add manager
       return;
     }
 
@@ -230,6 +232,11 @@ export class DefaultSelectionManager {
 
     if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
 
+    const target = e.raw.target;
+    if (isElement(target) && isDragHandle(target as Element)) {
+      return;
+    }
+
     // clear selection first
     this.clear();
 
@@ -292,7 +299,6 @@ export class DefaultSelectionManager {
       }
       return;
     }
-    const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);

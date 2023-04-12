@@ -650,14 +650,12 @@ export class DragHandle extends WithDisposable(LitElement) {
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
-    if (this._handleAnchorState) {
-      let modelState = null;
-      if (this.selectedBlocks[0] !== this._handleAnchorState.element) {
-        modelState = this._handleAnchorState;
-      }
-      this.toggleAttribute('data-selected', Boolean(modelState));
-      this.setSelectedBlock(modelState);
+    let modelState = this._handleAnchorState;
+    if (modelState && modelState.element === this.selectedBlocks[0]) {
+      modelState = null;
     }
+    this.setSelectedBlock(modelState);
+    this.toggleAttribute('data-selected', Boolean(modelState));
     e.stopPropagation();
   };
 
