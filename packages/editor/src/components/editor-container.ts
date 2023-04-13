@@ -10,11 +10,10 @@ import {
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  ShadowlessElement,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -31,7 +30,7 @@ function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
 }
 
 @customElement('editor-container')
-export class EditorContainer extends WithDisposable(ShadowlessElement) {
+export class EditorContainer extends WithDisposable(LitElement) {
   @property()
   page!: Page;
 
