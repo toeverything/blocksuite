@@ -1,73 +1,45 @@
 # Using Editor
 
-TODO
-
-<script>
-import '@blocksuite/editor/themes/affine.css';
-
-async function main() {
-  const { Workspace, Page, Text } = await import('@blocksuite/store');
-  const { AffineSchemas } = await import('@blocksuite/blocks/models');
-  const { EditorContainer } = await import('@blocksuite/editor');
-
-  // Create a workspace with one default page
-  const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
-  const page = workspace.createPage('page0');
-
-  const title = new Text('Hello BlockSuite!');
-  const defaultContent = new Text('Start editing here!');
-
-  // Create default blocks in the page
-  const pageBlockId = page.addBlock('affine:page', { title });
-
-  // Add the frame to the page
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-
-  // Add the paragraph to the frame
-  page.addBlock('affine:paragraph', { text: defaultContent }, frameId);
-
-  // Init editor with the page store
-  const editor = new EditorContainer();
-  editor.page = page;
-  document.querySelector('#editor-example').appendChild(editor);
-}
-
-if (typeof window !== 'undefined') {
-  main();
-}
-</script>
+In the [Getting Started](./getting-started) section, we used a `SimpleAffineEditor`, which is a simple wrapper around the `EditorContainer` component. In this part, we will take a closer look at its [source code](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts):
 
 ```ts
-import '@blocksuite/editor/themes/affine.css';
+import { AffineSchemas } from '@blocksuite/blocks/models';
+import type { Page } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
+import { LitElement } from 'lit';
+import { EditorContainer } from './editor-container.js';
 
-async function main() {
-  const { Workspace, Page, Text } = await import('@blocksuite/store');
-  const { AffineSchemas } = await import('@blocksuite/blocks/models');
-  const { EditorContainer } = await import('@blocksuite/editor');
+export class SimpleAffineEditor extends LitElement {
+  readonly workspace: Workspace;
+  readonly page: Page;
 
-  // Create a workspace with one default page
-  const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
-  const page = workspace.createPage('page0');
+  constructor() {
+    super();
 
-  const title = new Text('Hello BlockSuite!');
-  const defaultContent = new Text('Start editing here!');
+    this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
+    this.page = this.workspace.createPage('page0');
 
-  // Create default blocks in the page
-  const pageBlockId = page.addBlock('affine:page', { title });
+    const pageBlockId = this.page.addBlock('affine:page');
+    const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);
+    this.page.addBlock('affine:paragraph', {}, frameId);
+  }
 
-  // Add the frame to the page
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-
-  // Add the paragraph to the frame
-  page.addBlock('affine:paragraph', { text: defaultContent }, frameId);
-
-  // Init editor with the page store
-  const editor = new EditorContainer();
-  editor.page = page;
-  document.querySelector('#editor-example').appendChild(editor);
+  override connectedCallback() {
+    const editor = new EditorContainer();
+    editor.page = this.page;
+    this.appendChild(editor);
+  }
 }
-
-main();
 ```
 
-<div id="editor-example" style="height: 250px; border: 1px solid grey; padding: 20px;"></div>
+This is a web component (`LitElement`) that statically creates a `Workspace` and a `Page` and adds a `EditorContainer` to itself. The `EditorContainer` is the main component of the editor, which is responsible for rendering the page and handling user interactions.
+
+By using this approach, you can easily extend the BlockSuite-based editor and control all block content by manipulating the `page` instance. Remember, the data layer API of the editor data is always based simply on **blocks**—you don't need to learn complex concepts like _operations_, _actions_, _commands_, _transforms_! And now, you can undo and redo your changes as you wish, achieving the effect of time travel:
+
+- `page.undo()` undoes a change.
+- `page.redo()` redoes a change.
+- `page.captureSync()` immediately adds a history record.
+
+::: tip
+By default, all block operations within a certain period of time are aggregated into a single history record, which is particularly useful for rich-text editing. If you added 10 blocks at once and need to undo each addition separately, you can use `page.captureSync()` before adding each block.
+:::
