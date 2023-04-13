@@ -35,16 +35,16 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       page.addBlock('affine:paragraph', {}, parent.id);
     }
 
+    const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
+    assertExists(blockModel);
     // default column
-    const tagColumnId = page.db.updateColumn({
+    const tagColumnId = blockModel.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
       hide: false,
       selection: [],
     });
-    const blockModel = page.getBlockById(databaseId);
-    assertExists(blockModel);
     page.updateBlock(blockModel, {
       columns: [tagColumnId],
     });
@@ -84,11 +84,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const { rowIds, columnIds } = props;
 
     const columns = columnIds
-      .map(id => model.page.db.getColumn(id))
+      .map(id => model.getColumn(id))
       .filter((s: Column | null): s is Column => s !== null);
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
-      return model.page.db.updateColumn(nonIdProps);
+      return model.updateColumn(nonIdProps);
     });
     model.page.updateBlock(model, {
       columns: newColumnIds,
@@ -98,13 +98,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     rowIds.forEach((rowId, rowIndex) => {
       const newRowId = newRowIds[rowIndex];
       columnIds.forEach((columnId, columnIndex) => {
-        const cellData = model.page.db.getCell(rowId, columnId);
+        const cellData = model.getCell(rowId, columnId);
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {
           value = value.clone();
         }
-        model.page.db.updateCell(newRowId, {
+        model.updateCell(newRowId, {
           columnId: newColumnIds[columnIndex],
           value,
         });

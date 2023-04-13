@@ -315,12 +315,12 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
     if (type === 'delete') {
       const selection = [...(this.column.selection as SelectTag[])];
-      this.databaseModel.page.db.updateColumn({
+      this.databaseModel.updateColumn({
         ...this.column,
         selection: selection.filter((_, i) => i !== index),
       });
       const select = selection[index];
-      this.databaseModel.page.db.deleteSelectedCellTag(this.column.id, select);
+      this.databaseModel.deleteSelectedCellTag(this.column.id, select);
       return;
     }
   };
@@ -369,11 +369,11 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
-    this.databaseModel.page.db.updateColumn({
+    this.databaseModel.updateColumn({
       ...this.column,
       selection,
     });
-    this.databaseModel.page.db.renameSelectedCellTag(
+    this.databaseModel.renameSelectedCellTag(
       this.column.id,
       oldSelect,
       newSelect

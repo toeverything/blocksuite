@@ -87,7 +87,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     if (!this.cell) {
       if (!this.cell && !this.vEditor) {
         const yText = new this.databaseModel.page.YText();
-        this.databaseModel.page.db.updateCell(this.rowModel.id, {
+        this.databaseModel.updateCell(this.rowModel.id, {
           columnId: this.column.id,
           value: yText,
         });

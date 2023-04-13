@@ -1,4 +1,6 @@
-<div id="editor-example" style="height: 250px; border: 1px solid grey; padding: 20px;"></div>
+# Using Editor
+
+TODO
 
 <script>
 import '@blocksuite/editor/themes/affine.css';
@@ -12,22 +14,22 @@ async function main() {
   const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
   const page = workspace.createPage('page0');
 
+  const title = new Text('Hello BlockSuite!');
+  const defaultContent = new Text('Start editing here!');
+
   // Create default blocks in the page
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Hello BlockSuite!'),
-  });
+  const pageBlockId = page.addBlock('affine:page', { title });
+
+  // Add the frame to the page
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  page.addBlock('affine:paragraph', {
-    text: new Text('Start editing here!'),
-  }, frameId);
+
+  // Add the paragraph to the frame
+  page.addBlock('affine:paragraph', { text: defaultContent }, frameId);
 
   // Init editor with the page store
   const editor = new EditorContainer();
   editor.page = page;
-  const node = document.querySelector('#editor-example');
-  node.innerHTML = '';
-
-  node.appendChild(editor);
+  document.querySelector('#editor-example').appendChild(editor);
 }
 
 if (typeof window !== 'undefined') {
@@ -47,18 +49,17 @@ async function main() {
   const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
   const page = workspace.createPage('page0');
 
+  const title = new Text('Hello BlockSuite!');
+  const defaultContent = new Text('Start editing here!');
+
   // Create default blocks in the page
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Hello BlockSuite!'),
-  });
+  const pageBlockId = page.addBlock('affine:page', { title });
+
+  // Add the frame to the page
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  page.addBlock(
-    'affine:paragraph',
-    {
-      text: new Text('Start editing here!'),
-    },
-    frameId
-  );
+
+  // Add the paragraph to the frame
+  page.addBlock('affine:paragraph', { text: defaultContent }, frameId);
 
   // Init editor with the page store
   const editor = new EditorContainer();
@@ -68,3 +69,5 @@ async function main() {
 
 main();
 ```
+
+<div id="editor-example" style="height: 250px; border: 1px solid grey; padding: 20px;"></div>

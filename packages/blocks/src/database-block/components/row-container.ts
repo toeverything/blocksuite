@@ -15,7 +15,7 @@ export function DataBaseRowContainer(
 ) {
   const databaseModel = databaseBlock.model;
   const columns = databaseModel.columns.map(id =>
-    databaseModel.page.db.getColumn(id)
+    databaseModel.getColumn(id)
   ) as Column[];
 
   const filteredChildren =

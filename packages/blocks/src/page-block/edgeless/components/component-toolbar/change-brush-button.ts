@@ -1,5 +1,5 @@
 import '../tool-icon-button.js';
-import '../../toolbar/brush-tool/color-panel.js';
+import '../color-panel.js';
 
 import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -12,10 +12,7 @@ import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type {
-  ColorEvent,
-  EdgelessColorPanel,
-} from '../../toolbar/brush-tool/color-panel.js';
+import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): Color | undefined {

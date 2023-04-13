@@ -1,5 +1,8 @@
+import { SHORT_KEY } from './index.js';
+
 export * from './consts/affine-style-consts.js';
 export * from './consts/block-hub.js';
+export * from './consts/platform.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';
@@ -10,10 +13,10 @@ export type ALLOW_DEFAULT = typeof ALLOW_DEFAULT;
 
 export const HOTKEYS = {
   ANY_KEY: '*',
-  UNDO: 'command+z,ctrl+z',
-  REDO: 'command+shift+z,ctrl+shift+z,ctrl+y',
+  UNDO: `${SHORT_KEY}+z`,
+  REDO: `${SHORT_KEY}+shift+z,ctrl+y`,
   BACKSPACE: 'backspace',
-  SELECT_ALL: 'command+a,ctrl+a',
+  SELECT_ALL: `${SHORT_KEY}+a`,
   SHIFT_UP: 'shift+up',
   SHIFT_DOWN: 'shift+down',
 

@@ -222,7 +222,7 @@ export class EdgelessSelectionManager {
       this._container.components.dragHandle?.hide();
     }
 
-    if (!hovered) {
+    if (!hovered || this.blockSelectionState.active) {
       return null;
     }
 

@@ -261,7 +261,7 @@ export class LinkPopover extends LitElement {
         @click=${this._onEdit}
       >
         ${EditIcon}
-        <tool-tip inert role="tooltip">Edit link</tool-tip>
+        <tool-tip inert role="tooltip">Edit</tool-tip>
       </icon-button>
     </div>`;
   }

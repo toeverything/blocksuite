@@ -65,6 +65,36 @@ export async function switchColumnType(
   await typeMenu.click();
 }
 
+export function getDatabaseBodyRows(page: Page) {
+  const rowContainer = page.locator('.affine-database-block-rows');
+  return rowContainer.locator('.database-row');
+}
+
+export function getDatabaseBodyRow(page: Page, rowIndex = 0) {
+  const rows = getDatabaseBodyRows(page);
+  return rows.nth(rowIndex);
+}
+
+export async function assertDatabaseTitleColumnText(
+  page: Page,
+  title: string,
+  index = 0
+) {
+  const text = await page.evaluate(index => {
+    const rowContainer = document.querySelector('.affine-database-block-rows');
+    const row = rowContainer?.querySelector(
+      `.database-row:nth-child(${index + 1})`
+    );
+    const titleColumnCell = row?.querySelector('.database-cell:nth-child(1)');
+    const richText = titleColumnCell?.querySelector('rich-text');
+    const editor = richText?.vEditor;
+    if (!editor) throw new Error('Cannot find database title column editor');
+    return editor.yText.toString();
+  }, index);
+
+  expect(text).toBe(title);
+}
+
 export function getDatabaseBodyCell(
   page: Page,
   {
@@ -77,8 +107,7 @@ export function getDatabaseBodyCell(
     cellClass: string;
   }
 ) {
-  const rows = page.locator('.affine-database-block-rows');
-  const row = rows.locator('.database-row').nth(rowIndex);
+  const row = getDatabaseBodyRow(page, rowIndex);
   const cell = row.locator('.database-cell').nth(columnIndex);
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
