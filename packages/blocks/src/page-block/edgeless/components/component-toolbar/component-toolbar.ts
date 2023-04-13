@@ -35,7 +35,7 @@ type CategorizedElements = {
 
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       user-select: none;
@@ -86,6 +86,8 @@ export class EdgelessComponentToolbar extends LitElement {
           .elements=${shapeElements}
           .page=${this.page}
           .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
         >
         </edgeless-change-shape-button>`
       : null;
@@ -131,7 +133,7 @@ export class EdgelessComponentToolbar extends LitElement {
       : null;
   }
 
-  render() {
+  override render() {
     const groupedSelected = this._groupSelected();
     const { shape, brush, connector, frame } = groupedSelected;
 

@@ -77,10 +77,7 @@ export function initMoveColumnHandlers(
     const x = event.clientX;
     const y = event.clientY;
 
-    const { x: offsetX, y: offsetY } = dragPreview.offset;
-    dragPreview.style.transform = `translate(${x + offsetX}px, ${
-      y + offsetY
-    }px)`;
+    dragPreview.style.transform = `translate(${x}px, ${y}px)`;
 
     const { dragIndex, previewBoundaries, indicatorHeight, headerColumns } =
       dragColumnConfig;

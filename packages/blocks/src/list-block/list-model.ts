@@ -3,7 +3,6 @@ import { literal } from 'lit/static-html.js';
 
 export const ListBlockSchema = defineBlockSchema({
   flavour: 'affine:list',
-  role: 'content',
   props: internal => ({
     type: 'bulleted' as ListType,
     text: internal.Text(),
@@ -11,6 +10,7 @@ export const ListBlockSchema = defineBlockSchema({
   }),
   metadata: {
     version: 1,
+    role: 'content',
     tag: literal`affine-list`,
   },
 });

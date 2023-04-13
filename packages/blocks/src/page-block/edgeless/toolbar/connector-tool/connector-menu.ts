@@ -1,4 +1,4 @@
-import '../brush-tool/color-panel.js';
+import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
@@ -9,9 +9,9 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
+import type { ColorEvent } from '../../components/color-panel.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { ColorEvent } from '../brush-tool/color-panel.js';
 
 function ConnectorModeButtonGroup(
   mouseMode: MouseMode,
@@ -58,7 +58,7 @@ function ConnectorModeButtonGroup(
 
 @customElement('edgeless-connector-menu')
 export class EdgelessConnectorMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 260px;
       z-index: 1;
@@ -134,7 +134,7 @@ export class EdgelessConnectorMenu extends LitElement {
     });
   };
 
-  render() {
+  override render() {
     if (this.mouseMode.type !== 'connector') return nothing;
 
     const { color } = this.mouseMode;

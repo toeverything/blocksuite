@@ -1,6 +1,6 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
-import '../../toolbar/brush-tool/color-panel.js';
+import '../color-panel.js';
 
 import type { Color } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -16,7 +16,7 @@ import type {
 } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { ColorEvent } from '../../toolbar/brush-tool/color-panel.js';
+import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 export const FRAME_BACKGROUND_COLORS: Color[] = [
@@ -40,7 +40,7 @@ function getMostCommonBackground(
 
 @customElement('edgeless-change-frame-button')
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       fill: none;
@@ -114,7 +114,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorSelectorPopper = createButtonPopper(
@@ -128,7 +128,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const selectedBackground =
       getMostCommonBackground(this.frames) || FRAME_BACKGROUND_COLORS[0];
 

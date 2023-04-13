@@ -56,7 +56,7 @@ function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
 
 @customElement('affine-reference')
 export class AffineReference extends WithDisposable(ShadowlessElement) {
-  static styles = css`
+  static override styles = css`
     .affine-reference {
       white-space: nowrap;
       word-break: break-word;
@@ -106,7 +106,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     pageId: '0',
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
@@ -127,7 +127,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     // TODO fix User may create a subpage ref node by paste or undo/redo.
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
     if (this._refAttribute.type !== 'Subpage') {
@@ -208,7 +208,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
-  render() {
+  override render() {
     const refMeta = this._refMeta;
     const isDisabled = !refMeta;
     if (isDisabled && this._refAttribute.type === 'Subpage') {

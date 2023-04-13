@@ -28,7 +28,7 @@ export class AffineCodeLine extends ShadowlessElement {
       })
     | null = null;
 
-  render() {
+  override render() {
     assertExists(
       this.highlightOptionsGetter,
       'highlightOptionsGetter is not set'

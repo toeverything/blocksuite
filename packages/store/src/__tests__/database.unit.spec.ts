@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
@@ -9,7 +10,6 @@ import type { Cell, Column, SelectTag } from '../../../global/src/database.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator } from '../index.js';
 import { Workspace } from '../index.js';
-import type { DatabaseManager } from '../workspace/database.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -26,7 +26,7 @@ const AffineSchemas = [
 describe('DatabaseManager', () => {
   let workspace: Workspace;
   let page: Page;
-  let db: DatabaseManager;
+  let db: DatabaseBlockModel;
 
   let pageBlockId: BaseBlockModel['id'];
   let frameBlockId: BaseBlockModel['id'];
@@ -48,42 +48,51 @@ describe('DatabaseManager', () => {
     workspace = new Workspace(options).register(AffineSchemas);
     page = workspace.createPage('page0');
     page.awarenessStore.setFlag('enable_database', true);
-    db = page.db;
 
     pageBlockId = page.addBlock('affine:page', {
       title: new page.Text('database test'),
     });
     frameBlockId = page.addBlock('affine:frame', {}, pageBlockId);
 
-    col1 = page.db.updateColumn({
+    databaseBlockId = page.addBlock(
+      'affine:database',
+      {
+        columns: [],
+        titleColumn: 'Title',
+      },
+      frameBlockId
+    );
+
+    const databaseModel = page.getBlockById(
+      databaseBlockId
+    ) as DatabaseBlockModel;
+    db = databaseModel;
+
+    col1 = db.updateColumn({
       name: 'Number',
       type: 'number',
       width: 200,
       hide: false,
       decimal: 0,
     });
-    col2 = page.db.updateColumn({
+    col2 = db.updateColumn({
       name: 'Single Select',
       type: 'select',
       width: 200,
       hide: false,
       selection,
     });
-    col3 = page.db.updateColumn({
+    col3 = db.updateColumn({
       name: 'Rich Text',
       type: 'rich-text',
       width: 200,
       hide: false,
     });
 
-    databaseBlockId = page.addBlock(
-      'affine:database',
-      {
-        columns: [col1, col2, col3],
-        titleColumn: 'Title',
-      },
-      frameBlockId
-    );
+    page.updateBlock(databaseModel, {
+      columns: [col1, col2, col3],
+    });
+
     p1 = page.addBlock(
       'affine:paragraph',
       {
@@ -99,11 +108,11 @@ describe('DatabaseManager', () => {
       databaseBlockId
     );
 
-    page.db.updateCell(p1, {
+    db.updateCell(p1, {
       columnId: col1,
       value: 0.1,
     });
-    page.db.updateCell(p2, {
+    db.updateCell(p2, {
       columnId: col2,
       value: [selection[1]],
     });
@@ -171,8 +180,8 @@ describe('DatabaseManager', () => {
       value: 42,
     };
 
-    page.db.updateColumn(column);
-    page.db.updateCell(modelId, cell);
+    db.updateColumn(column);
+    db.updateCell(modelId, cell);
 
     const model = page.getBlockById(modelId);
 
@@ -192,12 +201,12 @@ describe('DatabaseManager', () => {
       'databaseId'
     );
 
-    page.db.updateCell(newRowId, {
+    db.updateCell(newRowId, {
       columnId: col2,
       value: [selection[2]],
     });
 
-    const cell = page.db.getCell(newRowId, col2);
+    const cell = db.getCell(newRowId, col2);
     expect(cell).toEqual({
       columnId: col2,
       value: [selection[2]],
@@ -205,7 +214,7 @@ describe('DatabaseManager', () => {
   });
 
   test('copyCellsByColumn', () => {
-    const newColId = page.db.updateColumn({
+    const newColId = db.updateColumn({
       name: 'Copied Select',
       type: 'select',
       width: 200,
@@ -213,9 +222,9 @@ describe('DatabaseManager', () => {
       selection,
     });
 
-    page.db.copyCellsByColumn(col2, newColId);
+    db.copyCellsByColumn(col2, newColId);
 
-    const cell = page.db.getCell(p2, newColId);
+    const cell = db.getCell(p2, newColId);
     expect(cell).toEqual({
       columnId: newColId,
       value: [selection[1]],
@@ -223,23 +232,23 @@ describe('DatabaseManager', () => {
   });
 
   test('deleteCellsByColumn', () => {
-    page.db.deleteCellsByColumn(col2);
+    db.deleteCellsByColumn(col2);
 
-    const cell = page.db.getCell(p2, { id: col2 } as Column);
+    const cell = db.getCell(p2, col2);
     expect(cell).toBeNull();
   });
 
   // FIXME: https://github.com/toeverything/blocksuite/issues/1949
   test.skip('convertCellsByColumn', () => {
-    page.db.convertCellsByColumn(col1, 'select');
-    const cell = page.db.getCell(p1, { id: col1 } as Column);
+    db.convertCellsByColumn(col1, 'select');
+    const cell = db.getCell(p1, col1);
     expect(cell).toEqual({
       columnId: col1,
       value: ['0.1'],
     });
 
-    page.db.convertCellsByColumn(col1, 'rich-text');
-    const richTextCell = page.db.getCell(p1, { id: col1 } as Column);
+    db.convertCellsByColumn(col1, 'rich-text');
+    const richTextCell = db.getCell(p1, col1);
     expect(richTextCell?.value.toString()).toEqual('0.1');
   });
 
@@ -248,9 +257,9 @@ describe('DatabaseManager', () => {
       color: '#fff',
       value: 'Option 3',
     };
-    page.db.renameSelectedCellTag(col2, selection[1], newSelection);
+    db.renameSelectedCellTag(col2, selection[1], newSelection);
 
-    const cell = page.db.getCell(p2, col2);
+    const cell = db.getCell(p2, col2);
     expect(cell).toEqual({
       columnId: col2,
       value: [newSelection],
@@ -258,9 +267,9 @@ describe('DatabaseManager', () => {
   });
 
   test('deleteSelectedCellTag', () => {
-    page.db.deleteSelectedCellTag(col2, selection[1]);
+    db.deleteSelectedCellTag(col2, selection[1]);
 
-    const cell = page.db.getCell(p2, col2);
+    const cell = db.getCell(p2, col2);
     expect(cell).toEqual({
       columnId: col2,
       value: [],

@@ -139,7 +139,7 @@ export class IndexedDBDocProvider
     doc.on('destroy', this.destroy);
   }
 
-  async destroy() {
+  override async destroy() {
     if (this._storeTimeoutId) {
       clearTimeout(this._storeTimeoutId);
     }

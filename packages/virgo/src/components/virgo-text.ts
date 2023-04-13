@@ -7,7 +7,7 @@ import { ZERO_WIDTH_SPACE } from '../consts.js';
 
 @customElement('v-text')
 export class VText extends LitElement {
-  static styles = css`
+  static override styles = css`
     v-text {
       word-wrap: break-word;
       white-space: break-spaces;
@@ -20,7 +20,7 @@ export class VText extends LitElement {
   @property()
   styles: DirectiveResult<typeof StyleMapDirective> = styleMap({});
 
-  render() {
+  override render() {
     // we need to avoid \n appearing before and after the span element, which will
     // cause the sync problem about the cursor position
     return html`<span style=${this.styles} data-virgo-text="true"
@@ -28,7 +28,7 @@ export class VText extends LitElement {
     >`;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     return this;
   }
 }

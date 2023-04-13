@@ -13,7 +13,7 @@ export const createImageInputElement = () => {
   return fileInput;
 };
 
-export type Props = Partial<BaseBlockModel>;
+type Props = Partial<BaseBlockModel>;
 
 export const uploadImageFromLocal = async (
   page: Page

@@ -44,17 +44,16 @@ describe('brush element', () => {
     const props = BrushElement.getBoundProps(element, {
       x: 0,
       y: 0,
-      w: 208,
-      h: 208,
+      w: 204,
+      h: 204,
     });
-    expect(props.xywh).toBe('[0,0,208,208]');
-    expect(props.points).toMatchObject(
-      JSON.stringify(
-        JSON.parse(data.points).map(([x, y]: [number, number]) => [
-          x * 2,
-          y * 2,
-        ])
-      )
+    expect(props.xywh).toBe('[0,0,204,204]');
+    const points = JSON.parse(props.points).map(([x, y]: [number, number]) => [
+      Math.round(x * 100) / 100,
+      Math.round(y * 100) / 100,
+    ]);
+    expect(points).toMatchObject(
+      JSON.parse(data.points).map(([x, y]: [number, number]) => [x * 2, y * 2])
     );
   });
 });

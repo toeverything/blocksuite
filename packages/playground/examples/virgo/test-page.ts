@@ -129,11 +129,11 @@ export class RichText extends ShadowlessElement {
     this.vEditor = vEditor;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.vEditor.mount(this._container);
   }
 
-  render() {
+  override render() {
     return html`<style>
         .rich-text-container {
           width: 100%;
@@ -160,7 +160,7 @@ export class RichText extends ShadowlessElement {
 
 @customElement('tool-bar')
 export class ToolBar extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .tool-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -175,7 +175,7 @@ export class ToolBar extends ShadowlessElement {
     this.vEditor = vEditor;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const boldButton = this.querySelector('.bold');
     const italicButton = this.querySelector('.italic');
     const underlineButton = this.querySelector('.underline');
@@ -254,7 +254,7 @@ export class ToolBar extends ShadowlessElement {
     });
   }
 
-  render() {
+  override render() {
     return html`
       <div class="tool-bar">
         <sl-button class="bold">bold</sl-button>
@@ -272,7 +272,7 @@ export class ToolBar extends ShadowlessElement {
 
 @customElement('test-page')
 export class TestPage extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .container {
       display: grid;
       height: 100vh;
@@ -300,7 +300,7 @@ export class TestPage extends ShadowlessElement {
     }
   `;
 
-  firstUpdated() {
+  override firstUpdated() {
     const TEXT_ID = 'virgo';
     const yDocA = new Y.Doc();
     const yDocB = new Y.Doc();
@@ -343,7 +343,7 @@ export class TestPage extends ShadowlessElement {
     docB.appendChild(richTextB);
   }
 
-  render() {
+  override render() {
     return html`
       <div class="container">
         <div class="editors">

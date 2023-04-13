@@ -123,8 +123,6 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -139,8 +137,6 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -162,8 +158,6 @@ describe('addBlock', () => {
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'sys:children': ['1', '2', '3'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -202,10 +196,10 @@ describe('addBlock', () => {
       })
     );
     const block = (await waitOnce(page.slots.rootAdded)) as BaseBlockModel;
-    if (Array.isArray(block)) {
+    if (!Array.isArray(block) || !block[0]) {
       throw new Error('');
     }
-    assert.equal(block.flavour, 'affine:page');
+    assert.equal(block[0].flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
@@ -314,8 +308,6 @@ describe('deleteBlock', () => {
     });
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -336,8 +328,6 @@ describe('deleteBlock', () => {
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -357,8 +347,6 @@ describe('deleteBlock', () => {
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'ext:cells': {},
-        'ext:columns': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',

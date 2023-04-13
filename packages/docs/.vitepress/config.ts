@@ -26,24 +26,12 @@ export default defineConfig({
         text: 'Using BlockSuite',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
-          {
-            text: 'Fundamental Concepts',
-            link: '/concepts',
-            items: [
-              {
-                text: 'Workspaces and Pages',
-                link: '/concepts#workspaces-and-pages',
-              },
-              {
-                text: 'Flavoured Blocks',
-                link: '/concepts#flavoured-blocks',
-              },
-            ],
-          },
-          { text: '🚧 Collaboration and Data Persistence', link: '' },
+          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
+          { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
+          { text: 'Handling Events', link: '/handling-events' },
+          { text: 'Using Editor', link: '/using-editor' },
+          { text: '🚧 Data Persistence', link: '/persistence' },
           { text: '🚧 Defining Your Block', link: '' },
-          { text: '🚧 Building Your Framework', link: '' },
-          { text: 'Editor Example', link: '/editor-example' },
           // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
         ],
       },

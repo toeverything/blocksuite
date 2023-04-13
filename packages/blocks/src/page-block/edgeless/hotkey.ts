@@ -10,6 +10,10 @@ import {
   handleUp,
 } from '../utils/index.js';
 import { FRAME_BACKGROUND_COLORS } from './components/component-toolbar/change-frame-button.js';
+import {
+  DEFAULT_FILL_COLOR,
+  DEFAULT_STROKE_COLOR,
+} from './components/component-toolbar/change-shape-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
 
@@ -63,7 +67,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
 
   hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
-    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shap`, etc.
+    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
     const { selected } = edgeless.getSelection().blockSelectionState;
@@ -104,7 +108,12 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     })
   );
   hotkey.addListener('s', () =>
-    setMouseMode(edgeless, { type: 'shape', shape: 'rect', color: '#000000' })
+    setMouseMode(edgeless, {
+      type: 'shape',
+      shape: 'rect',
+      fillColor: DEFAULT_FILL_COLOR,
+      strokeColor: DEFAULT_STROKE_COLOR,
+    })
   );
 
   // issue #1814

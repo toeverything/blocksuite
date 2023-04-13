@@ -1,14 +1,11 @@
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../../../../__internal__/index.js';
 
 @customElement('affine-database-column-drag-preview')
 export class ColumnDragPreview extends ShadowlessElement {
-  @property()
-  offset = { x: 0, y: 0 };
-
-  render() {
+  override render() {
     return html`
       <style>
         affine-database-column-drag-preview {

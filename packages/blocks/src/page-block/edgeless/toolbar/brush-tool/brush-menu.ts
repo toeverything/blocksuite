@@ -1,4 +1,4 @@
-import './color-panel.js';
+import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
 import type { Color } from '@blocksuite/phasor';
@@ -8,8 +8,8 @@ import { customElement, property } from 'lit/decorators.js';
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { BrushSize } from '../../../../__internal__/index.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
+import type { ColorEvent } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { ColorEvent } from './color-panel.js';
 
 function BrushSizeButtonGroup(
   mouseMode: MouseMode,
@@ -52,7 +52,7 @@ function BrushSizeButtonGroup(
 
 @customElement('edgeless-brush-menu')
 export class EdgelessBrushMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 260px;
       z-index: 1;
@@ -138,7 +138,7 @@ export class EdgelessBrushMenu extends LitElement {
     });
   };
 
-  render() {
+  override render() {
     if (this.mouseMode.type !== 'brush') return nothing;
 
     const { color } = this.mouseMode;

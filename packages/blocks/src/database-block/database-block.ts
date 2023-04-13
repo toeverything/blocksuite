@@ -108,7 +108,7 @@ export class DatabaseBlockComponent
 {
   flavour = 'affine:database' as const;
 
-  static styles = styles;
+  static override styles = styles;
 
   get slots() {
     return this.host.slots;
@@ -148,12 +148,10 @@ export class DatabaseBlockComponent
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): Column[] {
-    return this.model.columns.map(id =>
-      this.model.page.db.getColumn(id)
-    ) as Column[];
+    return this.model.columns.map(id => this.model.getColumn(id)) as Column[];
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
 
@@ -162,7 +160,7 @@ export class DatabaseBlockComponent
     disposables.addFromEvent(this, 'click', this._onClick);
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
 
@@ -175,7 +173,7 @@ export class DatabaseBlockComponent
     );
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
   }
@@ -226,6 +224,7 @@ export class DatabaseBlockComponent
   };
 
   private _addRow = (index?: number) => {
+    const currentSearchState = this._searchState;
     this._resetSearchState();
     this._resetHoverState();
 
@@ -236,6 +235,8 @@ export class DatabaseBlockComponent
     requestAnimationFrame(() => {
       this._columnHeaderComponent.setDragHandleHeight();
     });
+    // save the search state
+    this._setSearchState(currentSearchState);
   };
 
   private _addColumn = (index: number) => {
@@ -250,7 +251,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumn(schema);
+    const id = this.model.updateColumn(schema);
     const columns = [...currentColumns];
     columns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {
@@ -262,7 +263,7 @@ export class DatabaseBlockComponent
     });
   };
 
-  render() {
+  override render() {
     const rows = DataBaseRowContainer(
       this,
       this._filteredRowIds,

@@ -171,8 +171,8 @@ const styles = css`
 export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   value: SelectTag | undefined = undefined;
 
-  static styles = styles;
-  static tag = literal`affine-database-select-cell-editing`;
+  static override styles = styles;
+  static override tag = literal`affine-database-select-cell-editing`;
 
   @property()
   mode: SelectMode = SelectMode.Single;
@@ -194,12 +194,12 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     return this.mode === SelectMode.Single;
   }
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     this.style.width = `${SELECT_EDIT_POPUP_WIDTH}px`;
     this._selectInput.focus();
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     createPopper(
       {
@@ -315,12 +315,12 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
     if (type === 'delete') {
       const selection = [...(this.column.selection as SelectTag[])];
-      this.databaseModel.page.db.updateColumn({
+      this.databaseModel.updateColumn({
         ...this.column,
         selection: selection.filter((_, i) => i !== index),
       });
       const select = selection[index];
-      this.databaseModel.page.db.deleteSelectedCellTag(this.column.id, select);
+      this.databaseModel.deleteSelectedCellTag(this.column.id, select);
       return;
     }
   };
@@ -369,11 +369,11 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
-    this.databaseModel.page.db.updateColumn({
+    this.databaseModel.updateColumn({
       ...this.column,
       selection,
     });
-    this.databaseModel.page.db.renameSelectedCellTag(
+    this.databaseModel.renameSelectedCellTag(
       this.column.id,
       oldSelect,
       newSelect
@@ -382,7 +382,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     this._editingIndex = -1;
   };
 
-  render() {
+  override render() {
     const selection = this.column.selection as SelectTag[];
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {

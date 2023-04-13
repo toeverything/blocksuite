@@ -10,6 +10,10 @@ import type {
   ShapeMouseMode,
 } from '../../../../__internal__/index.js';
 import { WithDisposable } from '../../../../__internal__/index.js';
+import {
+  DEFAULT_FILL_COLOR,
+  DEFAULT_STROKE_COLOR,
+} from '../../components/component-toolbar/change-shape-button.js';
 import { createButtonPopper } from '../../components/utils.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -17,7 +21,7 @@ import type { EdgelessShapeMenu } from './shape-menu.js';
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -53,7 +57,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this.edgeless.slots.mouseModeUpdated.emit(mode);
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._shapeMenuPopper = createButtonPopper(
@@ -69,19 +73,20 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         this._setMouseMode({
           type: 'shape',
           shape,
-          color: '#000000',
+          fillColor: DEFAULT_FILL_COLOR,
+          strokeColor: DEFAULT_STROKE_COLOR,
         });
       })
     );
     super.firstUpdated(changedProperties);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._disposables?.dispose();
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
     const selectedShape = type === 'shape' ? this.mouseMode.shape : undefined;
 
@@ -93,7 +98,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._setMouseMode({
             type: 'shape',
             shape: 'rect',
-            color: '#000000',
+            fillColor: DEFAULT_FILL_COLOR,
+            strokeColor: DEFAULT_STROKE_COLOR,
           });
           this._toggleShapeMenu();
         }}

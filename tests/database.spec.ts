@@ -5,6 +5,7 @@ import {
   assertColumnWidth,
   assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
+  assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
   clickDatabaseOutside,
   copyByKeyboard,
@@ -16,6 +17,8 @@ import {
   focusRichText,
   getBlockModel,
   getBoundingBox,
+  getDatabaseBodyRow,
+  getDatabaseBodyRows,
   getDatabaseHeaderColumn,
   getDatabaseMouse,
   getFirstColumnCell,
@@ -686,4 +689,55 @@ test('should support drag and drop to move columns', async ({ page }) => {
 
   const { text } = await getDatabaseHeaderColumn(page, 3);
   expect(text).toBe('column1');
+});
+
+test('support drag and drop the add button to insert row', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await initDatabaseDynamicRowWithData(page, 'b', true);
+
+  await focusDatabaseHeader(page);
+  const newRecord = page.locator('.new-record');
+  const box = await getBoundingBox(newRecord);
+
+  const startX = box.x + box.width / 2;
+  const startY = box.y + box.height / 2;
+  const row0 = getDatabaseBodyRow(page, 0);
+  const box0 = await getBoundingBox(row0);
+  const endX = box0.x + box0.width / 2;
+  const endY = box0.y;
+  await dragBetweenCoords(
+    page,
+    { x: startX, y: startY },
+    // The drag judgment range is: [-20, 20]
+    { x: endX, y: endY - 21 },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+        await expect(page.locator('.affine-drag-indicator')).toBeHidden();
+      },
+    }
+  );
+
+  await dragBetweenCoords(
+    page,
+    { x: startX, y: startY },
+    { x: endX, y: endY },
+    {
+      steps: 50,
+      beforeMouseUp: async () => {
+        await waitNextFrame(page);
+        await expect(page.locator('.affine-drag-indicator')).toBeVisible();
+      },
+    }
+  );
+  const rows = getDatabaseBodyRows(page);
+  expect(await rows.count()).toBe(3);
+
+  await type(page, '1');
+  await assertDatabaseTitleColumnText(page, '1');
 });

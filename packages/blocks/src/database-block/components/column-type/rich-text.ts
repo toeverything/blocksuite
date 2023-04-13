@@ -63,7 +63,7 @@ function toggleStyle(
 
 @customElement('affine-database-rich-text-cell')
 class TextCell extends DatabaseCellElement<Y.Text> {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       align-items: center;
@@ -73,7 +73,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   `;
 
   vEditor: AffineVEditor | null = null;
-  static tag = literal`affine-database-rich-text-cell`;
+  static override tag = literal`affine-database-rich-text-cell`;
 
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
@@ -87,7 +87,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     if (!this.cell) {
       if (!this.cell && !this.vEditor) {
         const yText = new this.databaseModel.page.YText();
-        this.databaseModel.page.db.updateCell(this.rowModel.id, {
+        this.databaseModel.updateCell(this.rowModel.id, {
           columnId: this.column.id,
           value: yText,
         });
@@ -188,7 +188,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     }
   };
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (this.cell && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,19 +204,19 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     }
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._handleClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this.removeEventListener('click', this._handleClick);
     this.vEditor?.unmount();
     this.vEditor = null;
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         .rich-text-container {
@@ -231,7 +231,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
 @customElement('affine-database-rich-text-column-property-editing')
 class TextColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
-  static tag = literal`affine-database-rich-text-column-property-editing`;
+  static override tag = literal`affine-database-rich-text-column-property-editing`;
 }
 
 export const RichTextColumnRenderer = defineColumnRenderer(
