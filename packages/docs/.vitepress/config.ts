@@ -28,7 +28,7 @@ export default defineConfig({
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
-          { text: '🚧 Handling Events', link: '/handling-events' },
+          { text: 'Handling Events', link: '/handling-events' },
           { text: '🚧 Using Editor', link: '/using-editor' },
           { text: '🚧 Data Persistence', link: '/persistence' },
           { text: '🚧 Defining Your Block', link: '' },
