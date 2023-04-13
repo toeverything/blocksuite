@@ -3,13 +3,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { Detail } from './types.js';
 
-const IS_SAFARI = /Apple Computer/.test(globalThis.navigator?.vendor);
-export const IS_IOS =
-  IS_SAFARI &&
-  (/Mobile\/\w+/.test(globalThis.navigator?.userAgent) ||
-    globalThis.navigator?.maxTouchPoints > 2);
-export const IS_MAC = /Mac/i.test(globalThis.navigator?.platform);
-
 /**
  * Whether the block supports rendering its children.
  */

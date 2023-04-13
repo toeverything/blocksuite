@@ -226,6 +226,7 @@ export class DatabaseBlockComponent
   };
 
   private _addRow = (index?: number) => {
+    const currentSearchState = this._searchState;
     this._resetSearchState();
     this._resetHoverState();
 
@@ -236,6 +237,8 @@ export class DatabaseBlockComponent
     requestAnimationFrame(() => {
       this._columnHeaderComponent.setDragHandleHeight();
     });
+    // save the search state
+    this._setSearchState(currentSearchState);
   };
 
   private _addColumn = (index: number) => {

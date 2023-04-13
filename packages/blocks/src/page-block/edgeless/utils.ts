@@ -433,3 +433,28 @@ export function handleElementChangedEffectForConnector(
     });
   }
 }
+
+export function getBackgroundGrid(
+  viewportX: number,
+  viewportY: number,
+  zoom: number,
+  showGrid: boolean
+) {
+  const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
+  const gap = 20 * step * zoom;
+  const translateX = -viewportX * zoom + gap / 2;
+  const translateY = -viewportY * zoom + gap / 2;
+
+  const gridStyle = {
+    backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
+  };
+  const defaultStyle = {};
+  const style = showGrid ? gridStyle : defaultStyle;
+
+  return {
+    style,
+    gap,
+    translateX,
+    translateY,
+  };
+}

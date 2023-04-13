@@ -201,8 +201,7 @@ export class Renderer implements SurfaceViewport {
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
 
-    ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, width, height);
-    ctx.translate(-width / dpr / zoom, -height / dpr / zoom);
+    ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
 
     const elements = this.gridManager.search(viewBound);
     for (const element of elements) {
