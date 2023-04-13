@@ -327,7 +327,13 @@ function locatorComponentToolbarMoreButton(page: Page) {
     .locator('edgeless-more-button');
   return moreButton;
 }
-type Action = 'bringToFront' | 'sendToBack' | 'changeFrameColor';
+type Action =
+  | 'bringToFront'
+  | 'sendToBack'
+  | 'changeFrameColor'
+  | 'changeShapeFillColor'
+  | 'changeShapeStrokeColor';
+
 export async function triggerComponentToolbarAction(
   page: Page,
   action: Action
@@ -364,6 +370,22 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
+    case 'changeShapeFillColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-shape-button')
+        .locator('.fill-color-button');
+      await button.click();
+      break;
+    }
+    case 'changeShapeStrokeColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-shape-button')
+        .locator('.stroke-color-button');
+      await button.click();
+      break;
+    }
   }
 }
 
@@ -374,5 +396,21 @@ export async function changeEdgelessFrameBackground(
   const colorButton = page.locator(
     `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
   );
+  await colorButton.click();
+}
+
+export async function changeShapeFillColor(page: Page, color: `#${string}`) {
+  const colorButton = page
+    .locator('edgeless-change-shape-button')
+    .locator('.color-panel-container.fill-color')
+    .locator(`.color-unit[aria-label="${color}"]`);
+  await colorButton.click();
+}
+
+export async function changeShapeStrokeColor(page: Page, color: `#${string}`) {
+  const colorButton = page
+    .locator('edgeless-change-shape-button')
+    .locator('.color-panel-container.stroke-color')
+    .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }

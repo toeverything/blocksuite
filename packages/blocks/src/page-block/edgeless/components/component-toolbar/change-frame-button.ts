@@ -1,6 +1,6 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
-import '../../toolbar/brush-tool/color-panel.js';
+import '../color-panel.js';
 
 import type { Color } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -16,7 +16,7 @@ import type {
 } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { ColorEvent } from '../../toolbar/brush-tool/color-panel.js';
+import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 export const FRAME_BACKGROUND_COLORS: Color[] = [

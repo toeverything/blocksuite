@@ -58,6 +58,7 @@ import {
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
   DEFAULT_FRAME_WIDTH,
+  getBackgroundGrid,
   getCursorMode,
 } from './utils.js';
 
@@ -121,7 +122,7 @@ export class EdgelessPageBlockComponent
   mouseRoot!: HTMLElement;
 
   @property()
-  showGrid = false;
+  showGrid = true;
 
   @property()
   page!: Page;
@@ -459,18 +460,16 @@ export class EdgelessPageBlockComponent
     const hoverState = _selection.getHoverState();
     const hoverRect = EdgelessHoverRect(hoverState, zoom);
 
-    const translateX = -viewportX * zoom;
-    const translateY = -viewportY * zoom;
-
-    const gridStyle = {
-      backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
-    };
-    const defaultStyle = {};
-    const style = this.showGrid ? gridStyle : defaultStyle;
-
     const cursor = {
       cursor: getCursorMode(this.mouseMode),
     };
+
+    const { style, gap, translateX, translateY } = getBackgroundGrid(
+      viewportX,
+      viewportY,
+      zoom,
+      this.showGrid
+    );
 
     return html`
       <div class="affine-edgeless-surface-block-container">
@@ -486,7 +485,7 @@ export class EdgelessPageBlockComponent
             position: relative;
             overflow: hidden;
             height: 100%;
-            background-size: ${20 * zoom}px ${20 * zoom}px;
+            background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: #fff;
           }

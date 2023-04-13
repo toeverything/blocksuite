@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/blocks';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
@@ -45,8 +45,8 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     type: 'default',
   };
 
-  @state()
-  private showGrid = false;
+  @property()
+  showGrid = true;
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -121,14 +121,6 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       'affine.switch-mouse-mode',
       ({ detail }) => {
         this.mouseMode = detail;
-      }
-    );
-
-    this._disposables.addFromEvent(
-      window,
-      'affine:switch-edgeless-display-mode',
-      ({ detail }) => {
-        this.showGrid = detail;
       }
     );
 

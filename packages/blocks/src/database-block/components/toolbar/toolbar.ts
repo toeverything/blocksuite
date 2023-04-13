@@ -10,10 +10,14 @@ import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { ShadowlessElement } from '../../../__internal__/index.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../../__internal__/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { SearchState } from '../../types.js';
 import { onClickOutside } from '../../utils.js';
+import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
 type CellValues = string[];
@@ -28,7 +32,7 @@ type DatabaseMap = Record<string, CellValues>;
 
 const styles = css`
   .affine-database-toolbar {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 26px;
   }
@@ -134,10 +138,14 @@ const styles = css`
   .new-record > tool-tip {
     max-width: 280px;
   }
+
+  .show-toolbar {
+    display: flex;
+  }
 `;
 
 @customElement('affine-database-toolbar')
-export class DatabaseToolbar extends ShadowlessElement {
+export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static styles = styles;
 
   @property()
@@ -167,7 +175,19 @@ export class DatabaseToolbar extends ShadowlessElement {
   @query('.search-container')
   private _searchContainer!: HTMLDivElement;
 
+  @query('.new-record')
+  private _newRecord!: HTMLDivElement;
+
   private _toolbarAction!: ToolbarActionPopup | undefined;
+
+  firstUpdated() {
+    initAddNewRecordHandlers(
+      this._newRecord,
+      this,
+      this._disposables,
+      this.addRow
+    );
+  }
 
   private get _databaseMap() {
     const databaseMap: DatabaseMap = {};
@@ -300,7 +320,6 @@ export class DatabaseToolbar extends ShadowlessElement {
   };
 
   render() {
-    if (!this.hoverState) return null;
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
       this.searchState === SearchState.Searching;
@@ -334,7 +353,9 @@ export class DatabaseToolbar extends ShadowlessElement {
       </div>
     `;
 
-    return html`<div class="affine-database-toolbar">
+    return html`<div
+      class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
+    >
       <div class="affine-database-toolbar-item search-container">
         ${searchTool}
       </div>
@@ -348,6 +369,7 @@ export class DatabaseToolbar extends ShadowlessElement {
       </div>
       <div
         class="has-tool-tip affine-database-toolbar-item new-record"
+        draggable="true"
         @click=${() => this.addRow(0)}
       >
         ${PlusIcon}<span>New Record</span>

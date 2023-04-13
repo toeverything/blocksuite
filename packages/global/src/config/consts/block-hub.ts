@@ -17,6 +17,7 @@ import {
   TextIcon,
   TodoIcon,
 } from '../icons.js';
+import { SHORT_KEY } from './short-key.js';
 
 export type BlockConfig<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,63 +36,63 @@ export const paragraphConfig = [
     flavour: 'affine:paragraph',
     type: 'text',
     name: 'Text',
-    hotkey: 'command+option+0,ctrl+shift+0',
+    hotkey: `${SHORT_KEY}+option+0,${SHORT_KEY}+shift+0`,
     icon: TextIcon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h1',
     name: 'Heading 1',
-    hotkey: 'command+option+1,ctrl+shift+1',
+    hotkey: `${SHORT_KEY}+option+1,${SHORT_KEY}+shift+1`,
     icon: H1Icon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h2',
     name: 'Heading 2',
-    hotkey: 'command+option+2,ctrl+shift+2',
+    hotkey: `${SHORT_KEY}+option+2,${SHORT_KEY}+shift+2`,
     icon: H2Icon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h3',
     name: 'Heading 3',
-    hotkey: 'command+option+3,ctrl+shift+3',
+    hotkey: `${SHORT_KEY}+option+3,${SHORT_KEY}+shift+3`,
     icon: H3Icon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h4',
     name: 'Heading 4',
-    hotkey: 'command+option+4,ctrl+shift+4',
+    hotkey: `${SHORT_KEY}+option+4,${SHORT_KEY}+shift+4`,
     icon: H4Icon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h5',
     name: 'Heading 5',
-    hotkey: 'command+option+5,ctrl+shift+5',
+    hotkey: `${SHORT_KEY}+option+5,${SHORT_KEY}+shift+5`,
     icon: H5Icon,
   },
   {
     flavour: 'affine:paragraph',
     type: 'h6',
     name: 'Heading 6',
-    hotkey: 'command+option+6,ctrl+shift+6',
+    hotkey: `${SHORT_KEY}+option+6,${SHORT_KEY}+shift+6`,
     icon: H6Icon,
   },
   {
     flavour: 'affine:list',
     type: 'bulleted',
     name: 'Bulleted List',
-    hotkey: 'command+option+8,ctrl+shift+8',
+    hotkey: `${SHORT_KEY}+option+8,${SHORT_KEY}+shift+8`,
     icon: BulletedListIcon,
   },
   {
     flavour: 'affine:list',
     type: 'numbered',
     name: 'Numbered List',
-    hotkey: 'command+option+9,ctrl+shift+9',
+    hotkey: `${SHORT_KEY}+option+9,${SHORT_KEY}+shift+9`,
     icon: NumberedListIcon,
   },
   {
@@ -105,7 +106,7 @@ export const paragraphConfig = [
     flavour: 'affine:code',
     type: undefined,
     name: 'Code Block',
-    hotkey: 'command+option+c,ctrl+alt+c',
+    hotkey: `command+option+c,ctrl+alt+c`,
     icon: CodeBlockIcon,
   },
   {
@@ -119,7 +120,7 @@ export const paragraphConfig = [
     flavour: 'affine:divider',
     type: 'divider',
     name: 'Divider',
-    hotkey: 'command+option+d,ctrl+shift+d',
+    hotkey: `${SHORT_KEY}+option+d,${SHORT_KEY}+shift+d`,
     icon: DividerIcon,
   },
   // {
