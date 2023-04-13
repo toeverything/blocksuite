@@ -15,14 +15,16 @@ Example usage:
 ```ts
 import { Text } from '@blocksuite/store';
 
-const props = { text: new Text('New paragraph') };
-const newBlockId = page.addBlock('affine:paragraph', props);
+const props = { title: new Text('My New Page') };
+const newBlockId = page.addBlock('affine:page', props);
 ```
 
-`page.addBlock` returns the auto-generated `id` of the added block, rather than the block instance. The block instance will be added synchronously to the page, and can be retrieved by calling `page.getBlockById(id)`.
+`page.addBlock` returns the auto-generated `id` of the added block, rather than the block instance. The block instance will be added synchronously to the page, and can be retrieved by calling `page.getBlockById(id)`. To access any block on the page's block tree, simply reference it using `page.root.children[0].children[1]`.
+
+Each block instance on a page is a plain JavaScript model, representing a node on the block tree. At a minimum, each block node contains three fields: `id` for the unique identifier of the block, `flavour` for the block type, and `children` for any child blocks. Note that a paragraph block can also nest another paragraph block using the `children` field without an intermediate level.
 
 ::: info
-These is a good reason behind this design, which is the key to make the APIs collaborative by default (🚧).
+These is a good reason behind the design that returns `id` rather than block instance for `addBlock`, which is the key to make the APIs collaborative by default (documentation WIP).
 :::
 
 The `page.updateBlock` method is used to modify the properties of an existing block. It takes two arguments: the block instance to be updated and an object containing the updated properties.
@@ -40,7 +42,7 @@ Similarly, you can use the `page.deleteBlock` method to remove a block from the 
 In [BlockSuite playground](https://blocksuite-toeverything.vercel.app/?init), you can run `workspace.doc.toJSON()` in the console to see the basic block structure in BlockSuite.
 :::
 
-## Basic Block Flavours
+## Basic Block Flavours and Roles
 
 In the prebuilt editor, creating a simple page requires following block flavours: `affine:page`, `affine:frame`, and `affine:paragraph`.
 
@@ -52,4 +54,11 @@ In the prebuilt editor, creating a simple page requires following block flavours
 The `affine:frame` block is designed to interop with the whiteboard mode. If you only need the document editor, simply placing all other blocks within a single frame will be sufficient.
 :::
 
-To provide an out-of-the-box solution, the `affine:code`, `affine:list`, and `affine:embed` flavours are also built into the `AffineSchema` and can be freely reused.
+In BlockSuite, the role of blocks can be categorized into two distinct types: `ContentBlock`, which contains atomic content, and `HubBlock`, which serves as an empty block container.
+
+- Examples of `HubBlock` include `affine:page`, `affine:frame`, and `affine:database`.
+- Examples of `ContentBlock` include `affine:paragraph`, `affine:list`, `affine:code`, and `affine:embed`.
+
+## Defining Block Schema
+
+TODO

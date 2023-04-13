@@ -25,6 +25,8 @@ Here is how we create a new page with id `page0` within the workspace:
 const page = workspace.createPage('page0');
 ```
 
+The `page` instance provides a set of core APIs for performing block operations, e.g., `page.addBlock`, `page.updateBlock`, and `page.deleteBlock`. These APIs will be further introduced in the following sections of the document.
+
 ::: info
 🚧 A page within a workspace can also be loaded asynchronously.
 :::
