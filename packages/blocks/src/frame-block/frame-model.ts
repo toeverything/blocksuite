@@ -6,7 +6,7 @@ export const FrameBlockSchema = defineBlockSchema({
   role: 'content',
   props: () => ({
     xywh: '[0,0,720,480]',
-    background: 'var(--affine-background-secondary-color)',
+    background: '#FBFAFC',
   }),
   metadata: {
     version: 1,
