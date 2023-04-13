@@ -17,7 +17,7 @@ import {
   TextIcon,
   TodoIcon,
 } from '../icons.js';
-import { SHORT_KEY } from './short-key.js';
+import { SHORT_KEY } from './platform.js';
 
 export type BlockConfig<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
