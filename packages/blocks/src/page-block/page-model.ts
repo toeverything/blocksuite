@@ -10,7 +10,7 @@ export class PageBlockModel extends BaseBlockModel<PageProps> {
   override onCreated() {
     super.onCreated();
 
-    this.page.slots.onBlockUpdate.on(({ type }) => {
+    this.page.slots.blockUpdated.on(({ type }) => {
       if (type === 'add') {
         this.page.workspace.setPageMeta(this.page.id, {
           title: this.title.toString(),

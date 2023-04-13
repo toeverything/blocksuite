@@ -74,10 +74,6 @@ export class Page extends Space<FlatBlockMap> {
     onYEvent: new Slot<{
       event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
     }>(),
-    onBlockUpdate: new Slot<{
-      type: 'add' | 'delete' | 'update';
-      id: string;
-    }>(),
     blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
@@ -384,8 +380,6 @@ export class Page extends Space<FlatBlockMap> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
-
-      this.slots.onBlockUpdate.emit({ type: 'add', id });
     });
 
     this.slots.blockUpdated.emit({ type: 'add', id });
@@ -466,8 +460,6 @@ export class Page extends Space<FlatBlockMap> {
       const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
       syncBlockProps(schema, yBlock, props, this._ignoredKeys);
-
-      this.slots.onBlockUpdate.emit({ type: 'update', id: model.id });
     });
 
     model.propsUpdated.emit();
@@ -556,8 +548,6 @@ export class Page extends Space<FlatBlockMap> {
           });
         }
       }
-
-      this.slots.onBlockUpdate.emit({ type: 'delete', id: model.id });
     });
 
     this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
@@ -593,7 +583,6 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.textUpdated.dispose();
     this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
-    this.slots.onBlockUpdate.dispose();
     this.slots.onYEvent.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
