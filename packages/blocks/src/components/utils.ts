@@ -9,7 +9,7 @@ export const createKeydownObserver = ({
   onMove,
   onConfirm,
   onEsc,
-  ignoreKeys = [],
+  interceptor = (e, next) => next(),
   abortController,
 }: {
   target: HTMLElement;
@@ -17,15 +17,11 @@ export const createKeydownObserver = ({
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
   onEsc?: () => void;
-  ignoreKeys?: string[];
+  interceptor?: (e: KeyboardEvent, next: () => void) => void;
   abortController: AbortController;
 }) => {
   let query = '';
   const keyDownListener = (e: KeyboardEvent) => {
-    if (ignoreKeys.includes(e.key)) {
-      return;
-    }
-
     e.stopPropagation();
     if (
       // Abort when press modifier key to avoid weird behavior
@@ -88,12 +84,17 @@ export const createKeydownObserver = ({
     onUpdateQuery(query);
   };
 
-  target.addEventListener('keydown', keyDownListener, {
+  const listenerWithMiddleware = (e: KeyboardEvent) =>
+    interceptor(e, () => keyDownListener(e));
+
+  target.addEventListener('keydown', listenerWithMiddleware, {
     // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
     capture: true,
   });
   abortController.signal.addEventListener('abort', () => {
-    target.removeEventListener('keydown', keyDownListener, { capture: true });
+    target.removeEventListener('keydown', listenerWithMiddleware, {
+      capture: true,
+    });
   });
 
   if (onEsc) {
