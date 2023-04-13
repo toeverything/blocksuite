@@ -35,7 +35,7 @@ class NumberCellEditing extends DatabaseCellElement<number> {
       padding: 0;
       border: 0;
       font-size: 16px;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-family: var(--affine-font-family);
       outline: none;
       background: var(--affine-white);

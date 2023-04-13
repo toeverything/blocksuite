@@ -44,7 +44,7 @@ export class EdgelessToolbar extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
@@ -83,7 +83,7 @@ export class EdgelessToolbar extends LitElement {
 
     .zoom-percent:hover {
       color: var(--affine-primary-color);
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
   `;
 

@@ -9,7 +9,7 @@ export const editLinkStyle = css`
     height: 112px;
     padding: 12px;
     box-shadow: var(--affine-popover-shadow);
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     border-radius: 10px;
     display: grid;
     grid-template-columns: auto auto auto;
@@ -164,7 +164,7 @@ export const linkPopoverStyle = css`
     height: 34px;
     padding: 0 12px;
 
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0 10px 10px 10px;
   }

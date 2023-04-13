@@ -75,7 +75,7 @@ const styles = css`
     height: 28px;
   }
   .affine-database-block-footer:hover {
-    background-color: var(--affine-hover-background);
+    background-color: var(--affine-hover-color);
   }
   .affine-database-block-footer:hover .affine-database-block-add-row {
     display: flex;

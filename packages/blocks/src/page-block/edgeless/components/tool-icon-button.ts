@@ -12,7 +12,7 @@ export class EdgelessToolIconButton extends LitElement {
       display: flex;
       align-items: center;
       padding: 4px;
-      color: var(--affine-line-number-color);
+      color: var(--affine-text-secondary-color);
       margin-right: 8px;
       margin-top: 8px;
       margin-bottom: 8px;
@@ -34,7 +34,7 @@ export class EdgelessToolIconButton extends LitElement {
 
     .icon-container[disabled] {
       cursor: not-allowed;
-      color: var(--affine-disable-color);
+      color: var(--affine-text-disable-color);
     }
 
     ${tooltipStyle}

@@ -24,7 +24,7 @@ export const styles = css`
     padding: 12px 0;
     display: flex;
 
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);

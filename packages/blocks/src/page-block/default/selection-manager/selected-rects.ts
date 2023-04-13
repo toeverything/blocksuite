@@ -29,7 +29,7 @@ export class AffinePageSelectedRects extends WithDisposable(LitElement) {
     :host > div {
       position: absolute;
       border-radius: 5px;
-      background: var(--affine-selected-color);
+      background: var(--affine-hover-color);
     }
   `;
 

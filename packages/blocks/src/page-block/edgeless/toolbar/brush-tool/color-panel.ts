@@ -33,7 +33,7 @@ export class EdgelessColorPanel extends LitElement {
       flex-wrap: wrap;
       gap: 12px;
       box-sizing: border-box;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-primary-color);
     }
 
     .color-container {

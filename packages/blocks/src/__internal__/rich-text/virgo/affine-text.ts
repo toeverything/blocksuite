@@ -22,8 +22,8 @@ export function affineTextStyles(
   if (props.code) {
     inlineCodeStyle = {
       'font-family': 'var(--affine-font-code-family)',
-      background: 'var(--affine-code-background)',
-      color: 'var(--affine-code-color)',
+      background: 'var(--affine-background-code-block)',
+      color: 'var(--affine-text-primary-color)',
       'border-radius': '5px',
       padding: '0 5px',
       'font-size': 'calc(var(--affine-font-base) - 4px)',

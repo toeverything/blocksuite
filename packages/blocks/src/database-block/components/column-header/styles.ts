@@ -14,7 +14,7 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
   }
   .affine-database-column-header > .affine-database-column:first-child {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
 
   .affine-database-column {
@@ -71,8 +71,8 @@ export const styles = css`
   .affine-database-column-content:hover {
     background: linear-gradient(
         0deg,
-        var(--affine-hover-background),
-        var(--affine-hover-background)
+        var(--affine-hover-color),
+        var(--affine-hover-color)
       ),
       var(--affine-white);
   }
@@ -85,7 +85,7 @@ export const styles = css`
     display: flex;
     align-items: center;
     gap: 4px;
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     font-size: 14px;
     font-weight: 600;
   }

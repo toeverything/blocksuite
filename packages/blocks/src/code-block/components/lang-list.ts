@@ -14,7 +14,7 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-popover-background);
+        background: var(--affine-background-primary-color);
         border-radius: 10px;
         top: 24px;
         z-index: 1;

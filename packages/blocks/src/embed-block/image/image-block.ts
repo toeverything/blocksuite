@@ -60,7 +60,7 @@ export class ImageBlockComponent extends ShadowlessElement {
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-page-background);
+      background-color: var(--affine-white-90);
       margin: 0;
     }
 
@@ -109,7 +109,7 @@ export class ImageBlockComponent extends ShadowlessElement {
     }
 
     .resizable-img {
-      border: 1px solid var(--affine-page-background);
+      border: 1px solid var(--affine-white-90);
     }
     .resizable-img:hover {
       border: 1px solid var(--affine-primary-color);

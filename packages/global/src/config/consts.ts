@@ -1,4 +1,3 @@
-export * from './consts/affine-style-consts.js';
 export * from './consts/block-hub.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';

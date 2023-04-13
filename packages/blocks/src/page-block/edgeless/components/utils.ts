@@ -23,7 +23,7 @@ export function getCommonRectStyle(
     pointerEvents: 'none',
     boxSizing: 'border-box',
     zIndex: '1',
-    backgroundColor: !active && selected ? 'var(--affine-selected-color)' : '',
+    backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
   };
 }
 

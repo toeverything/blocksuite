@@ -30,10 +30,10 @@ import {
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
-fill="var(--affine-block-handle-color)" stroke="var(--affine-block-handle-color)"
+fill="var(--affine-icon-color)" stroke="var(--affine-icon-color)"
 stroke-width="1.5"/>
 <path d="M5 8.5L7.5 10.5L10.5 7"
-stroke="var(--affine-page-background)"
+stroke="var(--affine-white-90)"
 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 `;
 
@@ -96,7 +96,7 @@ export class DragPreview extends ShadowlessElement {
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-base);
         line-height: var(--affine-line-height);
-        color: var(--affine-edgeless-text-color);
+        color: var(--affine-text-primary-color);
         font-weight: 400;
         top: 0;
         left: 0;
@@ -162,7 +162,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       height: 100%;
       position: absolute;
       left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
-      border-right: 1px solid var(--affine-block-handle-color);
+      border-right: 1px solid var(--affine-icon-color);
       transition: opacity ease-in-out 300ms;
       pointer-events: none;
     }
@@ -174,7 +174,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       justify-content: center;
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
-      /* background-color: var(--affine-page-background); */
+      /* background-color: var(--affine-white-90); */
       pointer-events: auto;
     }
 
@@ -808,7 +808,7 @@ export class DragHandle extends WithDisposable(LitElement) {
               height="10"
               rx="2.5"
               transform="rotate(45 7.7782 0.707107)"
-              stroke="var(--affine-block-handle-color)"
+              stroke="var(--affine-icon-color)"
             />
           </svg>
         </div>

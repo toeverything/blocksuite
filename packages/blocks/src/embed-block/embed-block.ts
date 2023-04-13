@@ -26,7 +26,7 @@ export class EmbedBlockComponent extends ShadowlessElement {
     }
 
     .affine-embed-wrapper-caption:disabled {
-      background-color: var(--affine-page-background);
+      background-color: var(--affine-white-90);
     }
 
     .affine-embed-wrapper .caption-show {

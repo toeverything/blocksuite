@@ -40,7 +40,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       justify-content: center;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     menu-divider {
@@ -52,7 +52,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }

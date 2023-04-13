@@ -40,7 +40,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
-      background: var(--affine-code-block-background);
+      background: var(--affine-background-code-block);
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -92,10 +92,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       min-width: 101px;
     }
 
-    .affine-code-block-container.selected {
-      background-color: var(--affine-selected-color);
-    }
-
     .affine-code-block-container rich-text {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
@@ -107,7 +103,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       text-align: right;
       left: 20px;
       line-height: var(--affine-line-height);
-      color: var(--affine-line-number-color);
+      color: var(--affine-text-secondary-color);
     }
 
     .affine-code-block-container .rich-text-container {
@@ -149,7 +145,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-page-background);
+      background-color: var(--affine-white-90);
       margin: 0;
     }
 

@@ -32,7 +32,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       display: block;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     edgeless-shape-menu {

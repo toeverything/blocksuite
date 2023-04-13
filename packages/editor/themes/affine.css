@@ -8,27 +8,7 @@
 :root {
   --affine-theme-mode: light;
   --affine-editor-mode: page;
-  --affine-page-background: #fff;
-  --affine-popover-background: #fff;
-  --affine-hover-background: rgba(0, 0, 0, 0.04);
-  --affine-code-background: #f2f5f9;
-  --affine-tooltip-background: #261499;
-  --affine-hub-background: #fbfbfc;
-  --affine-card-hover-background: #f8f9ff;
-  --affine-text-color: #424149;
-  --affine-secondary-text-color: #8e8d91;
-  --affine-edgeless-text-color: #3a4c5c;
-  --affine-link-color2: #5438ff;
-  --affine-link-visited-color: #5438ff;
-  --affine-block-handle-color: #c7c3d9;
-  --affine-code-color: #77757d;
-  --affine-code-block-background: #fafbfd;
-  --affine-selected-color: rgba(84, 56, 255, 0.04);
-  --affine-disable-color: #a9a9ad;
-  --affine-tooltip-color: #fff;
-  --affine-line-number-color: #77757d;
-  --affine-modal-shadow: 0px 0px 20px 4px rgba(65, 64, 72, 0.24),
-    0px 0px 12px rgba(66, 65, 73, 0.14);
+
   --affine-popover-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
   --affine-font-h1: 28px;
   --affine-font-h2: 26px;

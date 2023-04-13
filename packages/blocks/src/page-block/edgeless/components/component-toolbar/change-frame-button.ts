@@ -45,7 +45,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       display: block;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     edgeless-color-panel {
@@ -54,7 +54,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 68px;
       padding: 8px 12px;
       flex-wrap: wrap;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -72,7 +72,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 16px;
       box-sizing: border-box;
       border-radius: 50%;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-size: 12px;
     }
   `;

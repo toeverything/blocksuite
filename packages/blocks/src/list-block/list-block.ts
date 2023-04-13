@@ -34,7 +34,7 @@ export class ListBlockComponent extends ShadowlessElement {
       margin-top: 0;
     }
     .affine-list-block-container.selected {
-      background-color: var(--affine-selected-color);
+      background-color: var(--affine-hover-color);
     }
     .affine-list-rich-text-wrapper {
       display: flex;

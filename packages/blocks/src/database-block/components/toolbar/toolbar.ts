@@ -55,7 +55,7 @@ const styles = css`
   }
   .affine-database-toolbar-item.more-action:hover,
   .more-action.active {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .affine-database-search-container {
     display: flex;
@@ -74,7 +74,7 @@ const styles = css`
   .search-container-expand {
     width: 138px;
     padding: 8px 12px;
-    background-color: var(--affine-hover-background);
+    background-color: var(--affine-hover-color);
   }
   .search-input-container {
     display: flex;
@@ -126,8 +126,8 @@ const styles = css`
       0px 0px 0px 0.5px var(--affine-black-10);
     background: linear-gradient(
         0deg,
-        var(--affine-hover-background),
-        var(--affine-hover-background)
+        var(--affine-hover-color),
+        var(--affine-hover-color)
       ),
       var(--affine-white);
   }

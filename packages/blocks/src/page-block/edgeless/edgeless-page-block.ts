@@ -89,7 +89,7 @@ export class EdgelessPageBlockComponent
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
-      color: var(--affine-edgeless-text-color);
+      color: var(--affine-text-primary-color);
       font-weight: 400;
     }
 
