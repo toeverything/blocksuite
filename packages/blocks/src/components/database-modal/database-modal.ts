@@ -42,7 +42,7 @@ const databaseViews: DatabaseView[] = [
 
 @customElement('affine-database-modal')
 export class DatabaseModal extends LitElement {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   page!: Page;
@@ -107,7 +107,7 @@ export class DatabaseModal extends LitElement {
     this.abortController.abort();
   }
 
-  render() {
+  override render() {
     return html`<div class="overlay-root">
       <div class="overlay-mask" @click=${this._hide}></div>
       <div class="modal-container">

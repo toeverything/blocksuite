@@ -14,7 +14,7 @@ export class VirgoLine extends LitElement {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
 
-  get textContent() {
+  override get textContent() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
@@ -24,15 +24,15 @@ export class VirgoLine extends LitElement {
     return result;
   }
 
-  protected firstUpdated(): void {
+  protected override firstUpdated(): void {
     this.style.display = 'block';
   }
 
-  render() {
+  override render() {
     return html`<div>${this.elements}</div>`;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     return this;
   }
 }

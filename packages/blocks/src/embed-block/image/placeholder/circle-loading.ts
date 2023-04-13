@@ -6,7 +6,7 @@ import { ShadowlessElement } from '../../../__internal__/index.js';
 const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockCircleLoading extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     @keyframes affine-image-block-rotate {
       from {
         rotate: 0deg;
@@ -44,7 +44,7 @@ export class AffineImageBlockCircleLoading extends ShadowlessElement {
     }
   `;
 
-  render() {
+  override render() {
     return html`<div class="affine-image-block-container">
       <div class="affine-image-block-loading"></div>
     </div>`;

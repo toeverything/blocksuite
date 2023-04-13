@@ -42,7 +42,7 @@ export function affineTextStyles(
 
 @customElement('affine-text')
 export class AffineText extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     affine-text {
       white-space: break-spaces;
       word-break: break-word;
@@ -54,7 +54,7 @@ export class AffineText extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 
-  render() {
+  override render() {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
       : styleMap({});

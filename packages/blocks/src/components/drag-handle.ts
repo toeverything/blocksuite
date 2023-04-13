@@ -46,7 +46,7 @@ export type DroppingType = 'none' | 'before' | 'after' | 'database';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
-  static styles = css`
+  static override styles = css`
     .affine-drag-indicator {
       position: absolute;
       top: 0;
@@ -65,7 +65,7 @@ export class DragIndicator extends LitElement {
   @property()
   rect: Rect | null = null;
 
-  render() {
+  override render() {
     if (!this.rect) {
       return null;
     }
@@ -84,7 +84,7 @@ export class DragPreview extends ShadowlessElement {
   @property()
   offset = { x: 0, y: 0 };
 
-  render() {
+  override render() {
     return html`<style>
       affine-drag-preview {
         --x: 0px;
@@ -146,7 +146,7 @@ const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
 export class DragHandle extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       top: 0;
       left: 0;
@@ -387,7 +387,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     this._scale = value;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.style.display = 'none';
     this.style.position = 'absolute';
     this._indicator = <DragIndicator>(
@@ -433,7 +433,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     disposables.addFromEvent(this._dragHandle, 'dragend', this.onDragEnd);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
 
     // cleanup
@@ -793,7 +793,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     this.hide(true);
   };
 
-  render() {
+  override render() {
     return html`
       <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle" draggable="true">

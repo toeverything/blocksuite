@@ -16,10 +16,10 @@ import { ConnectorMode } from './types.js';
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
   color = '#000000' as const;
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
+  override x = 0;
+  override y = 0;
+  override w = 0;
+  override h = 0;
 
   mode: ConnectorMode = ConnectorMode.Orthogonal;
   lineWidth = 2;
@@ -96,7 +96,10 @@ export class ConnectorElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  static getProps(element: BaseElement, rawProps: Record<string, unknown>) {
+  static override getProps(
+    element: BaseElement,
+    rawProps: Record<string, unknown>
+  ) {
     const props = simplePick(rawProps, [
       'index',
       'mode',
@@ -111,7 +114,7 @@ export class ConnectorElement extends BaseElement {
     return props;
   }
 
-  static getBoundProps(
+  static override getBoundProps(
     element: BaseElement,
     bound: IBound
   ): Record<string, string> {

@@ -42,7 +42,7 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
 
 @customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -82,7 +82,7 @@ export class EdgelessBrushToolButton extends LitElement {
     });
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'brush') {
         this._brushMenu?.dispose();
@@ -95,13 +95,13 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._brushMenu?.dispose();
     this._brushMenu = null;
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
 
     return html`

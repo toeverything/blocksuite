@@ -45,7 +45,7 @@ setBasePath(basePath);
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
       --sl-input-font-size-small: var(--affine-font-xs);
@@ -99,7 +99,7 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.page;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     this._setThemeMode(this._dark && matchMedia.matches);
     matchMedia.addEventListener('change', this._darkModeChange);
@@ -107,7 +107,7 @@ export class DebugMenu extends ShadowlessElement {
     return this;
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
@@ -243,7 +243,7 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
@@ -271,7 +271,7 @@ export class DebugMenu extends ShadowlessElement {
     this._styleMenu.hide();
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
@@ -298,7 +298,7 @@ export class DebugMenu extends ShadowlessElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         .debug-menu {

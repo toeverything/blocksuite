@@ -56,7 +56,7 @@ export class DefaultPageBlockComponent
   extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
-  static styles = css`
+  static override styles = css`
     .affine-default-viewport {
       position: relative;
       overflow-x: hidden;
@@ -367,7 +367,7 @@ export class DefaultPageBlockComponent
     }
   };
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
         this._initTitleVEditor();
@@ -375,7 +375,7 @@ export class DefaultPageBlockComponent
     }
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
         page: this.page,
@@ -487,7 +487,7 @@ export class DefaultPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const { page, selection } = this;
 
     hotkey.setScope(HOTKEY_SCOPE.AFFINE_PAGE);
@@ -529,7 +529,7 @@ export class DefaultPageBlockComponent
     this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 
-  render() {
+  override render() {
     requestAnimationFrame(() => {
       this.selection.refreshRemoteSelection();
     });

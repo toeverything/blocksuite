@@ -65,7 +65,7 @@ export class ShapeElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  static getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
+  static override getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
     return simplePick(rawProps, [
       'shapeType',
       'index',

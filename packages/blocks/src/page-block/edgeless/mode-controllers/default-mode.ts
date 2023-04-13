@@ -56,7 +56,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
-  enableHover = true;
+  override enableHover = true;
   dragType = DefaultModeDragType.None;
 
   private _startRange: Range | null = null;
@@ -64,7 +64,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
 
-  get draggingArea() {
+  override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),

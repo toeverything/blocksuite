@@ -77,7 +77,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     };
   }
 
-  async onBlockPasted(
+  override async onBlockPasted(
     model: BlockModels['affine:database'],
     props: Record<string, string[]>
   ) {

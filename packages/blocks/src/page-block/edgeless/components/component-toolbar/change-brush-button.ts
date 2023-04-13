@@ -29,7 +29,7 @@ function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
 
 @customElement('edgeless-change-brush-button')
 export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       flex-direction: row;
@@ -133,7 +133,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorPanelPopper = createButtonPopper(
@@ -147,7 +147,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const selectedColor = getMostCommonColor(this.elements);
     const style = {
       backgroundColor: selectedColor ?? '#fff',
