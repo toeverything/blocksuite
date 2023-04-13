@@ -71,6 +71,9 @@ export class Page extends Space<FlatBlockMap> {
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
+    onYEvent: new Slot<{
+      event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
+    }>(),
     blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
@@ -377,13 +380,6 @@ export class Page extends Space<FlatBlockMap> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
-
-      // TODO: remove this
-      if (flavour === 'affine:page') {
-        this.workspace.setPageMeta(this.id, {
-          title: blockProps.title?.toString(),
-        });
-      }
     });
 
     this.slots.blockUpdated.emit({ type: 'add', id });
@@ -554,10 +550,7 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id: model.id,
-    });
+    this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
   }
 
   trySyncFromExistingDoc() {
@@ -590,6 +583,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.textUpdated.dispose();
     this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
+    this.slots.onYEvent.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -679,11 +673,7 @@ export class Page extends Space<FlatBlockMap> {
     blockModel.role = schema.model.role;
     blockModel.tag = schema.model.tag;
 
-    schema.model.toModel?.({
-      model: blockModel,
-      block,
-      internal: internalPrimitives,
-    });
+    blockModel.onCreated();
 
     return blockModel;
   }
@@ -856,29 +846,10 @@ export class Page extends Space<FlatBlockMap> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
-      } else if (
-        // TODO: add event slots to let model handle this
-        event.path.includes('prop:yColumns') ||
-        event.path.includes('prop:yCells')
-      ) {
-        const blocks = this.getBlockByFlavour('affine:database');
-        blocks.forEach(block => {
-          // todo: refactor here
-          //  force update all blocks that used tagSchema, which is not efficient
-          //  but it's ok for now
-          block.propsUpdated.emit();
-        });
-      }
-    } else {
-      // TODO: add event slots to let model handle this
-      if (event.path.includes('props:yCells')) {
-        // todo: refactor here
-        const blockId = event.path[2] as string;
-        const block = this.getBlockById(blockId);
-        assertExists(block);
-        block.propsUpdated.emit();
       }
     }
+
+    this.slots.onYEvent.emit({ event });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).

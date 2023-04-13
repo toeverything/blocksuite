@@ -21,6 +21,20 @@ type SerializedCells = {
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
+  override onCreated() {
+    super.onCreated();
+
+    this.page.slots.onYEvent.on(({ event }) => {
+      if (
+        event.path.includes(this.id) &&
+        (event.path.includes('prop:yColumns') ||
+          event.path.includes('prop:yCells'))
+      ) {
+        this.propsUpdated.emit();
+      }
+    });
+  }
+
   get serializedCells(): SerializedCells {
     return this.yCells.toJSON();
   }

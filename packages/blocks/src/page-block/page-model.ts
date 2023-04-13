@@ -1,9 +1,28 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import type { Text } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
+
+type PageProps = {
+  title: Text;
+};
+
+export class PageBlockModel extends BaseBlockModel<PageProps> {
+  override onCreated() {
+    super.onCreated();
+
+    this.page.slots.blockUpdated.on(({ type }) => {
+      if (type === 'add') {
+        this.page.workspace.setPageMeta(this.page.id, {
+          title: this.title.toString(),
+        });
+      }
+    });
+  }
+}
 
 export const PageBlockSchema = defineBlockSchema({
   flavour: 'affine:page',
-  props: internal => ({
+  props: (internal): PageProps => ({
     title: internal.Text(),
   }),
   metadata: {
@@ -11,6 +30,5 @@ export const PageBlockSchema = defineBlockSchema({
     role: 'root',
     tag: literal`affine-page`,
   },
+  toModel: () => new PageBlockModel(),
 });
-
-export type PageBlockModel = SchemaToModel<typeof PageBlockSchema>;
