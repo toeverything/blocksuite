@@ -56,7 +56,7 @@ export class ThemeObserver extends Slot<CssVariable> {
     });
   }
 
-  dispose() {
+  override dispose() {
     super.dispose();
     this._observer?.disconnect();
   }
