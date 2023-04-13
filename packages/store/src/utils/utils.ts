@@ -29,16 +29,9 @@ export function assertValidChildren(
   });
 }
 
-export function initInternalProps(
-  yBlock: YBlock,
-  props: Partial<BlockProps>,
-  ext: Record<string, unknown>
-) {
+export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
-  Object.entries(ext).forEach(([key, value]) => {
-    yBlock.set(`ext:${key}`, value);
-  });
 
   const yChildren = new Y.Array();
   yBlock.set('sys:children', yChildren);
@@ -108,7 +101,9 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
 
     const key = prefixedKey.replace('prop:', '');
     const realValue = yBlock.get(prefixedKey);
-    if (realValue instanceof Y.Array) {
+    if (realValue instanceof Y.Map) {
+      props[key] = realValue;
+    } else if (realValue instanceof Y.Array) {
       props[key] = realValue.toArray();
     } else {
       props[key] = prefixedProps[prefixedKey];

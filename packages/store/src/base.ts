@@ -1,4 +1,3 @@
-import type { BlockModels } from '@blocksuite/global/types';
 import { Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 import { z } from 'zod';
@@ -43,26 +42,14 @@ export const BlockSchema = z.object({
       .args(z.custom<InternalPrimitives>())
       .returns(z.record(z.any()))
       .optional(),
-    toModel: z
-      .function()
-      .args(
-        z.custom<{
-          model: BaseBlockModel;
-          block: YBlock;
-          internal: InternalPrimitives;
-        }>()
-      )
-      .returns(z.void())
-      .optional(),
+    toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
 });
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
 
-export type PropsSetter<Props extends Record<string, unknown>> = (
-  props: Props
-) => Partial<Props>;
-export type PropsGetter<Props extends Record<string, unknown>> = (
+export type PropsSetter<Props> = (props: Props) => Partial<Props>;
+export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
 
@@ -75,7 +62,7 @@ interface StaticValue {
 export type SchemaToModel<
   Schema extends {
     model: {
-      props: PropsGetter<Record<string, unknown>>;
+      props: PropsGetter<object>;
       flavour: string;
     };
   }
@@ -87,24 +74,20 @@ export type SchemaToModel<
 export function defineBlockSchema<
   Flavour extends string,
   Role extends RoleType,
-  Props extends Record<string, unknown>,
+  Props extends object,
   Ext extends Record<string, unknown>,
   Metadata extends Readonly<{
     version: number;
+    role: Role;
     tag: StaticValue;
   }>,
-  Model extends BaseBlockModel & Props & Ext & { flavour: Flavour }
+  Model extends BaseBlockModel<Props>
 >(options: {
   flavour: Flavour;
-  role: Role;
   metadata: Metadata;
   props?: (internalPrimitives: InternalPrimitives) => Props;
   ext?: (internalPrimitives: InternalPrimitives) => Ext;
-  toModel?: (options: {
-    model: Model;
-    block: YBlock;
-    internal: InternalPrimitives;
-  }) => void;
+  toModel?: () => Model;
 }): {
   version: number;
   model: {
@@ -117,32 +100,27 @@ export function defineBlockSchema<
 
 export function defineBlockSchema({
   flavour,
-  role,
   props,
   metadata,
   ext,
   toModel,
 }: {
   flavour: string;
-  role: RoleType;
   metadata: {
     version: number;
+    role: RoleType;
     tag: StaticValue;
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   ext?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
-  toModel?: (options: {
-    model: BaseBlockModel;
-    block: YBlock;
-    internal: InternalPrimitives;
-  }) => void;
+  toModel?: () => BaseBlockModel;
 }): BlockSchemaType {
   const schema = {
     version: metadata.version,
     model: {
       tag: metadata.tag,
+      role: metadata.role,
       flavour,
-      role,
       props,
       ext,
       toModel,
@@ -152,35 +130,35 @@ export function defineBlockSchema({
   return schema;
 }
 
-export class BaseBlockModel<Props = unknown>
-  implements BlockSuiteInternal.IBaseBlockProps
-{
+function MagicProps(): {
+  new <Props>(): Props;
+} {
+  // @ts-ignore
+  return class {};
+}
+
+// @ts-ignore
+export class BaseBlockModel<
+  Props extends object = object
+> extends MagicProps()<Props> {
   static version: number;
-  flavour!: keyof BlockModels & string;
+  flavour!: string;
   tag!: StaticValue;
   role!: RoleType;
-  id: string;
+  page!: Page;
+  id!: string;
+  yBlock!: YBlock;
 
-  page: Page;
   propsUpdated = new Slot();
   childrenUpdated = new Slot();
   childMap = new Map<string, number>();
 
+  children: BaseBlockModel[] = [];
+
+  // TODO: remove these
   type?: string;
-  children: BaseBlockModel[];
-  // cells?: Y.Map<Y.Map<unknown>>;
-  // columns?: Y.Map<unknown>;
   text?: Text;
   sourceId?: string;
-
-  constructor(
-    page: Page,
-    props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>
-  ) {
-    this.page = page;
-    this.id = props.id;
-    this.children = [];
-  }
 
   isEmpty() {
     return this.children.length === 0;

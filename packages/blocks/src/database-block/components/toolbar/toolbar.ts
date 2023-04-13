@@ -196,7 +196,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const { serializedCells } = this.targetModel.page.db;
+    const { serializedCells } = this.targetModel;
     const rowIds = this.targetModel.children.map(child => child.id);
 
     rowIds.forEach(rowId => {

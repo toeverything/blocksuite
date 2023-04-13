@@ -3,9 +3,9 @@ import { literal } from 'lit/static-html.js';
 
 export const DividerBlockSchema = defineBlockSchema({
   flavour: 'affine:divider',
-  role: 'content',
   metadata: {
     version: 1,
+    role: 'content',
     tag: literal`affine-divider`,
   },
 });

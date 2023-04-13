@@ -148,9 +148,7 @@ export class DatabaseBlockComponent
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): Column[] {
-    return this.model.columns.map(id =>
-      this.model.page.db.getColumn(id)
-    ) as Column[];
+    return this.model.columns.map(id => this.model.getColumn(id)) as Column[];
   }
 
   connectedCallback() {
@@ -253,7 +251,7 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.page.db.updateColumn(schema);
+    const id = this.model.updateColumn(schema);
     const columns = [...currentColumns];
     columns.splice(index, 0, id);
     this.model.page.updateBlock(this.model, {

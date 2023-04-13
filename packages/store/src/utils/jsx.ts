@@ -35,8 +35,8 @@ const IGNORED_PROPS = [
   'sys:flavour',
   'sys:children',
   'prop:xywh',
-  'ext:cells',
-  'ext:columns',
+  'prop:yCells',
+  'prop:yColumns',
 ];
 
 export function yDocToJSXNode(

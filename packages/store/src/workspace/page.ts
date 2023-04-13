@@ -1,5 +1,4 @@
 import { debug } from '@blocksuite/global/debug';
-import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
@@ -16,7 +15,6 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { DatabaseManager } from './database.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
 
@@ -24,12 +22,13 @@ export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
 /** JSON-serializable properties of a block */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BlockProps = Record<string, any> & {
+export type BlockProps = {
   id: string;
   flavour: string;
   text?: Text;
   children?: BaseBlockModel[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [index: string]: any;
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -56,18 +55,15 @@ type PageOptions = {
 };
 
 export class Page extends Space<FlatBlockMap> {
-  private _workspace: Workspace;
-  private _idGenerator: IdGenerator;
+  private readonly _workspace: Workspace;
+  private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
   private _root: (BaseBlockModel | null)[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
   // TODO use schema
-  private _ignoredKeys = new Set<string>(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Object.keys(new BaseBlockModel(this, { id: null! }))
-  );
+  private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
 
   readonly slots = {
     historyUpdated: new Slot(),
@@ -85,7 +81,6 @@ export class Page extends Space<FlatBlockMap> {
       subpageIds: string[];
     }>(),
   };
-  readonly db: DatabaseManager;
 
   constructor({
     id,
@@ -97,7 +92,6 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
-    this.db = new DatabaseManager(this);
   }
 
   get readonly() {
@@ -309,24 +303,17 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  addBlocks<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
+  addBlocks(
     blocks: Array<{
-      flavour: Flavour;
-      blockProps?: Partial<
-        ALLProps[Flavour] &
-          Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-      >;
+      flavour: string;
+      blockProps?: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>>;
     }>,
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string[] {
     const ids: string[] = [];
     blocks.forEach(block => {
-      const id = this.addBlock<ALLProps, Flavour>(
+      const id = this.addBlock(
         block.flavour,
         block.blockProps ?? {},
         parent,
@@ -340,16 +327,9 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  addBlock<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
-    flavour: Flavour,
-    blockProps: Partial<
-      ALLProps[Flavour] &
-        Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-    > = {},
+  addBlock(
+    flavour: string,
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -378,8 +358,7 @@ export class Page extends Space<FlatBlockMap> {
       assertValidChildren(this._yBlocks, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      const ext = schema.model.ext?.(internalPrimitives) ?? {};
-      initInternalProps(yBlock, clonedProps, ext);
+      initInternalProps(yBlock, clonedProps);
 
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
@@ -399,6 +378,7 @@ export class Page extends Space<FlatBlockMap> {
         yChildren.insert(index, [id]);
       }
 
+      // TODO: remove this
       if (flavour === 'affine:page') {
         this.workspace.setPageMeta(this.id, {
           title: blockProps.title?.toString(),
@@ -406,10 +386,7 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'add',
-      id,
-    });
+    this.slots.blockUpdated.emit({ type: 'add', id });
 
     return id;
   }
@@ -468,7 +445,8 @@ export class Page extends Space<FlatBlockMap> {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const yBlock = this._yBlocks.get(model.id) as YBlock;
+    const yBlock = this._yBlocks.get(model.id);
+    assertExists(yBlock);
 
     this.transact(() => {
       // TODO diff children changes
@@ -510,11 +488,8 @@ export class Page extends Space<FlatBlockMap> {
 
     if (props.length > 1) {
       const blocks: Array<{
-        flavour: keyof BlockModelProps;
-        blockProps: Partial<
-          BlockModelProps &
-            Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
-        >;
+        flavour: string;
+        blockProps: Partial<BlockProps & Omit<BlockProps, 'id' | 'flavour'>>;
       }> = [];
       props.forEach(prop => {
         const { flavour, ...blockProps } = prop;
@@ -685,29 +660,24 @@ export class Page extends Space<FlatBlockMap> {
     } else if (!props.id) {
       throw new Error('Block id is not defined');
     }
-    const blockModel = new BaseBlockModel(
-      this,
-      props as PropsWithId<Omit<BlockProps, 'children'>>
-    );
+    const blockModel = schema.model.toModel
+      ? schema.model.toModel()
+      : new BaseBlockModel();
 
-    blockModel.flavour = schema.model.flavour as never;
-    blockModel.role = schema.model.role;
-    blockModel.tag = schema.model.tag;
+    blockModel.id = props.id;
     const modelProps = schema.model.props?.(internalPrimitives) ?? {};
     Object.entries(modelProps).forEach(([key, value]) => {
       // @ts-ignore
-      blockModel[key] = props[key] ?? value;
-
-      if (value instanceof Text) {
-        const yText = block.get(`prop:${key}`) as Y.Text;
-        Object.assign(blockModel, { [key]: new Text(yText) });
-      }
+      blockModel[key] =
+        value instanceof Text
+          ? new Text(block.get(`prop:${key}`) as Y.Text)
+          : props[key] ?? value;
     });
-    const exts = schema.model.ext?.(internalPrimitives) ?? {};
-    Object.entries(exts).forEach(([key, value]) => {
-      // @ts-ignore
-      blockModel[key] = block.get(`ext:${key}`) ?? value;
-    });
+    blockModel.page = this;
+    blockModel.yBlock = block;
+    blockModel.flavour = schema.model.flavour;
+    blockModel.role = schema.model.role;
+    blockModel.tag = schema.model.tag;
 
     schema.model.toModel?.({
       model: blockModel,
@@ -887,8 +857,9 @@ export class Page extends Space<FlatBlockMap> {
           model.childrenUpdated.emit();
         }
       } else if (
-        event.path.includes('ext:columns') ||
-        event.path.includes('ext:cells')
+        // TODO: add event slots to let model handle this
+        event.path.includes('prop:yColumns') ||
+        event.path.includes('prop:yCells')
       ) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
@@ -899,7 +870,8 @@ export class Page extends Space<FlatBlockMap> {
         });
       }
     } else {
-      if (event.path.includes('ext:cells')) {
+      // TODO: add event slots to let model handle this
+      if (event.path.includes('props:yCells')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);

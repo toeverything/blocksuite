@@ -341,10 +341,10 @@ export class EditColumnPopup extends LitElement {
     columnId: string,
     schemaProperties: Partial<Column>
   ) => {
-    const currentSchema = this.targetModel.page.db.getColumn(columnId);
+    const currentSchema = this.targetModel.getColumn(columnId);
     assertExists(currentSchema);
     const schema = { ...currentSchema, ...schemaProperties };
-    this.targetModel.page.db.updateColumn(schema);
+    this.targetModel.updateColumn(schema);
   };
 
   private _changeColumnType = (columnId: string, targetType: ColumnType) => {
@@ -360,12 +360,12 @@ export class EditColumnPopup extends LitElement {
     // multi-select -> select
     else if (currentType === 'multi-select' && targetType === 'select') {
       this._updateColumn(columnId, { type: targetType });
-      this.targetModel.page.db.convertCellsByColumn(columnId, 'select');
+      this.targetModel.convertCellsByColumn(columnId, 'select');
     }
     // number -> rich-text
     else if (currentType === 'number' && targetType === 'rich-text') {
       this._updateColumn(columnId, { type: targetType });
-      this.targetModel.page.db.convertCellsByColumn(columnId, 'rich-text');
+      this.targetModel.convertCellsByColumn(columnId, 'rich-text');
     } else {
       // incompatible types: clear the value of the column
       const renderer = getColumnRenderer(targetType);
@@ -373,7 +373,7 @@ export class EditColumnPopup extends LitElement {
         ...renderer.propertyCreator(),
         type: targetType,
       });
-      this.targetModel.page.db.deleteCellsByColumn(columnId);
+      this.targetModel.deleteCellsByColumn(columnId);
     }
 
     this.closePopup();
@@ -397,8 +397,8 @@ export class EditColumnPopup extends LitElement {
 
     if (actionType === 'delete') {
       this.targetModel.page.captureSync();
-      this.targetModel.page.db.deleteColumn(columnId);
-      this.targetModel.page.db.deleteCellsByColumn(columnId);
+      this.targetModel.deleteColumn(columnId);
+      this.targetModel.deleteCellsByColumn(columnId);
       const columns = this.targetModel.columns.filter(id => id !== columnId);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns,
@@ -427,17 +427,17 @@ export class EditColumnPopup extends LitElement {
 
     if (actionType === 'duplicate') {
       this.targetModel.page.captureSync();
-      const currentSchema = this.targetModel.page.db.getColumn(columnId);
+      const currentSchema = this.targetModel.getColumn(columnId);
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this.targetModel.page.db.updateColumn(schema);
+      const id = this.targetModel.updateColumn(schema);
       const newColumns = [...this.targetModel.columns];
       newColumns.splice(this.columnIndex + 1, 0, id);
       this.targetModel.page.updateBlock(this.targetModel, {
         columns: newColumns,
       });
-      this.targetModel.page.db.copyCellsByColumn(copyId, id);
+      this.targetModel.copyCellsByColumn(copyId, id);
       this.closePopup();
       return;
     }

@@ -32,7 +32,7 @@ export class DatabaseCellContainer
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.db.updateCell(this.rowModel.id, {
+      this.databaseModel.updateCell(this.rowModel.id, {
         columnId: this.column.id,
         value,
       });
@@ -55,7 +55,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.db.updateColumn({
+    this.databaseModel.updateColumn({
       ...this.column,
       ...newProperty,
     });
@@ -99,10 +99,7 @@ export class DatabaseCellContainer
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     const renderer = getColumnRenderer(this.column.type);
-    const cell = this.databaseModel.page.db.getCell(
-      this.rowModel.id,
-      this.column.id
-    );
+    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
