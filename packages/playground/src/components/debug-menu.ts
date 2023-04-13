@@ -101,10 +101,7 @@ export class DebugMenu extends ShadowlessElement {
 
   createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    if (this._dark && matchMedia.matches) {
-      document.querySelector('html')?.classList.add('dark');
-      document.querySelector('html')?.classList.add('sl-theme-dark');
-    }
+    this._setThemeMode(this._dark && matchMedia.matches);
     matchMedia.addEventListener('change', this._darkModeChange);
 
     return this;
@@ -223,35 +220,27 @@ export class DebugMenu extends ShadowlessElement {
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
-  private _toggleDarkMode() {
+  private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
-    this._dark = !this._dark;
-    if (this._dark) {
-      localStorage.setItem('blocksuite:dark', 'true');
+    this._dark = dark;
+    localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
+    html?.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (dark) {
       html?.classList.add('dark');
       html?.classList.add('sl-theme-dark');
     } else {
-      localStorage.setItem('blocksuite:dark', 'false');
       html?.classList.remove('dark');
       html?.classList.remove('sl-theme-dark');
     }
   }
 
-  private _darkModeChange = (e: MediaQueryListEvent) => {
-    const html = document.querySelector('html');
+  private _toggleDarkMode() {
+    this._setThemeMode(!this._dark);
+  }
 
-    if (e.matches) {
-      this._dark = true;
-      localStorage.setItem('blocksuite:dark', 'true');
-      html?.classList.add('dark');
-      html?.classList.add('sl-theme-dark');
-    } else {
-      localStorage.setItem('blocksuite:dark', 'false');
-      this._dark = false;
-      html?.classList.remove('dark');
-      html?.classList.remove('sl-theme-dark');
-    }
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    this._setThemeMode(!!e.matches);
   };
 
   firstUpdated() {

@@ -127,3 +127,7 @@ export async function switchReadonly(page: Page) {
 export async function activeEmbed(page: Page) {
   await page.click('.resizable-img');
 }
+
+export async function toggleDarkMode(page: Page) {
+  await page.click('sl-tooltip[content="Toggle Dark Mode"] sl-button');
+}

@@ -355,3 +355,17 @@ export function toHex(color: string) {
   const hex = ((r << 16) | (g << 8) | b).toString(16);
   return '#' + '0'.repeat(6 - hex.length) + hex;
 }
+
+export function capitalize(s: string) {
+  if (!s.length) {
+    return s;
+  }
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+export function uncapitalize(s: string) {
+  if (!s.length) {
+    return s;
+  }
+  return s[0].toLowerCase() + s.slice(1);
+}
