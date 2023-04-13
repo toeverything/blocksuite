@@ -205,7 +205,7 @@ describe('addBlock', () => {
     if (!Array.isArray(block) || !block[0]) {
       throw new Error('');
     }
-    assert.equal(block.flavour, 'affine:page');
+    assert.equal(block[0].flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
