@@ -1,11 +1,6 @@
 import type { Cell, Column, SelectTag } from '@blocksuite/global/database';
 import type { Text } from '@blocksuite/store';
-import {
-  assertExists,
-  BaseBlockModel,
-  defineBlockSchema,
-  Y,
-} from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema, Y } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export type Props = {
