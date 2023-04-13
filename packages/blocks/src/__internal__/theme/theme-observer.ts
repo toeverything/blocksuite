@@ -20,7 +20,7 @@ function cssNameToJsName(cssName: string) {
 function extractCssVariables(element: Element): CssVariable {
   const styles = window.getComputedStyle(element);
   const variables = VARIABLES.reduce((acc, cssName) => {
-    const value = styles.getPropertyValue(cssName);
+    const value = styles.getPropertyValue(cssName).trim();
     const name = cssNameToJsName(cssName) as CssVariableName;
     acc[name] = value;
     return acc;
