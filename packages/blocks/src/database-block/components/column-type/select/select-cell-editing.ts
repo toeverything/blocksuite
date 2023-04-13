@@ -384,7 +384,6 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   render() {
     const selection = this.column.selection as SelectTag[];
-    console.log(this.column);
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {
         return true;

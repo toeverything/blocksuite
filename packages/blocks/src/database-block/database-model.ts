@@ -30,7 +30,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
-    const id = column.id ?? this.page.createId();
+    const id = column.id ?? this.page.generateId();
     this.page.transact(() => this.yColumns.set(id, { ...column, id }));
     return id;
   }
