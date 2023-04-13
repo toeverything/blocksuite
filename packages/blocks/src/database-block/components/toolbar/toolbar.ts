@@ -265,7 +265,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onShowSearch = () => {
     this.setSearchState(SearchState.SearchInput);
     onClickOutside(
-      this._searchInput,
+      this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
