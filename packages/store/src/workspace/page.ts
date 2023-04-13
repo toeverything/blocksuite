@@ -59,7 +59,7 @@ export class Page extends Space<FlatBlockMap> {
   private _workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | BaseBlockModel[] | null = null;
+  private _root: (BaseBlockModel | null)[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
@@ -71,7 +71,7 @@ export class Page extends Space<FlatBlockMap> {
 
   readonly slots = {
     historyUpdated: new Slot(),
-    rootAdded: new Slot<BaseBlockModel | BaseBlockModel[]>(),
+    rootAdded: new Slot<(BaseBlockModel | null)[]>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
@@ -505,7 +505,7 @@ export class Page extends Space<FlatBlockMap> {
     assertExists(parent);
 
     const targetIndex =
-      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+      parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length > 1) {
@@ -569,7 +569,7 @@ export class Page extends Space<FlatBlockMap> {
         if (index > -1) {
           yChildren.delete(index, 1);
         }
-        if (options.bringChildrenTo === 'parent' && parent) {
+        if (options.bringChildrenTo === 'parent') {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
           this.updateBlock(options.bringChildrenTo, {
@@ -755,11 +755,15 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if (isRoot) {
-      this._root = model;
-      this.slots.rootAdded.emit(model);
+      this._root = Array.isArray(this._root)
+        ? [model, this._root[1]]
+        : [model, null];
+      this.slots.rootAdded.emit(this._root);
       this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
-      this._root = [this.root as BaseBlockModel, model];
+      this._root = Array.isArray(this._root)
+        ? [this._root[0], model]
+        : [null, model];
       this.slots.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
@@ -773,7 +777,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
-    if (model === this._root) {
+    if (model === this._root?.[0]) {
       this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event
