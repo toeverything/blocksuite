@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 import {
   addFrameByClick,
   captureHistory,
@@ -8,6 +10,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getCurrentEditorTheme,
+  getCurrentHTMLTheme,
   initEmptyParagraphState,
   pressBackspace,
   pressEnter,
@@ -15,6 +19,7 @@ import {
   redoByKeyboard,
   SHORT_KEY,
   switchReadonly,
+  toggleDarkMode,
   type,
   undoByClick,
   undoByKeyboard,
@@ -354,4 +359,17 @@ test('undo multi frames', async ({ page }) => {
 
   await redoByClick(page);
   await assertRichTexts(page, ['', '']);
+});
+
+test('change theme', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const currentTheme = await getCurrentHTMLTheme(page);
+  await toggleDarkMode(page);
+  const expectNextTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const nextHTMLTheme = await getCurrentHTMLTheme(page);
+  expect(nextHTMLTheme).toBe(expectNextTheme);
+
+  const nextEditorTheme = await getCurrentEditorTheme(page);
+  expect(nextEditorTheme).toBe(expectNextTheme);
 });

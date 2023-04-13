@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import type { DatabaseBlockModel, ThemeObserver } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -746,4 +746,17 @@ export async function getCurrentEditorPageId(page: Page) {
     const pageId = editor.page.id;
     return pageId;
   });
+}
+
+export async function getCurrentHTMLTheme(page: Page) {
+  const root = page.locator('html');
+  return await root.getAttribute('data-theme');
+}
+
+export async function getCurrentEditorTheme(page: Page) {
+  const mode = await page.locator('editor-container').evaluate(ele => {
+    return (ele as unknown as Element & { themeObserver: ThemeObserver })
+      .themeObserver.cssVariables?.['affineThemeMode'];
+  });
+  return mode;
 }
