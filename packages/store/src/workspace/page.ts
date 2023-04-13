@@ -869,7 +869,6 @@ export class Page extends Space<FlatBlockMap> {
           block.propsUpdated.emit();
         });
       }
-      console.log(event);
     } else {
       // TODO: add event slots to let model handle this
       if (event.path.includes('props:yCells')) {
