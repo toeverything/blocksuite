@@ -594,6 +594,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
     this.slots.onBlockUpdate.dispose();
+    this.slots.onYEvent.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
