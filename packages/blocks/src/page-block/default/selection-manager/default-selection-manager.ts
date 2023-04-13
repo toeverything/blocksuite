@@ -33,7 +33,7 @@ import {
   isEmbed,
   isImage,
   isInsidePageTitle,
-  isPageSelectedRects,
+  isSelectedBlocks,
   Point,
   Rect,
 } from '../../../__internal__/index.js';
@@ -107,11 +107,21 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
+
     const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
       return;
     }
+
+    if (
+      isElement(target) &&
+      (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
+    ) {
+      PreviewDragHandlers.onStart(this, e);
+      return;
+    }
+
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -120,15 +130,6 @@ export class DefaultSelectionManager {
     if (isDatabase(e)) {
       this.state.type = 'database';
       // todo: add manager
-      return;
-    }
-
-    if (
-      isElement(target) &&
-      (isDragHandle(target as Element) ||
-        isPageSelectedRects(target as Element))
-    ) {
-      PreviewDragHandlers.onStart(this, e);
       return;
     }
 
@@ -231,6 +232,11 @@ export class DefaultSelectionManager {
 
     if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
 
+    const target = e.raw.target;
+    if (isElement(target) && isDragHandle(target as Element)) {
+      return;
+    }
+
     // clear selection first
     this.clear();
 
@@ -293,7 +299,6 @@ export class DefaultSelectionManager {
       }
       return;
     }
-    const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
@@ -555,7 +560,7 @@ export class DefaultSelectionManager {
     }
   }
 
-  selectOneBlock(element: Element | null, rect?: DOMRect) {
+  selectOneBlock(element: Element | null | undefined, rect?: DOMRect) {
     // clear selection first
     this.clear();
     // rich-text should be unfocused

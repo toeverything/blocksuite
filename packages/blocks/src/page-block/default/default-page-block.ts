@@ -566,14 +566,17 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        <affine-page-selected-rects
-          .viewport=${viewport}
+        <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}
           .state=${{
             rects: this._selectedRects,
-            grab: !this._draggingArea,
+            grab: !draggingArea,
           }}
-        ></affine-page-selected-rects>
+          .offset=${{
+            x: -viewport.left + viewport.scrollLeft,
+            y: -viewport.top + viewport.scrollTop,
+          }}
+        ></affine-selected-blocks>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>
     `;

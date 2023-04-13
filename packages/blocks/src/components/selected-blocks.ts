@@ -3,11 +3,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { WithDisposable } from '../../../__internal__/index.js';
-import type { PageViewport } from './selection-state.js';
+import { type IPoint, WithDisposable } from '../__internal__/index.js';
 
-@customElement('affine-page-selected-rects')
-export class AffinePageSelectedRects extends WithDisposable(LitElement) {
+@customElement('affine-selected-blocks')
+export class AffineSelectedBlocks extends WithDisposable(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -48,7 +47,7 @@ export class AffinePageSelectedRects extends WithDisposable(LitElement) {
   mouseRoot!: HTMLElement;
 
   @property()
-  viewport!: PageViewport;
+  offset: IPoint = { x: 0, y: 0 };
 
   @property()
   state: { rects: DOMRect[]; grab: boolean } = { rects: [], grab: false };
@@ -60,14 +59,14 @@ export class AffinePageSelectedRects extends WithDisposable(LitElement) {
   }
 
   willUpdate() {
-    const { rects, grab } = this.state;
-    const firstRect = rects[0];
+    const {
+      rects: [firstRect],
+      grab,
+    } = this.state;
     if (firstRect) {
-      const { left, top, scrollLeft, scrollTop } = this.viewport;
-      const startTop = firstRect.top - top + scrollTop;
-      const startLeft = firstRect.left - left + scrollLeft;
-      this.style.top = `${startTop}px`;
-      this.style.left = `${startLeft}px`;
+      const { x, y } = this.offset;
+      this.style.top = `${firstRect.top + y}px`;
+      this.style.left = `${firstRect.left + x}px`;
     }
     this.toggleAttribute('data-grab', Boolean(firstRect && grab));
   }
@@ -93,6 +92,6 @@ export class AffinePageSelectedRects extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-page-selected-rects': AffinePageSelectedRects;
+    'affine-selected-blocks': AffineSelectedBlocks;
   }
 }

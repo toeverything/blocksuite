@@ -157,6 +157,10 @@ export class DragHandle extends WithDisposable(LitElement) {
       user-select: none;
     }
 
+    :host(:hover) > .affine-drag-handle-line {
+      opacity: 1;
+    }
+
     .affine-drag-handle-line {
       opacity: 0;
       height: 100%;
@@ -178,9 +182,24 @@ export class DragHandle extends WithDisposable(LitElement) {
       pointer-events: auto;
     }
 
+    .affine-drag-handle-normal {
+      display: block;
+    }
+
     .affine-drag-handle-hover {
       display: none;
       transition: opacity ease-in-out 300ms;
+    }
+
+    :host(:hover) .affine-drag-handle-normal,
+    :host([data-selected]) .affine-drag-handle-normal {
+      display: none !important;
+    }
+
+    :host(:hover) .affine-drag-handle-hover,
+    :host([data-selected]) .affine-drag-handle-hover {
+      display: block !important;
+      /* padding-top: 5px !important; FIXME */
     }
   `;
 
@@ -193,7 +212,7 @@ export class DragHandle extends WithDisposable(LitElement) {
       lastType: DroppingType
     ) => void;
     setDragType: (dragging: boolean) => void;
-    setSelectedBlock: (selectedBlock: EditingState) => void;
+    setSelectedBlock: (selectedBlock: EditingState | null) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getClosestBlockElement: (point: Point) => Element | null;
   }) {
@@ -230,7 +249,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   public setDragType: (dragging: boolean) => void;
 
-  public setSelectedBlock: (selectedBlock: EditingState) => void;
+  public setSelectedBlock: (selectedBlock: EditingState | null) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
 
@@ -238,12 +257,6 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
-
-  @query('.affine-drag-handle-hover')
-  private _dragHandleOver!: HTMLDivElement;
-
-  @query('.affine-drag-handle-normal')
-  private _dragHandleNormal!: HTMLDivElement;
 
   private _draggingElements: BlockComponentElement[] = [];
 
@@ -287,12 +300,10 @@ export class DragHandle extends WithDisposable(LitElement) {
       let startX = rect.left;
       let startY = rect.top;
       let height = rect.height;
-      let overDisplay = 'none';
-      let normalDisplay = 'block';
+      let selected = false;
       const selectedBlocks = this.selectedBlocks;
       if (selectedBlocks.includes(element)) {
-        overDisplay = normalDisplay;
-        normalDisplay = 'none';
+        selected = true;
 
         if (selectedBlocks.length > 1) {
           const tempSelectedBlocks =
@@ -306,9 +317,8 @@ export class DragHandle extends WithDisposable(LitElement) {
           height = last.bottom - first.top;
         }
       }
+      this.toggleAttribute('data-selected', selected);
       this._handleAnchorState = modelState;
-      this._dragHandleOver.style.display = overDisplay;
-      this._dragHandleNormal.style.display = normalDisplay;
       this.style.display = 'block';
       this.style.height = `${height / this._scale}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
@@ -640,11 +650,17 @@ export class DragHandle extends WithDisposable(LitElement) {
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
-    if (this._handleAnchorState) {
-      this.setSelectedBlock(this._handleAnchorState);
-      this._dragHandleOver.style.display = 'block';
-      this._dragHandleNormal.style.display = 'none';
+    const { selectedBlocks } = this;
+    let { _handleAnchorState: modelState } = this;
+    if (
+      modelState &&
+      selectedBlocks.length &&
+      modelState.element === selectedBlocks[0]
+    ) {
+      modelState = null;
     }
+    this.setSelectedBlock(modelState);
+    this.toggleAttribute('data-selected', Boolean(modelState));
     e.stopPropagation();
   };
 
@@ -659,11 +675,13 @@ export class DragHandle extends WithDisposable(LitElement) {
   onDragStart = (e: DragEvent, draggable = false) => {
     if (this._dragPreview || !e.dataTransfer) return;
 
-    const anchor = this._handleAnchorState && this._handleAnchorState.element;
+    const modelState = this._handleAnchorState;
     let draggingBlockElements = this.selectedBlocks;
 
-    if (anchor && !draggingBlockElements.includes(anchor)) {
-      draggingBlockElements = [anchor];
+    if (modelState && !draggingBlockElements.includes(modelState.element)) {
+      draggingBlockElements = [modelState.element];
+      // select current block
+      this.setSelectedBlock(modelState);
     }
 
     this._draggingElements = draggingBlockElements;
@@ -777,20 +795,6 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   render() {
     return html`
-      <style>
-        :host(:hover) > .affine-drag-handle-line {
-          opacity: 1;
-        }
-
-        :host(:hover) .affine-drag-handle-normal {
-          display: none !important;
-        }
-
-        :host(:hover) .affine-drag-handle-hover {
-          display: block !important;
-          /* padding-top: 5px !important; FIXME */
-        }
-      </style>
       <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle" draggable="true">
         <div class="affine-drag-handle-normal">
