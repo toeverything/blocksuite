@@ -1,7 +1,11 @@
-import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
+import {
+  IS_IOS,
+  IS_MAC,
+  MOVE_DETECT_THRESHOLD,
+} from '@blocksuite/global/config';
 
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
-import { debounce, IS_IOS, IS_MAC } from './std.js';
+import { debounce } from './std.js';
 
 export interface IPoint {
   x: number;

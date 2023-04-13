@@ -26,20 +26,8 @@ export default defineConfig({
         text: 'Using BlockSuite',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
-          {
-            text: 'Fundamental Concepts',
-            link: '/concepts',
-            items: [
-              {
-                text: 'Workspaces and Pages',
-                link: '/concepts#workspaces-and-pages',
-              },
-              {
-                text: 'Flavoured Blocks',
-                link: '/concepts#flavoured-blocks',
-              },
-            ],
-          },
+          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
+          { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
           { text: '🚧 Collaboration and Data Persistence', link: '' },
           { text: '🚧 Defining Your Block', link: '' },
           { text: 'Editor Example', link: '/editor-example' },
