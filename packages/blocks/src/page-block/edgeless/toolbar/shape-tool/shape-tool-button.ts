@@ -21,7 +21,7 @@ import type { EdgelessShapeMenu } from './shape-menu.js';
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -57,7 +57,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this.edgeless.slots.mouseModeUpdated.emit(mode);
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._shapeMenuPopper = createButtonPopper(
@@ -81,12 +81,12 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._disposables?.dispose();
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
     const selectedShape = type === 'shape' ? this.mouseMode.shape : undefined;
 

@@ -14,7 +14,7 @@ import { styles } from './styles.js';
 
 @customElement('slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   model!: BaseBlockModel;

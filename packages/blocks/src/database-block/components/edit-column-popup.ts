@@ -160,7 +160,7 @@ function isTitleColumn(column: Column | string): column is string {
 
 @customElement('affine-database-column-type-popup')
 class ColumnTypePopup extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 200px;
       padding: 8px;
@@ -214,7 +214,7 @@ class ColumnTypePopup extends LitElement {
   @property()
   changeColumnType!: (columnId: string, type: ColumnType) => void;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-database-column-type-popup">
         <div class="action column-type">
@@ -252,7 +252,7 @@ class ColumnTypePopup extends LitElement {
 
 @customElement('affine-database-edit-column-popup')
 export class EditColumnPopup extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
@@ -489,7 +489,7 @@ export class EditColumnPopup extends LitElement {
     `;
   };
 
-  protected render() {
+  protected override render() {
     return html`
       <div class="affine-database-edit-column-popup">
         ${this._renderActions()}

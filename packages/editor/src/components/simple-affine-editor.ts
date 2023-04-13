@@ -29,7 +29,7 @@ export class SimpleAffineEditor extends ShadowlessElement {
     this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     const editor = new EditorContainer();
     editor.page = this.page;
     this.appendChild(editor);

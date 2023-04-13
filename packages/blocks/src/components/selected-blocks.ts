@@ -7,7 +7,7 @@ import { type IPoint, WithDisposable } from '../__internal__/index.js';
 
 @customElement('affine-selected-blocks')
 export class AffineSelectedBlocks extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       position: absolute;
@@ -52,13 +52,13 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
   @property()
   state: { rects: DOMRect[]; grab: boolean } = { rects: [], grab: false };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     // trigger click event on editor container
     this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
   }
 
-  willUpdate() {
+  override willUpdate() {
     const {
       rects: [firstRect],
       grab,
@@ -71,7 +71,7 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     this.toggleAttribute('data-grab', Boolean(firstRect && grab));
   }
 
-  render() {
+  override render() {
     const { rects } = this.state;
     const firstRect = rects[0];
     return firstRect

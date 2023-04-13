@@ -24,7 +24,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
   private _draggingElementId: string | null = null;
 
-  protected _draggingArea: SelectionArea | null = null;
+  protected override _draggingArea: SelectionArea | null = null;
 
   onContainerClick(e: SelectionEvent): void {
     noop();

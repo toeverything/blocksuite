@@ -35,10 +35,10 @@ export function getBrushBoundFromPoints(
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
   color = '#000000' as const;
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
+  override x = 0;
+  override y = 0;
+  override w = 0;
+  override h = 0;
 
   /* Brush mouse coords relative to left-top corner */
   points: number[][] = [];
@@ -93,7 +93,7 @@ export class BrushElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  static getBoundProps(
+  static override getBoundProps(
     element: BaseElement,
     bound: IBound
   ): Record<string, string> {
@@ -117,7 +117,7 @@ export class BrushElement extends BaseElement {
     };
   }
 
-  static getProps(
+  static override getProps(
     element: BaseElement,
     rawProps: BrushProps & { xywh?: string }
   ): BrushProps & { xywh?: string } {

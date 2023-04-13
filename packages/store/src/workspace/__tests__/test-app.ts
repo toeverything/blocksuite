@@ -25,7 +25,7 @@ export class TestApp extends LitElement {
     this.input.value = '';
   }
 
-  firstUpdated(changedProps: PropertyValues) {
+  override firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
 
     this.workspace.slots.pagesUpdated.on(() => {
@@ -39,7 +39,7 @@ export class TestApp extends LitElement {
     this.workspace.slots;
   }
 
-  render() {
+  override render() {
     return html`
       <div>
         <input type="text" name="page" placeholder="add a page" />

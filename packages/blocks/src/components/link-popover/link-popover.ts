@@ -95,7 +95,7 @@ const isValidLink = (str: string) => {
 
 @customElement('edit-link-panel')
 export class LinkPopover extends LitElement {
-  static styles = linkPopoverStyle;
+  static override styles = linkPopoverStyle;
 
   @property()
   left = '0';
@@ -314,7 +314,7 @@ export class LinkPopover extends LitElement {
     </div>`;
   }
 
-  render() {
+  override render() {
     const mask = this.showMask
       ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
       : html``;

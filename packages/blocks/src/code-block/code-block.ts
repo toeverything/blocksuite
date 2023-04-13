@@ -31,7 +31,7 @@ import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
-  static styles = css`
+  static override styles = css`
     code-block {
       position: relative;
       z-index: 1;
@@ -288,7 +288,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     this._wrap = container.classList.toggle('wrap');
   }
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     this._themeChangeObserver = listenToThemeChange(this, async a => {
       if (!this._highlighter) return;
       const richText = this.querySelector('rich-text');
@@ -316,7 +316,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updated() {
+  override updated() {
     if (this.model.language !== this._preLang) {
       this._preLang = this.model.language;
 
@@ -448,7 +448,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     render(lineNumbers, lineNumbersContainer);
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

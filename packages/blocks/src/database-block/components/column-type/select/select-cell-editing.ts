@@ -171,8 +171,8 @@ const styles = css`
 export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   value: SelectTag | undefined = undefined;
 
-  static styles = styles;
-  static tag = literal`affine-database-select-cell-editing`;
+  static override styles = styles;
+  static override tag = literal`affine-database-select-cell-editing`;
 
   @property()
   mode: SelectMode = SelectMode.Single;
@@ -194,12 +194,12 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     return this.mode === SelectMode.Single;
   }
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     this.style.width = `${SELECT_EDIT_POPUP_WIDTH}px`;
     this._selectInput.focus();
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     createPopper(
       {
@@ -382,7 +382,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     this._editingIndex = -1;
   };
 
-  render() {
+  override render() {
     const selection = this.column.selection as SelectTag[];
     const filteredSelection = selection.filter(item => {
       if (!this._inputValue) {

@@ -86,7 +86,7 @@ export class EdgelessPageBlockComponent
   extends WithDisposable(ShadowlessElement)
   implements EdgelessContainer, BlockHost
 {
-  static styles = css`
+  static override styles = css`
     .affine-edgeless-page-block-container {
       position: relative;
       box-sizing: border-box;
@@ -414,7 +414,7 @@ export class EdgelessPageBlockComponent
     });
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
       this._selection = new EdgelessSelectionManager(this);
@@ -425,7 +425,7 @@ export class EdgelessPageBlockComponent
     super.update(changedProperties);
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this._initSlotEffects();
     this._initDragHandle();
     this.clipboard.init(this.page);
@@ -449,18 +449,18 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     this._frameResizeObserver.resetListener(this.page);
     super.updated(changedProperties);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboard.dispose();
     this.components.dragHandle?.remove();
   }
 
-  render() {
+  override render() {
     requestAnimationFrame(() => {
       this._selection.refreshRemoteSelection();
     });
