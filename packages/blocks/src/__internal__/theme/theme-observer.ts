@@ -4,6 +4,10 @@ import { capitalize, uncapitalize } from '../utils/std.js';
 import type { CssVariable, CssVariableName } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';
 
+/**
+ * Usage:
+ * cssNameToJsName('--affine-theme-mode');  // affineThemeMode
+ */
 function cssNameToJsName(cssName: string) {
   const upper = cssName
     .split('-')

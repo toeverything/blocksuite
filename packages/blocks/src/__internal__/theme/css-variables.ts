@@ -1,4 +1,4 @@
-/* CSS variables */
+/* CSS variables. You need to handle all places where CSS variables are marked. */
 export const VARIABLES = [
   '--affine-theme-mode',
   '--affine-editor-mode',
