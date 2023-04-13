@@ -4,6 +4,7 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -20,6 +21,7 @@ import {
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -183,19 +185,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
-  private _documentMutationObserver: MutationObserver = new MutationObserver(
-    async () => {
-      if (!this._highlighter) return;
-      const richText = this.querySelector('rich-text');
-      const vEditor = richText?.vEditor;
-      if (!vEditor) return;
-
-      // update code-line theme
-      setTimeout(() => {
-        vEditor.requestUpdate();
-      });
-    }
-  );
+  private _themeChangeObserver: Disposable | null = null;
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
@@ -289,7 +279,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
-    this._documentMutationObserver.disconnect();
+    this._themeChangeObserver?.dispose();
   }
 
   private _onClickWrapBtn() {
@@ -299,6 +289,18 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   protected firstUpdated() {
+    this._themeChangeObserver = listenToThemeChange(this, async a => {
+      if (!this._highlighter) return;
+      const richText = this.querySelector('rich-text');
+      const vEditor = richText?.vEditor;
+      if (!vEditor) return;
+
+      // update code-line theme
+      setTimeout(() => {
+        vEditor.requestUpdate();
+      });
+    });
+
     if (this.model.language === 'Plain Text') {
       this._highlighter = null;
       return;
@@ -312,10 +314,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     } else {
       this._highlighter = null;
     }
-
-    this._documentMutationObserver.observe(document.documentElement, {
-      attributes: true,
-    });
   }
 
   updated() {

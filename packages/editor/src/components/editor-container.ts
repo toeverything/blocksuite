@@ -11,6 +11,7 @@ import {
   getDefaultPageBlock,
   getServiceOrRegister,
   ShadowlessElement,
+  ThemeObserver,
 } from '@blocksuite/blocks';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
@@ -47,6 +48,8 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   @property()
   showGrid = true;
+
+  readonly themeObserver = new ThemeObserver();
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -144,6 +147,9 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+
+    this.themeObserver.observer(document.documentElement);
+    this._disposables.add(this.themeObserver);
   }
 
   disconnectedCallback() {
