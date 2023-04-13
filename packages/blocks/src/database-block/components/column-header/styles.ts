@@ -14,7 +14,7 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
   }
   .affine-database-column-header > .affine-database-column:first-child {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
 
   .affine-database-column {

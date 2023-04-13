@@ -64,7 +64,7 @@ const styles = css`
   }
   .select-option-container {
     padding: 8px;
-    color: rgba(0, 0, 0, 0.9);
+    color: var(--affine-black-90);
   }
   .select-option-container-header {
     padding: 8px 0px;
@@ -78,7 +78,7 @@ const styles = css`
     height: 28px;
     background: var(--affine-tag-white);
     border-radius: 4px;
-    color: rgba(0, 0, 0, 0.9);
+    color: var(--affine-black-90);
     background: var(--affine-tertiary-color);
   }
   .select-selected > .close-icon {
@@ -94,7 +94,7 @@ const styles = css`
     padding: 4px;
     gap: 5px;
     border-radius: 4px;
-    background: rgba(84, 56, 255, 0.04);
+    background: var(--affine-selected-color);
   }
   .select-option-new-text {
     height: 28px;
@@ -163,7 +163,7 @@ const styles = css`
   }
   .editing .select-option-icon {
     display: flex;
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--affine-hover-background);
   }
 `;
 
