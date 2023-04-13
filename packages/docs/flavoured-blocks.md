@@ -2,7 +2,11 @@
 
 In BlockSuite, block is the basic unit of structured content, representing a piece of text, an image or other media elements, or even a nested sub-document. BlockSuite supports defining various types of blocks, referred to as **flavoured blocks**. By combining and nesting blocks, users can create richly structured and styled content.
 
-The term "flavour" in blocks is inspired by the concept in physics and follows the `namespace:name` format. For example, we allow an `affine:paragraph` block to have similar sub-types, such as `h1`, `h2`, `h3`, `quote`, etc., which reduces redundant code and makes it easier for blocks with similar behavior to be converted between each other.
+The term "[flavour](<https://en.wikipedia.org/wiki/Flavour_(particle_physics)>)" for blocks is inspired by the concept in physics and follows the `namespace:name` format. For example, we allow an `affine:paragraph` block to have similar sub-types, such as `h1`, `h2`, `h3`, `quote`, etc., which reduces redundant code and makes it easier for blocks with similar behavior to be converted between each other.
+
+::: info
+In general, the terms "block flavour" and "block type" can be used interchangeably.
+:::
 
 ## Basic Block Operation APIs
 
