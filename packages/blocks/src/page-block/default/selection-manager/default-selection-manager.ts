@@ -315,6 +315,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerTripleClick = (e: SelectionEvent) => {
+    // clear selection first
+    // this.clear();
     handleNativeRangeTripleClick(e);
   };
 

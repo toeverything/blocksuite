@@ -142,24 +142,16 @@ export function initMouseEventHandlers(
 
     if (
       lastClickState &&
-      e.timeStamp - lastClickState.timeStamp <= 500 &&
+      e.timeStamp - lastClickState.timeStamp < 500 &&
       lastClickState.x === startX &&
       lastClickState.y === startY
     ) {
       if (clicks <= 1) {
-        if (clicks === 0) {
-          container.dispatchEvent(
-            new CustomEvent('doubleclick', {
-              detail: e,
-            })
-          );
-        } else if (clicks === 1) {
-          container.dispatchEvent(
-            new CustomEvent('tripleclick', {
-              detail: e,
-            })
-          );
-        }
+        container.dispatchEvent(
+          new CustomEvent(`${clicks ? 'triple' : 'double'}click`, {
+            detail: e,
+          })
+        );
         clicks++;
       }
     } else {
