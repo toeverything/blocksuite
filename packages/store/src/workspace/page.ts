@@ -857,8 +857,9 @@ export class Page extends Space<FlatBlockMap> {
           model.childrenUpdated.emit();
         }
       } else if (
-        event.path.includes('ext:columns') ||
-        event.path.includes('ext:cells')
+        // TODO: add event slots to let model handle this
+        event.path.includes('prop:yColumns') ||
+        event.path.includes('prop:yCells')
       ) {
         const blocks = this.getBlockByFlavour('affine:database');
         blocks.forEach(block => {
@@ -868,8 +869,10 @@ export class Page extends Space<FlatBlockMap> {
           block.propsUpdated.emit();
         });
       }
+      console.log(event);
     } else {
-      if (event.path.includes('ext:cells')) {
+      // TODO: add event slots to let model handle this
+      if (event.path.includes('props:yCells')) {
         // todo: refactor here
         const blockId = event.path[2] as string;
         const block = this.getBlockById(blockId);
