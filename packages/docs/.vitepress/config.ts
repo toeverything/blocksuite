@@ -29,7 +29,7 @@ export default defineConfig({
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
           { text: 'Handling Events', link: '/handling-events' },
-          { text: '🚧 Using Editor', link: '/using-editor' },
+          { text: 'Using Editor', link: '/using-editor' },
           { text: '🚧 Data Persistence', link: '/persistence' },
           { text: '🚧 Defining Your Block', link: '' },
           // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
