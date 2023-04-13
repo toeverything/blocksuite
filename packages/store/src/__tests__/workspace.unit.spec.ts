@@ -202,7 +202,7 @@ describe('addBlock', () => {
       })
     );
     const block = (await waitOnce(page.slots.rootAdded)) as BaseBlockModel;
-    if (Array.isArray(block)) {
+    if (!Array.isArray(block) || !block[0]) {
       throw new Error('');
     }
     assert.equal(block.flavour, 'affine:page');
