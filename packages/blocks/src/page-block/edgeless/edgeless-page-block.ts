@@ -487,7 +487,7 @@ export class EdgelessPageBlockComponent
             height: 100%;
             background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
-            background-color: #fff;
+            background-color: var(--affine-background-primary-color);
           }
         </style>
         <div

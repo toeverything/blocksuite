@@ -64,7 +64,7 @@ export class EdgelessToolbar extends LitElement {
       width: 1px;
       height: 24px;
       margin: 0 7px;
-      background-color: #e3e2e4;
+      background-color: var(--affine-divider-color);
     }
 
     .zoom-percent {

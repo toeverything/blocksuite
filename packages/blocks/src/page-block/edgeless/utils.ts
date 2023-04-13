@@ -446,7 +446,8 @@ export function getBackgroundGrid(
   const translateY = -viewportY * zoom + gap / 2;
 
   const gridStyle = {
-    backgroundImage: 'radial-gradient(#E6E6E6 1px, #fff 1px)',
+    backgroundImage:
+      'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)',
   };
   const defaultStyle = {};
   const style = showGrid ? gridStyle : defaultStyle;

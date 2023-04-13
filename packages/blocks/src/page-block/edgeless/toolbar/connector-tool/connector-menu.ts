@@ -96,7 +96,7 @@ export class EdgelessConnectorMenu extends LitElement {
 
     .connector-mode-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     menu-divider {

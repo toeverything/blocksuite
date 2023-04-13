@@ -71,7 +71,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
     .brush-size-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     .brush-size-button[active] div {

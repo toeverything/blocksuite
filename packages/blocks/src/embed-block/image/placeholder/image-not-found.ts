@@ -31,9 +31,9 @@ export class AffineImageBlockNotFoundCard extends ShadowlessElement {
       width: 453px;
       height: 104px;
       margin: 0 auto;
-      border: 1px solid #ebeeff;
+      border: 1px solid var(--affine-border-color);
       border-radius: 10px;
-      background: #fbfbff;
+      background: var(--affine-background-primary-color);
     }
   `;
 

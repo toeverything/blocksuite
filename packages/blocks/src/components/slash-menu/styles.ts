@@ -39,7 +39,7 @@ export const styles = css`
     max-width: 150px;
     display: flex;
     flex-direction: column;
-    color: #8e8d91;
+    color: var(--affine-text-secondary-color);
     gap: 5px;
     margin-bottom: 20px;
     /* transition: max-width 0.2s ease-in-out; */
@@ -86,7 +86,11 @@ export const styles = css`
     transform: translateY(-50%);
     width: 1px;
     height: 12px;
-    background: linear-gradient(180deg, #5438ff 0%, #b638ff 100%);
+    background: linear-gradient(
+      180deg,
+      var(--affine-text-emphasis-color) 0%,
+      var(--affine-palette-purple) 100%
+    );
     border-radius: 1px;
   }
 

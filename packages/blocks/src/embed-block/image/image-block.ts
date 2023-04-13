@@ -36,11 +36,8 @@ export class ImageBlockComponent extends ShadowlessElement {
 
     .resizable {
       max-width: 100%;
-      /* text-align: center; */
     }
-    /* .resizable:hover {
-      border: 2px solid #4286f4;
-    } */
+
     .active .resizable {
       border: 1px solid var(--affine-primary-color) !important;
     }

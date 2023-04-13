@@ -63,7 +63,7 @@ export class LangList extends ShadowlessElement {
         align-items: center;
         height: 32px;
         width: 192px;
-        border: 1px solid #d0d7e3;
+        border: 1px solid var(--affine-border-color);
         border-radius: 10px;
         padding-left: 44px;
         padding-top: 4px;
@@ -80,7 +80,7 @@ export class LangList extends ShadowlessElement {
       }
 
       #filter-input::placeholder {
-        color: #888a9e;
+        color: var(--affine-placeholder-color);
         font-size: var(--affine-font-sm);
       }
 
