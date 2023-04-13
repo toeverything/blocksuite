@@ -1,6 +1,11 @@
 import type { Cell, Column, SelectTag } from '@blocksuite/global/database';
 import type { Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema, Y } from '@blocksuite/store';
+import {
+  assertExists,
+  BaseBlockModel,
+  defineBlockSchema,
+  Y,
+} from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export type Props = {
@@ -21,6 +26,20 @@ type SerializedCells = {
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
+  override onCreated() {
+    super.onCreated();
+
+    this.page.slots.onYEvent.on(({ event }) => {
+      if (
+        event.path.includes(this.id) &&
+        (event.path.includes('prop:yColumns') ||
+          event.path.includes('prop:yCells'))
+      ) {
+        this.propsUpdated.emit();
+      }
+    });
+  }
+
   get serializedCells(): SerializedCells {
     return this.yCells.toJSON();
   }

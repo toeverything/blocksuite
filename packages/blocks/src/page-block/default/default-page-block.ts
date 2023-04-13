@@ -222,7 +222,6 @@ export class DefaultPageBlockComponent
       () => (this._isComposing = false)
     );
 
-    this._updateTitleInMeta();
     this.model.title.yText.observe(() => {
       this._updateTitleInMeta();
       this.requestUpdate();
