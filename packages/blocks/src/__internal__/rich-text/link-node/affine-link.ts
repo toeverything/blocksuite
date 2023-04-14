@@ -33,7 +33,7 @@ export class AffineLink extends ShadowlessElement {
 
   private _isHovering = false;
 
-  static styles = css`
+  static override styles = css`
     a {
       white-space: nowrap;
       word-break: break-word;
@@ -196,7 +196,7 @@ export class AffineLink extends ShadowlessElement {
     }, 0);
   }
 
-  render() {
+  override render() {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
       : styleMap({});

@@ -34,8 +34,14 @@ export class HandleResizeManager {
 
     let [minX, minY, maxX, maxY] = this._commonBound;
 
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
+    let deltaX = e.clientX - startX;
+    let deltaY = e.clientY - startY;
+    if (e.shiftKey) {
+      const { w, h } = getCommonBound([...this._bounds.values()]) as Bound;
+      const aspectRatio = w / h;
+      deltaX = deltaX > deltaY ? deltaX : deltaY * aspectRatio;
+      deltaY = deltaY > deltaX ? deltaY : deltaX / aspectRatio;
+    }
 
     switch (direction) {
       case HandleDirection.TopLeft:

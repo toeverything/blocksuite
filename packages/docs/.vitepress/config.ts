@@ -28,11 +28,9 @@ export default defineConfig({
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
-          { text: '🚧 Handling Events', link: '/handling-events' },
-          { text: '🚧 Using Editor', link: '/using-editor' },
-          { text: '🚧 Data Persistence', link: '/persistence' },
-          { text: '🚧 Defining Your Block', link: '' },
-          // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
+          { text: 'Handling Events', link: '/handling-events' },
+          { text: 'Using Editor', link: '/using-editor' },
+          { text: 'Data Persistence', link: '/data-persistence' },
         ],
       },
       {
@@ -42,9 +40,9 @@ export default defineConfig({
           {
             text: '🚧 Common Patterns',
             items: [
-              { text: '🚧 Controlled Components', link: '' },
+              { text: '🚧 Controlled Component', link: '' },
               { text: '🚧 Rich Text Orchestration', link: '' },
-              { text: '🚧 Container Blocks', link: '' },
+              { text: '🚧 Block Host', link: '' },
             ],
           },
         ],
@@ -54,8 +52,20 @@ export default defineConfig({
         items: [],
       },
       {
+        text: '🚧 Packages',
+        items: [
+          { text: '🚧 @blocksuite/store', link: '' },
+          { text: '🚧 @blocksuite/blocks', link: '' },
+          { text: '🚧 @blocksuite/editor', link: '' },
+          { text: '🚧 @blocksuite/virgo', link: '' },
+          { text: '🚧 @blocksuite/phasor', link: '' },
+          { text: '🚧 @blocksuite/connector', link: '' },
+        ],
+      },
+      {
         text: 'Developing BlockSuite',
         items: [
+          { text: '🚧 Defining Editable Block', link: '' },
           { text: '🚧 Building the Packages', link: '' },
           { text: '🚧 Making Contributions', link: '' },
           { text: '🚧 Testing', link: '' },

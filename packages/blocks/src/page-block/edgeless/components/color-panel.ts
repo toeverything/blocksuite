@@ -130,7 +130,7 @@ export function ColorUnit(
 
 @customElement('edgeless-color-panel')
 export class EdgelessColorPanel extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       width: 204px;
@@ -188,7 +188,7 @@ export class EdgelessColorPanel extends LitElement {
     this.value = value;
   }
 
-  render() {
+  override render() {
     return repeat(
       this.options,
       color => color,

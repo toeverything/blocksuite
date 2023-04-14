@@ -13,7 +13,7 @@ import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     affine-image > affine-embed {
       display: block;
     }
@@ -186,7 +186,7 @@ export class ImageBlockComponent extends ShadowlessElement {
     });
   }
 
-  async firstUpdated() {
+  override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
@@ -214,7 +214,7 @@ export class ImageBlockComponent extends ShadowlessElement {
     }
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
@@ -256,7 +256,7 @@ export class ImageBlockComponent extends ShadowlessElement {
     `;
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._imageReady.dispose();
     super.disconnectedCallback();
   }

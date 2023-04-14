@@ -1,7 +1,7 @@
-import { ShadowlessElement } from '@blocksuite/blocks';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
+import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
@@ -14,7 +14,7 @@ import { EditorContainer } from './editor-container.js';
  * You can use `editor.importMarkdown` to load markdown content.
  */
 @customElement('simple-affine-editor')
-export class SimpleAffineEditor extends ShadowlessElement {
+export class SimpleAffineEditor extends LitElement {
   readonly workspace: Workspace;
   readonly page: Page;
 
@@ -29,10 +29,14 @@ export class SimpleAffineEditor extends ShadowlessElement {
     this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     const editor = new EditorContainer();
     editor.page = this.page;
     this.appendChild(editor);
+  }
+
+  override disconnectedCallback() {
+    this.removeChild(this.children[0]);
   }
 }
 

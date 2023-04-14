@@ -967,10 +967,10 @@ export function isElement(target: EventTarget | null) {
 }
 
 /**
- * Returns `true` if the target is `affine-page-selected-rects`.
+ * Returns `true` if the target is `affine-selected-blocks`.
  */
-export function isPageSelectedRects(target: Element) {
-  return target.tagName === 'AFFINE-PAGE-SELECTED-RECTS';
+export function isSelectedBlocks(target: Element) {
+  return target.tagName === 'AFFINE-SELECTED-BLOCKS';
 }
 
 /**

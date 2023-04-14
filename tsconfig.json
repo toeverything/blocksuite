@@ -17,6 +17,7 @@
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
+    "noImplicitOverride": true,
     "skipLibCheck": true,
     "incremental": true,
     "paths": {

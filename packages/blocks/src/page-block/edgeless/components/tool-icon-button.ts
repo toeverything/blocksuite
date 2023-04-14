@@ -6,7 +6,7 @@ import { tooltipStyle } from '../../../components/tooltip/tooltip.js';
 
 @customElement('edgeless-tool-icon-button')
 export class EdgelessToolIconButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     .icon-container {
       position: relative;
       display: flex;
@@ -60,7 +60,7 @@ export class EdgelessToolIconButton extends LitElement {
     );
   }
 
-  render() {
+  override render() {
     const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
     return html`
       <div

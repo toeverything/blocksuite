@@ -11,7 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('icon-button')
 export class IconButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       box-sizing: border-box;
       display: flex;

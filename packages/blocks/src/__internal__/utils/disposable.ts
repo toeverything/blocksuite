@@ -31,14 +31,14 @@ export default function WithDisposable<T extends Constructor<LitElement>>(
   class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
 
-    connectedCallback() {
+    override connectedCallback() {
       super.connectedCallback();
       if (this._disposables.disposed) {
         this._disposables = new DisposableGroup();
       }
     }
 
-    disconnectedCallback() {
+    override disconnectedCallback() {
       super.disconnectedCallback();
       this._disposables.dispose();
     }

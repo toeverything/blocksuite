@@ -56,7 +56,7 @@ export class DefaultPageBlockComponent
   extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
-  static styles = css`
+  static override styles = css`
     .affine-default-viewport {
       position: relative;
       overflow-x: hidden;
@@ -222,7 +222,6 @@ export class DefaultPageBlockComponent
       () => (this._isComposing = false)
     );
 
-    this._updateTitleInMeta();
     this.model.title.yText.observe(() => {
       this._updateTitleInMeta();
       this.requestUpdate();
@@ -368,7 +367,7 @@ export class DefaultPageBlockComponent
     }
   };
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
         this._initTitleVEditor();
@@ -376,7 +375,7 @@ export class DefaultPageBlockComponent
     }
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
         page: this.page,
@@ -476,7 +475,7 @@ export class DefaultPageBlockComponent
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
-          if (target === this.viewportElement) {
+          if (target === this.pageBlockContainer) {
             this.selection.updateViewport();
             this.selection.updateRects();
             break;
@@ -484,11 +483,11 @@ export class DefaultPageBlockComponent
         }
       }
     );
-    resizeObserver.observe(this.viewportElement);
+    resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const { page, selection } = this;
 
     hotkey.setScope(HOTKEY_SCOPE.AFFINE_PAGE);
@@ -530,7 +529,7 @@ export class DefaultPageBlockComponent
     this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 
-  render() {
+  override render() {
     requestAnimationFrame(() => {
       this.selection.refreshRemoteSelection();
     });
@@ -567,14 +566,17 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        <affine-page-selected-rects
-          .viewport=${viewport}
+        <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}
           .state=${{
             rects: this._selectedRects,
-            grab: !this._draggingArea,
+            grab: !draggingArea,
           }}
-        ></affine-page-selected-rects>
+          .offset=${{
+            x: -viewport.left + viewport.scrollLeft,
+            y: -viewport.top + viewport.scrollTop,
+          }}
+        ></affine-selected-blocks>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>
     `;

@@ -56,7 +56,7 @@ function cursorStyle(rect: SelectionRect, color: string) {
 
 @customElement('remote-selection')
 export class RemoteSelection extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       position: absolute;
       pointer-events: none;
@@ -82,7 +82,7 @@ export class RemoteSelection extends LitElement {
 
   private _abortController = new AbortController();
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     assertExists(this.page);
     this.page.awarenessStore.slots.update.subscribe(
       msg => msg,
@@ -177,7 +177,7 @@ export class RemoteSelection extends LitElement {
     });
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._resizeObserver.disconnect();
     this._abortController.abort();
@@ -266,7 +266,7 @@ export class RemoteSelection extends LitElement {
     return null;
   }
 
-  render() {
+  override render() {
     if (!this.page || this._ranges.length === 0) {
       this._colorMap.clear();
       return html``;

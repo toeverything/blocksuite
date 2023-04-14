@@ -40,7 +40,7 @@ function getMostCommonBackground(
 
 @customElement('edgeless-change-frame-button')
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       fill: none;
@@ -114,7 +114,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorSelectorPopper = createButtonPopper(
@@ -128,7 +128,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const selectedBackground =
       getMostCommonBackground(this.frames) || FRAME_BACKGROUND_COLORS[0];
 

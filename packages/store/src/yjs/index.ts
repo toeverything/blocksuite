@@ -27,7 +27,7 @@ export class BlockSuiteDoc<
   }
 
   @debug('transact')
-  transact<T>(f: (arg0: Transaction) => T, origin?: number) {
+  override transact<T>(f: (arg0: Transaction) => T, origin?: number) {
     return super.transact(f, origin);
   }
 }

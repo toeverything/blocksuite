@@ -12,7 +12,7 @@ import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellElement<SelectTag[]> {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       align-items: center;
@@ -39,9 +39,9 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
     }
   `;
 
-  static tag = literal`affine-database-select-cell`;
+  static override tag = literal`affine-database-select-cell`;
 
-  render() {
+  override render() {
     const values = (this.cell?.value ?? []) as SelectTag[];
     return html`
       <div
@@ -65,7 +65,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
 
 @customElement('affine-database-select-column-property-editing')
 class SelectColumnPropertyEditing extends DatabaseCellElement<SelectTag[]> {
-  static tag = literal`affine-database-select-column-property-editing`;
+  static override tag = literal`affine-database-select-column-property-editing`;
 }
 
 export const SelectColumnRenderer = defineColumnRenderer(

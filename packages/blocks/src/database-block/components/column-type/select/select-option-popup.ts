@@ -24,7 +24,7 @@ const tagActions: SelectTagAction[] = [
 
 @customElement('affine-database-select-action-popup')
 export class SelectActionPopup extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       z-index: 11;
     }
@@ -57,7 +57,7 @@ export class SelectActionPopup extends LitElement {
   @property()
   onAction!: (type: SelectTagActionType, index: number) => void;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-database-select-action">
         ${tagActions.map(action => {

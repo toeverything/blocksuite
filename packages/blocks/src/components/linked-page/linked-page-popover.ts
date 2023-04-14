@@ -54,7 +54,7 @@ const DEFAULT_PAGE_NAME = 'Untitled';
 
 @customElement('affine-linked-page-popover')
 export class LinkedPagePopover extends WithDisposable(LitElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @state()
   private _position: {
@@ -122,7 +122,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     super();
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
@@ -223,7 +223,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._insertLinkedNode('Subpage', page.id);
   }
 
-  render() {
+  override render() {
     const MAX_HEIGHT = 396;
     const style = this._position
       ? styleMap({

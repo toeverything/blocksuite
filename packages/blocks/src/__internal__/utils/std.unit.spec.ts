@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { atLeastNMatches, countBy, groupBy, maxBy, toHex } from './std.js';
+import {
+  atLeastNMatches,
+  capitalize,
+  countBy,
+  groupBy,
+  maxBy,
+  toHex,
+  uncapitalize,
+} from './std.js';
 
 describe('countBy', () => {
   it('basic', () => {
@@ -92,5 +100,19 @@ describe('toHex', () => {
   it('throw error', () => {
     expect(() => toHex('fa')).toThrowError('Invalid color format');
     expect(() => toHex('rgb()')).toThrowError('Invalid color format');
+  });
+});
+
+describe('capitalize & uncapitalize', () => {
+  it('capitalize', () => {
+    expect(capitalize('abc')).toEqual('Abc');
+    expect(capitalize('')).toEqual('');
+    expect(capitalize('0abc')).toEqual('0abc');
+  });
+
+  it('un', () => {
+    expect(uncapitalize('Abc')).toEqual('abc');
+    expect(uncapitalize('')).toEqual('');
+    expect(uncapitalize('0abc')).toEqual('0abc');
   });
 });

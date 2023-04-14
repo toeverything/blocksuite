@@ -11,6 +11,7 @@ import {
   getDefaultPageBlock,
   getServiceOrRegister,
   ShadowlessElement,
+  ThemeObserver,
 } from '@blocksuite/blocks';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
@@ -38,7 +39,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  autofocus = false;
+  override autofocus = false;
 
   @property()
   mouseMode: MouseMode = {
@@ -47,6 +48,8 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   @property()
   showGrid = true;
+
+  readonly themeObserver = new ThemeObserver();
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -77,7 +80,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     subpageUnlinked: new Slot(),
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     const keydown = (e: KeyboardEvent) => {
@@ -144,14 +147,17 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+
+    this.themeObserver.observer(document.documentElement);
+    this._disposables.add(this.themeObserver);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
 
@@ -165,7 +171,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
@@ -185,7 +191,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     return createBlockHub(this, this.page);
   }
 
-  render() {
+  override render() {
     if (!this.model || !this.pageBlockModel) return null;
 
     const pageContainer = keyed(

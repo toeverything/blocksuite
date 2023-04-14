@@ -102,7 +102,7 @@ function ParagraphPanel(
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
-  static styles = formatQuickBarStyle;
+  static override styles = formatQuickBarStyle;
 
   @property()
   page!: Page;
@@ -143,7 +143,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     const startModel = this.models[0];

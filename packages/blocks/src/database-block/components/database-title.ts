@@ -11,7 +11,7 @@ import { initLimitedLengthVEditor } from '../utils.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
-  static styles = css`
+  static override styles = css`
     .affine-database-title {
       flex: 1;
       max-width: 300px;
@@ -68,7 +68,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
 
-  firstUpdated() {
+  override firstUpdated() {
     this._initTitleVEditor();
 
     this._disposables.addFromEvent(
@@ -118,7 +118,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     this._titleContainer.classList.add('ellipsis');
   };
 
-  render() {
+  override render() {
     const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
     return html`<div class="affine-database-title">
       <div

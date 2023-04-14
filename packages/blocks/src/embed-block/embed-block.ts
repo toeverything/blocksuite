@@ -6,7 +6,7 @@ import type { EmbedBlockModel } from './embed-model.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-embed-wrapper {
       text-align: center;
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -82,7 +82,7 @@ export class EmbedBlockComponent extends ShadowlessElement {
     }
   }
 
-  render() {
+  override render() {
     return html`
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">

@@ -8,7 +8,7 @@ import { codeLanguages } from '../utils/code-languages.js';
 // TODO extract to a common list component
 @customElement('lang-list')
 export class LangList extends ShadowlessElement {
-  static get styles() {
+  static override get styles() {
     return css`
       lang-list {
         display: flex;
@@ -142,7 +142,7 @@ export class LangList extends ShadowlessElement {
     );
   }
 
-  render() {
+  override render() {
     const filteredLanguages = LangList.languages.filter(language => {
       if (!this._filterText) {
         return true;

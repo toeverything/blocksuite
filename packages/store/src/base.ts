@@ -37,11 +37,6 @@ export const BlockSchema = z.object({
       .args(z.custom<InternalPrimitives>())
       .returns(z.record(z.any()))
       .optional(),
-    ext: z
-      .function()
-      .args(z.custom<InternalPrimitives>())
-      .returns(z.record(z.any()))
-      .optional(),
     toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
 });
@@ -86,14 +81,12 @@ export function defineBlockSchema<
   flavour: Flavour;
   metadata: Metadata;
   props?: (internalPrimitives: InternalPrimitives) => Props;
-  ext?: (internalPrimitives: InternalPrimitives) => Ext;
   toModel?: () => Model;
 }): {
   version: number;
   model: {
     role: Role;
     props: PropsGetter<Props>;
-    ext: PropsGetter<Ext>;
     flavour: Flavour;
   } & Metadata;
 };
@@ -102,7 +95,6 @@ export function defineBlockSchema({
   flavour,
   props,
   metadata,
-  ext,
   toModel,
 }: {
   flavour: string;
@@ -112,7 +104,6 @@ export function defineBlockSchema({
     tag: StaticValue;
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
-  ext?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   toModel?: () => BaseBlockModel;
 }): BlockSchemaType {
   const schema = {
@@ -122,7 +113,6 @@ export function defineBlockSchema({
       role: metadata.role,
       flavour,
       props,
-      ext,
       toModel,
     },
   } satisfies z.infer<typeof BlockSchema>;
@@ -178,5 +168,9 @@ export class BaseBlockModel<
   dispose() {
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
+  }
+
+  onCreated() {
+    // Empty by default
   }
 }
