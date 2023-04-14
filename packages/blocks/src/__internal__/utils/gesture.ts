@@ -188,7 +188,7 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (e.detail === 1) {
+    if (e.detail <= 1) {
       if (isDragging) {
         onContainerDragEnd(
           toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
