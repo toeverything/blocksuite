@@ -48,7 +48,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
         return deltas;
       }, [])
       .map(op => op.insert)
-      .join('');
+      .join('\n');
     focusedBlockModel.text?.insert(text, range.startOffset);
 
     const vEditor = getVirgoByModel(focusedBlockModel);
