@@ -168,6 +168,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
+    console.log(333);
     return this.currentController.onContainerDblClick(e);
   };
 

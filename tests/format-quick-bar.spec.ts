@@ -1105,3 +1105,25 @@ test('should convert to database work', async ({ page }) => {
   const rows = page.locator('.affine-database-block-row');
   expect(await rows.count()).toBe(3);
 });
+
+test('should show format-quick-bar and select all text of the block when triple clicking on text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello world');
+
+  const locator = page.locator('.virgo-editor').nth(0);
+  const textBox = await locator.boundingBox();
+  if (!textBox) {
+    throw new Error("Can't get bounding box");
+  }
+
+  await page.mouse.dblclick(textBox.x + 5, textBox.y + textBox.height / 2);
+
+  const { formatQuickBar } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+
+  await assertSelection(page, 1, 0, 3);
+});
