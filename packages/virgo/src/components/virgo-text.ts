@@ -7,18 +7,14 @@ import { ZERO_WIDTH_SPACE } from '../consts.js';
 
 @customElement('v-text')
 export class VText extends LitElement {
-  static override styles = css`
-    v-text {
-      word-wrap: break-word;
-      white-space: break-spaces;
-    }
-  `;
-
   @property()
   str: string = ZERO_WIDTH_SPACE;
 
   @property()
-  styles: DirectiveResult<typeof StyleMapDirective> = styleMap({});
+  styles: DirectiveResult<typeof StyleMapDirective> = styleMap({
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
+  });
 
   override render() {
     // we need to avoid \n appearing before and after the span element, which will
