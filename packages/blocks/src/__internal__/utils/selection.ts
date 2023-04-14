@@ -927,13 +927,15 @@ export function handleNativeRangeTripleClick(e: SelectionEvent) {
   const editor = document
     .elementFromPoint(clientX, clientY)
     ?.closest('.virgo-editor');
-  if (editor) {
-    const textNodes = getTextNodesFromElement(editor);
-    const first = textNodes[0];
-    const last = textNodes[textNodes.length - 1];
-    const range = new Range();
-    range.setStart(first, 0);
-    range.setEnd(last, Number(last.textContent?.length));
-    resetNativeSelection(range);
-  }
+
+  if (!editor) return null;
+
+  const textNodes = getTextNodesFromElement(editor);
+  const first = textNodes[0];
+  const last = textNodes[textNodes.length - 1];
+  const range = new Range();
+  range.setStart(first, 0);
+  range.setEnd(last, Number(last.textContent?.length));
+  resetNativeSelection(range);
+  return range;
 }

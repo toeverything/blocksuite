@@ -146,13 +146,11 @@ export function initMouseEventHandlers(
       lastClickState.x === startX &&
       lastClickState.y === startY
     ) {
-      if (clicks <= 1) {
-        container.dispatchEvent(
-          new CustomEvent(`${clicks ? 'triple' : 'double'}click`, {
-            detail: e,
-          })
-        );
+      if (clicks <= 2) {
         clicks++;
+      } else {
+        // We dont want to abort `format-quick-bar`.
+        e.stopPropagation();
       }
     } else {
       clicks = 0;
@@ -215,6 +213,12 @@ export function initMouseEventHandlers(
           toSelectionEvent(e, getBoundingClientRect, startX, startY)
         );
       }
+    } else if (clicks <= 2) {
+      container.dispatchEvent(
+        new CustomEvent(`${clicks === 1 ? 'double' : 'triple'}click`, {
+          detail: e,
+        })
+      );
     }
 
     lastClickState = {

@@ -54,6 +54,10 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 

@@ -32,6 +32,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 

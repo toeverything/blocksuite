@@ -21,7 +21,6 @@ import {
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
-  handleNativeRangeTripleClick,
   initMouseEventHandlers,
   isBlankArea,
   isDatabase,
@@ -38,7 +37,7 @@ import {
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -311,13 +310,23 @@ export class DefaultSelectionManager {
     // switch native selection
     NativeDragHandlers.onStart(this, e);
 
-    showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
+    showFormatQuickBarByClicks(
+      'double',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
   };
 
   private _onContainerTripleClick = (e: SelectionEvent) => {
-    // clear selection first
-    // this.clear();
-    handleNativeRangeTripleClick(e);
+    showFormatQuickBarByClicks(
+      'triple',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

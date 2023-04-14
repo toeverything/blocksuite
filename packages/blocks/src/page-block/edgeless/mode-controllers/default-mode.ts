@@ -2,13 +2,9 @@ import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PhasorElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
-import type {
-  BlockComponentElement,
-  DefaultMouseMode,
-  SelectionEvent,
-  TopLevelBlockModel,
-} from '../../../__internal__/index.js';
 import {
+  type BlockComponentElement,
+  type DefaultMouseMode,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -19,9 +15,11 @@ import {
   Point,
   Rect,
   resetNativeSelection,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -284,7 +282,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
-    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
+    showFormatQuickBarByClicks('double', e, this._page, this._edgeless);
+  }
+
+  onContainerTripleClick(e: SelectionEvent) {
+    showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {

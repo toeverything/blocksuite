@@ -38,6 +38,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
