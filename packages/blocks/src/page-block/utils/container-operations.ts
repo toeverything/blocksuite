@@ -9,25 +9,24 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import type {
-  BlockComponentElement,
-  ExtendedModel,
-  SelectionEvent,
-  TopLevelBlockModel,
-} from '../../__internal__/index.js';
 import {
   almostEqual,
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
+  type BlockComponentElement,
+  type ExtendedModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getDefaultPageBlock,
   getVirgoByModel,
   handleNativeRangeDblClick,
+  handleNativeRangeTripleClick,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
@@ -544,14 +543,18 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
   });
 }
 
-// Show format quick bar when double clicking on text
-export function showFormatQuickBarByDoubleClick(
+// Show format quick bar when double/triple clicking on text
+export function showFormatQuickBarByClicks(
+  type: 'double' | 'triple',
   e: SelectionEvent,
   page: Page,
   container?: HTMLElement,
   state?: PageSelectionState
 ) {
-  const range = handleNativeRangeDblClick(page, e);
+  const range =
+    type === 'double'
+      ? handleNativeRangeDblClick(page, e)
+      : handleNativeRangeTripleClick(e);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;
   if (page.readonly) return;

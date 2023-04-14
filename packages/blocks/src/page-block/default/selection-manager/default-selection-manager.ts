@@ -7,12 +7,9 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import type {
-  BlockComponentElement,
-  EditingState,
-  SelectionEvent,
-} from '../../../__internal__/index.js';
 import {
+  type BlockComponentElement,
+  type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
@@ -36,10 +33,11 @@ import {
   isSelectedBlocks,
   Point,
   Rect,
+  type SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -95,6 +93,7 @@ export class DefaultSelectionManager {
         this._onContainerDragEnd,
         this._onContainerClick,
         this._onContainerDblClick,
+        this._onContainerTripleClick,
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
@@ -311,7 +310,23 @@ export class DefaultSelectionManager {
     // switch native selection
     NativeDragHandlers.onStart(this, e);
 
-    showFormatQuickBarByDoubleClick(e, this.page, this.container, this.state);
+    showFormatQuickBarByClicks(
+      'double',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    showFormatQuickBarByClicks(
+      'triple',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

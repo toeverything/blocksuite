@@ -6,7 +6,7 @@ import {
   nonTextBlock,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VirgoLine } from '@blocksuite/virgo';
+import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
@@ -915,4 +915,27 @@ export function getClosestEditor(clientY: number, container = document.body) {
  */
 export function getClosestFrame(clientY: number) {
   return getHorizontalClosestElement(clientY, 'affine-frame');
+}
+
+/**
+ * Handle native range with triple click.
+ */
+export function handleNativeRangeTripleClick(e: SelectionEvent) {
+  const {
+    raw: { clientX, clientY },
+  } = e;
+  const editor = document
+    .elementFromPoint(clientX, clientY)
+    ?.closest('.virgo-editor');
+
+  if (!editor) return null;
+
+  const textNodes = getTextNodesFromElement(editor);
+  const first = textNodes[0];
+  const last = textNodes[textNodes.length - 1];
+  const range = new Range();
+  range.setStart(first, 0);
+  range.setEnd(last, Number(last.textContent?.length));
+  resetNativeSelection(range);
+  return range;
 }

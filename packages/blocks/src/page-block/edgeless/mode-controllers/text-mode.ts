@@ -57,6 +57,10 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     this._dragStartEvent = e;
     this._draggingArea = {

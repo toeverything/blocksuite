@@ -100,6 +100,7 @@ export function initMouseEventHandlers(
   onContainerDragEnd: (e: SelectionEvent) => void,
   onContainerClick: (e: SelectionEvent) => void,
   onContainerDblClick: (e: SelectionEvent) => void,
+  onContainerTripleClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
@@ -132,6 +133,14 @@ export function initMouseEventHandlers(
     if (!e.button) {
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail
+    // 1: single click, 2: double click, 3: triple click
+    if (e.detail > 3) {
+      // We dont want to abort `format-quick-bar`.
+      e.stopPropagation();
+    }
+
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
   };
@@ -179,13 +188,25 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (isDragging) {
-      onContainerDragEnd(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
-    } else {
-      onContainerClick(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY)
+    if (e.detail <= 1) {
+      if (isDragging) {
+        onContainerDragEnd(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+        );
+      } else {
+        onContainerClick(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY)
+        );
+      }
+    } else if (
+      e.detail === 3 &&
+      last &&
+      e.timeStamp - last.raw.timeStamp < 500
+    ) {
+      container.dispatchEvent(
+        new CustomEvent('tripleclick', {
+          detail: e,
+        })
       );
     }
 
@@ -212,6 +233,14 @@ export function initMouseEventHandlers(
     );
   };
 
+  const tripleClickHandler = (e: Event) => {
+    const evt = (e as CustomEvent).detail;
+    if (shouldFilterMouseEvent(evt)) return;
+    onContainerTripleClick(
+      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
+    );
+  };
+
   /**
    * TODO merge to `selectionChangeHandler`
    * @deprecated use `selectionChangeHandler` instead
@@ -233,6 +262,7 @@ export function initMouseEventHandlers(
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  container.addEventListener('tripleclick', tripleClickHandler);
   document.addEventListener(
     'selectionchange',
     selectionChangeHandlerWithDebounce
@@ -244,6 +274,7 @@ export function initMouseEventHandlers(
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    container.removeEventListener('tripleclick', tripleClickHandler);
     document.removeEventListener(
       'selectionchange',
       selectionChangeHandlerWithDebounce
