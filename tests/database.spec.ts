@@ -7,6 +7,7 @@ import {
   assertDatabaseColumnOrder,
   assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
+  blurDatabaseSearch,
   clickDatabaseOutside,
   copyByKeyboard,
   dragBetweenCoords,
@@ -35,6 +36,7 @@ import {
   pressArrowRight,
   pressBackspace,
   pressEnter,
+  pressEscape,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
@@ -200,7 +202,7 @@ test('should database search work', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, '26', false);
 
   // search for '2'
-  const searchIcon = await focusDatabaseSearch(page);
+  await focusDatabaseSearch(page);
   await type(page, '2');
   const rows = page.locator('.affine-database-block-row');
   expect(await rows.count()).toBe(3);
@@ -214,8 +216,49 @@ test('should database search work', async ({ page }) => {
   // clear search input
   const closeIcon = page.locator('.close-icon');
   await closeIcon.click();
-  expect(searchIcon).toBeVisible();
   expect(await rows.count()).toBe(3);
+});
+
+test('should database search input displayed correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  const searchContainer = await focusDatabaseSearch(page);
+  await blurDatabaseSearch(page);
+  expect(await searchContainer.getAttribute('style')).toContain(
+    'overflow: hidden;'
+  );
+
+  await focusDatabaseSearch(page);
+  await type(page, '2');
+  await blurDatabaseSearch(page);
+  expect(await searchContainer.getAttribute('style')).toContain(
+    'overflow: unset;'
+  );
+
+  await focusDatabaseSearch(page);
+  await pressBackspace(page);
+  await blurDatabaseSearch(page);
+  expect(await searchContainer.getAttribute('style')).toContain(
+    'overflow: hidden;'
+  );
+
+  await focusDatabaseSearch(page);
+  await type(page, '2');
+  const closeIcon = page.locator('.close-icon');
+  await closeIcon.click();
+  await blurDatabaseSearch(page);
+  expect(await searchContainer.getAttribute('style')).toContain(
+    'overflow: hidden;'
+  );
+
+  await focusDatabaseSearch(page);
+  await type(page, '2');
+  await pressEscape(page);
+  await blurDatabaseSearch(page);
+  expect(await searchContainer.getAttribute('style')).toContain(
+    'overflow: hidden;'
+  );
 });
 
 test('should database title and rich-text support undo/redo', async ({
