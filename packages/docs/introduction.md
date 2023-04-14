@@ -8,6 +8,8 @@ In traditional rich text editors, all content resides within a single `contented
 
 BlockSuite introduces a new paradigm for rich text editing known as block-based editing. Its block-based architecture overcomes these challenges by managing a block tree in its store. Each block node within this tree can be rendered using any common frontend framework. **If multiple blocks contain rich text, they are rendered across multiple `contenteditable` instances**, providing better stability and compatibility.
 
+![block-based-editing](./images/block-based-editing.png)
+
 For example, in a BlockSuite document containing two paragraphs, an image, and a table with ten text cells, you can have 12 rich text editor instances coexisting. The image component can be implemented using any regular UI framework without needing to be placed within a `contenteditable` element. This design allows for seamless integration and interaction between various components, while maintaining compatibility and stability across different UI frameworks.
 
 To further support block-based editing, BlockSuite has also developed its own lightweight rich text editor, _Virgo_. It's a minimalist editor designed to function like an input box for non-nested rich text content, rather than a heavy rich text container. This approach significantly reduces redundancy and results in a much simpler and lighter architecture. In practice, any UI framework can be used to build complex collaborative editors by embedding Virgo and reusing the data store of BlockSuite.
@@ -18,9 +20,11 @@ Block-based editing enables the use of popular UI frameworks for rendering neste
 
 The block-based editing architecture of BlockSuite may appear simple, but in reality, it requires advanced [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) (Conflict-free Replicated Data Types) technology to make it possible. This is because state changes in complex document editing scenarios often occur across multiple blocks. Coordinating state changes among numerous rich text instances can be challenging, especially when it comes to tracing historical states.
 
-However, CRDT is well-suited to address these issues. BlockSuite's block tree is built upon the high-performance [Yjs](https://github.com/yjs/yjs) library, which automatically records and tracks all historical operations on data (down to individual characters) while providing user-friendly APIs similar to `Map` and `Array`. As a result, BlockSuite's block update API is straightforward to use, requiring no knowledge of command-driven DSLs commonly found in traditional editors.
+However, CRDT is well-suited to address these issues. BlockSuite's block tree is built upon the high-performance [Yjs](https://github.com/yjs/yjs) library, which automatically records and tracks all historical operations on data (down to individual characters) while providing user-friendly APIs similar to `Map` and `Array`. With CRDT as its single source of truth, BlockSuite's block update API is not only straightforward to use, but also forms the unidirectional data flow that is collaborative by design.
 
-Thanks to the capability of CRDT to serialize any local state updates into incremental and standardized data structures, the following benefits are achieved:
+![data-flow](./images/data-flow.png)
+
+Also, thanks to the capability of CRDT to serialize any local state updates into incremental and standardized data structures, the following benefits are achieved:
 
 - Fully incremental undo and redo, enabling zero-cost time travel at runtime.
 - Incremental distribution of update data over the network, with updates being distributable via pluggable providers over different network protocol layers.

@@ -1,6 +1,8 @@
 # Workspaces and Pages
 
-BlockSuite is centered around the concept of blocks. However, to handle a large number of blocks efficiently, the blocks are organized into workspaces and pages. Workspace is the highest-level container that can hold multiple pages. Page is the sub-container for organizing blocks, and each page contains a strongly typed block tree.
+BlockSuite is centered around the concept of blocks. However, to handle a large number of blocks efficiently, the blocks are organized into workspaces and pages. `Workspace` is the highest-level container that can hold multiple pages. `Page` is the sub-container for organizing blocks, and each page contains a strongly typed block tree.
+
+![workspace-structure](./images/workspace-structure.png)
 
 ## Workspaces
 
