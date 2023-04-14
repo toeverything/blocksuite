@@ -39,6 +39,7 @@ import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
+  alias?: string[];
   icon: TemplateResult<1>;
   divider?: boolean;
   disabled?: boolean;
@@ -210,6 +211,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Table View',
+        alias: ['database'],
         icon: DatabaseTableViewIcon,
         divider: true,
         action: async ({ page, model }) => {
@@ -229,6 +231,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Kanban View',
+        alias: ['database'],
         icon: DatabaseKanbanViewIcon,
         disabled: true,
         // eslint-disable-next-line @typescript-eslint/no-empty-function
