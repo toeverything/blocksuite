@@ -54,6 +54,8 @@ In the prebuilt editor, creating a simple page requires following block flavours
 - The `affine:frame` block acts as a flat container within the page, and multiple frames can be positioned on the whiteboard.
 - Each `affine:paragraph` block holds a linear sequence of rich text within the page. It enables users to create text-based content and style it according to their needs.
 
+![block-nesting](./images/block-nesting.png)
+
 ::: tip
 The `affine:frame` block is designed to interop with the whiteboard mode. If you only need the document editor, simply placing all other blocks within a single frame will be sufficient.
 :::
