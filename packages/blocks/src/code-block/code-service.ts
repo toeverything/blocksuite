@@ -42,13 +42,9 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     range?: BlockRange
   ) {
     assertExists(range);
-    const text = pastedBlocks
-      .reduce((deltas: DeltaOperation[], block) => {
-        block.text && deltas.push(...block.text);
-        return deltas;
-      }, [])
-      .map(op => op.insert)
-      .join('\n');
+    const texts = pastedBlocks.map(block => block.text);
+    const lines = texts.map(line => line?.map(op => op.insert).join(''));
+    const text = lines.join('\n');
     focusedBlockModel.text?.insert(text, range.startOffset);
 
     const vEditor = getVirgoByModel(focusedBlockModel);
