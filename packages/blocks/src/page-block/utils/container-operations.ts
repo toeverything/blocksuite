@@ -555,7 +555,6 @@ export function showFormatQuickBarByClicks(
     type === 'double'
       ? handleNativeRangeDblClick(page, e)
       : handleNativeRangeTripleClick(e);
-  console.log(type, range);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;
   if (page.readonly) return;

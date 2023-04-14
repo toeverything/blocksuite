@@ -1120,10 +1120,32 @@ test('should show format-quick-bar and select all text of the block when triple 
     throw new Error("Can't get bounding box");
   }
 
-  await page.mouse.dblclick(textBox.x + 5, textBox.y + textBox.height / 2);
+  await page.mouse.dblclick(textBox.x + 10, textBox.y + textBox.height / 2);
 
   const { formatQuickBar } = getFormatBar(page);
   await expect(formatQuickBar).toBeVisible();
 
-  await assertSelection(page, 1, 0, 3);
+  await assertSelection(page, 0, 0, 5);
+
+  await page.mouse.click(0, 0);
+
+  await expect(formatQuickBar).toBeHidden();
+
+  await page.mouse.move(textBox.x + 10, textBox.y + textBox.height / 2);
+
+  const options = {
+    clickCount: 1,
+  };
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  options.clickCount++;
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  options.clickCount++;
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  await assertSelection(page, 0, 0, 'hello world'.length);
 });
