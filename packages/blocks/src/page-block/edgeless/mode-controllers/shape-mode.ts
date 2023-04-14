@@ -8,8 +8,8 @@ import type {
 import { noop } from '../../../__internal__/index.js';
 import { isTransparent } from '../components/color-panel.js';
 import {
-  DEFAULT_FILL_COLOR,
-  DEFAULT_STROKE_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
 import type { SelectionArea } from '../selection-manager.js';
 import { MouseModeController } from './index.js';
@@ -18,8 +18,8 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
     type: 'shape',
     shape: 'rect',
-    fillColor: DEFAULT_FILL_COLOR,
-    strokeColor: DEFAULT_STROKE_COLOR,
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
   };
 
   private _draggingElementId: string | null = null;

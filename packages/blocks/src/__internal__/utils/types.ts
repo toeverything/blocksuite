@@ -78,8 +78,8 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  fillColor: Color;
-  strokeColor: Color;
+  fillColor: RawCssVariablesName;
+  strokeColor: RawCssVariablesName;
 };
 
 export enum BrushSize {

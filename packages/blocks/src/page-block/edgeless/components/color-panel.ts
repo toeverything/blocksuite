@@ -29,7 +29,10 @@ export function isTransparent(color: RawCssVariablesName) {
 }
 
 function isSameColorWithBackground(color: RawCssVariablesName) {
-  return color.toLowerCase() === '--affine-palette-white';
+  return [
+    '--affine-palette-line-white',
+    '--affine-palette-shape-white',
+  ].includes(color.toLowerCase());
 }
 
 function TransparentColor(hollowCircle = false) {
