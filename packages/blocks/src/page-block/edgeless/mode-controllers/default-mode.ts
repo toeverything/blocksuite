@@ -282,6 +282,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
+    if (
+      e.raw.target &&
+      e.raw.target instanceof HTMLElement &&
+      e.raw.target.classList.contains('affine-edgeless-mask')
+    ) {
+      this.onContainerClick(e);
+      return;
+    }
+
     showFormatQuickBarByClicks('double', e, this._page, this._edgeless);
   }
 

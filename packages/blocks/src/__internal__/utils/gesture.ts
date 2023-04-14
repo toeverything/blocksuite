@@ -19,10 +19,6 @@ export interface Bound {
   h: number;
 }
 
-interface ClickState extends IPoint {
-  timeStamp: number;
-}
-
 export interface SelectionEvent extends IPoint {
   start: IPoint;
   delta: IPoint;
@@ -115,8 +111,6 @@ export function initMouseEventHandlers(
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
-  let lastClickState: ClickState | null = null;
-  let clicks = 0;
   const getBoundingClientRect: () => DOMRect = () =>
     container.getBoundingClientRect();
 
@@ -140,20 +134,11 @@ export function initMouseEventHandlers(
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
 
-    if (
-      lastClickState &&
-      e.timeStamp - lastClickState.timeStamp < 500 &&
-      lastClickState.x === startX &&
-      lastClickState.y === startY
-    ) {
-      if (clicks <= 2) {
-        clicks++;
-      } else {
-        // We dont want to abort `format-quick-bar`.
-        e.stopPropagation();
-      }
-    } else {
-      clicks = 0;
+    // https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail
+    // 1: single click, 2: double click, 3: triple click
+    if (e.detail > 3) {
+      // We dont want to abort `format-quick-bar`.
+      e.stopPropagation();
     }
 
     document.addEventListener('mouseup', mouseUpHandler);
@@ -203,7 +188,7 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (clicks === 0) {
+    if (e.detail === 1) {
       if (isDragging) {
         onContainerDragEnd(
           toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
@@ -213,19 +198,17 @@ export function initMouseEventHandlers(
           toSelectionEvent(e, getBoundingClientRect, startX, startY)
         );
       }
-    } else if (clicks <= 2) {
+    } else if (
+      e.detail === 3 &&
+      last &&
+      e.timeStamp - last.raw.timeStamp < 500
+    ) {
       container.dispatchEvent(
-        new CustomEvent(`${clicks === 1 ? 'double' : 'triple'}click`, {
+        new CustomEvent('tripleclick', {
           detail: e,
         })
       );
     }
-
-    lastClickState = {
-      timeStamp: e.timeStamp,
-      x: startX,
-      y: startY,
-    };
 
     startX = startY = -Infinity;
     isDragging = false;
@@ -243,18 +226,10 @@ export function initMouseEventHandlers(
     );
   };
 
-  // const dblClickHandler = (e: MouseEvent) => {
-  //   if (shouldFilterMouseEvent(e)) return;
-  //   onContainerDblClick(
-  //     toSelectionEvent(e, getBoundingClientRect, startX, startY)
-  //   );
-  // };
-
-  const doubleClickHandler = (e: Event) => {
-    const evt = (e as CustomEvent).detail;
-    if (shouldFilterMouseEvent(evt)) return;
+  const dblClickHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     onContainerDblClick(
-      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
+      toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
   };
 
@@ -286,8 +261,7 @@ export function initMouseEventHandlers(
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
-  // container.addEventListener('dblclick', dblClickHandler);
-  container.addEventListener('doubleclick', doubleClickHandler);
+  container.addEventListener('dblclick', dblClickHandler);
   container.addEventListener('tripleclick', tripleClickHandler);
   document.addEventListener(
     'selectionchange',
@@ -299,8 +273,7 @@ export function initMouseEventHandlers(
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
-    // container.removeEventListener('dblclick', dblClickHandler);
-    container.removeEventListener('doubleclick', doubleClickHandler);
+    container.removeEventListener('dblclick', dblClickHandler);
     container.removeEventListener('tripleclick', tripleClickHandler);
     document.removeEventListener(
       'selectionchange',
