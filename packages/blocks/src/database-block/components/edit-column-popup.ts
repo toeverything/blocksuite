@@ -55,6 +55,7 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
+    color: var(--affine-icon-color);
     fill: var(--affine-icon-color);
   }
   .action-divider {
