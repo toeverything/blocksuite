@@ -1,5 +1,5 @@
 import { BLOCK_ID_ATTR, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import type { KeyboardBindings } from '../__internal__/rich-text/keyboard.js';
