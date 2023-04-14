@@ -61,6 +61,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
+  // Do not select the text, when click again after activating the frame.
+  private _isDoubleClickedOnMask = false;
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -275,6 +277,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     } else {
       this._setNoneSelectionState();
     }
+
+    this._isDoubleClickedOnMask = false;
   }
 
   onContainerContextMenu(e: SelectionEvent) {
@@ -288,6 +292,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       e.raw.target.classList.contains('affine-edgeless-mask')
     ) {
       this.onContainerClick(e);
+      this._isDoubleClickedOnMask = true;
       return;
     }
 
@@ -295,6 +300,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerTripleClick(e: SelectionEvent) {
+    if (this._isDoubleClickedOnMask) return;
     showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
   }
 
