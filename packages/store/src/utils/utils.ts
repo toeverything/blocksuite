@@ -15,6 +15,7 @@ import type {
   YBlocks,
 } from '../workspace/page.js';
 import type { Page } from '../workspace/page.js';
+import { createYArrayProxy } from '../yjs/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -104,7 +105,8 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     if (realValue instanceof Y.Map) {
       props[key] = realValue;
     } else if (realValue instanceof Y.Array) {
-      props[key] = realValue.toArray();
+      const arr = createYArrayProxy(realValue);
+      props[key] = arr;
     } else {
       props[key] = prefixedProps[prefixedKey];
     }

@@ -7,7 +7,7 @@ export type Props = {
   title: Text;
   columns: string[];
   yCells: Y.Map<Y.Map<unknown>>;
-  yColumns: Y.Map<unknown>;
+  yColumns: Array<Column>;
   titleColumnName: string;
   titleColumnWidth: number;
 };
@@ -39,18 +39,41 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return this.yCells.toJSON();
   }
 
+  findColumnIndex(id: Column['id']) {
+    let result = -1;
+    this.yColumns.forEach((col, index) => {
+      if (col.id === id) result = index;
+    });
+    return result;
+  }
+
   getColumn(id: Column['id']): Column | null {
-    return (this.yColumns.get(id) ?? null) as Column | null;
+    const index = this.findColumnIndex(id);
+    if (index < 0) {
+      return null;
+    }
+    return this.yColumns.at(index)!;
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
     const id = column.id ?? this.page.generateId();
-    this.page.transact(() => this.yColumns.set(id, { ...column, id }));
+    const index = this.findColumnIndex(id);
+    this.page.transact(() => {
+      if (index < 0) {
+        this.yColumns.push({ ...column, id } as Column);
+      } else {
+        this.yColumns[index] = { ...column, id } as Column;
+      }
+    });
+    console.log(this.yColumns);
     return id;
   }
 
   deleteColumn(columnId: Column['id']) {
-    this.page.transact(() => this.yColumns.delete(columnId));
+    const index = this.findColumnIndex(columnId);
+    if (index < 0) return;
+
+    this.page.transact(() => this.yColumns.splice(index, 1));
   }
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
@@ -182,7 +205,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
     title: internal.Text(),
     columns: [],
     yCells: internal.Map<Y.Map<unknown>>(),
-    yColumns: internal.Map<unknown>(),
+    yColumns: [],
     titleColumnName: 'Title',
     titleColumnWidth: 432,
   }),
@@ -195,5 +218,3 @@ export const DatabaseBlockSchema = defineBlockSchema({
     return new DatabaseBlockModel();
   },
 });
-
-// export type DatabaseBlockModel = SchemaToModel<typeof DatabaseBlockSchema>;
