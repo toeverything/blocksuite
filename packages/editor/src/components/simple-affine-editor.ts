@@ -34,6 +34,10 @@ export class SimpleAffineEditor extends LitElement {
     editor.page = this.page;
     this.appendChild(editor);
   }
+
+  override disconnectedCallback() {
+    this.removeChild(this.children[0]);
+  }
 }
 
 declare global {
