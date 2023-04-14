@@ -34,7 +34,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Architecture In-Depth',
+        text: 'Editor Architecture',
         items: [
           { text: '🚧 Unidirectional Data Flow', link: '' },
           {
@@ -45,6 +45,7 @@ export default defineConfig({
               { text: '🚧 Block Host', link: '' },
             ],
           },
+          { text: '🚧 Defining Editable Block', link: '' },
         ],
       },
       {
@@ -65,7 +66,6 @@ export default defineConfig({
       {
         text: 'Developing BlockSuite',
         items: [
-          { text: '🚧 Defining Editable Block', link: '' },
           { text: '🚧 Building the Packages', link: '' },
           { text: '🚧 Making Contributions', link: '' },
           { text: '🚧 Testing', link: '' },

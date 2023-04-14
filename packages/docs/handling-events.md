@@ -14,16 +14,16 @@ BlockSuite extensively uses `Slot` to manage events. You can think of it as a ty
 import { Slot } from '@blocksuite/store';
 
 // Create a new slot
-const slot = new Slot<{ id: string }>();
+const slot = new Slot<{ name: string }>();
 
 // Subscribe events
-slot.on(({ id }) => console.log(id));
+slot.on(({ name }) => console.log(name));
 
 // Or alternatively only listen event once
-slot.once(({ id }) => console.log(id));
+slot.once(({ name }) => console.log(name));
 
 // Emit the event
-slot.emit({ id: 'foo' });
+slot.emit({ name: 'foo' });
 ```
 
 To unsubscribe from the slot, simply use the return value of `slot.on()`:
