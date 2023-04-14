@@ -506,7 +506,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
 
-  static styles = styles;
+  static override styles = styles;
 
   constructor(options: {
     mouseRoot: HTMLElement;
@@ -534,7 +534,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._onDropCallback = options.onDropCallback;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
     disposables.addFromEvent(this, 'dragstart', this._onDragStart);
@@ -556,7 +556,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._onResize();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
@@ -603,7 +603,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
   }
@@ -821,7 +821,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._maxHeight = boundingClientRect.height - TOP_DISTANCE - BOTTOM_OFFSET;
   };
 
-  render() {
+  override render() {
     const blockHubMenu = BlockHubMenu(
       this._enableDatabase,
       this._expanded,

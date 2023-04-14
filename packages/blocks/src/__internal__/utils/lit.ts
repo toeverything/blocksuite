@@ -37,14 +37,14 @@ export function WithDisposable<T extends Constructor<LitElement>>(
   class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
 
-    connectedCallback() {
+    override connectedCallback() {
       super.connectedCallback();
       if (this._disposables.disposed) {
         this._disposables = new DisposableGroup();
       }
     }
 
-    disconnectedCallback() {
+    override disconnectedCallback() {
       super.disconnectedCallback();
       this._disposables.dispose();
     }
@@ -55,7 +55,7 @@ export function WithDisposable<T extends Constructor<LitElement>>(
 export class ShadowlessElement extends LitElement {
   static disableShadowRoot = true;
 
-  protected static finalizeStyles(
+  protected static override finalizeStyles(
     styles?: CSSResultGroup
   ): CSSResultOrNative[] {
     let elementStyles = super.finalizeStyles(styles);
@@ -77,7 +77,7 @@ export class ShadowlessElement extends LitElement {
     return elementStyles;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     return (this.constructor as typeof ShadowlessElement).disableShadowRoot
       ? this
       : super.createRenderRoot();

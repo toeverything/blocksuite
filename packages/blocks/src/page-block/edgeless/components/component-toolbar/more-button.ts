@@ -47,7 +47,7 @@ function Actions(onClick: (action: Action) => void) {
 
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       fill: none;
@@ -146,7 +146,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this._actionsMenuPopper?.hide();
   };
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._actionsMenuPopper = createButtonPopper(
@@ -160,7 +160,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const actions = Actions(this._runAction);
     return html`
       <edgeless-tool-icon-button

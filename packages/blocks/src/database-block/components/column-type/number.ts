@@ -6,7 +6,7 @@ import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 @customElement('affine-database-number-cell')
 class NumberCell extends DatabaseCellElement<number> {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       align-items: center;
@@ -16,16 +16,16 @@ class NumberCell extends DatabaseCellElement<number> {
     }
   `;
 
-  static tag = literal`affine-database-number-cell`;
+  static override tag = literal`affine-database-number-cell`;
 
-  render() {
+  override render() {
     return html` <span class="number">${this.cell?.value}</span> `;
   }
 }
 
 @customElement('affine-database-number-cell-editing')
 class NumberCellEditing extends DatabaseCellElement<number> {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 100%;
     }
@@ -53,10 +53,10 @@ class NumberCellEditing extends DatabaseCellElement<number> {
     }
   `;
 
-  static tag = literal`affine-database-number-cell-editing`;
+  static override tag = literal`affine-database-number-cell-editing`;
   value: number | undefined = undefined;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
       if (event.key === 'Enter' && this.value) {
@@ -65,7 +65,7 @@ class NumberCellEditing extends DatabaseCellElement<number> {
     });
   }
 
-  protected render() {
+  protected override render() {
     return html`
       <input
         class="affine-database-number"
@@ -86,7 +86,7 @@ class NumberCellEditing extends DatabaseCellElement<number> {
 
 @customElement('affine-database-number-column-property-editing')
 class NumberColumnPropertyEditing extends DatabaseCellElement<number> {
-  static tag = literal`affine-database-number-column-property-editing`;
+  static override tag = literal`affine-database-number-column-property-editing`;
 }
 export const NumberColumnRenderer = defineColumnRenderer(
   'number',

@@ -16,11 +16,8 @@ import {
   getRichTextByModel,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
-import {
-  isControlledKeyboardEvent,
-  isFuzzyMatch,
-  isPrintableKeyEvent,
-} from '../../__internal__/utils/std.js';
+import { isFuzzyMatch } from '../../__internal__/utils/std.js';
+import { createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';
 
 /**
@@ -55,115 +52,9 @@ function initDefaultBlocks(page: Page, pageName: string) {
 
 const DEFAULT_PAGE_NAME = 'Untitled';
 
-const createKeydownObserver = ({
-  target,
-  onUpdateQuery,
-  onMove,
-  onConfirm,
-  onEsc,
-  ignoreKeys = [],
-  abortController,
-}: {
-  target: HTMLElement;
-  onUpdateQuery: (val: string) => void;
-  onMove: (step: 1 | -1) => void;
-  onConfirm: () => void;
-  onEsc?: () => void;
-  ignoreKeys?: string[];
-  abortController: AbortController;
-}) => {
-  let query = '';
-  const keyDownListener = (e: KeyboardEvent) => {
-    if (ignoreKeys.includes(e.key)) {
-      return;
-    }
-
-    e.stopPropagation();
-    if (
-      // Abort when press modifier key to avoid weird behavior
-      // e.g. press ctrl + a to select all or press ctrl + v to paste
-      isControlledKeyboardEvent(e) ||
-      e.key === 'Escape'
-    ) {
-      abortController.abort();
-      return;
-    }
-
-    if (!isPrintableKeyEvent(e)) {
-      switch (e.key) {
-        case 'Backspace': {
-          if (!query.length) {
-            abortController.abort();
-          }
-          query = query.slice(0, -1);
-          onUpdateQuery(query);
-          return;
-        }
-        case 'Enter': {
-          if (e.isComposing) {
-            return;
-          }
-          onConfirm();
-          e.preventDefault();
-          return;
-        }
-        case 'Tab': {
-          if (e.shiftKey) {
-            onMove(-1);
-          } else {
-            onMove(1);
-          }
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowUp': {
-          onMove(-1);
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowDown': {
-          onMove(1);
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowLeft':
-        case 'ArrowRight': {
-          abortController.abort();
-          return;
-        }
-        default:
-          // Other control keys
-          return;
-      }
-    }
-    query += e.key;
-    onUpdateQuery(query);
-  };
-
-  target.addEventListener('keydown', keyDownListener, {
-    // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-    capture: true,
-  });
-  abortController.signal.addEventListener('abort', () => {
-    target.removeEventListener('keydown', keyDownListener, { capture: true });
-  });
-
-  if (onEsc) {
-    const escListener = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onEsc();
-      }
-    };
-    window.addEventListener('keydown', escListener);
-    abortController.signal.addEventListener('abort', () =>
-      window.removeEventListener('keydown', escListener)
-    );
-  }
-};
-
 @customElement('affine-linked-page-popover')
 export class LinkedPagePopover extends WithDisposable(LitElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @state()
   private _position: {
@@ -231,7 +122,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     super();
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
@@ -332,7 +223,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._insertLinkedNode('Subpage', page.id);
   }
 
-  render() {
+  override render() {
     const MAX_HEIGHT = 396;
     const style = this._position
       ? styleMap({

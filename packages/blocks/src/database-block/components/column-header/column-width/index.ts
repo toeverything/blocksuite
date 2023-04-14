@@ -149,8 +149,8 @@ export function initChangeColumnWidthHandlers(
       });
     } else {
       const columnId = targetModel.columns[index - 1];
-      const columnProps = targetModel.page.db.getColumn(columnId);
-      targetModel.page.db.updateColumn({
+      const columnProps = targetModel.getColumn(columnId);
+      targetModel.updateColumn({
         ...columnProps,
         width: columnWidth,
       });

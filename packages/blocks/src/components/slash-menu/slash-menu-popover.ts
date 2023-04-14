@@ -5,17 +5,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getRichTextByModel,
-  isControlledKeyboardEvent,
   isFuzzyMatch,
-  isPrintableKeyEvent,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
+import { createKeydownObserver } from '../utils.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
 
 @customElement('slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   model!: BaseBlockModel;
@@ -65,16 +64,82 @@ export class SlashMenu extends WithDisposable(LitElement) {
       );
       return;
     }
-    this._disposables.addFromEvent(richText, 'keydown', this._keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-      capture: true,
-    });
-    this._disposables.addFromEvent(window, 'keydown', e => {
-      if (e.key === 'Escape') {
+
+    /**
+     * Handle arrow key
+     *
+     * The slash menu will be closed in the following keyboard cases:
+     * - Press the space key
+     * - Press the backspace key and the search string is empty
+     * - Press the escape key
+     * - When the search item is empty, the slash menu will be hidden temporarily,
+     *   and if the following key is not the backspace key, the slash menu will be closed
+     */
+    createKeydownObserver({
+      target: richText,
+      abortController: this.abortController,
+      interceptor: (e, next) => {
+        if (e.key === '/') {
+          // Can not stopPropagation here,
+          // otherwise the rich text will not be able to trigger a new the slash menu
+          return;
+        }
+        if (this._hide && e.key !== 'Backspace') {
+          // if the following key is not the backspace key,
+          // the slash menu will be closed
+          this.abortController.abort();
+          return;
+        }
+        if (this._hide) {
+          this._hide = false;
+        }
+
+        if (e.key === 'ArrowLeft') {
+          e.stopPropagation();
+          e.preventDefault();
+          // If the left panel is hidden, should not activate it
+          if (this._searchString.length) return;
+          this._leftPanelActivated = true;
+          return;
+        }
+        if (e.key === 'ArrowRight') {
+          e.stopPropagation();
+          e.preventDefault();
+          this._leftPanelActivated = false;
+          return;
+        }
+        next();
+      },
+      onUpdateQuery: val => {
+        this._filterItems = this._updateItem(val);
+        if (!this._filterItems.length) {
+          this._hide = true;
+        }
+      },
+      onMove: step => {
+        const configLen = this._filterItems.length;
+        if (this._leftPanelActivated) {
+          const nowGroupIdx = this._getGroupIndexByItem(
+            this._filterItems[this._activatedItemIndex]
+          );
+          this._handleClickCategory(
+            menuGroups[
+              (nowGroupIdx + step + menuGroups.length) % menuGroups.length
+            ]
+          );
+          return;
+        }
+        this._activatedItemIndex =
+          (this._activatedItemIndex + step + configLen) % configLen;
+        this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
+      },
+      onConfirm: () => {
+        this._handleClickItem(this._activatedItemIndex);
+      },
+      onEsc: () => {
         this.abortController.abort();
-      }
+      },
     });
-    // this._disposables.addFromEvent(richText, 'focusout', this._onClickAway);
   }
 
   updatePosition(position: { x: string; y: string; height: number }) {
@@ -89,144 +154,12 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   };
 
-  /**
-   * Handle arrow key
-   *
-   * The slash menu will be closed in the following keyboard cases:
-   * - Press the space key
-   * - Press the backspace key and the search string is empty
-   * - Press the escape key
-   * - When the search item is empty, the slash menu will be hidden temporarily,
-   *   and if the following key is not the backspace key, the slash menu will be closed
-   */
-  private _keyDownListener = (e: KeyboardEvent) => {
-    if (e.key === '/') {
-      // Can not stopPropagation here,
-      // otherwise the rich text will not be able to trigger a new the slash menu
-      return;
-    }
-    // This listener be bind to the window and the rich text element
-    // So we need to ensure that the event is triggered once.
-    // We also need to prevent the event from triggering the keyboard bindings action
-    e.stopPropagation();
-    if (this._hide) {
-      if (e.key !== 'Backspace') {
-        this.abortController.abort();
-        return;
-      }
-      this._searchString = this._searchString.slice(0, -1);
-      this._filterItems = this._updateItem();
-      this._hide = false;
-      return;
-    }
-    if (
-      // Abort when press modifier key to avoid weird behavior
-      // e.g. press ctrl + a to select all or press ctrl + v to paste
-      isControlledKeyboardEvent(e) ||
-      e.key === ' ' ||
-      e.key === 'Escape'
-    ) {
-      this.abortController.abort();
-      return;
-    }
-    if (e.key === 'Backspace') {
-      if (!this._searchString.length) {
-        this.abortController.abort();
-      }
-      this._searchString = this._searchString.slice(0, -1);
-      this._filterItems = this._updateItem();
-      return;
-    }
-    // Assume input a character, append it to the search string
-    if (isPrintableKeyEvent(e)) {
-      this._searchString += e.key;
-      this._filterItems = this._updateItem();
-      if (!this._filterItems.length) {
-        this._hide = true;
-      }
-      return;
-    }
-
-    if (
-      ![
-        'ArrowLeft',
-        'ArrowRight',
-        'ArrowUp',
-        'ArrowDown',
-        'Enter',
-        'Tab',
-      ].includes(e.key)
-    ) {
-      return;
-    }
-    // prevent arrow key from moving cursor
-    e.preventDefault();
-    const configLen = this._filterItems.length;
-
-    const handleCursorMove = (shift = 1) => {
-      if (this._leftPanelActivated) {
-        const nowGroupIdx = this._getGroupIndexByItem(
-          this._filterItems[this._activatedItemIndex]
-        );
-        this._handleClickCategory(
-          menuGroups[
-            (nowGroupIdx + shift + menuGroups.length) % menuGroups.length
-          ]
-        );
-        return;
-      }
-      this._activatedItemIndex =
-        (this._activatedItemIndex + shift + configLen) % configLen;
-      this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
-    };
-
-    switch (e.key) {
-      case 'Enter': {
-        if (e.isComposing) {
-          return;
-        }
-        this._handleClickItem(this._activatedItemIndex);
-        return;
-      }
-      case 'Tab': {
-        if (e.shiftKey) {
-          handleCursorMove(-1);
-        } else {
-          handleCursorMove();
-        }
-        return;
-      }
-
-      case 'ArrowUp': {
-        handleCursorMove(-1);
-        return;
-      }
-
-      case 'ArrowDown': {
-        handleCursorMove();
-        return;
-      }
-
-      case 'ArrowLeft':
-        // If the left panel is hidden, should not activate it
-        if (this._searchString.length) return;
-        this._leftPanelActivated = true;
-        return;
-      case 'ArrowRight':
-        if (this._leftPanelActivated) {
-          this._leftPanelActivated = false;
-        }
-        return;
-      default:
-        throw new Error(`Unknown key: ${e.key}`);
-    }
-  };
-
   private _getGroupIndexByItem(item: SlashItem) {
     return menuGroups.findIndex(group => group.items.includes(item));
   }
 
-  private _updateItem(): SlashItem[] {
+  private _updateItem(query: string): SlashItem[] {
+    this._searchString = query;
     this._activatedItemIndex = 0;
     // Activate the right panel when search string is not empty
     if (this._leftPanelActivated) {

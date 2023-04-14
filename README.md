@@ -151,14 +151,14 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Block-level selection
 - Rich-content
   - ✅ Image block
-  - 🚧 Database block
+  - ⚛️ Database block
   - 📌 Third-party embedded block
 - Whiteboard (edgeless mode)
   - ✅ Zooming and panning
   - ✅ Frame block
-  - ⚛️ Shape element
-  - ⚛️ Handwriting element
-  - 🚧 Shape connector
+  - ✅ Shape element
+  - ✅ Handwriting element
+  - ⚛️ Shape connector
   - 🚧 Grouping
 - Playground
   - ✅ Multiplayer collaboration

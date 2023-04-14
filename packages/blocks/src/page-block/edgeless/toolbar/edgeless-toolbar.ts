@@ -28,7 +28,7 @@ const FIT_TO_SCREEN_PADDING = 200;
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       position: absolute;
       z-index: 2;
@@ -132,7 +132,7 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.slots.viewportUpdated.emit();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
     const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;

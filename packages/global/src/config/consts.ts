@@ -1,7 +1,7 @@
 import { SHORT_KEY } from './index.js';
 
 export * from './consts/block-hub.js';
-export * from './consts/short-key.js';
+export * from './consts/platform.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';

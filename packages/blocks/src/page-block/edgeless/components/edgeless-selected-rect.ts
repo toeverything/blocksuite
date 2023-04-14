@@ -35,7 +35,7 @@ import {
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       user-select: none;
@@ -143,7 +143,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._lock = false;
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
 
@@ -179,13 +179,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(() => resizeObserver.disconnect());
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     // when viewport updates, popper should update too.
     this._componentToolbarPopper?.update();
     super.updated(changedProperties);
   }
 
-  render() {
+  override render() {
     if (this.state.selected.length === 0) return null;
 
     const { page, state, surface, resizeMode, _resizeManager } = this;

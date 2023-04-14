@@ -56,16 +56,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
-  enableHover = true;
+  override enableHover = true;
   dragType = DefaultModeDragType.None;
-  selectedBlocks: BlockComponentElement[] = [];
 
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
 
-  get draggingArea() {
+  override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
@@ -122,6 +121,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           this._blockSelectionState.active;
         this._setSelectionState([selected], active);
       }
+      this._edgeless.slots.selectedBlocksUpdated.emit([]);
       handleNativeRangeClick(this._page, e);
     }
   }
@@ -179,6 +179,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     ]);
     this._page.updateBlock(block, { xywh });
     this._handleDragMoveEffect(block);
+
+    // TODO: refactor
+    if (this._edgeless.getSelection().selectedBlocks.length) {
+      this._edgeless.slots.selectedBlocksUpdated.emit(
+        this._edgeless.getSelection().selectedBlocks
+      );
+    }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {

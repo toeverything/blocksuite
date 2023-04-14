@@ -22,7 +22,7 @@ const ELEMENT_TAG = 'affine-image-block-not-found-card' as const;
 
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockNotFoundCard extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-image-block-not-found-card {
       display: flex;
       flex-direction: column;
@@ -37,7 +37,7 @@ export class AffineImageBlockNotFoundCard extends ShadowlessElement {
     }
   `;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-image-block-not-found-card">${notFoundIcon}</div>
     `;

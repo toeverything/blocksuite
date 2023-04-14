@@ -58,7 +58,7 @@ function ConnectorModeButtonGroup(
 
 @customElement('edgeless-connector-menu')
 export class EdgelessConnectorMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 260px;
       z-index: 1;
@@ -134,7 +134,7 @@ export class EdgelessConnectorMenu extends LitElement {
     });
   };
 
-  render() {
+  override render() {
     if (this.mouseMode.type !== 'connector') return nothing;
 
     const { color } = this.mouseMode;

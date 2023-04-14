@@ -8,7 +8,7 @@ import type { DividerBlockModel } from './divider-model.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-divider-block-container {
       width: 100%;
       height: 20px;
@@ -29,12 +29,12 @@ export class DividerBlockComponent extends ShadowlessElement {
   @property()
   host!: BlockHost;
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

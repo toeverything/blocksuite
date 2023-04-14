@@ -41,7 +41,7 @@ function getMostCommonMode(
 
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       flex-direction: row;
@@ -174,7 +174,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
@@ -182,7 +182,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const selectedColor = getMostCommonColor(this.elements);
     const style = {
       backgroundColor: selectedColor ?? '#fff',

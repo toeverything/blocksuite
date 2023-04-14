@@ -36,29 +36,35 @@ export function registerService(
  */
 export function getService<Key extends Flavour>(
   flavour: Key
-): BlockServiceInstanceByKey<Key> {
+): BlockServiceInstanceByKey<Key>;
+export function getService(flavour: string): BaseService;
+export function getService(flavour: string): BaseService {
   const service = services.get(flavour);
   if (!service) {
     throw new Error(`cannot find service by flavour ${flavour}`);
   }
-  return service as BlockServiceInstanceByKey<Key>;
+  return service as BaseService;
 }
 
 export function getServiceOrRegister<Key extends Flavour>(
   flavour: Key
-): BlockServiceInstanceByKey<Key> | Promise<BlockServiceInstanceByKey<Key>> {
+): BlockServiceInstanceByKey<Key> | Promise<BlockServiceInstanceByKey<Key>>;
+export function getServiceOrRegister(
+  flavour: string
+): BaseService | Promise<BaseService>;
+export function getServiceOrRegister(
+  flavour: string
+): BaseService | Promise<BaseService> {
   const service = services.get(flavour);
   if (!service) {
     const Constructor =
       blockService[flavour as keyof BlockService] ?? BaseService;
     const result = registerService(flavour, Constructor);
     if (result instanceof Promise) {
-      return result.then(
-        () => services.get(flavour) as BlockServiceInstanceByKey<Key>
-      );
+      return result.then(() => services.get(flavour) as BaseService);
     } else {
-      return services.get(flavour) as BlockServiceInstanceByKey<Key>;
+      return services.get(flavour) as BaseService;
     }
   }
-  return service as BlockServiceInstanceByKey<Key>;
+  return service as BaseService;
 }

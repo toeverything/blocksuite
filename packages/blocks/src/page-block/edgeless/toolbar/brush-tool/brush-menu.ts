@@ -52,7 +52,7 @@ function BrushSizeButtonGroup(
 
 @customElement('edgeless-brush-menu')
 export class EdgelessBrushMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 260px;
       z-index: 1;
@@ -138,7 +138,7 @@ export class EdgelessBrushMenu extends LitElement {
     });
   };
 
-  render() {
+  override render() {
     if (this.mouseMode.type !== 'brush') return nothing;
 
     const { color } = this.mouseMode;

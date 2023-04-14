@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import type { DatabaseBlockModel, ThemeObserver } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -375,7 +375,7 @@ export async function initEmptyCodeBlockState(page: Page) {
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  // need to set `force` to true when clicking on `affine-page-selected-rects`
+  // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
 }
 
@@ -746,4 +746,17 @@ export async function getCurrentEditorPageId(page: Page) {
     const pageId = editor.page.id;
     return pageId;
   });
+}
+
+export async function getCurrentHTMLTheme(page: Page) {
+  const root = page.locator('html');
+  return await root.getAttribute('data-theme');
+}
+
+export async function getCurrentEditorTheme(page: Page) {
+  const mode = await page.locator('editor-container').evaluate(ele => {
+    return (ele as unknown as Element & { themeObserver: ThemeObserver })
+      .themeObserver.cssVariables?.['affineThemeMode'];
+  });
+  return mode;
 }

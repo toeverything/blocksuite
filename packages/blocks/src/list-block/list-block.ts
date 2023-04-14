@@ -21,7 +21,7 @@ import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-list-block-container {
       box-sizing: border-box;
       border-radius: 5px;
@@ -110,12 +110,12 @@ export class ListBlockComponent extends ShadowlessElement {
     this._select();
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);

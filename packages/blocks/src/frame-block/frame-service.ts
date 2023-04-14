@@ -7,7 +7,7 @@ import type { SerializedBlock } from '../__internal__/utils/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
 export class FrameBlockService extends BaseService<FrameBlockModel> {
-  async json2Block(
+  override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[]
   ) {
@@ -19,7 +19,7 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
     );
   }
 
-  block2Json(
+  override block2Json(
     block: FrameBlockModel,
     begin?: number,
     end?: number

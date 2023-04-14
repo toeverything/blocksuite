@@ -40,7 +40,7 @@ setBasePath(basePath);
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
       --sl-input-font-size-small: var(--affine-font-xs);
@@ -94,18 +94,15 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.page;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    if (this._dark && matchMedia.matches) {
-      document.querySelector('html')?.classList.add('dark');
-      document.querySelector('html')?.classList.add('sl-theme-dark');
-    }
+    this._setThemeMode(this._dark && matchMedia.matches);
     matchMedia.addEventListener('change', this._darkModeChange);
 
     return this;
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
@@ -218,38 +215,30 @@ export class DebugMenu extends ShadowlessElement {
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
-  private _toggleDarkMode() {
+  private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
-    this._dark = !this._dark;
-    if (this._dark) {
-      localStorage.setItem('blocksuite:dark', 'true');
+    this._dark = dark;
+    localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
+    html?.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (dark) {
       html?.classList.add('dark');
       html?.classList.add('sl-theme-dark');
     } else {
-      localStorage.setItem('blocksuite:dark', 'false');
       html?.classList.remove('dark');
       html?.classList.remove('sl-theme-dark');
     }
   }
 
-  private _darkModeChange = (e: MediaQueryListEvent) => {
-    const html = document.querySelector('html');
+  private _toggleDarkMode() {
+    this._setThemeMode(!this._dark);
+  }
 
-    if (e.matches) {
-      this._dark = true;
-      localStorage.setItem('blocksuite:dark', 'true');
-      html?.classList.add('dark');
-      html?.classList.add('sl-theme-dark');
-    } else {
-      localStorage.setItem('blocksuite:dark', 'false');
-      this._dark = false;
-      html?.classList.remove('dark');
-      html?.classList.remove('sl-theme-dark');
-    }
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    this._setThemeMode(!!e.matches);
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
@@ -261,7 +250,7 @@ export class DebugMenu extends ShadowlessElement {
     this._styleMenu.hide();
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
@@ -288,7 +277,7 @@ export class DebugMenu extends ShadowlessElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         .debug-menu {

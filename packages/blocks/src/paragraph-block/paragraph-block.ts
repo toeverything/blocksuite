@@ -61,7 +61,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
       border-radius: 5px;
@@ -186,7 +186,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._updatePlaceholder();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
       this.requestUpdate();
@@ -234,7 +234,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._placeholderDisposables = new DisposableGroup();
   };
 
-  render() {
+  override render() {
     const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(
       this.model,

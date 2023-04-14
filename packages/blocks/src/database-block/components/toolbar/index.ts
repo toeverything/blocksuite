@@ -12,7 +12,7 @@ class NewRecordPreview extends ShadowlessElement {
   @property()
   offset = { x: 0, y: 0 };
 
-  render() {
+  override render() {
     return html`
       <style>
         affine-database-new-record-preview {

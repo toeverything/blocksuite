@@ -11,7 +11,7 @@ const initFunctions = Object.values(examples);
 
 @customElement('start-panel')
 export class StartPanel extends LitElement {
-  static styles = css`
+  static override styles = css`
     .container {
       display: flex;
       flex-direction: row;
@@ -28,7 +28,7 @@ export class StartPanel extends LitElement {
     }
   `;
 
-  render() {
+  override render() {
     return html`
       <div class="container">
         ${repeat(

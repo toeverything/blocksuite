@@ -57,7 +57,7 @@ const databaseTypes: SwitchViewAction[] = [
 
 @customElement('affine-database-type-popup')
 class DatabaseTypePopup extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 200px;
       padding: 8px;
@@ -106,7 +106,7 @@ class DatabaseTypePopup extends LitElement {
   @property()
   dbType!: SwitchViewActionType;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-database-type-popup">
         <div class="action database-type">
@@ -136,7 +136,7 @@ class DatabaseTypePopup extends LitElement {
 
 @customElement('affine-database-toolbar-action-popup')
 export class ToolbarActionPopup extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 200px;
       height: 128px;
@@ -253,7 +253,7 @@ export class ToolbarActionPopup extends LitElement {
     `;
   };
 
-  render() {
+  override render() {
     return html`<div class="affine-database-toolbar-action-popup">
       ${this._renderActions()}
     </div>`;

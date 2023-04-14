@@ -86,7 +86,7 @@ const STROKE_COLORS: Color[] = [
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       flex-direction: row;
@@ -208,7 +208,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this._forceUpdateSelection();
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._shapeMenuPopper = createButtonPopper(
@@ -255,7 +255,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const selectedShape = getMostCommonShape(this.elements);
     const icon = selectedShape
       ? ShapeComponentConfigMap[selectedShape].icon

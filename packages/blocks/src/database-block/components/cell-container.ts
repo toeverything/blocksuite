@@ -15,7 +15,7 @@ export class DatabaseCellContainer
   extends DatabaseCellElement<unknown>
   implements RowHost
 {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       align-items: center;
@@ -32,7 +32,7 @@ export class DatabaseCellContainer
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.db.updateCell(this.rowModel.id, {
+      this.databaseModel.updateCell(this.rowModel.id, {
         columnId: this.column.id,
         value,
       });
@@ -55,7 +55,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.db.updateColumn({
+    this.databaseModel.updateColumn({
       ...this.column,
       ...newProperty,
     });
@@ -65,7 +65,7 @@ export class DatabaseCellContainer
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
@@ -86,23 +86,20 @@ export class DatabaseCellContainer
     });
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._onClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this.removeEventListener('click', this._onClick);
     super.disconnectedCallback();
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  render() {
+  override render() {
     const renderer = getColumnRenderer(this.column.type);
-    const cell = this.databaseModel.page.db.getCell(
-      this.rowModel.id,
-      this.column.id
-    );
+    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`

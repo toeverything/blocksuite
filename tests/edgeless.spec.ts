@@ -342,7 +342,7 @@ test('add Text', async ({ page }) => {
   await assertRichTexts(page, ['', 'hello']);
 
   await page.mouse.move(30, 40);
-  await assertEdgelessHoverRect(page, [0, 0, 448, 72]);
+  await assertEdgelessSelectedRect(page, [0, 0, 448, 72]);
 });
 
 test.skip('add empty Text', async ({ page }) => {

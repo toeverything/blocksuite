@@ -146,7 +146,7 @@ const styles = css`
 
 @customElement('affine-database-toolbar')
 export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   targetModel!: DatabaseBlockModel;
@@ -180,7 +180,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
 
-  firstUpdated() {
+  override firstUpdated() {
     initAddNewRecordHandlers(
       this._newRecord,
       this,
@@ -196,7 +196,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const { serializedCells } = this.targetModel.page.db;
+    const { serializedCells } = this.targetModel;
     const rowIds = this.targetModel.children.map(child => child.id);
 
     rowIds.forEach(rowId => {
@@ -265,7 +265,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onShowSearch = () => {
     this.setSearchState(SearchState.SearchInput);
     onClickOutside(
-      this._searchInput,
+      this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
@@ -319,7 +319,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this._searchContainer.style.overflow = 'hidden';
   };
 
-  render() {
+  override render() {
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
       this.searchState === SearchState.Searching;

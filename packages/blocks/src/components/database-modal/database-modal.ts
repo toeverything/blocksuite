@@ -12,6 +12,7 @@ import {
   getCurrentBlockRange,
   getDefaultPage,
 } from '../../__internal__/index.js';
+import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { styles } from './styles.js';
 
 type DatabaseViewName = 'table' | 'kanban';
@@ -41,7 +42,7 @@ const databaseViews: DatabaseView[] = [
 
 @customElement('affine-database-modal')
 export class DatabaseModal extends LitElement {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   page!: Page;
@@ -64,8 +65,21 @@ export class DatabaseModal extends LitElement {
     const parentModel = this.page.getParent(models[0]);
     assertExists(parentModel);
 
+    const id = this.page.addBlock(
+      'affine:database',
+      {
+        columns: [],
+        titleColumnName: 'Title',
+      },
+      parentModel,
+      parentModel.children.indexOf(models[0])
+    );
+
+    const databaseModel = this.page.getBlockById(id) as DatabaseBlockModel;
+    assertExists(databaseModel);
+
     // default column
-    const tagColumnId = this.page.db.updateColumn({
+    const tagColumnId = databaseModel.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
@@ -73,18 +87,10 @@ export class DatabaseModal extends LitElement {
       selection: [],
     });
 
-    const id = this.page.addBlock(
-      'affine:database',
-      {
-        columns: [tagColumnId],
-        titleColumnName: 'Title',
-      },
-      parentModel,
-      parentModel.children.indexOf(models[0])
-    );
+    this.page.updateBlock(databaseModel, {
+      columns: [tagColumnId],
+    });
 
-    const databaseModel = this.page.getBlockById(id);
-    assertExists(databaseModel);
     this.page.moveBlocks(models, databaseModel);
 
     // Try clean block selection
@@ -101,7 +107,7 @@ export class DatabaseModal extends LitElement {
     this.abortController.abort();
   }
 
-  render() {
+  override render() {
     return html`<div class="overlay-root">
       <div class="overlay-mask" @click=${this._hide}></div>
       <div class="modal-container">
