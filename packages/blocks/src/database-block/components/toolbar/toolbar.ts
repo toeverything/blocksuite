@@ -264,15 +264,17 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onShowSearch = () => {
     this.setSearchState(SearchState.SearchInput);
-    onClickOutside(
-      this._searchContainer,
+    const removeListener = onClickOutside(
+      this._searchInput,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
           this._searchContainer.style.overflow = 'hidden';
+          removeListener();
         }
       },
-      'mousedown'
+      'mousedown',
+      true
     );
   };
 
