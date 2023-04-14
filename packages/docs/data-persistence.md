@@ -10,6 +10,8 @@ The BlockSuite workspace is encoded using the [y-protocols](https://github.com/y
 
 However, the more powerful aspect of the Git model is that you only need to connect via SSH or HTTP to sync a Git repository, without worrying about handling asynchronous network IO details. This is why BlockSuite provides a provider-based persistence solution. Different providers can handle the asynchronous IO over different network protocols (such as WebSocket and WebRTC) and storages (such as IndexedDB and SQLite). As long as the BlockSuite workspace is connected to the provider, you can reliably synchronize blocks through it.
 
+![pluggable-providers](./images/pluggable-providers.png)
+
 Code example:
 
 ```ts
