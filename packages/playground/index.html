@@ -23,6 +23,7 @@
         margin-top: 78px;
       }
 
+      /* CSS variables. You need to handle all places where `CSS variables` are marked. */
       html[class='dark sl-theme-dark'] {
         --affine-theme-mode: dark;
         --affine-editor-mode: page;
@@ -138,18 +139,35 @@
         --affine-tag-yellow: rgb(187, 165, 61);
         --affine-tag-orange: rgb(231, 161, 58);
         --affine-tag-gray: rgb(41, 41, 41);
-        --affine-palette-yellow: rgb(255, 232, 56);
-        --affine-palette-orange: rgb(255, 175, 56);
-        --affine-palette-tangerine: rgb(255, 99, 31);
-        --affine-palette-red: rgb(252, 63, 85);
-        --affine-palette-magenta: rgb(255, 56, 179);
-        --affine-palette-purple: rgb(182, 56, 255);
-        --affine-palette-navy: rgb(59, 37, 204);
-        --affine-palette-blue: rgb(79, 144, 255);
-        --affine-palette-green: rgb(16, 203, 134);
-        --affine-palette-grey: rgb(153, 153, 153);
-        --affine-palette-white: rgb(255, 255, 255);
-        --affine-palette-black: rgb(0, 0, 0);
+
+        /* --affine-palette-transparent: special values added for the sake of logical consistency. */
+        --affine-palette-transparent: #00000000;
+
+        --affine-palette-line-yellow: rgb(255, 232, 56);
+        --affine-palette-line-orange: rgb(255, 175, 56);
+        --affine-palette-line-tangerine: rgb(255, 99, 31);
+        --affine-palette-line-red: rgb(252, 63, 85);
+        --affine-palette-line-magenta: rgb(255, 56, 179);
+        --affine-palette-line-purple: rgb(182, 56, 255);
+        --affine-palette-line-navy: rgb(59, 37, 204);
+        --affine-palette-line-blue: rgb(79, 144, 255);
+        --affine-palette-line-green: rgb(16, 203, 134);
+        --affine-palette-line-grey: rgb(153, 153, 153);
+        --affine-palette-line-white: rgb(255, 255, 255);
+        --affine-palette-line-black: rgb(0, 0, 0);
+
+        --affine-palette-shape-yellow: rgb(255, 241, 136);
+        --affine-palette-shape-orange: rgb(255, 207, 136);
+        --affine-palette-shape-tangerine: rgb(255, 161, 121);
+        --affine-palette-shape-red: rgb(253, 140, 153);
+        --affine-palette-shape-magenta: rgb(255, 136, 209);
+        --affine-palette-shape-purple: rgb(211, 136, 255);
+        --affine-palette-shape-navy: rgb(137, 124, 224);
+        --affine-palette-shape-blue: rgb(149, 188, 255);
+        --affine-palette-shape-green: rgb(112, 224, 182);
+        --affine-palette-shape-grey: rgb(194, 194, 194);
+        --affine-palette-shape-white: rgb(255, 255, 255);
+        --affine-palette-shape-black: rgb(0, 0, 0);
       }
     </style>
   </head>

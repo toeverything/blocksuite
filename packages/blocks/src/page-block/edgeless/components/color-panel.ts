@@ -9,18 +9,18 @@ import type { RawCssVariablesName } from '../../../__internal__/theme/css-variab
 export class ColorEvent extends CustomEvent<RawCssVariablesName> {}
 
 const DEFAULT_COLORS: RawCssVariablesName[] = [
-  '--affine-palette-yellow',
-  '--affine-palette-orange',
-  '--affine-palette-tangerine',
-  '--affine-palette-red',
-  '--affine-palette-magenta',
-  '--affine-palette-purple',
-  '--affine-palette-green',
-  '--affine-palette-blue',
-  '--affine-palette-navy',
-  '--affine-palette-black',
-  '--affine-palette-grey',
-  '--affine-palette-white',
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-green',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-black',
+  '--affine-palette-line-grey',
+  '--affine-palette-line-white',
 ];
 export const DEFAULT_SELECTED_COLOR = DEFAULT_COLORS[9];
 
