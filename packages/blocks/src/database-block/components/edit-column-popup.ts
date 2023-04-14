@@ -55,6 +55,7 @@ export const actionStyles = css`
   .action-content > svg {
     width: 20px;
     height: 20px;
+    color: var(--affine-icon-color);
     fill: var(--affine-icon-color);
   }
   .action-divider {
@@ -260,6 +261,7 @@ export class EditColumnPopup extends LitElement {
       border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       z-index: 1;
+      font-family: var(--affine-font-family);
     }
 
     .affine-database-edit-column-popup {
