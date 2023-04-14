@@ -10,14 +10,22 @@ export class ShapeElement extends BaseElement {
   shapeType: ShapeType;
   radius = 0;
   filled = false;
-  fillColor: Color = '#ffffff';
+  fillColor = '#ffffff';
   strokeWidth = 4;
-  strokeColor: Color = '#000000';
+  strokeColor = '#000000';
   strokeStyle: StrokeStyle = 'solid';
 
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
+  }
+
+  get realStrokeColor() {
+    return this.transformPropertyValue(this.strokeColor);
+  }
+
+  get realFillColor() {
+    return this.transformPropertyValue(this.fillColor);
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {

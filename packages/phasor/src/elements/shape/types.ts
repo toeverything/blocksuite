@@ -1,4 +1,4 @@
-import type { Color, IBound, StrokeStyle } from '../../consts.js';
+import type { IBound, StrokeStyle } from '../../consts.js';
 import type { HitTestOptions } from '../base-element.js';
 import type { ShapeElement } from './shape-element.js';
 
@@ -13,9 +13,9 @@ export type SerializedShapeProps = {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
-  fillColor: Color;
+  fillColor: string;
   strokeWidth: number;
-  strokeColor: Color;
+  strokeColor: string;
   strokeStyle: StrokeStyle;
 };
 

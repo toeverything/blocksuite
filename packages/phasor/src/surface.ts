@@ -3,7 +3,10 @@ import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import * as Y from 'yjs';
 
 import type { Color, IBound } from './consts.js';
-import type { HitTestOptions } from './elements/base-element.js';
+import type {
+  HitTestOptions,
+  TransformPropertyValue,
+} from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
 import type { ConnectorProps, Controller } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
@@ -32,9 +35,15 @@ export class SurfaceManager {
   private _bindings = new Map<string, Set<string>>();
   private _lastIndex = 'a0';
 
-  constructor(yContainer: Y.Map<unknown>) {
+  private _transformPropertyValue: TransformPropertyValue;
+
+  constructor(
+    yContainer: Y.Map<unknown>,
+    transformPropertyValue: TransformPropertyValue
+  ) {
     this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
+    this._transformPropertyValue = transformPropertyValue;
 
     this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
@@ -55,6 +64,7 @@ export class SurfaceManager {
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
     const id = generateElementId();
     const element = new ShapeElement(id, shapeType);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     if (props) {
@@ -67,6 +77,7 @@ export class SurfaceManager {
   addDebugElement(bound: IBound, color: string): string {
     const id = generateElementId();
     const element = new DebugElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.color = color;
@@ -84,6 +95,7 @@ export class SurfaceManager {
   ): string {
     const id = generateElementId();
     const element = new BrushElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.points = points;
@@ -102,6 +114,7 @@ export class SurfaceManager {
   ) {
     const id = generateElementId();
     const element = new ConnectorElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.controllers = controllers;
@@ -306,6 +319,7 @@ export class SurfaceManager {
     assertExists(ElementCtor);
     const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     this._renderer.addElement(element);
     this._elements.set(element.id, element);

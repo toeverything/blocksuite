@@ -58,8 +58,15 @@ function createRectPath(
 
 export const RectMethods: ShapeMethods = {
   render(ctx: CanvasRenderingContext2D, element: ShapeElement) {
-    const { w, h, strokeWidth, filled, fillColor, strokeColor, radius } =
-      element;
+    const {
+      w,
+      h,
+      strokeWidth,
+      filled,
+      realFillColor,
+      realStrokeColor,
+      radius,
+    } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
@@ -71,12 +78,12 @@ export const RectMethods: ShapeMethods = {
     const path = createRectPath(0, 0, renderWidth, renderHeight, r, r);
 
     if (filled) {
-      ctx.fillStyle = fillColor;
+      ctx.fillStyle = realFillColor;
       ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
-      ctx.strokeStyle = strokeColor;
+      ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }

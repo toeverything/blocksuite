@@ -12,7 +12,8 @@ function createEllipsePath(width: number, height: number) {
 
 export const EllipseMethods: ShapeMethods = {
   render(ctx: CanvasRenderingContext2D, element: ShapeElement) {
-    const { w, h, strokeWidth, filled, fillColor, strokeColor } = element;
+    const { w, h, strokeWidth, filled, realFillColor, realStrokeColor } =
+      element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = Math.max(1, w - renderOffset * 2);
@@ -23,12 +24,12 @@ export const EllipseMethods: ShapeMethods = {
     const path = createEllipsePath(renderWidth, renderHeight);
 
     if (filled) {
-      ctx.fillStyle = fillColor;
+      ctx.fillStyle = realFillColor;
       ctx.fill(path);
     }
 
     if (strokeWidth > 0) {
-      ctx.strokeStyle = strokeColor;
+      ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }

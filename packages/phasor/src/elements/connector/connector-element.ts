@@ -45,7 +45,7 @@ export class ConnectorElement extends BaseElement {
     const secondToLast = this.controllers[this.controllers.length - 2];
     drawArrow(path, [secondToLast.x, secondToLast.y], [last.x, last.y]);
 
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.transformPropertyValue(this.color);
     ctx.lineWidth = this.lineWidth;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';

@@ -56,7 +56,7 @@ export class BrushElement extends BaseElement {
     const commands = Utils.getSvgPathFromStrokePoints(stroke);
     const path = new Path2D(commands);
 
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.transformPropertyValue(this.color);
     ctx.lineWidth = this.lineWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';

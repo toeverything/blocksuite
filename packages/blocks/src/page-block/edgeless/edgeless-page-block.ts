@@ -35,6 +35,8 @@ import {
   resetNativeSelection,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
+import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
+import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
 import {
   ShadowlessElement,
   WithDisposable,
@@ -191,7 +193,13 @@ export class EdgelessPageBlockComponent
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this.surface = new SurfaceManager(yContainer);
+    this.surface = new SurfaceManager(yContainer, value => {
+      // The color of the old data is in hex format
+      if (value.startsWith('#')) {
+        return value;
+      }
+      return getThemePropertyValue(this, value as CssVariableName) ?? value;
+    });
   }
 
   private _handleToolbarFlag() {
