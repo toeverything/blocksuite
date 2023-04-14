@@ -10,6 +10,7 @@ import type {
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type { RawCssVariablesName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -88,7 +89,7 @@ export enum BrushSize {
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: Color;
+  color: RawCssVariablesName;
   lineWidth: BrushSize;
 };
 

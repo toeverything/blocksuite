@@ -7,6 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { DEFAULT_SELECTED_COLOR } from '../../components/color-panel.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
@@ -78,7 +79,7 @@ export class EdgelessBrushToolButton extends LitElement {
     this.edgeless.slots.mouseModeUpdated.emit({
       type: 'brush',
       lineWidth: 4,
-      color: '#010101',
+      color: DEFAULT_SELECTED_COLOR,
     });
   }
 

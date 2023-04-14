@@ -8,6 +8,12 @@ function extractCssVariables(element: Element): CssVariable {
   const variables = VARIABLES.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
     acc[cssName] = value;
+
+    // --affine-palette-transparent: special values added for the sake of logical consistency.
+    if (cssName === '--affine-palette-transparent' && !value) {
+      acc[cssName] = '#00000000';
+    }
+
     return acc;
   }, {} as CssVariable);
   return variables;

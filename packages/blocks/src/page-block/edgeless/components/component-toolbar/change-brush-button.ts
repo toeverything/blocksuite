@@ -8,17 +8,21 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { WithDisposable } from '../../../../__internal__/index.js';
+import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
+import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: BrushElement[]): Color | undefined {
+function getMostCommonColor(
+  elements: BrushElement[]
+): RawCssVariablesName | undefined {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as Color) : undefined;
+  return max ? (max[0] as RawCssVariablesName) : undefined;
 }
 
 function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
@@ -124,7 +128,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setBrushColor(color: Color) {
+  private _setBrushColor(color: RawCssVariablesName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
@@ -148,9 +152,10 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
+    const selectedColor =
+      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
     const style = {
-      backgroundColor: selectedColor ?? '#fff',
+      backgroundColor: `var(${selectedColor})`,
     };
 
     const selectedSize = getMostCommonSize(this.elements);

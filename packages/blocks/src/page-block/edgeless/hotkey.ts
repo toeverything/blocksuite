@@ -9,6 +9,7 @@ import {
   handleDown,
   handleUp,
 } from '../utils/index.js';
+import { DEFAULT_SELECTED_COLOR } from './components/color-panel.js';
 import { FRAME_BACKGROUND_COLORS } from './components/component-toolbar/change-frame-button.js';
 import {
   DEFAULT_FILL_COLOR,
@@ -103,7 +104,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener('p', () =>
     setMouseMode(edgeless, {
       type: 'brush',
-      color: '#000',
+      color: DEFAULT_SELECTED_COLOR,
       lineWidth: BrushSize.Thin,
     })
   );

@@ -89,7 +89,7 @@ export class SurfaceManager {
     bound: IBound,
     points: number[][] = [],
     props?: {
-      color?: Color;
+      color?: string;
       lineWidth?: number;
     }
   ): string {

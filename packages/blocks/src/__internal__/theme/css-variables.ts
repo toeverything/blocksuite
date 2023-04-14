@@ -98,6 +98,10 @@ export const VARIABLES = [
   '--affine-tag-blue',
   '--affine-tag-purple',
   '--affine-tag-pink',
+
+  // --affine-palette-transparent: special values added for the sake of logical consistency.
+  '--affine-palette-transparent',
+
   '--affine-palette-yellow',
   '--affine-palette-orange',
   '--affine-palette-tangerine',

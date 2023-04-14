@@ -34,7 +34,7 @@ export function getBrushBoundFromPoints(
 
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
-  color = '#000000' as const;
+  color = '#000000';
   override x = 0;
   override y = 0;
   override w = 0;
