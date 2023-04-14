@@ -185,16 +185,10 @@ export function getBlockClipboardInfo(
   end?: number
 ) {
   const service = getService(model.flavour);
-  // FIXME: remove ts-ignore
-  // @ts-ignore
   const html = service.block2html(model, { begin, end });
-  // FIXME: remove ts-ignore
-  // @ts-ignore
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
   // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-  // FIXME: remove ts-ignore
-  // @ts-ignore
   const json = service.block2Json(model, begin, end);
 
   return {
@@ -220,7 +214,7 @@ function createPageClipboardItems(range: BlockRange) {
     return getBlockClipboardInfo(model);
   });
 
-  const stringifiedData = JSON.stringify(
+  const stringifiesData = JSON.stringify(
     clipGroups
       .filter(group => {
         if (!group.json) {
@@ -238,7 +232,7 @@ function createPageClipboardItems(range: BlockRange) {
   // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
   // Playwright issue: https://github.com/microsoft/playwright/issues/18013
   const customClipboardFragment = createHTMLStringForCustomData(
-    stringifiedData,
+    stringifiesData,
     CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
   );
 
@@ -252,7 +246,7 @@ function createPageClipboardItems(range: BlockRange) {
   );
   const pageClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-    stringifiedData
+    stringifiesData
   );
 
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
