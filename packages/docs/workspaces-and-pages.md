@@ -9,7 +9,7 @@ A `Workspace` in BlockSuite acts as a top-level container for organizing pages. 
 ```ts
 import { Workspace } from '@blocksuite/store';
 
-const workspace = new Workspace({ id: 'hello' });
+const workspace = new Workspace({ id: 'foo' });
 
 // We can register a batch of blocks to the workspace
 workspace.register(AffineSchemas);
