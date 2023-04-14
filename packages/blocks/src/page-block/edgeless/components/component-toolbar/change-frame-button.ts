@@ -8,6 +8,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
 import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
@@ -19,13 +20,13 @@ import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-export const FRAME_BACKGROUND_COLORS: Color[] = [
-  '#FBFAFC',
-  '#FFF4D8',
-  '#FFE1E1',
-  '#DFF4E8',
-  '#E1EFFF',
-  '#F3F0FF',
+export const FRAME_BACKGROUND_COLORS: RawCssVariablesName[] = [
+  '--affine-background-secondary-color',
+  '--affine-tag-yellow',
+  '--affine-tag-red',
+  '--affine-tag-green',
+  '--affine-tag-blue',
+  '--affine-tag-purple',
 ];
 
 function getMostCommonBackground(
@@ -98,15 +99,15 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _renderSelectedColor(color: Color) {
-    const style = { backgroundColor: color };
+  private _renderSelectedColor(color: RawCssVariablesName) {
+    const style = { backgroundColor: `var(${color})` };
 
     return html`<div class="selected-background" style=${styleMap(style)}>
       A
     </div>`;
   }
 
-  private _setBlockBackground(color: Color) {
+  private _setBlockBackground(color: RawCssVariablesName) {
     this.frames.forEach(frame => {
       this.page.updateBlock(frame, { background: color });
     });

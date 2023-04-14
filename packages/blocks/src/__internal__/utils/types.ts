@@ -100,7 +100,7 @@ export type PanMouseMode = {
 
 export type TextMouseMode = {
   type: 'text';
-  background: Color;
+  background: RawCssVariablesName;
 };
 
 export type ConnectorMouseMode = {
