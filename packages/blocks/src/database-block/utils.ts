@@ -19,14 +19,14 @@ function isVisible(elem: HTMLElement) {
 
 export function onClickOutside(
   element: HTMLElement,
-  callback: (element: HTMLElement) => void,
+  callback: (element: HTMLElement) => boolean | void,
   event: 'click' | 'mousedown' = 'click'
 ): () => void {
   const outsideClickListener = (event: Event) => {
     if (!element.contains(event.target as Node) && isVisible(element)) {
       // or use: event.target.closest(selector) === null
-      callback(element);
-      removeClickListener();
+      const isRemove = !callback(element);
+      isRemove && removeClickListener();
     }
   };
 
