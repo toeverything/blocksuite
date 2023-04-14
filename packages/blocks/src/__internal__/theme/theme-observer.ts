@@ -1,28 +1,13 @@
 import { Slot } from '@blocksuite/store';
 
-import { capitalize, uncapitalize } from '../utils/std.js';
-import type { CssVariable, CssVariableName } from './css-variables.js';
+import type { CssVariable } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';
-
-/**
- * Usage:
- * cssNameToJsName('--affine-theme-mode');  // affineThemeMode
- */
-function cssNameToJsName(cssName: string) {
-  const upper = cssName
-    .split('-')
-    .filter(s => !!s)
-    .map(s => capitalize(s))
-    .join('');
-  return uncapitalize(upper);
-}
 
 function extractCssVariables(element: Element): CssVariable {
   const styles = window.getComputedStyle(element);
   const variables = VARIABLES.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
-    const name = cssNameToJsName(cssName) as CssVariableName;
-    acc[name] = value;
+    acc[cssName] = value;
     return acc;
   }, {} as CssVariable);
   return variables;

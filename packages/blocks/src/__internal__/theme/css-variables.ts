@@ -112,13 +112,21 @@ export const VARIABLES = [
   '--affine-palette-black',
 ] as const;
 
-type CamelCase<S extends string> =
-  S extends `${infer P1}-${infer P2}${infer P3}`
-    ? `${Lowercase<P1>}${Capitalize<CamelCase<`${P2}${P3}`>>}`
-    : `${Lowercase<S>}`;
-
 type VariablesType = typeof VARIABLES;
-type RawCssVariablesName = Extract<VariablesType[keyof VariablesType], string>;
+export type RawCssVariablesName = Extract<
+  VariablesType[keyof VariablesType],
+  string
+>;
 
-export type CssVariableName = Uncapitalize<CamelCase<RawCssVariablesName>>;
-export type CssVariable = Record<CssVariableName, string>;
+// It seems like we don't need to convert the CSS variable format to the JS variable format.
+// type CamelCase<S extends string> =
+//   S extends `${infer P1}-${infer P2}${infer P3}`
+//     ? `${Lowercase<P1>}${Capitalize<CamelCase<`${P2}${P3}`>>}`
+//     : `${Lowercase<S>}`;
+// export type CssVariableName = Uncapitalize<CamelCase<RawCssVariablesName>>;
+
+export type CssVariable = Record<RawCssVariablesName, string>;
+
+export function isRawCssVariable(name: string): name is RawCssVariablesName {
+  return VARIABLES.includes(name as RawCssVariablesName);
+}

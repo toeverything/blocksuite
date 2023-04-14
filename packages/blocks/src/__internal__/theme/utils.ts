@@ -1,7 +1,22 @@
 import { assertExists } from '@blocksuite/store';
 
-import type { CssVariable, CssVariableName } from './css-variables.js';
+import { capitalize, uncapitalize } from '../utils/std.js';
+import type { CssVariable, RawCssVariablesName } from './css-variables.js';
+import { isRawCssVariable } from './css-variables.js';
 import type { ThemeObserver } from './theme-observer.js';
+
+/**
+ * Usage:
+ * cssNameToJsName('--affine-theme-mode');  // affineThemeMode
+ */
+export function cssNameToJsName(cssName: string) {
+  const upper = cssName
+    .split('-')
+    .filter(s => !!s)
+    .map(s => capitalize(s))
+    .join('');
+  return uncapitalize(upper);
+}
 
 function getClosestEditorContainer(element: Element) {
   const container = element.closest(
@@ -23,7 +38,7 @@ export function listenToThemeChange(
 
 export function getThemePropertyValue(
   currentELement: Element,
-  name: CssVariableName
+  name: RawCssVariablesName
 ) {
   const container = getClosestEditorContainer(currentELement);
   return container.themeObserver.cssVariables?.[name];
