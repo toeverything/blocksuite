@@ -1,4 +1,5 @@
-import { getStrokePoints } from 'perfect-freehand';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { getStrokePoints } from 'perfect-freehand/dist/esm/index.js';
 
 import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
