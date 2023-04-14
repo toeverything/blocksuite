@@ -304,11 +304,12 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _onUpdateNormalColumn = (name: string, column: Column) => {
+    this.targetModel.page.captureSync();
     this.targetModel.updateColumn({
       ...column,
       name,
     });
-    this.targetModel.propsUpdated.emit();
+    this.targetModel.applyColumnUpdate();
   };
 
   override render() {

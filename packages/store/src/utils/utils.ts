@@ -76,7 +76,7 @@ export function syncBlockProps(
 
   // set default value
   Object.entries(propSchema).forEach(([key, value]) => {
-    if (!yBlock.has(`prop:${key}`)) {
+    if (!yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined) {
       if (value instanceof Text) {
         yBlock.set(`prop:${key}`, new Y.Text());
       } else if (Array.isArray(value)) {

@@ -36,6 +36,7 @@ export class DatabaseCellContainer
         columnId: this.column.id,
         value,
       });
+      this.databaseModel.applyColumnUpdate();
       this.requestUpdate();
     });
   }

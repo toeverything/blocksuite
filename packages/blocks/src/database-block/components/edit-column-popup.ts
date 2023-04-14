@@ -399,44 +399,32 @@ export class EditColumnPopup extends LitElement {
       this.targetModel.page.captureSync();
       this.targetModel.deleteColumn(columnId);
       this.targetModel.deleteCellsByColumn(columnId);
-      const columns = this.targetModel.columns.filter(id => id !== columnId);
-      this.targetModel.page.updateBlock(this.targetModel, {
-        columns,
-      });
+      this.targetModel.applyColumnUpdate();
       this.closePopup();
       return;
     }
 
     if (actionType === 'move-left' || actionType === 'move-right') {
-      this.targetModel.page.captureSync();
       const targetIndex =
         actionType === 'move-left'
           ? this.columnIndex - 1
           : this.columnIndex + 1;
-      const columns = [...this.targetModel.columns];
-      [columns[this.columnIndex], columns[targetIndex]] = [
-        columns[targetIndex],
-        columns[this.columnIndex],
-      ];
-      this.targetModel.page.updateBlock(this.targetModel, {
-        columns,
-      });
+      this.targetModel.page.captureSync();
+      this.targetModel.moveColumn(this.columnIndex, targetIndex);
+      this.targetModel.applyColumnUpdate();
       this.closePopup();
       return;
     }
 
     if (actionType === 'duplicate') {
+      // TODO: rich text copy throws, check reason
       this.targetModel.page.captureSync();
       const currentSchema = this.targetModel.getColumn(columnId);
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this.targetModel.updateColumn(schema);
-      const newColumns = [...this.targetModel.columns];
-      newColumns.splice(this.columnIndex + 1, 0, id);
-      this.targetModel.page.updateBlock(this.targetModel, {
-        columns: newColumns,
-      });
+      const id = this.targetModel.addColumn(schema, this.columnIndex + 1);
+      this.targetModel.applyColumnUpdate();
       this.targetModel.copyCellsByColumn(copyId, id);
       this.closePopup();
       return;

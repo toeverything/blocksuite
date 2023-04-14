@@ -55,7 +55,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const columnIds = block.columns as string[];
+    const columnIds = block.columns.map(col => col.id);
     const rowIds = block.children.map(child => child.id);
 
     return {

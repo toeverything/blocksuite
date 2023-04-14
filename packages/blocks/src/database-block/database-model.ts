@@ -5,9 +5,8 @@ import { literal } from 'lit/static-html.js';
 
 export type Props = {
   title: Text;
-  columns: string[];
   yCells: Y.Map<Y.Map<unknown>>;
-  yColumns: Array<Column>;
+  columns: Array<Column>;
   titleColumnName: string;
   titleColumnWidth: number;
 };
@@ -27,7 +26,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     this.page.slots.onYEvent.on(({ event }) => {
       if (
         event.path.includes(this.id) &&
-        (event.path.includes('prop:yColumns') ||
+        (event.path.includes('prop:columns') ||
           event.path.includes('prop:yCells'))
       ) {
         this.propsUpdated.emit();
@@ -39,9 +38,15 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return this.yCells.toJSON();
   }
 
+  applyColumnUpdate() {
+    this.page.updateBlock(this, {
+      columns: this.columns,
+    });
+  }
+
   findColumnIndex(id: Column['id']) {
     let result = -1;
-    this.yColumns.forEach((col, index) => {
+    this.columns.forEach((col, index) => {
       if (col.id === id) result = index;
     });
     return result;
@@ -52,7 +57,20 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     if (index < 0) {
       return null;
     }
-    return this.yColumns.at(index)!;
+    return this.columns.at(index)!;
+  }
+
+  addColumn(column: Omit<Column, 'id'>, index?: number): string {
+    const id = this.page.generateId();
+    this.page.transact(() => {
+      const col = { ...column, id } as Column;
+      if (index === undefined) {
+        this.columns.push(col);
+      } else {
+        this.columns.splice(index, 0, col);
+      }
+    });
+    return id;
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
@@ -60,20 +78,27 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     const index = this.findColumnIndex(id);
     this.page.transact(() => {
       if (index < 0) {
-        this.yColumns.push({ ...column, id } as Column);
+        this.columns.push({ ...column, id } as Column);
       } else {
-        this.yColumns[index] = { ...column, id } as Column;
+        this.columns[index] = { ...column, id } as Column;
       }
     });
-    console.log(this.yColumns);
     return id;
+  }
+
+  moveColumn(from: number, to: number) {
+    this.page.transact(() => {
+      const column = this.columns.at(from)!;
+      this.columns.splice(from, 1);
+      this.columns.splice(to, 0, column);
+    });
   }
 
   deleteColumn(columnId: Column['id']) {
     const index = this.findColumnIndex(columnId);
     if (index < 0) return;
 
-    this.page.transact(() => this.yColumns.splice(index, 1));
+    this.page.transact(() => this.columns.splice(index, 1));
   }
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
@@ -203,9 +228,8 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     title: internal.Text(),
-    columns: [],
     yCells: internal.Map<Y.Map<unknown>>(),
-    yColumns: [],
+    columns: [],
     titleColumnName: 'Title',
     titleColumnWidth: 432,
   }),

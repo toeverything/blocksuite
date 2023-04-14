@@ -129,15 +129,8 @@ export function initMoveColumnHandlers(
     }
 
     targetModel.page.captureSync();
-    const columns = [...targetModel.columns];
-    // move column
-    const column = columns[fromIndex];
-    columns.splice(fromIndex, 1);
-    columns.splice(toIndex, 0, column);
-
-    targetModel.page.updateBlock(targetModel, {
-      columns,
-    });
+    targetModel.moveColumn(fromIndex, toIndex);
+    targetModel.applyColumnUpdate();
   };
 
   const disposables = new DisposableGroup();
