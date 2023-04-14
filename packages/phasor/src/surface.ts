@@ -7,6 +7,7 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/base-element.js';
+import { defaultTransformPropertyValue } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
 import type { ConnectorProps, Controller } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
@@ -39,7 +40,7 @@ export class SurfaceManager {
 
   constructor(
     yContainer: Y.Map<unknown>,
-    transformPropertyValue: TransformPropertyValue
+    transformPropertyValue: TransformPropertyValue = defaultTransformPropertyValue
   ) {
     this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;

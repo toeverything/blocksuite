@@ -15,6 +15,9 @@ export interface HitTestOptions {
 }
 
 export type TransformPropertyValue = (value: string) => string;
+export function defaultTransformPropertyValue(v: string) {
+  return v;
+}
 
 export abstract class BaseElement implements SurfaceElement {
   abstract type: string;
