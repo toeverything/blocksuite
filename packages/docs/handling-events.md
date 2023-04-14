@@ -23,7 +23,7 @@ slot.on(({ id }) => console.log(id));
 slot.once(({ id }) => console.log(id));
 
 // Emit the event
-slot.emit({ id: 'hello' });
+slot.emit({ id: 'foo' });
 ```
 
 To unsubscribe from the slot, simply use the return value of `slot.on()`:

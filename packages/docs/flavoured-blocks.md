@@ -122,4 +122,4 @@ const listBlock = page.getBlockById(id);
 page.updateBlock(listBlock, { type: 'numbered' });
 ```
 
-So far, we have only covered the definition of the block model using the `@blocksuite/store` package, which is framework agnostic. In the following sections, we will explain how to integrate the block model with UI frameworks.
+So far, we have only covered the definition of the block model using the `@blocksuite/store` package, which is framework agnostic. In the following sections, we will explain how to integrate the block model with UI frameworks, as well as how to build your own editable block in AFFiNE, which involves additional runtime concepts.

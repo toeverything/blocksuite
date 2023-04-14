@@ -16,7 +16,7 @@ export class SimpleAffineEditor extends LitElement {
   constructor() {
     super();
 
-    this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
+    this.workspace = new Workspace({ id: 'foo' }).register(AffineSchemas);
     this.page = this.workspace.createPage('page0');
 
     const pageBlockId = this.page.addBlock('affine:page');
@@ -39,6 +39,8 @@ By using this approach, you can easily extend the BlockSuite-based editor and co
 - `page.undo()` undoes a change.
 - `page.redo()` redoes a change.
 - `page.captureSync()` immediately adds a history record.
+
+Happy hacking!
 
 ::: tip
 By default, all block operations within a certain period of time are aggregated into a single history record, which is particularly useful for rich-text editing. If you added 10 blocks at once and need to undo each addition separately, you can use `page.captureSync()` before adding each block.
