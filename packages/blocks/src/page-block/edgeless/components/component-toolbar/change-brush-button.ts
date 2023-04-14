@@ -1,7 +1,7 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
 
-import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
+import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

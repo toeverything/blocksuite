@@ -1,5 +1,5 @@
 import type { Cell, Column } from '@blocksuite/global/database';
-import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
+import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';

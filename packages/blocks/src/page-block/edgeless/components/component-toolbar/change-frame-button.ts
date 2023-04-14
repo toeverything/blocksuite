@@ -2,7 +2,6 @@ import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
-import type { Color } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

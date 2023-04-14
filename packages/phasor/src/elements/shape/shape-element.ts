@@ -1,4 +1,4 @@
-import type { Color, StrokeStyle } from '../../consts.js';
+import type { StrokeStyle } from '../../consts.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';

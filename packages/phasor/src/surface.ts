@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import * as Y from 'yjs';
 
-import type { Color, IBound } from './consts.js';
+import type { IBound } from './consts.js';
 import type {
   HitTestOptions,
   TransformPropertyValue,

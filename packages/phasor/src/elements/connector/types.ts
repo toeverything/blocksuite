@@ -1,5 +1,3 @@
-import type { Color } from '../../consts.js';
-
 export enum ConnectorMode {
   Straight,
   Orthogonal,
