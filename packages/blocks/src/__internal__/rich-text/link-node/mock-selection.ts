@@ -11,7 +11,7 @@ export class LinkMockSelection extends LitElement {
     this.rects = rects;
   }
 
-  render() {
+  override render() {
     return html`
       ${this.rects.map(
         rect => html`<div

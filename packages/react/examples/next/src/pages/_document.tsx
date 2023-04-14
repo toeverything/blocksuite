@@ -9,7 +9,7 @@ import Document, {
 import React from 'react';
 
 class BlockSuiteDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
+  static override async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
     return {
       ...initialProps,
@@ -17,7 +17,7 @@ class BlockSuiteDocument extends Document {
     };
   }
 
-  render() {
+  override render() {
     return (
       <Html lang="en">
         <Head>{CssBaseline.flush()}</Head>

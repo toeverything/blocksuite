@@ -1,15 +1,17 @@
 # Workspaces and Pages
 
-BlockSuite is centered around the concept of blocks. However, to handle a large number of blocks efficiently, the blocks are organized into workspaces and pages. Workspace is the highest-level container for managing and organizing pages, and each workspace can hold multiple pages. Page is the sub-container for organizing blocks, and each page contains a strongly typed block tree.
+BlockSuite is centered around the concept of blocks. However, to handle a large number of blocks efficiently, the blocks are organized into workspaces and pages. `Workspace` is the highest-level container that can hold multiple pages. `Page` is the sub-container for organizing blocks, and each page contains a strongly typed block tree.
+
+![workspace-structure](./images/workspace-structure.png)
 
 ## Workspaces
 
-A `Workspace` in BlockSuite acts as a top-level container for managing and organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
+A `Workspace` in BlockSuite acts as a top-level container for organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
 
 ```ts
 import { Workspace } from '@blocksuite/store';
 
-const workspace = new Workspace({ id: 'hello' });
+const workspace = new Workspace({ id: 'foo' });
 
 // We can register a batch of blocks to the workspace
 workspace.register(AffineSchemas);

@@ -729,7 +729,7 @@ test('should format quick bar work in single block selection', async ({
     { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(1);
 
   const formatQuickBar = page.locator(`.format-quick-bar`);
@@ -801,7 +801,7 @@ test('should format quick bar work in multiple block selection', async ({
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);
@@ -886,7 +886,7 @@ test('should format quick bar with block selection works when update block type'
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);
@@ -964,7 +964,7 @@ test('should format quick bar show after convert to code block', async ({
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatQuickBar).toBeVisible();
-  const rects = page.locator('affine-page-selected-rects > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
   await formatBarController.assertBoundingBox(395, 99);
   await assertStoreMatchJSX(
@@ -1104,4 +1104,48 @@ test('should convert to database work', async ({ page }) => {
   await expect(database).toBeVisible();
   const rows = page.locator('.affine-database-block-row');
   expect(await rows.count()).toBe(3);
+});
+
+test('should show format-quick-bar and select all text of the block when triple clicking on text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello world');
+
+  const locator = page.locator('.virgo-editor').nth(0);
+  const textBox = await locator.boundingBox();
+  if (!textBox) {
+    throw new Error("Can't get bounding box");
+  }
+
+  await page.mouse.dblclick(textBox.x + 10, textBox.y + textBox.height / 2);
+
+  const { formatQuickBar } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+
+  await assertSelection(page, 0, 0, 5);
+
+  await page.mouse.click(0, 0);
+
+  await expect(formatQuickBar).toBeHidden();
+
+  await page.mouse.move(textBox.x + 10, textBox.y + textBox.height / 2);
+
+  const options = {
+    clickCount: 1,
+  };
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  options.clickCount++;
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  options.clickCount++;
+  await page.mouse.down(options);
+  await page.mouse.up(options);
+
+  await assertSelection(page, 0, 0, 'hello world'.length);
 });

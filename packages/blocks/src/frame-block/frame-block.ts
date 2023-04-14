@@ -9,7 +9,7 @@ import type { FrameBlockModel } from './frame-model.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-frame-block-container.selected {
       background-color: var(--affine-selected-color);
     }
@@ -21,12 +21,12 @@ export class FrameBlockComponent extends ShadowlessElement {
   @property()
   host!: BlockHost;
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

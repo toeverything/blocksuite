@@ -14,7 +14,7 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
   }
   .affine-database-column-header > .affine-database-column:first-child {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
 
   .affine-database-column {
@@ -124,6 +124,7 @@ export const styles = css`
   .affine-database-column-move svg {
     width: 10px;
     height: 14px;
+    color: var(--affine-black-10);
     cursor: move;
     opacity: 0;
   }

@@ -40,7 +40,7 @@ const columnTypeIconMap: Record<string, TemplateResult> = {
 
 @customElement('affine-database-column-header')
 export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   targetModel!: DatabaseBlockModel;
@@ -81,7 +81,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this._editingColumnId = id;
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     this._initChangeColumnWidthHandlers();
     this._initHeaderMousemoveHandlers();
     this._initMoveColumnHandlers();
@@ -93,7 +93,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
       this._titleColumnInput.focus();
@@ -116,7 +116,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._columnWidthDisposables.dispose();
 
@@ -311,7 +311,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this.targetModel.propsUpdated.emit();
   };
 
-  render() {
+  override render() {
     const style = styleMap({
       width: `${this.targetModel.titleColumnWidth}px`,
     });

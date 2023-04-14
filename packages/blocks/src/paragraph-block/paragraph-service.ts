@@ -3,7 +3,7 @@ import { BaseService } from '../__internal__/service/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
-  block2html(
+  override block2html(
     model: ParagraphBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {

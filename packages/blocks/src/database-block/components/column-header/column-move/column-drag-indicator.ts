@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('affine-database-column-drag-indicator')
 export class ColumnDragIndicator extends LitElement {
-  static styles = css`
+  static override styles = css`
     .affine-database-column-drag-indicator {
       position: fixed;
       z-index: 10;

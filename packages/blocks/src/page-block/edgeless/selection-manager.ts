@@ -2,6 +2,7 @@ import type { PhasorElement } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
 import type {
+  BlockComponentElement,
   MouseMode,
   SelectionEvent,
   TopLevelBlockModel,
@@ -32,7 +33,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
-  /* The selected block or surface element */
+  /* The selected frame or surface element */
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
@@ -49,6 +50,9 @@ export class EdgelessSelectionManager {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
+
+  // selected blocks
+  selectedBlocks: BlockComponentElement[] = [];
 
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
@@ -130,6 +134,7 @@ export class EdgelessSelectionManager {
       this._onContainerDragEnd,
       this._onContainerClick,
       this._onContainerDblClick,
+      this._onContainerTripleClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
@@ -164,6 +169,10 @@ export class EdgelessSelectionManager {
 
   private _onContainerDblClick = (e: SelectionEvent) => {
     return this.currentController.onContainerDblClick(e);
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    return this.currentController.onContainerTripleClick(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

@@ -25,7 +25,7 @@ export const PreviewDragHandlers = {
         } = e;
         state.lastPoint = new Point(clientX, clientY);
       },
-      onScroll(d) {
+      onScroll(_) {
         const {
           container,
           state: { lastPoint },
@@ -33,7 +33,6 @@ export const PreviewDragHandlers = {
 
         assertExists(lastPoint);
 
-        lastPoint.y + d;
         container.components.dragHandle?.onDrag(
           createDragEvent(
             'drag',

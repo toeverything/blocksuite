@@ -146,7 +146,7 @@ const styles = css`
 
 @customElement('affine-database-toolbar')
 export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
-  static styles = styles;
+  static override styles = styles;
 
   @property()
   targetModel!: DatabaseBlockModel;
@@ -180,7 +180,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
 
-  firstUpdated() {
+  override firstUpdated() {
     initAddNewRecordHandlers(
       this._newRecord,
       this,
@@ -321,7 +321,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this._searchContainer.style.overflow = 'hidden';
   };
 
-  render() {
+  override render() {
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
       this.searchState === SearchState.Searching;

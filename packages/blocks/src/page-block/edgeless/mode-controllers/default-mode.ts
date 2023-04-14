@@ -2,13 +2,9 @@ import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PhasorElement, XYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
-import type {
-  BlockComponentElement,
-  DefaultMouseMode,
-  SelectionEvent,
-  TopLevelBlockModel,
-} from '../../../__internal__/index.js';
 import {
+  type BlockComponentElement,
+  type DefaultMouseMode,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -19,9 +15,11 @@ import {
   Point,
   Rect,
   resetNativeSelection,
+  type SelectionEvent,
+  type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -56,16 +54,17 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
-  enableHover = true;
+  override enableHover = true;
   dragType = DefaultModeDragType.None;
-  selectedBlocks: BlockComponentElement[] = [];
 
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
+  // Do not select the text, when click again after activating the frame.
+  private _isDoubleClickedOnMask = false;
 
-  get draggingArea() {
+  override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
@@ -122,6 +121,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           this._blockSelectionState.active;
         this._setSelectionState([selected], active);
       }
+      this._edgeless.slots.selectedBlocksUpdated.emit([]);
       handleNativeRangeClick(this._page, e);
     }
   }
@@ -179,6 +179,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     ]);
     this._page.updateBlock(block, { xywh });
     this._handleDragMoveEffect(block);
+
+    // TODO: refactor
+    if (this._edgeless.getSelection().selectedBlocks.length) {
+      this._edgeless.slots.selectedBlocksUpdated.emit(
+        this._edgeless.getSelection().selectedBlocks
+      );
+    }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
@@ -270,6 +277,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     } else {
       this._setNoneSelectionState();
     }
+
+    this._isDoubleClickedOnMask = false;
   }
 
   onContainerContextMenu(e: SelectionEvent) {
@@ -277,7 +286,22 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
-    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
+    if (
+      e.raw.target &&
+      e.raw.target instanceof HTMLElement &&
+      e.raw.target.classList.contains('affine-edgeless-mask')
+    ) {
+      this.onContainerClick(e);
+      this._isDoubleClickedOnMask = true;
+      return;
+    }
+
+    showFormatQuickBarByClicks('double', e, this._page, this._edgeless);
+  }
+
+  onContainerTripleClick(e: SelectionEvent) {
+    if (this._isDoubleClickedOnMask) return;
+    showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {

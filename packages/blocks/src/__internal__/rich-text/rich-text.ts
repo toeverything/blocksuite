@@ -14,7 +14,7 @@ const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
 
 @customElement('rich-text')
 export class RichText extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-rich-text {
       height: 100%;
       width: 100%;
@@ -53,7 +53,7 @@ export class RichText extends ShadowlessElement {
   private _inlineSuggestController: InlineSuggestionController =
     new InlineSuggestionController(this);
 
-  firstUpdated() {
+  override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
@@ -139,13 +139,13 @@ export class RichText extends ShadowlessElement {
     }
   }
 
-  updated() {
+  override updated() {
     if (this._vEditor) {
       this._vEditor.setReadonly(this.model.page.readonly);
     }
   }
 
-  render() {
+  override render() {
     return html`<div
         class="affine-rich-text virgo-editor"
         @keydown=${this._inlineSuggestController.onKeyDown}

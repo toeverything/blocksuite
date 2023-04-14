@@ -5,7 +5,7 @@ import { ShadowlessElement } from '../../../../__internal__/index.js';
 
 @customElement('affine-database-column-drag-preview')
 export class ColumnDragPreview extends ShadowlessElement {
-  render() {
+  override render() {
     return html`
       <style>
         affine-database-column-drag-preview {

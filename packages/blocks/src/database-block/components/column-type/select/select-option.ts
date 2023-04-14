@@ -10,7 +10,7 @@ import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
 export class SelectOption extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host * {
       box-sizing: border-box;
     }
@@ -41,7 +41,7 @@ export class SelectOption extends LitElement {
 
   private _vEditor!: VEditor;
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('editing') && this.editing) {
       this._vEditor.focusEnd();
@@ -53,7 +53,7 @@ export class SelectOption extends LitElement {
     return this._vEditor.yText.toString();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this._vEditor = initLimitedLengthVEditor({
       yText: this.select.value,
       container: this._container,
@@ -64,7 +64,7 @@ export class SelectOption extends LitElement {
     });
   }
 
-  render() {
+  override render() {
     const style = styleMap({
       backgroundColor: this.select.color,
     });
