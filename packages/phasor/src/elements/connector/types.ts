@@ -33,7 +33,7 @@ export type SerializedConnectorProps = {
 
   mode: ConnectorMode;
   lineWidth: number;
-  color: Color;
+  color: string;
 
   startElement?: AttachedElement;
   endElement?: AttachedElement;

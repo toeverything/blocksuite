@@ -2,11 +2,7 @@ import '../tool-icon-button.js';
 import '../color-panel.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
-import type {
-  Color,
-  ConnectorElement,
-  SurfaceManager,
-} from '@blocksuite/phasor';
+import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
 import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -15,6 +11,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
@@ -23,12 +20,15 @@ import {
   getConnectorAttachedInfo,
 } from '../../utils.js';
 import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
+import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: ConnectorElement[]): Color | undefined {
+function getMostCommonColor(
+  elements: ConnectorElement[]
+): RawCssVariablesName | undefined {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as Color) : undefined;
+  return max ? (max[0] as RawCssVariablesName) : undefined;
 }
 
 function getMostCommonMode(
@@ -165,7 +165,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setConnectorColor(color: Color) {
+  private _setConnectorColor(color: RawCssVariablesName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
@@ -183,9 +183,10 @@ export class EdgelessChangeConnectorButton extends LitElement {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
+    const selectedColor =
+      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
     const style = {
-      backgroundColor: selectedColor ?? '#fff',
+      backgroundColor: `var(${selectedColor})`,
     };
 
     const selectedMode = getMostCommonMode(this.elements);

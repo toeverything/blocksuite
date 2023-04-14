@@ -106,7 +106,7 @@ export type TextMouseMode = {
 export type ConnectorMouseMode = {
   type: 'connector';
   mode: ConnectorMode;
-  color: Color;
+  color: RawCssVariablesName;
 };
 
 export type MouseMode =

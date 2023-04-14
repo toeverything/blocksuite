@@ -15,7 +15,7 @@ import { ConnectorMode } from './types.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
-  color = '#000000' as const;
+  color = '#000000';
   override x = 0;
   override y = 0;
   override w = 0;
