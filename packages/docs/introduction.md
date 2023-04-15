@@ -22,7 +22,7 @@ The block-based editing architecture of BlockSuite may appear simple, but in rea
 
 However, CRDT is well-suited to address these issues. BlockSuite's block tree is built upon the high-performance [Yjs](https://github.com/yjs/yjs) library, which automatically records and tracks all historical operations on data (down to individual characters) while providing user-friendly APIs similar to `Map` and `Array`. With CRDT as its single source of truth, BlockSuite's block update API is not only straightforward to use, but also forms the unidirectional data flow that is collaborative by design.
 
-![data-flow](./images/data-flow.png)
+![unidirectional-data-flow](./images/unidirectional-data-flow.png)
 
 Also, thanks to the capability of CRDT to serialize any local state updates into incremental and standardized data structures, the following benefits are achieved:
 

@@ -71,8 +71,6 @@ export function initAddNewRecordHandlers(
 
   const database = container.closest('affine-database');
   assertExists(database);
-  const { width: databaseWidth, left: databaseLeft } =
-    database.getBoundingClientRect();
   const rowContainer = database.querySelector<HTMLElement>(
     '.affine-database-block-rows'
   );
@@ -126,6 +124,8 @@ export function initAddNewRecordHandlers(
     if (row) {
       const { top, bottom } = row.element.getBoundingClientRect();
       const rectTop = row.isLast ? bottom : top;
+      const { width: databaseWidth, left: databaseLeft } =
+        database.getBoundingClientRect();
       indicator.rect = Rect.fromLWTH(databaseLeft, databaseWidth, rectTop, 3);
       dragConfig.index = row.insertRowIndex;
     } else {

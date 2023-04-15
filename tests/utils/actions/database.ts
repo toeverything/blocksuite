@@ -208,10 +208,18 @@ export async function waitSearchTransitionEnd(page: Page) {
 
 export async function focusDatabaseSearch(page: Page) {
   (await getDatabaseMouse(page)).mouseOver();
-  const searchIcon = page.locator('.affine-database-search-input-icon');
+  const searchContainer = page.locator('.search-container');
+  const searchIcon = searchContainer.locator(
+    '.affine-database-search-input-icon'
+  );
   await searchIcon.click();
   await waitSearchTransitionEnd(page);
-  return searchIcon;
+  return searchContainer;
+}
+
+export async function blurDatabaseSearch(page: Page) {
+  const dbTitle = page.locator('[data-block-is-database-title="true"]');
+  await dbTitle.click();
 }
 
 export async function focusDatabaseHeader(page: Page, columnIndex = 0) {
