@@ -148,7 +148,7 @@ export class DatabaseBlockComponent
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): Column[] {
-    return [...this.model.columns];
+    return this.model.columns;
   }
 
   override connectedCallback() {
@@ -161,8 +161,22 @@ export class DatabaseBlockComponent
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this.model.propsUpdated.on(() => {
+      this.requestUpdate();
+      // TODO: optimize performance here
+      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+        cell.requestUpdate();
+      });
+      this.querySelector('affine-database-column-header')?.requestUpdate();
+    });
+    this.model.childrenUpdated.on(() => {
+      this.requestUpdate();
+      // TODO: optimize performance here
+      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+        cell.requestUpdate();
+      });
+      this.querySelector('affine-database-column-header')?.requestUpdate();
+    });
 
     const tableContent = this._tableContainer.parentElement;
     assertExists(tableContent);
@@ -288,7 +302,6 @@ export class DatabaseBlockComponent
               .columns=${this.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
-              .tableContainer=${this._tableContainer}
             ></affine-database-column-header>
             ${rows}
           </div>

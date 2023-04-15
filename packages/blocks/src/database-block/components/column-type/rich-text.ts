@@ -94,7 +94,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
         this._initVEditor(yText, true);
       }
     }
-    // TODO: check why undo not working here
   }
 
   private _initVEditor(value: Y.Text, focus = false) {

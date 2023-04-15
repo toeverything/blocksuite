@@ -13,7 +13,7 @@ export function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
-  const columns = [...databaseModel.columns];
+  const columns = databaseModel.columns;
 
   const filteredChildren =
     searchState === SearchState.Searching
