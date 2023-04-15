@@ -36,7 +36,10 @@ export default defineConfig({
       {
         text: 'Editor Architecture',
         items: [
-          { text: '🚧 Unidirectional Data Flow', link: '' },
+          {
+            text: 'Unidirectional Data Flow',
+            link: '/unidirectional-data-flow',
+          },
           {
             text: '🚧 Common Patterns',
             items: [
