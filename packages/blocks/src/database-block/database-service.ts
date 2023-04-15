@@ -38,16 +38,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    const tagColumnId = blockModel.updateColumn({
+    blockModel.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
       hide: false,
       selection: [],
     });
-    page.updateBlock(blockModel, {
-      columns: [tagColumnId],
-    });
+    blockModel.applyColumnUpdate();
   }
 
   override block2Json(
@@ -90,9 +88,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       const { id, ...nonIdProps } = schema;
       return model.updateColumn(nonIdProps);
     });
-    model.page.updateBlock(model, {
-      columns: newColumnIds,
-    });
+    model.applyColumnUpdate();
 
     const newRowIds = model.children.map(child => child.id);
     rowIds.forEach((rowId, rowIndex) => {
