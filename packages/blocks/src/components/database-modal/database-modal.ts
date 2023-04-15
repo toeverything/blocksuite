@@ -88,10 +88,6 @@ export class DatabaseModal extends LitElement {
     });
     databaseModel.applyColumnUpdate();
 
-    // this.page.updateBlock(databaseModel, {
-    //   columns: [tagColumnId],
-    // });
-
     this.page.moveBlocks(models, databaseModel);
 
     // Try clean block selection
