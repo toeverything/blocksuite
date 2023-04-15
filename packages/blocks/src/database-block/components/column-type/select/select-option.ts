@@ -36,6 +36,15 @@ export class SelectOption extends LitElement {
   @property()
   editing!: boolean;
 
+  @property()
+  index!: number;
+
+  @property()
+  saveSelectionName!: (index: number) => void;
+
+  @property()
+  setEditingIndex!: (index: number) => void;
+
   @query('.select-option-text')
   private _container!: HTMLDivElement;
 
@@ -43,9 +52,12 @@ export class SelectOption extends LitElement {
 
   override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
-    if (changedProperties.has('editing') && this.editing) {
-      this._vEditor.focusEnd();
+    if (changedProperties.has('editing')) {
+      if (this.editing) {
+        this._vEditor.focusEnd();
+      }
       this._vEditor.setReadonly(!this.editing);
+      // TODO: reset vEditor text
     }
   }
 
@@ -61,6 +73,22 @@ export class SelectOption extends LitElement {
       maxLength: SELECT_TAG_NAME_MAX_LENGTH,
       // When editing the current select, other sibling selects should not be edited
       readonly: !this.editing,
+      handlers: {
+        keydown: event => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            this.saveSelectionName(this.index);
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            this.setEditingIndex(-1);
+            this._container.blur();
+          }
+        },
+      },
+      options: {
+        defaultMode: 'pure',
+      },
     });
   }
 

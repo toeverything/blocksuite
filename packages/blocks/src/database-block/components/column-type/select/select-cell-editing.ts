@@ -309,7 +309,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   private _onSelectAction = (type: SelectTagActionType, index: number) => {
     if (type === 'rename') {
-      this._editingIndex = index;
+      this._setEditingIndex(index);
       return;
     }
 
@@ -379,7 +379,11 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       newSelect
     );
 
-    this._editingIndex = -1;
+    this._setEditingIndex(-1);
+  };
+
+  private _setEditingIndex = (index: number) => {
+    this._editingIndex = index;
   };
 
   override render() {
@@ -458,7 +462,10 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
                     <affine-database-select-option
                       .databaseModel=${this.databaseModel}
                       .select=${select}
-                      .editing=${index === this._editingIndex}
+                      .editing=${isEditing}
+                      .index=${index}
+                      .saveSelectionName=${this._onSaveSelectionName}
+                      .setEditingIndex=${this._setEditingIndex}
                     ></affine-database-select-option>
                   </div>
                   <div class="select-option-icon" @click=${onOptionIconClick}>
