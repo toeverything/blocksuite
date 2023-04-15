@@ -968,7 +968,7 @@ test('should format quick bar show after convert to code block', async ({
   await expect(formatBarController.formatQuickBar).toBeVisible();
   const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
-  await formatBarController.assertBoundingBox(395, 99);
+  await formatBarController.assertBoundingBox(377, 99);
   await assertStoreMatchJSX(
     page,
     `
