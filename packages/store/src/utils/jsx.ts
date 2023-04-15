@@ -36,7 +36,6 @@ const IGNORED_PROPS = [
   'sys:children',
   'prop:xywh',
   'prop:yCells',
-  'prop:columns',
 ];
 
 export function yDocToJSXNode(
@@ -66,6 +65,10 @@ export function yDocToJSXNode(
 
   if ('prop:title' in props && props['prop:title'] instanceof Array) {
     props['prop:title'] = parseDelta(props['prop:title'] as DeltaText);
+  }
+
+  if ('prop:columns' in props && props['prop:columns'] instanceof Array) {
+    props['prop:columns'] = `Array [${props['prop:columns'].length}]`;
   }
 
   return {
