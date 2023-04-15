@@ -263,9 +263,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   };
 
   private _onShowSearch = () => {
+    // only triggered from the SearchIcon to others
+    if (
+      [SearchState.Searching, SearchState.SearchInput].includes(
+        this.searchState
+      )
+    )
+      return;
     this.setSearchState(SearchState.SearchInput);
     const removeListener = onClickOutside(
-      this._searchInput,
+      this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
