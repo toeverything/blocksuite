@@ -8,9 +8,11 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   initEmptyParagraphState,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowRight,
   pressEnter,
   setSelection,
@@ -1148,4 +1150,35 @@ test('should show format-quick-bar and select all text of the block when triple 
   await page.mouse.up(options);
 
   await assertSelection(page, 0, 0, 'hello world'.length);
+});
+
+test('should update the format quick bar state when there is a change in keyboard selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
+    const frame = page.addBlock('affine:frame', {}, pageId);
+    const delta = [
+      { insert: '1', attributes: { bold: true } },
+      { insert: '2', attributes: { bold: true } },
+      { insert: '3', attributes: { bold: false } },
+    ];
+    const text = page.Text.fromDelta(delta);
+    page.addBlock('affine:paragraph', { text }, frame);
+  });
+  await focusTitle(page);
+  await pressArrowDown(page);
+
+  const formatBar = getFormatBar(page);
+  await withPressKey(page, 'Shift', async () => {
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await expect(formatBar.boldBtn).toHaveAttribute('active', '');
+    await page.keyboard.press('ArrowRight');
+    await expect(formatBar.boldBtn).not.toHaveAttribute('active', '');
+  });
 });
