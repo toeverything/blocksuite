@@ -34,7 +34,7 @@ This design can be represented by the following diagram:
 The advantage of this approach is that the application-layer code can **completely ignore whether updates to the block model come from local editing, history stack, or collaboration with other users**. Just subscribing to model update events is adequate.
 
 ::: info
-In BlockSuite, we generally refer to the block instances that users manipulate through the page API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
+In BlockSuite, we generally refer to the block instances that users manipulate through the `page` API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
 :::
 
 ## Case Study
