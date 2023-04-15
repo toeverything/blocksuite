@@ -34,7 +34,7 @@ This design can be represented by the following diagram:
 The advantage of this approach is that the application-layer code can **completely ignore whether updates to the block model come from local editing, history stack, or collaboration with other users**. Just subscribing to model update events is adequate.
 
 ::: info
-In BlockSuite, we generally refer to the block instances that users manipulate through the page API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
+In BlockSuite, we generally refer to the block instances that users manipulate through the `page` API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
 :::
 
 ## Case Study
@@ -56,7 +56,7 @@ const blockModel = page.root.children[0].children[2];
 page.deleteBlock(blockModel);
 ```
 
-At this point, BlockSuite will not directly modify the block tree under `page.root`, but will instead firstly modifies the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event` data structure, which contains all the incremental state changes in this update. BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
+At this point, BlockSuite will not directly modify the block tree under `page.root`, but will instead firstly modifies the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event` data structure, which contains all the incremental state changes in this update (similar to patches in git and virtual DOM). BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
 
 In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated` slot event of `FrameBlock` will be triggered. This will enable the corresponding component in the UI framework component tree to refresh itself. Since each child block has an ID, this is very conducive to combining the common list key optimizations in UI frameworks, achieving on-demand block component updates.
 
