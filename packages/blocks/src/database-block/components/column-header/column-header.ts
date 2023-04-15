@@ -264,6 +264,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     editColumn.targetColumn = column;
     editColumn.columnIndex = index - 1;
     editColumn.closePopup = () => {
+      this._editingColumnPopupIndex = -1;
       editColumn.remove();
     };
     editColumn.insertColumn = position => {
