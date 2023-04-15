@@ -310,7 +310,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       ...column,
       name,
     });
-    this.targetModel.propsUpdated.emit();
+    this.targetModel.applyColumnUpdate();
   };
 
   override render() {
