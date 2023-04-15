@@ -237,6 +237,8 @@ test('should database search input displayed correctly', async ({ page }) => {
   );
 
   await focusDatabaseSearch(page);
+  // focus fail
+  await page.locator('.affine-database-search-input').click();
   await pressBackspace(page);
   await blurDatabaseSearch(page);
   expect(await searchContainer.getAttribute('style')).toContain(
@@ -259,6 +261,33 @@ test('should database search input displayed correctly', async ({ page }) => {
   expect(await searchContainer.getAttribute('style')).toContain(
     'overflow: hidden;'
   );
+});
+
+test.only('should clicking the searchIcon alter the searchState correctly', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRowWithData(page, 'text1');
+  await initDatabaseRowWithData(page, 'text2');
+  await initDatabaseRowWithData(page, 'text3');
+
+  await focusDatabaseSearch(page);
+  // search for '2'
+  await type(page, '2');
+
+  // click searchIcon when opening
+  const searchIcon = page.locator('.affine-database-search-input-icon');
+  await searchIcon.click();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(1);
+
+  // clear text
+  const closeIcon = page.locator('.close-icon');
+  await closeIcon.click();
+  expect(await rows.count()).toBe(3);
 });
 
 test('should database title and rich-text support undo/redo', async ({
