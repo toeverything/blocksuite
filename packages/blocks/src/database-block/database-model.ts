@@ -57,7 +57,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     if (index < 0) {
       return null;
     }
-    return this.columns.at(index)!;
+    return this.columns[index];
   }
 
   addColumn(column: Omit<Column, 'id'>, index?: number): string {
