@@ -88,7 +88,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   moveColumn(from: number, to: number) {
     this.page.transact(() => {
-      const column = this.columns.at(from)!;
+      const column = this.columns[from];
       this.columns.splice(from, 1);
       this.columns.splice(to, 0, column);
     });

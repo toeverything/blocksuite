@@ -52,7 +52,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   addColumn!: (index: number) => string;
 
   get tableContainer(): HTMLElement {
-    return this.parentElement!;
+    return this.parentElement as HTMLElement;
   }
 
   @state()
