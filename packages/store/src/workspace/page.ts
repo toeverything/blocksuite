@@ -15,6 +15,7 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { createYArrayProxy } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
 
@@ -683,7 +684,7 @@ export class Page extends Space<FlatBlockMap> {
     let isRoot = false;
     let isSurface = false;
 
-    const props = toBlockProps(yBlock) as BlockProps;
+    const props = toBlockProps(yBlock);
     const model = this._createBlockModel({ ...props, id }, yBlock);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
@@ -691,7 +692,7 @@ export class Page extends Space<FlatBlockMap> {
     if (model.flavour === 'affine:page') {
       isRoot = true;
     }
-    this._blockMap.set(props.id, model);
+    this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
@@ -777,7 +778,7 @@ export class Page extends Space<FlatBlockMap> {
       const value = event.target.get(key);
       hasPropsUpdate = true;
       if (value instanceof Y.Array) {
-        props[key.replace('prop:', '')] = value.toArray();
+        props[key.replace('prop:', '')] = createYArrayProxy(value);
       } else {
         props[key.replace('prop:', '')] = value;
       }

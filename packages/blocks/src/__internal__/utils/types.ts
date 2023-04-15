@@ -1,3 +1,4 @@
+import type { Cell, Column } from '@blocksuite/global/database';
 import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
@@ -142,7 +143,8 @@ export type SerializedBlock = {
     titleColumnName: string;
     titleColumnWidth: number;
     rowIds: string[];
-    columnIds: string[];
+    cells: Record<string, Record<string, Cell>>;
+    columns: Column[];
   };
   // frame block
   xywh?: string;

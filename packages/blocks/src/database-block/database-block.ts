@@ -148,7 +148,7 @@ export class DatabaseBlockComponent
   private _disposables: DisposableGroup = new DisposableGroup();
 
   get columns(): Column[] {
-    return this.model.columns.map(id => this.model.getColumn(id)) as Column[];
+    return this.model.columns;
   }
 
   override connectedCallback() {
@@ -161,8 +161,22 @@ export class DatabaseBlockComponent
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this.model.propsUpdated.on(() => {
+      this.requestUpdate();
+      // TODO: optimize performance here
+      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+        cell.requestUpdate();
+      });
+      this.querySelector('affine-database-column-header')?.requestUpdate();
+    });
+    this.model.childrenUpdated.on(() => {
+      this.requestUpdate();
+      // TODO: optimize performance here
+      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+        cell.requestUpdate();
+      });
+      this.querySelector('affine-database-column-header')?.requestUpdate();
+    });
 
     const tableContent = this._tableContainer.parentElement;
     assertExists(tableContent);
@@ -251,12 +265,8 @@ export class DatabaseBlockComponent
       hide: false,
       ...renderer.propertyCreator(),
     };
-    const id = this.model.updateColumn(schema);
-    const columns = [...currentColumns];
-    columns.splice(index, 0, id);
-    this.model.page.updateBlock(this.model, {
-      columns,
-    });
+    const id = this.model.addColumn(schema, index);
+    this.model.applyColumnUpdate();
 
     requestAnimationFrame(() => {
       this._columnHeaderComponent.setEditingColumnId(id);
@@ -292,7 +302,6 @@ export class DatabaseBlockComponent
               .columns=${this.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
-              .tableContainer=${this._tableContainer}
             ></affine-database-column-header>
             ${rows}
           </div>

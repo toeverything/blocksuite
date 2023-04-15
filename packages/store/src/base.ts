@@ -19,11 +19,13 @@ export type RoleType = (typeof role)[number];
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
   Map: <T>() => Y.Map<T>;
+  Array: <T>() => Y.Array<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
   Map: <T>() => new Y.Map<T>(),
+  Array: <T>() => new Y.Array<T>(),
 });
 
 export const BlockSchema = z.object({
