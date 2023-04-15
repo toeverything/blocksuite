@@ -52,10 +52,7 @@ However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of li
 - The `packages/editor` package ships a complete BlockSuite-based editor.
 
 ```sh
-pnpm i \
-  @blocksuite/store@nightly \
-  @blocksuite/blocks@nightly \
-  @blocksuite/editor@nightly
+pnpm i @blocksuite/store@nightly @blocksuite/blocks@nightly @blocksuite/editor@nightly
 ```
 
 In the following chapters, we will continue to demonstrate their usage and the core concepts involved.
