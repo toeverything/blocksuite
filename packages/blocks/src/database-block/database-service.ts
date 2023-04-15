@@ -1,4 +1,5 @@
 import type { Column } from '@blocksuite/global/database';
+import type { Cell } from '@blocksuite/global/database';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -38,16 +39,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    const tagColumnId = blockModel.updateColumn({
+    blockModel.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
       hide: false,
       selection: [],
     });
-    page.updateBlock(blockModel, {
-      columns: [tagColumnId],
-    });
+    blockModel.applyColumnUpdate();
   }
 
   override block2Json(
@@ -55,7 +54,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const columnIds = block.columns as string[];
+    const columns = [...block.columns];
     const rowIds = block.children.map(child => child.id);
 
     return {
@@ -66,7 +65,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         titleColumnName: block.titleColumnName,
         titleColumnWidth: block.titleColumnWidth,
         rowIds,
-        columnIds,
+        cells: block.yCells.toJSON(),
+        columns,
       },
       children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
@@ -79,26 +79,27 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   override async onBlockPasted(
     model: BlockModels['affine:database'],
-    props: Record<string, string[]>
+    props: {
+      rowIds: string[];
+      columns: Column[];
+      cells: Record<string, Record<string, Cell>>;
+    }
   ) {
-    const { rowIds, columnIds } = props;
+    const { rowIds, columns, cells } = props;
 
-    const columns = columnIds
-      .map(id => model.getColumn(id))
-      .filter((s: Column | null): s is Column => s !== null);
+    const columnIds = columns.map(column => column.id);
+
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.updateColumn(nonIdProps);
     });
-    model.page.updateBlock(model, {
-      columns: newColumnIds,
-    });
+    model.applyColumnUpdate();
 
     const newRowIds = model.children.map(child => child.id);
     rowIds.forEach((rowId, rowIndex) => {
       const newRowId = newRowIds[rowIndex];
       columnIds.forEach((columnId, columnIndex) => {
-        const cellData = model.getCell(rowId, columnId);
+        const cellData = cells[rowId]?.[columnId];
         let value = cellData?.value;
         if (!value) return;
         if (value instanceof model.page.YText) {

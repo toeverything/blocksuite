@@ -51,8 +51,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @property()
   addColumn!: (index: number) => string;
 
-  @property()
-  tableContainer!: HTMLElement;
+  get tableContainer(): HTMLElement {
+    return this.parentElement as HTMLElement;
+  }
 
   @state()
   private _editingColumnId = '';
@@ -304,11 +305,12 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _onUpdateNormalColumn = (name: string, column: Column) => {
+    this.targetModel.page.captureSync();
     this.targetModel.updateColumn({
       ...column,
       name,
     });
-    this.targetModel.propsUpdated.emit();
+    this.targetModel.applyColumnUpdate();
   };
 
   override render() {
