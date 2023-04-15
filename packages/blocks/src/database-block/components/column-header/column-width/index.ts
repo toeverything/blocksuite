@@ -148,12 +148,13 @@ export function initChangeColumnWidthHandlers(
         titleColumnWidth: columnWidth,
       });
     } else {
-      const columnId = targetModel.columns[index - 1];
+      const columnId = targetModel.columns[index - 1].id;
       const columnProps = targetModel.getColumn(columnId);
       targetModel.updateColumn({
         ...columnProps,
         width: columnWidth,
       });
+      targetModel.applyColumnUpdate();
     }
   };
 
