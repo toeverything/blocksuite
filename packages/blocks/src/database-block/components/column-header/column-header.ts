@@ -77,6 +77,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _columnMoveDisposables: DisposableGroup = new DisposableGroup();
   private _isHeaderHover = false;
   private _indicator: ColumnDragIndicator | null = null;
+  private _editingColumnPopupIndex = -1;
 
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
@@ -246,6 +247,11 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     index: number
   ) => {
     if (this._editingColumnId) return;
+    if (this._editingColumnPopupIndex === index) {
+      this._editingColumnPopupIndex = -1;
+      return;
+    }
+    this._editingColumnPopupIndex = index;
 
     const currentEl = target as Element;
     const reference = currentEl.classList.contains('affine-database-column')
@@ -259,6 +265,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     editColumn.targetColumn = column;
     editColumn.columnIndex = index - 1;
     editColumn.closePopup = () => {
+      this._editingColumnPopupIndex = -1;
       editColumn.remove();
     };
     editColumn.insertColumn = position => {
@@ -267,10 +274,18 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this.addColumn(insertIdex);
     };
     document.body.appendChild(editColumn);
-    requestAnimationFrame(() => {
-      createPopper(reference, editColumn, { placement: 'bottom-start' });
-      onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
-    });
+    createPopper(reference, editColumn, { placement: 'bottom-start' });
+    onClickOutside(
+      editColumn,
+      (ele, target) => {
+        // click outside of column title, need to reset the index
+        if (!target.closest('.affine-database-column-content')) {
+          this._editingColumnPopupIndex = -1;
+        }
+        ele.remove();
+      },
+      'mousedown'
+    );
   };
 
   private _onKeydown = (
