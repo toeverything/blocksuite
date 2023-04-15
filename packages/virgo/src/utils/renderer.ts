@@ -1,5 +1,6 @@
-import { VirgoElement } from '../components/virgo-element.js';
-import type { AttributesRenderer, DeltaInsert } from '../types.js';
+import { html, type TemplateResult } from 'lit';
+
+import type { AttributeRenderer, DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function renderElement<TextAttributes extends BaseTextAttributes>(
@@ -7,14 +8,13 @@ export function renderElement<TextAttributes extends BaseTextAttributes>(
   parseAttributes: (
     textAttributes?: TextAttributes
   ) => TextAttributes | undefined,
-  attributesRenderer: AttributesRenderer<TextAttributes>
-): VirgoElement<TextAttributes> {
-  const vElement = new VirgoElement<TextAttributes>();
-  vElement.delta = {
-    insert: delta.insert,
-    attributes: parseAttributes(delta.attributes),
-  };
-  vElement.attributesRenderer = attributesRenderer;
-
-  return vElement;
+  attributeRenderer: AttributeRenderer<TextAttributes>
+): TemplateResult<1> {
+  return html`<v-element
+    .delta=${{
+      insert: delta.insert,
+      attributes: parseAttributes(delta.attributes),
+    }}
+    .attributeRenderer=${attributeRenderer}
+  ></v-element>`;
 }

@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  "docs"
   "editor"
   "global"
   "phasor"
@@ -10,6 +11,7 @@ packages=(
   "react"
   "store"
   "virgo"
+  "connector"
 )
 
 for package in "${packages[@]}"

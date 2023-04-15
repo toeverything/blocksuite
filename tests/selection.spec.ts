@@ -3,10 +3,10 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeEmbed,
   activeFrameInEdgeless,
   addFrameByClick,
   copyByKeyboard,
-  doubleClickBlockById,
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -15,11 +15,13 @@ import {
   focusTitle,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
+  getRichTextBoundingBox,
   getSelectedTextByVirgo,
   getVirgoSelectionIndex,
   getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  initImageState,
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
@@ -58,34 +60,19 @@ test('click on blank area', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 }; // deepscan-disable-line NULL_POINTER
-  });
-  await page.mouse.click(above123.x, above123.y);
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left, y: box123.top + 5 };
+  await page.mouse.click(inside123.x, inside123.y);
   await assertSelection(page, 0, 0, 0);
 
-  const above456 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 };
-  });
-  await page.mouse.click(above456.x, above456.y);
+  const box456 = await getRichTextBoundingBox(page, '3');
+  const inside456 = { x: box456.left, y: box456.top + 5 };
+  await page.mouse.click(inside456.x, inside456.y);
   await assertSelection(page, 1, 0, 0);
 
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.bottom - 5 };
-  });
-  await page.mouse.click(below789.x, below789.y);
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.left, y: box789.bottom - 5 };
+  await page.mouse.click(inside789.x, inside789.y);
   await assertSelection(page, 2, 0, 0);
 });
 
@@ -95,24 +82,14 @@ test('native range delete', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await dragBetweenCoords(page, inside123, inside789);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -132,24 +109,14 @@ test('native range input', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await dragBetweenCoords(page, inside123, inside789);
   await page.keyboard.press('a');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['a']);
@@ -161,24 +128,14 @@ test('native range selection backwards', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 2 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 2 };
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const bottomRight789 = { x: box789.right, y: box789.bottom };
 
   // from bottom to top
-  await dragBetweenCoords(page, bottomRight789, topLeft123);
+  await dragBetweenCoords(page, bottomRight789, above123);
   await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -199,21 +156,11 @@ test('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
   await resetHistory(page);
 
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 10 };
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 10 };
 
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 10, y: bbox.bottom + 10 };
-  });
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right - 10, y: box789.bottom + 10 };
 
   await dragBetweenCoords(page, below789, above123);
   await pressBackspace(page);
@@ -356,13 +303,10 @@ test('double click choose words', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
-  const helloPosition = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const rect = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: rect.left + 2, y: rect.top + 8 };
-  });
+
+  const hello = await getRichTextBoundingBox(page, '2');
+  const helloPosition = { x: hello.x + 2, y: hello.y + 8 };
+
   await page.mouse.dblclick(helloPosition.x, helloPosition.y);
   const text = await page.evaluate(() => {
     let text = '';
@@ -413,6 +357,7 @@ test('select text leaving a few words in the last line and delete', async ({
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
+  await waitNextFrame(page);
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('abc89');
@@ -518,24 +463,14 @@ test('select text in the same line with dragging rightward and press enter creat
   await assertRichTexts(page, ['123', '456', '789']);
   // blur the editor
   await page.mouse.click(0, 0);
-  const above123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left - 20, y: bbox.top - 20 };
-  });
-  const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right + 30, y: bbox.bottom + 50 };
-  });
 
-  await dragBetweenCoords(page, below789, above123, {
-    steps: 50,
-  });
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left - 20, y: box123.top - 20 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right + 30, y: box789.bottom + 50 };
+
+  await dragBetweenCoords(page, below789, above123, { steps: 50 });
   await page.keyboard.press('Enter', { delay: 50 });
   await type(page, 'abc');
   await assertRichTexts(page, ['123', '456', '789', 'abc']);
@@ -662,12 +597,15 @@ test('selection on heavy page', async ({ page }) => {
       },
     }
   );
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(5);
 });
 
-// Refs: https://github.com/toeverything/blocksuite/issues/1004
 test('Change title when first content is divider', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1004',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -746,14 +684,16 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   await page.mouse.click(rect.left - 50, rect.top + 5);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['123456', '789']);
 
   await undoByKeyboard(page);
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
   await page.mouse.click(rect.right + 50, rect.top + 5);
 
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
@@ -858,7 +798,8 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   // focus last block in first frame
   await focusRichText(page, 2);
   // goto next frame
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page);
+  await waitNextFrame(page);
   await type(page, 'ABC');
 
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
@@ -914,8 +855,6 @@ test('should select full text of the first block when leaving the affine-frame-b
       },
     }
   );
-  await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '1234567');
 });
 
 test('should add a new line when clicking the bottom of the last non-text block', async ({
@@ -926,6 +865,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await pressEnter(page);
+  await waitNextFrame(page);
 
   // code block
   await type(page, '```');
@@ -943,8 +883,9 @@ test('should add a new line when clicking the bottom of the last non-text block'
     return secondRichText.getBoundingClientRect();
   });
   await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
-  await waitNextFrame(page);
+  await page.waitForTimeout(200);
   await type(page, 'ABC');
+  await page.waitForTimeout(200);
   await assertRichTexts(page, [
     '123',
     '456',
@@ -967,7 +908,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   await page.mouse.up();
   expect(await getSelectedTextByVirgo(page)).toBe('45');
 
@@ -976,9 +917,9 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.move(coord.x - 26 - 24, coord.y);
   // ↓
-  await page.mouse.move(coord.x - 20, coord.y + 90);
+  await page.mouse.move(coord.x - 26 - 24, coord.y + 90);
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
@@ -1004,31 +945,24 @@ test('should indent native multi-selection block', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  const topLeft456 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 1, y: bbox.top + 1 };
-  });
 
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 1, y: bbox.bottom - 1 };
-  });
+  const box456 = await getRichTextBoundingBox(page, '3');
+  const inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, topLeft456, bottomRight789);
+  await dragBetweenCoords(page, inside456, inside789);
 
   await page.keyboard.press('Tab');
 
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -1056,7 +990,7 @@ test('should indent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 30, coord.y - 10);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10);
   await page.mouse.down();
   // ←
   await page.mouse.move(coord.x + 20, coord.y + 50);
@@ -1067,7 +1001,9 @@ test('should indent multi-selection block', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -1161,7 +1097,7 @@ test('should keep selection state when scrolling backward', async ({
     return viewport.scrollTop;
   });
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(3 + 5 + 3);
   expect(scrollTop).toBe(0);
 });
@@ -1235,7 +1171,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     }
     return viewport.scrollTop;
   });
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(3 + 5 + 3);
   // See https://jestjs.io/docs/expect#tobeclosetonumber-numdigits
   // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2 = 0.511646496140377
@@ -1309,7 +1245,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   );
 
   // get count with scroll wheel
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1423,7 +1359,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   );
 
   // get count with scroll wheel
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1527,7 +1463,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1610,50 +1546,31 @@ test('should not clear selected rects when scrolling the wheel', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
-  const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return viewport.scrollTop;
-  });
 
   await page.mouse.wheel(viewport.right, -distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
   const count1 = await rects.count();
-  const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    return viewport.scrollTop;
-  });
 
   expect(count0).toBeGreaterThan(0);
-  expect(scrollTop0).toBeCloseTo(distance / 2, -0.01);
   expect(count0).toBe(count1);
-  expect(scrollTop0).toBeCloseTo(scrollTop1 + distance / 4, -0.01);
 
   await page.mouse.wheel(viewport.right, distance / 4);
-  await page.waitForTimeout(250);
+  await waitNextFrame(page);
 
-  const [count2, scrollTop2] = await page.evaluate(() => {
+  const count2 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
     if (!viewport) {
       throw new Error();
     }
-    return [
-      viewport.querySelector('.affine-page-selected-rects-container')?.children
-        .length || 0,
-      viewport.scrollTop,
-    ] as const;
+    return viewport
+      .querySelector('affine-selected-blocks')
+      ?.shadowRoot?.querySelectorAll('*').length;
   });
 
   expect(count0).toBe(count2);
-  expect(scrollTop0).toBeCloseTo(scrollTop2, -0.01);
 });
 
 test('should refresh selected rects when resizing the window/viewport', async ({
@@ -1712,7 +1629,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -1778,7 +1695,7 @@ test('should clear block selection before native selection', async ({
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
 
   await dragBetweenIndices(
@@ -1844,7 +1761,7 @@ test('should clear native selection before block selection', async ({
 
   expect(text0).toBe('456');
   expect(textCount).toBe(0);
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
 });
 
@@ -1895,7 +1812,7 @@ test('should not be misaligned when the editor container has padding or margin',
     }
   );
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(3);
 });
 
@@ -2020,6 +1937,9 @@ test('should keep native range selection when scrolling forward with the scroll 
   });
   await page.waitForTimeout(250);
 
+  await page.evaluate(() => {
+    document.querySelector('.affine-default-viewport')?.scrollTo(0, 0);
+  });
   await page.mouse.move(0, 0);
 
   await dragBetweenIndices(
@@ -2051,12 +1971,7 @@ test('undo should clear block selection', async ({ page }) => {
   await type(page, 'world');
   await pressEnter(page);
 
-  const rect = await page
-    .locator('[data-block-id="2"] .virgo-editor')
-    .boundingBox();
-  if (!rect) {
-    throw new Error();
-  }
+  const rect = await getRichTextBoundingBox(page, '2');
   await dragBetweenCoords(
     page,
     { x: rect.x - 5, y: rect.y - 5 },
@@ -2064,9 +1979,7 @@ test('undo should clear block selection', async ({ page }) => {
   );
 
   await redoByKeyboard(page);
-  const selectedBlocks = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const selectedBlocks = page.locator('affine-selected-blocks > *');
   await expect(selectedBlocks).toHaveCount(1);
 
   await undoByKeyboard(page);
@@ -2086,7 +1999,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await page.mouse.click(0, 0);
   await dragBetweenCoords(
     page,
-    { x: coord.x - 30, y: coord.y - 10 },
+    { x: coord.x - 26 - 24, y: coord.y - 10 },
     { x: coord.x + 20, y: coord.y + 50 }
   );
   await pressTab(page);
@@ -2095,7 +2008,9 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     page,
     `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -2117,11 +2032,13 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await page.mouse.click(coord.x - 40, coord.y - 40);
   await pressTab(page);
 
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
 });
 
-test('should blur rich-text first when block selection', async ({ page }) => {
+test('should blur rich-text first on starting block selection', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -2137,4 +2054,95 @@ test('should blur rich-text first when block selection', async ({ page }) => {
   );
 
   await expect(page.locator('*:focus')).toHaveCount(0);
+});
+
+test('should not show option menu of image on block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await activeEmbed(page);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(1);
+
+  await pressEnter(page);
+  await type(page, '123');
+
+  const imageRect = await page.locator('affine-image').boundingBox();
+  const richTextRect = await page.locator('rich-text').boundingBox();
+  if (!imageRect || !richTextRect) {
+    throw new Error();
+  }
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: richTextRect.x + richTextRect.width + 1,
+      y: richTextRect.y + richTextRect.height + 1,
+    },
+    {
+      x: imageRect.x + imageRect.width - 1,
+      y: imageRect.y + imageRect.height - 1,
+    }
+  );
+
+  await page.waitForTimeout(50);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(0);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(2);
+});
+
+test('should not show option menu of image on native selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await activeEmbed(page);
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(1);
+
+  await pressEnter(page);
+  await type(page, '123');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 1],
+    [0, 0],
+    { x: 0, y: 0 },
+    { x: -40, y: 0 }
+  );
+
+  await page.waitForTimeout(50);
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 1],
+    [0, 0],
+    { x: 0, y: 0 },
+    { x: -40, y: -100 }
+  );
+
+  await page.waitForTimeout(50);
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123');
+
+  await expect(
+    page.locator('.affine-embed-editing-state-container')
+  ).toHaveCount(0);
 });

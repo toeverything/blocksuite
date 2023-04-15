@@ -11,7 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('icon-button')
 export class IconButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       box-sizing: border-box;
       display: flex;
@@ -27,6 +27,13 @@ export class IconButton extends LitElement {
       fill: var(--affine-icon-color);
       font-family: var(--affine-font-family);
       color: var(--affine-popover-color);
+      pointer-events: auto;
+    }
+
+    :host > span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     :host(:hover) {
@@ -44,8 +51,8 @@ export class IconButton extends LitElement {
     :host([disabled]),
     :host(:disabled) {
       background: transparent;
-      color: var(--affine-popover-color);
-      fill: var(--affine-icon-color);
+      color: var(--affine-disable-color);
+      fill: var(--affine-disable-color);
       cursor: not-allowed;
     }
 
@@ -81,7 +88,7 @@ export class IconButton extends LitElement {
   text: string | null = null;
 
   @property()
-  disabled = false;
+  disabled: false | '' = false;
 
   constructor() {
     super();
@@ -93,6 +100,18 @@ export class IconButton extends LitElement {
         this.click();
       }
     });
+
+    // Prevent click event when disabled
+    this.addEventListener(
+      'click',
+      event => {
+        if (this.disabled === '') {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
   }
 
   override connectedCallback() {
@@ -124,7 +143,7 @@ export class IconButton extends LitElement {
 
   override render() {
     return html`<slot></slot>${this.text
-        ? html`<span style="margin-left: 12px;">${this.text}</span>`
+        ? html`<span>${this.text}</span>`
         : ''}`;
   }
 }

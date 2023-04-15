@@ -13,18 +13,18 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/react": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@next/font": "13.1.6",
+    "@next/font": "13.2.4",
     "@nextui-org/react": "1.0.0-beta.12",
-    "next": "13.1.6",
+    "next": "13.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^18.14.4",
+    "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "eslint": "^8.35.0",
-    "eslint-config-next": "^13.2.3",
-    "typescript": "^5.0.1-rc"
+    "eslint": "^8.36.0",
+    "eslint-config-next": "^13.2.4",
+    "typescript": "^5.0.2"
   }
 }

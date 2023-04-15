@@ -21,8 +21,8 @@ export const SHORT_KEY = IS_MAC ? 'Meta' : 'Control';
  */
 export const MODIFIER_KEY = IS_MAC ? 'Alt' : 'Shift';
 
-export async function type(page: Page, content: string) {
-  await page.keyboard.type(content, { delay: 50 });
+export async function type(page: Page, content: string, delay = 50) {
+  await page.keyboard.type(content, { delay });
 }
 
 export async function withPressKey(
@@ -71,6 +71,10 @@ export async function pressEnter(page: Page) {
   await page.keyboard.press('Enter', { delay: 50 });
 }
 
+export async function pressEscape(page: Page) {
+  await page.keyboard.press('Escape');
+}
+
 export async function undoByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+z`);
 }
@@ -111,13 +115,23 @@ export async function copyByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
 }
 
-export async function pasteByKeyboard(page: Page) {
-  const doesEditorActive = await page.evaluate(() =>
-    document.activeElement?.closest('editor-container')
-  );
-  if (!doesEditorActive) {
-    await page.click('editor-container');
+export async function cutByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
+}
+
+/**
+ * Notice: this method will try to click closest editor by default
+ */
+export async function pasteByKeyboard(page: Page, forceFocus = true) {
+  if (forceFocus) {
+    const isEditorActive = await page.evaluate(() =>
+      document.activeElement?.closest('editor-container')
+    );
+    if (!isEditorActive) {
+      await page.click('editor-container');
+    }
   }
+
   await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
 }
 

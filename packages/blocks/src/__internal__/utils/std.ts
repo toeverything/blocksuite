@@ -7,7 +7,14 @@ import type { Detail } from './types.js';
  * Whether the block supports rendering its children.
  */
 export function supportsChildren(model: BaseBlockModel): boolean {
-  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
+  if (
+    matchFlavours(model, [
+      // 'affine:database',
+      'affine:embed',
+      'affine:divider',
+      'affine:code',
+    ])
+  ) {
     return false;
   }
   if (
@@ -57,14 +64,18 @@ export function noop() {
  * throttledLog("Hello, world!");
  * ```
  */
-export const throttle = <
+export function throttle<
+  Args extends unknown[],
+  T extends (...args: Args) => void
+>(
+  fn: (...args: Args) => void,
+  limit: number,
+  options?: { leading?: boolean; trailing?: boolean }
+): T;
+export function throttle<
   Args extends unknown[],
   T extends (this: unknown, ...args: Args) => void
->(
-  fn: T,
-  limit: number,
-  { leading = true, trailing = true } = {}
-): T => {
+>(fn: T, limit: number, { leading = true, trailing = true } = {}): T {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let lastArgs: Args | null = null;
 
@@ -90,7 +101,7 @@ export const throttle = <
     }
     timer = setTimeout(setTimer, limit);
   } as T;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debounce = <T extends (...args: any[]) => void>(
@@ -147,3 +158,214 @@ export const clamp = (value: number, min: number, max: number): number => {
   }
   return value;
 };
+
+/**
+ *
+ * @example
+ * ```ts
+ * const items = [
+ *  {name: 'a', classroom: 'c1'},
+ *  {name: 'b', classroom: 'c2'},
+ *  {name: 'a', classroom: 't0'}
+ * ]
+ * const counted = countBy(items1, i => i.name);
+ * // counted: { a: 2, b: 1}
+ * ```
+ */
+export function countBy<T>(
+  items: T[],
+  key: (item: T) => string | number
+): Record<string, number> {
+  const count: Record<string, number> = {};
+  items.forEach(item => {
+    const k = key(item);
+    if (!count[k]) {
+      count[k] = 0;
+    }
+    count[k] += 1;
+  });
+  return count;
+}
+
+/**
+ * @example
+ * ```ts
+ * const items = [{n: 1}, {n: 2}]
+ * const max = maxBy(items, i => i.n);
+ * // max: {n: 2}
+ * ```
+ */
+export function maxBy<T>(items: T[], value: (item: T) => number): T | null {
+  if (!items.length) {
+    return null;
+  }
+  let maxItem = items[0];
+  let max = value(maxItem);
+
+  for (let i = 1; i < items.length; i++) {
+    const item = items[i];
+    const v = value(item);
+    if (v > max) {
+      max = v;
+      maxItem = item;
+    }
+  }
+
+  return maxItem;
+}
+
+export function isControlledKeyboardEvent(e: KeyboardEvent) {
+  return e.ctrlKey || e.metaKey || e.altKey;
+}
+
+export function isPrintableKeyEvent(event: KeyboardEvent): boolean {
+  return event.key.length === 1 && !isControlledKeyboardEvent(event);
+}
+
+/**
+ * Checks if there are at least `n` elements in the array that match the given condition.
+ *
+ * @param arr - The input array of elements.
+ * @param matchFn - A function that takes an element of the array and returns a boolean value
+ *                  indicating if the element matches the desired condition.
+ * @param n - The minimum number of matching elements required.
+ * @returns A boolean value indicating if there are at least `n` matching elements in the array.
+ *
+ * @example
+ * const arr = [1, 2, 3, 4, 5];
+ * const isEven = (num: number): boolean => num % 2 === 0;
+ * console.log(atLeastNMatches(arr, isEven, 2)); // Output: true
+ */
+export function atLeastNMatches<T>(
+  arr: T[],
+  matchFn: (element: T) => boolean,
+  n: number
+): boolean {
+  let count = 0;
+
+  for (let i = 0; i < arr.length; i++) {
+    if (matchFn(arr[i])) {
+      count++;
+
+      if (count >= n) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Groups an array of elements based on a provided key function.
+ *
+ * @example
+ * interface Student {
+ *   name: string;
+ *   age: number;
+ * }
+ * const students: Student[] = [
+ *   { name: 'Alice', age: 25 },
+ *   { name: 'Bob', age: 23 },
+ *   { name: 'Cathy', age: 25 },
+ * ];
+ * const groupedByAge = groupBy(students, (student) => student.age.toString());
+ * console.log(groupedByAge);
+ * // Output: {
+ *  '23': [ { name: 'Bob', age: 23 } ],
+ *  '25': [ { name: 'Alice', age: 25 }, { name: 'Cathy', age: 25 } ]
+ * }
+ */
+export function groupBy<T>(
+  arr: T[],
+  key: string | ((item: T) => string)
+): Record<string, T[]> {
+  const result = {} as Record<string, T[]>;
+
+  for (const item of arr) {
+    const groupKey =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (typeof key === 'function' ? key(item) : (item as any)[key]) as string;
+
+    if (!result[groupKey]) {
+      result[groupKey] = [];
+    }
+
+    result[groupKey].push(item);
+  }
+
+  return result;
+}
+
+function escapeRegExp(input: string) {
+  // escape regex characters in the input string to prevent regex format errors
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Checks if the name is a fuzzy match of the query.
+ *
+ * @example
+ * ```ts
+ * const name = 'John Smith';
+ * const query = 'js';
+ * const isMatch = isFuzzyMatch(name, query);
+ * // isMatch: true
+ * ```
+ */
+export function isFuzzyMatch(name: string, query: string) {
+  const pureName = name
+    .trim()
+    .toLowerCase()
+    .split('')
+    .filter(char => /[A-Za-z0-9]/.test(char))
+    .join('');
+
+  const regex = new RegExp(
+    query
+      .split('')
+      .map(item => `${escapeRegExp(item)}.*`)
+      .join(''),
+    'i'
+  );
+  return regex.test(pureName);
+}
+
+export function toHex(color: string) {
+  let r, g, b;
+
+  if (color.startsWith('#')) {
+    color = color.substr(1);
+    if (color.length === 3) {
+      color = color.replace(/./g, '$&$&');
+    }
+    [r, g, b] = color.match(/.{2}/g)?.map(hex => parseInt(hex, 16)) ?? [];
+  } else if (color.startsWith('rgba')) {
+    [r, g, b] = color.match(/\d+/g)?.map(Number) ?? [];
+  } else if (color.startsWith('rgb')) {
+    [r, g, b] = color.match(/\d+/g)?.map(Number) ?? [];
+  } else {
+    throw new Error('Invalid color format');
+  }
+
+  if (r === undefined || g === undefined || b === undefined) {
+    throw new Error('Invalid color format');
+  }
+
+  const hex = ((r << 16) | (g << 8) | b).toString(16);
+  return '#' + '0'.repeat(6 - hex.length) + hex;
+}
+
+export function capitalize(s: string) {
+  if (!s.length) {
+    return s;
+  }
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+export function uncapitalize(s: string) {
+  if (!s.length) {
+    return s;
+  }
+  return s[0].toLowerCase() + s.slice(1);
+}

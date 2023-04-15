@@ -1,25 +1,22 @@
-import { BaseService } from '../__internal__/service/index.js';
-import type { ListBlockModel } from './list-model.js';
+import type { BaseBlockModel } from '@blocksuite/store';
 
-export class ListBlockService extends BaseService {
+import type { BlockTransformContext } from '../__internal__/index.js';
+import type { BlockRange, SerializedBlock } from '../__internal__/index.js';
+import { BaseService } from '../__internal__/service/index.js';
+import { json2block } from '../__internal__/service/json2block.js';
+import type { ListBlockModel } from './list-model.js';
+export class ListBlockService extends BaseService<ListBlockModel> {
   override block2html(
     block: ListBlockModel,
-    childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
-    begin?: number,
-    end?: number
+    { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    let text = super.block2html(
-      block,
+    let text = super.block2html(block, {
       childText,
-      previousSiblingId,
-      nextSiblingId,
       begin,
-      end
-    );
-    const previousSiblingBlock = block.page.getBlockById(previousSiblingId);
-    const nextSiblingBlock = block.page.getBlockById(nextSiblingId);
+      end,
+    });
+    const previousSiblingBlock = block.page.getPreviousSibling(block);
+    const nextSiblingBlock = block.page.getNextSibling(block);
     switch (block.type) {
       case 'bulleted':
       case 'toggle':
@@ -71,5 +68,17 @@ export class ListBlockService extends BaseService {
       }
     }
     return text;
+  }
+
+  override async json2Block(
+    focusedBlockModel: BaseBlockModel,
+    pastedBlocks: SerializedBlock[],
+    range?: BlockRange
+  ) {
+    const convertToPastedIfEmpty = pastedBlocks[0].flavour !== 'affine:list';
+    return json2block(focusedBlockModel, pastedBlocks, {
+      range,
+      convertToPastedIfEmpty,
+    });
   }
 }

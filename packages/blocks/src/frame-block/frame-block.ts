@@ -2,17 +2,14 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  BlockChildrenContainer,
-  type BlockHost,
-  NonShadowLitElement,
-} from '../__internal__/index.js';
+import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { tryUpdateFrameSize } from '../page-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends NonShadowLitElement {
-  static styles = css`
+export class FrameBlockComponent extends ShadowlessElement {
+  static override styles = css`
     .affine-frame-block-container.selected {
       background-color: var(--affine-selected-color);
     }
@@ -24,12 +21,12 @@ export class FrameBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

@@ -32,6 +32,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
@@ -94,11 +98,13 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._draggingTopLeftPoint = newTopLeft;
     this._draggingPathPoints = points.map(([x, y]) => [x - deltaX, y - deltaY]);
 
-    this._surface.updateBrushElement(
+    this._surface.updateBrushElementPoints(
       this._draggingElementId,
       {
-        x: this._draggingTopLeftPoint[0],
-        y: this._draggingTopLeftPoint[1],
+        // During rendering in the brush-element, it actively offsets by half of the stroke width
+        // to ensure that the rectangular area formed by the brush remains consistent.
+        x: this._draggingTopLeftPoint[0] - lineWidth / 2,
+        y: this._draggingTopLeftPoint[1] - lineWidth / 2,
         w: newBound.w,
         h: newBound.h,
       },

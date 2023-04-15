@@ -1,4 +1,9 @@
-import type { BlockTag, RowHost, TagSchema } from '@blocksuite/global/database';
+import type {
+  Cell,
+  Column,
+  ColumnType,
+  RowHost,
+} from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { LitElement } from 'lit';
@@ -7,53 +12,48 @@ import type { literal } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from './database-model.js';
 
-export abstract class DatabaseCellLitElement extends LitElement {
+export abstract class DatabaseCellElement<Value> extends LitElement {
   static tag: ReturnType<typeof literal>;
   @property()
-  rowHost!: RowHost;
+  rowHost!: RowHost<Value>;
   @property()
   databaseModel!: DatabaseBlockModel;
   @property()
   rowModel!: BaseBlockModel;
   @property()
-  column!: TagSchema;
+  column!: Column;
   @property()
-  tag!: BlockTag | null;
+  cell!: Cell | null;
 }
 
-export interface TagSchemaRenderer<
-  Type extends string = string,
+export interface ColumnRenderer<
+  Type extends ColumnType = ColumnType,
   Property extends Record<string, unknown> = Record<string, unknown>,
   BaseValue = unknown
 > {
   displayName: string;
   type: Type;
   propertyCreator: () => Property;
-  components: TagUIComponents;
+  components: ColumnComponents;
 }
-
-export type RendererToTagSchema<Renderer extends TagSchemaRenderer> =
-  Renderer extends TagSchemaRenderer<infer Type, infer Property, infer Value>
-    ? TagSchema<Type, Property, Value>
-    : never;
 
 /**
  * @internal
  */
-const registry = new Map<TagSchemaRenderer['type'], TagSchemaRenderer>();
+const registry = new Map<ColumnRenderer['type'], ColumnRenderer>();
 
-export interface TagUIComponents<
+export interface ColumnComponents<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
   Value = unknown
 > {
-  Cell: typeof DatabaseCellLitElement;
-  CellEditing: typeof DatabaseCellLitElement | false;
-  ColumnPropertyEditing: typeof DatabaseCellLitElement;
+  Cell: typeof DatabaseCellElement<Value>;
+  CellEditing: typeof DatabaseCellElement<Value> | false;
+  ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
 }
 
-export function defineTagSchemaRenderer<
-  Type extends string,
+export function defineColumnRenderer<
+  Type extends ColumnType,
   Property extends Record<string, unknown>,
   Value
 >(
@@ -61,14 +61,14 @@ export function defineTagSchemaRenderer<
   propertyCreator: () => Property,
   defaultValue: (page: Page) => Value | null,
   components: {
-    Cell: typeof DatabaseCellLitElement;
-    CellEditing: typeof DatabaseCellLitElement | false;
-    ColumnPropertyEditing: typeof DatabaseCellLitElement;
+    Cell: typeof DatabaseCellElement<Value>;
+    CellEditing: typeof DatabaseCellElement<Value> | false;
+    ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
   },
   config: {
     displayName: string;
   }
-): TagSchemaRenderer<Type, Property, Value> {
+): ColumnRenderer<Type, Property, Value> {
   return {
     displayName: config.displayName,
     type,
@@ -77,20 +77,20 @@ export function defineTagSchemaRenderer<
   };
 }
 
-export function registerTagSchemaRenderer(renderer: TagSchemaRenderer) {
+export function registerColumnRenderer(renderer: ColumnRenderer) {
   if (registry.has(renderer.type)) {
     throw new Error('cannot register twice for ' + renderer.type);
   }
   registry.set(renderer.type, renderer);
 }
 
-export function listTagSchemaRenderer(): TagSchemaRenderer[] {
+export function listColumnRenderer(): ColumnRenderer[] {
   return [...registry.values()];
 }
 
-export function getTagSchemaRenderer(
-  type: TagSchemaRenderer['type']
-): TagSchemaRenderer {
+export function getColumnRenderer(
+  type: ColumnRenderer['type']
+): ColumnRenderer {
   const renderer = registry.get(type);
   if (!renderer) {
     throw new Error('cannot find renderer');

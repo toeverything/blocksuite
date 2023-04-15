@@ -1,36 +1,97 @@
+import { PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
-import type { IService } from '../utils/index.js';
+import type { KeyboardBindings } from '../rich-text/keyboard.js';
+import {
+  handleIndent,
+  handleKeyDown,
+  handleKeyUp,
+  handleUnindent,
+} from '../rich-text/rich-text-operations.js';
+import type { AffineVEditor } from '../rich-text/virgo/types.js';
+import { getService } from '../service.js';
+import type {
+  BlockRange,
+  BlockTransformContext,
+  SerializedBlock,
+} from '../utils/index.js';
 import { supportsChildren } from '../utils/std.js';
+import { json2block } from './json2block.js';
+import {
+  enterMarkdownMatch,
+  hardEnter,
+  onBackspace,
+  onKeyLeft,
+  onKeyRight,
+  onSoftEnter,
+  onSpace,
+  spaceMarkdownMatch,
+} from './keymap.js';
 
-export class BaseService implements IService {
+export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   onLoad?: () => Promise<void>;
+
   block2html(
-    block: BaseBlockModel,
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
+    block: BlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {}
+  ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + BaseService.deltaLeaf2Html(item);
+      return html + BaseService.deltaLeaf2Html(block, item);
     }, '');
     return `${text}${childText}`;
   }
 
   block2Text(
-    block: BaseBlockModel,
-    childText: string,
-    begin?: number,
-    end?: number
-  ) {
-    const text = (block.text?.toString() || '').slice(begin || 0, end);
+    block: BlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {}
+  ): string {
+    const text = (block.text?.toString() || '').slice(
+      begin || 0,
+      end || undefined
+    );
     return `${text}${childText}`;
   }
 
-  private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+  block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    return {
+      flavour: block.flavour,
+      type: block.type as string,
+      text: delta,
+      children: block.children?.map((child, index) => {
+        if (index === block.children.length - 1) {
+          // @ts-ignore
+          return getService(child.flavour).block2Json(child, 0, end);
+        }
+        // @ts-ignore
+        return getService(child.flavour).block2Json(child);
+      }),
+    };
+  }
+
+  // json2block is triggered when paste behavior occurs(now),
+  // at this time cursor is focus on one block, and is must a caret in this block(since selection has been handled in paste callback)
+  // this is the common handler for most block, but like code block, it should be overridden this
+  async json2Block(
+    focusedBlockModel: BlockModel,
+    pastedBlocks: SerializedBlock[],
+    range?: BlockRange
+  ) {
+    return json2block(focusedBlockModel, pastedBlocks, { range });
+  }
+
+  async onBlockPasted(
+    model: BlockModel,
+    clipboardData: Record<string, unknown>
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ) {}
+
+  private static deltaLeaf2Html(
+    block: BaseBlockModel,
+    deltaLeaf: DeltaOperation
+  ) {
     let text: string = deltaLeaf.insert;
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
@@ -52,7 +113,19 @@ export class BaseService implements IService {
       text = `<s>${text}</s>`;
     }
     if (attributes.link) {
-      text = `<a href='${attributes.link}'>${text}</a>`;
+      text = `<a href="${attributes.link}">${text}</a>`;
+    }
+    if (attributes.reference) {
+      const refPageId = attributes.reference.pageId;
+      const workspace = block.page.workspace;
+      const pageMeta = workspace.meta.pageMetas.find(
+        page => page.id === refPageId
+      );
+      const host = window.location.origin;
+      // maybe should use public link at here?
+      const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
+      const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
+      text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
   }
@@ -60,12 +133,12 @@ export class BaseService implements IService {
   /**
    * side effect when update block
    */
-  async updateEffect(block: BaseBlockModel) {
+  async updateEffect(block: BlockModel) {
     const handleUnindent = (
       await import('../rich-text/rich-text-operations.js')
     ).handleUnindent;
     // we need to unindent the first child of the block if it not
-    // support children
+    // supports children
     if (supportsChildren(block)) {
       return;
     }
@@ -75,5 +148,109 @@ export class BaseService implements IService {
     }
 
     handleUnindent(block.page, block.children[0], 0, false);
+  }
+
+  defineKeymap(block: BlockModel, virgo: AffineVEditor): KeyboardBindings {
+    return {
+      enterMarkdownMatch: {
+        key: 'Enter',
+        handler: (range, context) => {
+          assertExists(virgo);
+          return enterMarkdownMatch(block, virgo, range, context);
+        },
+      },
+      spaceMarkdownMatch: {
+        key: ' ',
+        handler(range, context) {
+          assertExists(virgo);
+          return spaceMarkdownMatch(block, virgo, range, context);
+        },
+      },
+      hardEnter: {
+        key: 'Enter',
+        handler(range, context) {
+          assertExists(virgo);
+          return hardEnter(block, range, virgo, context.event);
+        },
+      },
+      softEnter: {
+        key: 'Enter',
+        shiftKey: true,
+        handler(range, context) {
+          assertExists(virgo);
+          return onSoftEnter(block, range, virgo);
+        },
+      },
+      // shortKey+enter
+      insertLineAfter: {
+        key: 'Enter',
+        shortKey: true,
+        handler(range, context) {
+          assertExists(virgo);
+          return hardEnter(block, range, virgo, context.event, true);
+        },
+      },
+      tab: {
+        key: 'Tab',
+        handler(range, context) {
+          const index = range.index;
+          handleIndent(block.page, block, index);
+          context.event.stopPropagation();
+          return PREVENT_DEFAULT;
+        },
+      },
+      shiftTab: {
+        key: 'Tab',
+        shiftKey: true,
+        handler(range, context) {
+          const index = range.index;
+          handleUnindent(block.page, block, index);
+          context.event.stopPropagation();
+          return PREVENT_DEFAULT;
+        },
+      },
+      backspace: {
+        key: 'Backspace',
+        handler(range, context) {
+          return onBackspace(block, context.event, this.vEditor);
+        },
+      },
+      up: {
+        key: 'ArrowUp',
+        shiftKey: false,
+        handler(range, context) {
+          return handleKeyUp(context.event, this.vEditor.rootElement);
+        },
+      },
+      down: {
+        key: 'ArrowDown',
+        shiftKey: false,
+        handler(range, context) {
+          return handleKeyDown(context.event, this.vEditor.rootElement);
+        },
+      },
+      left: {
+        key: 'ArrowLeft',
+        shiftKey: false,
+        handler(range, context) {
+          return onKeyLeft(context.event, range);
+        },
+      },
+      right: {
+        key: 'ArrowRight',
+        shiftKey: false,
+        handler(range, context) {
+          return onKeyRight(block, context.event, range);
+        },
+      },
+      inputRule: {
+        key: ' ',
+        shiftKey: null,
+        prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
+        handler(range, context) {
+          return onSpace(block, virgo, range, context);
+        },
+      },
+    };
   }
 }

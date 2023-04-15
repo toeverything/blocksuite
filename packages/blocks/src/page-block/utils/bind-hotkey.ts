@@ -7,15 +7,19 @@ import {
 import type { Page } from '@blocksuite/store';
 
 import {
+  blockRangeToNativeRange,
   focusBlockByModel,
   hotkey,
+  isMultiBlockRange,
   isPageMode,
+  isPrintableKeyEvent,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
+  clearSelection,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
@@ -28,7 +32,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
-import { formatConfig } from './const.js';
+import { actionConfig, formatConfig } from './const.js';
 import {
   deleteModelsByRange,
   updateBlockType,
@@ -45,6 +49,21 @@ export function bindCommonHotkey(page: Page) {
         return;
       }
 
+      action({ page });
+    });
+  });
+
+  actionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
+    // if (!isPrintableKeyEvent(e) || page.readonly) return;
+    if (!hotkeyStr) return;
+
+    hotkey.addListener(hotkeyStr, e => {
+      // Prevent default behavior
+      e.preventDefault();
+      if (!enabledWhen(page)) return;
+      if (page.awarenessStore.isReadonly(page)) {
+        return;
+      }
       action({ page });
     });
   });
@@ -72,6 +91,20 @@ export function bindCommonHotkey(page: Page) {
     page.redo();
   });
 
+  // Fixes: https://github.com/toeverything/blocksuite/issues/200
+  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
+  // that have pop-up for selecting local characters.
+  // So we could just hook on the keydown event and detect whether user input a new character.
+  hotkey.addListener(HOTKEYS.ANY_KEY, e => {
+    if (!isPrintableKeyEvent(e) || page.readonly) return;
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange || blockRange.type === 'Block') return;
+
+    const range = blockRangeToNativeRange(blockRange);
+    if (!range || !isMultiBlockRange(range)) return;
+    deleteModelsByRange(page);
+  });
+
   // !!!
   // Don't forget to remove hotkeys at `removeCommonHotKey`
 }
@@ -84,6 +117,7 @@ export function removeCommonHotKey() {
       .filter((i): i is string => !!i),
     HOTKEYS.UNDO,
     HOTKEYS.REDO,
+    HOTKEYS.ANY_KEY,
   ]);
 }
 
@@ -129,7 +163,7 @@ export function handleUp(
     const range = getCurrentNativeRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock && isPageMode(page)) {
-      focusTitle();
+      focusTitle(page);
       return;
     }
 
@@ -310,17 +344,20 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       return;
     }
     if (blockRange.type === 'Block') {
+      e.preventDefault();
+
       const endModel = blockRange.models[blockRange.models.length - 1];
       const parentModel = page.getParent(endModel);
       const index = parentModel?.children.indexOf(endModel);
       assertExists(index);
       assertExists(parentModel);
-      const id = page.addBlockByFlavour(
+      const id = page.addBlock(
         'affine:paragraph',
         { type: 'text' },
         parentModel,
         index + 1
       );
+
       asyncFocusRichText(page, id);
       selection.clear();
       return;
@@ -411,15 +448,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
 
-function clearSelection(page: Page) {
-  if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
-}
 export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([
@@ -435,5 +463,6 @@ export function removeHotkeys() {
     HOTKEYS.RIGHT,
     HOTKEYS.ENTER,
     HOTKEYS.TAB,
+    HOTKEYS.SPACE,
   ]);
 }

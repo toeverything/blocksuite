@@ -9,9 +9,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { blockRangeToNativeRange } from '../../__internal__/utils/block-range.js';
+import {
+  blockRangeToNativeRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import { getEditorContainer } from '../../__internal__/utils/query.js';
-import { resetNativeSelection } from '../../__internal__/utils/selection.js';
 
 interface SelectionRect {
   width: number;
@@ -54,7 +56,7 @@ function cursorStyle(rect: SelectionRect, color: string) {
 
 @customElement('remote-selection')
 export class RemoteSelection extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       position: absolute;
       pointer-events: none;
@@ -80,7 +82,7 @@ export class RemoteSelection extends LitElement {
 
   private _abortController = new AbortController();
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     assertExists(this.page);
     this.page.awarenessStore.slots.update.subscribe(
       msg => msg,
@@ -142,14 +144,27 @@ export class RemoteSelection extends LitElement {
             return this.page.getBlockById(id);
           })
           .filter(Boolean) as BaseBlockModel[];
+        if (!models.length) {
+          return;
+        }
         requestAnimationFrame(() => {
-          const nativeRange = blockRangeToNativeRange({
+          assertExists(this.page);
+          // special case for title
+          if (models.length === 1 && models[0] === this.page.root) {
+            restoreSelection({
+              type: 'Title',
+              startOffset: userRange.startOffset,
+              endOffset: userRange.endOffset,
+              models: [this.page.root],
+            });
+            return;
+          }
+          restoreSelection({
             type: 'Native',
             startOffset: userRange.startOffset,
             endOffset: userRange.endOffset,
             models,
           });
-          resetNativeSelection(nativeRange);
         });
       }
     );
@@ -162,7 +177,7 @@ export class RemoteSelection extends LitElement {
     });
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._resizeObserver.disconnect();
     this._abortController.abort();
@@ -177,12 +192,23 @@ export class RemoteSelection extends LitElement {
       })
       .filter(Boolean) as BaseBlockModel[];
 
-    const nativeRange = blockRangeToNativeRange({
-      type: 'Native',
-      startOffset: userRange.startOffset,
-      endOffset: userRange.endOffset,
-      models,
-    });
+    let nativeRange: Range | null = null;
+    // special case for title
+    if (models.length === 1 && models[0] === this.page.root) {
+      nativeRange = blockRangeToNativeRange({
+        type: 'Title',
+        startOffset: userRange.startOffset,
+        endOffset: userRange.endOffset,
+        models: [this.page.root],
+      });
+    } else {
+      nativeRange = blockRangeToNativeRange({
+        type: 'Native',
+        startOffset: userRange.startOffset,
+        endOffset: userRange.endOffset,
+        models,
+      });
+    }
     if (!nativeRange) {
       return [];
     }
@@ -240,7 +266,7 @@ export class RemoteSelection extends LitElement {
     return null;
   }
 
-  render() {
+  override render() {
     if (!this.page || this._ranges.length === 0) {
       this._colorMap.clear();
       return html``;

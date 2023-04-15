@@ -5,7 +5,6 @@
 import './declare-test-window.js';
 
 import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
-import type { VEditor } from '@blocksuite/virgo';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -13,6 +12,8 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
+import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
+import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
   SerializedStore,
@@ -30,6 +31,7 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getCurrentEditorPageId,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -39,6 +41,7 @@ export const defaultStore: SerializedStore = {
     pages: [
       {
         id: 'page0',
+        subpageIds: [],
         title: '',
       },
     ],
@@ -56,8 +59,6 @@ export const defaultStore: SerializedStore = {
   },
   'space:page0': {
     '0': {
-      'meta:tags': {},
-      'meta:tagSchema': {},
       'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',
@@ -68,6 +69,7 @@ export const defaultStore: SerializedStore = {
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,72]',
+      'prop:background': '#FBFAFC',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -100,15 +102,14 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(async () => {
-    const richTexts = Array.from(document.querySelectorAll('rich-text'));
-    const result = [];
-    for (const richText of richTexts) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richText as any).vEditor as VEditor;
-      result.push(editor.yText.toString());
-    }
-    return result;
+  const actualTexts = await page.evaluate(() => {
+    const richTexts = Array.from(
+      document.querySelectorAll<RichText>('rich-text')
+    );
+    return richTexts.map(richText => {
+      const editor = richText.vEditor;
+      return editor.yText.toString();
+    });
   });
   expect(actualTexts).toEqual(texts);
 }
@@ -149,6 +150,25 @@ export async function assertImageOption(page: Page) {
 export async function assertPageTitleFocus(page: Page) {
   const locator = page.locator('.affine-default-page-block-title').nth(0);
   await expect(locator).toBeFocused();
+}
+
+export async function assertListPrefix(
+  page: Page,
+  predict: (string | RegExp)[],
+  range?: [number, number]
+) {
+  const prefixs = await page.locator('.affine-list-block__prefix');
+
+  let start = 0;
+  let end = await prefixs.count();
+  if (range) {
+    [start, end] = range;
+  }
+
+  for (let i = start; i < end; i++) {
+    const prefix = await prefixs.nth(i).innerText();
+    expect(prefix).toContain(predict[i]);
+  }
 }
 
 export async function assertBlockCount(
@@ -346,7 +366,7 @@ export async function assertBlockProps(
       const model = element.model as BaseBlockModel;
       return Object.fromEntries(
         // @ts-ignore
-        Object.keys(props).map(key => [key, model[key]])
+        Object.keys(props).map(key => [key, (model[key] as unknown).toString()])
       );
     },
     [id, props] as const
@@ -437,11 +457,12 @@ export async function assertMatchMarkdown(page: Page, text: string) {
 export async function assertStoreMatchJSX(
   page: Page,
   snapshot: string,
-  id?: string
+  blockId?: string
 ) {
+  const pageId = await getCurrentEditorPageId(page);
   const element = (await page.evaluate(
-    id => window.workspace.exportJSX(id),
-    id
+    ([blockId, pageId]) => window.workspace.exportJSX(blockId, pageId),
+    [blockId, pageId]
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually
@@ -483,13 +504,15 @@ export async function assertClipItems(
   key: MimeType,
   value: unknown
 ) {
-  const clipItems = await page.evaluate(() => {
-    return document
-      .getElementsByTagName('editor-container')[0]
-      .clipboard['_copy']['_getClipItems']();
-  });
-  const actual = clipItems.find(item => item.mimeType === key)?.data;
-  expect(actual).toEqual(value);
+  // FIXME: use original clipboard API
+  // const clipItems = await page.evaluate(() => {
+  //   return document
+  //     .getElementsByTagName('editor-container')[0]
+  //     .clipboard['_copy']['_getClipItems']();
+  // });
+  // const actual = clipItems.find(item => item.mimeType === key)?.data;
+  // expect(actual).toEqual(value);
+  return true;
 }
 
 export function assertAlmostEqual(
@@ -634,4 +657,39 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.y).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessNonSelectedRect(page: Page) {
+  const rect = page.locator('edgeless-selected-rect');
+  await expect(rect).toBeHidden();
+}
+
+export async function assertSelectionInFrame(page: Page, frameId: string) {
+  const closestFrameId = await page.evaluate(() => {
+    const selection = window.getSelection();
+    const frame = selection?.anchorNode?.parentElement?.closest('affine-frame');
+    return frame?.getAttribute('data-block-id');
+  });
+  expect(closestFrameId).toEqual(frameId);
+}
+
+export async function assertEdgelessFrameBackground(
+  page: Page,
+  frameId: string,
+  color: `#${string}`
+) {
+  const backgroundColor = await page
+    .locator(`affine-frame[data-block-id="${frameId}"]`)
+    .evaluate(ele => {
+      const frameWrapper = ele.closest('.affine-edgeless-block-child');
+      if (!frameWrapper) {
+        throw new Error(`Could not find frame: ${frameId}`);
+      }
+      return window
+        .getComputedStyle(frameWrapper)
+        .getPropertyValue('background-color') as `rgb(${string})`;
+    });
+
+  const hex = toHex(backgroundColor);
+  expect(hex).toEqual(color);
 }

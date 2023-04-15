@@ -1,13 +1,25 @@
-import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
+  BLOCK_ID_ATTR as ATTR,
+} from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
 
 import type { Loader } from '../../components/loader.js';
-import type { DefaultPageBlockComponent } from '../../index.js';
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+} from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import type { IPoint } from './gesture.js';
+import type { Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
+
+const ATTR_SELECTOR = `[${ATTR}]`;
+
+// margin-top: calc(var(--affine-paragraph-space) + 24px);
+// h1.margin-top = 8px + 24px = 32px;
+const MAX_SPACE = 32;
+const STEPS = MAX_SPACE / 2 / 2;
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -24,21 +36,6 @@ interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
-export function getBlockById<T extends ElementTagName>(
-  id: string,
-  container: Element = document.body
-) {
-  return container.querySelector<T>(
-    `[${ATTR}="${id}"]` as T
-  ) as BlockComponentElement | null;
-}
-
-export function getBlockByPoint(
-  point: IPoint
-): BlockComponentElement | null | undefined {
-  return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
-}
-
 /**
  * @deprecated Use `page.getParent` instead
  */
@@ -46,10 +43,10 @@ export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  const currentBlock = getBlockById(id, ele);
+  const currentBlock = getBlockElementById(id, ele);
   return (
     (currentBlock?.parentElement?.closest<T>(
-      `[${ATTR}]` as T
+      ATTR_SELECTOR as T
     ) as BlockComponentElement) || null
   );
 }
@@ -150,7 +147,7 @@ export function getPreviousBlock(
 /**
  * Note: this method will return `DefaultPageBlockComponent` | `EdgelessPageBlockComponent`!
  *
- * @deprecated This method only works in the paper mode!
+ * @deprecated Use {@link getDefaultPage} instead. This method only works in the paper mode!
  */
 export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.page.root);
@@ -171,12 +168,33 @@ export function getContainerByModel(model: BaseBlockModel) {
   return container;
 }
 
+/**
+ * If it's not in the page mode, it will return `null` directly.
+ */
+export function getDefaultPage(page: Page) {
+  if (!isPageMode(page)) {
+    return null;
+  }
+  const editor = getEditorContainer(page);
+  const pageComponent = editor.querySelector('affine-default-page');
+  return pageComponent;
+}
+
+/**
+ * If it's not in the edgeless mode, it will return `null` directly.
+ */
+export function getEdgelessPage(page: Page) {
+  const editor = getEditorContainer(page);
+  const pageComponent = editor.querySelector('affine-edgeless-page');
+  return pageComponent;
+}
+
 export function getEditorContainer(page: Page) {
   assertExists(
     page.root,
-    'Failed to check paper mode! Page root is not exists!'
+    'Failed to check page mode! Page root is not exists!'
   );
-  const pageBlock = document.querySelector(`[${ATTR}="${page.root.id}"]`);
+  const pageBlock = getBlockElementById(page.root.id);
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
   assertExists(editorContainer);
@@ -225,9 +243,9 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector<DefaultPageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
+  const page = document.querySelector<
+    DefaultPageBlockComponent | EdgelessPageBlockComponent
+  >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
@@ -241,9 +259,9 @@ export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const page = document.querySelector<DefaultPageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
+  const page = document.querySelector<
+    DefaultPageBlockComponent | EdgelessPageBlockComponent
+  >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return Promise.resolve(null);
 
   if (model.id === model.page.root.id) {
@@ -313,6 +331,9 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
   return startModel;
 }
 
+/**
+ * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
+ */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
   const richText = blockElement?.querySelector<RichText>('rich-text');
@@ -325,6 +346,16 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
+}
+
+export function getVirgoByModel(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Not support database model since it's may be have multiple Virgo instances.
+    throw new Error('Cannot get virgo by database model!');
+  }
+  const richText = getRichTextByModel(model);
+  if (!richText) return null;
+  return richText.vEditor;
 }
 
 // TODO fix find embed model
@@ -349,7 +380,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
   ) {
-    const parentElement = commonAncestor.closest(`[${ATTR}]`)
+    const parentElement = commonAncestor.closest(ATTR_SELECTOR)
       ?.parentElement as HTMLElement;
     if (parentElement != null) {
       commonAncestor = parentElement;
@@ -357,7 +388,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
   }
 
   const intersectedModels: BaseBlockModel[] = [];
-  const blockElements = commonAncestor.querySelectorAll(`[${ATTR}]`);
+  const blockElements = commonAncestor.querySelectorAll(ATTR_SELECTOR);
 
   if (!blockElements.length) return [];
 
@@ -375,7 +406,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 
       const mainElement = matchFlavours(block.model, ['affine:page'] as const)
         ? element?.querySelector('.affine-default-page-block-title-container')
-        : element?.querySelector('rich-text');
+        : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
@@ -388,17 +419,9 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
-  const containerBlock = element.closest(`[${ATTR}]`) as ContainerBlock;
-  // In extreme cases, the block may be loading, and the model is not yet available.
-  // For example
-  // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
-  if ('hostModel' in containerBlock) {
-    const loader = containerBlock as Loader;
-    assertExists(loader.hostModel);
-    return loader.hostModel;
-  }
-  assertExists(containerBlock.model);
-  return containerBlock.model;
+  const closestBlock = element.closest(ATTR_SELECTOR);
+  assertExists(closestBlock, 'Cannot find block element by element');
+  return getModelByBlockElement(closestBlock);
 }
 
 function mergeRect(a: DOMRect, b: DOMRect) {
@@ -435,78 +458,6 @@ export function getDOMRectByLine(
   }
 }
 
-export function getVRangeByNode(node: Node): VRange | null {
-  if (!node.parentElement) return null;
-
-  const richText = node.parentElement.closest('rich-text') as RichText;
-  const vEditor = richText?.vEditor;
-  if (!vEditor) return null;
-
-  return vEditor.getVRange();
-}
-
-/**
- * Get the specific text node and offset by the selected block.
- * The reverse implementation of {@link getVRangeByNode}
- * See also {@link getVRangeByNode}
- *
- * ```ts
- * const [startNode, startOffset] = getTextNodeBySelectedBlock(startModel, startOffset);
- * const [endNode, endOffset] = getTextNodeBySelectedBlock(endModel, endOffset);
- *
- * const range = new Range();
- * range.setStart(startNode, startOffset);
- * range.setEnd(endNode, endOffset);
- *
- * const selection = window.getSelection();
- * selection.removeAllRanges();
- * selection.addRange(range);
- * ```
- */
-export function getTextNodeBySelectedBlock(model: BaseBlockModel, offset = 0) {
-  const text = model.text;
-  if (!text) {
-    throw new Error("Failed to get block's text!");
-  }
-  if (offset > text.length) {
-    offset = text.length;
-    // FIXME enable strict check
-    // console.error(
-    //   'Offset is out of range! model: ',
-    //   model,
-    //   'offset: ',
-    //   offset,
-    //   'text: ',
-    //   text.toString(),
-    //   'text.length: ',
-    //   text.length
-    // );
-  }
-  const blockElement = getBlockById(model.id);
-  if (!blockElement) {
-    throw new Error('Failed to get block element, block id: ' + model.id);
-  }
-  const richText = blockElement.querySelector('rich-text');
-  if (!richText) {
-    throw new Error('Failed to get rich text element');
-  }
-  const vEditor = richText.vEditor;
-  assertExists(vEditor);
-  const [leaf, leafOffset] = vEditor.getTextPoint(offset);
-  return [leaf, leafOffset] as const;
-}
-
-export function getAllBlocks() {
-  const blocks: BlockComponentElement[] = Array.from(
-    document.querySelectorAll(`[${ATTR}]`)
-  );
-  return blocks.filter(item => {
-    return (
-      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'
-    );
-  });
-}
-
 export function isInsideRichText(element: unknown): element is RichText {
   // Fool-proofing
   if (element instanceof Event) {
@@ -541,6 +492,15 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isInsideDatabaseTitle(element: unknown): boolean {
+  const titleElement = document.querySelector(
+    '[data-block-is-database-title="true"]'
+  );
+  if (!titleElement) return false;
+
+  return titleElement.contains(element as Node);
+}
+
 export function isCaptionElement(node: unknown): node is HTMLInputElement {
   if (!(node instanceof Element)) {
     return false;
@@ -555,4 +515,474 @@ export function getElementFromEventTarget(
   if (target instanceof Element) return target;
   if (target instanceof Node) target.parentElement;
   return null;
+}
+
+/**
+ * Returns `16` if node is contained in the parent.
+ * Otherwise return `0`.
+ */
+export function contains(parent: Element, node: Element) {
+  return (
+    parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
+  );
+}
+
+/**
+ * Returns `true` if node is contained in the elements.
+ */
+export function isContainedIn(elements: Element[], node: Element) {
+  return elements.some(parent => contains(parent, node));
+}
+
+/**
+ * Returns `true` if element has `data-block-id` attribute.
+ */
+export function hasBlockId(element: Element) {
+  return element.hasAttribute(ATTR);
+}
+
+/**
+ * Returns `true` if element is default page.
+ */
+export function isDefaultPage({ tagName }: Element) {
+  return tagName === 'AFFINE-DEFAULT-PAGE';
+}
+
+/**
+ * Returns `true` if element is edgeless page.
+ */
+export function isEdgelessPage({ tagName }: Element) {
+  return tagName === 'AFFINE-EDGELESS-PAGE';
+}
+
+/**
+ * Returns `true` if element is default/edgeless page or frame.
+ */
+export function isPageOrFrame(element: Element) {
+  return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
+}
+
+/**
+ * Returns `true` if element is not page or frame.
+ */
+export function isBlock(element: Element) {
+  return !isPageOrFrame(element);
+}
+
+/**
+ * Returns `true` if element is image.
+ */
+export function isImage({ tagName }: Element) {
+  return tagName === 'AFFINE-IMAGE';
+}
+
+/**
+ * Returns `true` if element is frame.
+ */
+function isFrame({ tagName }: Element) {
+  return tagName === 'AFFINE-FRAME';
+}
+
+/**
+ * Returns `true` if element is embed.
+ */
+function isEmbed({ tagName }: Element) {
+  return tagName === 'AFFINE-EMBED';
+}
+
+/**
+ * Returns `true` if element is database.
+ */
+function isDatabase({ tagName }: Element) {
+  return tagName === 'AFFINE-DATABASE';
+}
+
+/**
+ * Returns `true` if element is edgeless block child.
+ */
+export function isEdgelessBlockChild({ classList }: Element) {
+  return classList.contains('affine-edgeless-block-child');
+}
+
+/**
+ * Returns the closest block element by a point in the rect.
+ *
+ * ```
+ * ############### block
+ * ||############# block
+ * ||||########### block
+ * ||||    ...
+ * ||||  y - 2 * n
+ * ||||    ...
+ * ||||----------- cursor
+ * ||||    ...
+ * ||||  y + 2 * n
+ * ||||    ...
+ * ||||########### block
+ * ||############# block
+ * ############### block
+ * ```
+ */
+export function getClosestBlockElementByPoint(
+  point: Point,
+  state: {
+    rect?: Rect;
+    container?: Element;
+  } | null = null,
+  scale = 1
+): Element | null {
+  const { y } = point;
+
+  let container;
+  let element = null;
+  let bounds = null;
+  let childBounds = null;
+  let diff = 0;
+  let n = 1;
+
+  if (state) {
+    container = state.container;
+    const rect = state.rect || container?.getBoundingClientRect();
+    if (rect) {
+      point.x = Math.min(
+        Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+        rect.right - PADDING_LEFT * scale - 1
+      );
+    }
+  }
+
+  // find block element
+  element = findBlockElement(
+    document.elementsFromPoint(point.x, point.y),
+    container
+  );
+
+  // Horizontal direction: for nested structures
+  if (element) {
+    // Database
+    if (isDatabase(element)) {
+      bounds = element.getBoundingClientRect();
+      const rows = getDatabaseBlockRowsElement(element);
+      assertExists(rows);
+      childBounds = rows.getBoundingClientRect();
+
+      if (childBounds.height) {
+        if (point.y < childBounds.top || point.y > childBounds.bottom) {
+          return element;
+        }
+        childBounds = null;
+      } else {
+        return element;
+      }
+    } else {
+      // Indented paragraphs or list
+      bounds = getRectByBlockElement(element);
+      childBounds = element
+        .querySelector('.affine-block-children-container')
+        ?.firstElementChild?.getBoundingClientRect();
+
+      if (childBounds && childBounds.height) {
+        if (bounds.x < point.x && point.x <= childBounds.x) {
+          return element;
+        }
+        childBounds = null;
+      } else {
+        return element;
+      }
+    }
+
+    bounds = null;
+    element = null;
+  }
+
+  // Vertical direction
+  do {
+    point.y = y - n * 2;
+
+    if (n < 0) n--;
+    n *= -1;
+
+    // find block element
+    element = findBlockElement(
+      document.elementsFromPoint(point.x, point.y),
+      container
+    );
+
+    if (element) {
+      bounds = getRectByBlockElement(element);
+      diff = bounds.bottom - point.y;
+      if (diff >= 0 && diff <= STEPS * 2) {
+        return element;
+      }
+      diff = point.y - bounds.top;
+      if (diff >= 0 && diff <= STEPS * 2) {
+        return element;
+      }
+      bounds = null;
+      element = null;
+    }
+  } while (n <= STEPS);
+
+  return element;
+}
+
+/**
+ * Returns the closest block element by element that does not contain the page element and frame element.
+ */
+export function getClosestBlockElementByElement(element: Element | null) {
+  if (!element) return null;
+  if (hasBlockId(element) && isBlock(element)) {
+    return element;
+  }
+  element = element.closest(ATTR_SELECTOR);
+  if (element && isBlock(element)) {
+    return element;
+  }
+  return null;
+}
+
+/**
+ * Returns the model of the block element.
+ */
+export function getModelByBlockElement(element: Element) {
+  const containerBlock = element as ContainerBlock;
+  // In extreme cases, the block may be loading, and the model is not yet available.
+  // For example
+  // // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
+  if ('hostModel' in containerBlock) {
+    const loader = containerBlock as Loader;
+    assertExists(loader.hostModel);
+    return loader.hostModel;
+  }
+  assertExists(containerBlock.model);
+  return containerBlock.model;
+}
+
+/**
+ * Returns all block elements in an element.
+ */
+export function getBlockElementsByElement(
+  element: BlockComponentElement | Document | Element = document
+) {
+  return Array.from(element.querySelectorAll(ATTR_SELECTOR)).filter(isBlock);
+}
+
+/**
+ * Returns the block element by id with the parent.
+ */
+export function getBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  return parent.querySelector(`[${ATTR}="${id}"]`);
+}
+
+/**
+ * Returns the closest frame block element by id with the parent.
+ */
+export function getClosestFrameBlockElementById(
+  id: string,
+  parent: BlockComponentElement | Document | Element = document
+) {
+  const element = getBlockElementById(id, parent);
+  if (!element) return null;
+  if (isFrame(element)) return element;
+  return element.closest('affine-frame');
+}
+
+/**
+ * Returns rect of the block element.
+ *
+ * Compatible with Safari!
+ * https://github.com/toeverything/blocksuite/issues/902
+ * https://github.com/toeverything/blocksuite/pull/1121
+ */
+export function getRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
+  if (isDatabase(element)) return element.getBoundingClientRect();
+  return (element.firstElementChild ?? element).getBoundingClientRect();
+}
+
+/**
+ * Returns selected state rect of the block element.
+ */
+export function getSelectedStateRectByBlockElement(
+  element: Element | BlockComponentElement
+) {
+  if (isImage(element))
+    return (
+      element.querySelector('.resizable-img') ?? element
+    ).getBoundingClientRect();
+  return getRectByBlockElement(element);
+}
+
+/**
+ * Returns block elements excluding their subtrees.
+ * Only keep block elements of same level.
+ */
+export function getBlockElementsExcludeSubtrees(
+  elements: Element[] | BlockComponentElement[]
+) {
+  if (elements.length <= 1) return elements;
+  let parent = elements[0];
+  return elements.filter((node, index) => {
+    if (index === 0) return true;
+    if (contains(parent, node)) {
+      return false;
+    } else {
+      parent = node;
+      return true;
+    }
+  });
+}
+
+/**
+ * Returns block elements including their subtrees.
+ */
+export function getBlockElementsIncludeSubtrees(elements: Element[]) {
+  return elements.reduce<Element[]>((elements, element) => {
+    elements.push(element, ...getBlockElementsByElement(element));
+    return elements;
+  }, []);
+}
+
+/**
+ * Find block element from an `Element[]`.
+ * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
+ */
+function findBlockElement(elements: Element[], parent?: Element) {
+  const len = elements.length;
+  let element = null;
+  let i = 0;
+  while (i < len) {
+    element = elements[i];
+    i++;
+    // if parent does not contain element, it's ignored
+    if (parent && !contains(parent, element)) continue;
+    if (hasBlockId(element) && isBlock(element)) return element;
+    if (isEmbed(element)) {
+      if (i < len && hasBlockId(elements[i]) && isBlock(elements[i])) {
+        return elements[i];
+      }
+      return getClosestBlockElementByElement(element);
+    }
+  }
+  return null;
+}
+
+/**
+ * query current mode whether is light or dark
+ */
+export function queryCurrentMode(): 'light' | 'dark' {
+  const mode = getComputedStyle(document.documentElement).getPropertyValue(
+    '--affine-theme-mode'
+  );
+
+  if (mode.trim() === 'dark') {
+    return 'dark';
+  } else {
+    return 'light';
+  }
+}
+
+/**
+ * Get hovering frame with given a point in edgeless mode.
+ */
+export function getHoveringFrame(point: Point) {
+  return (
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
+    null
+  );
+}
+
+/**
+ * Returns `true` if the database is empty.
+ */
+export function isEmptyDatabase(model: BaseBlockModel) {
+  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+}
+
+/**
+ * Gets the table of the database.
+ */
+export function getDatabaseBlockTableElement(element: Element) {
+  return element.querySelector('.affine-database-block-table');
+}
+
+/**
+ * Gets the column header of the database.
+ */
+export function getDatabaseBlockColumnHeaderElement(element: Element) {
+  return element.querySelector('.affine-database-column-header');
+}
+
+/**
+ * Gets the rows of the database.
+ */
+export function getDatabaseBlockRowsElement(element: Element) {
+  return element.querySelector('.affine-database-block-rows');
+}
+
+/**
+ * Gets the drop rect by block and point.
+ */
+export function getDropRectByPoint(
+  point: Point,
+  model: BaseBlockModel,
+  element: Element
+) {
+  const result = {
+    rect: getRectByBlockElement(element),
+    // 0: others, 1: empty database
+    flag: 0,
+  };
+
+  // If the database is empty and the point is inside the database
+  if (isEmptyDatabase(model)) {
+    result.flag = 1;
+    const table = getDatabaseBlockTableElement(element);
+    assertExists(table);
+    const bounds = table.getBoundingClientRect();
+    if (point.y < bounds.top) return result;
+    const header = getDatabaseBlockColumnHeaderElement(element);
+    assertExists(header);
+    const headerBounds = header.getBoundingClientRect();
+    result.rect = new DOMRect(
+      headerBounds.left,
+      headerBounds.bottom,
+      result.rect.width,
+      1
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Returns `true` if the target is `Element`.
+ */
+export function isElement(target: EventTarget | null) {
+  return target && target instanceof Element;
+}
+
+/**
+ * Returns `true` if the target is `affine-selected-blocks`.
+ */
+export function isSelectedBlocks(target: Element) {
+  return target.tagName === 'AFFINE-SELECTED-BLOCKS';
+}
+
+/**
+ * Returns `true` if the target is `affine-drag-handle`.
+ */
+export function isDragHandle(target: Element) {
+  return target.tagName === 'AFFINE-DRAG-HANDLE';
+}
+
+/**
+ * Returns `true` if block elements have database block element.
+ */
+export function hasDatabase(elements: Element[]) {
+  return elements.some(isDatabase);
 }

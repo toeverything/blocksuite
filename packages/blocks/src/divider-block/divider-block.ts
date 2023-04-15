@@ -2,16 +2,13 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  BlockChildrenContainer,
-  type BlockHost,
-  NonShadowLitElement,
-} from '../__internal__/index.js';
+import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { DividerBlockModel } from './divider-model.js';
 
 @customElement('affine-divider')
-export class DividerBlockComponent extends NonShadowLitElement {
-  static styles = css`
+export class DividerBlockComponent extends ShadowlessElement {
+  static override styles = css`
     .affine-divider-block-container {
       width: 100%;
       height: 20px;
@@ -32,12 +29,12 @@ export class DividerBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

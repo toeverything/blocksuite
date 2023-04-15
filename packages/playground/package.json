@@ -1,7 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.5.0-alpha.1",
+  "version": "0.5.0-alpha.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -16,13 +16,16 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
+    "@blocksuite/connector": "workspace:*",
     "@lit-labs/react": "^1.1.1",
+    "@rich-data/json-plugin": "^3.0.0-20230329005843-d296129",
+    "@rich-data/viewer": "^3.0.0-20230329005843-d296129",
     "@shoelace-style/shoelace": "2.0.0",
     "browser-fs-access": "^0.32.1",
     "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.5.48"
+    "yjs": "^13.5.50"
   },
   "license": "MPL-2.0",
   "devDependencies": {

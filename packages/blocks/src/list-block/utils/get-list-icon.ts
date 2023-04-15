@@ -39,7 +39,7 @@ export function ListIcon(
       class="affine-list-block__prefix ${model.type === 'todo'
         ? 'affine-list-block__todo-prefix'
         : ''}"
-      @mousedown="${(e: MouseEvent) => onClick(e)}"
+      @click="${(e: MouseEvent) => onClick(e)}"
     >
       ${icon}
     </div>

@@ -186,7 +186,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
-  prop:language="JavaScript"
+  prop:language="Plain Text"
 />`,
     codeBlockId
   );
@@ -263,6 +263,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await page.keyboard.down('Shift');
   await pressArrowLeft(page, 'use'.length);
   await page.keyboard.up('Shift');
+  await pressArrowLeft(page, 1);
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
 
@@ -292,9 +293,11 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use
 "
     />
@@ -336,14 +339,16 @@ test.skip('use code block copy menu of code block copy whole code block', async 
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use
 "
     />
     <affine:code
-      prop:language="JavaScript"
+      prop:language="Plain Text"
       prop:text="use"
     />
   </affine:frame>
@@ -484,7 +489,7 @@ test('press ArrowDown before code block can select code block', async ({
   await focusRichText(page);
   await page.keyboard.press('ArrowDown');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-selected-blocks > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -493,9 +498,7 @@ test('press backspace inside should select code block', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
   const codeBlock = page.locator('affine-code');
-  const selectedRects = page.locator(
-    '.affine-page-selected-rects-container > *'
-  );
+  const selectedRects = page.locator('affine-selected-blocks > *');
   await page.keyboard.press('Backspace');
   await expect(selectedRects).toHaveCount(1);
   await expect(codeBlock).toBeVisible();
@@ -515,7 +518,7 @@ test('press backspace after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('Backspace');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-selected-blocks > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -530,7 +533,7 @@ test('press ArrowUp after code block can select code block', async ({
   await pressEnter(page);
   await page.keyboard.press('ArrowUp');
 
-  const locator = page.locator('.affine-page-selected-rects-container > *');
+  const locator = page.locator('affine-selected-blocks > *');
   await expect(locator).toHaveCount(1);
 });
 
@@ -589,10 +592,17 @@ test('should tab works in code block', async ({ page }) => {
 
   await type(page, 'const a = 10;');
   await assertRichTexts(page, ['const a = 10;']);
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab', { delay: 50 });
   await assertRichTexts(page, ['  const a = 10;']);
-  await page.keyboard.press(`Shift+Tab`);
+  await page.keyboard.press(`Shift+Tab`, { delay: 50 });
   await assertRichTexts(page, ['const a = 10;']);
+
+  await page.keyboard.press('Enter', { delay: 50 });
+  await type(page, 'const b = "NothingToSay";');
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.press('Tab', { delay: 50 });
+  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay";']);
 });
 
 test('should code block wrap active after click', async ({ page }) => {

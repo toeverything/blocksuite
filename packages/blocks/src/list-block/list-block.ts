@@ -1,24 +1,27 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
-  getBlockElementByModel,
   getDefaultPageBlock,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
+import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends NonShadowLitElement {
-  static styles = css`
+export class ListBlockComponent extends ShadowlessElement {
+  static override styles = css`
     .affine-list-block-container {
       box-sizing: border-box;
       border-radius: 5px;
@@ -82,15 +85,14 @@ export class ListBlockComponent extends NonShadowLitElement {
   @state()
   showChildren = true;
 
-  private _select(model: ListBlockModel) {
-    const { selection } = getDefaultPageBlock(model);
-    const blockElement = getBlockElementByModel(model);
-    assertExists(
-      blockElement,
-      'Failed to select list, blockElement not found!'
-    );
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
 
-    selection.setSelectedBlocks([blockElement]);
+  private _select() {
+    const { selection } = getDefaultPageBlock(this.model);
+    selection?.selectOneBlock(this);
   }
 
   private _onClickIcon = (e: MouseEvent) => {
@@ -105,15 +107,15 @@ export class ListBlockComponent extends NonShadowLitElement {
       this.host.page.updateBlock(this.model, checkedPropObj);
       return;
     }
-    this._select(this.model);
+    this._select();
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  render() {
+  override render() {
     const { deep, index } = getListInfo(this.host, this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
@@ -138,7 +140,11 @@ export class ListBlockComponent extends NonShadowLitElement {
           }`}
         >
           ${listIcon}
-          <rich-text .host=${this.host} .model=${this.model}></rich-text>
+          <rich-text
+            .host=${this.host}
+            .model=${this.model}
+            .textSchema=${this.textSchema}
+          ></rich-text>
         </div>
         ${childrenContainer}
       </div>

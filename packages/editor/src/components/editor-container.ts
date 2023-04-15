@@ -1,25 +1,38 @@
 import {
-  getDefaultPageBlock,
-  getServiceOrRegister,
+  type CommonSlots,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
   type MouseMode,
   type PageBlockModel,
+  type SurfaceBlockModel,
+  WithDisposable,
 } from '@blocksuite/blocks';
 import {
-  NonShadowLitElement,
-  type SurfaceBlockModel,
+  getDefaultPageBlock,
+  getServiceOrRegister,
+  ShadowlessElement,
+  ThemeObserver,
 } from '@blocksuite/blocks';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
+import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
+import { keyed } from 'lit/directives/keyed.js';
 
-import { ClipboardManager, ContentParser } from '../managers/index.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 import { OutsideDragManager } from '../utils/outside-drag-manager.js';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
+  Object.entries(from).forEach(([key, slot]) => {
+    if (key in to) {
+      slot.pipe(to[key]);
+    }
+  });
+}
+
 @customElement('editor-container')
-export class EditorContainer extends NonShadowLitElement {
+export class EditorContainer extends WithDisposable(ShadowlessElement) {
   @property()
   page!: Page;
 
@@ -27,19 +40,17 @@ export class EditorContainer extends NonShadowLitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
+  override autofocus = false;
+
+  @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
 
-  @state()
-  private showGrid = false;
-
-  // TODO only select block
   @property()
-  clipboard = new ClipboardManager(this, this);
+  showGrid = true;
 
-  @property()
-  contentParser = new ContentParser(this);
+  readonly themeObserver = new ThemeObserver();
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -58,23 +69,24 @@ export class EditorContainer extends NonShadowLitElement {
       : null;
   }
 
-  @query('.affine-block-placeholder-input')
-  private _placeholderInput!: HTMLInputElement;
+  @query('affine-default-page')
+  private _defaultPageBlock?: DefaultPageBlockComponent;
 
-  private _disposables = new DisposableGroup();
+  @query('affine-edgeless-page')
+  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   public outsideDragManager = new OutsideDragManager(this);
 
-  override firstUpdated() {
-    // todo: refactor to a better solution
-    getServiceOrRegister('affine:code');
-  }
+  slots: CommonSlots = {
+    pageLinkClicked: new Slot(),
+    subpageLinked: new Slot(),
+    subpageUnlinked: new Slot(),
+  };
 
   override connectedCallback() {
     super.connectedCallback();
 
-    // Question: Why do we prevent this?
-    this._disposables.addFromEvent(window, 'keydown', e => {
+    const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
         e.preventDefault();
       }
@@ -85,15 +97,25 @@ export class EditorContainer extends NonShadowLitElement {
       }
       const pageModel = this.pageBlockModel;
       if (!pageModel) return;
-      const pageBlock = getDefaultPageBlock(pageModel);
-      pageBlock.selection.clear();
+
+      if (this.mode === 'page') {
+        const pageBlock = getDefaultPageBlock(pageModel);
+        pageBlock.selection.clear();
+      }
 
       const selection = getSelection();
       if (!selection || selection.isCollapsed || !checkEditorElementActive()) {
         return;
       }
       selection.removeAllRanges();
-    });
+    };
+
+    // Question: Why do we prevent this?
+    if (isFirefox) {
+      this._disposables.addFromEvent(document.body, 'keydown', keydown);
+    } else {
+      this._disposables.addFromEvent(window, 'keydown', keydown);
+    }
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
@@ -108,18 +130,12 @@ export class EditorContainer extends NonShadowLitElement {
       }
     );
 
-    this._disposables.addFromEvent(
-      window,
-      'affine:switch-edgeless-display-mode',
-      ({ detail }) => {
-        this.showGrid = detail;
-      }
-    );
-
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
-        this.requestUpdate();
+        // add the 'page' as requesting property to
+        // make sure the `forwardSlot` is called in `updated` lifecycle
+        this.requestUpdate('page');
       })
     );
     this._disposables.add(
@@ -135,8 +151,28 @@ export class EditorContainer extends NonShadowLitElement {
       })
     );
 
-    this._placeholderInput?.focus();
+    this.themeObserver.observer(document.documentElement);
+    this._disposables.add(this.themeObserver);
+  }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.page.awarenessStore.setLocalRange(this.page, null);
+  }
+
+  override firstUpdated() {
+    // todo: refactor to a better solution
+    getServiceOrRegister('affine:code');
+
+    if (this.mode === 'page') {
+      setTimeout(() => {
+        const defaultPage = this.querySelector('affine-default-page');
+        if (this.autofocus) {
+          defaultPage?.titleVEditor.focusEnd();
+        }
+      });
+    }
+    
     this.outsideDragManager.registerHandler(
       files => Array.from(files).every(file => /^image\//.test(file.type)),
       () => {
@@ -146,7 +182,19 @@ export class EditorContainer extends NonShadowLitElement {
     );
   }
 
-  public async createBlockHub() {
+  override updated(changedProperties: Map<string, unknown>) {
+    if (!changedProperties.has('page') && !changedProperties.has('mode')) {
+      return;
+    }
+    if (this._defaultPageBlock) {
+      forwardSlot(this._defaultPageBlock.slots, this.slots);
+    }
+    if (this._edgelessPageBlock) {
+      forwardSlot(this._edgelessPageBlock.slots, this.slots);
+    }
+  }
+
+  async createBlockHub() {
     await this.updateComplete;
     if (!this.page.root) {
       await new Promise(res => this.page.slots.rootAdded.once(res));
@@ -154,33 +202,33 @@ export class EditorContainer extends NonShadowLitElement {
     return createBlockHub(this, this.page);
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.page.awarenessStore.setLocalRange(this.page, null);
-    this._disposables.dispose();
-  }
-
-  render() {
+  override render() {
     if (!this.model || !this.pageBlockModel) return null;
 
-    const pageContainer = html`
-      <affine-default-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.pageBlockModel}
-      ></affine-default-page>
-    `;
+    const pageContainer = keyed(
+      'page-' + this.pageBlockModel.id,
+      html`
+        <affine-default-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+        ></affine-default-page>
+      `
+    );
 
-    const edgelessContainer = html`
-      <affine-edgeless-page
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .pageModel=${this.pageBlockModel}
-        .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
-        .mouseMode=${this.mouseMode}
-        .showGrid=${this.showGrid}
-      ></affine-edgeless-page>
-    `;
+    const edgelessContainer = keyed(
+      'edgeless-' + this.pageBlockModel.id,
+      html`
+        <affine-edgeless-page
+          .mouseRoot=${this as HTMLElement}
+          .page=${this.page}
+          .model=${this.pageBlockModel}
+          .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
+          .mouseMode=${this.mouseMode}
+          .showGrid=${this.showGrid}
+        ></affine-edgeless-page>
+      `
+    );
 
     const remoteSelectionContainer = html`
       <remote-selection .page=${this.page}></remote-selection>
@@ -202,6 +250,7 @@ export class EditorContainer extends NonShadowLitElement {
           height: 100%;
           position: relative;
           overflow: hidden;
+          font-family: var(--affine-font-family);
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

@@ -4,40 +4,34 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
-import type { Page, Workspace } from '@blocksuite/store';
+import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
+import type { Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import { addShapeElement } from './utils';
 
 export interface InitFn {
-  (workspace: Workspace): Promise<string>;
+  (workspace: Workspace): void;
   id: string;
   displayName: string;
   description: string;
 }
 
 export const empty: InitFn = (workspace: Workspace) => {
-  return new Promise<string>(resolve => {
-    workspace.slots.pageAdded.once(pageId => {
-      const page = workspace.getPage(pageId) as Page;
+  const page = workspace.createPage('page0');
 
-      // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text(),
-      });
-
-      page.addBlockByFlavour('affine:surface', {}, null);
-
-      // Add frame block inside page block
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      // Add paragraph block inside frame block
-      page.addBlockByFlavour('affine:paragraph', {}, frameId);
-      page.resetHistory();
-      resolve(pageId);
-    });
-
-    workspace.createPage('page0');
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text(),
   });
+
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Add paragraph block inside frame block
+  page.addBlock('affine:paragraph', {}, frameId);
+  page.resetHistory();
 };
 
 empty.id = 'empty';
@@ -45,33 +39,26 @@ empty.displayName = 'Empty Editor';
 empty.description = 'Start from empty editor';
 
 export const heavy: InitFn = (workspace: Workspace) => {
-  return new Promise<string>(resolve => {
-    workspace.slots.pageAdded.once(pageId => {
-      const page = workspace.getPage(pageId) as Page;
+  const page = workspace.createPage('page0');
 
-      // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text(),
-      });
-      page.addBlockByFlavour('affine:surface', {}, null);
-
-      // Add frame block inside page block
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      for (let i = 0; i < 1000; i++) {
-        // Add paragraph block inside frame block
-        page.addBlockByFlavour(
-          'affine:paragraph',
-          {
-            text: new Text('Hello, world! ' + i),
-          },
-          frameId
-        );
-      }
-      resolve(pageId);
-    });
-
-    workspace.createPage('page0');
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text(),
   });
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  for (let i = 0; i < 1000; i++) {
+    // Add paragraph block inside frame block
+    page.addBlock(
+      'affine:paragraph',
+      {
+        text: new Text('Hello, world! ' + i),
+      },
+      frameId
+    );
+  }
 };
 
 heavy.id = 'heavy';
@@ -98,43 +85,34 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export const preset: InitFn = (workspace: Workspace) => {
-  return new Promise<string>(resolve => {
-    workspace.slots.pageAdded.once(async pageId => {
-      const page = workspace.getPage(pageId) as Page;
+  const page = workspace.createPage('page0');
 
-      // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text('Welcome to BlockSuite playground'),
-      });
-      page.addBlockByFlavour('affine:surface', {}, null);
-
-      // Add frame block inside page block
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      // Import preset markdown content inside frame block
-      await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
-
-      addShapeElement(page, {
-        id: '0',
-        index: 'a0',
-        type: 'shape',
-        xywh: '[0,0,100,100]',
-
-        shapeType: 'rect',
-
-        radius: 0,
-        filled: false,
-        fillColor: '#ffffff',
-        strokeWidth: 4,
-        strokeColor: '#010101',
-        strokeStyle: 'solid',
-      });
-
-      page.resetHistory();
-      resolve(pageId);
-    });
-
-    workspace.createPage('page0');
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text('Welcome to BlockSuite Playground'),
   });
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Import preset markdown content inside frame block
+  const contentParser = new window.ContentParser(page);
+  addShapeElement(page, {
+    id: '0',
+    index: 'a0',
+    type: 'shape',
+    xywh: '[0,0,100,100]',
+
+    shapeType: 'rect',
+
+    radius: 0,
+    filled: false,
+    fillColor: '#ffffff',
+    strokeWidth: 4,
+    strokeColor: '#010101',
+    strokeStyle: 'solid',
+  });
+  contentParser.importMarkdown(presetMarkdown, frameId);
 };
 
 preset.id = 'preset';
@@ -142,106 +120,96 @@ preset.displayName = 'BlockSuite Starter';
 preset.description = 'Start from friendly introduction';
 
 export const database: InitFn = (workspace: Workspace) => {
-  return new Promise<string>(resolve => {
-    workspace.slots.pageAdded.once(async pageId => {
-      const page = workspace.getPage(pageId) as Page;
-      page.awarenessStore.setFlag('enable_database', true);
+  const page = workspace.createPage('page0');
+  page.awarenessStore.setFlag('enable_database', true);
 
-      // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text('Welcome to BlockSuite playground'),
-      });
-      page.addBlockByFlavour('affine:surface', {}, null);
-
-      // Add frame block inside page block
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-
-      type Option = 'Done' | 'TODO' | 'WIP';
-      const selection = ['Done', 'TODO', 'WIP'] as Option[];
-      const col1 = page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {
-          decimal: 0,
-        },
-        name: 'Number',
-        type: 'number',
-      });
-      const col2 = page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {
-          selection: selection,
-        },
-        name: 'Select 2',
-        type: 'select',
-      });
-      const col3 = page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {},
-        name: 'Select 2',
-        type: 'rich-text',
-      });
-      // Add database block inside frame block
-      const databaseId = page.addBlockByFlavour(
-        'affine:database',
-        {
-          columns: [col1, col2, col3],
-        },
-        frameId
-      );
-      const p1 = page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new page.Text('text1'),
-        },
-        databaseId
-      );
-      const p2 = page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new page.Text('text2'),
-        },
-        databaseId
-      );
-
-      page.updateBlockTag(p1, {
-        schemaId: col1,
-        value: 0.1,
-      });
-
-      page.updateBlockTag(p2, {
-        schemaId: col2,
-        value: 'TODO',
-      });
-
-      const text = new page.YText();
-      text.insert(0, '123');
-      text.insert(0, 'code');
-      page.updateBlockTag(p2, {
-        schemaId: col3,
-        value: text,
-      });
-
-      // Add a paragraph after database
-      page.addBlockByFlavour('affine:paragraph', {}, frameId);
-
-      page.resetHistory();
-      resolve(pageId);
-    });
-
-    workspace.createPage('page0');
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text('Welcome to BlockSuite Playground'),
   });
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+
+  const selection = [
+    { value: 'Done', color: 'var(--affine-tag-white)' },
+    { value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { value: 'WIP', color: 'var(--affine-tag-blue)' },
+  ];
+  // Add database block inside frame block
+  const databaseId = page.addBlock(
+    'affine:database',
+    {
+      // columns: [col1, col2, col3],
+      columns: [],
+      titleColumnName: 'Title',
+      titleColumnWidth: 200,
+    },
+    frameId
+  );
+  const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+  const col1 = database.updateColumn({
+    name: 'Number',
+    type: 'number',
+    width: 200,
+    hide: false,
+    decimal: 0,
+  });
+  const col2 = database.updateColumn({
+    name: 'Single Select',
+    type: 'select',
+    width: 200,
+    hide: false,
+    selection,
+  });
+  const col3 = database.updateColumn({
+    name: 'Rich Text',
+    type: 'rich-text',
+    width: 200,
+    hide: false,
+  });
+
+  page.updateBlock(database, {
+    columns: [col1, col2, col3],
+  });
+
+  const p1 = page.addBlock(
+    'affine:paragraph',
+    {
+      text: new page.Text('text1'),
+    },
+    databaseId
+  );
+  const p2 = page.addBlock(
+    'affine:paragraph',
+    {
+      text: new page.Text('text2'),
+    },
+    databaseId
+  );
+
+  database.updateCell(p1, {
+    columnId: col1,
+    value: 0.1,
+  });
+
+  database.updateCell(p2, {
+    columnId: col2,
+    value: [selection[1]],
+  });
+
+  const text = new page.YText();
+  text.insert(0, '123');
+  text.insert(0, 'code');
+  database.updateCell(p2, {
+    columnId: col3,
+    value: text,
+  });
+
+  // Add a paragraph after database
+  page.addBlock('affine:paragraph', {}, frameId);
+  page.resetHistory();
 };
 
 database.id = 'database';

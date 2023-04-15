@@ -1,16 +1,17 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const CodeBlockModelSchema = defineBlockSchema(
-  'affine:code',
-  internal => ({
+export const CodeBlockSchema = defineBlockSchema({
+  flavour: 'affine:code',
+  props: internal => ({
     text: internal.Text(),
-    language: 'JavaScript',
+    language: 'Plain Text',
   }),
-  {
+  metadata: {
     version: 1,
+    role: 'content',
     tag: literal`affine-code`,
-  }
-);
+  },
+});
 
-export type CodeBlockModel = SchemaToModel<typeof CodeBlockModelSchema>;
+export type CodeBlockModel = SchemaToModel<typeof CodeBlockSchema>;

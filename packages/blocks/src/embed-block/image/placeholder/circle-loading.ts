@@ -1,12 +1,12 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { NonShadowLitElement } from '../../../__internal__/index.js';
+import { ShadowlessElement } from '../../../__internal__/index.js';
 
 const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;
 @customElement(ELEMENT_TAG)
-export class AffineImageBlockCircleLoading extends NonShadowLitElement {
-  static styles = css`
+export class AffineImageBlockCircleLoading extends ShadowlessElement {
+  static override styles = css`
     @keyframes affine-image-block-rotate {
       from {
         rotate: 0deg;
@@ -44,7 +44,7 @@ export class AffineImageBlockCircleLoading extends NonShadowLitElement {
     }
   `;
 
-  render() {
+  override render() {
     return html`<div class="affine-image-block-container">
       <div class="affine-image-block-loading"></div>
     </div>`;

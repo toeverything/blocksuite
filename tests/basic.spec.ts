@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 import {
   addFrameByClick,
   captureHistory,
@@ -8,6 +10,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getCurrentEditorTheme,
+  getCurrentHTMLTheme,
   initEmptyParagraphState,
   pressBackspace,
   pressEnter,
@@ -15,6 +19,7 @@ import {
   redoByKeyboard,
   SHORT_KEY,
   switchReadonly,
+  toggleDarkMode,
   type,
   undoByClick,
   undoByKeyboard,
@@ -50,19 +55,19 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text('hello'),
     });
-    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const frame = page.addBlock('affine:frame', {}, pageId);
 
     const text = new page.Text('world');
-    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, frame);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    page.addBlockByFlavour(
+    page.addBlock(
       'affine:paragraph',
       {
         text: page.Text.fromDelta(delta),
@@ -80,12 +85,14 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
   await waitDefaultPageLoaded(pageA);
+  await focusTitle(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await waitNextFrame(pageB);
   await waitDefaultPageLoaded(pageB);
+  await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
 
   await type(pageB, ' world');
@@ -268,7 +275,7 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('should undo/redo work on title', async ({ page }) => {
+test('should undo/redo works on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -306,7 +313,41 @@ test('should undo/redo work on title', async ({ page }) => {
   await assertRichTexts(page, ['hello ']);
 });
 
-test.skip('undo multi frames', async ({ page }) => {
+test('should undo/redo cursor works on title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await waitNextFrame(page);
+
+  await focusTitle(page);
+  await type(page, 'title');
+  await focusRichText(page);
+  await type(page, 'hello');
+  await captureHistory(page);
+
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello']);
+
+  await focusTitle(page);
+  await type(page, '1');
+  await focusRichText(page);
+  await undoByKeyboard(page);
+  await waitNextFrame(page);
+  await type(page, '2');
+  await assertTitle(page, 'title2');
+  await assertRichTexts(page, ['hello']);
+
+  await type(page, '3');
+  await focusRichText(page);
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  await redoByKeyboard(page);
+  await waitNextFrame(page);
+  await type(page, '4');
+  await assertTitle(page, 'title23');
+  await assertRichTexts(page, ['hello4']);
+});
+
+test('undo multi frames', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -318,4 +359,17 @@ test.skip('undo multi frames', async ({ page }) => {
 
   await redoByClick(page);
   await assertRichTexts(page, ['', '']);
+});
+
+test('change theme', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const currentTheme = await getCurrentHTMLTheme(page);
+  await toggleDarkMode(page);
+  const expectNextTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const nextHTMLTheme = await getCurrentHTMLTheme(page);
+  expect(nextHTMLTheme).toBe(expectNextTheme);
+
+  const nextEditorTheme = await getCurrentEditorTheme(page);
+  expect(nextEditorTheme).toBe(expectNextTheme);
 });

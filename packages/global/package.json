@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/global",
-  "version": "0.5.0-alpha.1",
+  "version": "0.5.0-alpha.3",
   "types": "./index.d.ts",
   "type": "module",
   "scripts": {
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "ansi-colors": "^4.1.3",
-    "zod": "^3.20.6"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "lit": "^2.6.1"

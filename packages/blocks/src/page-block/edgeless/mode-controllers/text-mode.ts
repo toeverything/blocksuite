@@ -1,16 +1,14 @@
-import { serializeXYWH } from '@blocksuite/phasor';
-
 import type {
   SelectionEvent,
   TextMouseMode,
 } from '../../../__internal__/index.js';
-import { handleNativeRangeAtPoint, noop } from '../../../__internal__/index.js';
+import {
+  handleNativeRangeAtPoint,
+  noop,
+  Point,
+} from '../../../__internal__/index.js';
+import { DEFAULT_FRAME_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
-
-const DEFAULT_FRAME_WIDTH = 448;
-const DEFAULT_FRAME_HEIGHT = 72;
-const DEFAULT_FRAME_OFFSET_X = 30;
-const DEFAULT_FRAME_OFFSET_Y = 40;
 
 export class TextModeController extends MouseModeController<TextMouseMode> {
   readonly mouseMode = <TextMouseMode>{
@@ -20,20 +18,11 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   private _dragStartEvent: SelectionEvent | null = null;
 
   private _addText(e: SelectionEvent, width = DEFAULT_FRAME_WIDTH) {
-    const [modelX, modelY] = this._surface.toModelCoord(e.x, e.y);
-    const frameId = this._page.addBlockByFlavour(
-      'affine:frame',
-      {
-        xywh: serializeXYWH(
-          modelX - DEFAULT_FRAME_OFFSET_X,
-          modelY - DEFAULT_FRAME_OFFSET_Y,
-          width,
-          DEFAULT_FRAME_HEIGHT
-        ),
-      },
-      this._page.root?.id
+    const frameId = this._edgeless.addFrameWithPoint(
+      new Point(e.x, e.y),
+      width
     );
-    this._page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    this._page.addBlock('affine:paragraph', {}, frameId);
     this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
     // Wait for mouseMode updated
@@ -44,7 +33,6 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
           selected: [element],
           active: true,
         };
-        this._edgeless.setBlockSelectionState(selectionState);
         this._edgeless.slots.selectionUpdated.emit(selectionState);
 
         // Waiting dom updated, `frame mask` is removed
@@ -66,6 +54,10 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   }
 
   onContainerDblClick(e: SelectionEvent): void {
+    noop();
+  }
+
+  onContainerTripleClick(e: SelectionEvent) {
     noop();
   }
 

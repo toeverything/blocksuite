@@ -1,3 +1,4 @@
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -14,10 +15,17 @@ import {
   asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
+  getBlockElementByModel,
+  getClosestBlockElementByElement,
   getDefaultPageBlock,
+  getVirgoByModel,
+  handleNativeRangeDblClick,
+  handleNativeRangeTripleClick,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
+  resetNativeSelection,
+  type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -29,19 +37,16 @@ import {
   updateBlockRange,
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
-import {
-  getBlockElementByModel,
-  getRichTextByModel,
-} from '../../__internal__/utils/query.js';
-import {
-  getCurrentNativeRange,
-  resetNativeSelection,
-} from '../../__internal__/utils/selection.js';
-import type { BlockSchema } from '../../models.js';
-import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
+import type { BlockSchemas } from '../../models.js';
+import type {
+  DefaultSelectionManager,
+  PageSelectionState,
+} from '../default/selection-manager/index.js';
+import { calcCurrentSelectionPosition } from './position.js';
 
 const DEFAULT_SPACING = 64;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -52,7 +57,7 @@ export function handleBlockSelectionBatchDelete(
   const index = parentModel.children.indexOf(models[0]);
   page.captureSync();
   models.forEach(model => page.deleteBlock(model));
-  const id = page.addBlockByFlavour(
+  const id = page.addBlock(
     'affine:paragraph',
     { type: 'text' },
     parentModel,
@@ -66,8 +71,7 @@ export function handleBlockSelectionBatchDelete(
     return;
   }
   defaultPageBlock.selection.clear();
-  id && asyncFocusRichText(page, id);
-  return;
+  return id && asyncFocusRichText(page, id);
 }
 
 export function deleteModelsByRange(
@@ -78,8 +82,7 @@ export function deleteModelsByRange(
     return;
   }
   if (blockRange.type === 'Block') {
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    return;
+    return handleBlockSelectionBatchDelete(page, blockRange.models);
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -87,9 +90,7 @@ export function deleteModelsByRange(
     throw new Error('startModel or endModel does not have text');
   }
 
-  const firstRichText = getRichTextByModel(startModel);
-  assertExists(firstRichText);
-  const vEditor = firstRichText.vEditor;
+  const vEditor = getVirgoByModel(startModel);
   assertExists(vEditor);
 
   // Only select one block
@@ -99,11 +100,11 @@ export function deleteModelsByRange(
       blockRange.startOffset === blockRange.endOffset &&
       blockRange.startOffset > 0
     ) {
-      startModel.text.delete(blockRange.startOffset - 1, 1);
-      vEditor.setVRange({
-        index: blockRange.startOffset - 1,
-        length: 0,
-      });
+      // startModel.text.delete(blockRange.startOffset - 1, 1);
+      // vEditor.setVRange({
+      //   index: blockRange.startOffset - 1,
+      //   length: 0,
+      // });
       return;
     }
     startModel.text.delete(
@@ -127,7 +128,7 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  vEditor.setVRange({
+  return vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });
@@ -159,7 +160,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
     .join('\n');
   models.map(model => page.deleteBlock(model));
 
-  const id = page.addBlockByFlavour(
+  const id = page.addBlock(
     'affine:code',
     { text: new Text(text) },
     parent,
@@ -170,7 +171,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
 
 export function updateBlockType(
   models: BaseBlockModel[],
-  flavour: keyof BlockSchema,
+  flavour: keyof BlockSchemas,
   type?: string
 ) {
   if (!models.length) {
@@ -195,6 +196,30 @@ export function updateBlockType(
     }
     return [model];
   }
+  if (flavour === 'affine:divider') {
+    const model = models.at(-1);
+    if (!model) {
+      return [];
+    }
+    const parent = page.getParent(model);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(model);
+    const nextSibling = page.getNextSibling(model);
+    let nextSiblingId = nextSibling?.id as string;
+    const id = page.addBlock('affine:divider', {}, parent, index + 1);
+    if (!nextSibling) {
+      nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
+    }
+    asyncFocusRichText(page, nextSiblingId);
+    const newModel = page.getBlockById(id);
+    if (!newModel) {
+      throw new Error('Failed to get model after add divider block!');
+    }
+    return [newModel];
+  }
+
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
   models.forEach(model => {
@@ -213,15 +238,15 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const firstModel = newModels[0];
-  const lastModel = newModels.at(-1);
-  if (savedBlockRange) {
-    onModelTextUpdated(firstModel, () => {
+  const allTextUpdated = savedBlockRange?.models.map(
+    model => new Promise(resolve => onModelTextUpdated(model, resolve))
+  );
+  if (allTextUpdated && savedBlockRange) {
+    Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
     });
-  } else {
-    if (lastModel) asyncFocusRichText(page, lastModel.id);
   }
+
   return newModels;
 }
 
@@ -236,7 +261,7 @@ function transformBlock(
   const blockProps: {
     type?: string;
     text?: Text;
-    children?: BlockSuiteInternal.IBaseBlockProps[];
+    children?: BaseBlockModel[];
   } = {
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
@@ -244,7 +269,7 @@ function transformBlock(
   };
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
-  return page.addBlockByFlavour(flavour, blockProps, parent, index);
+  return page.addBlock(flavour, blockProps, parent, index);
 }
 
 /**
@@ -252,9 +277,15 @@ function transformBlock(
  *
  * Used for format quick bar.
  */
-function mergeFormat(formatArr: AffineTextAttributes[]): AffineTextAttributes {
+function mergeFormat(
+  formatArr: AffineTextAttributes[],
+  loose: boolean
+): AffineTextAttributes {
   if (!formatArr.length) {
     return {};
+  }
+  if (loose) {
+    return formatArr.reduce((acc, cur) => ({ ...acc, ...cur }));
   }
   return formatArr.reduce((acc, cur) => {
     const newFormat: AffineTextAttributes = {};
@@ -270,18 +301,27 @@ function mergeFormat(formatArr: AffineTextAttributes[]): AffineTextAttributes {
   });
 }
 
+/**
+ * By default, it is in `strict` mode, which only returns the formats that all the text in the range share.
+ * formats with different values, such as different links, are considered different formats.
+ *
+ * If the `loose` mode is enabled, any format that exists in the range will be returned.
+ * formats with different values will only return the last one.
+ */
 export function getCombinedFormat(
-  blockRange: BlockRange
+  blockRange: BlockRange,
+  loose = false
 ): AffineTextAttributes {
   if (blockRange.models.length === 1) {
-    const richText = getRichTextByModel(blockRange.models[0]);
-    assertExists(richText);
-    const { vEditor } = richText;
+    const vEditor = getVirgoByModel(blockRange.models[0]);
     assertExists(vEditor);
-    const format = vEditor.getFormat({
-      index: blockRange.startOffset,
-      length: blockRange.endOffset - blockRange.startOffset,
-    });
+    const format = vEditor.getFormat(
+      {
+        index: blockRange.startOffset,
+        length: blockRange.endOffset - blockRange.startOffset,
+      },
+      loose
+    );
     return format;
   }
   const formatArr = [];
@@ -293,13 +333,15 @@ export function getCombinedFormat(
     startModel.text &&
     startModel.text.length
   ) {
-    const startRichText = getRichTextByModel(startModel);
-    assertExists(startRichText);
-    assertExists(startRichText.vEditor);
-    const startFormat = startRichText.vEditor.getFormat({
-      index: blockRange.startOffset,
-      length: startRichText.vEditor.yText.length - blockRange.startOffset,
-    });
+    const vEditor = getVirgoByModel(startModel);
+    assertExists(vEditor);
+    const startFormat = vEditor.getFormat(
+      {
+        index: blockRange.startOffset,
+        length: vEditor.yText.length - blockRange.startOffset,
+      },
+      loose
+    );
     formatArr.push(startFormat);
   }
   // End block
@@ -309,13 +351,15 @@ export function getCombinedFormat(
     endModel.text &&
     endModel.text.length
   ) {
-    const endRichText = getRichTextByModel(endModel);
-    assertExists(endRichText);
-    assertExists(endRichText.vEditor);
-    const endFormat = endRichText.vEditor.getFormat({
-      index: 0,
-      length: blockRange.endOffset,
-    });
+    const vEditor = getVirgoByModel(endModel);
+    assertExists(vEditor);
+    const endFormat = vEditor.getFormat(
+      {
+        index: 0,
+        length: blockRange.endOffset,
+      },
+      loose
+    );
     formatArr.push(endFormat);
   }
   // Between blocks
@@ -324,30 +368,32 @@ export function getCombinedFormat(
     .filter(model => !matchFlavours(model, ['affine:code'] as const))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
-      const richText = getRichTextByModel(model);
-      assertExists(richText);
-      assertExists(richText.vEditor);
-      const format = richText.vEditor.getFormat({
+      const vEditor = getVirgoByModel(model);
+      assertExists(vEditor);
+      const format = vEditor.getFormat({
         index: 0,
-        length: richText.vEditor.yText.length - 1,
+        length: vEditor.yText.length - 1,
       });
       formatArr.push(format);
-    });
+    }, loose);
 
-  return mergeFormat(formatArr);
+  return mergeFormat(formatArr, loose);
 }
 
-export function getCurrentCombinedFormat(page: Page): AffineTextAttributes {
+export function getCurrentCombinedFormat(
+  page: Page,
+  loose = false
+): AffineTextAttributes {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange || blockRange.models.every(model => !model.text)) {
     return {};
   }
-  return getCombinedFormat(blockRange);
+  return getCombinedFormat(blockRange, loose);
 }
 
 function formatBlockRange(
   blockRange: BlockRange,
-  key: keyof AffineTextAttributes
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
   const { startOffset, endOffset } = blockRange;
   const startModel = blockRange.models[0];
@@ -355,6 +401,20 @@ function formatBlockRange(
   // edge case 1: collapsed range
   if (blockRange.models.length === 1 && startOffset === endOffset) {
     // Collapsed range
+
+    const vEditor = getVirgoByModel(startModel);
+    const delta = vEditor?.getDeltaByRangeIndex(startOffset);
+    if (!vEditor || !delta) return;
+    vEditor.setMarks({
+      ...vEditor.marks,
+      [key]:
+        (vEditor.marks && vEditor.marks[key]) ||
+        (delta.attributes && delta.attributes[key])
+          ? null
+          : true,
+    });
+    clearMarksOnDiscontinuousInput(vEditor);
+
     return;
   }
   const format = getCombinedFormat(blockRange);
@@ -362,8 +422,8 @@ function formatBlockRange(
   // edge case 2: same model
   if (blockRange.models.length === 1) {
     if (matchFlavours(startModel, ['affine:code'] as const)) return;
-    const richText = getRichTextByModel(startModel);
-    richText?.vEditor?.slots.updated.once(() => {
+    const vEditor = getVirgoByModel(startModel);
+    vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
     });
     startModel.text?.format(startOffset, endOffset - startOffset, {
@@ -405,7 +465,10 @@ function formatBlockRange(
   }
 }
 
-export function handleFormat(page: Page, key: keyof AffineTextAttributes) {
+export function handleFormat(
+  page: Page,
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;
   page.captureSync();
@@ -418,14 +481,11 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     selection.state.selectedBlocks.length === 0 &&
     currentSelection?.focusNode?.nodeName === '#text'
   ) {
-    const currentRange = getCurrentNativeRange();
-    const rangeRect = currentRange.getBoundingClientRect();
-    selection.selectBlocksByRect(rangeRect);
+    selection.selectOneBlock(
+      getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
+    );
   } else {
-    const LARGE_BOUND = 999999;
-    const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
-    selection.state.focusedBlockIndex = -1; // SELECT_ALL
-    selection.selectBlocksByRect(rect);
+    selection.selectAllBlocks();
   }
 
   resetNativeSelection(null);
@@ -468,11 +528,10 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
-      if (!bound) return;
 
       const [x, y, w, h] = deserializeXYWH(model.xywh);
       const newModelHeight =
-        (bound.height + EDGELESS_BLOCK_CHILD_PADDING * 2) / zoom;
+        bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
@@ -481,5 +540,34 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
         offset = newX + w;
       }
     });
+  });
+}
+
+// Show format quick bar when double/triple clicking on text
+export function showFormatQuickBarByClicks(
+  type: 'double' | 'triple',
+  e: SelectionEvent,
+  page: Page,
+  container?: HTMLElement,
+  state?: PageSelectionState
+) {
+  const range =
+    type === 'double'
+      ? handleNativeRangeDblClick(page, e)
+      : handleNativeRangeTripleClick(e);
+  if (e.raw.target instanceof HTMLTextAreaElement) return;
+  if (!range || range.collapsed) return;
+  if (page.readonly) return;
+
+  const direction = 'center-bottom';
+  showFormatQuickBar({
+    page,
+    container,
+    direction,
+    anchorEl: {
+      getBoundingClientRect: () => {
+        return calcCurrentSelectionPosition(direction, state);
+      },
+    },
   });
 }

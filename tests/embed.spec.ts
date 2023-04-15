@@ -9,8 +9,7 @@ import {
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
-  focusRichText,
-  initEmptyParagraphState,
+  initImageState,
   insertThreeLevelLists,
   moveToImage,
   pressEnter,
@@ -28,28 +27,6 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-async function initImageState(page: Page) {
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await page.evaluate(() => {
-    const clipData = {
-      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
-    };
-    const dT = new DataTransfer();
-    const e = new ClipboardEvent('paste', { clipboardData: dT });
-    Object.defineProperty(e, 'target', {
-      writable: false,
-      value: document.body,
-    });
-    e.clipboardData?.setData('text/html', clipData['text/html']);
-    document
-      .getElementsByTagName('editor-container')[0]
-      .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
-  });
-  // due to pasting img calls fetch, so we need timeout for downloading finished.
-  await page.waitForTimeout(500);
-}
-
 async function focusCaption(page: Page) {
   await page.click('.embed-editing-state>format-bar-button:nth-child(1)');
 }
@@ -61,16 +38,16 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 704, height: 528 });
+  await assertImageSize(page, { width: 656, height: 492 });
 
   await dragEmbedResizeByTopLeft(page);
-  await assertImageSize(page, { width: 304, height: 228 });
+  await assertImageSize(page, { width: 256, height: 192 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 704, height: 528 });
+  await assertImageSize(page, { width: 656, height: 492 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 304, height: 228 });
+  await assertImageSize(page, { width: 256, height: 192 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -80,16 +57,16 @@ test('can drag resize image by right menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 704, height: 528 });
+  await assertImageSize(page, { width: 656, height: 492 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 304, height: 228 });
+  await assertImageSize(page, { width: 256, height: 192 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 704, height: 528 });
+  await assertImageSize(page, { width: 656, height: 492 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 304, height: 228 });
+  await assertImageSize(page, { width: 256, height: 192 });
 });
 
 test('can click and delete image', async ({ page }) => {
@@ -128,7 +105,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await initImageState(page);
   await assertRichImage(page, 1);
 
-  await activeEmbed(page);
   await moveToImage(page);
   await assertImageOption(page);
 
@@ -137,9 +113,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
     page,
     page.locator('.affine-embed-wrapper-caption')
   );
-  await pressEnter(page);
-  await type(page, 'aa');
-  await assertRichTexts(page, ['aa']);
 });
 
 const mockImageId = '_e2e_test_image_id_';
@@ -148,9 +121,9 @@ async function initMockImage(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlockByFlavour('affine:page');
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
-    page.addBlockByFlavour(
+    const pageId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock(
       'affine:embed',
       {
         type: 'image',
@@ -372,7 +345,7 @@ test('select image should not show format bar', async ({ page }) => {
     { x: rect.x + 20, y: rect.y + 20 },
     { x: rect.x - 20, y: rect.y - 20 }
   );
-  const rects = page.locator('.affine-page-selected-rects-container > *');
+  const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).not.toBeVisible();

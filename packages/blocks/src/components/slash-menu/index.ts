@@ -1,62 +1,17 @@
-import './slash-menu-node.js';
-
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import {
-  getRichTextByModel,
-  throttle,
-} from '../../__internal__/utils/index.js';
-import { onModelElementUpdated } from '../../page-block/index.js';
-import {
-  calcSafeCoordinate,
-  compareTopAndBottomSpace,
-  type DragDirection,
-} from '../../page-block/utils/position.js';
-import type { SlashMenu } from './slash-menu-node.js';
+import { getVirgoByModel, throttle } from '../../__internal__/utils/index.js';
+import { getPopperPosition } from '../../page-block/utils/position.js';
+import { SlashMenu } from './slash-menu-popover.js';
 
 let globalAbortController = new AbortController();
-
-function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
-  const { placement, height } = compareTopAndBottomSpace(
-    range,
-    document.body,
-    16
-  );
-
-  const positioningElRect = range.getBoundingClientRect();
-  const positioningPoint = {
-    x: positioningElRect.x,
-    y:
-      positioningElRect.y +
-      (placement === 'bottom' ? positioningElRect.height : 0),
-  };
-
-  // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
-  const boundaryRect = document.body.getBoundingClientRect();
-  const slashMenuRect = slashMenu.slashMenuElement.getBoundingClientRect();
-
-  // Add offset to avoid the quick bar being covered by the window border
-  const gapY = 5;
-  const safeCoordinate = calcSafeCoordinate({
-    positioningPoint,
-    objRect: slashMenuRect,
-    boundaryRect,
-    offsetY: placement === 'bottom' ? gapY : -gapY,
-  });
-
-  slashMenu.left = `${safeCoordinate.x}px`;
-  slashMenu.top = `${safeCoordinate.y}px`;
-  slashMenu.maxHeight = height;
-  slashMenu.position = placement;
-}
 
 function onAbort(
   e: Event,
   slashMenu: SlashMenu,
   positionCallback: () => void,
-  model: BaseBlockModel,
-  range: Range
+  model: BaseBlockModel
 ) {
   slashMenu.remove();
   window.removeEventListener('resize', positionCallback);
@@ -84,8 +39,7 @@ function onAbort(
     );
     return;
   }
-  const richText = getRichTextByModel(model);
-  const vEditor = richText?.vEditor;
+  const vEditor = getVirgoByModel(model);
   if (!vEditor) {
     console.warn(
       'Failed to clean slash search text! No vEditor found for model, model:',
@@ -119,7 +73,6 @@ export function showSlashMenu({
 }: {
   model: BaseBlockModel;
   range: Range;
-  direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
 }) {
@@ -127,26 +80,31 @@ export function showSlashMenu({
   globalAbortController.abort();
   globalAbortController = abortController;
 
-  const slashMenu = document.createElement('slash-menu');
+  const slashMenu = new SlashMenu();
   slashMenu.model = model;
   slashMenu.abortController = abortController;
 
   // Handle position
-  const updatePosition = throttle(
-    () => updateSlashMenuPosition(slashMenu, range),
-    10
-  );
+  const updatePosition = throttle(() => {
+    const slashMenuElement = slashMenu.slashMenuElement;
+    assertExists(
+      slashMenuElement,
+      'You should render the slash menu node even if no position'
+    );
+    const position = getPopperPosition(slashMenuElement, range);
+    slashMenu.updatePosition(position);
+  }, 10);
 
   window.addEventListener('resize', updatePosition);
 
   // Mount
   container.appendChild(slashMenu);
-  // Wait for the format quick bar to be mounted
-  onModelElementUpdated(model, updatePosition);
+  // Wait for the Node to be mounted
+  setTimeout(updatePosition);
 
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {
-    onAbort(e, slashMenu, updatePosition, model, range);
+    onAbort(e, slashMenu, updatePosition, model);
   });
 
   return slashMenu;

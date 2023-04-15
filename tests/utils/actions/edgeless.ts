@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
+import { SHORT_KEY } from './keyboard.js';
 
 export async function getFrameRect(
   page: Page,
@@ -36,11 +37,13 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-export type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text';
+type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text' | 'connector';
+type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
   page: Page,
-  mode: MouseMode,
+  type: ToolType,
   innerContainer = true
 ) {
   const text = {
@@ -49,10 +52,38 @@ export function locatorEdgelessToolButton(
     brush: 'Pen',
     pan: 'Hand',
     text: 'Text',
-  }[mode];
-  const button = page.locator('edgeless-tool-icon-button').filter({
-    hasText: text,
-  });
+    connector: 'Connector',
+
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
+  const button = page
+    .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export function locatorEdgelessComponentToolButton(
+  page: Page,
+  type: ComponentToolType,
+  innerContainer = true
+) {
+  const text = {
+    shape: 'Shape',
+    brush: 'Color',
+    thin: 'Thin',
+    thick: 'Thick',
+    more: 'More',
+  }[type];
+  const button = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
 
   return innerContainer ? button.locator('.icon-container') : button;
 }
@@ -62,7 +93,8 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'default':
     case 'brush':
     case 'pan':
-    case 'text': {
+    case 'text':
+    case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
       break;
@@ -112,16 +144,12 @@ export async function getEdgelessSelectedRect(page: Page) {
 }
 
 export async function decreaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .first();
+  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
   await btn.click();
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = page
-    .locator('edgeless-view-control-bar edgeless-tool-icon-button')
-    .nth(1);
+  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
   await btn.click();
 }
 
@@ -142,6 +170,16 @@ export async function addBasicRectShapeElement(
 ) {
   await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 10 });
+  await setMouseMode(page, 'default');
+}
+
+export async function addBasicConnectorElement(
+  page: Page,
+  start: { x: number; y: number },
+  end: { x: number; y: number }
+) {
+  await setMouseMode(page, 'connector');
+  await dragBetweenCoords(page, start, end, { steps: 100 });
   await setMouseMode(page, 'default');
 }
 
@@ -224,4 +262,155 @@ export async function activeFrameInEdgeless(page: Page, frameId: string) {
 export async function selectFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
   await page.mouse.click(bound.x, bound.y);
+}
+
+export async function updateExistedBrushElementSize(
+  page: Page,
+  size: 'thin' | 'thick'
+) {
+  const text = {
+    thin: 'Thin',
+    thick: 'Thick',
+  }[size];
+
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  await btn.click();
+}
+
+export async function openComponentToolbarMoreMenu(page: Page) {
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: 'More',
+    });
+
+  await btn.click();
+}
+
+export async function clickComponentToolbarMoreMenuButton(
+  page: Page,
+  button: 'delete'
+) {
+  const text = {
+    delete: 'Delete',
+  }[button];
+
+  const btn = page
+    .locator('edgeless-component-toolbar edgeless-more-button')
+    .locator('.action-item')
+    .filter({ hasText: text });
+
+  await btn.click();
+}
+
+// stepX/Y may not equal to wheel event delta.
+// Chromium reports deltaX/deltaY scaled by host device scale factor.
+// https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
+export async function zoomByMouseWheel(
+  page: Page,
+  stepX: number,
+  stepY: number
+) {
+  await page.keyboard.down(SHORT_KEY);
+  await page.mouse.wheel(stepX, stepY);
+  await page.keyboard.up(SHORT_KEY);
+}
+
+function locatorComponentToolbarMoreButton(page: Page) {
+  const moreButton = page
+    .locator('edgeless-component-toolbar')
+    .locator('edgeless-more-button');
+  return moreButton;
+}
+type Action =
+  | 'bringToFront'
+  | 'sendToBack'
+  | 'changeFrameColor'
+  | 'changeShapeFillColor'
+  | 'changeShapeStrokeColor';
+
+export async function triggerComponentToolbarAction(
+  page: Page,
+  action: Action
+) {
+  switch (action) {
+    case 'bringToFront': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'sendToBack': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send to back',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'changeFrameColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-frame-button');
+      await button.click();
+      break;
+    }
+    case 'changeShapeFillColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-shape-button')
+        .locator('.fill-color-button');
+      await button.click();
+      break;
+    }
+    case 'changeShapeStrokeColor': {
+      const button = page
+        .locator('edgeless-component-toolbar')
+        .locator('edgeless-change-shape-button')
+        .locator('.stroke-color-button');
+      await button.click();
+      break;
+    }
+  }
+}
+
+export async function changeEdgelessFrameBackground(
+  page: Page,
+  color: `#${string}`
+) {
+  const colorButton = page.locator(
+    `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
+  );
+  await colorButton.click();
+}
+
+export async function changeShapeFillColor(page: Page, color: `#${string}`) {
+  const colorButton = page
+    .locator('edgeless-change-shape-button')
+    .locator('.color-panel-container.fill-color')
+    .locator(`.color-unit[aria-label="${color}"]`);
+  await colorButton.click();
+}
+
+export async function changeShapeStrokeColor(page: Page, color: `#${string}`) {
+  const colorButton = page
+    .locator('edgeless-change-shape-button')
+    .locator('.color-panel-container.stroke-color')
+    .locator(`.color-unit[aria-label="${color}"]`);
+  await colorButton.click();
 }

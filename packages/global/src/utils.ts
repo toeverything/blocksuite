@@ -73,6 +73,7 @@ export const isNonTextBlock = <
 ) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
+  | unknown
   | void
   | null
   | undefined
@@ -124,7 +125,3 @@ export function isEqual<T extends Allowed, U extends T>(
 export async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-export const getDefaultPlaygroundURL = (isE2E: boolean): URL =>
-  new URL(`http://localhost:5173/`);
-// new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);

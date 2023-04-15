@@ -3,6 +3,8 @@ import hotkeys from 'hotkeys-js';
 
 import {
   isCaptionElement,
+  isDatabaseInput,
+  isInsideDatabaseTitle,
   isInsidePageTitle,
   isInsideRichText,
 } from './query.js';
@@ -43,6 +45,13 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
       return false;
     }
+    // undo/redo should work in database title or cell container
+    if (
+      (isInsideDatabaseTitle(event.target) || isDatabaseInput(event.target)) &&
+      isUndoRedo(event)
+    ) {
+      return false;
+    }
     // Some event dispatch from body
     // for example, press backspace to remove block-level selection
     if (event.target === document.body) {
@@ -60,52 +69,70 @@ function shouldFilterHotkey(event: KeyboardEvent) {
   return false;
 }
 
-const SCOPE = {
-  AFFINE_PAGE: 'affine:page',
-  OTHER: 'other',
-};
+export enum HOTKEY_SCOPE {
+  AFFINE_PAGE = 'affine:page',
+  AFFINE_EDGELESS = 'affine:edgeless',
+}
 
-// Singleton
+const HOTKEY_DISABLED_SCOPE = 'hotkey_disabled';
+
+/**
+ * Singleton
+ *
+ * When rendering a page or an edgeless view,
+ * `setScope` is called to set a unique scope for each view.
+ * All hotkeys are then bound to this scope.
+ * When a page or an edgeless view is disconnected,
+ * all hotkeys registered during the view's lifetime are destroyed.
+ */
 class HotkeyManager {
   private readonly _hotkeys: typeof hotkeys;
+  private _scope: HOTKEY_SCOPE = HOTKEY_SCOPE.AFFINE_PAGE;
+  private _disabled = false;
 
   constructor() {
     this._hotkeys = hotkeys;
   }
 
-  private _setScope(scope: string): void {
+  get disabled() {
+    return this._disabled;
+  }
+
+  setScope(scope: HOTKEY_SCOPE) {
+    this._scope = scope;
     this._hotkeys.setScope(scope);
+  }
+
+  deleteScope(scope: HOTKEY_SCOPE) {
+    this._hotkeys.deleteScope(scope);
   }
 
   addListener(
     hotkey: string,
     listener: KeyHandler,
     options: {
-      scope?: string;
       keyup?: boolean;
       keydown?: boolean;
     } = {}
   ): void {
-    const scope = options.scope ?? SCOPE.AFFINE_PAGE;
-    this._hotkeys(hotkey, { ...options, scope }, listener);
+    this._hotkeys(hotkey, { ...options, scope: this._scope }, listener);
   }
 
-  removeListener(
-    hotkey: string | Array<string>,
-    scope: string = SCOPE.AFFINE_PAGE
-  ): void {
+  removeListener(hotkey: string | Array<string>): void {
     this._hotkeys.unbind(
       (Array.isArray(hotkey) ? hotkey : [hotkey]).join(','),
-      scope
+      this._scope
     );
   }
 
   disableHotkey(): void {
-    this._hotkeys.setScope(SCOPE.OTHER);
+    this._disabled = true;
+    this._hotkeys.setScope(HOTKEY_DISABLED_SCOPE);
   }
 
   enableHotkey(): void {
-    this._setScope(SCOPE.AFFINE_PAGE);
+    this._disabled = false;
+    this._hotkeys.setScope(this._scope);
   }
 
   /**

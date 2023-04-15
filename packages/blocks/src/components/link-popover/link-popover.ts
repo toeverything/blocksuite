@@ -95,7 +95,7 @@ const isValidLink = (str: string) => {
 
 @customElement('edit-link-panel')
 export class LinkPopover extends LitElement {
-  static styles = linkPopoverStyle;
+  static override styles = linkPopoverStyle;
 
   @property()
   left = '0';
@@ -204,6 +204,7 @@ export class LinkPopover extends LitElement {
 
   private _onKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
       this._onConfirm();
     }
     if (!this.linkInput) {
@@ -260,7 +261,7 @@ export class LinkPopover extends LitElement {
         @click=${this._onEdit}
       >
         ${EditIcon}
-        <tool-tip inert role="tooltip">Edit link</tool-tip>
+        <tool-tip inert role="tooltip">Edit</tool-tip>
       </icon-button>
     </div>`;
   }
@@ -313,7 +314,7 @@ export class LinkPopover extends LitElement {
     </div>`;
   }
 
-  render() {
+  override render() {
     const mask = this.showMask
       ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
       : html``;

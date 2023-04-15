@@ -1,7 +1,5 @@
-import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
@@ -24,12 +22,13 @@ export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
 /** JSON-serializable properties of a block */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BlockProps = Record<string, any> & {
+export type BlockProps = {
   id: string;
   flavour: string;
   text?: Text;
   children?: BaseBlockModel[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [index: string]: any;
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -43,43 +42,56 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export type PageData = {
+type FlatBlockMap = {
   [key: string]: YBlock;
 };
 
-export class Page extends Space<PageData> {
-  private _workspace: Workspace;
-  private _idGenerator: IdGenerator;
+type PageOptions = {
+  id: string;
+  workspace: Workspace;
+  doc: BlockSuiteDoc;
+  awarenessStore: AwarenessStore;
+  idGenerator?: IdGenerator;
+};
+
+export class Page extends Space<FlatBlockMap> {
+  private readonly _workspace: Workspace;
+  private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | BaseBlockModel[] | null = null;
+  private _root: (BaseBlockModel | null)[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
   // TODO use schema
-  private _ignoredKeys = new Set<string>(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Object.keys(new BaseBlockModel(this, { id: null! }))
-  );
+  private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
 
   readonly slots = {
     historyUpdated: new Slot(),
-    rootAdded: new Slot<BaseBlockModel | BaseBlockModel[]>(),
+    rootAdded: new Slot<(BaseBlockModel | null)[]>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
+    onYEvent: new Slot<{
+      event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
+    }>(),
     blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    subpageUpdated: new Slot<{
+      type: 'add' | 'delete';
+      id: string;
+      subpageIds: string[];
+    }>(),
   };
 
-  constructor(
-    workspace: Workspace,
-    id: string,
-    doc: BlockSuiteDoc,
-    awarenessStore: AwarenessStore,
-    idGenerator: IdGenerator = uuidv4
-  ) {
+  constructor({
+    id,
+    workspace,
+    doc,
+    awarenessStore,
+    idGenerator = uuidv4,
+  }: PageOptions) {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
@@ -101,30 +113,21 @@ export class Page extends Space<PageData> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get tags() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
-    return this.root.tags as Y.Map<Y.Map<unknown>>;
-  }
-
-  get tagSchema() {
-    assertExists(this.root);
-    assertExists(this.root.flavour === 'affine:page');
-    return this.root.tagSchema as Y.Map<unknown>;
-  }
-
   get blobs() {
     return this.workspace.blobs;
   }
 
   /** key-value store of blocks */
   private get _yBlocks(): YBlocks {
-    return this.origin;
+    return this._ySpace;
   }
 
   get root() {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    if (root && root.flavour !== 'affine:page') {
+    if (!root) return root;
+
+    const rootSchema = this._workspace.flavourSchemaMap.get(root.flavour);
+    if (rootSchema?.model.role !== 'root') {
       console.error('data broken');
     }
     return root;
@@ -134,7 +137,7 @@ export class Page extends Space<PageData> {
     return Array.isArray(this._root) ? this._root[1] : null;
   }
 
-  /** @internal used for getting surface block elements for phasor */
+  /** @internal Used for getting surface elements for phasor. */
   get ySurfaceContainer() {
     assertExists(this.surface);
     const ySurface = this._yBlocks.get(this.surface.id);
@@ -172,74 +175,33 @@ export class Page extends Space<PageData> {
     return Text;
   }
 
-  undo = () => {
+  undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  };
+  }
 
-  redo = () => {
+  redo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  };
+  }
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync = () => {
+  captureSync() {
     this._history.stopCapturing();
-  };
+  }
 
-  resetHistory = () => {
+  resetHistory() {
     this._history.clear();
-  };
-
-  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
-    const already = this.tags.has(id);
-    let tags: Y.Map<unknown>;
-    if (!already) {
-      tags = new Y.Map();
-    } else {
-      tags = this.tags.get(id) as Y.Map<unknown>;
-    }
-    this.transact(() => {
-      if (!already) {
-        this.tags.set(id, tags);
-      }
-      // Related issue: https://github.com/yjs/yjs/issues/255
-      const tagMap = new Y.Map();
-      tagMap.set('schemaId', tag.schemaId);
-      tagMap.set('value', tag.value);
-      tags.set(tag.schemaId, tagMap);
-    });
   }
 
-  getBlockTagByTagSchema(
-    model: BaseBlockModel,
-    schema: TagSchema
-  ): BlockTag | null {
-    const tags = this.tags.get(model.id);
-    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
-    if (!tagMap) {
-      return null;
-    }
-    return {
-      schemaId: tagMap.get('schemaId') as string,
-      value: tagMap.get('value') as unknown,
-    };
-  }
-
-  getTagSchema(id: TagSchema['id']): TagSchema | null {
-    return (this.tagSchema.get(id) ?? null) as TagSchema | null;
-  }
-
-  setTagSchema(schema: Omit<TagSchema, 'id'>): string {
-    const id = this._idGenerator();
-    this.transact(() => this.tagSchema.set(id, { ...schema, id }));
-    return id;
+  generateId() {
+    return this._idGenerator();
   }
 
   getBlockById(id: string) {
@@ -337,29 +299,24 @@ export class Page extends Space<PageData> {
     return this.workspace.flavourSchemaMap.get(flavour);
   }
 
-  getInitialPropsMapByFlavour(flavour: string) {
-    return this.workspace.flavourInitialPropsMap.get(flavour);
+  getInitialPropsByFlavour(flavour: string) {
+    const schema = this.workspace.flavourSchemaMap.get(flavour);
+    assertExists(schema);
+    return schema.model.props?.(internalPrimitives) ?? {};
   }
 
   @debug('CRUD')
-  public addBlocksByFlavour<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
+  addBlocks(
     blocks: Array<{
-      flavour: Flavour;
-      blockProps?: Partial<
-        ALLProps[Flavour] &
-          Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-      >;
+      flavour: string;
+      blockProps?: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>>;
     }>,
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string[] {
     const ids: string[] = [];
     blocks.forEach(block => {
-      const id = this.addBlockByFlavour<ALLProps, Flavour>(
+      const id = this.addBlock(
         block.flavour,
         block.blockProps ?? {},
         parent,
@@ -373,16 +330,9 @@ export class Page extends Space<PageData> {
   }
 
   @debug('CRUD')
-  public addBlockByFlavour<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
-    flavour: Flavour,
-    blockProps: Partial<
-      ALLProps[Flavour] &
-        Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-    > = {},
+  addBlock(
+    flavour: string,
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -409,24 +359,20 @@ export class Page extends Space<PageData> {
       this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initInternalProps(yBlock, clonedProps);
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
-      assertExists(defaultProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      syncBlockProps(
-        schema,
-        defaultProps,
-        yBlock,
-        clonedProps,
-        this._ignoredKeys
-      );
+      initInternalProps(yBlock, clonedProps);
+
+      syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
       if (typeof parent === 'string') {
-        parent = this._blockMap.get(parent);
+        parent = this._blockMap.get(parent) ?? null;
       }
 
-      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
+      let parentId = null;
+      if (parent !== null) {
+        parentId = parent?.id ?? this.root?.id;
+      }
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -436,28 +382,17 @@ export class Page extends Space<PageData> {
       }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'add',
-      id,
-    });
+    this.slots.blockUpdated.emit({ type: 'add', id });
 
     return id;
-  }
-
-  updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.updateBlock(model, props);
   }
 
   @debug('CRUD')
   moveBlocks(
     blocks: BaseBlockModel[],
-    targetModel: BaseBlockModel,
-    top = true
+    newParent: BaseBlockModel,
+    newSibling: BaseBlockModel | null = null,
+    insertBeforeSibling = true
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -465,38 +400,39 @@ export class Page extends Space<PageData> {
     }
 
     const firstBlock = blocks[0];
-    const currentParentModel = this.getParent(firstBlock);
+    const currentParent = this.getParent(firstBlock);
 
     // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParentModel)) {
+    if (blocks.some(block => this.getParent(block) !== currentParent)) {
       console.error('the blocks must have the same parent');
     }
 
-    const nextParentModel = this.getParent(targetModel);
-    if (currentParentModel === null || nextParentModel === null) {
-      throw new Error('cannot find parent model');
+    if (currentParent === null || newParent === null) {
+      throw new Error("Can't find parent model");
     }
 
     this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
+      const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
       const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
       yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
+      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
-      const nextIdx = yChildrenB
-        .toArray()
-        .findIndex(id => id === targetModel.id);
+
+      let nextIdx = 0;
+      if (newSibling) {
+        nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
+      }
 
       const ids = blocks.map(block => block.id);
-      if (top) {
+      if (insertBeforeSibling) {
         yChildrenB.insert(nextIdx, ids);
       } else {
         yChildrenB.insert(nextIdx + 1, ids);
       }
     });
-    currentParentModel.propsUpdated.emit();
-    nextParentModel.propsUpdated.emit();
+    currentParent.propsUpdated.emit();
+    newParent.propsUpdated.emit();
   }
 
   @debug('CRUD')
@@ -505,7 +441,8 @@ export class Page extends Space<PageData> {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const yBlock = this._yBlocks.get(model.id) as YBlock;
+    const yBlock = this._yBlocks.get(model.id);
+    assertExists(yBlock);
 
     this.transact(() => {
       // TODO diff children changes
@@ -520,13 +457,9 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(
-        model.flavour
-      );
-      assertExists(defaultProps);
       const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
-      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, yBlock, props, this._ignoredKeys);
     });
 
     model.propsUpdated.emit();
@@ -546,44 +479,26 @@ export class Page extends Space<PageData> {
     assertExists(parent);
 
     const targetIndex =
-      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+      parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length > 1) {
       const blocks: Array<{
-        flavour: keyof BlockModelProps;
-        blockProps: Partial<
-          BlockModelProps &
-            Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
-        >;
+        flavour: string;
+        blockProps: Partial<BlockProps & Omit<BlockProps, 'id' | 'flavour'>>;
       }> = [];
       props.forEach(prop => {
         const { flavour, ...blockProps } = prop;
         assertExists(flavour);
         blocks.push({ flavour, blockProps });
       });
-      const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
-      return ids;
+      return this.addBlocks(blocks, parent.id, insertIndex);
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
-      const id = this.addBlockByFlavour(
-        flavour,
-        blockProps,
-        parent.id,
-        insertIndex
-      );
+      const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
       return [id];
     }
-  }
-
-  deleteBlockById(id: string) {
-    if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
-      return;
-    }
-    const model = this._blockMap.get(id) as BaseBlockModel;
-    this.deleteBlock(model);
   }
 
   @debug('CRUD')
@@ -607,7 +522,7 @@ export class Page extends Space<PageData> {
     if (options.bringChildrenTo === 'parent' && parent) {
       parent.children.unshift(...model.children);
     } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-      options.bringChildrenTo.children.unshift(...model.children);
+      options.bringChildrenTo.children.push(...model.children);
     }
     this._blockMap.delete(model.id);
 
@@ -625,30 +540,29 @@ export class Page extends Space<PageData> {
         if (index > -1) {
           yChildren.delete(index, 1);
         }
-        if (options.bringChildrenTo === 'parent' && parent) {
+        if (options.bringChildrenTo === 'parent') {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlockById(options.bringChildrenTo.id, {
+          this.updateBlock(options.bringChildrenTo, {
             children: options.bringChildrenTo.children,
           });
         }
       }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id: model.id,
-    });
+    this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
   }
 
-  syncFromExistingDoc() {
+  trySyncFromExistingDoc() {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
-    tryMigrate(this.doc);
+    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
+      tryMigrate(this.doc);
+      this._handleVersion();
+    }
 
-    this._handleVersion();
     this._initYBlocks();
 
     const visited = new Set<string>();
@@ -669,6 +583,7 @@ export class Page extends Space<PageData> {
     this.slots.textUpdated.dispose();
     this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
+    this.slots.onYEvent.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -729,25 +644,37 @@ export class Page extends Space<PageData> {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(props: Omit<BlockProps, 'children'>) {
+  private _createBlockModel(
+    props: Omit<BlockProps, 'children'>,
+    block: YBlock
+  ) {
     const schema = this.workspace.flavourSchemaMap.get(props.flavour);
     if (!schema) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     } else if (!props.id) {
       throw new Error('Block id is not defined');
     }
-    const blockModel = new BaseBlockModel(
-      this,
-      props as PropsWithId<Omit<BlockProps, 'children'>>
-    );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    blockModel.flavour = schema.model.flavour as any;
-    blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.props(internalPrimitives);
+    const blockModel = schema.model.toModel
+      ? schema.model.toModel()
+      : new BaseBlockModel();
+
+    blockModel.id = props.id;
+    const modelProps = schema.model.props?.(internalPrimitives) ?? {};
     Object.entries(modelProps).forEach(([key, value]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (blockModel as any)[key] = props[key] ?? value;
+      // @ts-ignore
+      blockModel[key] =
+        value instanceof Text
+          ? new Text(block.get(`prop:${key}`) as Y.Text)
+          : props[key] ?? value;
     });
+    blockModel.page = this;
+    blockModel.yBlock = block;
+    blockModel.flavour = schema.model.flavour;
+    blockModel.role = schema.model.role;
+    blockModel.tag = schema.model.tag;
+
+    blockModel.onCreated();
+
     return blockModel;
   }
 
@@ -757,7 +684,7 @@ export class Page extends Space<PageData> {
     let isSurface = false;
 
     const props = toBlockProps(yBlock) as BlockProps;
-    const model = this._createBlockModel({ ...props, id });
+    const model = this._createBlockModel({ ...props, id }, yBlock);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
@@ -765,33 +692,6 @@ export class Page extends Space<PageData> {
       isRoot = true;
     }
     this._blockMap.set(props.id, model);
-
-    const initialProps = this.workspace.flavourInitialPropsMap.get(
-      model.flavour
-    );
-    assertExists(initialProps);
-    Object.entries(initialProps).forEach(([key, value]) => {
-      if (value instanceof Text) {
-        const yText = yBlock.get(`prop:${key}`) as Y.Text;
-        Object.assign(model, { [key]: new Text(yText) });
-      }
-    });
-
-    if (matchFlavours(model, ['affine:page'] as const)) {
-      model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
-
-      const titleText = yBlock.get('prop:title') as Y.Text;
-      model.title = new Text(titleText);
-    }
-
-    // TODO use schema
-    if (model.flavour === 'affine:database') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<unknown>
-      ).toArray();
-    }
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
@@ -807,17 +707,23 @@ export class Page extends Space<PageData> {
             this._handleYBlockAdd(visited, id);
           }
 
-          const child = this._blockMap.get(id) as BaseBlockModel;
-          model.children[index as number] = child;
+          model.children[index as number] = this._blockMap.get(
+            id
+          ) as BaseBlockModel;
         }
       });
     }
 
     if (isRoot) {
-      this._root = model;
-      this.slots.rootAdded.emit(model);
+      this._root = Array.isArray(this._root)
+        ? [model, this._root[1]]
+        : [model, null];
+      this.slots.rootAdded.emit(this._root);
+      this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
-      this._root = [this.root as BaseBlockModel, model];
+      this._root = Array.isArray(this._root)
+        ? [this._root[0], model]
+        : [null, model];
       this.slots.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
@@ -831,7 +737,7 @@ export class Page extends Space<PageData> {
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
-    if (model === this._root) {
+    if (model === this._root?.[0]) {
       this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event
@@ -941,15 +847,9 @@ export class Page extends Space<PageData> {
           model.childrenUpdated.emit();
         }
       }
-    } else {
-      if (event.path.includes('meta:tags')) {
-        // todo: refactor here
-        const blockId = event.path[2] as string;
-        const block = this.getBlockById(blockId);
-        assertExists(block);
-        block.propsUpdated.emit();
-      }
     }
+
+    this.slots.onYEvent.emit({ event });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).

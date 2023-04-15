@@ -1,12 +1,12 @@
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { NonShadowLitElement } from '../__internal__/index.js';
+import { ShadowlessElement } from '../__internal__/index.js';
 import type { EmbedBlockModel } from './embed-model.js';
 
 @customElement('affine-embed')
-export class EmbedBlockComponent extends NonShadowLitElement {
-  static styles = css`
+export class EmbedBlockComponent extends ShadowlessElement {
+  static override styles = css`
     .affine-embed-wrapper {
       text-align: center;
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -82,7 +82,7 @@ export class EmbedBlockComponent extends NonShadowLitElement {
     }
   }
 
-  render() {
+  override render() {
     return html`
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">

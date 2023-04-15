@@ -118,7 +118,9 @@ test('drag blank line into text area', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -175,7 +177,9 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -231,7 +235,9 @@ test('drag numbered list block from list menu into text area and blockHub list c
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -252,4 +258,60 @@ test('drag numbered list block from list menu into text area and blockHub list c
 </affine:page>`
   );
   await expect(blockHubListContainer).toBeHidden();
+});
+
+test('should auto hide card list when dragging a card', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
+  await listMenu.hover();
+  const blockHubListContainer = page.locator(
+    '.affine-block-hub-container[type="list"]'
+  );
+  await expect(blockHubListContainer).toBeVisible();
+
+  const numberedListPos = await getCenterPosition(
+    page,
+    '.has-tool-tip[affine-flavour="affine:list"][affine-type="numbered"]'
+  );
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: numberedListPos.x, y: numberedListPos.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+  await waitNextFrame(page);
+
+  await expect(blockHubListContainer).toBeHidden();
+});
+
+test('drag database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const databaseMenu = '.block-hub-icon-container:nth-child(5)';
+
+  const databaseRect = await getCenterPosition(page, databaseMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: databaseRect.x, y: databaseRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  const database = page.locator('affine-database');
+  expect(database).toBeVisible();
+  const tagColumn = page.locator('.affine-database-column').nth(1);
+  expect(await tagColumn.innerText()).toBe('Tag');
+  const defaultRows = page.locator('.affine-database-block-row');
+  expect(await defaultRows.count()).toBe(3);
 });

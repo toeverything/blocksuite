@@ -6,11 +6,14 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusRichTextEnd,
   initEmptyParagraphState,
   pressEnter,
+  pressShiftEnter,
   SHORT_KEY,
   switchReadonly,
   type,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -60,6 +63,10 @@ test('basic link', async ({ page }) => {
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopoverLocator).toBeVisible();
+  // workaround to make tab key work as expected
+  await editLinkPopoverLocator.click({
+    position: { x: 5, y: 5 },
+  });
   await page.keyboard.press('Tab');
   await type(page, text2);
   await page.keyboard.press('Tab');
@@ -73,7 +80,9 @@ test('basic link', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="#FBFAFC"
+  >
     <affine:paragraph
       prop:text={
         <>
@@ -94,16 +103,16 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
       const { page } = window;
-      const pageId = page.addBlockByFlavour('affine:page', {
+      const pageId = page.addBlock('affine:page', {
         title: new page.Text('title'),
       });
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+      const frameId = page.addBlock('affine:frame', {}, pageId);
 
       const text = page.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
-      const id = page.addBlockByFlavour(
+      const id = page.addBlock(
         'affine:paragraph',
         { type: 'text', text: text },
         frameId
@@ -275,4 +284,39 @@ test('should keyboard work in link popover', async ({ page }) => {
   await assertKeyboardWorkInInput(page, editTextInput);
   const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
   await assertKeyboardWorkInInput(page, editLinkInput);
+});
+
+test('link bar should not be appear when the range is collapsed', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  await pressCreateLinkShortCut(page);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).not.toBeVisible();
+
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+
+  await focusRichTextEnd(page);
+  await pressShiftEnter(page);
+  await waitNextFrame(page);
+  await type(page, 'bbb');
+  await dragBetweenIndices(page, [0, 1], [0, 5]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+
+  await focusRichTextEnd(page, 0);
+  await pressEnter(page);
+  // create auto line-break in span element
+  await type(page, 'd'.repeat(67));
+  await page.mouse.click(1, 1);
+  await waitNextFrame(page);
+  await dragBetweenIndices(page, [1, 1], [1, 66]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
 });

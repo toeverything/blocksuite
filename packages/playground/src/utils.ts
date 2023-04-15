@@ -1,5 +1,5 @@
 import * as blocks from '@blocksuite/blocks';
-import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import {
   configDebugLog,
@@ -14,9 +14,9 @@ import {
   type DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  type StoreOptions,
   Utils,
   Workspace,
+  type WorkspaceOptions,
 } from '@blocksuite/store';
 import { fileOpen } from 'browser-fs-access';
 
@@ -68,7 +68,7 @@ if (isE2E) {
       const workspace = new Workspace({
         id: 'temporary',
       })
-        .register(builtInSchemas)
+        .register(AffineSchemas)
         .register(__unstableSchemas);
       Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
       globalThis.debugWorkspace = workspace;
@@ -96,12 +96,13 @@ export function initDebugConfig() {
 async function initWithMarkdownContent(workspace: Workspace, url: URL) {
   const { empty: emptyInit } = await import('./data/index.js');
 
-  const pageId = await emptyInit(workspace);
-  const page = workspace.getPage(pageId);
+  emptyInit(workspace);
+  const page = workspace.getPage('page0');
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());
-  return window.editor.clipboard.importMarkdown(content, page.root.id);
+  const contentParser = new window.ContentParser(page);
+  return contentParser.importMarkdown(content, page.root.id);
 }
 
 export async function tryInitExternalContent(
@@ -120,10 +121,7 @@ export async function tryInitExternalContent(
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
  * We use webrtcDocProvider by default if the `providers` param is missing.
  */
-export function createWorkspaceOptions(): Pick<
-  StoreOptions,
-  'providers' | 'idGenerator' | 'id' | 'defaultFlags'
-> {
+export function createWorkspaceOptions(): WorkspaceOptions {
   const providers: DocProviderConstructor[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
@@ -155,8 +153,7 @@ export function createWorkspaceOptions(): Pick<
       enable_block_hub: true,
       enable_database: true,
       enable_edgeless_toolbar: true,
-      enable_slash_menu: params.get('slash') !== '0',
-      enable_block_selection_format_bar: true,
+      enable_linked_page: true,
       readonly: {
         'space:page0': false,
       },

@@ -2,4 +2,3 @@
 .gitignore
 .husky
 .vscode
-/tests

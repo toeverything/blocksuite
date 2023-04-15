@@ -2,6 +2,7 @@
 // ALL_PACKAGES
 const allPackages = [
   'blocks',
+  'docs',
   'editor',
   'global',
   'phasor',
@@ -9,6 +10,7 @@ const allPackages = [
   'react',
   'store',
   'virgo',
+  'connector',
 ];
 
 const createPattern = packageName => [
@@ -58,6 +60,7 @@ module.exports = {
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
+    'packages/connector/dist/*',
   ],
   overrides: [
     {
@@ -70,7 +73,7 @@ module.exports = {
       },
     },
     ...allPackages.map(pkg => ({
-      files: [`packages/${pkg}/src/*.ts`],
+      files: [`packages/${pkg}/src/**/*.ts`],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
           'error',

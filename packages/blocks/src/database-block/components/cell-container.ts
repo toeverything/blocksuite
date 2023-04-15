@@ -4,18 +4,25 @@ import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { DatabaseCellLitElement, getTagSchemaRenderer } from '../register.js';
+import { DatabaseCellElement, getColumnRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
+
+/** affine-database-cell-container padding */
+const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
-  extends DatabaseCellLitElement
+  extends DatabaseCellElement<unknown>
   implements RowHost
 {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 10px ${CELL_PADDING}px;
+      border-right: 1px solid var(--affine-border-color);
     }
   `;
 
@@ -23,15 +30,14 @@ export class DatabaseCellContainer
   private _isEditing = false;
 
   setValue(value: unknown) {
-    if (value) {
-      setTimeout(() => {
-        this.databaseModel.page.captureSync();
-        this.databaseModel.page.updateBlockTag(this.rowModel.id, {
-          schemaId: this.column.id,
-          value,
-        });
+    queueMicrotask(() => {
+      this.databaseModel.page.captureSync();
+      this.databaseModel.updateCell(this.rowModel.id, {
+        columnId: this.column.id,
+        value,
       });
-    }
+      this.requestUpdate();
+    });
   }
 
   setEditing = (isEditing: boolean) => {
@@ -47,31 +53,22 @@ export class DatabaseCellContainer
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ) {
-    const newProperty = apply(this.column.property);
+    const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.setTagSchema({
+    this.databaseModel.updateColumn({
       ...this.column,
-      property: newProperty,
+      ...newProperty,
     });
   }
 
-  protected firstUpdated() {
-    this.databaseModel.propsUpdated.on(() => this.requestUpdate());
-    this.databaseModel.childrenUpdated.on(() => this.requestUpdate());
-    this.rowModel.propsUpdated.on(() => this.requestUpdate());
-    this.rowModel.childrenUpdated.on(() => this.requestUpdate());
+  setHeight = (height: number) => {
+    this.style.height = `${height + CELL_PADDING * 2}px`;
+  };
+
+  protected override firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
-  }
-
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('column')) {
-      requestAnimationFrame(() => {
-        this.style.minWidth = `${this.column.internalProperty.width}px`;
-        this.style.maxWidth = `${this.column.internalProperty.width}px`;
-      });
-    }
   }
 
   _onClick = (event: Event) => {
@@ -89,23 +86,20 @@ export class DatabaseCellContainer
     });
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._onClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this.removeEventListener('click', this._onClick);
     super.disconnectedCallback();
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  protected render() {
-    const renderer = getTagSchemaRenderer(this.column.type);
-    const tag = this.databaseModel.page.getBlockTagByTagSchema(
-      this.rowModel,
-      this.column
-    );
+  override render() {
+    const renderer = getColumnRenderer(this.column.type);
+    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
@@ -115,7 +109,7 @@ export class DatabaseCellContainer
           .databaseModel=${this.databaseModel}
           .rowModel=${this.rowModel}
           .column=${this.column}
-          .tag=${tag}
+          .cell=${cell}
         ></${editingTag}>
       `;
     }
@@ -126,7 +120,7 @@ export class DatabaseCellContainer
         .databaseModel=${this.databaseModel}
         .rowModel=${this.rowModel}
         .column=${this.column}
-        .tag=${tag}
+        .cell=${cell}
       ></${previewTag}>
     `;
   }

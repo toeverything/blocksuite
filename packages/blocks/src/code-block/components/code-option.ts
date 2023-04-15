@@ -1,4 +1,9 @@
-import { CopyIcon, DeleteIcon, LineWrapIcon } from '@blocksuite/global/config';
+import {
+  CancelWrapIcon,
+  CopyIcon,
+  DeleteIcon,
+  WrapIcon,
+} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
@@ -6,6 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { copyCode } from '../../page-block/default/utils.js';
+import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({
   model,
@@ -48,7 +54,7 @@ export function CodeOptionTemplate({
       <format-bar-button
         class="has-tool-tip"
         data-testid="copy-button"
-        @click=${() => copyCode(model)}
+        @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
         <tool-tip inert tip-position="right-start" role="tooltip"
@@ -61,7 +67,7 @@ export function CodeOptionTemplate({
         ?active=${wrap}
         @click=${onClickWrap}
       >
-        ${LineWrapIcon}
+        ${wrap ? CancelWrapIcon : WrapIcon}
         <tool-tip inert tip-position="right-start" role="tooltip"
           >Wrap code</tool-tip
         >

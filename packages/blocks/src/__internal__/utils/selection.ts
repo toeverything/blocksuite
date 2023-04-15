@@ -1,4 +1,3 @@
-import type { FrameBlockComponent } from '@blocksuite/blocks';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -7,13 +6,16 @@ import {
   nonTextBlock,
 } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
+import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
+  getDefaultPage,
   getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
@@ -95,9 +97,9 @@ async function setNewTop(y: number, editableContainer: Element) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(index = Infinity) {
+export function focusTitle(page: Page, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const pageComponent = document.querySelector('affine-default-page');
+  const pageComponent = getDefaultPage(page);
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }
@@ -107,7 +109,7 @@ export function focusTitle(index = Infinity) {
   if (index > pageComponent.titleVEditor.yText.length) {
     index = pageComponent.titleVEditor.yText.length;
   }
-  pageComponent.titleVEditor.setVRange({ index, length: 0 });
+  pageComponent.titleVEditor.setVRange({ index, length: len });
 }
 
 export async function focusRichText(
@@ -116,6 +118,9 @@ export async function focusRichText(
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
+  editableContainer
+    .querySelector<VirgoLine>('v-line')
+    ?.scrollIntoView({ block: 'nearest' });
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -188,10 +193,7 @@ export function focusBlockByModel(
   defaultPageBlock.selection &&
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection &&
-      defaultPageBlock.selection.setFocusedBlockIndexByElement(
-        element as Element
-      );
+    defaultPageBlock.selection?.setFocusedBlock(element as Element);
     focusRichText(editableContainer, position);
   }
 }
@@ -240,6 +242,19 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+export function clearSelection(page: Page) {
+  if (!page.root) return;
+  const defaultPageBlock = getDefaultPageBlock(page.root);
+
+  if ('selection' in defaultPageBlock) {
+    // this is not EdgelessPageBlockComponent
+    defaultPageBlock.selection.clear();
+  }
+}
+
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const richText = richTextParent.querySelector('rich-text');
   assertExists(richText);
@@ -251,6 +266,9 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   }
 }
 
+/**
+ * @deprecated Use {@link focusBlockByModel} instead.
+ */
 export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();
@@ -485,7 +503,7 @@ function retargetClick(page: Page, e: SelectionEvent) {
   if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
     const parent = page.getParent(model);
     assertExists(parent);
-    const id = page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    const id = page.addBlock('affine:paragraph', {}, parent.id);
     asyncFocusRichText(page, id);
     return;
   }
@@ -897,4 +915,27 @@ export function getClosestEditor(clientY: number, container = document.body) {
  */
 export function getClosestFrame(clientY: number) {
   return getHorizontalClosestElement(clientY, 'affine-frame');
+}
+
+/**
+ * Handle native range with triple click.
+ */
+export function handleNativeRangeTripleClick(e: SelectionEvent) {
+  const {
+    raw: { clientX, clientY },
+  } = e;
+  const editor = document
+    .elementFromPoint(clientX, clientY)
+    ?.closest('.virgo-editor');
+
+  if (!editor) return null;
+
+  const textNodes = getTextNodesFromElement(editor);
+  const first = textNodes[0];
+  const last = textNodes[textNodes.length - 1];
+  const range = new Range();
+  range.setStart(first, 0);
+  range.setEnd(last, Number(last.textContent?.length));
+  resetNativeSelection(range);
+  return range;
 }

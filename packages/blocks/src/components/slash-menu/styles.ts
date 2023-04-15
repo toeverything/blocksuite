@@ -11,14 +11,16 @@ export const styles = css`
   }
 
   .slash-menu-container {
-    position: fixed;
     z-index: var(--affine-z-index-popover);
+    user-select: none;
   }
 
   .slash-menu {
+    position: fixed;
+    left: 0;
+    top: 0;
     box-sizing: border-box;
     font-size: var(--affine-font-base);
-    position: absolute;
     padding: 12px 0;
     display: flex;
 

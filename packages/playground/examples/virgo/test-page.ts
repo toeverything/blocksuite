@@ -1,7 +1,12 @@
 import '@shoelace-style/shoelace';
 
-import { type BaseTextAttributes, VEditor, VText } from '@blocksuite/virgo';
-import { css, html, LitElement } from 'lit';
+import { ShadowlessElement } from '@blocksuite/blocks';
+import {
+  type BaseTextAttributes,
+  type DeltaInsert,
+  VEditor,
+} from '@blocksuite/virgo';
+import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
@@ -32,7 +37,8 @@ function virgoTextStyles(
   }
 
   return styleMap({
-    'white-space': 'pre-wrap',
+    'word-wrap': 'break-word',
+    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -40,26 +46,27 @@ function virgoTextStyles(
   });
 }
 
-const attributeRenderer = (
-  vText: VText,
-  attributes: BaseTextAttributes = {}
-) => {
-  const style = attributes ? virgoTextStyles(attributes) : styleMap({});
+const attributeRenderer = (delta: DeltaInsert) => {
+  const style = delta.attributes
+    ? virgoTextStyles(delta.attributes)
+    : styleMap({
+        'white-space': 'break-spaces',
+        'word-wrap': 'break-word',
+      });
 
   // just for test
-  if (vText.str.length > 4) {
-    const leftStr = vText.str.slice(0, 3);
-    const rightStr = vText.str.slice(3);
+  if (delta.insert.length > 4) {
+    const leftStr = delta.insert.slice(0, 3);
+    const rightStr = delta.insert.slice(3);
 
-    const leftVText = new VText();
-    leftVText.str = leftStr;
-    const rightVText = new VText();
-    rightVText.str = rightStr;
-
-    return html`<span style=${style}>${leftVText}${rightVText}</span>`;
+    return html`<span style=${style}
+      ><v-text .str=${leftStr}></v-text><v-text .str=${rightStr}></v-text
+    ></span>`;
   }
 
-  return html`<span style=${style}>${vText}</span>`;
+  return html`<span style=${style}
+    ><v-text .str=${delta.insert}></v-text
+  ></span>`;
 };
 
 function toggleStyle(
@@ -110,8 +117,8 @@ function toggleStyle(
   vEditor.setVRange(vRange);
 }
 
-@customElement('rich-text')
-export class RichText extends LitElement {
+@customElement('virgo-test-rich-text')
+export class RichText extends ShadowlessElement {
   vEditor: VEditor;
 
   @query('.rich-text-container')
@@ -122,16 +129,18 @@ export class RichText extends LitElement {
     this.vEditor = vEditor;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.vEditor.mount(this._container);
   }
 
-  render() {
+  override render() {
     return html`<style>
         .rich-text-container {
           width: 100%;
           height: 100%;
           outline: none;
+          word-break: break-word;
+          white-space: break-spaces;
         }
 
         code {
@@ -150,8 +159,8 @@ export class RichText extends LitElement {
 }
 
 @customElement('tool-bar')
-export class ToolBar extends LitElement {
-  static styles = css`
+export class ToolBar extends ShadowlessElement {
+  static override styles = css`
     .tool-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -166,19 +175,15 @@ export class ToolBar extends LitElement {
     this.vEditor = vEditor;
   }
 
-  protected firstUpdated(): void {
-    if (!this.shadowRoot) {
-      throw new Error('Cannot find shadow root');
-    }
-
-    const boldButton = this.shadowRoot.querySelector('.bold');
-    const italicButton = this.shadowRoot.querySelector('.italic');
-    const underlineButton = this.shadowRoot.querySelector('.underline');
-    const strikeButton = this.shadowRoot.querySelector('.strike');
-    const code = this.shadowRoot.querySelector('.code');
-    const resetButton = this.shadowRoot.querySelector('.reset');
-    const undoButton = this.shadowRoot.querySelector('.undo');
-    const redoButton = this.shadowRoot.querySelector('.redo');
+  override firstUpdated() {
+    const boldButton = this.querySelector('.bold');
+    const italicButton = this.querySelector('.italic');
+    const underlineButton = this.querySelector('.underline');
+    const strikeButton = this.querySelector('.strike');
+    const code = this.querySelector('.code');
+    const resetButton = this.querySelector('.reset');
+    const undoButton = this.querySelector('.undo');
+    const redoButton = this.querySelector('.redo');
 
     if (
       !boldButton ||
@@ -249,7 +254,7 @@ export class ToolBar extends LitElement {
     });
   }
 
-  protected render(): unknown {
+  override render() {
     return html`
       <div class="tool-bar">
         <sl-button class="bold">bold</sl-button>
@@ -266,8 +271,8 @@ export class ToolBar extends LitElement {
 }
 
 @customElement('test-page')
-export class TestPage extends LitElement {
-  static styles = css`
+export class TestPage extends ShadowlessElement {
+  static override styles = css`
     .container {
       display: grid;
       height: 100vh;
@@ -295,7 +300,7 @@ export class TestPage extends LitElement {
     }
   `;
 
-  protected firstUpdated(): void {
+  override firstUpdated() {
     const TEXT_ID = 'virgo';
     const yDocA = new Y.Doc();
     const yDocB = new Y.Doc();
@@ -310,7 +315,7 @@ export class TestPage extends LitElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA);
-    editorA.setAttributesRenderer(attributeRenderer);
+    editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
     const editorB = new VEditor(textB);
@@ -318,12 +323,12 @@ export class TestPage extends LitElement {
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
 
-    if (!this.shadowRoot) {
+    if (!this) {
       throw new Error('Cannot find shadow root');
     }
 
-    const docA = this.shadowRoot.querySelector('.doc-a');
-    const docB = this.shadowRoot.querySelector('.doc-b');
+    const docA = this.querySelector('.doc-a');
+    const docB = this.querySelector('.doc-b');
 
     if (!docA || !docB) {
       throw new Error('Cannot find doc');
@@ -338,7 +343,7 @@ export class TestPage extends LitElement {
     docB.appendChild(richTextB);
   }
 
-  protected render(): unknown {
+  override render() {
     return html`
       <div class="container">
         <div class="editors">

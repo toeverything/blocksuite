@@ -6,26 +6,26 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getService } from '../../__internal__/service.js';
+import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockComponentElement,
+  EditingState,
+  Point,
+  SerializedBlock,
+} from '../../__internal__/index.js';
 import {
-  type BlockComponentElement,
-  doesInSamePath,
-  getBlockById,
+  getBlockElementById,
   getBlockElementByModel,
-  getRichTextByModel,
-  type OpenBlockInfo,
-} from '../../__internal__/utils/index.js';
+  getBlockElementsExcludeSubtrees,
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  isInSamePath,
+} from '../../__internal__/index.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-
-export interface EditingState {
-  model: BaseBlockModel;
-  position: DOMRect;
-  index: number;
-  element: BlockComponentElement;
-}
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -34,9 +34,9 @@ function hasOptionBar(block: BaseBlockModel) {
 }
 
 function getBlockWithOptionBarRect(
-  hoverDom: HTMLElement,
+  hoverDom: Element,
   block: BaseBlockModel
-): HTMLElement {
+): Element {
   if (hoverDom.hasAttribute(BLOCK_SERVICE_LOADING_ATTR)) {
     return hoverDom;
   }
@@ -122,7 +122,7 @@ function binarySearchBlockEditingState(
   }
 ): EditingState | null {
   const noSkipX = !options?.skipX;
-  const dragging = Boolean(options?.dragging);
+  const dragging = !!options?.dragging;
   let containerLeft = 0;
 
   if (noSkipX) {
@@ -211,10 +211,9 @@ function binarySearchBlockEditingState(
               ) {
                 if (x >= result.blockRect.left && x < blockRect.left) {
                   return {
-                    index: mid,
-                    position: result.blockRect,
+                    rect: result.blockRect,
                     model: result.block,
-                    element: result.hoverDom,
+                    element: result.hoverDom as BlockComponentElement,
                   };
                 } else {
                   depth--;
@@ -234,10 +233,9 @@ function binarySearchBlockEditingState(
       }
 
       return {
-        index: mid,
-        position: blockRect,
+        rect: blockRect,
         model: block,
-        element: hoverDom,
+        element: hoverDom as BlockComponentElement,
       };
     }
 
@@ -288,7 +286,7 @@ const offscreen = document.createElement(
 
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
-  let hoverDom = getBlockById(block.id);
+  let hoverDom = getBlockElementById(block.id);
 
   // Give an empty position (xywh=0,0,0,0) for invisible blocks.
   // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
@@ -379,32 +377,14 @@ export async function downloadImage(model: BaseBlockModel) {
 }
 
 export async function copyImage(model: EmbedBlockModel) {
-  const copyType = 'blocksuite/x-c+w';
-  const service = getService(model.flavour);
-  const text = service.block2Text(model, '', 0, 0);
-  const delta = [
-    {
-      insert: text,
-    },
-  ];
-  const copyData = JSON.stringify({
-    data: [
-      {
-        type: model.type,
-        sourceId: model.sourceId,
-        width: model.width,
-        height: model.height,
-        caption: model.caption,
-        flavour: model.flavour,
-        text: delta,
-        children: model.children,
-      },
-    ],
+  copyBlocks({
+    type: 'Block',
+    models: [model],
+    startOffset: 0,
+    endOffset: 0,
   });
-  const copySuccess = performNativeCopy([
-    { mimeType: copyType, data: copyData },
-  ]);
-  copySuccess && toast('Copied image to clipboard');
+
+  toast('Copied image to clipboard');
 }
 
 function getTextDelta(model: BaseBlockModel) {
@@ -418,7 +398,7 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData: { data: OpenBlockInfo[] } = {
+  const copyData: { data: SerializedBlock[] } = {
     data: [
       {
         type: model.type,
@@ -487,29 +467,16 @@ async function getUrlByModel(model: BaseBlockModel) {
   return url;
 }
 
-export function isControlledKeyboardEvent(e: KeyboardEvent) {
-  return e.ctrlKey || e.metaKey || e.shiftKey;
-}
-
-export function copyCode(model: BaseBlockModel) {
-  const richText = getRichTextByModel(model);
-  assertExists(richText);
-  const vEditor = richText.vEditor;
-  assertExists(vEditor);
-  vEditor.setVRange({
-    index: 0,
-    length: vEditor.yText.length,
-  });
-  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
-
-  vEditor.setVRange({
-    index: vEditor.yText.length,
-    length: 0,
+export function copyCode(codeBlockModel: CodeBlockModel) {
+  copyBlocks({
+    type: 'Block',
+    models: [codeBlockModel],
+    startOffset: 0,
+    endOffset: 0,
   });
 
   toast('Copied to clipboard');
 }
-
 export function getAllowSelectedBlocks(
   model: BaseBlockModel
 ): BaseBlockModel[] {
@@ -529,74 +496,58 @@ export function getAllowSelectedBlocks(
   return result;
 }
 
-export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
+export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
     // drag handle should be the same level with editor-container
-    container: defaultPageBlock.mouseRoot as HTMLElement,
-    getBlockEditingStateByCursor(
-      blocks,
-      pageX,
-      pageY,
-      cursor,
-      size,
-      skipX,
-      dragging
-    ) {
-      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
-        size,
-        skipX,
-        dragging,
-      });
-    },
-    getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
-      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
-        skipX,
-      });
-    },
-    onDropCallback(e, blocks, end): void {
-      const page = defaultPageBlock.page;
-      const rect = end.position;
-      const targetModel = end.model;
-      if (
-        blocks.length === 1 &&
-        doesInSamePath(page, targetModel, blocks[0].model)
-      ) {
-        return;
-      }
-      page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
-      page.moveBlocks(
-        blocks.map(b => b.model),
-        targetModel,
-        distanceToTop < distanceToBottom
+    container: pageBlock.mouseRoot as HTMLElement,
+    onDropCallback(_point, blockElements, editingState, type): void {
+      if (!editingState || type === 'none') return;
+      const { model } = editingState;
+      const page = pageBlock.page;
+      const models = getBlockElementsExcludeSubtrees(blockElements).map(
+        getModelByBlockElement
       );
-      const type = defaultPageBlock.selection.state.type;
-      defaultPageBlock.selection.clear();
-      defaultPageBlock.selection.state.type = type;
+      if (models.length === 1 && isInSamePath(page, model, models[0])) return;
 
-      defaultPageBlock.updateComplete.then(() => {
+      page.captureSync();
+
+      if (type === 'database') {
+        page.moveBlocks(models, model);
+      } else {
+        const parent = page.getParent(model);
+        assertExists(parent);
+        page.moveBlocks(models, parent, model, type === 'before');
+      }
+
+      // unneeded
+      // pageBlock.selection.clear();
+      // pageBlock.selection.state.type = 'block';
+
+      pageBlock.updateComplete.then(() => {
         // update selection rects
         // block may change its flavour after moved.
-        defaultPageBlock.selection.setSelectedBlocks(
-          blocks
-            .map(b => getBlockById(b.model.id))
-            .filter((b): b is BlockComponentElement => !!b)
-        );
+        requestAnimationFrame(() => {
+          pageBlock.selection.setSelectedBlocks(
+            blockElements
+              .map(b => getBlockElementById(b.model.id))
+              .filter((b): b is BlockComponentElement => !!b)
+          );
+        });
       });
     },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ): void {
-      if (Array.isArray(selectedBlocks)) {
-        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
-      } else if (selectedBlocks) {
-        const { position, index } = selectedBlocks;
-        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
-      }
+    setDragType(dragging: boolean) {
+      pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
+    },
+    setSelectedBlock(modelState: EditingState | null) {
+      pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
     getSelectedBlocks() {
-      return defaultPageBlock.selection.state.selectedBlocks;
+      return pageBlock.selection.state.selectedBlocks;
+    },
+    getClosestBlockElement(point: Point) {
+      return getClosestBlockElementByPoint(point, {
+        rect: pageBlock.innerRect,
+      });
     },
   });
 }

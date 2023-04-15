@@ -2,9 +2,11 @@ import { getStrokePoints } from 'perfect-freehand';
 
 import type { IBound } from '../../consts.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { simplePick } from '../../utils/std.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
+import type { BrushProps, SerializedBrushProps } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStrokePoints(points, {
@@ -32,11 +34,11 @@ export function getBrushBoundFromPoints(
 
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
-  color = '#000000';
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
+  color = '#000000' as const;
+  override x = 0;
+  override y = 0;
+  override w = 0;
+  override h = 0;
 
   /* Brush mouse coords relative to left-top corner */
   points: number[][] = [];
@@ -44,49 +46,6 @@ export class BrushElement extends BaseElement {
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
     return isPointIn(this, x, y);
-  }
-
-  serialize(): Record<string, unknown> {
-    return {
-      id: this.id,
-      index: this.index,
-      type: this.type,
-      xywh: this._xywh,
-
-      color: this.color,
-      lineWidth: this.lineWidth,
-      points: JSON.stringify(this.points),
-    };
-  }
-
-  static deserialize(data: Record<string, unknown>): BrushElement {
-    const element = new BrushElement(data.id as string);
-    element.index = data.index as string;
-    element.color = data.color as string;
-    element.lineWidth = data.lineWidth as number;
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-    element.points = JSON.parse(data.points as string);
-    return element;
-  }
-
-  static getBoundProps(
-    element: BaseElement,
-    bound: IBound
-  ): Record<string, string> {
-    const elementH = element.h || 1;
-    const elementW = element.w || 1;
-    const boundH = bound.h || 1;
-    const boundW = bound.w || 1;
-    const points = (element as BrushElement).points.map(([x, y]) => {
-      return [boundW * (x / elementW), boundH * (y / elementH)];
-    });
-
-    return {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-      points: JSON.stringify(points),
-    };
   }
 
   render(ctx: CanvasRenderingContext2D) {
@@ -102,5 +61,74 @@ export class BrushElement extends BaseElement {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.stroke(path);
+  }
+
+  serialize(): SerializedBrushProps {
+    return {
+      id: this.id,
+      index: this.index,
+      type: this.type,
+      xywh: this._xywh,
+
+      color: this.color,
+      lineWidth: this.lineWidth,
+      points: JSON.stringify(this.points),
+    };
+  }
+
+  static deserialize(data: Record<string, unknown>): BrushElement {
+    const element = new BrushElement(data.id as string);
+
+    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
+    setXYWH(element, { x, y, w, h });
+    element.points = JSON.parse(data.points as string);
+
+    const { xywh, ...props } = BrushElement.getProps(element, data);
+    BrushElement.updateProps(element, props);
+
+    return element;
+  }
+
+  static updateProps(element: BrushElement, props: BrushProps) {
+    Object.assign(element, props);
+  }
+
+  static override getBoundProps(
+    element: BaseElement,
+    bound: IBound
+  ): Record<string, string> {
+    const { lineWidth } = element as BrushElement;
+    const elementH = Math.max(element.h - lineWidth, 1);
+    const elementW = Math.max(element.w - lineWidth, 1);
+    const boundH = Math.max(bound.h - lineWidth, 1);
+    const boundW = Math.max(bound.w - lineWidth, 1);
+    const points = (element as BrushElement).points.map(([x, y]) => {
+      return [boundW * (x / elementW), boundH * (y / elementH)];
+    });
+
+    return {
+      xywh: serializeXYWH(
+        bound.x,
+        bound.y,
+        boundW + lineWidth,
+        boundH + lineWidth
+      ),
+      points: JSON.stringify(points),
+    };
+  }
+
+  static override getProps(
+    element: BaseElement,
+    rawProps: BrushProps & { xywh?: string }
+  ): BrushProps & { xywh?: string } {
+    const props = simplePick(rawProps, ['index', 'color', 'lineWidth', 'xywh']);
+
+    if (props.lineWidth) {
+      const { x, y, w, h } = element;
+      const d = props.lineWidth - (element as BrushElement).lineWidth;
+      props.xywh = serializeXYWH(x, y, w + d, h + d);
+    }
+
+    return props;
   }
 }

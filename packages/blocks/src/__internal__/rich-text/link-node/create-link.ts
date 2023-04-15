@@ -8,7 +8,7 @@ import {
   blockRangeToNativeRange,
   getCurrentBlockRange,
 } from '../../utils/block-range.js';
-import { getEditorContainer, getRichTextByModel } from '../../utils/index.js';
+import { getEditorContainer, getVirgoByModel } from '../../utils/index.js';
 import { LinkMockSelection } from './mock-selection.js';
 
 export function createLink(page: Page) {
@@ -19,22 +19,22 @@ export function createLink(page: Page) {
   }
   const startModel = blockRange.models[0];
   if (!startModel) return;
-  const richText = getRichTextByModel(startModel);
-  if (!richText) return;
-
-  const { vEditor } = richText;
+  const vEditor = getVirgoByModel(startModel);
   assertExists(vEditor);
   const vRange = {
     index: blockRange.startOffset,
     length: blockRange.endOffset - blockRange.startOffset,
   };
+  if (vRange.length === 0) {
+    return;
+  }
 
   // User can cancel link by pressing shortcut again
   const format = vEditor.getFormat(vRange);
   if (format.link) {
     page.captureSync();
     vEditor.formatText(vRange, { link: null });
-    // vEditor.setVRange(vRange);
+    vEditor.setVRange(vRange);
     // recreate link
     // setTimeout(() => {
     //   createLink(page);
@@ -78,5 +78,6 @@ export function createLink(page: Page) {
 
     page.captureSync();
     vEditor.formatText(vRange, { link });
+    vEditor.setVRange(vRange);
   });
 }

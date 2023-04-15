@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
 import { BlockHubIcon20 } from '@blocksuite/global/config';
@@ -9,11 +8,16 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  BlockChildrenContainer,
   type BlockHost,
   isPageMode,
-  NonShadowLitElement,
+  ShadowlessElement,
 } from '../__internal__/index.js';
+import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import {
+  affineTextAttributes,
+  type AffineTextSchema,
+} from '../__internal__/rich-text/virgo/types.js';
+import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 function TipsPlaceholder(model: BaseBlockModel) {
@@ -56,8 +60,8 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends NonShadowLitElement {
-  static styles = css`
+export class ParagraphBlockComponent extends ShadowlessElement {
+  static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
       border-radius: 5px;
@@ -174,6 +178,12 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   private _isComposing = false;
   @state()
   private _isFocus = false;
+
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
+
   private _placeholderDisposables = new DisposableGroup();
 
   override connectedCallback() {
@@ -182,7 +192,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this._updatePlaceholder();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
       this.requestUpdate();
@@ -230,7 +240,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this._placeholderDisposables = new DisposableGroup();
   };
 
-  render() {
+  override render() {
     const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(
       this.model,
@@ -238,12 +248,19 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       () => this.requestUpdate()
     );
 
+    // hide placeholder in database
+    const tipsPlaceholderTemplate =
+      this.host.flavour === 'affine:database'
+        ? ''
+        : this._tipsPlaceholderTemplate;
+
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${this._tipsPlaceholderTemplate}
+        ${tipsPlaceholderTemplate}
         <rich-text
           .host=${this.host}
           .model=${this.model}
+          .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}
           @focusout=${this._onFocusOut}
           style=${styleMap({

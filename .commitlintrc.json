@@ -6,6 +6,7 @@
       "always",
       [
         "blocks",
+        "docs",
         "editor",
         "edgeless",
         "global",
@@ -14,7 +15,20 @@
         "react",
         "next-example",
         "store",
-        "virgo"
+        "virgo",
+        "paragraph",
+        "list",
+        "link",
+        "code",
+        "database",
+        "divider",
+        "embed",
+        "selection",
+        "block-hub",
+        "slash-menu",
+        "drag-handle",
+        "format-bar",
+        "connector"
       ]
     ]
   }

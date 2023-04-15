@@ -1,8 +1,8 @@
-import { NonShadowLitElement } from '@blocksuite/blocks';
-import { builtInSchemas } from '@blocksuite/blocks/models';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Text, Workspace } from '@blocksuite/store';
-import { customElement, query } from 'lit/decorators.js';
+import { AffineSchemas } from '@blocksuite/blocks/models';
+import type { Page } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
+import { LitElement } from 'lit';
+import { customElement } from 'lit/decorators.js';
 
 import { EditorContainer } from './editor-container.js';
 
@@ -14,49 +14,29 @@ import { EditorContainer } from './editor-container.js';
  * You can use `editor.importMarkdown` to load markdown content.
  */
 @customElement('simple-affine-editor')
-export class SimpleAffineEditor extends NonShadowLitElement {
+export class SimpleAffineEditor extends LitElement {
   readonly workspace: Workspace;
-  page!: Page;
-
-  @query('editor-container')
-  private _editorContainer!: EditorContainer;
+  readonly page: Page;
 
   constructor() {
     super();
 
-    this.workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
-    this._subscribePage();
+    this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
+    this.page = this.workspace.createPage('page0');
 
-    this.workspace.createPage('page0');
+    const pageBlockId = this.page.addBlock('affine:page');
+    const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);
+    this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  // Subscribe for page update and create editor after page loaded.
-  private _subscribePage() {
-    const { workspace } = this;
-    workspace.slots.pageAdded.once(pageId => {
-      const page = workspace.getPage(pageId) as Page;
-      this.page = page;
-
-      const editor = new EditorContainer();
-      editor.page = page;
-      this.appendChild(editor);
-
-      const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: new Text(),
-      });
-      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-      page.addBlockByFlavour('affine:paragraph', {}, frameId);
-    });
+  override connectedCallback() {
+    const editor = new EditorContainer();
+    editor.page = this.page;
+    this.appendChild(editor);
   }
 
-  setTitle(title: Text) {
-    this.page.updateBlock(this.page.root as BaseBlockModel, { title });
-  }
-
-  importMarkdown(content: string) {
-    const root = this.page.root as BaseBlockModel;
-    const { _editorContainer } = this;
-    _editorContainer.clipboard.importMarkdown(content, root.id);
+  override disconnectedCallback() {
+    this.removeChild(this.children[0]);
   }
 }
 

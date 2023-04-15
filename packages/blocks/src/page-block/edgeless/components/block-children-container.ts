@@ -1,3 +1,4 @@
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -5,13 +6,12 @@ import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockElement } from '../../../__internal__/index.js';
+import { BlockElement } from '../../../__internal__/service/components.js';
 import type {
   BlockHost,
   FrameBlockModel,
   TopLevelBlockModel,
 } from '../../../index.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 
 function EdgelessMask() {
   const style = {
@@ -20,6 +20,7 @@ function EdgelessMask() {
     left: '0',
     bottom: '0',
     right: '0',
+    zIndex: '1',
   };
   return html`
     <div class="affine-edgeless-mask" style=${styleMap(style)}></div>
@@ -32,7 +33,7 @@ function EdgelessBlockChild(
   viewport: SurfaceViewport,
   active: boolean
 ) {
-  const { xywh } = model;
+  const { xywh, background } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
@@ -45,10 +46,11 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: 'white',
+    background,
     pointerEvents: 'all',
     zIndex: '0',
     boxSizing: 'border-box',
+    borderRadius: '4px',
   };
 
   const mask = active ? nothing : EdgelessMask();
@@ -64,19 +66,14 @@ export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
-  activeModelId: string | null
+  active: boolean
 ) {
   return html`
     ${repeat(
       model.children,
       child => child.id,
       child =>
-        EdgelessBlockChild(
-          child as FrameBlockModel,
-          host,
-          viewport,
-          activeModelId === child.id
-        )
+        EdgelessBlockChild(child as FrameBlockModel, host, viewport, active)
     )}
   `;
 }

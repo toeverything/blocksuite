@@ -10,11 +10,7 @@ import {
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
-import {
-  assertExists,
-  DisposableGroup,
-  isFirefox,
-} from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
@@ -26,29 +22,33 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { NonShadowLitElement } from '../__internal__/index.js';
-import type { DefaultSelectionSlots } from '../index.js';
-import type { EditingState } from '../page-block/default/utils.js';
+import type { EditingState, Rect } from '../__internal__/index.js';
 import {
-  getBlockEditingStateByCursor,
-  getBlockEditingStateByPosition,
-} from '../page-block/default/utils.js';
-import type { DragIndicator } from './drag-handle.js';
+  getClosestBlockElementByPoint,
+  getModelByBlockElement,
+  Point,
+  ShadowlessElement,
+  WithDisposable,
+} from '../__internal__/index.js';
+import {
+  DragHandle,
+  type DragIndicator,
+  type DroppingType,
+} from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
   affine-block-hub {
     position: absolute;
     z-index: 1;
+    user-select: none;
   }
 
   .affine-block-hub-container {
     width: 274px;
     position: absolute;
     right: calc(100% + 8px);
-    top: calc(50%);
     overflow-y: unset;
-    transform: translateY(-50%);
     display: none;
     justify-content: center;
     fill: var(--affine-icon-color);
@@ -151,6 +151,7 @@ const styles = css`
     margin: 16px 0 20px 12px;
     color: var(--affine-secondary-text-color);
     font-size: var(--affine-font-base);
+    user-select: none;
   }
 
   .prominent {
@@ -437,7 +438,7 @@ function BlockHubMenu(
 }
 
 @customElement('affine-block-hub')
-export class BlockHub extends NonShadowLitElement {
+export class BlockHub extends WithDisposable(ShadowlessElement) {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
@@ -445,7 +446,14 @@ export class BlockHub extends NonShadowLitElement {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  slots!: DefaultSelectionSlots;
+  public onDragStarted: () => void;
+
+  @property()
+  public getHoveringFrameState: (point: Point) => {
+    container?: Element;
+    rect?: Rect;
+    scale: number;
+  };
 
   @state()
   private _expanded = false;
@@ -482,40 +490,51 @@ export class BlockHub extends NonShadowLitElement {
 
   private readonly _onDropCallback: (
     e: DragEvent,
-    lastModelState: EditingState
+    point: Point,
+    lastModelState: EditingState | null,
+    lastType: DroppingType
   ) => Promise<void>;
+
   private _currentClientX = 0;
   private _currentClientY = 0;
   private _isCardListVisible = false;
   private _indicator!: DragIndicator;
-  private _lastModelState: EditingState | null = null;
-  private _cursor = 0;
+  private _lastDroppingTarget: EditingState | null = null;
+  private _lastDroppingType: DroppingType = 'none';
+  private _lastDraggingType: DroppingType = 'none';
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
-  private _disposables: DisposableGroup = new DisposableGroup();
 
-  static styles = styles;
+  static override styles = styles;
 
   constructor(options: {
     mouseRoot: HTMLElement;
     enableDatabase: boolean;
+    getAllowedBlocks: () => BaseBlockModel[];
+    getHoveringFrameState: (point: Point) => {
+      container?: Element;
+      rect?: Rect;
+      scale: number;
+    };
+    onDragStarted: () => void;
     onDropCallback: (
       e: DragEvent,
-      lastModelState: EditingState
+      point: Point,
+      lastModelState: EditingState | null,
+      lastType: DroppingType
     ) => Promise<void>;
   }) {
     super();
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
-    this.getAllowedBlocks = () => {
-      console.warn('you may forget to set `getAllowedBlocks`');
-      return [];
-    };
+    this.onDragStarted = options.onDragStarted;
+    this.getAllowedBlocks = options.getAllowedBlocks;
+    this.getHoveringFrameState = options.getHoveringFrameState;
     this._onDropCallback = options.onDropCallback;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const disposables = this._disposables;
     disposables.addFromEvent(this, 'dragstart', this._onDragStart);
@@ -537,7 +556,7 @@ export class BlockHub extends NonShadowLitElement {
     this._onResize();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
@@ -584,7 +603,7 @@ export class BlockHub extends NonShadowLitElement {
     );
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
   }
@@ -594,7 +613,7 @@ export class BlockHub extends NonShadowLitElement {
    * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
-  private _onTransitionStart = (e: TransitionEvent) => {
+  private _onTransitionStart = (_: TransitionEvent) => {
     if (this._timer) {
       clearTimeout(this._timer);
     }
@@ -615,8 +634,7 @@ export class BlockHub extends NonShadowLitElement {
   private _onClick = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
+      this._hideCardList();
     }
   };
 
@@ -625,18 +643,23 @@ export class BlockHub extends NonShadowLitElement {
       this._expanded = true;
     } else {
       this._expanded = false;
+      this._hideCardList();
+    }
+  }
+
+  private _onBlockHubButtonClick = (_: MouseEvent) => {
+    this._expanded = !this._expanded;
+    if (!this._expanded) {
+      this._hideCardList();
+    }
+  };
+
+  private _hideCardList() {
+    if (this._visibleCardType) {
       this._visibleCardType = null;
       this._isCardListVisible = false;
     }
   }
-
-  private _onBlockHubButtonClick = (e: MouseEvent) => {
-    this._expanded = !this._expanded;
-    if (!this._expanded) {
-      this._visibleCardType = null;
-      this._isCardListVisible = false;
-    }
-  };
 
   private _onDragStart = (event: DragEvent) => {
     this._showTooltip = false;
@@ -655,7 +678,9 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this.slots.selectedRectsUpdated.emit([]);
+    this._lastDraggingType =
+      data.flavour === 'affine:database' ? 'database' : 'none';
+    this.onDragStarted();
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -663,27 +688,10 @@ export class BlockHub extends NonShadowLitElement {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
     }
-
-    this._refreshCursor(e);
-  };
-
-  private _refreshCursor = (e: MouseEvent) => {
-    let x = e.clientX;
-    let y = e.clientY;
-    if (isFirefox) {
-      x = this._currentClientX;
-      y = this._currentClientY;
-    }
-    const blocks = this.getAllowedBlocks();
-    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
-      skipX: true,
-    });
-    modelState
-      ? (this._cursor = modelState.index)
-      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
+    this._hideCardList();
     let x = e.clientX;
     let y = e.clientY;
     if (isFirefox) {
@@ -693,31 +701,54 @@ export class BlockHub extends NonShadowLitElement {
       y = this._currentClientY;
     }
 
-    const modelState = this._cursor
-      ? getBlockEditingStateByCursor(
-          this.getAllowedBlocks(),
-          x,
-          y,
-          this._cursor,
-          {
-            size: 5,
-            skipX: false,
-            dragging: true,
-          }
-        )
-      : getBlockEditingStateByPosition(this.getAllowedBlocks(), x, y, {
-          skipX: true,
-        });
-
-    if (modelState) {
-      this._cursor = modelState.index;
-      this._lastModelState = modelState;
-      this._indicator.targetRect = modelState.position;
+    if (
+      !this._indicator ||
+      (this._indicator.rect &&
+        this._indicator.rect.left === x &&
+        this._indicator.rect.top === y)
+    ) {
+      return;
     }
-    this._indicator.cursorPosition = {
-      x,
-      y,
-    };
+
+    const point = new Point(x, y);
+    const {
+      container,
+      rect: frameRect,
+      scale,
+    } = this.getHoveringFrameState(point.clone());
+    let element = null;
+    if (frameRect) {
+      element = getClosestBlockElementByPoint(
+        point,
+        { container, rect: frameRect },
+        scale
+      );
+    }
+
+    let type: DroppingType = 'none';
+    let rect = null;
+    let lastModelState = null;
+    if (element) {
+      const model = getModelByBlockElement(element);
+      const result = DragHandle.calcTarget(
+        point,
+        model,
+        element,
+        [],
+        scale,
+        this._lastDraggingType === 'database'
+      );
+
+      if (result) {
+        type = result.type;
+        rect = result.rect;
+        lastModelState = result.modelState;
+      }
+    }
+
+    this._indicator.rect = rect;
+    this._lastDroppingType = type;
+    this._lastDroppingTarget = lastModelState;
   };
 
   private _onDragOver = (e: DragEvent) => {
@@ -732,30 +763,36 @@ export class BlockHub extends NonShadowLitElement {
     this._currentClientY = e.clientY;
   };
 
-  private _onDragEnd = (e: DragEvent) => {
+  private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    if (this._indicator.cursorPosition && this._indicator.targetRect) {
-      this._isCardListVisible = false;
-      this._visibleCardType = null;
+    this._lastDraggingType = 'none';
+    this._lastDroppingType = 'none';
+    this._lastDroppingTarget = null;
+
+    if (this._indicator) {
+      this._indicator.rect = null;
     }
-    this._indicator.cursorPosition = null;
-    this._indicator.targetRect = null;
   };
 
   private _onDrop = (e: DragEvent) => {
     assertExists(e.dataTransfer);
     if (!e.dataTransfer.getData('affine/block-hub')) return;
-    if (!this._lastModelState) return;
 
-    this._onDropCallback(e, this._lastModelState);
+    this._onDropCallback(
+      e,
+      // `drag.clientY` !== `dragend.clientY` in chrome.
+      this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY),
+      this._lastDroppingTarget,
+      this._lastDroppingType
+    );
   };
 
-  private _onCardMouseDown = (e: Event) => {
+  private _onCardMouseDown = (_: Event) => {
     this._isGrabbing = true;
   };
 
-  private _onCardMouseUp = (e: Event) => {
+  private _onCardMouseUp = (_: Event) => {
     this._isGrabbing = false;
   };
 
@@ -784,7 +821,7 @@ export class BlockHub extends NonShadowLitElement {
     this._maxHeight = boundingClientRect.height - TOP_DISTANCE - BOTTOM_OFFSET;
   };
 
-  render() {
+  override render() {
     const blockHubMenu = BlockHubMenu(
       this._enableDatabase,
       this._expanded,

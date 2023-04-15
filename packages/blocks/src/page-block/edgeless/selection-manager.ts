@@ -1,16 +1,17 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
-import type { Page, UserRange } from '@blocksuite/store';
+import type { PhasorElement } from '@blocksuite/phasor';
+import type { Page } from '@blocksuite/store';
 
-import {
-  initMouseEventHandlers,
-  type MouseMode,
-  noop,
-  type SelectionEvent,
-  type TopLevelBlockModel,
+import type {
+  BlockComponentElement,
+  MouseMode,
+  SelectionEvent,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
+import { initMouseEventHandlers, noop } from '../../__internal__/index.js';
+import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
+import { ConnectorModeController } from './mode-controllers/connector-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
@@ -20,10 +21,11 @@ import {
   getSelectionBoxBound,
   getXYWH,
   initWheelEventHandlers,
+  isTopLevelBlock,
   pickTopBlock,
 } from './utils.js';
 
-export type Selectable = TopLevelBlockModel | SurfaceElement;
+export type Selectable = TopLevelBlockModel | PhasorElement;
 
 export interface EdgelessHoverState {
   rect: DOMRect;
@@ -31,7 +33,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
-  /* The selected block or surface element */
+  /* The selected frame or surface element */
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
@@ -49,6 +51,9 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
 
+  // selected blocks
+  selectedBlocks: BlockComponentElement[] = [];
+
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
@@ -57,6 +62,10 @@ export class EdgelessSelectionManager {
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
+
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
 
   get isActive() {
     return this.currentController.isActive;
@@ -100,6 +109,7 @@ export class EdgelessSelectionManager {
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
       text: new TextModeController(this._container),
+      connector: new ConnectorModeController(this._container),
     };
 
     this._initMouseAndWheelEvents();
@@ -124,6 +134,7 @@ export class EdgelessSelectionManager {
       this._onContainerDragEnd,
       this._onContainerClick,
       this._onContainerDblClick,
+      this._onContainerTripleClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
@@ -160,6 +171,10 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerDblClick(e);
   };
 
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    return this.currentController.onContainerTripleClick(e);
+  };
+
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this._updateLastMousePos(e);
     this._container.slots.hoverUpdated.emit();
@@ -175,25 +190,12 @@ export class EdgelessSelectionManager {
   };
 
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
-    this.updateLocalSelection();
+    updateLocalSelectionRange(this.page);
   };
 
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
-  }
-
-  updateLocalSelection() {
-    const page = this.page;
-    const blockRange = getCurrentBlockRange(page);
-    if (blockRange && blockRange.type === 'Native') {
-      const userRange: UserRange = {
-        startOffset: blockRange.startOffset,
-        endOffset: blockRange.endOffset,
-        blockIds: blockRange.models.map(m => m.id),
-      };
-      page.awarenessStore.setLocalRange(page, userRange);
-    }
   }
 
   refreshRemoteSelection() {
@@ -212,9 +214,24 @@ export class EdgelessSelectionManager {
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
-    const hovered =
-      surface.pickTop(modelX, modelY) ?? pickTopBlock(frames, modelX, modelY);
-    if (!hovered) {
+    const hovered: Selectable | null =
+      surface.pickTop(modelX, modelY) || pickTopBlock(frames, modelX, modelY);
+
+    // See https://github.com/toeverything/blocksuite/issues/1812
+    if (
+      // if not frame block
+      !isTopLevelBlock(hovered) ||
+      // if in other mouse mode
+      this.mouseMode.type !== 'default' ||
+      // if current selection is not active
+      !this.blockSelectionState.active ||
+      // if current selected block is not the hovered block
+      this.blockSelectionState.selected[0].id !== hovered.id
+    ) {
+      this._container.components.dragHandle?.hide();
+    }
+
+    if (!hovered || this.blockSelectionState.active) {
       return null;
     }
 

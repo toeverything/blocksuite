@@ -1,15 +1,14 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
-import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
-export class LangList extends NonShadowLitElement {
-  static get styles() {
+export class LangList extends ShadowlessElement {
+  static override get styles() {
     return css`
       lang-list {
         display: flex;
@@ -52,6 +51,13 @@ export class LangList extends NonShadowLitElement {
         margin-bottom: 5px;
       }
 
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        margin-top: 8px;
+        margin-left: 4px;
+      }
+
       #filter-input {
         display: flex;
         align-items: center;
@@ -79,15 +85,21 @@ export class LangList extends NonShadowLitElement {
       }
 
       .search-icon {
-        left: 13.65px;
         position: absolute;
-        top: 16px;
+        left: 8px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        fill: var(--affine-icon-color);
       }
     `;
   }
 
   @state()
   private _filterText = '';
+
+  @state()
+  private _currentSelectedIndex = -1;
 
   @property()
   selectedLanguage = '';
@@ -98,9 +110,9 @@ export class LangList extends NonShadowLitElement {
   @property()
   delay = 150;
 
-  static languages = codeLanguages.map(
-    lang => lang.toUpperCase()[0] + lang.slice(1)
-  );
+  static languages = codeLanguages
+    .map(lang => lang.toUpperCase()[0] + lang.slice(1))
+    .concat(['Plain Text']);
 
   override async connectedCallback() {
     await super.connectedCallback();
@@ -125,12 +137,12 @@ export class LangList extends NonShadowLitElement {
     this.selectedLanguage = language;
     this.dispatchEvent(
       createEvent('selected-language-changed', {
-        language: this.selectedLanguage ?? 'JavaScript',
+        language: this.selectedLanguage ?? 'Plain Text',
       })
     );
   }
 
-  render() {
+  override render() {
     const filteredLanguages = LangList.languages.filter(language => {
       if (!this._filterText) {
         return true;
@@ -138,31 +150,53 @@ export class LangList extends NonShadowLitElement {
       return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
-    const styles = styleMap({
-      display: 'flex',
-      'padding-top': '8px',
-      'padding-left': '4px',
-    });
+    const onLanguageSelect = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (this._currentSelectedIndex >= filteredLanguages.length - 1) return;
+
+        this._currentSelectedIndex++;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (this._currentSelectedIndex <= -1) return;
+
+        this._currentSelectedIndex--;
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (
+          this._currentSelectedIndex === -1 ||
+          this._currentSelectedIndex >= filteredLanguages.length
+        )
+          return;
+
+        this._onLanguageClicked(filteredLanguages[this._currentSelectedIndex]);
+      }
+    };
 
     return html`
       <div class="lang-list-container">
-        <div style="${styles}">
+        <div class="input-wrapper">
           <div class="search-icon">${SearchIcon}</div>
           <input
             id="filter-input"
             type="text"
             placeholder="Search"
-            @input="${() => (this._filterText = this.filterInput?.value)}"
+            @input="${() => {
+              this._filterText = this.filterInput?.value;
+              this._currentSelectedIndex = -1;
+            }}"
+            @keydown="${onLanguageSelect}"
           />
         </div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
-            language => html`
+            (language, index) => html`
               <icon-button
                 width="100%"
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
+                ?hover=${index === this._currentSelectedIndex}
               >
                 ${language}
               </icon-button>

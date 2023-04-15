@@ -3,12 +3,18 @@ import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { asyncGetRichTextByModel, getRichTextByModel } from './query.js';
+import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
   richText?.vEditor?.setVRange(vRange);
+
+  return new Promise<void>(resolve => {
+    richText?.vEditor?.slots.rangeUpdated.once(() => {
+      resolve();
+    });
+  });
 }
 
 export function asyncFocusRichText(
@@ -19,7 +25,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'] as const)) return;
-  asyncSetVRange(model, vRange);
+  return asyncSetVRange(model, vRange);
 }
 
 export function isCollapsedAtBlockStart(vEditor: VEditor) {
@@ -27,7 +33,7 @@ export function isCollapsedAtBlockStart(vEditor: VEditor) {
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-export function doesInSamePath(
+export function isInSamePath(
   page: Page,
   children: BaseBlockModel,
   father: BaseBlockModel
@@ -77,7 +83,7 @@ export function convertToList(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlockByFlavour('affine:list', blockProps, parent, index);
+    const id = page.addBlock('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:list'] as const) &&
@@ -118,12 +124,7 @@ export function convertToParagraph(
     };
     page.deleteBlock(model);
 
-    const id = page.addBlockByFlavour(
-      'affine:paragraph',
-      blockProps,
-      parent,
-      index
-    );
+    const id = page.addBlock('affine:paragraph', blockProps, parent, index);
     asyncFocusRichText(page, id);
   } else if (
     matchFlavours(model, ['affine:paragraph'] as const) &&
@@ -133,7 +134,7 @@ export function convertToParagraph(
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    const vEditor = getRichTextByModel(model)?.vEditor;
+    const vEditor = getVirgoByModel(model);
     if (vEditor) {
       vEditor.setVRange({
         index: 0,
@@ -169,13 +170,13 @@ export function convertToDivider(
       children: model.children,
     };
     // space.deleteBlock(model);
-    page.addBlockByFlavour('affine:divider', blockProps, parent, index);
+    page.addBlock('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {
       asyncFocusRichText(page, nextBlock.id);
     } else {
-      const nextId = page.addBlockByFlavour('affine:paragraph', {}, parent);
+      const nextId = page.addBlock('affine:paragraph', {}, parent);
       asyncFocusRichText(page, nextId);
     }
   }

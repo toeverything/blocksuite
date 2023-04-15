@@ -55,3 +55,10 @@ Example:
 - PerfectPan, @PerfectPan, 2023/02/22
 - Alessio Gravili, @AlessioGr, 2023/02/26
 - Sg, @suica, 2023/03/11
+- zhangyi, @hanchayi, 2023/03/16
+- Victor Nanka, @victornanka, 2023/03/21
+- Aditya Sharma, @adityash1, 2023/03/31
+- yuusheng, @yuusheng, 2023/04/04
+- BaoLei, @blurname, 2023/04/08
+- luke358, @luke358, 2023/04/13
+- Skye Sun, @skyesun, 2023/04/14

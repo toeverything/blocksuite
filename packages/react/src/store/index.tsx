@@ -1,4 +1,4 @@
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import { DebugDocProvider, Workspace } from '@blocksuite/store';
 import { IndexedDBDocProvider } from '@blocksuite/store';
@@ -60,7 +60,7 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
           })
       );
       workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));
-      workspaces.forEach(workspace => workspace.register(builtInSchemas));
+      workspaces.forEach(workspace => workspace.register(AffineSchemas));
       window.setTimeout(
         () =>
           store.setState({

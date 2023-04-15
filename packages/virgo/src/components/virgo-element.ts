@@ -1,11 +1,10 @@
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
-import { getDefaultAttributeRenderer } from '../utils/attributes-renderer.js';
+import { getDefaultAttributeRenderer } from '../utils/attribute-renderer.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import { VText } from './virgo-text.js';
 
 @customElement('v-element')
 export class VirgoElement<
@@ -17,21 +16,18 @@ export class VirgoElement<
   };
 
   @property({ type: Function, attribute: false })
-  attributesRenderer: (vText: VText, attributes?: T) => TemplateResult<1> =
+  attributeRenderer: (delta: DeltaInsert<T>) => TemplateResult<1> =
     getDefaultAttributeRenderer<T>();
 
-  render() {
-    const vText = new VText();
-    vText.str = this.delta.insert;
-
+  override render() {
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
     return html`<span data-virgo-element="true"
-      >${this.attributesRenderer(vText, this.delta.attributes)}</span
+      >${this.attributeRenderer(this.delta)}</span
     >`;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
     return this;
   }
 }

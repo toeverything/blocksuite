@@ -1,16 +1,17 @@
-import '../tool-icon-button.js';
+import '../../components/tool-icon-button.js';
 
+import { Slot } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import type { ShapeMouseMode } from '../../../../__internal__/index.js';
 import { ShapeComponentConfig } from './shape-menu-config.js';
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
+      display: block;
       z-index: 2;
     }
     .shape-menu-container {
@@ -27,15 +28,23 @@ export class EdgelessShapeMenu extends LitElement {
   `;
 
   @property()
-  mouseMode!: MouseMode;
+  selectedShape?: ShapeMouseMode['shape'];
 
-  @property()
-  edgeless!: EdgelessPageBlockComponent;
+  slots = {
+    select: new Slot<ShapeMouseMode['shape']>(),
+  };
 
-  render() {
-    const shapeType =
-      this.mouseMode.type === 'shape' ? this.mouseMode.shape : null;
+  private _onSelect(value: ShapeMouseMode['shape']) {
+    this.selectedShape = value;
+    this.slots.select.emit(value);
+  }
 
+  override disconnectedCallback(): void {
+    this.slots.select.dispose();
+    super.disconnectedCallback();
+  }
+
+  override render() {
     return html`
       <div class="shape-menu-container">
         ${ShapeComponentConfig.map(({ name, icon, tooltip, disabled }) => {
@@ -43,15 +52,11 @@ export class EdgelessShapeMenu extends LitElement {
             <edgeless-tool-icon-button
               .disabled=${disabled}
               .tooltip=${tooltip}
-              .active=${shapeType === name}
+              .active=${this.selectedShape === name}
               @tool.click=${() => {
                 if (disabled) return;
 
-                this.edgeless.slots.mouseModeUpdated.emit({
-                  type: 'shape',
-                  shape: name,
-                  color: '#000000',
-                });
+                this._onSelect(name);
               }}
             >
               ${icon}

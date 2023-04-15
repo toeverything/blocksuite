@@ -3,8 +3,10 @@ import { expect } from '@playwright/test';
 import {
   clickBlockTypeMenuItem,
   dragBetweenIndices,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   formatType,
   initEmptyParagraphState,
   initThreeParagraphs,
@@ -20,6 +22,7 @@ import {
   redoByKeyboard,
   resetHistory,
   selectAllByKeyboard,
+  setVirgoSelection,
   SHORT_KEY,
   strikethrough,
   type,
@@ -32,6 +35,7 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
+  assertTitle,
   assertTypeFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -64,6 +68,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
   // redo
   await redoByKeyboard(page);
+  await waitNextFrame(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
   // the format should be removed after trigger the hotkey again
@@ -132,7 +137,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -181,7 +188,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -203,7 +212,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -263,9 +274,197 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await redoByClick(page);
   await assertTextFormat(page, 0, 0, { strike: true });
 
+  await waitNextFrame(page);
   // the format should be removed after trigger the hotkey again
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, {});
+});
+
+test('use formatted cursor with hotkey', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+  // format italic
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await type(page, 'bbb');
+  // format bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'ccc');
+  // unformat italic
+  await page.keyboard.press(`${SHORT_KEY}+i`, { delay: 50 });
+  await type(page, 'ddd');
+  // unformat bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'eee');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaa"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  // format bold
+  await page.keyboard.press(`${SHORT_KEY}+b`, { delay: 50 });
+  await type(page, 'fff');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaa"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fff"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await pressArrowLeft(page);
+  await pressArrowRight(page);
+  await type(page, 'ggg');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaa"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fffggg"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+
+  await setVirgoSelection(page, 3, 0);
+  await waitNextFrame(page);
+  await type(page, 'hhh');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="aaahhh"
+        />
+        <text
+          insert="bbb"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ccc"
+          italic={true}
+        />
+        <text
+          bold={true}
+          insert="ddd"
+        />
+        <text
+          insert="eee"
+        />
+        <text
+          bold={true}
+          insert="fffggg"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 });
 
 test('should single line format hotkey work', async ({ page }) => {
@@ -289,7 +488,9 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -328,7 +529,9 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -360,7 +563,9 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -427,7 +632,9 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -458,7 +665,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="h1"
@@ -470,7 +679,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="h6"
@@ -483,7 +694,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -497,7 +710,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -510,9 +725,30 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="hello"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+  await page.waitForTimeout(50);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+d`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:background="#FBFAFC"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="text"
+  />
+  <affine:divider />
+  <affine:paragraph
     prop:type="text"
   />
 </affine:frame>`,
@@ -548,7 +784,9 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="ho"
     prop:type="text"
@@ -562,7 +800,9 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -585,7 +825,9 @@ test('should cut work multiple line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="19"
     prop:type="text"
@@ -599,7 +841,9 @@ test('should cut work multiple line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="#FBFAFC"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -626,6 +870,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await pressEnter(page);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['1', '23']);
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
   await assertRichTexts(page, ['1', '23', '']);
@@ -699,6 +944,7 @@ test('pressing enter when selecting multiple blocks should create new block', as
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await waitNextFrame(page);
   await pressEnter(page);
   await assertRichTexts(page, ['1', '89']);
   await assertSelection(page, 1, 0, 0);
@@ -750,4 +996,43 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 0, 1);
   await pressArrowDown(page);
   await assertSelection(page, 1, 1);
+});
+
+test('should cut in title works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusTitle(page);
+  await type(page, 'hello');
+  await assertTitle(page, 'hello');
+
+  await dragOverTitle(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertTitle(page, '');
+
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, ['hello']);
+});
+
+test('should support ctrl/cmd+g convert to database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+
+  await page.keyboard.press(`${SHORT_KEY}+g`);
+  const tableView = page.locator('.modal-view-item.table');
+  await tableView.click();
+  const database = page.locator('affine-database');
+  await expect(database).toBeVisible();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
 });

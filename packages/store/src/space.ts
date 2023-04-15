@@ -10,27 +10,30 @@ export interface StackItem {
 
 export class Space<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Data extends Record<string, unknown> = Record<string, any>,
-  Flags extends Record<string, unknown> = BlockSuiteFlags
+  State extends Record<string, unknown> = Record<string, any>
 > {
   /** unprefixed id */
   readonly id: string;
   readonly doc: BlockSuiteDoc;
   readonly awarenessStore: AwarenessStore;
+
   /**
-   * @internal
-   * @protected
+   * @internal Used for convenient access to the underlying Yjs map,
+   * can be used interchangeably with ySpace
    */
-  protected readonly proxy: Data;
-  protected readonly origin: Y.Map<Data[keyof Data]>;
+  protected readonly _proxy: State;
+  /**
+   * @internal The actual underlying Yjs map
+   */
+  protected readonly _ySpace: Y.Map<State[keyof State]>;
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;
     this.doc = doc;
     this.awarenessStore = awarenessStore;
-    const targetId = this.id.startsWith('space:') ? this.id : this.prefixedId;
-    this.origin = this.doc.getMap(targetId);
-    this.proxy = this.doc.getMapProxy<string, Data>(targetId);
+    const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
+    this._ySpace = this.doc.getMap(prefixedId);
+    this._proxy = this.doc.getMapProxy<string, State>(prefixedId);
   }
 
   get prefixedId() {

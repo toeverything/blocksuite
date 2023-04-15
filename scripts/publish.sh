@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  # "docs" # NOT PUBLISHED
   "editor"
   "global"
   "phasor"
@@ -10,6 +11,7 @@ packages=(
   "react"
   "store"
   "virgo"
+  "connector"
 )
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"

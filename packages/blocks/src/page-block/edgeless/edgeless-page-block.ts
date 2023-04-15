@@ -1,49 +1,71 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-toolbar.js';
-import './view-control-bar.js';
 import './components/edgeless-selected-rect.js';
+import './toolbar/edgeless-toolbar.js';
 
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import { SurfaceManager } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
+import {
+  BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '@blocksuite/global/config';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+  SurfaceManager,
+} from '@blocksuite/phasor';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+  Slot,
+} from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockComponentElement,
+  Point,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
 import {
   almostEqual,
-  type BlockHost,
-  hotkey,
+  asyncFocusRichText,
+  getRectByBlockElement,
+  handleNativeRangeAtPoint,
   resetNativeSelection,
-  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/utils/lit.js';
 import type {
+  BlockHost,
+  DragHandle,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
 } from '../../index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import {
-  bindCommonHotkey,
-  EDGELESS_BLOCK_CHILD_PADDING,
-  handleDown,
-  handleUp,
-  removeCommonHotKey,
-  tryUpdateFrameSize,
-} from '../utils/index.js';
+import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
+import { bindEdgelessHotkeys } from './hotkey.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
 } from './selection-manager.js';
-import { getCursorMode, isTopLevelBlock } from './utils.js';
+import {
+  DEFAULT_FRAME_HEIGHT,
+  DEFAULT_FRAME_OFFSET_X,
+  DEFAULT_FRAME_OFFSET_Y,
+  DEFAULT_FRAME_WIDTH,
+  getBackgroundGrid,
+  getCursorMode,
+} from './utils.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -61,10 +83,10 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends NonShadowLitElement
+  extends WithDisposable(ShadowlessElement)
   implements EdgelessContainer, BlockHost
 {
-  static styles = css`
+  static override styles = css`
     .affine-edgeless-page-block-container {
       position: relative;
       box-sizing: border-box;
@@ -94,14 +116,24 @@ export class EdgelessPageBlockComponent
 
   flavour = 'edgeless' as const;
 
+  /**
+   * Shared components
+   */
+  components = {
+    dragHandle: <DragHandle | null>null,
+  };
+
   @property()
-  showGrid = false;
+  mouseRoot!: HTMLElement;
+
+  @property()
+  showGrid = true;
 
   @property()
   page!: Page;
 
   @property()
-  pageModel!: PageBlockModel;
+  model!: PageBlockModel;
 
   @property()
   surfaceModel!: SurfaceBlockModel;
@@ -114,87 +146,38 @@ export class EdgelessPageBlockComponent
   @state()
   private _toolbarEnabled = false;
 
+  @state()
+  private _rectsOfSelectedBlocks: DOMRect[] = [];
+
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
-  slots: EdgelessSelectionSlots = {
+  clipboard = new EdgelessClipboard(this.page, this);
+
+  slots = {
     viewportUpdated: new Slot(),
+    selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+
+    subpageLinked: new Slot<{ pageId: string }>(),
+    subpageUnlinked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string }>(),
   };
 
   surface!: SurfaceManager;
 
   getService = getService;
 
-  private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
-
-  // When user enters pan mode by pressing space,
-  // we should revert to the last mouse mode once user releases the key.
-  private _shouldRevertMode = false;
-  private _lastMode: MouseMode | null = null;
-
-  private _frameResizeObserver = new FrameResizeObserver();
-
-  private _bindHotkeys() {
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, this.page));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, this.page));
-    hotkey.addListener(HOTKEYS.SPACE, this._handleSpace, { keyup: true });
-    bindCommonHotkey(this.page);
-
-    return () => {
-      hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
-      removeCommonHotKey();
-    };
+  // FIXME: Many parts of code assume that the `selection` is used in page mode
+  getSelection() {
+    return this._selection;
   }
 
-  private _handleBackspace = (e: KeyboardEvent) => {
-    const { selected } = this._selection.blockSelectionState;
-    selected.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = this.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 frame
-        if (children.length > 1) {
-          this.page.deleteBlock(element);
-        }
-      } else {
-        this.surface.removeElement(element.id);
-      }
-    });
-    this._selection.currentController.clearSelection();
-    this.slots.selectionUpdated.emit(this._selection.blockSelectionState);
-  };
-
-  private _handleSpace = (event: KeyboardEvent) => {
-    const { mouseMode, blockSelectionState } = this._selection;
-    if (event.type === 'keydown') {
-      if (mouseMode.type === 'pan') {
-        return;
-      }
-
-      // when user is editing, shouldn't enter pan mode
-      if (mouseMode.type === 'default' && blockSelectionState.active) {
-        return;
-      }
-
-      this.mouseMode = { type: 'pan', panning: false };
-      this._shouldRevertMode = true;
-      this._lastMode = mouseMode;
-    }
-    if (event.type === 'keyup') {
-      if (
-        mouseMode.type === 'pan' &&
-        this._shouldRevertMode &&
-        this._lastMode
-      ) {
-        this.mouseMode = this._lastMode;
-      }
-    }
-  };
+  private _frameResizeObserver = new FrameResizeObserver();
 
   private _clearSelection() {
     requestAnimationFrame(() => {
@@ -209,9 +192,6 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer);
-    const frame = this.pageModel.children[0] as FrameBlockModel;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-    this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
   private _handleToolbarFlag() {
@@ -233,26 +213,82 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+    };
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.slots.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
   private _initSlotEffects() {
     // TODO: listen to new children
-    // this.pageModel.children.forEach(frame => {
+    // this.model.children.forEach(frame => {
     //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
     // });
     const { _disposables, slots } = this;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this.style.setProperty(
-          '--affine-zoom',
-          `${this.surface.viewport.zoom}`
-        );
+        const prevZoom = this.style.getPropertyValue('--affine-zoom');
+        const newZoom = this.surface.viewport.zoom;
+        if (!prevZoom || +prevZoom !== newZoom) {
+          this.style.setProperty('--affine-zoom', `${newZoom}`);
+          this.components.dragHandle?.setScale(newZoom);
+        }
+        if (this._selection.selectedBlocks.length) {
+          slots.selectedBlocksUpdated.emit(this._selection.selectedBlocks);
+        }
         this.requestUpdate();
       })
     );
+    _disposables.add(
+      slots.selectedBlocksUpdated.on(selectedBlocks => {
+        this._selection.selectedBlocks = selectedBlocks;
+        // TODO: remove `requestAnimationFrame`
+        requestAnimationFrame(() => {
+          this._rectsOfSelectedBlocks = selectedBlocks.map(
+            getRectByBlockElement
+          );
+        });
+        // this.requestUpdate();
+      })
+    );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
-    _disposables.add(slots.selectionUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.selectionUpdated.on(state => {
+        this._selection.currentController.setBlockSelectionState(state);
+        this._clearSelection();
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.mouseModeUpdated.on(mouseMode => {
+        if (mouseMode.type !== 'default') {
+          this.components.dragHandle?.hide();
+        }
         this.mouseMode = mouseMode;
       })
     );
@@ -264,7 +300,7 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(this._selection);
     _disposables.add(this.surface);
-    _disposables.add(this._bindHotkeys());
+    _disposables.add(bindEdgelessHotkeys(this));
 
     _disposables.add(this._frameResizeObserver);
     _disposables.add(
@@ -286,19 +322,99 @@ export class EdgelessPageBlockComponent
         });
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
-        this.setBlockSelectionState({
+        slots.selectionUpdated.emit({
           ...this._selection.blockSelectionState,
         });
-        slots.selectionUpdated.emit(this._selection.blockSelectionState);
       })
     );
   }
 
-  setBlockSelectionState(state: EdgelessSelectionState) {
-    this._selection.currentController.setBlockSelectionState(state);
+  addFrameWithPoint(
+    point: Point,
+    width = DEFAULT_FRAME_WIDTH,
+    height = DEFAULT_FRAME_HEIGHT
+  ) {
+    const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    return this.page.addBlock(
+      'affine:frame',
+      {
+        xywh: serializeXYWH(
+          x - DEFAULT_FRAME_OFFSET_X,
+          y - DEFAULT_FRAME_OFFSET_Y,
+          width,
+          height
+        ),
+      },
+      this.page.root?.id
+    );
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  /**
+   * Adds a new frame with the given blocks and point.
+   * @param blocks Array<Partial<BaseBlockModel>>
+   * @param point Point
+   */
+  addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
+    this.page.captureSync();
+    const frameId = this.addFrameWithPoint(point);
+    const ids = this.page.addBlocks(
+      blocks.map(({ flavour, ...blockProps }) => {
+        assertExists(flavour);
+        return {
+          flavour,
+          blockProps,
+        };
+      }),
+      frameId
+    );
+    return {
+      frameId,
+      ids,
+    };
+  }
+
+  /** Moves selected blocks into a new frame at the given point. */
+  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point, rect?: DOMRect) {
+    this.page.captureSync();
+    const width = rect?.width
+      ? rect.width / this.surface.viewport.zoom +
+        EDGELESS_BLOCK_CHILD_PADDING * 2
+      : DEFAULT_FRAME_WIDTH;
+    const frameId = this.addFrameWithPoint(point, width);
+    this.page.moveBlocks(
+      blocks,
+      this.page.getBlockById(frameId) as FrameBlockModel
+    );
+    this.setSelection(frameId, true, blocks[0].id, point);
+  }
+
+  /*
+   * Set selection state by giving frameId & blockId.
+   * Not supports surface elements.
+   */
+  setSelection(frameId: string, active = true, blockId: string, point?: Point) {
+    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+    assertExists(frameBlock);
+
+    requestAnimationFrame(() => {
+      this.slots.selectionUpdated.emit({
+        selected: [frameBlock as TopLevelBlockModel],
+        active,
+      });
+      // Waiting dom updated, `frame mask` is removed
+      this.updateComplete.then(() => {
+        if (blockId) {
+          asyncFocusRichText(this.page, blockId);
+        } else if (point) {
+          // Cannot reuse `handleNativeRangeClick` directly here,
+          // since `retargetClick` will re-target to pervious editor
+          handleNativeRangeAtPoint(point.x, point.y);
+        }
+      });
+    });
+  }
+
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
       this._selection = new EdgelessSelectionManager(this);
@@ -309,15 +425,21 @@ export class EdgelessPageBlockComponent
     super.update(changedProperties);
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this._initSlotEffects();
-
+    this._initDragHandle();
+    this.clipboard.init(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
+
+      const frame = this.model.children[0] as FrameBlockModel;
+      const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+      this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
+
       // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();
       this.requestUpdate();
@@ -327,32 +449,33 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     this._frameResizeObserver.resetListener(this.page);
     super.updated(changedProperties);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
-    this._disposables.dispose();
+    this.clipboard.dispose();
+    this.components.dragHandle?.remove();
   }
 
-  render() {
+  override render() {
     requestAnimationFrame(() => {
       this._selection.refreshRemoteSelection();
     });
 
-    this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { viewport } = this.surface;
-    const { _selection, page } = this;
+    const { _selection, _rectsOfSelectedBlocks, page } = this;
     const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.pageModel,
+      this.model,
       this,
       this.surface.viewport,
-      active ? selected[0].id : null
+      active
     );
 
     const { zoom, viewportX, viewportY } = viewport;
@@ -361,19 +484,16 @@ export class EdgelessPageBlockComponent
     const hoverState = _selection.getHoverState();
     const hoverRect = EdgelessHoverRect(hoverState, zoom);
 
-    const translateX = -viewportX * zoom;
-    const translateY = -viewportY * zoom;
-
-    const gridStyle = {
-      backgroundImage:
-        'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
-    };
-    const defaultStyle = {};
-    const style = this.showGrid ? gridStyle : defaultStyle;
-
     const cursor = {
       cursor: getCursorMode(this.mouseMode),
     };
+
+    const { style, gap, translateX, translateY } = getBackgroundGrid(
+      viewportX,
+      viewportY,
+      zoom,
+      this.showGrid
+    );
 
     return html`
       <div class="affine-edgeless-surface-block-container">
@@ -389,7 +509,7 @@ export class EdgelessPageBlockComponent
             position: relative;
             overflow: hidden;
             height: 100%;
-            background-size: ${20 * zoom}px ${20 * zoom}px;
+            background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: #fff;
           }
@@ -400,6 +520,13 @@ export class EdgelessPageBlockComponent
         >
           ${childrenContainer}
         </div>
+        <affine-selected-blocks
+          .mouseRoot=${this.mouseRoot}
+          .state=${{
+            rects: _rectsOfSelectedBlocks,
+            grab: false,
+          }}
+        ></affine-selected-blocks>
         ${hoverRect} ${draggingArea}
         ${selected.length
           ? html`
@@ -416,14 +543,11 @@ export class EdgelessPageBlockComponent
         ? html`
             <edgeless-toolbar
               .mouseMode=${this.mouseMode}
+              .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>
           `
         : nothing}
-      <edgeless-view-control-bar
-        .edgeless=${this}
-        .zoom=${zoom}
-      ></edgeless-view-control-bar>
     `;
   }
 }

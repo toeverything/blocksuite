@@ -2,12 +2,28 @@ import type { Page } from '@playwright/test';
 
 import { waitNextFrame } from './misc.js';
 
+function getDebugMenu(page: Page) {
+  const debugMenu = page.locator('debug-menu');
+  return {
+    debugMenu,
+    undoBtn: debugMenu.locator('sl-button[content="Undo"]'),
+    redoBtn: debugMenu.locator('sl-button[content="Redo"]'),
+
+    blockTypeButton: debugMenu.getByRole('button', { name: 'Block Type' }),
+    testOperationsButton: debugMenu.getByRole('button', {
+      name: 'Test Operations',
+    }),
+
+    addNewPageBtn: debugMenu.locator('sl-button[content="Add New Page"]'),
+  };
+}
+
 export async function undoByClick(page: Page) {
-  await page.click('sl-button[content="Undo"]');
+  await getDebugMenu(page).undoBtn.click();
 }
 
 export async function redoByClick(page: Page) {
-  await page.click('sl-button[content="Redo"]');
+  await getDebugMenu(page).redoBtn.click();
 }
 
 export async function clickBlockById(page: Page, id: string) {
@@ -30,8 +46,45 @@ export async function addFrameByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Add Frame');
 }
 
+export async function toggleTabMenu(page: Page) {
+  await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
+}
+
+export async function addNewPage(page: Page) {
+  const { addNewPageBtn } = getDebugMenu(page);
+  if (!(await addNewPageBtn.isVisible())) {
+    await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
+  }
+  await addNewPageBtn.click();
+  const pageMetas = await page.evaluate(() => {
+    const { workspace } = window;
+    return workspace.meta.pageMetas;
+  });
+  if (!pageMetas.length) throw new Error('Add new page failed');
+  return pageMetas[pageMetas.length - 1];
+}
+
+export async function switchToPage(page: Page, pageId?: string) {
+  if (!pageId) {
+    const pageMetas = await page.evaluate(() => {
+      const { workspace } = window;
+      return workspace.meta.pageMetas;
+    });
+    if (!pageMetas.length) throw new Error("There's no page to switch to");
+
+    pageId = pageMetas[0].id;
+  }
+
+  const { debugMenu, addNewPageBtn } = getDebugMenu(page);
+  if (!(await addNewPageBtn.isVisible())) {
+    await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
+  }
+  const targetTab = debugMenu.locator(`sl-tab[panel="${pageId}"]`);
+  await targetTab.click();
+}
+
 export async function clickTestOperationsMenuItem(page: Page, name: string) {
-  const menuButton = page.getByRole('button', { name: 'Test Operations' });
+  const menuButton = getDebugMenu(page).testOperationsButton;
   await menuButton.click();
   await waitNextFrame(page); // wait for animation ended
 
@@ -41,7 +94,7 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
 }
 
 export async function clickBlockTypeMenuItem(page: Page, name: string) {
-  const menuButton = page.getByRole('button', { name: 'Block Type' });
+  const menuButton = getDebugMenu(page).blockTypeButton;
   await menuButton.click();
 
   const menuItem = page.getByRole('menuitem', { name });
@@ -73,4 +126,8 @@ export async function switchReadonly(page: Page) {
 
 export async function activeEmbed(page: Page) {
   await page.click('.resizable-img');
+}
+
+export async function toggleDarkMode(page: Page) {
+  await page.click('sl-tooltip[content="Toggle Dark Mode"] sl-button');
 }

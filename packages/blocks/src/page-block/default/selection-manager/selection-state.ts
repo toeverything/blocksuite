@@ -1,18 +1,22 @@
-import type { EmbedBlockComponent } from '@blocksuite/blocks';
-import {
-  type BlockComponentElement,
-  getAllBlocks,
-  Point,
-  resetNativeSelection,
-  type SelectionEvent,
-} from '@blocksuite/blocks/std';
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
+import type {
+  BlockComponentElement,
+  SelectionEvent,
+} from '../../../__internal__/index.js';
+import {
+  getBlockElementsByElement,
+  getRectByBlockElement,
+  Point,
+  resetNativeSelection,
+} from '../../../__internal__/index.js';
 import type { RichText } from '../../../__internal__/rich-text/rich-text.js';
+import type { EmbedBlockComponent } from '../../../embed-block/index.js';
 
 export type PageSelectionType =
   | 'native'
   | 'block'
+  | 'block:drag'
   | 'none'
   | 'embed'
   | 'database';
@@ -43,12 +47,11 @@ export class PageSelectionState {
   draggingArea: { start: Point; end: Point } | null = null;
   selectedEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: BlockComponentElement[] = [];
-  // -1: SELECT_ALL
-  // >=0: only current focused-block
-  focusedBlockIndex = -1;
+  // null: SELECT_ALL
+  focusedBlock: BlockComponentElement | null = null;
   rafID?: number;
+  lastPoint: Point | null = null;
   private _startRange: Range | null = null;
-  private _rangePoint: Point | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<BlockComponentElement, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
@@ -70,10 +73,6 @@ export class PageSelectionState {
     return this._startRange;
   }
 
-  get rangePoint() {
-    return this._rangePoint;
-  }
-
   get richTextCache() {
     return this._richTextCache;
   }
@@ -90,11 +89,7 @@ export class PageSelectionState {
     const { clientX, clientY } = e.raw;
     this._startRange = caretRangeFromPoint(clientX, clientY);
     // Save the last coordinates so that we can send them when scrolling through the wheel
-    this.updateRangePoint(clientX, clientY);
-  }
-
-  updateRangePoint(x: number, y: number) {
-    this._rangePoint = new Point(x, y);
+    this.lastPoint = new Point(clientX, clientY);
   }
 
   resetDraggingArea(
@@ -117,10 +112,12 @@ export class PageSelectionState {
 
   refreshBlockRectCache() {
     this._blockCache.clear();
-    const allBlocks = getAllBlocks();
+    // find all blocks from the document
+    const allBlocks = getBlockElementsByElement(
+      document
+    ) as BlockComponentElement[];
     for (const block of allBlocks) {
-      const rect = block.getBoundingClientRect();
-      this._blockCache.set(block, rect);
+      this._blockCache.set(block, getRectByBlockElement(block));
     }
   }
 
@@ -147,17 +144,18 @@ export class PageSelectionState {
   }
 
   clearNativeSelection() {
+    this.clearRaf();
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
-    this._rangePoint = null;
+    this.lastPoint = null;
     resetNativeSelection(null);
   }
 
   clearBlockSelection() {
     this.type = 'none';
     this._activeComponent = null;
-    this.focusedBlockIndex = -1;
+    this.focusedBlock = null;
     this.selectedBlocks = [];
     this.clearDraggingArea();
   }

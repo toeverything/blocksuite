@@ -1,49 +1,37 @@
-import '../tool-icon-button.js';
+import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
 import { ShapeIcon } from '@blocksuite/global/config';
-import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
+import type {
+  MouseMode,
+  ShapeMouseMode,
+} from '../../../../__internal__/index.js';
+import { WithDisposable } from '../../../../__internal__/index.js';
+import {
+  DEFAULT_FILL_COLOR,
+  DEFAULT_STROKE_COLOR,
+} from '../../components/component-toolbar/change-shape-button.js';
+import { createButtonPopper } from '../../components/utils.js';
+import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
-interface ShapeMenuPopper {
-  element: EdgelessShapeMenu;
-  dispose: () => void;
-}
-
-function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
-  const shapeMenu = document.createElement('edgeless-shape-menu');
-  document.body.appendChild(shapeMenu);
-  const popper = createPopper(reference, shapeMenu, {
-    placement: 'top',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 12],
-        },
-      },
-    ],
-  });
-
-  return {
-    element: shapeMenu,
-    dispose: () => {
-      shapeMenu.remove();
-      popper.destroy();
-    },
-  };
-}
-
 @customElement('edgeless-shape-tool-button')
-export class EdgelessShapeToolButton extends LitElement {
-  static styles = css`
+export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
+  static override styles = css`
     :host {
       display: flex;
+    }
+
+    edgeless-shape-menu {
+      display: none;
+    }
+
+    edgeless-shape-menu[data-show] {
+      display: block;
     }
   `;
 
@@ -53,44 +41,73 @@ export class EdgelessShapeToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _shapeMenu: ShapeMenuPopper | null = null;
+  @state()
+  private _popperShow = false;
+
+  @query('edgeless-shape-menu')
+  private _shapeMenu!: EdgelessShapeMenu;
+
+  private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private _toggleShapeMenu() {
-    if (this._shapeMenu) {
-      this._shapeMenu.dispose();
-      this._shapeMenu = null;
-    } else {
-      this._shapeMenu = createShapeMenuPopper(this);
-      this._shapeMenu.element.mouseMode = this.mouseMode;
-      this._shapeMenu.element.edgeless = this.edgeless;
-    }
+    this._shapeMenuPopper?.toggle();
   }
 
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseMode')) {
-      this._shapeMenu?.dispose();
-      this._shapeMenu = null;
-    }
+  private _setMouseMode(mode: ShapeMouseMode) {
+    this.edgeless.slots.mouseModeUpdated.emit(mode);
   }
 
-  disconnectedCallback() {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
+    const _disposables = this._disposables;
+
+    this._shapeMenuPopper = createButtonPopper(
+      this,
+      this._shapeMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._shapeMenuPopper);
+    _disposables.add(
+      this._shapeMenu.slots.select.on(shape => {
+        this._setMouseMode({
+          type: 'shape',
+          shape,
+          fillColor: DEFAULT_FILL_COLOR,
+          strokeColor: DEFAULT_STROKE_COLOR,
+        });
+      })
+    );
+    super.firstUpdated(changedProperties);
+  }
+
+  override disconnectedCallback() {
+    this._disposables?.dispose();
     super.disconnectedCallback();
-    this._shapeMenu?.dispose?.();
-    this._shapeMenu = null;
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
+    const selectedShape = type === 'shape' ? this.mouseMode.shape : undefined;
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'Shape'}
+        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
-        .testId=${'shape'}
-        @tool.click=${() => this._toggleShapeMenu()}
+        @tool.click=${() => {
+          this._setMouseMode({
+            type: 'shape',
+            shape: 'rect',
+            fillColor: DEFAULT_FILL_COLOR,
+            strokeColor: DEFAULT_STROKE_COLOR,
+          });
+          this._toggleShapeMenu();
+        }}
       >
         ${ShapeIcon}
       </edgeless-tool-icon-button>
+      <edgeless-shape-menu .selectedShape=${selectedShape}>
+      </edgeless-shape-menu>
     `;
   }
 }

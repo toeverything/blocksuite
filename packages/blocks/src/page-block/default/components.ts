@@ -5,15 +5,12 @@ import {
   DownloadIcon,
 } from '@blocksuite/global/config';
 import { html } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EditingState } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import type {
-  DefaultSelectionSlots,
-  EmbedEditingState,
-} from './default-page-block.js';
+import type { DefaultSelectionSlots } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
@@ -40,7 +37,7 @@ export function DraggingArea(rect: DOMRect | null) {
 }
 
 export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[],
+  rects: DOMRect[],
   viewport: PageViewport
 ) {
   const { left, top, scrollLeft, scrollTop } = viewport;
@@ -50,6 +47,7 @@ export function EmbedSelectedRectsContainer(
         position: absolute;
         display: block;
         border: 2px solid var(--affine-primary-color);
+        user-select: none;
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
@@ -73,38 +71,8 @@ export function EmbedSelectedRectsContainer(
   `;
 }
 
-export function SelectedRectsContainer(
-  rects: DOMRect[],
-  viewport: PageViewport
-) {
-  const { left, top, scrollLeft, scrollTop } = viewport;
-  return html`
-    <style>
-      .affine-page-selected-rects-container > div {
-        position: absolute;
-        display: block;
-        background: var(--affine-selected-color);
-        z-index: 1;
-        pointer-events: none;
-        border-radius: 5px;
-      }
-    </style>
-    <div class="affine-page-selected-rects-container">
-      ${repeat(rects, rect => {
-        const style = {
-          left: rect.left - left + scrollLeft + 'px',
-          top: rect.top - top + scrollTop + 'px',
-          width: rect.width + 'px',
-          height: rect.height + 'px',
-        };
-        return html` <div style=${styleMap(style)}></div>`;
-      })}
-    </div>
-  `;
-}
-
 export function EmbedEditingContainer(
-  embedEditingState: EmbedEditingState | null,
+  embedEditingState: EditingState | null,
   slots: DefaultSelectionSlots,
   viewport: PageViewport
 ) {
@@ -112,7 +80,7 @@ export function EmbedEditingContainer(
 
   const { left, top, scrollLeft, scrollTop } = viewport;
   const {
-    position: { x, y },
+    rect: { x, y },
     model,
   } = embedEditingState;
   const style = {

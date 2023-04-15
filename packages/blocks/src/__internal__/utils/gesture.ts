@@ -1,4 +1,8 @@
-import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
+import {
+  IS_IOS,
+  IS_MAC,
+  MOVE_DETECT_THRESHOLD,
+} from '@blocksuite/global/config';
 
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
 import { debounce } from './std.js';
@@ -27,6 +31,7 @@ export interface SelectionEvent extends IPoint {
     alt: boolean;
   };
   button?: number;
+  dragging: boolean;
 }
 
 function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
@@ -65,6 +70,7 @@ function toSelectionEvent(
       alt: e.altKey,
     },
     button: e.button,
+    dragging: !!last,
   };
   if (last) {
     delta.x = offsetX - last.x;
@@ -81,6 +87,9 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (target.tagName === 'INPUT') {
     return true;
   }
+  if (target.tagName === 'FORMAT-QUICK-BAR') {
+    return true;
+  }
   return false;
 }
 
@@ -91,6 +100,7 @@ export function initMouseEventHandlers(
   onContainerDragEnd: (e: SelectionEvent) => void,
   onContainerClick: (e: SelectionEvent) => void,
   onContainerDblClick: (e: SelectionEvent) => void,
+  onContainerTripleClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
@@ -123,6 +133,14 @@ export function initMouseEventHandlers(
     if (!e.button) {
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail
+    // 1: single click, 2: double click, 3: triple click
+    if (e.detail > 3) {
+      // We dont want to abort `format-quick-bar`.
+      e.stopPropagation();
+    }
+
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
   };
@@ -152,12 +170,15 @@ export function initMouseEventHandlers(
     }
 
     if (isDragging) {
-      onContainerDragMove(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      const current = toSelectionEvent(
+        e,
+        getBoundingClientRect,
+        startX,
+        startY,
+        last
       );
-      onContainerMouseMove(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
+      onContainerDragMove(current);
+      onContainerMouseMove(current);
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
   };
@@ -167,13 +188,25 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (isDragging) {
-      onContainerDragEnd(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
-    } else {
-      onContainerClick(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY)
+    if (e.detail <= 1) {
+      if (isDragging) {
+        onContainerDragEnd(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+        );
+      } else {
+        onContainerClick(
+          toSelectionEvent(e, getBoundingClientRect, startX, startY)
+        );
+      }
+    } else if (
+      e.detail === 3 &&
+      last &&
+      e.timeStamp - last.raw.timeStamp < 500
+    ) {
+      container.dispatchEvent(
+        new CustomEvent('tripleclick', {
+          detail: e,
+        })
       );
     }
 
@@ -200,6 +233,18 @@ export function initMouseEventHandlers(
     );
   };
 
+  const tripleClickHandler = (e: Event) => {
+    const evt = (e as CustomEvent).detail;
+    if (shouldFilterMouseEvent(evt)) return;
+    onContainerTripleClick(
+      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
+    );
+  };
+
+  /**
+   * TODO merge to `selectionChangeHandler`
+   * @deprecated use `selectionChangeHandler` instead
+   */
   const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
@@ -209,7 +254,7 @@ export function initMouseEventHandlers(
     onSelectionChangeWithDebounce(e as Event);
   }, 300);
 
-  const selectionChangeHandlerWithoutDebounce = (e: Event) => {
+  const selectionChangeHandler = (e: Event) => {
     onSelectionChangeWithoutDebounce(e);
   };
 
@@ -217,28 +262,52 @@ export function initMouseEventHandlers(
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  container.addEventListener('tripleclick', tripleClickHandler);
   document.addEventListener(
     'selectionchange',
     selectionChangeHandlerWithDebounce
   );
-  document.addEventListener(
-    'selectionchange',
-    selectionChangeHandlerWithoutDebounce
-  );
+  document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    container.removeEventListener('tripleclick', tripleClickHandler);
     document.removeEventListener(
       'selectionchange',
       selectionChangeHandlerWithDebounce
     );
-    document.removeEventListener(
-      'selectionchange',
-      selectionChangeHandlerWithoutDebounce
-    );
+    document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
+}
+
+export function isPinchEvent(e: WheelEvent) {
+  // two finger pinches on touch pad, ctrlKey is always true.
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
+  if (IS_IOS || IS_MAC) {
+    return e.ctrlKey || e.metaKey;
+  }
+  return e.ctrlKey;
+}
+
+/**
+ * Returns a `DragEvent` via `MouseEvent`.
+ */
+export function createDragEvent(type: string, event?: MouseEvent) {
+  const options = {
+    dataTransfer: new DataTransfer(),
+  };
+  if (event) {
+    const { clientX, clientY, screenX, screenY } = event;
+    Object.assign(options, {
+      clientX,
+      clientY,
+      screenX,
+      screenY,
+    });
+  }
+  return new DragEvent(type, options);
 }

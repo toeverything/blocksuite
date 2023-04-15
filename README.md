@@ -2,9 +2,9 @@
 
 <p align="center">
   <picture style="width: 500px">
-    <source media="(prefers-color-scheme: light)" srcset="assets/logo-and-name-h.svg" />
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-and-name-h-white.svg" />
-    <img src="assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h-white.svg" />
+    <img src="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
   </picture>
 </p>
 
@@ -21,18 +21,22 @@
 
 BlockSuite (_pronounced "block sweet"_) is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
+![BlockSuite-based Editor in AFFiNE](https://user-images.githubusercontent.com/79301703/230893796-dc707955-e4e5-4a42-a3c9-18d1ea754f6f.gif)
+
+<p align="center">BlockSuite-based Editor in AFFiNE</p>
+
 - 👉 [Try BlockSuite-based AFFiNE online](https://app.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned or [see our roadmap here](https://github.com/orgs/toeverything/projects/10/views/6)!
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned or [see our roadmap here](https://github.com/orgs/toeverything/projects/10)!
 
 ## Introduction
 
 BlockSuite works very differently than traditional rich text frameworks:
 
-- For the data model, using BlockSuite does not require working with data-driven DSLs (e.g., _operations_, _actions_, _commmands_, _transforms_...). Instead, by using [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) as the single source of truth, BlockSuite provides a strongly-typed block tree model based on [Yjs](https://github.com/yjs/yjs). In BlockSuite, manipulating blocks is as easy as updating a todo list. Meanwhile, by taking full advantage of CRDT, it supports zero-cost time travel, real-time collaboration, and pluggable persistence backends right out of the box.
-- For rich text editing, BlockSuite orchestrates rich text content into discrete blocks. In BlockSuite, a document with 100 paragraphs can be rendered into 100 text blocks, aka 100 rich text editor instances, eliminating the classic practice of putting all content into one dangerous [`contenteditale`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) monolith.
-- At the rendering layer, BlockSuite is framework agnostic. It does not assume that the block tree can only be rendered through the DOM. It not only implements its entire document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but also provides a hybrid [canvas-based renderer](./packages/phasor/) for parts of the whiteboard content. Both renderers can coexist on the same page and share the same centralized data store.
+- For the data model, BlockSuite eliminates the need to work with data-driven DSLs (e.g., _operations_, _actions_, _commands_, _transforms_). Instead, it utilizes [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) as the single source of truth, offering a strongly-typed block tree model built on [Yjs](https://github.com/yjs/yjs). With BlockSuite, manipulating blocks becomes as simple as updating a todo list. Moreover, by fully harnessing the power of CRDT, it supports zero-cost time travel, real-time collaboration, and out-of-the-box pluggable persistence backends.
+- For rich text editing, BlockSuite seamlessly organizes rich text content into discrete blocks. In BlockSuite, a document with 100 paragraphs can be rendered into 100 text blocks or 100 individual rich text editor instances, effectively eliminating the outdated practice of consolidating all content into a single, risky [`contenteditable`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) monolith.
+- At the rendering layer, BlockSuite remains framework agnostic. It doesn't limit the block tree rendering to the DOM. Not only does it implement its entire document editing UI using [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but it also offers a hybrid [canvas-based renderer](./packages/phasor/) for whiteboard content sections. Both renderers can coexist on the same page and share a unified centralized data store.
 
 BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more foundational modules as reusable packages for this in the BlockSuite project.
 
@@ -47,7 +51,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
-- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10/views/6)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
@@ -105,51 +109,24 @@ And here is a minimal collaboration-ready editor showing how these underlying Bl
 
 ```ts
 import '@blocksuite/blocks';
-// A workspace can hold multiple pages, and a page can hold multiple blocks.
 import { Workspace, Page } from '@blocksuite/store';
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 
-/**
- * Manually create the initial page structure.
- * In collaboration mode or on page refresh with local persistence,
- * the page data will be automatically loaded from store providers.
- * In these cases, this function should not be called.
- */
-function createInitialPage(workspace: Workspace) {
-  // Events are being emitted using slots.
-  workspace.slots.pageAdded.once(pageId => {
-    const page = workspace.getPage(pageId) as Page;
-
-    // Block types are defined and registered in BlockSchema.
-    const pageBlockId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    page.addBlock({ flavour: 'affine:paragraph' }, frameId);
-  });
-
-  // Create a new page. This will trigger the slot above.
-  workspace.createPage('page0');
-}
-
-// Subscribe for page update and create editor on page added.
-function initEditorOnPageAdded(workspace: Workspace) {
-  workspace.slots.pageAdded.once(pageId => {
-    const page = workspace.getPage(pageId) as Page;
-    const editor = new EditorContainer();
-    editor.page = page;
-    document.body.appendChild(editor);
-  });
-}
-
 function main() {
-  // Initialize the store.
-  const workspace = new Workspace({ id: 'test' }).register(builtInSchemas);
+  // Create a workspace with one default page
+  const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
+  const page = workspace.createPage('page0');
 
-  // Start waiting for the first page...
-  initEditorOnPageAdded(workspace);
+  // Create default blocks in the page
+  const pageBlockId = page.addBlock('affine:page');
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  page.addBlock('affine:paragraph', {}, frameId);
 
-  // Suppose we are the first one to create the page.
-  createInitialPage(workspace);
+  // Init editor with the page store
+  const editor = new EditorContainer();
+  editor.page = page;
+  document.body.appendChild(editor);
 }
 
 main();
@@ -159,7 +136,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
 
 ## Current Status (`@blocksuite/editor`)
 
-> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10/views/6).
+> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10).
 
 - Basic text editing
   - ✅ Paragraph with inline style
@@ -174,13 +151,14 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Block-level selection
 - Rich-content
   - ✅ Image block
-  - 🚧 Database block
+  - ⚛️ Database block
   - 📌 Third-party embedded block
 - Whiteboard (edgeless mode)
   - ✅ Zooming and panning
   - ✅ Frame block
-  - ⚛️ Shape element
-  - ⚛️ Handwriting element
+  - ✅ Shape element
+  - ✅ Handwriting element
+  - ⚛️ Shape connector
   - 🚧 Grouping
 - Playground
   - ✅ Multiplayer collaboration
@@ -191,6 +169,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
   - ✅ React hooks integration
+  - 🚧 Dynamic component registration
   - 📌 Dynamic block registration
 
 Icons above correspond to the following meanings:

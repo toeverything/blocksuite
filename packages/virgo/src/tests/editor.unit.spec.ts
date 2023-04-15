@@ -368,3 +368,105 @@ test('getDeltasByVRange', () => {
     ],
   ]);
 });
+
+test('cursor with format', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  const virgo = new VEditor(yText);
+
+  virgo.insertText(
+    {
+      index: 0,
+      length: 0,
+    },
+    'aaa',
+    {
+      bold: true,
+    }
+  );
+
+  virgo.setMarks({
+    italic: true,
+  });
+
+  virgo.insertText(
+    {
+      index: 3,
+      length: 0,
+    },
+    'bbb'
+  );
+
+  expect(virgo.yText.toDelta()).toEqual([
+    {
+      insert: 'aaa',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        italic: true,
+      },
+    },
+  ]);
+});
+
+test('incorrect format value `false`', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  const virgo = new VEditor(yText);
+
+  virgo.insertText(
+    {
+      index: 0,
+      length: 0,
+    },
+    'aaa',
+    {
+      // @ts-expect-error insert incorrect value
+      bold: false,
+      italic: true,
+    }
+  );
+
+  virgo.insertText(
+    {
+      index: 3,
+      length: 0,
+    },
+    'bbb',
+    {
+      underline: true,
+    }
+  );
+
+  expect(virgo.yText.toDelta()).toEqual([
+    {
+      insert: 'aaa',
+      attributes: {
+        italic: true,
+      },
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        underline: true,
+      },
+    },
+  ]);
+});
+
+test('yText should not contain \r', () => {
+  const yDoc = new Y.Doc();
+  const yText = yDoc.getText('text');
+  yText.insert(0, 'aaa\r');
+
+  expect(yText.toString()).toEqual('aaa\r');
+  expect(() => {
+    new VEditor(yText);
+  }).toThrow(
+    'yText must not contain \r because it will break the range synclization'
+  );
+});

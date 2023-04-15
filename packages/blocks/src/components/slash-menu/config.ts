@@ -1,7 +1,8 @@
 import {
   CopyIcon,
+  DatabaseKanbanViewIcon,
+  DatabaseTableViewIcon,
   DeleteIcon,
-  DividerIcon,
   DuplicateIcon,
   ImageIcon20,
   NowIcon,
@@ -11,19 +12,25 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   getCurrentNativeRange,
-  getRichTextByModel,
+  getVirgoByModel,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { copyBlock } from '../../page-block/default/utils.js';
-// import { formatConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/const.js';
 import {
   onModelTextUpdated,
   updateBlockType,
@@ -32,8 +39,10 @@ import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
+  alias?: string[];
   icon: TemplateResult<1>;
   divider?: boolean;
+  disabled?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
 
@@ -41,8 +50,7 @@ function insertContent(model: BaseBlockModel, text: string) {
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
-  const richText = getRichTextByModel(model);
-  const vEditor = richText?.vEditor;
+  const vEditor = getVirgoByModel(model);
   if (!vEditor) {
     throw new Error("Can't insert text! vEditor not found");
   }
@@ -55,19 +63,6 @@ function insertContent(model: BaseBlockModel, text: string) {
     length: 0,
   });
 }
-
-const dividerItem: SlashItem = {
-  name: 'Divider',
-  icon: DividerIcon,
-  action({ page, model }) {
-    const parent = page.getParent(model);
-    if (!parent) {
-      return;
-    }
-    const index = parent.children.indexOf(model);
-    page.addBlockByFlavour('affine:divider', {}, parent, index + 1);
-  },
-};
 
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
   {
@@ -99,29 +94,36 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
           },
         })),
-      dividerItem,
     ],
   },
-  // TODO https://github.com/toeverything/blocksuite/issues/1184
-  // {
-  //   name: 'Style',
-  //   items: formatConfig
-  //     .filter(i => !['Link', 'Code'].includes(i.name))
-  //     .map(({ name, icon, id }, idx) => ({
-  //       name,
-  //       icon,
-  //       divider: idx === 0,
-  //       action: ({ model }) => {
-  //         if (!model.text) {
-  //           return;
-  //         }
-  //         const len = model.text.length;
-  //         model.text.format(0, len, {
-  //           [id]: true,
-  //         });
-  //       },
-  //     })),
-  // },
+  {
+    name: 'Style',
+    items: formatConfig
+      .filter(i => !['Link', 'Code'].includes(i.name))
+      .map(({ name, icon, id }, idx) => ({
+        name,
+        icon,
+        divider: idx === 0,
+        action: ({ model }) => {
+          if (!model.text) {
+            return;
+          }
+          const len = model.text.length;
+          if (!len) {
+            const vEditor = getVirgoByModel(model);
+            assertExists(vEditor, "Can't set style mark! vEditor not found");
+            vEditor.setMarks({
+              [id]: true,
+            });
+            clearMarksOnDiscontinuousInput(vEditor);
+            return;
+          }
+          model.text.format(0, len, {
+            [id]: true,
+          });
+        },
+      })),
+  },
   {
     name: 'List',
     items: paragraphConfig
@@ -205,6 +207,39 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     ],
   },
   {
+    name: 'Database',
+    items: [
+      {
+        name: 'Table View',
+        alias: ['database'],
+        icon: DatabaseTableViewIcon,
+        divider: true,
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          const id = page.addBlock(
+            'affine:database',
+            {},
+            page.getParent(model),
+            index
+          );
+          const service = await getServiceOrRegister('affine:database');
+          service.initDatabaseBlock(page, model, id, false);
+        },
+      },
+      {
+        name: 'Kanban View',
+        alias: ['database'],
+        icon: DatabaseKanbanViewIcon,
+        disabled: true,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        action: ({ model }) => {},
+      },
+    ],
+  },
+  {
     name: 'Actions',
     items: [
       {
@@ -241,7 +276,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlockByFlavour(
+          page.addBlock(
             model.flavour,
             {
               type: model.type,

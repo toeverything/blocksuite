@@ -1,16 +1,30 @@
 import {
   BoldIcon,
+  CopyIcon,
+  DatabaseTableViewIcon,
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
+  SHORT_KEY,
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 
+import { copyBlocks } from '../../__internal__/clipboard/utils.js';
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { handleFormat } from '../../page-block/utils/index.js';
+import { showDatabaseModal } from '../../components/database-modal/index.js';
+import { toast } from '../../components/toast.js';
+import {
+  getCurrentCombinedFormat,
+  handleFormat,
+} from '../../page-block/utils/index.js';
+import { getCurrentBlockRange } from '../../std.js';
 
 type ActionProps = {
   page: Page;
@@ -26,7 +40,7 @@ export const formatConfig = [
     id: 'bold',
     name: 'Bold',
     icon: BoldIcon,
-    hotkey: 'command+b,ctrl+b',
+    hotkey: `${SHORT_KEY}+b`,
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -37,7 +51,7 @@ export const formatConfig = [
     id: 'italic',
     name: 'Italic',
     icon: ItalicIcon,
-    hotkey: 'command+i,ctrl+i',
+    hotkey: `${SHORT_KEY}+i`,
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -48,7 +62,7 @@ export const formatConfig = [
     id: 'underline',
     name: 'Underline',
     icon: UnderlineIcon,
-    hotkey: 'command+u,ctrl+u',
+    hotkey: `${SHORT_KEY}+u`,
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -59,7 +73,7 @@ export const formatConfig = [
     id: 'strike',
     name: 'Strikethrough',
     icon: StrikethroughIcon,
-    hotkey: 'command+shift+s,ctrl+shift+s',
+    hotkey: `${SHORT_KEY}+shift+s`,
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -70,7 +84,7 @@ export const formatConfig = [
     id: 'code',
     name: 'Code',
     icon: InlineCodeIcon,
-    hotkey: 'command+e,ctrl+e',
+    hotkey: `${SHORT_KEY}+e`,
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
@@ -81,16 +95,65 @@ export const formatConfig = [
     id: 'link',
     name: 'Link',
     icon: LinkIcon,
-    hotkey: 'command+k,ctrl+k',
+    hotkey: `${SHORT_KEY}+k`,
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) =>
-      models.length === 1 && noneCodeBlockSelected(models),
+      models.length === 1 &&
+      noneCodeBlockSelected(models) &&
+      // can't create link when selection includes reference node
+      // XXX get loose format at here is not a good practice
+      !getCurrentCombinedFormat(models[0].page, true).reference,
     action: ({ page, abortController, format }: ActionProps) => {
       createLink(page);
       if (format && abortController && !('link' in format)) {
         abortController.abort();
       }
+    },
+  },
+];
+
+const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
+
+export const actionConfig = [
+  {
+    id: 'copy',
+    name: 'Copy',
+    disabledToolTip: undefined,
+    icon: CopyIcon,
+    hotkey: undefined,
+    showWhen: () => true,
+    enabledWhen: () => true,
+    action: ({ page }: ActionProps) => {
+      const range = getCurrentBlockRange(page);
+      assertExists(range);
+      copyBlocks(range);
+      toast('Copied to clipboard');
+    },
+  },
+  {
+    id: 'convert-to-database',
+    name: 'To Database',
+    disabledToolTip:
+      'Contains Block types that cannot be converted to Database. Learn more',
+    icon: DatabaseTableViewIcon,
+    hotkey: `${SHORT_KEY}+g`,
+    showWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      const isShow = range?.type === 'Block';
+      return isShow;
+    },
+    enabledWhen: (page: Page) => {
+      const range = getCurrentBlockRange(page);
+      if (!range) return false;
+      return range.models.every(model =>
+        DATABASE_WHITE_LIST.includes(model.flavour)
+      );
+    },
+    action: ({ page }: ActionProps) => {
+      showDatabaseModal({
+        page,
+      });
     },
   },
 ];

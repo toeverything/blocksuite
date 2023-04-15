@@ -1,56 +1,38 @@
-export interface RowHost extends HTMLElement {
+export interface RowHost<Value = unknown> extends HTMLElement {
   setEditing(isEditing: boolean): void;
-  // todo: type improvement
-  setValue(value: unknown): void;
+  setHeight(height: number): void;
+  setValue(value: Value): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ): void;
 }
 
-export interface SchemaInternalProperty {
-  /**
-   * color of the tag
-   */
-  color: `#${string}`;
-  /**
-   * width of a column
-   */
+export type ColumnType =
+  | 'rich-text'
+  | 'select'
+  | 'multi-select'
+  | 'number'
+  | 'progress';
+
+export interface Column extends Record<string, unknown> {
+  id: string;
+  type: ColumnType;
   width: number; // px
-  /**
-   * whether this display in the table
-   */
   hide: boolean;
 }
 
-export type TagSchemaProperty<Property extends Record<string, unknown>> =
-  Property;
+export type Cell = {
+  columnId: Column['id'];
+  value: unknown;
+};
 
-export interface TagSchema<
-  Type extends string = string,
-  Property extends Record<string, unknown> = Record<string, unknown>,
-  BaseValue = unknown
-> {
-  /**
-   * each instance of tag type has its own unique uuid
-   */
-  id: string;
-  type: Type;
-  /**
-   * column name
-   */
-  name: string;
-  internalProperty: SchemaInternalProperty;
-  property: TagSchemaProperty<Property>;
-  /**
-   * this value is just for hold the `BaseValue`,
-   *  don't use this value in the runtime.
-   */
-  __$TYPE_HOLDER$__?: BaseValue;
+export const enum ColumnInsertPosition {
+  Left = 'left',
+  Right = 'right',
 }
 
-export type BlockTag<Schema extends TagSchema = TagSchema> = {
-  schemaId: Schema['id'];
-  value: Schema extends TagSchema<infer _, infer __, infer Value>
-    ? Value
-    : never;
+/** select tag property */
+export type SelectTag = {
+  color: string;
+  value: string;
 };

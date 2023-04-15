@@ -1,12 +1,13 @@
-import '../tool-icon-button.js';
+import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
 import { PenIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
@@ -41,7 +42,7 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
 
 @customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -53,16 +54,21 @@ export class EdgelessBrushToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @state()
+  private _popperShow = false;
+
   private _brushMenu: BrushMenuPopper | null = null;
 
   private _toggleBrushMenu() {
     if (this._brushMenu) {
       this._brushMenu.dispose();
       this._brushMenu = null;
+      this._popperShow = false;
     } else {
       this._brushMenu = createBrushMenuPopper(this);
       this._brushMenu.element.mouseMode = this.mouseMode;
       this._brushMenu.element.edgeless = this.edgeless;
+      this._popperShow = true;
     }
   }
 
@@ -76,7 +82,7 @@ export class EdgelessBrushToolButton extends LitElement {
     });
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'brush') {
         this._brushMenu?.dispose();
@@ -89,18 +95,18 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._brushMenu?.dispose();
     this._brushMenu = null;
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${'Pen'}
+        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @tool.click=${() => {
           this._trySetBrushMode();

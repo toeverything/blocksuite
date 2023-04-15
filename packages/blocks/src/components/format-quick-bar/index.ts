@@ -1,11 +1,10 @@
 import './button.js';
-import './format-bar-node.js';
 
 import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
-import { getDefaultPageBlock } from '../../__internal__/utils/query.js';
+import { getViewportElement } from '../../__internal__/utils/query.js';
 import { throttle } from '../../__internal__/utils/std.js';
 import { onModelElementUpdated } from '../../page-block/index.js';
 import {
@@ -13,7 +12,7 @@ import {
   calcSafeCoordinate,
   type DragDirection,
 } from '../../page-block/utils/position.js';
-import type { FormatQuickBar } from './format-bar-node.js';
+import { FormatQuickBar } from './format-bar-node.js';
 
 let formatQuickBarInstance: FormatQuickBar | null = null;
 
@@ -58,7 +57,7 @@ export const showFormatQuickBar = async ({
     return;
   }
 
-  const formatQuickBar = document.createElement('format-quick-bar');
+  const formatQuickBar = new FormatQuickBar();
   formatQuickBar.page = page;
   formatQuickBar.models = blockRange.models;
   formatQuickBar.abortController = abortController;
@@ -105,9 +104,7 @@ export const showFormatQuickBar = async ({
   if (!page.root) {
     throw new Error("Failed to get page's root element");
   }
-  const pageBlock = getDefaultPageBlock(page.root);
-  const scrollContainer = pageBlock.viewportElement;
-
+  const scrollContainer = getViewportElement(page);
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
     scrollContainer.addEventListener('scroll', updatePos, { passive: true });
@@ -158,7 +155,7 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mouseup', mouseDownHandler);
+    document.removeEventListener('mousedown', mouseDownHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSlot.dispose();

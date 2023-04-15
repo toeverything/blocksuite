@@ -1,15 +1,29 @@
-import type { ShapeType } from '@blocksuite/phasor';
+import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type {
+  BlockServiceInstanceByKey,
+  ServiceFlavour,
+} from '../../models.js';
+import type { Clipboard } from '../clipboard/index.js';
+import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
-export interface IService {
-  onLoad?: () => Promise<void>;
+export interface BlockTransformContext {
+  childText?: string;
+  begin?: number;
+  end?: number;
+}
+
+export interface EditingState {
+  element: BlockComponentElement;
+  model: BaseBlockModel;
+  rect: DOMRect;
 }
 
 /** Common context interface definition for block models. */
@@ -20,14 +34,21 @@ export interface IService {
 export interface BlockHostContext {
   getService: <Key extends ServiceFlavour>(
     flavour: Key
-  ) => BlockServiceInstance[Key];
+  ) => BlockServiceInstanceByKey<Key>;
 }
+
+export type CommonSlots = RefNodeSlots;
 
 export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
+  clipboard: Clipboard;
+  readonly slots: CommonSlots;
 }
 
+/**
+ * @deprecated Not used yet
+ */
 export interface CommonBlockElement extends HTMLElement {
   host: BlockHost;
   model: BaseBlockModel;
@@ -55,13 +76,19 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  color: `#${string}`;
+  fillColor: Color;
+  strokeColor: Color;
 };
+
+export enum BrushSize {
+  Thin = 4,
+  Thick = 16,
+}
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: `#${string}`;
-  lineWidth: number;
+  color: Color;
+  lineWidth: BrushSize;
 };
 
 export type PanMouseMode = {
@@ -71,6 +98,13 @@ export type PanMouseMode = {
 
 export type TextMouseMode = {
   type: 'text';
+  background: Color;
+};
+
+export type ConnectorMouseMode = {
+  type: 'connector';
+  mode: ConnectorMode;
+  color: Color;
 };
 
 export type MouseMode =
@@ -78,12 +112,13 @@ export type MouseMode =
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode;
+  | TextMouseMode
+  | ConnectorMouseMode;
 
-export type OpenBlockInfo = {
+export type SerializedBlock = {
   flavour: string;
   type?: string;
-  text: {
+  text?: {
     insert?: string;
     delete?: number;
     retain?: number;
@@ -95,12 +130,22 @@ export type OpenBlockInfo = {
     retain?: number;
   }[];
   checked?: boolean;
-  children: OpenBlockInfo[];
+  children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
   width?: number;
   height?: number;
   language?: string;
+  databaseProps?: {
+    id: string;
+    title: string;
+    titleColumnName: string;
+    titleColumnWidth: number;
+    rowIds: string[];
+    columnIds: string[];
+  };
+  // frame block
+  xywh?: string;
 };
 
 declare global {

@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { NonShadowLitElement } from '../../../__internal__/index.js';
+import { ShadowlessElement } from '../../../__internal__/index.js';
 
 const notFoundIcon = html`<svg
   width="25"
@@ -21,8 +21,8 @@ const notFoundIcon = html`<svg
 const ELEMENT_TAG = 'affine-image-block-not-found-card' as const;
 
 @customElement(ELEMENT_TAG)
-export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
-  static styles = css`
+export class AffineImageBlockNotFoundCard extends ShadowlessElement {
+  static override styles = css`
     .affine-image-block-not-found-card {
       display: flex;
       flex-direction: column;
@@ -37,7 +37,7 @@ export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
     }
   `;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-image-block-not-found-card">${notFoundIcon}</div>
     `;
