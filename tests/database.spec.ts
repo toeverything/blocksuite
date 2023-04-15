@@ -263,7 +263,7 @@ test('should database search input displayed correctly', async ({ page }) => {
   );
 });
 
-test.only('should clicking the searchIcon alter the searchState correctly', async ({
+test('should clicking the searchIcon alter the searchState correctly', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
