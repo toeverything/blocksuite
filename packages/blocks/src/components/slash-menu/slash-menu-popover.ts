@@ -48,6 +48,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
    */
   private _searchString = '';
 
+  get enabledDatabase() {
+    return !!this.model.page.awarenessStore.getFlag('enable_database');
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
@@ -227,7 +231,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
   private _categoryTemplate() {
     const showCategory = !this._searchString.length;
 
-    const activatedCategory = menuGroups.find(group =>
+    const filteredGroups = this.enabledDatabase
+      ? menuGroups
+      : menuGroups.filter(group => group.name !== 'Database');
+    const activatedCategory = filteredGroups.find(group =>
       group.items.some(
         item => item.name === this._filterItems[this._activatedItemIndex].name
       )
@@ -236,7 +243,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     return html`<div
       class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
     >
-      ${menuGroups.map(
+      ${filteredGroups.map(
         group =>
           html`<div
             class="slash-category-name ${activatedCategory?.name === group.name
@@ -270,12 +277,12 @@ export class SlashMenu extends WithDisposable(LitElement) {
       : styleMap({
           visibility: 'hidden',
         });
-
-    const filterItems = this.model.page.awarenessStore.getFlag(
-      'enable_database'
-    )
+    const filterItems = this.enabledDatabase
       ? this._filterItems
-      : this._filterItems.filter(item => item.name !== 'Database');
+      : this._filterItems.filter(item => {
+          if (!item.alias) return true;
+          return item.alias.indexOf('database') === -1;
+        });
     const btnItems = filterItems.map(
       ({ name, icon, divider, disabled = false }, index) => html`<div
           class="slash-item-divider"
