@@ -170,9 +170,7 @@ export const database: InitFn = (workspace: Workspace) => {
     hide: false,
   });
 
-  page.updateBlock(database, {
-    columns: [col1, col2, col3],
-  });
+  database.applyColumnUpdate();
 
   const p1 = page.addBlock(
     'affine:paragraph',

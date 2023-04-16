@@ -134,6 +134,7 @@ export class EdgelessSelectionManager {
       this._onContainerDragEnd,
       this._onContainerClick,
       this._onContainerDblClick,
+      this._onContainerTripleClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
@@ -168,6 +169,10 @@ export class EdgelessSelectionManager {
 
   private _onContainerDblClick = (e: SelectionEvent) => {
     return this.currentController.onContainerDblClick(e);
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    return this.currentController.onContainerTripleClick(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

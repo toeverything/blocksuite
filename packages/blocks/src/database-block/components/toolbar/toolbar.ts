@@ -46,10 +46,7 @@ const styles = css`
     align-items: center;
     justify-content: center;
   }
-  .affine-database-toolbar-item.search-container {
-    overflow: hidden;
-  }
-  .affine-database-toolbar-item.search {
+  .search-container {
     overflow: hidden;
   }
   .affine-database-toolbar-item.more-action {
@@ -264,22 +261,22 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onShowSearch = () => {
     this.setSearchState(SearchState.SearchInput);
-    onClickOutside(
+    const removeListener = onClickOutside(
       this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
-          this._searchContainer.style.overflow = 'hidden';
+          removeListener();
         }
       },
-      'mousedown'
+      'mousedown',
+      true
     );
   };
 
   private _onFocusSearchInput = () => {
     if (this.searchState === SearchState.SearchInput) {
       this._searchInput.focus();
-      this._searchContainer.style.overflow = 'unset';
     } else {
       this._searchInput.blur();
     }
@@ -316,7 +313,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this._searchInput.value = '';
     this.setFilteredRowIds([]);
     this.setSearchState(SearchState.SearchIcon);
-    this._searchContainer.style.overflow = 'hidden';
   };
 
   override render() {
@@ -324,12 +320,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       this.searchState === SearchState.SearchInput ||
       this.searchState === SearchState.Searching;
     const isActiveMoreAction = this.searchState === SearchState.Action;
+
+    const onSearchIconClick = expandSearch ? undefined : this._onShowSearch;
+
     const searchTool = html`
       <div
         class="affine-database-search-container ${expandSearch
           ? 'search-container-expand'
           : ''}"
-        @click=${this._onShowSearch}
+        @click=${onSearchIconClick}
         @transitionend=${this._onFocusSearchInput}
       >
         <div class="affine-database-search-input-icon">

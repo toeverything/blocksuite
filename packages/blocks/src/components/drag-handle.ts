@@ -10,13 +10,11 @@ import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  BlockComponentElement,
-  EditingState,
-  SelectionEvent,
-} from '../__internal__/index.js';
 import {
+  type BlockComponentElement,
+  type EditingState,
   getBlockElementsExcludeSubtrees,
+  getClosestBlockElementByElement,
   getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
@@ -24,6 +22,7 @@ import {
   isContainedIn,
   Point,
   Rect,
+  type SelectionEvent,
   ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
@@ -550,25 +549,46 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     if (type === 'before') {
       // before
-      const prev = element.previousElementSibling;
+      let prev;
+      let prevRect;
+
+      prev = element.previousElementSibling;
       if (prev) {
         if (prev === draggingElements[draggingElements.length - 1]) {
           type = 'none';
         } else {
-          const prevRect = getRectByBlockElement(prev);
-          offsetY = (domRect.top - prevRect.bottom) / 2;
+          prevRect = getRectByBlockElement(prev);
         }
+      } else {
+        prev = element.parentElement?.previousElementSibling;
+        if (prev) {
+          prevRect = prev.getBoundingClientRect();
+        }
+      }
+
+      if (prevRect) {
+        offsetY = (domRect.top - prevRect.bottom) / 2;
       }
     } else {
       // after
-      const next = element.nextElementSibling;
+      let next;
+      let nextRect;
+
+      next = element.nextElementSibling;
       if (next) {
         if (next === draggingElements[0]) {
           type = 'none';
-        } else {
-          const nextRect = getRectByBlockElement(next);
-          offsetY = (nextRect.top - domRect.bottom) / 2;
+          next = null;
         }
+      } else {
+        next = getClosestBlockElementByElement(
+          element.parentElement
+        )?.nextElementSibling;
+      }
+
+      if (next) {
+        nextRect = getRectByBlockElement(next);
+        offsetY = (nextRect.top - domRect.bottom) / 2;
       }
     }
 

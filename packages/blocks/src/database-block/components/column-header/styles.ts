@@ -124,6 +124,7 @@ export const styles = css`
   .affine-database-column-move svg {
     width: 10px;
     height: 14px;
+    color: var(--affine-black-10);
     cursor: move;
     opacity: 0;
   }

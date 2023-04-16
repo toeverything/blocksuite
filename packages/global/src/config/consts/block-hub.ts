@@ -106,6 +106,8 @@ export const paragraphConfig = [
     flavour: 'affine:code',
     type: undefined,
     name: 'Code Block',
+    // Use `alt` instead of `shift` because `ctrl+shift+c` will open chrome devtools on Windows.
+    // Use `command` / `ctrl` instead of `${SHORT_KEY}` because `option` and `alt` are the same key on Mac, they will trigger twice.
     hotkey: `command+option+c,ctrl+alt+c`,
     icon: CodeBlockIcon,
   },

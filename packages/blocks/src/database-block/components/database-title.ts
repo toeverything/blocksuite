@@ -5,7 +5,6 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '../../__internal__/utils/lit.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { DATABASE_TITLE_LENGTH } from '../consts.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { initLimitedLengthVEditor } from '../utils.js';
@@ -58,8 +57,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       position: absolute;
       opacity: 0.5;
     }
-
-    ${tooltipStyle}
   `;
 
   @property()
@@ -123,14 +120,11 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
-    return html`<div class="has-tool-tip affine-database-title">
+    return html`<div class="affine-database-title">
       <div
         class="database-title ${isEmpty ? 'database-title-empty' : ''}"
         data-block-is-database-title="true"
       ></div>
-      <tool-tip inert arrow tip-position="top" role="tooltip"
-        >Database hello new work is not only
-      </tool-tip>
     </div>`;
   }
 }

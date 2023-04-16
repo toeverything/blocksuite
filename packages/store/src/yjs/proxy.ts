@@ -6,7 +6,7 @@ export type DataInitializer<Data extends Record<string, unknown>> = {
     : () => Data[Key];
 };
 
-export type ProxyConfig<Data extends Record<string, unknown>> = {
+export type ProxyConfig = {
   readonly?: boolean;
 };
 
@@ -41,7 +41,7 @@ function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
 
 export function createYMapProxy<Data extends Record<string, unknown>>(
   yMap: YMap<unknown>,
-  config: ProxyConfig<Data> = {}
+  config: ProxyConfig = {}
 ): Data {
   const { readonly = false } = config;
   const object = {} as Data;

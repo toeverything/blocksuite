@@ -171,7 +171,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
     }
     return menuGroups
       .flatMap(group => group.items)
-      .filter(({ name }) => isFuzzyMatch(name, searchStr));
+      .filter(({ name, alias = [] }) =>
+        [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
+      );
   }
 
   private _scrollToItem(item: SlashItem, force = true) {
