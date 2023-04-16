@@ -359,6 +359,16 @@ export class VEditor<
     });
   }
 
+  coverText(
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void {
+    this._transact(() => {
+      this.yText.delete(0, this.yText.length);
+      this.yText.insert(0, text, attributes);
+    });
+  }
+
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
