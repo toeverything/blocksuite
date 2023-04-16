@@ -29,7 +29,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   private _activatedItemIndex = 0;
 
   @state()
-  private _filterItems = menuGroups.flatMap(group => group.items);
+  private _filterItems: SlashItem[] = [];
 
   @state()
   private _hide = false;
@@ -52,6 +52,21 @@ export class SlashMenu extends WithDisposable(LitElement) {
     return !!this.model.page.awarenessStore.getFlag('enable_database');
   }
 
+  get filteredMenuGroups() {
+    return this.enabledDatabase
+      ? menuGroups
+      : menuGroups.filter(group => group.name !== 'Database');
+  }
+
+  get filterItems() {
+    return this.enabledDatabase
+      ? this._filterItems
+      : this._filterItems.filter(item => {
+          if (!item.alias) return true;
+          return item.alias.indexOf('database') === -1;
+        });
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
@@ -59,6 +74,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       // Prevent input from losing focus
       e.preventDefault();
     });
+    this._filterItems = this.filteredMenuGroups.flatMap(group => group.items);
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -115,27 +131,29 @@ export class SlashMenu extends WithDisposable(LitElement) {
         next();
       },
       onUpdateQuery: val => {
-        this._filterItems = this._updateItem(val);
-        if (!this._filterItems.length) {
+        const newFilteredItems = this._updateItem(val);
+        this._filterItems = newFilteredItems;
+        if (!newFilteredItems.length) {
           this._hide = true;
         }
       },
       onMove: step => {
-        const configLen = this._filterItems.length;
+        const configLen = this.filterItems.length;
         if (this._leftPanelActivated) {
           const nowGroupIdx = this._getGroupIndexByItem(
-            this._filterItems[this._activatedItemIndex]
+            this.filterItems[this._activatedItemIndex]
           );
           this._handleClickCategory(
-            menuGroups[
-              (nowGroupIdx + step + menuGroups.length) % menuGroups.length
+            this.filteredMenuGroups[
+              (nowGroupIdx + step + this.filteredMenuGroups.length) %
+                this.filteredMenuGroups.length
             ]
           );
           return;
         }
         this._activatedItemIndex =
           (this._activatedItemIndex + step + configLen) % configLen;
-        this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
+        this._scrollToItem(this.filterItems[this._activatedItemIndex], false);
       },
       onConfirm: () => {
         this._handleClickItem(this._activatedItemIndex);
@@ -159,7 +177,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
   };
 
   private _getGroupIndexByItem(item: SlashItem) {
-    return menuGroups.findIndex(group => group.items.includes(item));
+    return this.filteredMenuGroups.findIndex(group =>
+      group.items.includes(item)
+    );
   }
 
   private _updateItem(query: string): SlashItem[] {
@@ -171,9 +191,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
     }
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
-      return menuGroups.flatMap(group => group.items);
+      return this.filteredMenuGroups.flatMap(group => group.items);
     }
-    return menuGroups
+    return this.filteredMenuGroups
       .flatMap(group => group.items)
       .filter(({ name, alias = [] }) =>
         [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
@@ -205,7 +225,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     if (
       this._leftPanelActivated ||
       index < 0 ||
-      index >= this._filterItems.length
+      index >= this.filterItems.length
     ) {
       return;
     }
@@ -214,36 +234,32 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Otherwise, the action may change the model and cause the slash string to be changed
     this.abortController.abort(this._searchString);
 
-    const { action } = this._filterItems[index];
+    const { action } = this.filterItems[index];
     action({ page: this.model.page, model: this.model });
   }
 
   private _handleClickCategory(group: { name: string; items: SlashItem[] }) {
-    const menuGroup = menuGroups.find(g => g.name === group.name);
+    const menuGroup = this.filteredMenuGroups.find(g => g.name === group.name);
     if (!menuGroup) return;
     const item = menuGroup.items[0];
     this._scrollToItem(item);
-    this._activatedItemIndex = this._filterItems.findIndex(
+    this._activatedItemIndex = this.filterItems.findIndex(
       i => i.name === item.name
     );
   }
 
   private _categoryTemplate() {
     const showCategory = !this._searchString.length;
-
-    const filteredGroups = this.enabledDatabase
-      ? menuGroups
-      : menuGroups.filter(group => group.name !== 'Database');
-    const activatedCategory = filteredGroups.find(group =>
+    const activatedCategory = this.filteredMenuGroups.find(group =>
       group.items.some(
-        item => item.name === this._filterItems[this._activatedItemIndex].name
+        item => item.name === this.filterItems[this._activatedItemIndex].name
       )
     );
 
     return html`<div
       class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
     >
-      ${filteredGroups.map(
+      ${this.filteredMenuGroups.map(
         group =>
           html`<div
             class="slash-category-name ${activatedCategory?.name === group.name
@@ -277,13 +293,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
       : styleMap({
           visibility: 'hidden',
         });
-    const filterItems = this.enabledDatabase
-      ? this._filterItems
-      : this._filterItems.filter(item => {
-          if (!item.alias) return true;
-          return item.alias.indexOf('database') === -1;
-        });
-    const btnItems = filterItems.map(
+
+    const btnItems = this.filterItems.map(
       ({ name, icon, divider, disabled = false }, index) => html`<div
           class="slash-item-divider"
           ?hidden=${!divider || !!this._searchString.length}
