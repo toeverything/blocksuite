@@ -79,17 +79,14 @@ export class DatabaseModal extends LitElement {
     assertExists(databaseModel);
 
     // default column
-    const tagColumnId = databaseModel.updateColumn({
+    databaseModel.updateColumn({
       name: 'Tag',
       type: 'multi-select',
       width: 200,
       hide: false,
       selection: [],
     });
-
-    this.page.updateBlock(databaseModel, {
-      columns: [tagColumnId],
-    });
+    databaseModel.applyColumnUpdate();
 
     this.page.moveBlocks(models, databaseModel);
 

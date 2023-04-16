@@ -1,4 +1,3 @@
-import type { Column } from '@blocksuite/global/database';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -14,9 +13,7 @@ export function DataBaseRowContainer(
   searchState: SearchState
 ) {
   const databaseModel = databaseBlock.model;
-  const columns = databaseModel.columns.map(id =>
-    databaseModel.getColumn(id)
-  ) as Column[];
+  const columns = databaseModel.columns;
 
   const filteredChildren =
     searchState === SearchState.Searching
@@ -42,7 +39,7 @@ export function DataBaseRowContainer(
         border-bottom: 1px solid var(--affine-border-color);
       }
       .affine-database-block-row > .affine-database-block-row-cell:first-child {
-        background: var(--affine-hover-background);
+        background: var(--affine-hover-color);
       }
       .affine-database-block-row > .database-cell {
         background: var(--affine-white);

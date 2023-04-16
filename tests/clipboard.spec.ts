@@ -611,11 +611,7 @@ test('should copy and paste of database work', async ({ page }) => {
     prop:background="#FBFAFC"
   >
     <affine:database
-      prop:columns={
-        Array [
-          "4",
-        ]
-      }
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -625,7 +621,7 @@ test('should copy and paste of database work', async ({ page }) => {
       />
     </affine:database>
     <affine:database
-      prop:columns={Array []}
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -650,11 +646,7 @@ test('should copy and paste of database work', async ({ page }) => {
     prop:background="#FBFAFC"
   >
     <affine:database
-      prop:columns={
-        Array [
-          "4",
-        ]
-      }
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}

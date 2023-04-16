@@ -21,7 +21,7 @@ export class BlockSuiteDoc<
     >
       ? Data[Key]
       : never
-  >(key: Key, config?: ProxyConfig<Value>): Value {
+  >(key: Key, config?: ProxyConfig): Value {
     const map = super.getMap(key);
     return createYMapProxy(map, config);
   }
@@ -31,3 +31,5 @@ export class BlockSuiteDoc<
     return super.transact(f, origin);
   }
 }
+
+export { createYArrayProxy } from './array.js';
