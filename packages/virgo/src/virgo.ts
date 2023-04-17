@@ -359,7 +359,7 @@ export class VEditor<
     });
   }
 
-  coverText(
+  setText(
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
