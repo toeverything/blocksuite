@@ -127,7 +127,8 @@ export const showFormatQuickBar = async ({
   const popstateHandler = () => {
     abortController.abort();
   };
-  document.addEventListener('mousedown', mouseDownHandler);
+  // Should not use mouse event for better mobile compatible
+  document.addEventListener('pointerdown', mouseDownHandler);
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
 
@@ -136,7 +137,7 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mousedown', mouseDownHandler);
+    document.removeEventListener('pointerdown', mouseDownHandler);
     window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSlot.dispose();
   });
