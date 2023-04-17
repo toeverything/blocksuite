@@ -252,7 +252,7 @@ test('import markdown', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test.skip('copy clipItems format', async ({ page }) => {
+test('copy clipItems format', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -277,7 +277,7 @@ test.skip('copy clipItems format', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test.skip('copy partially selected text', async ({ page }) => {
+test('copy partially selected text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -296,52 +296,6 @@ test.skip('copy partially selected text', async ({ page }) => {
   await waitNextFrame(page);
 
   await assertRichTexts(page, ['123 456 789', '456']);
-});
-// FIXME
-test.skip('copy more than one delta op on a block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-
-  const clipData = 'You `talking` to me?';
-
-  await importMarkdown(page, clipData, '0');
-  await setSelection(page, 3, 0, 3, 1);
-  await setVirgoSelection(page, 0, 14);
-  await assertClipItems(page, 'text/plain', 'You talking to');
-  await assertClipItems(
-    page,
-    'blocksuite/x-c+w',
-    JSON.stringify({
-      data: [
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [
-            {
-              insert: 'You ',
-            },
-            {
-              insert: 'talking',
-              attributes: {
-                code: true,
-              },
-            },
-            {
-              insert: ' to',
-            },
-          ],
-          children: [],
-        },
-      ],
-    })
-  );
-  await assertClipItems(
-    page,
-    'text/html',
-    '<p>You <code>talking</code> to</p>'
-  );
 });
 
 test('copy & paste outside editor', async ({ page }) => {

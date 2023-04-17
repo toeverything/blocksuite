@@ -837,7 +837,7 @@ test('should cut work multiple line', async ({ page }) => {
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
-  expect(text).toBe('2345678');
+  expect(text).toBe(`23\n456\n78`);
   await assertStoreMatchJSX(
     page,
     `
