@@ -1,5 +1,5 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store/index.js';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   getClosestBlockElementByPoint,
