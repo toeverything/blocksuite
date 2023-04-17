@@ -1,6 +1,9 @@
 import { expect, test } from 'vitest';
 
-import { deltaInsertsToChunks, transformDelta } from '../utils/convert.js';
+import {
+  deltaInsertsToChunks,
+  transformDelta,
+} from '../utils/delta-convert.js';
 
 test('transformDelta', () => {
   expect(
