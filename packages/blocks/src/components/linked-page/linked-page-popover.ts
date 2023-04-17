@@ -95,14 +95,14 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
         active: filteredPageList.length === this._activatedItemIndex,
-        icon: NewPageIcon,
+        icon: DualLinkIcon,
         action: () => this._createPage(),
       },
       {
         key: 'create-subpage',
         name: `Create "${displayPageName}" subpage`,
         active: filteredPageList.length + 1 === this._activatedItemIndex,
-        icon: DualLinkIcon,
+        icon: NewPageIcon,
         action: () => this._createSubpage(),
       },
     ];
