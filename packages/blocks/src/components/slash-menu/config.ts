@@ -162,8 +162,12 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: TodayIcon,
         divider: true,
         action: ({ model }) => {
+          // yyyy-mm-dd
           const date = new Date();
-          const strTime = date.toISOString().split('T')[0];
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          const strTime = `${year}-${month}-${day}`;
           insertContent(model, strTime);
         },
       },
@@ -171,9 +175,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         name: 'Tomorrow',
         icon: TomorrowIcon,
         action: ({ model }) => {
+          // yyyy-mm-dd
           const date = new Date();
           date.setDate(date.getDate() + 1);
-          const strTime = date.toISOString().split('T')[0];
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          const strTime = `${year}-${month}-${day}`;
           insertContent(model, strTime);
         },
       },
