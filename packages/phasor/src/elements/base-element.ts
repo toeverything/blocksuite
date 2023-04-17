@@ -14,10 +14,16 @@ export interface HitTestOptions {
   fillHollow: boolean;
 }
 
+export type TransformPropertyValue = (value: string) => string;
+export function defaultTransformPropertyValue(v: string) {
+  return v;
+}
+
 export abstract class BaseElement implements SurfaceElement {
   abstract type: string;
   id: string;
   index!: string;
+  transformPropertyValue: TransformPropertyValue = v => v;
 
   x = 0;
   y = 0;

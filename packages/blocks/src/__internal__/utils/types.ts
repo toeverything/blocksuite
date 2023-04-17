@@ -1,5 +1,5 @@
 import type { Cell, Column } from '@blocksuite/global/database';
-import type { Color, ConnectorMode, ShapeType } from '@blocksuite/phasor';
+import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
@@ -10,6 +10,7 @@ import type {
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -77,8 +78,8 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  fillColor: Color;
-  strokeColor: Color;
+  fillColor: CssVariableName;
+  strokeColor: CssVariableName;
 };
 
 export enum BrushSize {
@@ -88,7 +89,7 @@ export enum BrushSize {
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: Color;
+  color: CssVariableName;
   lineWidth: BrushSize;
 };
 
@@ -99,13 +100,13 @@ export type PanMouseMode = {
 
 export type TextMouseMode = {
   type: 'text';
-  background: Color;
+  background: CssVariableName;
 };
 
 export type ConnectorMouseMode = {
   type: 'connector';
   mode: ConnectorMode;
-  color: Color;
+  color: CssVariableName;
 };
 
 export type MouseMode =

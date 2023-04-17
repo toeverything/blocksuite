@@ -4,6 +4,10 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '@blocksuite/blocks';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import type { Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -107,9 +111,9 @@ export const preset: InitFn = (workspace: Workspace) => {
 
     radius: 0,
     filled: false,
-    fillColor: '#ffffff',
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeWidth: 4,
-    strokeColor: '#010101',
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
     strokeStyle: 'solid',
   });
   contentParser.importMarkdown(presetMarkdown, frameId);

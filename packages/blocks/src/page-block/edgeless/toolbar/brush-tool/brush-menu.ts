@@ -1,12 +1,12 @@
 import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
-import type { Color } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { BrushSize } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { ColorEvent } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -116,7 +116,7 @@ export class EdgelessBrushMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor = (color: Color) => {
+  private _setBrushColor = (color: CssVariableName) => {
     if (this.mouseMode.type !== 'brush') return;
 
     const { lineWidth } = this.mouseMode;

@@ -1,30 +1,32 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
 
-import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
+import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { WithDisposable } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
+import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: BrushElement[]): Color | undefined {
+function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as Color) : undefined;
+  return max ? (max[0] as CssVariableName) : null;
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
+function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : undefined;
+  return max ? (Number(max[0]) as BrushSize) : null;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -124,7 +126,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setBrushColor(color: Color) {
+  private _setBrushColor(color: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
@@ -148,9 +150,10 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
+    const selectedColor =
+      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
     const style = {
-      backgroundColor: selectedColor ?? '#fff',
+      backgroundColor: `var(${selectedColor})`,
     };
 
     const selectedSize = getMostCommonSize(this.elements);

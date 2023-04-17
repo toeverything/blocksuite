@@ -9,10 +9,11 @@ import {
   handleDown,
   handleUp,
 } from '../utils/index.js';
+import { DEFAULT_SELECTED_COLOR } from './components/color-panel.js';
 import { FRAME_BACKGROUND_COLORS } from './components/component-toolbar/change-frame-button.js';
 import {
-  DEFAULT_FILL_COLOR,
-  DEFAULT_STROKE_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
 } from './components/component-toolbar/change-shape-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
@@ -103,7 +104,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener('p', () =>
     setMouseMode(edgeless, {
       type: 'brush',
-      color: '#000',
+      color: DEFAULT_SELECTED_COLOR,
       lineWidth: BrushSize.Thin,
     })
   );
@@ -111,8 +112,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     setMouseMode(edgeless, {
       type: 'shape',
       shape: 'rect',
-      fillColor: DEFAULT_FILL_COLOR,
-      strokeColor: DEFAULT_STROKE_COLOR,
+      fillColor: DEFAULT_SHAPE_FILL_COLOR,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
     })
   );
 

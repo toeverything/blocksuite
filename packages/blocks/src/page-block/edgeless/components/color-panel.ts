@@ -1,33 +1,54 @@
 import { TransparentIcon } from '@blocksuite/global/config';
-import type { Color } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-export class ColorEvent extends CustomEvent<Color> {}
+import type { CssVariableName } from '../../../__internal__/theme/css-variables.js';
 
-const colors: Color[] = [
-  '#ffe838',
-  '#ffaf38',
-  '#ff631f',
-  '#fc3f55',
-  '#ff38b3',
-  '#b638ff',
-  '#10cb86',
-  '#4f90ff',
-  '#3b25cc',
-  '#010101',
-  '#999999',
-  '#ffffff',
-];
+export class ColorEvent extends Event {
+  detail: CssVariableName;
 
-export function isTransparent(color: Color) {
-  return color.toLowerCase() === '#00000000';
+  constructor(
+    type: string,
+    {
+      detail,
+      composed,
+      bubbles,
+    }: { detail: CssVariableName; composed: boolean; bubbles: boolean }
+  ) {
+    super(type, { bubbles, composed });
+    this.detail = detail;
+  }
 }
 
-function isSameColorWithBackground(color: Color) {
-  return color.toLowerCase() === '#ffffff';
+// export class ColorEvent extends CustomEvent<RawCssVariableNames> {}
+
+const DEFAULT_COLORS: CssVariableName[] = [
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-green',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-black',
+  '--affine-palette-line-grey',
+  '--affine-palette-line-white',
+];
+export const DEFAULT_SELECTED_COLOR = DEFAULT_COLORS[9];
+
+export function isTransparent(color: CssVariableName) {
+  return color.toLowerCase() === '--affine-palette-transparent';
+}
+
+function isSameColorWithBackground(color: CssVariableName) {
+  return [
+    '--affine-palette-line-white',
+    '--affine-palette-shape-white',
+  ].includes(color.toLowerCase());
 }
 
 function TransparentColor(hollowCircle = false) {
@@ -56,8 +77,12 @@ function TransparentColor(hollowCircle = false) {
   </div>`;
 }
 
-function BorderedHollowCircle(color: Color) {
+function BorderedHollowCircle(color: CssVariableName) {
   const strokeWidth = isSameColorWithBackground(color) ? 1 : 0;
+  const style = {
+    fill: `var(${color})`,
+    stroke: 'var(--affine-border-color)',
+  };
   return html`<svg
     width="16"
     height="16"
@@ -67,14 +92,13 @@ function BorderedHollowCircle(color: Color) {
   >
     <path
       d="M12.3125 8C12.3125 10.3817 10.3817 12.3125 8 12.3125C5.61827 12.3125 3.6875 10.3817 3.6875 8C3.6875 5.61827 5.61827 3.6875 8 3.6875C10.3817 3.6875 12.3125 5.61827 12.3125 8ZM8 15.5C12.1421 15.5 15.5 12.1421 15.5 8C15.5 3.85786 12.1421 0.5 8 0.5C3.85786 0.5 0.5 3.85786 0.5 8C0.5 12.1421 3.85786 15.5 8 15.5Z"
-      fill="${color}"
-      stroke="#e5e5e5"
       stroke-width="${strokeWidth}"
+      style=${styleMap(style)}
     />
   </svg> `;
 }
 
-function AdditionIcon(color: Color, hollowCircle: boolean) {
+function AdditionIcon(color: CssVariableName, hollowCircle: boolean) {
   if (isTransparent(color)) {
     return TransparentColor(hollowCircle);
   }
@@ -85,7 +109,7 @@ function AdditionIcon(color: Color, hollowCircle: boolean) {
 }
 
 export function ColorUnit(
-  color: Color,
+  color: CssVariableName,
   {
     hollowCircle,
     letter,
@@ -96,12 +120,12 @@ export function ColorUnit(
 ) {
   const additionIcon = AdditionIcon(color, !!hollowCircle);
 
-  const colorStyle = !hollowCircle ? { background: color } : {};
+  const colorStyle = !hollowCircle ? { background: `var(${color})` } : {};
 
   const borderStyle =
     isSameColorWithBackground(color) && !hollowCircle
       ? {
-          border: '1px solid #e5e5e5',
+          border: '1px solid var(--affine-border-color)',
         }
       : {};
 
@@ -166,10 +190,10 @@ export class EdgelessColorPanel extends LitElement {
   `;
 
   @property()
-  value?: Color;
+  value?: CssVariableName;
 
   @property()
-  options: Color[] = colors;
+  options: CssVariableName[] = DEFAULT_COLORS;
 
   @property()
   showLetterMark = false;
@@ -177,7 +201,7 @@ export class EdgelessColorPanel extends LitElement {
   @property()
   hollowCircle = false;
 
-  private _onSelect(value: Color) {
+  private _onSelect(value: CssVariableName) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,

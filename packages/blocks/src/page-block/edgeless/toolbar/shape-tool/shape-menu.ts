@@ -28,7 +28,7 @@ export class EdgelessShapeMenu extends LitElement {
   `;
 
   @property()
-  selectedShape?: ShapeMouseMode['shape'];
+  selectedShape?: ShapeMouseMode['shape'] | null;
 
   slots = {
     select: new Slot<ShapeMouseMode['shape']>(),

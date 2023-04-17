@@ -46,7 +46,7 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background,
+    background: `var(${background})`,
     pointerEvents: 'all',
     zIndex: '0',
     boxSizing: 'border-box',

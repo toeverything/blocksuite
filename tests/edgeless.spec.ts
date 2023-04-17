@@ -3,6 +3,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
+import { toHex } from '../packages/blocks/src/__internal__/utils/std.js';
 import {
   activeFrameInEdgeless,
   addBasicConnectorElement,
@@ -40,6 +41,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
+  getCurrentThemeCSSPropertyValue,
   initEmptyEdgelessState,
   initThreeParagraphs,
   locatorPanButton,
@@ -55,6 +57,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertEdgelessColorSameWithHexColor,
   assertEdgelessFrameBackground,
   assertEdgelessHoverRect,
   assertEdgelessNonHoverRect,
@@ -286,14 +289,16 @@ test('add brush element with color', async ({ page }) => {
   await switchEditorMode(page);
 
   await setMouseMode(page, 'brush');
-  await selectBrushColor(page, '#B638FF');
+  const color = '--affine-palette-line-blue';
+  await selectBrushColor(page, color);
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
   await dragBetweenCoords(page, start, end, { steps: 100 });
 
-  const [color] = await pickColorAtPoints(page, [[110, 110]]);
-  assertSameColor(color, '#B638FF');
+  const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
+
+  await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
 });
 
 test('add brush element with different size', async ({ page }) => {
@@ -303,7 +308,8 @@ test('add brush element with different size', async ({ page }) => {
 
   await setMouseMode(page, 'brush');
   await selectBrushSize(page, 16);
-  await selectBrushColor(page, '#B638FF');
+  const color = '--affine-palette-line-blue';
+  await selectBrushColor(page, color);
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 100 };
@@ -320,8 +326,9 @@ test('add brush element with different size', async ({ page }) => {
       [110, 91],
       [110, 108],
     ]);
-  assertSameColor(topEdge, '#B638FF');
-  assertSameColor(bottomEdge, '#B638FF');
+
+  await assertEdgelessColorSameWithHexColor(page, color, topEdge);
+  await assertEdgelessColorSameWithHexColor(page, color, bottomEdge);
   assertSameColor(nearTopEdge, '#000000');
   assertSameColor(nearBottomEdge, '#000000');
 });
@@ -1314,11 +1321,15 @@ test('change frame color', async ({ page }) => {
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
-  await assertEdgelessFrameBackground(page, ids.frameId, '#fbfafc');
+  await assertEdgelessFrameBackground(
+    page,
+    ids.frameId,
+    '--affine-background-secondary-color'
+  );
 
   await selectFrameInEdgeless(page, ids.frameId);
   await triggerComponentToolbarAction(page, 'changeFrameColor');
-  const color = '#dff4e8';
+  const color = '--affine-tag-blue';
   await changeEdgelessFrameBackground(page, color);
   await assertEdgelessFrameBackground(page, ids.frameId, color);
 });
@@ -1336,14 +1347,14 @@ test('change shape fill color', async ({ page }) => {
 
   await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeFillColor');
-  const color = '#897ce0';
+  const color = '--affine-palette-shape-navy';
   await changeShapeFillColor(page, color);
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [
     [rect.start.x + 20, rect.start.y + 20],
   ]);
 
-  assertSameColor(picked, color);
+  await assertEdgelessColorSameWithHexColor(page, color, picked);
 });
 
 test('change shape stroke color', async ({ page }) => {
@@ -1359,12 +1370,12 @@ test('change shape stroke color', async ({ page }) => {
 
   await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
-  const color = '#3b25cc';
+  const color = '--affine-palette-line-navy';
   await changeShapeStrokeColor(page, color);
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [
     [rect.start.x + 2, rect.start.y + 2],
   ]);
 
-  assertSameColor(picked, color);
+  await assertEdgelessColorSameWithHexColor(page, color, picked);
 });

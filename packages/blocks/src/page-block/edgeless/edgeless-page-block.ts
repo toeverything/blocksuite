@@ -35,6 +35,9 @@ import {
   resetNativeSelection,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
+import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
+import { isCssVariable } from '../../__internal__/theme/css-variables.js';
+import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
 import {
   ShadowlessElement,
   WithDisposable,
@@ -191,7 +194,20 @@ export class EdgelessPageBlockComponent
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this.surface = new SurfaceManager(yContainer);
+    this.surface = new SurfaceManager(yContainer, value => {
+      if (isCssVariable(value)) {
+        const cssValue = getThemePropertyValue(this, value as CssVariableName);
+        if (cssValue === undefined) {
+          console.error(
+            new Error(
+              `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
+            )
+          );
+        }
+        return cssValue ?? value;
+      }
+      return value;
+    });
   }
 
   private _handleToolbarFlag() {

@@ -1,5 +1,3 @@
-import type { Color } from '../../consts.js';
-
 export type SerializedBrushProps = {
   id: string;
   index: string;
@@ -9,7 +7,7 @@ export type SerializedBrushProps = {
   // [[x0,y0],[x1,y1]...]
   points: string;
 
-  color: Color;
+  color: string;
   lineWidth: number;
 };
 

@@ -1,41 +1,32 @@
 import { Slot } from '@blocksuite/store';
 
-import { capitalize, uncapitalize } from '../utils/std.js';
-import type { CssVariable, CssVariableName } from './css-variables.js';
+import type { CssVariablesMap } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';
 
-/**
- * Usage:
- * cssNameToJsName('--affine-theme-mode');  // affineThemeMode
- */
-function cssNameToJsName(cssName: string) {
-  const upper = cssName
-    .split('-')
-    .filter(s => !!s)
-    .map(s => capitalize(s))
-    .join('');
-  return uncapitalize(upper);
-}
-
-function extractCssVariables(element: Element): CssVariable {
+function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
   const variables = VARIABLES.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
-    const name = cssNameToJsName(cssName) as CssVariableName;
-    acc[name] = value;
+    acc[cssName] = value;
+
+    // --affine-palette-transparent: special values added for the sake of logical consistency.
+    if (cssName === '--affine-palette-transparent' && !value) {
+      acc[cssName] = '#00000000';
+    }
+
     return acc;
-  }, {} as CssVariable);
+  }, {} as CssVariablesMap);
   return variables;
 }
 
 /**
  * Observer theme changing by `data-theme` property
  */
-export class ThemeObserver extends Slot<CssVariable> {
+export class ThemeObserver extends Slot<CssVariablesMap> {
   private _observer?: MutationObserver;
 
   private _mode = '';
-  private _cssVariables: CssVariable | null = null;
+  private _cssVariables: CssVariablesMap | null = null;
 
   get cssVariables() {
     return this._cssVariables;

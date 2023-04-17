@@ -1,4 +1,4 @@
-/* CSS variables. You need to handle all places where CSS variables are marked. */
+/* CSS variables. You need to handle all places where `CSS variables` are marked. */
 export const VARIABLES = [
   '--affine-theme-mode',
   '--affine-editor-mode',
@@ -98,27 +98,45 @@ export const VARIABLES = [
   '--affine-tag-blue',
   '--affine-tag-purple',
   '--affine-tag-pink',
-  '--affine-palette-yellow',
-  '--affine-palette-orange',
-  '--affine-palette-tangerine',
-  '--affine-palette-red',
-  '--affine-palette-magenta',
-  '--affine-palette-purple',
-  '--affine-palette-navy',
-  '--affine-palette-blue',
-  '--affine-palette-green',
-  '--affine-palette-grey',
-  '--affine-palette-white',
-  '--affine-palette-black',
+
+  // --affine-palette-transparent: special values added for the sake of logical consistency.
+  '--affine-palette-transparent',
+
+  '--affine-palette-shape-yellow',
+  '--affine-palette-shape-orange',
+  '--affine-palette-shape-tangerine',
+  '--affine-palette-shape-red',
+  '--affine-palette-shape-magenta',
+  '--affine-palette-shape-purple',
+  '--affine-palette-shape-navy',
+  '--affine-palette-shape-blue',
+  '--affine-palette-shape-green',
+  '--affine-palette-shape-grey',
+  '--affine-palette-shape-white',
+  '--affine-palette-shape-black',
+
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-green',
+  '--affine-palette-line-grey',
+  '--affine-palette-line-white',
+  '--affine-palette-line-black',
 ] as const;
 
-type CamelCase<S extends string> =
-  S extends `${infer P1}-${infer P2}${infer P3}`
-    ? `${Lowercase<P1>}${Capitalize<CamelCase<`${P2}${P3}`>>}`
-    : `${Lowercase<S>}`;
-
 type VariablesType = typeof VARIABLES;
-type RawCssVariablesName = Extract<VariablesType[keyof VariablesType], string>;
+export type CssVariableName = Extract<
+  VariablesType[keyof VariablesType],
+  string
+>;
 
-export type CssVariableName = Uncapitalize<CamelCase<RawCssVariablesName>>;
-export type CssVariable = Record<CssVariableName, string>;
+export type CssVariablesMap = Record<CssVariableName, string>;
+
+export function isCssVariable(name: string): name is CssVariableName {
+  return VARIABLES.includes(name as CssVariableName);
+}

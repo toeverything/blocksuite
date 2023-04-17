@@ -961,7 +961,7 @@ test('should indent native multi-selection block', async ({ page }) => {
     page,
     `<affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:paragraph
       prop:text="123"
@@ -1002,7 +1002,7 @@ test('should indent multi-selection block', async ({ page }) => {
     page,
     `<affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:paragraph
       prop:text="123"
@@ -2009,7 +2009,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:paragraph
       prop:text="123"

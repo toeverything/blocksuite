@@ -6,12 +6,13 @@ import type {
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
+import { DEFAULT_SELECTED_COLOR } from '../components/color-panel.js';
 import { MouseModeController } from './index.js';
 
 export class BrushModeController extends MouseModeController<BrushMouseMode> {
   readonly mouseMode = <BrushMouseMode>{
     type: 'brush',
-    color: '#000000',
+    color: DEFAULT_SELECTED_COLOR,
     lineWidth: 4,
   };
 

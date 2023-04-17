@@ -11,8 +11,8 @@ import type {
 } from '../../../../__internal__/index.js';
 import { WithDisposable } from '../../../../__internal__/index.js';
 import {
-  DEFAULT_FILL_COLOR,
-  DEFAULT_STROKE_COLOR,
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../components/component-toolbar/change-shape-button.js';
 import { createButtonPopper } from '../../components/utils.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
@@ -73,8 +73,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         this._setMouseMode({
           type: 'shape',
           shape,
-          fillColor: DEFAULT_FILL_COLOR,
-          strokeColor: DEFAULT_STROKE_COLOR,
+          fillColor: DEFAULT_SHAPE_FILL_COLOR,
+          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
         });
       })
     );
@@ -98,8 +98,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._setMouseMode({
             type: 'shape',
             shape: 'rect',
-            fillColor: DEFAULT_FILL_COLOR,
-            strokeColor: DEFAULT_STROKE_COLOR,
+            fillColor: DEFAULT_SHAPE_FILL_COLOR,
+            strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           });
           this._toggleShapeMenu();
         }}

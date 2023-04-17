@@ -340,7 +340,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -381,7 +381,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -492,7 +492,7 @@ test('cut will delete all content, and copy will reappear content', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -511,7 +511,7 @@ test('cut will delete all content, and copy will reappear content', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -562,7 +562,7 @@ test('should copy and paste of database work', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:database
       prop:columns="Array [1]"
@@ -597,7 +597,7 @@ test('should copy and paste of database work', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:database
       prop:columns="Array [1]"

@@ -214,7 +214,7 @@ test.describe('slash search', () => {
       page,
       `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:list
     prop:checked={false}
