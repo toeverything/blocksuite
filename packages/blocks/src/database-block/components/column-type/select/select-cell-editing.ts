@@ -194,6 +194,10 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     return this.mode === SelectMode.Single;
   }
 
+  get selectionList() {
+    return this.column.selection as SelectTag[];
+  }
+
   protected override firstUpdated() {
     this.style.width = `${SELECT_EDIT_POPUP_WIDTH}px`;
     this._selectInput.focus();
@@ -237,8 +241,16 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     event: KeyboardEvent,
     selectedValue: SelectTag[]
   ) => {
-    if (event.key === 'Enter' && this._inputValue.trim() !== '') {
-      this._onAddSelection(selectedValue);
+    const inputValue = this._inputValue.trim();
+    if (event.key === 'Enter' && inputValue !== '') {
+      const selectTag = this.selectionList.find(
+        item => item.value === inputValue
+      );
+      if (selectTag) {
+        this._onSelect(selectedValue, selectTag);
+      } else {
+        this._onAddSelection(selectedValue);
+      }
     }
   };
 
@@ -314,12 +326,11 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     }
 
     if (type === 'delete') {
-      const selection = [...(this.column.selection as SelectTag[])];
       this.databaseModel.updateColumn({
         ...this.column,
-        selection: selection.filter((_, i) => i !== index),
+        selection: this.selectionList.filter((_, i) => i !== index),
       });
-      const select = selection[index];
+      const select = this.selectionList[index];
       this.databaseModel.deleteSelectedCellTag(this.column.id, select);
       return;
     }
@@ -365,7 +376,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .querySelectorAll('affine-database-select-option')
       .item(index) as SelectOption;
 
-    const selection = [...(this.column.selection as SelectTag[])];
+    const selection = [...this.selectionList];
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
@@ -383,8 +394,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   };
 
   override render() {
-    const selection = this.column.selection as SelectTag[];
-    const filteredSelection = selection.filter(item => {
+    const filteredSelection = this.selectionList.filter(item => {
       if (!this._inputValue) {
         return true;
       }
