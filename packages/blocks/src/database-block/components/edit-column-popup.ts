@@ -45,7 +45,7 @@ export const actionStyles = css`
     cursor: pointer;
   }
   .action:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .action-content {
     display: flex;
@@ -167,7 +167,7 @@ class ColumnTypePopup extends LitElement {
       padding: 8px;
       border: 1px solid var(--affine-border-color);
       border-radius: 4px;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-primary-color);
       box-shadow: var(--affine-popover-shadow);
     }
     ${actionStyles}
@@ -255,7 +255,7 @@ class ColumnTypePopup extends LitElement {
 export class EditColumnPopup extends LitElement {
   static override styles = css`
     :host {
-      background: var(--affine-popover-background);
+      background: var(--affine-background-primary-color);
       box-shadow: var(--affine-popover-shadow);
       padding: 8px;
       border: 1px solid var(--affine-border-color);
@@ -267,7 +267,7 @@ export class EditColumnPopup extends LitElement {
     .affine-database-edit-column-popup {
       display: flex;
       flex-direction: column;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
     .affine-database-edit-column-popup * {
       box-sizing: border-box;

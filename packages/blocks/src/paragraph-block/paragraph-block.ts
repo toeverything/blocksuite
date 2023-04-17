@@ -67,13 +67,12 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       border-radius: 5px;
     }
     .affine-paragraph-block-container.selected {
-      background-color: var(--affine-selected-color);
+      background-color: var(--affine-hover-color);
     }
     .h1 {
       font-size: var(--affine-font-h1);
       line-height: calc(1em + 12px);
       margin-top: calc(var(--affine-paragraph-space) + 24px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h1 code {
       font-size: calc(var(--affine-font-base) + 8px);
@@ -82,7 +81,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: var(--affine-font-h2);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 20px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h2 code {
       font-size: calc(var(--affine-font-base) + 6px);
@@ -91,7 +89,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: var(--affine-font-h3);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 16px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h3 code {
       font-size: calc(var(--affine-font-base) + 4px);
@@ -100,7 +97,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: var(--affine-font-h4);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 12px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h4 code {
       font-size: calc(var(--affine-font-base) + 2px);
@@ -109,7 +105,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: var(--affine-font-h5);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 8px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h5 code {
       font-size: calc(var(--affine-font-base));
@@ -118,7 +113,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: var(--affine-font-h6);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 4px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h6 code {
       font-size: calc(var(--affine-font-base) - 2px);

@@ -11,7 +11,7 @@ import type { FrameBlockModel } from './frame-model.js';
 export class FrameBlockComponent extends ShadowlessElement {
   static override styles = css`
     .affine-frame-block-container.selected {
-      background-color: var(--affine-selected-color);
+      background-color: var(--affine-hover-color);
     }
   `;
 

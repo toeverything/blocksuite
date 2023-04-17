@@ -1312,7 +1312,7 @@ export const DatabaseDone = html`
 const addColumnStyle = `
   width: 12px;
   height: 12px;
-  fill: var(--affine-text-color);
+  fill: var(--affine-text-primary-color);
 `;
 export const DatabaseAddColumn = html`
   <svg viewBox="0 0 16 16" style=${addColumnStyle}>

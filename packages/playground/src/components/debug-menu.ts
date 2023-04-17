@@ -23,11 +23,6 @@ import {
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
-import {
-  CSSColorProperties,
-  CSSSizeProperties,
-  plate,
-} from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
@@ -250,24 +245,8 @@ export class DebugMenu extends ShadowlessElement {
     });
     this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 350;
-    const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');
     sizeFolder.open();
-    CSSSizeProperties.forEach(item => {
-      const { name, defaultValue, cssProperty } = item;
-      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
-        style.setProperty(cssProperty, Math.round(e) + 'px');
-      });
-    });
-
-    const colorFolder = this._styleMenu.addFolder('Color');
-    colorFolder.open();
-    CSSColorProperties.forEach(item => {
-      const { name, cssProperty } = item;
-      colorFolder.addColor(plate, name).onChange((color: string | null) => {
-        style.setProperty(cssProperty, color);
-      });
-    });
     this._styleMenu.hide();
   }
 

@@ -70,7 +70,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       margin: 0 2px;
     }
     .affine-reference:hover {
-      background: var(--affine-hover-background);
+      background: var(--affine-hover-color);
     }
 
     .affine-reference > svg {
@@ -228,8 +228,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       attributes,
       isDisabled
         ? {
-            color: 'var(--affine-disable-color)',
-            fill: 'var(--affine-disable-color)',
+            color: 'var(--affine-text-disable-color)',
+            fill: 'var(--affine-text-disable-color)',
           }
         : {}
     );

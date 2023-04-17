@@ -28,7 +28,7 @@ import { SelectActionPopup } from './select-option-popup.js';
 const styles = css`
   :host {
     z-index: 2;
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
   }
   .affine-database-select-cell-select {
@@ -45,7 +45,7 @@ const styles = css`
     min-height: 44px;
     width: 345px;
     padding: 10px 8px;
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-input {
     flex: 1 1 0%;
@@ -124,7 +124,7 @@ const styles = css`
     margin-bottom: 4px;
   }
   .select-option:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-option:hover .select-option-icon {
     display: flex;
@@ -151,7 +151,7 @@ const styles = css`
     cursor: pointer;
   }
   .select-option-icon:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-option-icon svg {
     width: 16px;
@@ -159,7 +159,7 @@ const styles = css`
     pointer-events: none;
   }
   .editing {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .editing .select-option-icon {
     display: flex;
