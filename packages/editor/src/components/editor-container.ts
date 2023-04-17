@@ -15,7 +15,7 @@ import {
   ShadowlessElement,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { assertExists,isFirefox, type Page, Slot } from '@blocksuite/store';
+import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
