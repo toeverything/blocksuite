@@ -5,6 +5,7 @@ import {
   assertColumnWidth,
   assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
+  assertDatabaseSearching,
   assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
   blurDatabaseSearch,
@@ -210,6 +211,11 @@ test('should database search work', async ({ page }) => {
   // search for '23'
   await type(page, '3');
   expect(await rows.count()).toBe(1);
+  // click searchIcon when opening
+  const searchIcon = page.locator('.affine-database-search-input-icon');
+  await searchIcon.click();
+  expect(await rows.count()).toBe(1);
+
   const cell = page.locator('.select-selected');
   expect(await cell.innerText()).toBe('123');
 
@@ -223,42 +229,32 @@ test('should database search input displayed correctly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  const searchContainer = await focusDatabaseSearch(page);
+  await focusDatabaseSearch(page);
   await blurDatabaseSearch(page);
-  expect(await searchContainer.getAttribute('style')).toContain(
-    'overflow: hidden;'
-  );
+  await assertDatabaseSearching(page, false);
 
   await focusDatabaseSearch(page);
   await type(page, '2');
   await blurDatabaseSearch(page);
-  expect(await searchContainer.getAttribute('style')).toContain(
-    'overflow: unset;'
-  );
+  await assertDatabaseSearching(page, true);
 
   await focusDatabaseSearch(page);
   await pressBackspace(page);
   await blurDatabaseSearch(page);
-  expect(await searchContainer.getAttribute('style')).toContain(
-    'overflow: hidden;'
-  );
+  await assertDatabaseSearching(page, false);
 
   await focusDatabaseSearch(page);
   await type(page, '2');
   const closeIcon = page.locator('.close-icon');
   await closeIcon.click();
   await blurDatabaseSearch(page);
-  expect(await searchContainer.getAttribute('style')).toContain(
-    'overflow: hidden;'
-  );
+  await assertDatabaseSearching(page, false);
 
   await focusDatabaseSearch(page);
   await type(page, '2');
   await pressEscape(page);
   await blurDatabaseSearch(page);
-  expect(await searchContainer.getAttribute('style')).toContain(
-    'overflow: hidden;'
-  );
+  await assertDatabaseSearching(page, false);
 });
 
 test('should database title and rich-text support undo/redo', async ({
@@ -568,6 +564,31 @@ test.describe('select column tag action', () => {
     const selected2 = cellSelected.nth(1);
     expect(await selected1.innerText()).toBe('1234123abc');
     expect(await selected2.innerText()).toBe('abc');
+  });
+
+  test('should select tag renaming support shortcut key', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    const { selectOption } = await performSelectColumnTagAction(page, 'rename');
+    await waitNextFrame(page);
+    await type(page, '456');
+    // esc
+    await pressEscape(page);
+    const option1 = selectOption.nth(0);
+    const input = option1.locator('[data-virgo-text="true"]');
+    expect(await input.innerText()).toBe('123');
+
+    await clickDatabaseOutside(page);
+    await performSelectColumnTagAction(page, 'rename');
+    await waitNextFrame(page);
+    await type(page, '456');
+    // enter
+    await pressEnter(page);
+    expect(await input.innerText()).toBe('123456');
   });
 
   test('should support select tag deletion', async ({ page }) => {

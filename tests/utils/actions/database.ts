@@ -206,15 +206,30 @@ export async function waitSearchTransitionEnd(page: Page) {
   await waitNextFrame(page, 400);
 }
 
+export async function assertDatabaseSearching(
+  page: Page,
+  isSearching: boolean
+) {
+  const searchExpand = page.locator('.search-container-expand');
+  const count = await searchExpand.count();
+  expect(count).toBe(isSearching ? 1 : 0);
+}
+
 export async function focusDatabaseSearch(page: Page) {
   (await getDatabaseMouse(page)).mouseOver();
   const searchContainer = page.locator('.search-container');
-  const searchIcon = searchContainer.locator(
-    '.affine-database-search-input-icon'
-  );
-  await searchIcon.click();
-  await waitSearchTransitionEnd(page);
-  return searchContainer;
+  const searchExpand = searchContainer.locator('.search-container-expand');
+  const count = await searchExpand.count();
+  if (count === 1) {
+    const input = searchContainer.locator('.affine-database-search-input');
+    await input.click();
+  } else {
+    const searchIcon = searchContainer.locator(
+      '.affine-database-search-input-icon'
+    );
+    await searchIcon.click();
+    await waitSearchTransitionEnd(page);
+  }
 }
 
 export async function blurDatabaseSearch(page: Page) {

@@ -19,7 +19,7 @@ export class EdgelessShapeMenu extends LitElement {
       align-items: center;
       width: 240px;
       height: 48px;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: none;
@@ -28,7 +28,7 @@ export class EdgelessShapeMenu extends LitElement {
   `;
 
   @property()
-  selectedShape?: ShapeMouseMode['shape'];
+  selectedShape?: ShapeMouseMode['shape'] | null;
 
   slots = {
     select: new Slot<ShapeMouseMode['shape']>(),

@@ -2,12 +2,13 @@ import '../tool-icon-button.js';
 import '../color-panel.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
-import type { Color, ShapeElement, SurfaceManager } from '@blocksuite/phasor';
+import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -22,67 +23,67 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonShape(
   elements: ShapeElement[]
-): ShapeMouseMode['shape'] | undefined {
+): ShapeMouseMode['shape'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElement) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['shape']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['shape']) : null;
 }
 
 function getMostCommonFillColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | undefined {
+): ShapeMouseMode['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
-    return ele.filled ? ele.fillColor : '#00000000';
+    return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
 }
 
 function getMostCommonStrokeColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | undefined {
+): ShapeMouseMode['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
 }
 
-export const DEFAULT_FILL_COLOR = '#00000000';
-const FILL_COLORS: Color[] = [
-  '#FFF188',
-  '#FFCF88',
-  '#FFA179',
-  '#FD8C99',
-  '#FF88D1',
-  '#D388FF',
-  '#70E0B6',
-  '#95BCFF',
-  '#897CE0',
-  '#000000',
-  '#FFFFFF',
-  '#00000000',
+const FILL_COLORS: CssVariableName[] = [
+  '--affine-palette-shape-yellow',
+  '--affine-palette-shape-orange',
+  '--affine-palette-shape-tangerine',
+  '--affine-palette-shape-red',
+  '--affine-palette-shape-magenta',
+  '--affine-palette-shape-purple',
+  '--affine-palette-shape-green',
+  '--affine-palette-shape-blue',
+  '--affine-palette-shape-navy',
+  '--affine-palette-shape-black',
+  '--affine-palette-shape-white',
+  '--affine-palette-transparent',
 ];
+export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[11];
 
-export const DEFAULT_STROKE_COLOR = '#000000';
-const STROKE_COLORS: Color[] = [
-  '#FFE838',
-  '#FFAF38',
-  '#FF631F',
-  '#FC3F55',
-  '#FF38B3',
-  '#B638FF',
-  '#10CB86',
-  '#4F90FF',
-  '#3B25CC',
-  '#000000',
-  '#FFFFFF',
-  '#00000000',
+const STROKE_COLORS: CssVariableName[] = [
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-green',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-black',
+  '--affine-palette-line-white',
+  '--affine-palette-transparent',
 ];
+export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[9];
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
@@ -94,7 +95,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       justify-content: center;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     menu-divider {
@@ -184,7 +185,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setShapeFillColor(color: Color) {
+  private _setShapeFillColor(color: CssVariableName) {
     const filled = !isTransparent(color);
     this.page.transact(() => {
       this.elements.forEach(ele => {
@@ -197,7 +198,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this._forceUpdateSelection();
   }
 
-  private _setShapeStrokeColor(color: Color) {
+  private _setShapeStrokeColor(color: CssVariableName) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
         this.surface.updateElementProps(ele.id, {
@@ -265,6 +266,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       getMostCommonFillColor(this.elements) ?? FILL_COLORS[0];
     const selectedStrokeColor =
       getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
+
     return html`
       <edgeless-tool-icon-button
         class="change-shape-button"

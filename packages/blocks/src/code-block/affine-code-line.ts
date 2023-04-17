@@ -38,6 +38,7 @@ export class AffineCodeLine extends ShadowlessElement {
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
       const vText = new VText();
       vText.str = this.delta.insert;
+      vText.styles = styleMap({});
       return html`<span>${vText}</span>`;
     }
 

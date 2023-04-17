@@ -130,21 +130,21 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _initResizeEffect(element: HTMLElement) {
     const pageBlock = getDefaultPage(this.targetModel.page);
     const viewportElement = pageBlock?.viewportElement;
-    assertExists(viewportElement);
-
-    const resizeObserver = new ResizeObserver(
-      (entries: ResizeObserverEntry[]) => {
-        for (const { target } of entries) {
-          if (target === viewportElement) {
-            const { right: containerRight } = element.getBoundingClientRect();
-            // calc the position of add column button
-            this._addColumnButton.style.left = `${containerRight}px`;
-            break;
+    if (viewportElement) {
+      const resizeObserver = new ResizeObserver(
+        (entries: ResizeObserverEntry[]) => {
+          for (const { target } of entries) {
+            if (target === viewportElement) {
+              const { right: containerRight } = element.getBoundingClientRect();
+              // calc the position of add column button
+              this._addColumnButton.style.left = `${containerRight}px`;
+              break;
+            }
           }
         }
-      }
-    );
-    resizeObserver.observe(viewportElement);
+      );
+      resizeObserver.observe(viewportElement);
+    }
   }
 
   setDragHandleHeight() {

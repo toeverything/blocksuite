@@ -43,12 +43,6 @@ export class AffineLink extends ShadowlessElement {
       cursor: pointer;
     }
 
-    /*
-    a:visited {
-      color: var(--affine-link-visited-color);
-    }
-    */
-
     a:hover [data-virgo-text='true'] {
       text-decoration: underline;
     }

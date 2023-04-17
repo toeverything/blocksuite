@@ -24,5 +24,5 @@ export function clearMarksOnDiscontinuousInput(vEditor: VEditor): void {
 }
 
 export function setupVirgoScroll(page: Page, vEditor: VEditor): void {
-  vEditor.shouldScrollIntoView = isPageMode(page);
+  vEditor.shouldLineScrollIntoView = isPageMode(page);
 }

@@ -24,8 +24,8 @@ export class IconButton extends LitElement {
       background: transparent;
       cursor: pointer;
       user-select: none;
-      fill: var(--affine-icon-color);
       font-family: var(--affine-font-family);
+      fill: var(--affine-icon-color);
       color: var(--affine-popover-color);
       pointer-events: auto;
     }
@@ -37,7 +37,7 @@ export class IconButton extends LitElement {
     }
 
     :host(:hover) {
-      background: var(--affine-hover-background);
+      background: var(--affine-hover-color);
       fill: var(--affine-primary-color);
       color: var(--affine-primary-color);
     }
@@ -51,14 +51,14 @@ export class IconButton extends LitElement {
     :host([disabled]),
     :host(:disabled) {
       background: transparent;
-      color: var(--affine-disable-color);
-      fill: var(--affine-disable-color);
+      color: var(--affine-text-disable-color);
+      fill: var(--affine-text-disable-color);
       cursor: not-allowed;
     }
 
     /* You can add a 'hover' attribute to the button to show the hover style */
     :host([hover]) {
-      background: var(--affine-hover-background);
+      background: var(--affine-hover-color);
       fill: var(--affine-primary-color);
       color: var(--affine-primary-color);
     }

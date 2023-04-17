@@ -32,7 +32,7 @@ export const PageManger = () => {
             mt: '1rem',
             ml: '1rem',
           }}
-          onClick={() => {
+          onPress={() => {
             createPage();
           }}
         >
@@ -47,7 +47,7 @@ export const PageManger = () => {
                   isPressable
                   isHoverable
                   variant="bordered"
-                  onClick={() => {
+                  onPress={() => {
                     setCurrentPage(page);
                   }}
                 >
@@ -70,7 +70,7 @@ export const PageManger = () => {
             mt: '1rem',
             ml: '1rem',
           }}
-          onClick={() => setCurrentPage(null)}
+          onPress={() => setCurrentPage(null)}
         >
           Back to list
         </Button>
@@ -80,7 +80,7 @@ export const PageManger = () => {
             ml: '1rem',
           }}
           color="error"
-          onClick={() => deletePage(currentPage.id)}
+          onPress={() => deletePage(currentPage.id)}
         >
           Delete Page
         </Button>

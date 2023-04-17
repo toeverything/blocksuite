@@ -18,7 +18,7 @@ const paragraphPanelStyle = css`
     padding: 8px 4px;
     overflow-y: auto;
 
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
@@ -36,7 +36,7 @@ export const formatQuickBarStyle = css`
     height: 40px;
 
     border-radius: 10px 10px 10px 0;
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
     z-index: var(--affine-z-index-popover);
     user-select: none;

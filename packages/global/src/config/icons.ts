@@ -1312,7 +1312,7 @@ export const DatabaseDone = html`
 const addColumnStyle = `
   width: 12px;
   height: 12px;
-  fill: var(--affine-text-color);
+  fill: var(--affine-text-primary-color);
 `;
 export const DatabaseAddColumn = html`
   <svg viewBox="0 0 16 16" style=${addColumnStyle}>
@@ -1378,7 +1378,7 @@ const PageIconSVG = svg`
   />
 `;
 
-const PageSubpageSVG = svg`<path
+const LinkedPageSVG = svg`<path
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H14C14.4142 3.25 14.75 3.58579 14.75 4C14.75 4.41421 14.4142 4.75 14 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V20C4.75 20.4142 4.41421 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20V6Z"
@@ -1435,10 +1435,10 @@ export const ConnectorLIcon = html`<svg
 </svg> `;
 
 export const FontPageIcon = fontIcon(PageIconSVG);
-export const FontPageSubpageIcon = fontIcon(PageSubpageSVG);
+export const FontLinkedPageIcon = fontIcon(LinkedPageSVG);
 
 export const PageIcon = icon(PageIconSVG, 20);
-export const PageSubpageIcon = icon(PageSubpageSVG, 20);
+export const LinkedPageIcon = icon(LinkedPageSVG, 20);
 
 export const NewPageIcon = html`<svg
   width="20"
@@ -1458,15 +1458,11 @@ export const NewPageIcon = html`<svg
   />
 </svg>`;
 
-export const DualLinkIcon = html`<svg
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path
-    fill-rule="evenodd"
-    clip-rule="evenodd"
-    d="M11 4.75C10.5858 4.75 10.25 4.41421 10.25 4C10.25 3.58579 10.5858 3.25 11 3.25H19.9C19.9174 3.25 19.9346 3.25052 19.9517 3.25155C20.1594 3.23823 20.3716 3.31093 20.5303 3.46967C20.6891 3.62841 20.7618 3.84059 20.7485 4.04829C20.7495 4.0654 20.75 4.08264 20.75 4.1V13C20.75 13.4142 20.4142 13.75 20 13.75C19.5858 13.75 19.25 13.4142 19.25 13V5.81066L4.53033 20.5303C4.23744 20.8232 3.76256 20.8232 3.46967 20.5303C3.17678 20.2374 3.17678 19.7626 3.46967 19.4697L18.1893 4.75H11Z"
-  />
-</svg>`;
+export const DualLinkSVG = svg` <path
+  fill-rule="evenodd"
+  clip-rule="evenodd"
+  d="M11 4.75C10.5858 4.75 10.25 4.41421 10.25 4C10.25 3.58579 10.5858 3.25 11 3.25H19.9C19.9174 3.25 19.9346 3.25052 19.9517 3.25155C20.1594 3.23823 20.3716 3.31093 20.5303 3.46967C20.6891 3.62841 20.7618 3.84059 20.7485 4.04829C20.7495 4.0654 20.75 4.08264 20.75 4.1V13C20.75 13.4142 20.4142 13.75 20 13.75C19.5858 13.75 19.25 13.4142 19.25 13V5.81066L4.53033 20.5303C4.23744 20.8232 3.76256 20.8232 3.46967 20.5303C3.17678 20.2374 3.17678 19.7626 3.46967 19.4697L18.1893 4.75H11Z"
+/>`;
+
+export const DualLinkIcon = icon(DualLinkSVG, 20);
+export const DualLinkIcon16 = icon(DualLinkSVG, 16);

@@ -1,5 +1,3 @@
-import type { Color } from '../../consts.js';
-
 export enum ConnectorMode {
   Straight,
   Orthogonal,
@@ -33,7 +31,7 @@ export type SerializedConnectorProps = {
 
   mode: ConnectorMode;
   lineWidth: number;
-  color: Color;
+  color: string;
 
   startElement?: AttachedElement;
   endElement?: AttachedElement;

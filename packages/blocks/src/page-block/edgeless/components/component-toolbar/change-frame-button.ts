@@ -2,12 +2,12 @@ import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
-import type { Color } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
@@ -19,23 +19,23 @@ import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-export const FRAME_BACKGROUND_COLORS: Color[] = [
-  '#FBFAFC',
-  '#FFF4D8',
-  '#FFE1E1',
-  '#DFF4E8',
-  '#E1EFFF',
-  '#F3F0FF',
+export const FRAME_BACKGROUND_COLORS: CssVariableName[] = [
+  '--affine-background-secondary-color',
+  '--affine-tag-yellow',
+  '--affine-tag-red',
+  '--affine-tag-green',
+  '--affine-tag-blue',
+  '--affine-tag-purple',
 ];
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]
-): TextMouseMode['background'] | undefined {
+): TextMouseMode['background'] | null {
   const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
     return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as TextMouseMode['background']) : undefined;
+  return max ? (max[0] as TextMouseMode['background']) : null;
 }
 
 @customElement('edgeless-change-frame-button')
@@ -45,7 +45,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       display: block;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     edgeless-color-panel {
@@ -54,7 +54,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 68px;
       padding: 8px 12px;
       flex-wrap: wrap;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -72,7 +72,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 16px;
       box-sizing: border-box;
       border-radius: 50%;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-size: 12px;
     }
   `;
@@ -98,15 +98,15 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _renderSelectedColor(color: Color) {
-    const style = { backgroundColor: color };
+  private _renderSelectedColor(color: CssVariableName) {
+    const style = { backgroundColor: `var(${color})` };
 
     return html`<div class="selected-background" style=${styleMap(style)}>
       A
     </div>`;
   }
 
-  private _setBlockBackground(color: Color) {
+  private _setBlockBackground(color: CssVariableName) {
     this.frames.forEach(frame => {
       this.page.updateBlock(frame, { background: color });
     });

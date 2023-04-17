@@ -65,18 +65,18 @@ export class DefaultPageBlockComponent
     }
 
     .affine-default-page-block-container {
+      display: flex;
+      flex-direction: column;
       width: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-weight: 400;
       max-width: var(--affine-editor-width);
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-
-      min-height: calc(100% - 78px);
       padding-bottom: 150px;
 
       /* Leave a place for drag-handle */
@@ -176,7 +176,7 @@ export class DefaultPageBlockComponent
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
-    pageLinkClicked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -563,6 +563,7 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
+            <backlink-button .host=${this} .page=${this.page}></backlink-button>
           </div>
           ${childrenContainer}
         </div>

@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel, ThemeObserver } from '@blocksuite/blocks';
+import type {
+  CssVariableName,
+  DatabaseBlockModel,
+  ThemeObserver,
+} from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -756,7 +760,20 @@ export async function getCurrentHTMLTheme(page: Page) {
 export async function getCurrentEditorTheme(page: Page) {
   const mode = await page.locator('editor-container').evaluate(ele => {
     return (ele as unknown as Element & { themeObserver: ThemeObserver })
-      .themeObserver.cssVariables?.['affineThemeMode'];
+      .themeObserver.cssVariables?.['--affine-theme-mode'];
   });
   return mode;
+}
+
+export async function getCurrentThemeCSSPropertyValue(
+  page: Page,
+  property: CssVariableName
+) {
+  const value = await page
+    .locator('editor-container')
+    .evaluate((ele, property: CssVariableName) => {
+      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+        .themeObserver.cssVariables?.[property];
+    }, property);
+  return value;
 }

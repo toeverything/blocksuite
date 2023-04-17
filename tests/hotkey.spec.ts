@@ -138,7 +138,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -189,7 +189,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -213,7 +213,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -302,7 +302,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -342,7 +342,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -386,7 +386,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -430,7 +430,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -489,7 +489,7 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -530,7 +530,7 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -564,7 +564,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -633,7 +633,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -666,7 +666,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -680,7 +680,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -695,7 +695,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:list
     prop:checked={false}
@@ -711,7 +711,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:list
     prop:checked={false}
@@ -726,7 +726,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -741,7 +741,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -785,7 +785,7 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="ho"
@@ -801,7 +801,7 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="hello"
@@ -826,7 +826,7 @@ test('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="19"
@@ -837,12 +837,12 @@ test('should cut work multiple line', async ({ page }) => {
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
-  expect(text).toBe('2345678');
+  expect(text).toBe(`23\n456\n78`);
   await assertStoreMatchJSX(
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"

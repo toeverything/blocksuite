@@ -14,7 +14,7 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-popover-background);
+        background: var(--affine-background-primary-color);
         border-radius: 10px;
         top: 24px;
         z-index: 1;
@@ -63,7 +63,7 @@ export class LangList extends ShadowlessElement {
         align-items: center;
         height: 32px;
         width: 192px;
-        border: 1px solid #d0d7e3;
+        border: 1px solid var(--affine-border-color);
         border-radius: 10px;
         padding-left: 44px;
         padding-top: 4px;
@@ -80,7 +80,7 @@ export class LangList extends ShadowlessElement {
       }
 
       #filter-input::placeholder {
-        color: #888a9e;
+        color: var(--affine-placeholder-color);
         font-size: var(--affine-font-sm);
       }
 

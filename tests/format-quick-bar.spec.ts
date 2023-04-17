@@ -8,9 +8,11 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   initEmptyParagraphState,
   initThreeParagraphs,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowRight,
   pressEnter,
   setSelection,
@@ -211,7 +213,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -256,7 +258,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -301,7 +303,7 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -346,7 +348,7 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -386,7 +388,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -421,7 +423,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -461,7 +463,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -487,7 +489,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -515,7 +517,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -757,7 +759,7 @@ test('should format quick bar work in single block selection', async ({
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -826,7 +828,7 @@ test('should format quick bar work in multiple block selection', async ({
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text={
@@ -900,7 +902,7 @@ test('should format quick bar with block selection works when update block type'
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:list
     prop:checked={false}
@@ -927,7 +929,7 @@ test('should format quick bar with block selection works when update block type'
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:paragraph
     prop:text="123"
@@ -966,12 +968,12 @@ test('should format quick bar show after convert to code block', async ({
   await expect(formatBarController.formatQuickBar).toBeVisible();
   const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
-  await formatBarController.assertBoundingBox(395, 99);
+  await formatBarController.assertBoundingBox(377, 99);
   await assertStoreMatchJSX(
     page,
     `
 <affine:frame
-  prop:background="#FBFAFC"
+  prop:background="--affine-background-secondary-color"
 >
   <affine:code
     prop:language="Plain Text"
@@ -1148,4 +1150,35 @@ test('should show format-quick-bar and select all text of the block when triple 
   await page.mouse.up(options);
 
   await assertSelection(page, 0, 0, 'hello world'.length);
+});
+
+test('should update the format quick bar state when there is a change in keyboard selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
+    const frame = page.addBlock('affine:frame', {}, pageId);
+    const delta = [
+      { insert: '1', attributes: { bold: true } },
+      { insert: '2', attributes: { bold: true } },
+      { insert: '3', attributes: { bold: false } },
+    ];
+    const text = page.Text.fromDelta(delta);
+    page.addBlock('affine:paragraph', { text }, frame);
+  });
+  await focusTitle(page);
+  await pressArrowDown(page);
+
+  const formatBar = getFormatBar(page);
+  await withPressKey(page, 'Shift', async () => {
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await expect(formatBar.boldBtn).toHaveAttribute('active', '');
+    await page.keyboard.press('ArrowRight');
+    await expect(formatBar.boldBtn).not.toHaveAttribute('active', '');
+  });
 });

@@ -52,7 +52,8 @@ export class VEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
-  shouldScrollIntoView = true;
+  shouldLineScrollIntoView = true;
+  shouldCursorScrollIntoView = true;
 
   slots: {
     mounted: Slot;
@@ -356,6 +357,16 @@ export class VEditor<
       this.yText.format(vRange.index, vRange.length, {
         ...unset,
       });
+    });
+  }
+
+  setText(
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void {
+    this._transact(() => {
+      this.yText.delete(0, this.yText.length);
+      this.yText.insert(0, text, attributes);
     });
   }
 

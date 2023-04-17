@@ -251,6 +251,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
           position: relative;
           overflow: hidden;
           font-family: var(--affine-font-family);
+          background: var(--affine-background-primary-color);
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

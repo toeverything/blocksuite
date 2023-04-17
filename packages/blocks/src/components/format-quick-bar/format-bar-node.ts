@@ -12,7 +12,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { restoreSelection } from '../../__internal__/utils/block-range.js';
+import {
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import {
   getRichTextByModel,
   WithDisposable,
@@ -159,6 +162,8 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       this.remove();
     });
 
+    document.addEventListener('selectionchange', this._selectionChangeHandler);
+
     const mutationObserver = new MutationObserver(() => {
       if (!this.page) {
         return;
@@ -183,6 +188,12 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       });
     });
     this._disposables.add(() => mutationObserver.disconnect());
+    this._disposables.add(() =>
+      document.removeEventListener(
+        'selectionchange',
+        this._selectionChangeHandler
+      )
+    );
   }
 
   private _onHover() {
@@ -212,6 +223,25 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     }
     clearTimeout(this._paragraphPanelTimer);
   }
+
+  private _selectionChangeHandler = () => {
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      this.abortController.abort();
+      return;
+    }
+    // If the selection is collapsed, abort the format quick bar
+    if (
+      blockRange.type === 'Native' &&
+      blockRange.models.length === 1 &&
+      blockRange.startOffset === blockRange.endOffset
+    ) {
+      this.abortController.abort();
+      return;
+    }
+    this._format = getCurrentCombinedFormat(this.page);
+    this.positionUpdated.emit();
+  };
 
   override render() {
     const page = this.page;

@@ -2,12 +2,12 @@ import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
-import type { Color } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { ColorEvent } from '../../components/color-panel.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
@@ -68,7 +68,7 @@ export class EdgelessConnectorMenu extends LitElement {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -91,12 +91,12 @@ export class EdgelessConnectorMenu extends LitElement {
 
     .connector-mode-button[active],
     .connector-mode-button:hover {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .connector-mode-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     menu-divider {
@@ -112,7 +112,7 @@ export class EdgelessConnectorMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setConnectorColor = (color: Color) => {
+  private _setConnectorColor = (color: CssVariableName) => {
     if (this.mouseMode.type !== 'connector') return;
 
     const { mode } = this.mouseMode;

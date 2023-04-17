@@ -57,6 +57,15 @@ export class SelectActionPopup extends LitElement {
   @property()
   onAction!: (type: SelectTagActionType, index: number) => void;
 
+  @property()
+  onClose!: () => void;
+
+  private _onAction = (e: Event, type: SelectTagActionType) => {
+    e.stopPropagation();
+    this.onAction(type, this.index);
+    this.onClose();
+  };
+
   override render() {
     return html`
       <div class="affine-database-select-action">
@@ -67,7 +76,7 @@ export class SelectActionPopup extends LitElement {
           return html`
             <div
               class="action ${action.type}"
-              @mousedown=${() => this.onAction(action.type, this.index)}
+              @mousedown=${(e: Event) => this._onAction(e, action.type)}
             >
               <div class="action-content">
                 ${action.icon}<span>${action.text}</span>

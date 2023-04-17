@@ -4,7 +4,11 @@
 
 import './declare-test-window.js';
 
-import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
+import type {
+  CssVariableName,
+  FrameBlockModel,
+  PageBlockModel,
+} from '@blocksuite/blocks';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -32,6 +36,7 @@ import {
 import {
   captureHistory,
   getCurrentEditorPageId,
+  getCurrentThemeCSSPropertyValue,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -69,7 +74,7 @@ export const defaultStore: SerializedStore = {
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,72]',
-      'prop:background': '#FBFAFC',
+      'prop:background': '--affine-background-secondary-color',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -631,8 +636,8 @@ export async function assertEdgelessNonHoverRect(page: Page) {
   await expect(hoverRect).toBeHidden();
 }
 
-export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
-  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
+export function assertSameColor(c1?: `#${string}`, c2?: `#${string}`) {
+  expect(c1?.toLowerCase()).toEqual(c2?.toLowerCase());
 }
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -676,20 +681,31 @@ export async function assertSelectionInFrame(page: Page, frameId: string) {
 export async function assertEdgelessFrameBackground(
   page: Page,
   frameId: string,
-  color: `#${string}`
+  color: CssVariableName
 ) {
   const backgroundColor = await page
     .locator(`affine-frame[data-block-id="${frameId}"]`)
     .evaluate(ele => {
-      const frameWrapper = ele.closest('.affine-edgeless-block-child');
+      const frameWrapper = ele.closest<HTMLDivElement>(
+        '.affine-edgeless-block-child'
+      );
       if (!frameWrapper) {
         throw new Error(`Could not find frame: ${frameId}`);
       }
-      return window
-        .getComputedStyle(frameWrapper)
-        .getPropertyValue('background-color') as `rgb(${string})`;
+      return frameWrapper.style.background;
     });
 
-  const hex = toHex(backgroundColor);
-  expect(hex).toEqual(color);
+  expect(backgroundColor).toEqual(`var(${color})`);
+}
+
+export async function assertEdgelessColorSameWithHexColor(
+  page: Page,
+  edgelessColor: CssVariableName,
+  hexColor: `#${string}`
+) {
+  const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);
+  expect(themeColor).toBeTruthy();
+  const edgelessHexColor = toHex(themeColor as string);
+
+  assertSameColor(hexColor, edgelessHexColor as `#${string}`);
 }

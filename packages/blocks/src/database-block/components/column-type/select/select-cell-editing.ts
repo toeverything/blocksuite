@@ -28,7 +28,7 @@ import { SelectActionPopup } from './select-option-popup.js';
 const styles = css`
   :host {
     z-index: 2;
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
   }
   .affine-database-select-cell-select {
@@ -45,7 +45,7 @@ const styles = css`
     min-height: 44px;
     width: 345px;
     padding: 10px 8px;
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-input {
     flex: 1 1 0%;
@@ -124,7 +124,7 @@ const styles = css`
     margin-bottom: 4px;
   }
   .select-option:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-option:hover .select-option-icon {
     display: flex;
@@ -151,7 +151,7 @@ const styles = css`
     cursor: pointer;
   }
   .select-option-icon:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .select-option-icon svg {
     width: 16px;
@@ -159,7 +159,7 @@ const styles = css`
     pointer-events: none;
   }
   .editing {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .editing .select-option-icon {
     display: flex;
@@ -192,6 +192,10 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
+  }
+
+  get selectionList() {
+    return this.column.selection as SelectTag[];
   }
 
   protected override firstUpdated() {
@@ -237,8 +241,16 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     event: KeyboardEvent,
     selectedValue: SelectTag[]
   ) => {
-    if (event.key === 'Enter' && this._inputValue.trim() !== '') {
-      this._onAddSelection(selectedValue);
+    const inputValue = this._inputValue.trim();
+    if (event.key === 'Enter' && inputValue !== '') {
+      const selectTag = this.selectionList.find(
+        item => item.value === inputValue
+      );
+      if (selectTag) {
+        this._onSelect(selectedValue, selectTag);
+      } else {
+        this._onAddSelection(selectedValue);
+      }
     }
   };
 
@@ -309,17 +321,16 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   private _onSelectAction = (type: SelectTagActionType, index: number) => {
     if (type === 'rename') {
-      this._editingIndex = index;
+      this._setEditingIndex(index);
       return;
     }
 
     if (type === 'delete') {
-      const selection = [...(this.column.selection as SelectTag[])];
       this.databaseModel.updateColumn({
         ...this.column,
-        selection: selection.filter((_, i) => i !== index),
+        selection: this.selectionList.filter((_, i) => i !== index),
       });
-      const select = selection[index];
+      const select = this.selectionList[index];
       this.databaseModel.deleteSelectedCellTag(this.column.id, select);
       return;
     }
@@ -335,6 +346,8 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     action.onAction = this._onSelectAction;
     action.index = index;
     selectOption.appendChild(action);
+    const onClose = () => action.remove();
+    action.onClose = onClose;
 
     createPopper(
       {
@@ -353,11 +366,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         placement: 'bottom-end',
       }
     );
-    onClickOutside(
-      selectOption as HTMLElement,
-      () => action.remove(),
-      'mousedown'
-    );
+    onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
   };
 
   private _onSaveSelectionName = (index: number) => {
@@ -365,7 +374,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .querySelectorAll('affine-database-select-option')
       .item(index) as SelectOption;
 
-    const selection = [...(this.column.selection as SelectTag[])];
+    const selection = [...this.selectionList];
     const oldSelect = selection[index];
     const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
     selection[index] = newSelect;
@@ -379,12 +388,15 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       newSelect
     );
 
-    this._editingIndex = -1;
+    this._setEditingIndex(-1);
+  };
+
+  private _setEditingIndex = (index: number) => {
+    this._editingIndex = index;
   };
 
   override render() {
-    const selection = this.column.selection as SelectTag[];
-    const filteredSelection = selection.filter(item => {
+    const filteredSelection = this.selectionList.filter(item => {
       if (!this._inputValue) {
         return true;
       }
@@ -458,7 +470,10 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
                     <affine-database-select-option
                       .databaseModel=${this.databaseModel}
                       .select=${select}
-                      .editing=${index === this._editingIndex}
+                      .editing=${isEditing}
+                      .index=${index}
+                      .saveSelectionName=${this._onSaveSelectionName}
+                      .setEditingIndex=${this._setEditingIndex}
                     ></affine-database-select-option>
                   </div>
                   <div class="select-option-icon" @click=${onOptionIconClick}>
