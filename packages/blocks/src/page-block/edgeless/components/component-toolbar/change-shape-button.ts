@@ -23,34 +23,34 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonShape(
   elements: ShapeElement[]
-): ShapeMouseMode['shape'] | undefined {
+): ShapeMouseMode['shape'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElement) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['shape']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['shape']) : null;
 }
 
 function getMostCommonFillColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | undefined {
+): ShapeMouseMode['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
 }
 
 function getMostCommonStrokeColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | undefined {
+): ShapeMouseMode['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : undefined;
+  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
 }
 
 const FILL_COLORS: RawCssVariablesName[] = [

@@ -30,12 +30,12 @@ export const FRAME_BACKGROUND_COLORS: RawCssVariablesName[] = [
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]
-): TextMouseMode['background'] | undefined {
+): TextMouseMode['background'] | null {
   const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
     return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as TextMouseMode['background']) : undefined;
+  return max ? (max[0] as TextMouseMode['background']) : null;
 }
 
 @customElement('edgeless-change-frame-button')

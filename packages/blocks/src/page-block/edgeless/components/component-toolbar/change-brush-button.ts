@@ -19,16 +19,16 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: BrushElement[]
-): RawCssVariablesName | undefined {
+): RawCssVariablesName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as RawCssVariablesName) : undefined;
+  return max ? (max[0] as RawCssVariablesName) : null;
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
+function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : undefined;
+  return max ? (Number(max[0]) as BrushSize) : null;
 }
 
 @customElement('edgeless-change-brush-button')

@@ -25,18 +25,16 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: ConnectorElement[]
-): RawCssVariablesName | undefined {
+): RawCssVariablesName | null {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as RawCssVariablesName) : undefined;
+  return max ? (max[0] as RawCssVariablesName) : null;
 }
 
-function getMostCommonMode(
-  elements: ConnectorElement[]
-): ConnectorMode | undefined {
+function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   const modes = countBy(elements, (ele: ConnectorElement) => ele.mode);
   const max = maxBy(Object.entries(modes), ([k, count]) => count);
-  return max ? (Number(max[0]) as ConnectorMode) : undefined;
+  return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
 @customElement('edgeless-change-connector-button')
