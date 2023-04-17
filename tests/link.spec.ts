@@ -81,7 +81,7 @@ test('basic link', async ({ page }) => {
     `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:paragraph
       prop:text={

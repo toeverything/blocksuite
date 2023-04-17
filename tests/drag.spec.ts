@@ -141,7 +141,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -192,7 +192,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -249,7 +249,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -307,7 +307,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -429,7 +429,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
@@ -493,7 +493,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:background="#FBFAFC"
+    prop:background="--affine-background-secondary-color"
   >
     <affine:list
       prop:checked={false}
