@@ -9,7 +9,7 @@ import { customElement, property } from 'lit/decorators.js';
  * render() {
  *   return html`${showPortal
  *     ? html`<affine-portal .template=${portalTemplate}></affine-portal>`
- *     : ""}`;
+ *     : null}`;
  * };
  * ```
  */

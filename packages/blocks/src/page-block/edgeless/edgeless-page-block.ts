@@ -167,7 +167,7 @@ export class EdgelessPageBlockComponent
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
-    pageLinkClicked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
   surface!: SurfaceManager;

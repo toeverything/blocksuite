@@ -1,3 +1,4 @@
+import './default/backlink-popover.js';
 export * from './default/default-page-block.js';
 export { getAllowSelectedBlocks } from './default/utils.js';
 export {
