@@ -84,15 +84,13 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
   private _handleClick() {
     this.databaseModel.page.captureSync();
-    if (!this.cell) {
-      if (!this.cell && !this.vEditor) {
-        const yText = new this.databaseModel.page.YText();
-        this.databaseModel.updateCell(this.rowModel.id, {
-          columnId: this.column.id,
-          value: yText,
-        });
-        this._initVEditor(yText, true);
-      }
+    if (!this.cell && !this.vEditor) {
+      const yText = new this.databaseModel.page.YText();
+      this.databaseModel.updateCell(this.rowModel.id, {
+        columnId: this.column.id,
+        value: yText,
+      });
+      this._initVEditor(yText, true);
     }
   }
 

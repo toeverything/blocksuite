@@ -23,7 +23,7 @@ export abstract class DatabaseCellElement<Value> extends LitElement {
   @property()
   column!: Column;
   @property()
-  cell!: Cell | null;
+  cell: Cell | null = null;
 }
 
 export interface ColumnRenderer<
