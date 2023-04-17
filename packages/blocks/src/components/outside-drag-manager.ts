@@ -59,7 +59,7 @@ export class OutsideDragManager {
     if (element) {
       const model = getModelByBlockElement(element);
       const result = DragHandle.calcTarget(point, model, element, [], 1, false);
-      if (result) {
+      if (result && model.flavour !== 'affine:database') {
         rect = result.rect;
         this._targetModel = result.modelState.model;
       }
