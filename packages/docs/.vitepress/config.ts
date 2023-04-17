@@ -44,9 +44,12 @@ export default defineConfig({
             text: 'Framework UI Patterns',
             link: '/framework-ui-patterns',
             items: [
-              { text: '🚧 Rich Text Orchestration', link: '' },
-              { text: '🚧 Controlled Component', link: '' },
-              { text: '🚧 Block Host', link: '' },
+              {
+                text: '🚧 Rich Text Orchestration',
+                link: '/rich-text-orchestration',
+              },
+              { text: '🚧 Controlled Components', link: '' },
+              { text: '🚧 Hosts and Containers', link: '' },
             ],
           },
           { text: '🚧 Defining Editable Block', link: '' },
