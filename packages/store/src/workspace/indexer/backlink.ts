@@ -55,9 +55,8 @@ export class BacklinkIndexer {
     return backlinkList;
   }
 
-  private _reviseDoc() {
-    // TODO
-  }
+  // private _reviseDoc() {
+  // }
 
   onRefreshIndex() {
     this._linkIndexMap = {};
