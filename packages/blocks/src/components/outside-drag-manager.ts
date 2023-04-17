@@ -1,5 +1,5 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Workspace } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   asyncFocusRichText,
@@ -43,13 +43,15 @@ export class OutsideDragManager {
   }
 
   private _onDragOver(event: DragEvent) {
+    const page = this._editor.querySelector('affine-default-page');
+    if (page === null) {
+      return;
+    }
+
     event.preventDefault();
     const x = event.clientX;
     const y = event.clientY;
     const point = new Point(x, y);
-    const page = this._editor.querySelector('affine-default-page');
-    assertExists(page);
-
     const element = getClosestBlockElementByPoint(point, {
       rect: page.innerRect,
     });
