@@ -589,7 +589,7 @@ export class DefaultSelectionManager {
       rect = getRectByBlockElement(this.state.focusedBlock);
     }
 
-    // find subtrees of focused block ement
+    // find subtrees of focused block element
     const selectedBlocks = getBlockElementsIncludeSubtrees([element]);
 
     // only current focused block element
