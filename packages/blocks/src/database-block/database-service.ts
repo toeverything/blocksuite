@@ -65,7 +65,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         titleColumnName: block.titleColumnName,
         titleColumnWidth: block.titleColumnWidth,
         rowIds,
-        cells: block.yCells.toJSON(),
+        cells: block.cells,
         columns,
       },
       children: block.children?.map((child, index) => {

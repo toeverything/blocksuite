@@ -1,4 +1,4 @@
-import { Map as YMap } from 'yjs';
+import { AbstractType as YAbstractType, Map as YMap } from 'yjs';
 
 import type { ProxyConfig } from './config.js';
 
@@ -39,10 +39,19 @@ function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   });
 }
 
-function obj2YMap(object: Record<string, unknown>) {
+function isPureObject(value: unknown): value is object {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    !(value instanceof YAbstractType)
+  );
+}
+
+export function obj2YMap(object: Record<string, unknown>) {
   const yMap = new YMap();
   Object.entries(object).forEach(([key, value]) => {
-    if (typeof value === 'object' && value !== null) {
+    if (isPureObject(value)) {
       yMap.set(key, obj2YMap(value as Record<string, unknown>));
       return;
     }
@@ -78,7 +87,7 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
         throw new Error('key cannot be a symbol');
       }
 
-      if (deep && typeof value === 'object' && value !== null) {
+      if (deep && isPureObject(value)) {
         const _yMap = obj2YMap(value as Record<string, unknown>);
         yMap.set(p, _yMap);
         const _value = createYMapProxy(_yMap, config);

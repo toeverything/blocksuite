@@ -1,11 +1,11 @@
 import type { Cell, Column, SelectTag } from '@blocksuite/global/database';
-import type { Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema, Y } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export type Props = {
   title: Text;
-  yCells: Y.Map<Y.Map<unknown>>;
+  cells: SerializedCells;
   columns: Array<Column>;
   titleColumnName: string;
   titleColumnWidth: number;
@@ -27,7 +27,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       if (
         event.path.includes(this.id) &&
         (event.path.includes('prop:columns') ||
-          event.path.includes('prop:yCells'))
+          event.path.includes('prop:cells'))
       ) {
         this.propsUpdated.emit();
       }
@@ -35,12 +35,18 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   get serializedCells(): SerializedCells {
-    return this.yCells.toJSON();
+    return this.cells;
   }
 
   applyColumnUpdate() {
     this.page.updateBlock(this, {
       columns: this.columns,
+    });
+  }
+
+  applyCellsUpdate() {
+    this.page.updateBlock(this, {
+      cells: this.cells,
     });
   }
 
@@ -102,45 +108,38 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
-    const yRow = this.yCells.get(rowId);
-    const yCell = (yRow?.get(columnId) as Y.Map<unknown>) ?? null;
+    const yRow = this.cells[rowId];
+    const yCell = yRow?.[columnId] ?? null;
     if (!yCell) return null;
 
     return {
-      columnId: yCell.get('columnId') as string,
-      value: yCell.get('value') as unknown,
+      columnId: yCell.columnId,
+      value: yCell.value,
     };
   }
 
   updateCell(rowId: string, cell: Cell) {
-    const hasRow = this.yCells.has(rowId);
-    let yRow: Y.Map<unknown>;
+    const hasRow = rowId in this.cells;
     if (!hasRow) {
-      yRow = new Y.Map();
-    } else {
-      yRow = this.yCells.get(rowId) as Y.Map<unknown>;
+      this.cells[rowId] = {};
     }
     this.page.transact(() => {
-      if (!hasRow) {
-        this.yCells.set(rowId, yRow);
-      }
-      // Related issue: https://github.com/yjs/yjs/issues/255
-      const yCell = new Y.Map();
-      yCell.set('columnId', cell.columnId);
-      yCell.set('value', cell.value);
-      yRow.set(cell.columnId, yCell);
+      this.cells[rowId][cell.columnId] = {
+        columnId: cell.columnId,
+        value: cell.value,
+      };
     });
   }
 
   copyCellsByColumn(fromId: Column['id'], toId: Column['id']) {
     this.page.transact(() => {
-      this.yCells.forEach(yRow => {
-        const yCell = yRow.get(fromId) as Y.Map<unknown>;
-        if (yCell) {
-          const yNewCell = new Y.Map();
-          yNewCell.set('columnId', toId);
-          yNewCell.set('value', yCell.get('value'));
-          yRow.set(toId, yNewCell);
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][fromId];
+        if (cell) {
+          this.cells[rowId][toId] = {
+            ...cell,
+            columnId: toId,
+          };
         }
       });
     });
@@ -148,7 +147,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   deleteCellsByColumn(columnId: Column['id']) {
     this.page.transact(() => {
-      this.yCells.forEach(yRow => yRow.delete(columnId));
+      Object.keys(this.cells).forEach(rowId => {
+        delete this.cells[rowId][columnId];
+      });
     });
   }
 
@@ -157,26 +158,28 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     newType: 'select' | 'rich-text'
   ) {
     this.page.transact(() => {
-      this.yCells.forEach(yRow => {
-        const yCell = yRow.get(columnId) as Y.Map<unknown>;
-        if (!yCell) return;
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][columnId];
+        if (!cell) return;
+
+        const value = cell.value;
+        if (!value) return;
 
         if (newType === 'select') {
-          const value = yCell.get('value');
-          if (!value) return;
+          this.cells[rowId][columnId] = {
+            columnId,
+            value: [(value as string[])[0]],
+          };
+          return;
+        }
 
-          const yNewCell = new Y.Map();
-          yNewCell.set('columnId', columnId);
-          yNewCell.set('value', [(value as string[])[0]]);
-          yRow.set(columnId, yNewCell);
-        } else if (newType === 'rich-text') {
-          const value = yCell.get('value');
-          if (!value) return;
-
-          const yNewCell = new Y.Map();
-          yNewCell.set('columnId', columnId);
-          yNewCell.set('value', new Y.Text((value as number) + ''));
-          yRow.set(columnId, yNewCell);
+        if (newType === 'rich-text') {
+          const text = new Text((value as number) + '');
+          this.cells[rowId][columnId] = {
+            columnId,
+            value: text.yText,
+          };
+          return;
         }
       });
     });
@@ -188,37 +191,38 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     newValue: SelectTag
   ) {
     this.page.transact(() => {
-      this.yCells.forEach(yRow => {
-        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]>;
-        if (!yCell) return;
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][columnId];
+        if (!cell) return;
 
-        const selected = yCell.get('value') as SelectTag[];
+        const selected = cell.value as SelectTag[];
         const newSelected = [...selected];
         const index = newSelected.indexOf(oldValue);
         newSelected[index] = newValue;
 
-        const yNewCell = new Y.Map();
-        yNewCell.set('columnId', columnId);
-        yNewCell.set('value', newSelected);
-        yRow.set(columnId, yNewCell);
+        this.cells[rowId][columnId] = {
+          columnId,
+          value: newSelected,
+        };
       });
     });
   }
 
   deleteSelectedCellTag(columnId: Column['id'], target: SelectTag) {
     this.page.transact(() => {
-      this.yCells.forEach(yRow => {
-        const yCell = yRow.get(columnId) as Y.Map<SelectTag[]>;
-        if (!yCell) return;
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][columnId];
+        if (!cell) return;
 
-        const selected = yCell.get('value') as SelectTag[];
-        let newSelected = [...selected];
-        newSelected = selected.filter(item => item.value !== target.value);
+        const selected = cell.value as SelectTag[];
+        const newSelected = [...selected].filter(
+          item => item.value !== target.value
+        );
 
-        const yNewCell = new Y.Map();
-        yNewCell.set('columnId', columnId);
-        yNewCell.set('value', newSelected);
-        yRow.set(columnId, yNewCell);
+        this.cells[rowId][columnId] = {
+          columnId,
+          value: newSelected,
+        };
       });
     });
   }
@@ -228,7 +232,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     title: internal.Text(),
-    yCells: internal.Map<Y.Map<unknown>>(),
+    cells: {},
     columns: [],
     titleColumnName: 'Title',
     titleColumnWidth: 432,
