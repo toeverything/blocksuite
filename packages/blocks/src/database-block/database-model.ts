@@ -34,10 +34,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  get serializedCells(): SerializedCells {
-    return this.cells;
-  }
-
   applyColumnUpdate() {
     this.page.updateBlock(this, {
       columns: this.columns,
