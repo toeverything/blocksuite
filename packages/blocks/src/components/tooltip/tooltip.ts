@@ -19,8 +19,9 @@ export const tooltipStyle = css`
     text-align: center;
     font-size: var(--affine-font-sm);
     padding: 4px 12px;
-    color: var(--affine-tooltip-color);
-    background: var(--affine-tooltip-background);
+    color: var(--affine-white);
+    /* TODO: use --affine-tooltip-background */
+    background: #33258a;
     box-shadow: var(--affine-tooltip-shadow);
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -73,7 +74,8 @@ export const tooltipStyle = css`
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 6px solid var(--affine-tooltip-background);
+    /* TODO: use --affine-tooltip-background */
+    border-top: 6px solid #33258a;
   }
 
   .has-tool-tip {

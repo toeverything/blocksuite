@@ -26,7 +26,7 @@ export const styles = css`
     padding: 10px 18px 14px;
     height: 288px;
     border-radius: 5px;
-    background: var(--affine-hub-background);
+    background: var(--affine-background-overlay-panel-color);
   }
   .modal-header {
     display: flex;
@@ -34,7 +34,7 @@ export const styles = css`
     align-items: center;
   }
   .modal-header-title {
-    color: var(--affine-text-color);
+    color: var(--affine-text-primary-color);
     font-size: 20px;
     font-weight: 600;
   }
@@ -45,7 +45,7 @@ export const styles = css`
     cursor: pointer;
   }
   .modal-footer {
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     font-size: 14px;
     text-align: center;
   }
@@ -67,7 +67,7 @@ export const styles = css`
     pointer-events: none;
   }
   .modal-view-item-content:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .modal-view-item-content:hover .modal-view-item-text,
   .modal-view-item-content:hover svg {
@@ -99,7 +99,7 @@ export const styles = css`
   }
   .modal-view-item-description {
     font-size: 12px;
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     text-align: center;
   }
 `;

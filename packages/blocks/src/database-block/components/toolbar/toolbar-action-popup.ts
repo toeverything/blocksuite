@@ -63,7 +63,7 @@ class DatabaseTypePopup extends LitElement {
       padding: 8px;
       border: 1px solid var(--affine-border-color);
       border-radius: 4px;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-primary-color);
       box-shadow: var(--affine-popover-shadow);
     }
     :host * {
@@ -146,7 +146,7 @@ export class ToolbarActionPopup extends LitElement {
       box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
         inset 0px 0px 0px 0.5px var(--affine-white);
       z-index: var(--affine-z-index-popover);
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
     }
     :host * {
       box-sizing: border-box;

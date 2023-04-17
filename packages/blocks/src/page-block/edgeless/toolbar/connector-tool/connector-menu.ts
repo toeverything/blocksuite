@@ -68,7 +68,7 @@ export class EdgelessConnectorMenu extends LitElement {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -91,12 +91,12 @@ export class EdgelessConnectorMenu extends LitElement {
 
     .connector-mode-button[active],
     .connector-mode-button:hover {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .connector-mode-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     menu-divider {

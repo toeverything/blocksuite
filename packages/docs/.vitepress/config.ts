@@ -36,12 +36,16 @@ export default defineConfig({
       {
         text: 'Editor Architecture',
         items: [
-          { text: '🚧 Unidirectional Data Flow', link: '' },
           {
-            text: '🚧 Common Patterns',
+            text: 'Unidirectional Data Flow',
+            link: '/unidirectional-data-flow',
+          },
+          {
+            text: 'Framework UI Patterns',
+            link: '/framework-ui-patterns',
             items: [
-              { text: '🚧 Controlled Component', link: '' },
               { text: '🚧 Rich Text Orchestration', link: '' },
+              { text: '🚧 Controlled Component', link: '' },
               { text: '🚧 Block Host', link: '' },
             ],
           },
@@ -53,22 +57,22 @@ export default defineConfig({
         items: [],
       },
       {
-        text: '🚧 Packages',
+        text: 'Packages',
         items: [
-          { text: '🚧 @blocksuite/store', link: '' },
-          { text: '🚧 @blocksuite/blocks', link: '' },
-          { text: '🚧 @blocksuite/editor', link: '' },
-          { text: '🚧 @blocksuite/virgo', link: '' },
-          { text: '🚧 @blocksuite/phasor', link: '' },
-          { text: '🚧 @blocksuite/connector', link: '' },
+          { text: '🚧 <code>@blocksuite/store</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/blocks</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/phasor</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/connector</code>', link: '' },
         ],
       },
       {
         text: 'Developing BlockSuite',
         items: [
-          { text: '🚧 Building the Packages', link: '' },
+          { text: '🚧 Building Packages', link: '' },
+          { text: '🚧 Running Tests', link: '' },
           { text: '🚧 Making Contributions', link: '' },
-          { text: '🚧 Testing', link: '' },
         ],
       },
     ],

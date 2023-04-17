@@ -69,7 +69,7 @@ export class DefaultPageBlockComponent
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-weight: 400;
       max-width: var(--affine-editor-width);
       margin: 0 auto;

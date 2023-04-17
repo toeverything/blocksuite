@@ -51,6 +51,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+- 📄 [Documentation](https://block-suite.com/introduction.html)
 - 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
@@ -60,79 +61,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 
 ## Getting Started
 
-The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nightly` versions are released daily based on the master branch, and they are always tested on CI. This means that the `nightly` versions can already be used in real-world projects like AFFiNE at any time:
-
-```sh
-pnpm i @blocksuite/editor@nightly
-```
-
-If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](./packages/playground/examples/basic/index.html)):
-
-```ts
-import { SimpleAffineEditor } from '@blocksuite/editor';
-import '@blocksuite/editor/themes/affine.css';
-
-const editor = new SimpleAffineEditor();
-document.body.appendChild(editor);
-```
-
-Or equivalently, you can also use the declarative style:
-
-```html
-<body>
-  <simple-affine-editor></simple-affine-editor>
-  <script type="module">
-    import '@blocksuite/editor';
-    import '@blocksuite/editor/themes/affine.css';
-  </script>
-</body>
-```
-
-👉 [Try `SimpleAffineEditor` online](https://blocksuite-toeverything.vercel.app/examples/basic/)
-
-However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and data persistence features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
-
-- The `packages/store` package is a data store built for general-purpose state management.
-- The `packages/blocks` package holds the default BlockSuite editable blocks.
-- The `packages/editor` package ships a complete BlockSuite-based editor.
-
-```sh
-pnpm i \
-  @blocksuite/store@nightly \
-  @blocksuite/blocks@nightly \
-  @blocksuite/editor@nightly
-```
-
-And here is a minimal collaboration-ready editor showing how these underlying BlockSuite packages are composed together:
-
-> 🚧 Here we will work with the concepts of `Workspace`, `Page`, `Block` and `Slot`. These are the primitives for building a block-based collaborative application. We are preparing a comprehensive documentation about their usage!
-
-```ts
-import '@blocksuite/blocks';
-import { Workspace, Page } from '@blocksuite/store';
-import { AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/editor';
-
-function main() {
-  // Create a workspace with one default page
-  const workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
-  const page = workspace.createPage('page0');
-
-  // Create default blocks in the page
-  const pageBlockId = page.addBlock('affine:page');
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  page.addBlock('affine:paragraph', {}, frameId);
-
-  // Init editor with the page store
-  const editor = new EditorContainer();
-  editor.page = page;
-  document.body.appendChild(editor);
-}
-
-main();
-```
-
-For React developers, check out the [`@blocksuite/react`](./packages/react/README.md) doc for React components and hooks support.
+To learn how to start using BlockSuite, visit [block-suite.com](https://block-suite.com/introduction.html).
 
 ## Current Status (`@blocksuite/editor`)
 

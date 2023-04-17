@@ -46,10 +46,7 @@ const styles = css`
     align-items: center;
     justify-content: center;
   }
-  .affine-database-toolbar-item.search-container {
-    overflow: hidden;
-  }
-  .affine-database-toolbar-item.search {
+  .search-container {
     overflow: hidden;
   }
   .affine-database-toolbar-item.more-action {
@@ -59,7 +56,7 @@ const styles = css`
   }
   .affine-database-toolbar-item.more-action:hover,
   .more-action.active {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
   }
   .affine-database-search-container {
     display: flex;
@@ -78,7 +75,7 @@ const styles = css`
   .search-container-expand {
     width: 138px;
     padding: 8px 12px;
-    background-color: var(--affine-hover-background);
+    background-color: var(--affine-hover-color);
   }
   .search-input-container {
     display: flex;
@@ -130,8 +127,8 @@ const styles = css`
       0px 0px 0px 0.5px var(--affine-black-10);
     background: linear-gradient(
         0deg,
-        var(--affine-hover-background),
-        var(--affine-hover-background)
+        var(--affine-hover-color),
+        var(--affine-hover-color)
       ),
       var(--affine-white);
   }
@@ -265,11 +262,10 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onShowSearch = () => {
     this.setSearchState(SearchState.SearchInput);
     const removeListener = onClickOutside(
-      this._searchInput,
+      this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
           this.setSearchState(SearchState.SearchIcon);
-          this._searchContainer.style.overflow = 'hidden';
           removeListener();
         }
       },
@@ -281,7 +277,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onFocusSearchInput = () => {
     if (this.searchState === SearchState.SearchInput) {
       this._searchInput.focus();
-      this._searchContainer.style.overflow = 'unset';
     } else {
       this._searchInput.blur();
     }
@@ -318,7 +313,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this._searchInput.value = '';
     this.setFilteredRowIds([]);
     this.setSearchState(SearchState.SearchIcon);
-    this._searchContainer.style.overflow = 'hidden';
   };
 
   override render() {
@@ -326,12 +320,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       this.searchState === SearchState.SearchInput ||
       this.searchState === SearchState.Searching;
     const isActiveMoreAction = this.searchState === SearchState.Action;
+
+    const onSearchIconClick = expandSearch ? undefined : this._onShowSearch;
+
     const searchTool = html`
       <div
         class="affine-database-search-container ${expandSearch
           ? 'search-container-expand'
           : ''}"
-        @click=${this._onShowSearch}
+        @click=${onSearchIconClick}
         @transitionend=${this._onFocusSearchInput}
       >
         <div class="affine-database-search-input-icon">

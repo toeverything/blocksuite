@@ -32,7 +32,7 @@ class NewRecordPreview extends ShadowlessElement {
               rgba(96, 70, 254, 0.3)
             ),
             linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
-            #ffffff;
+            var(--affine-icon-color);
           /* light/floatButtonShadow */
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
             0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
@@ -71,8 +71,6 @@ export function initAddNewRecordHandlers(
 
   const database = container.closest('affine-database');
   assertExists(database);
-  const { width: databaseWidth, left: databaseLeft } =
-    database.getBoundingClientRect();
   const rowContainer = database.querySelector<HTMLElement>(
     '.affine-database-block-rows'
   );
@@ -126,6 +124,8 @@ export function initAddNewRecordHandlers(
     if (row) {
       const { top, bottom } = row.element.getBoundingClientRect();
       const rectTop = row.isLast ? bottom : top;
+      const { width: databaseWidth, left: databaseLeft } =
+        database.getBoundingClientRect();
       indicator.rect = Rect.fromLWTH(databaseLeft, databaseWidth, rectTop, 3);
       dragConfig.index = row.insertRowIndex;
     } else {
