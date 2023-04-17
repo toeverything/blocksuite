@@ -57,7 +57,7 @@ export class SelectOption extends LitElement {
         this._vEditor.focusEnd();
       }
       this._vEditor.setReadonly(!this.editing);
-      // TODO: reset vEditor text
+      this._vEditor.setText(this.select.value);
     }
   }
 

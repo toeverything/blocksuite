@@ -335,6 +335,8 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     action.onAction = this._onSelectAction;
     action.index = index;
     selectOption.appendChild(action);
+    const onClose = () => action.remove();
+    action.onClose = onClose;
 
     createPopper(
       {
@@ -353,11 +355,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         placement: 'bottom-end',
       }
     );
-    onClickOutside(
-      selectOption as HTMLElement,
-      () => action.remove(),
-      'mousedown'
-    );
+    onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
   };
 
   private _onSaveSelectionName = (index: number) => {
