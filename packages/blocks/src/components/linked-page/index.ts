@@ -50,7 +50,8 @@ export function showLinkedPagePopover({
   // Wait for node to be mounted
   setTimeout(updatePosition);
 
-  disposables.addFromEvent(window, 'mousedown', (e: Event) => {
+  // Should not use mouse event for better mobile compatible
+  disposables.addFromEvent(window, 'pointerdown', (e: Event) => {
     if (e.target === linkedPage) return;
     abortController.abort();
   });
