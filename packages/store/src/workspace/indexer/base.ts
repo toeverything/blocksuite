@@ -8,7 +8,7 @@ import type { Workspace } from '../workspace.js';
 
 type PageId = string;
 
-type IndexBlockEvent =
+export type IndexBlockEvent =
   | {
       pageId: PageId;
       blockId: string;
@@ -33,6 +33,7 @@ export class BlockIndexer {
      * Note: sys:children update will not trigger event
      */
     blockUpdated: new Slot<IndexBlockEvent>(),
+    refreshIndex: new Slot(),
   };
 
   constructor(
@@ -187,6 +188,11 @@ export class BlockIndexer {
       pageId = `space:${pageId}`;
     }
     return this._doc.getMap(pageId);
+  }
+
+  refreshIndex() {
+    this.slots.refreshIndex.emit();
+    this._initIndex();
   }
 
   dispose() {

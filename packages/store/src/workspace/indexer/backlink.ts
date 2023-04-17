@@ -9,7 +9,7 @@ type PageId = string;
 type BlockId = string;
 type LinkedNode = { type: 'LinkedPage' | 'Subpage'; pageId: PageId };
 /**
- * {@link AffineTextAttributes}
+ * Please sync type with {@link AffineTextAttributes} manually
  */
 type TextDelta = DeltaInsert<BaseTextAttributes & { reference: LinkedNode }>;
 

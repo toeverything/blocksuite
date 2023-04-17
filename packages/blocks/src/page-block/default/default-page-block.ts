@@ -65,6 +65,8 @@ export class DefaultPageBlockComponent
     }
 
     .affine-default-page-block-container {
+      display: flex;
+      flex-direction: column;
       width: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
@@ -75,8 +77,6 @@ export class DefaultPageBlockComponent
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-
-      min-height: calc(100% - 78px);
       padding-bottom: 150px;
 
       /* Leave a place for drag-handle */

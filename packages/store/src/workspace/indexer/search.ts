@@ -3,7 +3,7 @@ import FlexSearch from 'flexsearch';
 import type { Doc, Map as YMap } from 'yjs';
 import { Text as YText } from 'yjs';
 
-import type { YBlock } from './page.js';
+import type { YBlock } from '../page.js';
 
 const DocumentIndexer = FlexSearch.Document;
 const Index = FlexSearch.Index;
@@ -54,7 +54,7 @@ export type IndexMeta = Readonly<{
   tags: string[];
 }>;
 
-export class Indexer {
+export class SearchIndexer {
   private readonly _doc: Doc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
 
@@ -81,6 +81,7 @@ export class Indexer {
       .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
   }
 
+  // TODO: remove this method, observe page meta instead
   onPageCreated(pageId: string) {
     this._handlePageIndexing(pageId, this._getPage(pageId));
   }
