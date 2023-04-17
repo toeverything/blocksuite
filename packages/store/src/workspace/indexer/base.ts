@@ -74,6 +74,9 @@ export class BlockIndexer {
     Array.from(doc.share.keys())
       // filter out 'space:meta'
       .filter(pageId => pageId !== 'space:meta')
+      .map(pageId =>
+        pageId.startsWith('space:') ? pageId.slice('space:'.length) : pageId
+      )
       .map(pageId => ({ pageId, page: this._getPage(pageId) }))
       .forEach(({ pageId, page }) => {
         assertExists(page, `Failed to find page '${pageId}'`);
@@ -189,9 +192,10 @@ export class BlockIndexer {
   };
 
   private _getPage(pageId: PageId): Y.Map<YBlock> | undefined {
-    if (!pageId.startsWith('space:')) {
-      pageId = `space:${pageId}`;
+    if (pageId.startsWith('space:')) {
+      console.warn('Unexpected page prefix', pageId);
     }
+    pageId = `space:${pageId}`;
     return this._doc.getMap(pageId);
   }
 
