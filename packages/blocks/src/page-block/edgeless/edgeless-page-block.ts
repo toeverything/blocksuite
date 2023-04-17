@@ -511,6 +511,10 @@ export class EdgelessPageBlockComponent
       this.showGrid
     );
 
+    // TODO: refactor with ResizeObserver
+    const { scrollLeft, scrollTop } = this.mouseRoot;
+    const { left, top } = this.mouseRoot.getBoundingClientRect();
+
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
@@ -541,6 +545,10 @@ export class EdgelessPageBlockComponent
           .state=${{
             rects: _rectsOfSelectedBlocks,
             grab: false,
+          }}
+          .offset=${{
+            x: -left + scrollLeft,
+            y: -top + scrollTop,
           }}
         ></affine-selected-blocks>
         ${hoverRect} ${draggingArea}
