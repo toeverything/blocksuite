@@ -247,10 +247,7 @@ export class ContentParser {
         const clipBlockInfos =
           (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
           [];
-        if (clipBlockInfos.length) {
-          return clipBlockInfos;
-        }
-        return [];
+        return clipBlockInfos;
       }
     );
 
