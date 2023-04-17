@@ -1,8 +1,10 @@
 import {
+  asyncFocusRichText,
   type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   type MouseMode,
+  OutsideDragManager,
   type PageBlockModel,
   type SurfaceBlockModel,
   WithDisposable,
@@ -13,14 +15,13 @@ import {
   ShadowlessElement,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { isFirefox, type Page, Slot } from '@blocksuite/store';
+import { assertExists,isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
-import { OutsideDragManager } from '../utils/outside-drag-manager.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
@@ -172,12 +173,30 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
         }
       });
     }
-    
+
     this.outsideDragManager.registerHandler(
       files => Array.from(files).every(file => /^image\//.test(file.type)),
-      () => {
-        // TODO: add image block to the page
-        console.log('add image');
+      async (files, targetModel) => {
+        const storage = await this.page.blobs;
+        assertExists(storage);
+        const result = [];
+        for (const file of Array.from(files)) {
+          const id = await storage.set(file);
+          const props = {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+          };
+          result.push(props);
+        }
+        if (targetModel) {
+          this.page.captureSync();
+          const parent = this.page.getParent(targetModel);
+          assertExists(parent);
+          const ids = this.page.addSiblingBlocks(targetModel, result);
+          const focusId = ids[0];
+          asyncFocusRichText(this.page, focusId);
+        }
       }
     );
   }
