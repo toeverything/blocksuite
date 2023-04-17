@@ -3,6 +3,7 @@ import type * as Y from 'yjs';
 import type { VRange } from '../types.js';
 import { VEditor } from '../virgo.js';
 import { isSelectionBackwards } from './selection.js';
+import { calculateTextLength } from './text.js';
 
 type VRangeRunnerContext = {
   rootElement: HTMLElement;
@@ -229,7 +230,7 @@ const buildContext = (
  *    the vRange of first Editor is {index: 2, length: 4},
  *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
  */
-export function toVirgoRange(
+export function domRangeToVirgoRange(
   selection: Selection,
   rootElement: HTMLElement,
   yText: Y.Text
@@ -259,4 +260,60 @@ export function toVirgoRange(
   }
 
   return null;
+}
+
+/**
+ * calculate the dom selection from vRange for **this Editor**
+ */
+export function virgoRangeToDomRange(
+  rootElement: HTMLElement,
+  vRange: VRange
+): Range | null {
+  const lineElements = Array.from(rootElement.querySelectorAll('v-line'));
+
+  // calculate anchorNode and focusNode
+  let anchorText: Text | null = null;
+  let focusText: Text | null = null;
+  let anchorOffset = 0;
+  let focusOffset = 0;
+  let index = 0;
+
+  for (let i = 0; i < lineElements.length; i++) {
+    if (anchorText && focusText) {
+      break;
+    }
+
+    const texts = VEditor.getTextNodesFromElement(lineElements[i]);
+    for (const text of texts) {
+      const textLength = calculateTextLength(text);
+
+      if (!anchorText && index + textLength >= vRange.index) {
+        anchorText = text;
+        anchorOffset = vRange.index - index;
+      }
+      if (!focusText && index + textLength >= vRange.index + vRange.length) {
+        focusText = text;
+        focusOffset = vRange.index + vRange.length - index;
+      }
+
+      if (anchorText && focusText) {
+        break;
+      }
+
+      index += textLength;
+    }
+
+    // the one because of the line break
+    index += 1;
+  }
+
+  if (!anchorText || !focusText) {
+    return null;
+  }
+
+  const range = document.createRange();
+  range.setStart(anchorText, anchorOffset);
+  range.setEnd(focusText, focusOffset);
+
+  return range;
 }
