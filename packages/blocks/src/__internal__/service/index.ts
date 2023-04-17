@@ -48,7 +48,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     { childText = '', begin = 0, end }: BlockTransformContext = {}
   ): string {
     const text = (block.text?.toString() || '').slice(begin, end);
-    return `${text}\n${childText}`;
+    return `${text}${childText}`;
   }
 
   block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {

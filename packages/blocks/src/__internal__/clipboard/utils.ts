@@ -238,7 +238,11 @@ function createPageClipboardItems(range: BlockRange) {
 
   const textClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.TEXT,
-    clipGroups.map(group => group.text).join('')
+    clipGroups.reduce((text, group, index) => {
+      return `${text}${group.text}${
+        index === clipGroups.length - 1 ? '' : '\n'
+      }`;
+    }, '')
   );
   const htmlClipboardItem = new ClipboardItem(
     CLIPBOARD_MIMETYPE.HTML,
