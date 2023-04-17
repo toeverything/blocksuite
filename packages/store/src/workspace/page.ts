@@ -16,8 +16,9 @@ import {
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { createYArrayProxy } from '../yjs/index.js';
+import type { PageMeta } from './meta.js';
 import { tryMigrate } from './migrations.js';
-import type { PageMeta, Workspace } from './workspace.js';
+import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
