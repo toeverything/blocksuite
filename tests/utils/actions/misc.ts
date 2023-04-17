@@ -756,7 +756,7 @@ export async function getCurrentHTMLTheme(page: Page) {
 export async function getCurrentEditorTheme(page: Page) {
   const mode = await page.locator('editor-container').evaluate(ele => {
     return (ele as unknown as Element & { themeObserver: ThemeObserver })
-      .themeObserver.cssVariables?.['affineThemeMode'];
+      .themeObserver.cssVariables?.['--affine-theme-mode'];
   });
   return mode;
 }
