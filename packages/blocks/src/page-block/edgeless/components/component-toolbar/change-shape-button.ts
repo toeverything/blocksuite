@@ -94,7 +94,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       justify-content: center;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     menu-divider {

@@ -41,7 +41,8 @@ export default defineConfig({
             link: '/unidirectional-data-flow',
           },
           {
-            text: '🚧 Framework UI Patterns',
+            text: 'Framework UI Patterns',
+            link: '/framework-ui-patterns',
             items: [
               { text: '🚧 Rich Text Orchestration', link: '' },
               { text: '🚧 Controlled Component', link: '' },

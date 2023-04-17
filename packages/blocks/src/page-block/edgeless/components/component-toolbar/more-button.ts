@@ -52,7 +52,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     .more-actions-container {
@@ -61,7 +61,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       padding: 8px 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       font-size: 16px;
@@ -84,7 +84,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     }
 
     .action-item:hover {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .action-item[data-disabled] {

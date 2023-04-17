@@ -16,7 +16,7 @@ export const styles = css`
     display: flex;
     flex-direction: column;
 
-    background: var(--affine-popover-background);
+    background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
@@ -29,7 +29,7 @@ export const styles = css`
   }
 
   .linked-page-popover .group-title {
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     margin: 8px 12px;
   }
 

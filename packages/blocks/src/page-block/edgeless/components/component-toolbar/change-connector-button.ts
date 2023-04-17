@@ -49,7 +49,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       justify-content: center;
       fill: none;
       stroke: none;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     menu-divider {
@@ -61,7 +61,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white-90);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -82,7 +82,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     }
 
     .connector-mode-button[active] {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .connector-color-button .color {

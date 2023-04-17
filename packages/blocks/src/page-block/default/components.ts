@@ -27,7 +27,7 @@ export function DraggingArea(rect: DOMRect | null) {
     <style>
       .affine-page-dragging-area {
         position: absolute;
-        background: var(--affine-selected-color);
+        background: var(--affine-hover-color);
         z-index: 1;
         pointer-events: none;
       }

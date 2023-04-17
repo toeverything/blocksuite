@@ -53,7 +53,7 @@ const styles = css`
     justify-content: center;
     fill: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
-    background: var(--affine-hub-background);
+    background: var(--affine-background-overlay-panel-color);
     box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
     border-radius: 10px;
   }
@@ -86,7 +86,7 @@ const styles = css`
     align-items: center;
     width: 250px;
     height: 54px;
-    background: var(--affine-page-background);
+    background: var(--affine-white-90);
     box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
     border-radius: 10px;
     margin-bottom: 12px;
@@ -109,7 +109,7 @@ const styles = css`
   }
 
   .card-container-inner:hover .card-container {
-    background: var(--affine-card-hover-background);
+    background: var(--affine-hover-color);
     fill: var(--affine-primary-color);
     top: -2px;
     left: -2px;
@@ -125,7 +125,7 @@ const styles = css`
   .card-description-container {
     display: block;
     width: 190px;
-    color: var(--affine-text-color);
+    color: var(--affine-text-primary-color);
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
     margin: 8px 0 8px 12px;
@@ -135,7 +135,7 @@ const styles = css`
   .affine-block-hub-container .description {
     font-size: var(--affine-font-sm);
     line-height: var(--affine-line-height);
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     white-space: pre;
   }
 
@@ -149,7 +149,7 @@ const styles = css`
 
   .affine-block-hub-title-container {
     margin: 16px 0 20px 12px;
-    color: var(--affine-secondary-text-color);
+    color: var(--affine-text-secondary-color);
     font-size: var(--affine-font-base);
     user-select: none;
   }
@@ -166,7 +166,7 @@ const styles = css`
     align-items: center;
     position: fixed;
     width: 44px;
-    background: var(--affine-page-background);
+    background: var(--affine-white-90);
     border-radius: 10px;
   }
 
@@ -180,9 +180,9 @@ const styles = css`
     align-items: center;
     margin-bottom: 8px;
     position: relative;
-    background: var(--affine-page-background);
+    background: var(--affine-white-90);
     border-radius: 5px;
-    fill: var(--affine-line-number-color);
+    fill: var(--affine-text-secondary-color);
     height: 36px;
   }
 
@@ -191,7 +191,7 @@ const styles = css`
   }
 
   .block-hub-icon-container:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
     border-radius: 5px;
   }
 
@@ -202,9 +202,9 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: var(--affine-page-background);
+    background: var(--affine-white-90);
     border-radius: 10px;
-    fill: var(--affine-line-number-color);
+    fill: var(--affine-text-secondary-color);
   }
 
   .block-hub-menu-container[expanded] .new-icon {
@@ -215,7 +215,7 @@ const styles = css`
     box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
       -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
     fill: var(--affine-primary-color);
-    background: var(--affine-page-background);
+    background: var(--affine-white-90);
   }
 
   .icon-expanded {
@@ -224,7 +224,7 @@ const styles = css`
   }
 
   .icon-expanded:hover {
-    background: var(--affine-hover-background);
+    background: var(--affine-hover-color);
     box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
       -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   }

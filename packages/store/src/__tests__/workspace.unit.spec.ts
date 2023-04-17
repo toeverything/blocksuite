@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
+import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -9,7 +10,6 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { Slot } from '../../../global/src/utils/slot.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
@@ -195,7 +195,7 @@ describe('addBlock', () => {
         title: new page.Text(),
       })
     );
-    const block = (await waitOnce(page.slots.rootAdded)) as BaseBlockModel;
+    const block = await waitOnce(page.slots.rootAdded);
     if (!Array.isArray(block) || !block[0]) {
       throw new Error('');
     }

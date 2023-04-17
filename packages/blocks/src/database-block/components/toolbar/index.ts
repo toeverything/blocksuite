@@ -32,7 +32,7 @@ class NewRecordPreview extends ShadowlessElement {
               rgba(96, 70, 254, 0.3)
             ),
             linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
-            #ffffff;
+            var(--affine-icon-color);
           /* light/floatButtonShadow */
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
             0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);

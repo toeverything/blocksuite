@@ -1,6 +1,5 @@
 import { SHORT_KEY } from './index.js';
 
-export * from './consts/affine-style-consts.js';
 export * from './consts/block-hub.js';
 export * from './consts/platform.js';
 

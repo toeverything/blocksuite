@@ -253,8 +253,8 @@ export function SingleConnectorHandles(
         height: 9px;
         box-sizing: border-box;
         border-radius: 50%;
-        border: 2px solid #5438ff;
-        background-color: #fff;
+        border: 2px solid var(--affine-text-emphasis-color);
+        background-color: var(--affine-background-primary-color);
         transform: translate(-50%, -50%);
         cursor: pointer;
         z-index: 10;

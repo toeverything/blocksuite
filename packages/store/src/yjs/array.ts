@@ -1,6 +1,6 @@
 import { Array as YArray } from 'yjs';
 
-import type { ProxyConfig } from './proxy.js';
+import type { ProxyConfig } from './config.js';
 
 function initialize(arr: unknown[], yArray: YArray<unknown>) {
   yArray.forEach((value, key) => {
@@ -10,7 +10,7 @@ function initialize(arr: unknown[], yArray: YArray<unknown>) {
 
 export function createYArrayProxy<T = unknown>(
   yArray: YArray<T>,
-  config: ProxyConfig = {}
+  config: Pick<ProxyConfig, 'readonly'> = {}
 ): T[] {
   const { readonly = false } = config;
   const array: T[] = [];
@@ -25,17 +25,17 @@ export function createYArrayProxy<T = unknown>(
     set: (target, p, value, receiver) => {
       if (readonly) {
         throw new Error('Modify data is not allowed');
-      } else {
-        if (typeof p === 'string') {
-          const index = Number(p);
-          if (!Number.isNaN(index)) {
-            yArray.insert(index, [value]);
-          }
-          return Reflect.set(target, p, value, receiver);
-        } else {
-          throw new Error('key cannot be a symbol');
-        }
       }
+
+      if (typeof p !== 'string') {
+        throw new Error('key cannot be a symbol');
+      }
+
+      const index = Number(p);
+      if (!Number.isNaN(index)) {
+        yArray.insert(index, [value]);
+      }
+      return Reflect.set(target, p, value, receiver);
     },
     get: (target, p, receiver) => {
       return Reflect.get(target, p, receiver);
@@ -43,17 +43,17 @@ export function createYArrayProxy<T = unknown>(
     deleteProperty(target: T[], p: string | symbol): boolean {
       if (readonly) {
         throw new Error('Modify data is not allowed');
-      } else {
-        if (typeof p === 'string') {
-          const index = Number(p);
-          if (!Number.isNaN(index)) {
-            yArray.delete(index, 1);
-          }
-          return Reflect.deleteProperty(target, p);
-        } else {
-          throw new Error('key cannot be a symbol');
-        }
       }
+
+      if (typeof p !== 'string') {
+        throw new Error('key cannot be a symbol');
+      }
+
+      const index = Number(p);
+      if (!Number.isNaN(index)) {
+        yArray.delete(index, 1);
+      }
+      return Reflect.deleteProperty(target, p);
     },
   });
 }
