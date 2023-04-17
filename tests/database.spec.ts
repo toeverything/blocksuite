@@ -566,6 +566,31 @@ test.describe('select column tag action', () => {
     expect(await selected2.innerText()).toBe('abc');
   });
 
+  test('should select tag renaming support shortcut key', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    const { selectOption } = await performSelectColumnTagAction(page, 'rename');
+    await waitNextFrame(page);
+    await type(page, '456');
+    // esc
+    await pressEscape(page);
+    const option1 = selectOption.nth(0);
+    const input = option1.locator('[data-virgo-text="true"]');
+    expect(await input.innerText()).toBe('123');
+
+    await clickDatabaseOutside(page);
+    await performSelectColumnTagAction(page, 'rename');
+    await waitNextFrame(page);
+    await type(page, '456');
+    // enter
+    await pressEnter(page);
+    expect(await input.innerText()).toBe('123456');
+  });
+
   test('should support select tag deletion', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
