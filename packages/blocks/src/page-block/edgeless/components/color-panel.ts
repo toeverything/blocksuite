@@ -6,7 +6,23 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RawCssVariablesName } from '../../../__internal__/theme/css-variables.js';
 
-export class ColorEvent extends CustomEvent<RawCssVariablesName> {}
+export class ColorEvent extends Event {
+  detail: RawCssVariablesName;
+
+  constructor(
+    type: string,
+    {
+      detail,
+      composed,
+      bubbles,
+    }: { detail: RawCssVariablesName; composed: boolean; bubbles: boolean }
+  ) {
+    super(type, { bubbles, composed });
+    this.detail = detail;
+  }
+}
+
+// export class ColorEvent extends CustomEvent<RawCssVariablesName> {}
 
 const DEFAULT_COLORS: RawCssVariablesName[] = [
   '--affine-palette-line-yellow',
