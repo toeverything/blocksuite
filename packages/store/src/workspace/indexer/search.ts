@@ -77,6 +77,7 @@ export class SearchIndexer {
     });
 
     Array.from(doc.share.keys())
+      .filter(pageId => pageId !== 'space:meta')
       .map(k => [k, this._getPage(k)] as const)
       .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
   }

@@ -39,7 +39,7 @@ export class BlockIndexer {
   constructor(
     doc: BlockSuiteDoc<BlockSuiteDocData>,
     {
-      immediately = true,
+      immediately = false,
       slots,
     }: {
       readonly slots: Workspace['slots'];
@@ -52,9 +52,15 @@ export class BlockIndexer {
     if (immediately) {
       this._initIndex();
     } else {
-      requestIdleCallback(() => {
-        this._initIndex();
-      });
+      if ('requestIdleCallback' in globalThis) {
+        requestIdleCallback(() => {
+          this._initIndex();
+        });
+      } else {
+        setTimeout(() => {
+          this._initIndex();
+        }, 0);
+      }
     }
   }
 
@@ -137,7 +143,6 @@ export class BlockIndexer {
               'Unexpected prop:text changed! Please update text indexer',
               e
             );
-            // need update block, unimplemented
           }
           return;
         }
