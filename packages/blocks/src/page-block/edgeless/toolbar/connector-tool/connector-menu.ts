@@ -7,7 +7,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { ColorEvent } from '../../components/color-panel.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
@@ -112,7 +112,7 @@ export class EdgelessConnectorMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setConnectorColor = (color: RawCssVariablesName) => {
+  private _setConnectorColor = (color: CssVariableName) => {
     if (this.mouseMode.type !== 'connector') return;
 
     const { mode } = this.mouseMode;

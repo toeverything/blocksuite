@@ -5,9 +5,9 @@
 import './declare-test-window.js';
 
 import type {
+  CssVariableName,
   FrameBlockModel,
   PageBlockModel,
-  RawCssVariablesName,
 } from '@blocksuite/blocks';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
@@ -681,7 +681,7 @@ export async function assertSelectionInFrame(page: Page, frameId: string) {
 export async function assertEdgelessFrameBackground(
   page: Page,
   frameId: string,
-  color: RawCssVariablesName
+  color: CssVariableName
 ) {
   const backgroundColor = await page
     .locator(`affine-frame[data-block-id="${frameId}"]`)
@@ -700,7 +700,7 @@ export async function assertEdgelessFrameBackground(
 
 export async function assertEdgelessColorSameWithHexColor(
   page: Page,
-  edgelessColor: RawCssVariablesName,
+  edgelessColor: CssVariableName,
   hexColor: `#${string}`
 ) {
   const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);

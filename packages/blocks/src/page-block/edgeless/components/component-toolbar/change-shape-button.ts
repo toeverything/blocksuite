@@ -8,7 +8,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../../../../__internal__/index.js';
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -53,7 +53,7 @@ function getMostCommonStrokeColor(
   return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
 }
 
-const FILL_COLORS: RawCssVariablesName[] = [
+const FILL_COLORS: CssVariableName[] = [
   '--affine-palette-shape-yellow',
   '--affine-palette-shape-orange',
   '--affine-palette-shape-tangerine',
@@ -69,7 +69,7 @@ const FILL_COLORS: RawCssVariablesName[] = [
 ];
 export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[11];
 
-const STROKE_COLORS: RawCssVariablesName[] = [
+const STROKE_COLORS: CssVariableName[] = [
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-tangerine',
@@ -185,7 +185,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setShapeFillColor(color: RawCssVariablesName) {
+  private _setShapeFillColor(color: CssVariableName) {
     const filled = !isTransparent(color);
     this.page.transact(() => {
       this.elements.forEach(ele => {
@@ -198,7 +198,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this._forceUpdateSelection();
   }
 
-  private _setShapeStrokeColor(color: RawCssVariablesName) {
+  private _setShapeStrokeColor(color: CssVariableName) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
         this.surface.updateElementProps(ele.id, {

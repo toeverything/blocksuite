@@ -7,7 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
@@ -19,7 +19,7 @@ import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-export const FRAME_BACKGROUND_COLORS: RawCssVariablesName[] = [
+export const FRAME_BACKGROUND_COLORS: CssVariableName[] = [
   '--affine-background-secondary-color',
   '--affine-tag-yellow',
   '--affine-tag-red',
@@ -98,7 +98,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _renderSelectedColor(color: RawCssVariablesName) {
+  private _renderSelectedColor(color: CssVariableName) {
     const style = { backgroundColor: `var(${color})` };
 
     return html`<div class="selected-background" style=${styleMap(style)}>
@@ -106,7 +106,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     </div>`;
   }
 
-  private _setBlockBackground(color: RawCssVariablesName) {
+  private _setBlockBackground(color: CssVariableName) {
     this.frames.forEach(frame => {
       this.page.updateBlock(frame, { background: color });
     });

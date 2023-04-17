@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/store';
 
 import { capitalize, uncapitalize } from '../utils/std.js';
-import type { CssVariable, RawCssVariablesName } from './css-variables.js';
+import type { CssVariableName, CssVariablesMap } from './css-variables.js';
 import type { ThemeObserver } from './theme-observer.js';
 
 /**
@@ -29,7 +29,7 @@ function getClosestEditorContainer(element: Element) {
 
 export function listenToThemeChange(
   currentELement: Element,
-  callback: (cssVariables: CssVariable) => void
+  callback: (cssVariables: CssVariablesMap) => void
 ) {
   const container = getClosestEditorContainer(currentELement);
   return container.themeObserver.on(callback);
@@ -37,7 +37,7 @@ export function listenToThemeChange(
 
 export function getThemePropertyValue(
   currentELement: Element,
-  name: RawCssVariablesName
+  name: CssVariableName
 ) {
   const container = getClosestEditorContainer(currentELement);
   return container.themeObserver.cssVariables?.[name];

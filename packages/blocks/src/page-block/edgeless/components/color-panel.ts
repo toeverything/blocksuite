@@ -4,10 +4,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RawCssVariablesName } from '../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../__internal__/theme/css-variables.js';
 
 export class ColorEvent extends Event {
-  detail: RawCssVariablesName;
+  detail: CssVariableName;
 
   constructor(
     type: string,
@@ -15,16 +15,16 @@ export class ColorEvent extends Event {
       detail,
       composed,
       bubbles,
-    }: { detail: RawCssVariablesName; composed: boolean; bubbles: boolean }
+    }: { detail: CssVariableName; composed: boolean; bubbles: boolean }
   ) {
     super(type, { bubbles, composed });
     this.detail = detail;
   }
 }
 
-// export class ColorEvent extends CustomEvent<RawCssVariablesName> {}
+// export class ColorEvent extends CustomEvent<RawCssVariableNames> {}
 
-const DEFAULT_COLORS: RawCssVariablesName[] = [
+const DEFAULT_COLORS: CssVariableName[] = [
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-tangerine',
@@ -40,11 +40,11 @@ const DEFAULT_COLORS: RawCssVariablesName[] = [
 ];
 export const DEFAULT_SELECTED_COLOR = DEFAULT_COLORS[9];
 
-export function isTransparent(color: RawCssVariablesName) {
+export function isTransparent(color: CssVariableName) {
   return color.toLowerCase() === '--affine-palette-transparent';
 }
 
-function isSameColorWithBackground(color: RawCssVariablesName) {
+function isSameColorWithBackground(color: CssVariableName) {
   return [
     '--affine-palette-line-white',
     '--affine-palette-shape-white',
@@ -77,7 +77,7 @@ function TransparentColor(hollowCircle = false) {
   </div>`;
 }
 
-function BorderedHollowCircle(color: RawCssVariablesName) {
+function BorderedHollowCircle(color: CssVariableName) {
   const strokeWidth = isSameColorWithBackground(color) ? 1 : 0;
   const style = {
     fill: `var(${color})`,
@@ -98,7 +98,7 @@ function BorderedHollowCircle(color: RawCssVariablesName) {
   </svg> `;
 }
 
-function AdditionIcon(color: RawCssVariablesName, hollowCircle: boolean) {
+function AdditionIcon(color: CssVariableName, hollowCircle: boolean) {
   if (isTransparent(color)) {
     return TransparentColor(hollowCircle);
   }
@@ -109,7 +109,7 @@ function AdditionIcon(color: RawCssVariablesName, hollowCircle: boolean) {
 }
 
 export function ColorUnit(
-  color: RawCssVariablesName,
+  color: CssVariableName,
   {
     hollowCircle,
     letter,
@@ -190,10 +190,10 @@ export class EdgelessColorPanel extends LitElement {
   `;
 
   @property()
-  value?: RawCssVariablesName;
+  value?: CssVariableName;
 
   @property()
-  options: RawCssVariablesName[] = DEFAULT_COLORS;
+  options: CssVariableName[] = DEFAULT_COLORS;
 
   @property()
   showLetterMark = false;
@@ -201,7 +201,7 @@ export class EdgelessColorPanel extends LitElement {
   @property()
   hollowCircle = false;
 
-  private _onSelect(value: RawCssVariablesName) {
+  private _onSelect(value: CssVariableName) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,

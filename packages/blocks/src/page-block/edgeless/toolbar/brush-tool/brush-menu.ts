@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { BrushSize } from '../../../../__internal__/index.js';
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { ColorEvent } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -116,7 +116,7 @@ export class EdgelessBrushMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor = (color: RawCssVariablesName) => {
+  private _setBrushColor = (color: CssVariableName) => {
     if (this.mouseMode.type !== 'brush') return;
 
     const { lineWidth } = this.mouseMode;

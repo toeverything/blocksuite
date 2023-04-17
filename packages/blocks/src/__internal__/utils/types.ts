@@ -10,7 +10,7 @@ import type {
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
-import type { RawCssVariablesName } from '../theme/css-variables.js';
+import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -78,8 +78,8 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
-  fillColor: RawCssVariablesName;
-  strokeColor: RawCssVariablesName;
+  fillColor: CssVariableName;
+  strokeColor: CssVariableName;
 };
 
 export enum BrushSize {
@@ -89,7 +89,7 @@ export enum BrushSize {
 
 export type BrushMouseMode = {
   type: 'brush';
-  color: RawCssVariablesName;
+  color: CssVariableName;
   lineWidth: BrushSize;
 };
 
@@ -100,13 +100,13 @@ export type PanMouseMode = {
 
 export type TextMouseMode = {
   type: 'text';
-  background: RawCssVariablesName;
+  background: CssVariableName;
 };
 
 export type ConnectorMouseMode = {
   type: 'connector';
   mode: ConnectorMode;
-  color: RawCssVariablesName;
+  color: CssVariableName;
 };
 
 export type MouseMode =

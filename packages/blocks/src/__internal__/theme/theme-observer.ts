@@ -1,9 +1,9 @@
 import { Slot } from '@blocksuite/store';
 
-import type { CssVariable } from './css-variables.js';
+import type { CssVariablesMap } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';
 
-function extractCssVariables(element: Element): CssVariable {
+function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
   const variables = VARIABLES.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
@@ -15,18 +15,18 @@ function extractCssVariables(element: Element): CssVariable {
     }
 
     return acc;
-  }, {} as CssVariable);
+  }, {} as CssVariablesMap);
   return variables;
 }
 
 /**
  * Observer theme changing by `data-theme` property
  */
-export class ThemeObserver extends Slot<CssVariable> {
+export class ThemeObserver extends Slot<CssVariablesMap> {
   private _observer?: MutationObserver;
 
   private _mode = '';
-  private _cssVariables: CssVariable | null = null;
+  private _cssVariables: CssVariablesMap | null = null;
 
   get cssVariables() {
     return this._cssVariables;

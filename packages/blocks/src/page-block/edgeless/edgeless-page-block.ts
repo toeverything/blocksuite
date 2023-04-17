@@ -35,8 +35,8 @@ import {
   resetNativeSelection,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
-import type { RawCssVariablesName } from '../../__internal__/theme/css-variables.js';
-import { isRawCssVariable } from '../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
+import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
 import {
   ShadowlessElement,
@@ -195,11 +195,8 @@ export class EdgelessPageBlockComponent
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
     this.surface = new SurfaceManager(yContainer, value => {
-      if (isRawCssVariable(value)) {
-        const cssValue = getThemePropertyValue(
-          this,
-          value as RawCssVariablesName
-        );
+      if (isCssVariable(value)) {
+        const cssValue = getThemePropertyValue(this, value as CssVariableName);
         if (cssValue === undefined) {
           console.error(
             new Error(

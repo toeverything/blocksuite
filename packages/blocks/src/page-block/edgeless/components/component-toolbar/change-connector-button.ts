@@ -11,7 +11,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
@@ -25,10 +25,10 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: ConnectorElement[]
-): RawCssVariablesName | null {
+): CssVariableName | null {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as RawCssVariablesName) : null;
+  return max ? (max[0] as CssVariableName) : null;
 }
 
 function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
@@ -163,7 +163,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setConnectorColor(color: RawCssVariablesName) {
+  private _setConnectorColor(color: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {

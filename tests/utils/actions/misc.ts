@@ -2,8 +2,8 @@
 import '../declare-test-window.js';
 
 import type {
+  CssVariableName,
   DatabaseBlockModel,
-  RawCssVariablesName,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -767,11 +767,11 @@ export async function getCurrentEditorTheme(page: Page) {
 
 export async function getCurrentThemeCSSPropertyValue(
   page: Page,
-  property: RawCssVariablesName
+  property: CssVariableName
 ) {
   const value = await page
     .locator('editor-container')
-    .evaluate((ele, property: RawCssVariablesName) => {
+    .evaluate((ele, property: CssVariableName) => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
         .themeObserver.cssVariables?.[property];
     }, property);

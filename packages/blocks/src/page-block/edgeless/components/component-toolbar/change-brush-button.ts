@@ -8,7 +8,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { WithDisposable } from '../../../../__internal__/index.js';
-import type { RawCssVariablesName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -17,12 +17,10 @@ import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
 import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(
-  elements: BrushElement[]
-): RawCssVariablesName | null {
+function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as RawCssVariablesName) : null;
+  return max ? (max[0] as CssVariableName) : null;
 }
 
 function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
@@ -128,7 +126,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setBrushColor(color: RawCssVariablesName) {
+  private _setBrushColor(color: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
