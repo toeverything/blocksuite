@@ -1,5 +1,4 @@
 import {
-  asyncFocusRichText,
   type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -174,14 +173,15 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       });
     }
 
+    // Adding images from outside by dragging
     this.outsideDragManager.registerHandler(
       files => Array.from(files).every(file => /^image\//.test(file.type)),
-      async (files, targetModel) => {
+      async images => {
         const storage = await this.page.blobs;
         assertExists(storage);
         const result = [];
-        for (const file of Array.from(files)) {
-          const id = await storage.set(file);
+        for (const img of Array.from(images)) {
+          const id = await storage.set(img);
           const props = {
             flavour: 'affine:embed',
             type: 'image',
@@ -189,14 +189,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
           };
           result.push(props);
         }
-        if (targetModel) {
-          this.page.captureSync();
-          const parent = this.page.getParent(targetModel);
-          assertExists(parent);
-          const ids = this.page.addSiblingBlocks(targetModel, result);
-          const focusId = ids[0];
-          asyncFocusRichText(this.page, focusId);
-        }
+        return result;
       }
     );
   }

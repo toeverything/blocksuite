@@ -1,7 +1,8 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 
 import {
+  asyncFocusRichText,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
@@ -11,10 +12,7 @@ import { DragHandle } from './index.js';
 
 interface OutsideDragHandler {
   filter: (files: FileList) => boolean;
-  callback: (
-    files: FileList,
-    targetModel: BaseBlockModel | null
-  ) => Promise<void>;
+  file2props: (files: FileList) => Promise<Array<Partial<BaseBlockModel>>>;
 }
 
 export class OutsideDragManager {
@@ -67,17 +65,26 @@ export class OutsideDragManager {
     this._indicator.rect = rect;
   }
 
-  private _onDrop(event: DragEvent) {
+  private async _onDrop(event: DragEvent) {
     assertExists(event.dataTransfer);
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) {
       return;
     }
     for (const handler of this._handlers) {
-      const { filter, callback } = handler;
+      const { filter, file2props } = handler;
       if (filter(files)) {
         event.preventDefault();
-        callback(files, this._targetModel);
+        const blocks = await file2props(files);
+        if (this._targetModel) {
+          const page = this._targetModel.page;
+          page.captureSync();
+          const parent = page.getParent(this._targetModel);
+          assertExists(parent);
+          const ids = page.addSiblingBlocks(this._targetModel, blocks);
+          const focusId = ids[0];
+          asyncFocusRichText(page, focusId);
+        }
       }
     }
     this._indicator.rect = null;
@@ -85,11 +92,8 @@ export class OutsideDragManager {
 
   registerHandler(
     filter: (files: FileList) => boolean,
-    callback: (
-      files: FileList,
-      targetModel: BaseBlockModel | null
-    ) => Promise<void>
+    file2props: (files: FileList) => Promise<Array<Partial<BaseBlockModel>>>
   ) {
-    this._handlers.push({ filter, callback });
+    this._handlers.push({ filter, file2props });
   }
 }
