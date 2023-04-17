@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import type { RawCssVariablesName } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -202,7 +203,7 @@ export async function resizeElementByTopLeftHandle(
   );
 }
 
-export async function selectBrushColor(page: Page, color: `#${string}`) {
+export async function selectBrushColor(page: Page, color: RawCssVariablesName) {
   const colorButton = page.locator(
     `edgeless-brush-menu .color-unit[aria-label="${color.toLowerCase()}"]`
   );
@@ -391,7 +392,7 @@ export async function triggerComponentToolbarAction(
 
 export async function changeEdgelessFrameBackground(
   page: Page,
-  color: `#${string}`
+  color: RawCssVariablesName
 ) {
   const colorButton = page.locator(
     `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
@@ -399,7 +400,10 @@ export async function changeEdgelessFrameBackground(
   await colorButton.click();
 }
 
-export async function changeShapeFillColor(page: Page, color: `#${string}`) {
+export async function changeShapeFillColor(
+  page: Page,
+  color: RawCssVariablesName
+) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
     .locator('.color-panel-container.fill-color')
@@ -407,7 +411,10 @@ export async function changeShapeFillColor(page: Page, color: `#${string}`) {
   await colorButton.click();
 }
 
-export async function changeShapeStrokeColor(page: Page, color: `#${string}`) {
+export async function changeShapeStrokeColor(
+  page: Page,
+  color: RawCssVariablesName
+) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
     .locator('.color-panel-container.stroke-color')
