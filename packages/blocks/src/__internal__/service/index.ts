@@ -45,12 +45,9 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
 
   block2Text(
     block: BlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { childText = '', begin = 0, end }: BlockTransformContext = {}
   ): string {
-    const text = (block.text?.toString() || '').slice(
-      begin || 0,
-      end || undefined
-    );
+    const text = (block.text?.toString() || '').slice(begin, end);
     return `${text}${childText}`;
   }
 
