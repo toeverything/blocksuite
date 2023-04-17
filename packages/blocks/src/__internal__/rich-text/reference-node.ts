@@ -1,4 +1,4 @@
-import { FontPageIcon, FontPageSubpageIcon } from '@blocksuite/global/config';
+import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import type {
@@ -42,7 +42,7 @@ export type RefNodeSlots = {
    * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
    */
   subpageUnlinked: Slot<{ pageId: string }>;
-  pageLinkClicked: Slot<{ pageId: string }>;
+  pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
 };
 
 function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
@@ -252,7 +252,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
-      >${type === 'LinkedPage' ? FontPageSubpageIcon : FontPageIcon}<span
+      >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}<span
         class="affine-reference-title"
         data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
