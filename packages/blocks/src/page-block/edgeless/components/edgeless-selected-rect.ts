@@ -76,7 +76,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragMove,
       this._onDragEnd
     );
-    this.addEventListener('mousedown', stopPropagation);
+    this.addEventListener('pointerdown', stopPropagation);
   }
 
   get zoom() {
@@ -203,9 +203,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const resizeHandles = ResizeHandles(
       selectedRect,
       resizeMode,
-      (e: MouseEvent, direction: HandleDirection) => {
+      (e: PointerEvent, direction: HandleDirection) => {
         const bounds = getSelectableBounds(this.state.selected);
-        _resizeManager.onMouseDown(e, direction, bounds);
+        _resizeManager.onPointerDown(e, direction, bounds);
       }
     );
 

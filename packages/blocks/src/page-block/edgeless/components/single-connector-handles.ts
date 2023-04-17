@@ -21,8 +21,8 @@ import {
   pickBy,
 } from '../utils.js';
 
-function capMousedown(
-  event: MouseEvent,
+function capPointerdown(
+  event: PointerEvent,
   surface: SurfaceManager,
   page: Page,
   element: ConnectorElement,
@@ -35,8 +35,8 @@ function capMousedown(
     x: c.x + element.x,
     y: c.y + element.y,
   }));
-  const mousemove = (mouseMoveEvent: MouseEvent) => {
-    const { x, y } = mouseMoveEvent;
+  const pointermove = (pointerMoveEvent: PointerEvent) => {
+    const { x, y } = pointerMoveEvent;
     const [modelX, modelY] = surface.toModelCoord(x, y);
     const { start, end } = getConnectorAttachedInfo(element, surface, page);
 
@@ -108,13 +108,13 @@ function capMousedown(
     requestUpdate();
   };
 
-  const mouseup = () => {
-    document.removeEventListener('mousemove', mousemove);
-    document.removeEventListener('mouseup', mouseup);
+  const pointerup = () => {
+    document.removeEventListener('pointermove', pointermove);
+    document.removeEventListener('pointerup', pointerup);
   };
 
-  document.addEventListener('mousemove', mousemove);
-  document.addEventListener('mouseup', mouseup);
+  document.addEventListener('pointermove', pointermove);
+  document.addEventListener('pointerup', pointerup);
 }
 
 type Handle = {
@@ -150,8 +150,8 @@ function getControllerHandles(controllers: Controller[]) {
   return handles;
 }
 
-function centerControllerMousedown(
-  event: MouseEvent,
+function centerControllerPointerdown(
+  event: PointerEvent,
   surface: SurfaceManager,
   page: Page,
   element: ConnectorElement,
@@ -162,7 +162,7 @@ function centerControllerMousedown(
   const startY = event.clientY;
   const { controllers, x, y } = element;
 
-  const mousemove = (mouseMoveEvent: MouseEvent) => {
+  const pointermove = (pointerMoveEvent: PointerEvent) => {
     const { isVertical, position } = handle;
     const { zoom } = surface.viewport;
 
@@ -172,8 +172,8 @@ function centerControllerMousedown(
       y: c.y + y,
     }));
 
-    const deltaX = isVertical ? mouseMoveEvent.clientX - startX : 0;
-    const deltaY = isVertical ? 0 : mouseMoveEvent.clientY - startY;
+    const deltaX = isVertical ? pointerMoveEvent.clientX - startX : 0;
+    const deltaY = isVertical ? 0 : pointerMoveEvent.clientY - startY;
 
     const point0 = absoluteControllers[position];
     const newPoint0 = {
@@ -217,12 +217,12 @@ function centerControllerMousedown(
 
     requestUpdate();
   };
-  const mouseup = (mouseUpEvent: MouseEvent) => {
-    document.removeEventListener('mousemove', mousemove);
-    document.removeEventListener('mouseup', mouseup);
+  const pointerup = () => {
+    document.removeEventListener('pointermove', pointermove);
+    document.removeEventListener('pointerup', pointerup);
   };
-  document.addEventListener('mousemove', mousemove);
-  document.addEventListener('mouseup', mouseup);
+  document.addEventListener('pointermove', pointermove);
+  document.addEventListener('pointerup', pointerup);
 }
 
 export function SingleConnectorHandles(
@@ -259,20 +259,28 @@ export function SingleConnectorHandles(
         cursor: pointer;
         z-index: 10;
         pointer-events: all;
+
+        /**
+         * Fix: pointerEvent stops firing after a short time.
+         * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+         * up to the one that implements the gesture (in other words, the first containing scrolling element)
+         * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+         */
+        touch-action: none;
       }
     </style>
     <div
       class="line-controller"
       style=${styleMap(start)}
-      @mousedown=${(e: MouseEvent) => {
-        capMousedown(e, surface, page, element, 'start', mode, requestUpdate);
+      @pointerdown=${(e: PointerEvent) => {
+        capPointerdown(e, surface, page, element, 'start', mode, requestUpdate);
       }}
     ></div>
     <div
       class="line-controller"
       style=${styleMap(end)}
-      @mousedown=${(e: MouseEvent) => {
-        capMousedown(e, surface, page, element, 'end', mode, requestUpdate);
+      @pointerdown=${(e: PointerEvent) => {
+        capPointerdown(e, surface, page, element, 'end', mode, requestUpdate);
       }}
     ></div>
     ${repeat(
@@ -287,8 +295,8 @@ export function SingleConnectorHandles(
         return html`<div
           class="line-controller"
           style=${styleMap(style)}
-          @mousedown=${(e: MouseEvent) => {
-            centerControllerMousedown(
+          @pointerdown=${(e: PointerEvent) => {
+            centerControllerPointerdown(
               e,
               surface,
               page,

@@ -115,6 +115,19 @@ export class EdgelessPageBlockComponent
       z-index: 1;
       pointer-events: none;
     }
+    .affine-block-children-container.edgeless {
+      padding-left: 0;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      /**
+       * Fix: pointerEvent stops firing after a short time.
+       * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+       * up to the one that implements the gesture (in other words, the first containing scrolling element)
+       * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+       */
+      touch-action: none;
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -541,10 +554,6 @@ export class EdgelessPageBlockComponent
       >
         <style>
           .affine-block-children-container.edgeless {
-            padding-left: 0;
-            position: relative;
-            overflow: hidden;
-            height: 100%;
             background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: var(--affine-background-primary-color);

@@ -22,7 +22,7 @@ export interface Bound {
 export interface SelectionEvent extends IPoint {
   start: IPoint;
   delta: IPoint;
-  raw: MouseEvent;
+  raw: PointerEvent | MouseEvent;
   containerOffset: IPoint;
   keys: {
     shift: boolean;
@@ -39,7 +39,8 @@ function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
 }
 
 function toSelectionEvent(
-  e: MouseEvent,
+  // MouseEvent for dblclick and contextmenu
+  e: PointerEvent | MouseEvent,
   getBoundingClientRect: () => DOMRect,
   startX: number,
   startY: number,
@@ -114,12 +115,12 @@ export function initMouseEventHandlers(
   const getBoundingClientRect: () => DOMRect = () =>
     container.getBoundingClientRect();
 
-  const mouseOutHandler = (e: MouseEvent) =>
+  const pointerOutHandler = (e: PointerEvent) =>
     onContainerMouseOut(
       toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
 
-  const mouseDownHandler = (e: MouseEvent) => {
+  const pointerDownHandler = (e: PointerEvent) => {
     if (shouldFilterMouseEvent(e)) return;
     if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
@@ -141,11 +142,11 @@ export function initMouseEventHandlers(
       e.stopPropagation();
     }
 
-    document.addEventListener('mouseup', mouseUpHandler);
-    document.addEventListener('mouseout', mouseOutHandler);
+    document.addEventListener('pointerup', pointerUpHandler);
+    document.addEventListener('pointerout', pointerOutHandler);
   };
 
-  const mouseMoveHandler = (e: MouseEvent) => {
+  const pointerMoveHandler = (e: PointerEvent) => {
     if (shouldFilterMouseEvent(e)) return;
     if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
@@ -183,7 +184,7 @@ export function initMouseEventHandlers(
     }
   };
 
-  const mouseUpHandler = (e: MouseEvent) => {
+  const pointerUpHandler = (e: PointerEvent) => {
     if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
@@ -214,8 +215,8 @@ export function initMouseEventHandlers(
     isDragging = false;
     last = null;
 
-    document.removeEventListener('mouseup', mouseUpHandler);
-    document.removeEventListener('mouseout', mouseOutHandler);
+    document.removeEventListener('pointerup', pointerUpHandler);
+    document.removeEventListener('pointerout', pointerOutHandler);
   };
 
   const contextMenuHandler = (e: MouseEvent) => {
@@ -258,8 +259,8 @@ export function initMouseEventHandlers(
     onSelectionChangeWithoutDebounce(e);
   };
 
-  container.addEventListener('mousedown', mouseDownHandler);
-  container.addEventListener('mousemove', mouseMoveHandler);
+  container.addEventListener('pointerdown', pointerDownHandler);
+  container.addEventListener('pointermove', pointerMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
   container.addEventListener('tripleclick', tripleClickHandler);
@@ -270,8 +271,8 @@ export function initMouseEventHandlers(
   document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
-    container.removeEventListener('mousedown', mouseDownHandler);
-    container.removeEventListener('mousemove', mouseMoveHandler);
+    container.removeEventListener('pointerdown', pointerDownHandler);
+    container.removeEventListener('pointermove', pointerMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
     container.removeEventListener('tripleclick', tripleClickHandler);
