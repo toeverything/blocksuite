@@ -19,7 +19,7 @@ import type {
   ToolbarActionType,
 } from '../../types.js';
 import { isDivider } from '../../utils.js';
-import { actionStyles } from '../edit-column-popup.js';
+import { actionStyles } from '../edit-column-popup/styles.js';
 
 const toolbarActions: ToolbarAction[] = [
   {
