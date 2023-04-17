@@ -73,6 +73,15 @@ const styles = css`
     justify-content: flex-start;
     gap: 8px;
   }
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #b1b1b1;
+  }
 `;
 
 export type BackLink = {
@@ -143,29 +152,31 @@ function backlinkPopover(host: BlockHost, backlinks: BackLink[]) {
   const metas = host.page.workspace.meta.pageMetas;
   return html`<div class="backlink-popover">
     <div class="group-title">Linked to this page</div>
-    ${backlinks.map(({ pageId, blockId, type }) => {
-      const icon = type === 'LinkedPage' ? LinkedPageIcon : PageIcon;
-      const pageMeta = metas.find(page => page.id === pageId);
-      if (!pageMeta) {
-        console.warn('Unexpected page meta not found', pageId);
-      }
-      const title = pageMeta?.title || DEFAULT_PAGE_NAME;
-      return html`<icon-button
-        width="248px"
-        height="32px"
-        text=${title}
-        @click=${() => {
-          if (pageId === host.page.id) {
-            // On the current page, no need to jump
-            // TODO jump to block
-            return;
-          }
-          host.slots.pageLinkClicked.emit({ pageId, blockId });
-        }}
-      >
-        ${icon}
-      </icon-button>`;
-    })}
+    <div class="group" style="overflow-y: scroll; max-height: 372px;">
+      ${backlinks.map(({ pageId, blockId, type }) => {
+        const icon = type === 'LinkedPage' ? LinkedPageIcon : PageIcon;
+        const pageMeta = metas.find(page => page.id === pageId);
+        if (!pageMeta) {
+          console.warn('Unexpected page meta not found', pageId);
+        }
+        const title = pageMeta?.title || DEFAULT_PAGE_NAME;
+        return html`<icon-button
+          width="248px"
+          height="32px"
+          text=${title}
+          @click=${() => {
+            if (pageId === host.page.id) {
+              // On the current page, no need to jump
+              // TODO jump to block
+              return;
+            }
+            host.slots.pageLinkClicked.emit({ pageId, blockId });
+          }}
+        >
+          ${icon}
+        </icon-button>`;
+      })}
+    </div>
   </div>`;
 }
 
