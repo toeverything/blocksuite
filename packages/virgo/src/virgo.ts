@@ -52,7 +52,8 @@ export class VEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
-  shouldScrollIntoView = true;
+  shouldLineScrollIntoView = true;
+  shouldCursorScrollIntoView = true;
 
   slots: {
     mounted: Slot;
