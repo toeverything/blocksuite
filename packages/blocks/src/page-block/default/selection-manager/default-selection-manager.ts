@@ -675,7 +675,6 @@ export class DefaultSelectionManager {
     this.slots.draggingAreaUpdated.dispose();
     this.slots.embedEditingStateUpdated.dispose();
     this.slots.embedRectsUpdated.dispose();
-    this.slots.nativeSelectionToggled.dispose();
     this._disposables.dispose();
   }
 }
