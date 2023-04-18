@@ -84,23 +84,33 @@ export function initialize(
   });
 }
 
-export function subscribeYEvent(arr: unknown[], yArray: YArray<unknown>): void;
-export function subscribeYEvent(object: UnRecord, yMap: YMap<unknown>): void;
 export function subscribeYEvent(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>
+  arr: unknown[],
+  yArray: YArray<unknown>,
+  config: ProxyConfig
+): void;
+export function subscribeYEvent(
+  object: UnRecord,
+  yMap: YMap<unknown>,
+  config: ProxyConfig
 ): void;
 export function subscribeYEvent(
   target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>
+  yAbstract: YArray<unknown> | YMap<unknown>,
+  config: ProxyConfig
+): void;
+export function subscribeYEvent(
+  target: unknown[] | UnRecord,
+  yAbstract: YArray<unknown> | YMap<unknown>,
+  config: ProxyConfig
 ): void {
   if (yAbstract instanceof YArray) {
-    subscribeYArray(target as unknown[], yAbstract);
+    subscribeYArray(target as unknown[], yAbstract, config);
     return;
   }
 
   if (yAbstract instanceof YMap) {
-    subscribeYMap(target as UnRecord, yAbstract);
+    subscribeYMap(target as UnRecord, yAbstract, config);
     return;
   }
 
