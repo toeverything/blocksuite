@@ -863,12 +863,12 @@ test('should title column support quick renaming', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
   await focusDatabaseHeader(page, 1);
-  const { text, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  const { textElement, renameIcon } = await getDatabaseHeaderColumn(page, 1);
   await renameIcon.click();
   await waitNextFrame(page);
   await type(page, '123');
   await clickDatabaseOutside(page);
-  expect(text).toBe('123');
+  expect(await textElement.innerText()).toBe('123');
 });
 
 test('should title column support quick changing of column type', async ({
