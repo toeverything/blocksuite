@@ -15,7 +15,7 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { createYArrayProxy } from '../yjs/index.js';
+import { createYProxy } from '../yjs/index.js';
 import type { PageMeta } from './meta.js';
 import { tryMigrate } from './migrations.js';
 import type { Workspace } from './workspace.js';
@@ -778,8 +778,10 @@ export class Page extends Space<FlatBlockMap> {
       }
       const value = event.target.get(key);
       hasPropsUpdate = true;
-      if (value instanceof Y.Array) {
-        props[key.replace('prop:', '')] = createYArrayProxy(value);
+      if (value instanceof Y.Map || value instanceof Y.Array) {
+        props[key.replace('prop:', '')] = createYProxy(value, {
+          deep: true,
+        });
       } else {
         props[key.replace('prop:', '')] = value;
       }

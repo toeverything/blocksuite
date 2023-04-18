@@ -193,12 +193,12 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       databaseMap[child.id] = [child.text?.toString() ?? ''];
     }
 
-    const { serializedCells } = this.targetModel;
+    const { cells } = this.targetModel;
     const rowIds = this.targetModel.children.map(child => child.id);
 
     rowIds.forEach(rowId => {
       // The map containing all columns related to this row (block)
-      const columnMap = serializedCells[rowId];
+      const columnMap = cells[rowId];
       if (!columnMap) return;
 
       // Flatten the columnMap into a list of values

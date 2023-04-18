@@ -589,7 +589,7 @@ export class DefaultSelectionManager {
       rect = getRectByBlockElement(this.state.focusedBlock);
     }
 
-    // find subtrees of focused block ement
+    // find subtrees of focused block element
     const selectedBlocks = getBlockElementsIncludeSubtrees([element]);
 
     // only current focused block element
@@ -675,7 +675,6 @@ export class DefaultSelectionManager {
     this.slots.draggingAreaUpdated.dispose();
     this.slots.embedEditingStateUpdated.dispose();
     this.slots.embedRectsUpdated.dispose();
-    this.slots.nativeSelectionToggled.dispose();
     this._disposables.dispose();
   }
 }

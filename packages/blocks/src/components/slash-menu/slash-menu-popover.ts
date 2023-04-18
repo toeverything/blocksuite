@@ -5,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getRichTextByModel,
+  isControlledKeyboardEvent,
   isFuzzyMatch,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
@@ -114,7 +115,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this._hide = false;
         }
 
-        if (e.key === 'ArrowLeft') {
+        const isControlled = isControlledKeyboardEvent(e);
+        const isShift = e.shiftKey;
+        if (e.key === 'ArrowLeft' && !isControlled && !isShift) {
           e.stopPropagation();
           e.preventDefault();
           // If the left panel is hidden, should not activate it
@@ -122,7 +125,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this._leftPanelActivated = true;
           return;
         }
-        if (e.key === 'ArrowRight') {
+        if (e.key === 'ArrowRight' && !isControlled && !isShift) {
           e.stopPropagation();
           e.preventDefault();
           this._leftPanelActivated = false;

@@ -155,6 +155,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
+  @query('.affine-edgeless-page-block-container')
+  pageBlockContainer!: HTMLDivElement;
+
   clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
@@ -179,6 +182,8 @@ export class EdgelessPageBlockComponent
   getSelection() {
     return this._selection;
   }
+
+  private _resizeObserver: ResizeObserver | null = null;
 
   private _frameResizeObserver = new FrameResizeObserver();
 
@@ -413,6 +418,7 @@ export class EdgelessPageBlockComponent
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {
+      this.slots.selectedBlocksUpdated.emit([]);
       this.slots.selectionUpdated.emit({
         selected: [frameBlock as TopLevelBlockModel],
         active,
@@ -441,9 +447,19 @@ export class EdgelessPageBlockComponent
     super.update(changedProperties);
   }
 
+  private _initResizeEffect() {
+    const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
+      this.surface.onResize();
+      this.slots.selectedBlocksUpdated.emit(this.getSelection().selectedBlocks);
+    });
+    resizeObserver.observe(this.pageBlockContainer);
+    this._resizeObserver = resizeObserver;
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initDragHandle();
+    this._initResizeEffect();
     this.clipboard.init(this.page);
     tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
 
@@ -474,6 +490,10 @@ export class EdgelessPageBlockComponent
     super.disconnectedCallback();
     this.clipboard.dispose();
     this.components.dragHandle?.remove();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    }
   }
 
   override render() {
@@ -494,7 +514,7 @@ export class EdgelessPageBlockComponent
       active
     );
 
-    const { zoom, viewportX, viewportY } = viewport;
+    const { zoom, viewportX, viewportY, left, top } = viewport;
     const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
 
     const hoverState = _selection.getHoverState();
@@ -541,6 +561,10 @@ export class EdgelessPageBlockComponent
           .state=${{
             rects: _rectsOfSelectedBlocks,
             grab: false,
+          }}
+          .offset=${{
+            x: -left,
+            y: -top,
           }}
         ></affine-selected-blocks>
         ${hoverRect} ${draggingArea}

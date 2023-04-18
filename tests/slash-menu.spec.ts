@@ -10,6 +10,7 @@ import {
 import {
   enterPlaygroundRoom,
   focusRichText,
+  getVirgoSelectionText,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -118,7 +119,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test('should slash menu position correct', async () => {
+  test('should position slash menu correctly', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
@@ -126,6 +127,63 @@ test.describe('slash menu should show and hide correctly', () => {
     const { x, y } = box;
     assertAlmostEqual(x, 120, 6);
     assertAlmostEqual(y, 167, 8);
+  });
+
+  test('should move up down with arrow key', async () => {
+    await page.keyboard.press('ArrowDown');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const maybeActivatedItem = slashItems.nth(1);
+    await expect(maybeActivatedItem).toHaveText(['Heading 1']);
+    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(slashMenu).toBeVisible();
+
+    const maybeActivatedItem2 = slashItems.nth(2);
+    await expect(maybeActivatedItem2).toHaveText(['Heading 2']);
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
+    page.keyboard.press(`${SHORT_KEY}+N`);
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const maybeActivatedItem = slashItems.nth(1);
+    await expect(maybeActivatedItem).toHaveText(['Heading 1']);
+    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+
+    page.keyboard.press(`${SHORT_KEY}+P`);
+    await expect(slashMenu).toBeVisible();
+
+    const maybeActivatedItem2 = slashItems.nth(0);
+    await expect(maybeActivatedItem2).toHaveText(['Text']);
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('should allow only pressing modifier key', async () => {
+    page.keyboard.press(SHORT_KEY);
+    await expect(slashMenu).toBeVisible();
+
+    page.keyboard.press('Shift');
+    await expect(slashMenu).toBeVisible();
+  });
+
+  test('should allow other hotkey to passthrough', async () => {
+    page.keyboard.press(`${SHORT_KEY}+A`);
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/']);
+
+    const selected = await getVirgoSelectionText(page);
+    expect(selected).toBe('/');
   });
 
   test('left arrow should active left panel', async () => {

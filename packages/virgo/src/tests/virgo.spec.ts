@@ -781,6 +781,6 @@ test('yText should not contain \r', async ({ page }) => {
   });
 
   expect(message).toBe(
-    'yText must not contain \r because it will break the range synclization'
+    'yText must not contain \r because it will break the range synchronization'
   );
 });

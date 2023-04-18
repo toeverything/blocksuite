@@ -35,7 +35,7 @@ const IGNORED_PROPS = [
   'sys:flavour',
   'sys:children',
   'prop:xywh',
-  'prop:yCells',
+  'prop:cells',
 ];
 
 export function yDocToJSXNode(
@@ -99,7 +99,7 @@ function serializeYMap(map: Y.Map<unknown>) {
     } else if (value instanceof Y.Text) {
       json[key] = serializeYText(value);
     } else if (value instanceof Y.Array) {
-      json[key] = value.toJSON();
+      json[key] = value.toArray();
     } else if (value instanceof Y.AbstractType) {
       json[key] = value.toJSON();
     } else {
