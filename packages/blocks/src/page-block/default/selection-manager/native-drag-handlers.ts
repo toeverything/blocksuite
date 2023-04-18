@@ -11,7 +11,6 @@ export const NativeDragHandlers = {
   onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     selection.state.resetStartRange(e);
     selection.state.type = 'native';
-    selection.slots.nativeSelectionToggled.emit(false);
   },
 
   onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
@@ -27,6 +26,5 @@ export const NativeDragHandlers = {
 
   onEnd(selection: DefaultSelectionManager, _: SelectionEvent) {
     selection.state.clearRaf();
-    selection.slots.nativeSelectionToggled.emit(true);
   },
 };
