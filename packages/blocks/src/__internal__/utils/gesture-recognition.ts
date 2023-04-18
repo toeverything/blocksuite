@@ -255,7 +255,7 @@ export class GestureRecognition {
     document.removeEventListener('pointerout', this._pointerout);
   };
 
-  private _pointerout(event: PointerEvent) {
+  private _pointerout = (event: PointerEvent) => {
     const selectionEvent = toSelectionEvent(
       event,
       this._getTargetRect(),
@@ -268,7 +268,7 @@ export class GestureRecognition {
       return;
     }
     this._callbacks.onPointerOut?.(selectionEvent);
-  }
+  };
 
   listen() {
     const target = this._target;
