@@ -64,6 +64,15 @@ function insertContent(model: BaseBlockModel, text: string) {
   });
 }
 
+function formatDate(date: Date) {
+  // yyyy-mm-dd
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const strTime = `${year}-${month}-${day}`;
+  return strTime;
+}
+
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
   {
     name: 'Text',
@@ -163,18 +172,17 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         divider: true,
         action: ({ model }) => {
           const date = new Date();
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
         name: 'Tomorrow',
         icon: TomorrowIcon,
         action: ({ model }) => {
+          // yyyy-mm-dd
           const date = new Date();
           date.setDate(date.getDate() + 1);
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
@@ -183,8 +191,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         action: ({ model }) => {
           const date = new Date();
           date.setDate(date.getDate() - 1);
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
