@@ -135,6 +135,9 @@ export const styles = css`
     border-radius: 4px;
     opacity: 0;
   }
+  .affine-database-column-text-icon svg {
+    fill: var(--affine-icon-color);
+  }
   .affine-database-column-input {
     width: 100%;
     height: 24px;
