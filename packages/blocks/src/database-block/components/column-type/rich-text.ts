@@ -176,7 +176,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
       const page = this.databaseModel.page;
       page.captureSync();
-      const text = new Text(this.cell.value as string);
+      const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
         index: vRange.index + 1,
