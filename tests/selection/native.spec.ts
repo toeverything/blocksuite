@@ -38,7 +38,7 @@ import {
   type,
   undoByKeyboard,
   waitNextFrame,
-} from '../../utils/actions/index.js';
+} from '../utils/actions/index.js';
 import {
   assertBlockCount,
   assertClipItems,
@@ -47,8 +47,8 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertTitle,
-} from '../../utils/asserts.js';
-import { test } from '../../utils/playwright.js';
+} from '../utils/asserts.js';
+import { test } from '../utils/playwright.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);

@@ -26,14 +26,14 @@ import {
   type,
   undoByKeyboard,
   waitNextFrame,
-} from '../../utils/actions/index.js';
+} from '../utils/actions/index.js';
 import {
   assertAlmostEqual,
   assertBlockCount,
   assertRichTexts,
   assertStoreMatchJSX,
-} from '../../utils/asserts.js';
-import { test } from '../../utils/playwright.js';
+} from '../utils/asserts.js';
+import { test } from '../utils/playwright.js';
 
 test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
