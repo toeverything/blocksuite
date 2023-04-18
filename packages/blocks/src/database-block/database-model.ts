@@ -193,13 +193,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
         const selected = cell.value as SelectTag[];
         const newSelected = [...selected];
-        const index = newSelected.indexOf(oldValue);
+        const index = newSelected.findIndex(s => s.value === oldValue.value);
         newSelected[index] = newValue;
 
-        this.cells[rowId][columnId] = {
-          columnId,
-          value: newSelected,
-        };
+        this.cells[rowId][columnId].value = newSelected;
       });
     });
   }

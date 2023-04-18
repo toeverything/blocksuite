@@ -176,8 +176,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
       const page = this.databaseModel.page;
       page.captureSync();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const text = new Text(this.cell.value as any);
+      const text = new Text(this.cell.value as string);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
         index: vRange.index + 1,
@@ -189,8 +188,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   override update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (this.cell && !this.vEditor) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.vEditor = new VEditor(this.cell.value as any);
+      this.vEditor = new VEditor(this.cell.value as string);
       setupVirgoScroll(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({

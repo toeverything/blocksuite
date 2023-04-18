@@ -54,12 +54,16 @@ describe('blocksuite yjs', () => {
       obj.set('foo', 1);
       map.set('obj', obj);
       map.set('num', 0);
+      const map2 = new Y.Map();
+      obj.set('map', map2);
+      map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const proxy = createYMapProxy<Record<string, any>>(map, { deep: true });
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
+      expect(proxy.obj.map.foo).toBe(40);
 
       proxy.obj.bar = 100;
       expect(obj.get('bar')).toBe(100);
@@ -74,6 +78,11 @@ describe('blocksuite yjs', () => {
       expect(
         (map.get('obj2') as Y.Map<Y.Map<string>>).get('bar').get('str')
       ).toBe('hello');
+
+      proxy.obj3 = {};
+      const { obj3 } = proxy;
+      obj3.id = 'obj3';
+      expect((map.get('obj3') as Y.Map<string>).get('id')).toBe('obj3');
     });
   });
 });
