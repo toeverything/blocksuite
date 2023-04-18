@@ -361,7 +361,12 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       assertExists(column);
       this._onUpdateNormalColumn(name, column);
     }
-    this.setEditingColumnId('');
+    // To handle this situation:
+    // 1. click the pen icon, edit the title
+    // 2. then click the other column's pen icon, edit the title
+    if (this._editingColumnId === column?.id) {
+      this.setEditingColumnId('');
+    }
   };
 
   private _onUpdateTitleColumn = (titleColumnName: string) => {
@@ -377,6 +382,11 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       name,
     });
     this.targetModel.applyColumnUpdate();
+  };
+
+  private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
+    event.stopPropagation();
+    this.setEditingColumnId(columnId);
   };
 
   override render() {
@@ -417,7 +427,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     </div>
                     <div
                       class="affine-database-column-text-icon"
-                      @click=${() => this.setEditingColumnId('-1')}
+                      @click=${(e: MouseEvent) =>
+                        this._onEditColumnTitle(e, '-1')}
                     >
                       ${PenIcon}
                     </div>
@@ -475,7 +486,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                           </div>
                           <div
                             class="affine-database-column-text-icon"
-                            @click=${() => this.setEditingColumnId(column.id)}
+                            @click=${(e: MouseEvent) =>
+                              this._onEditColumnTitle(e, column.id)}
                           >
                             ${PenIcon}
                           </div>
