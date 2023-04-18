@@ -108,13 +108,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
-      onClickOutside(
-        this._titleColumnInput,
-        () => {
-          this.setEditingColumnId('');
-        },
-        'mousedown'
-      );
     }
 
     if (changedProperties.has('columns')) {
@@ -344,24 +337,28 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     type: 'title' | 'normal',
     column?: Column
   ) => {
-    const name = (event.target as HTMLInputElement).value;
     if (event.key === 'Enter') {
       this.targetModel.page.captureSync();
-      if (type === 'title') {
-        // title column
-        this._onUpdateTitleColumn(name);
-      } else {
-        // other columns
-        assertExists(column);
-        this._onUpdateNormalColumn(name, column);
-      }
-      this.setEditingColumnId('');
+      this._saveColumnTitle(type, column);
       return;
     }
     if (event.key === 'Escape') {
       this.setEditingColumnId('');
       return;
     }
+  };
+
+  private _saveColumnTitle = (type: 'title' | 'normal', column?: Column) => {
+    const name = this._titleColumnInput.value;
+    if (type === 'title') {
+      // title column
+      this._onUpdateTitleColumn(name);
+    } else {
+      // other columns
+      assertExists(column);
+      this._onUpdateNormalColumn(name, column);
+    }
+    this.setEditingColumnId('');
   };
 
   private _onUpdateTitleColumn = (titleColumnName: string) => {
@@ -409,6 +406,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     value=${this.targetModel.titleColumnName}
                     @keydown=${(event: KeyboardEvent) =>
                       this._onKeydown(event, 'title')}
+                    @blur=${() => this._saveColumnTitle('title')}
                   />`
                 : html`<div class="affine-database-column-text-content">
                     <div class="affine-database-column-text-input">
@@ -466,6 +464,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                           value=${column.name}
                           @keydown=${(event: KeyboardEvent) =>
                             this._onKeydown(event, 'normal', column)}
+                          @blur=${() => this._saveColumnTitle('normal', column)}
                         />`
                       : html`<div class="affine-database-column-text-content">
                           <div class="affine-database-column-text-input">
