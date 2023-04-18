@@ -418,6 +418,7 @@ export class EdgelessPageBlockComponent
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {
+      this.slots.selectedBlocksUpdated.emit([]);
       this.slots.selectionUpdated.emit({
         selected: [frameBlock as TopLevelBlockModel],
         active,

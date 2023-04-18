@@ -62,14 +62,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           page.moveBlocks(models, parent, model, type === 'before');
         }
 
-        if (targetFrameBlock !== frameBlock) {
-          pageBlock.setSelection(
-            targetFrameBlock.model.id,
-            true,
-            focusId,
-            point
-          );
-        }
+        pageBlock.setSelection(targetFrameBlock.model.id, true, focusId, point);
         return;
       }
 
