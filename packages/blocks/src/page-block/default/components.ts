@@ -14,6 +14,10 @@ import type { DefaultSelectionSlots } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
+function stopPropagation(event: PointerEvent | MouseEvent) {
+  event.stopPropagation();
+}
+
 export function DraggingArea(rect: DOMRect | null) {
   if (rect === null) return null;
 
@@ -99,7 +103,10 @@ export function EmbedEditingContainer(
       ${tooltipStyle}
     </style>
 
-    <div class="affine-embed-editing-state-container">
+    <div
+      class="affine-embed-editing-state-container"
+      @pointerdown=${stopPropagation}
+    >
       <div style=${styleMap(style)} class="embed-editing-state">
         <format-bar-button
           class="has-tool-tip"

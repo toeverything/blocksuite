@@ -421,7 +421,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     // host
-    disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
+    disposables.addFromEvent(this, 'pointermove', this._onPointerMoveOnHost);
 
     // drag handle
     disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
@@ -441,7 +441,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     this._handleAnchorDisposable?.dispose();
   }
 
-  private _onMouseMoveOnHost(e: MouseEvent) {
+  private _onPointerMoveOnHost(e: PointerEvent) {
     if (isFirefox) {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
