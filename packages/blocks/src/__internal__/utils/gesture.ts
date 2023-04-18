@@ -1,83 +1,15 @@
-import {
-  IS_IOS,
-  IS_MAC,
-  MOVE_DETECT_THRESHOLD,
-} from '@blocksuite/global/config';
+import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
 
+import type { SelectionEvent } from './gesture-recognition.js';
+import { GestureRecognition, toSelectionEvent } from './gesture-recognition.js';
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
 import { debounce } from './std.js';
-
-export interface IPoint {
-  x: number;
-  y: number;
-}
 
 export interface Bound {
   x: number;
   y: number;
   w: number;
   h: number;
-}
-
-export interface SelectionEvent extends IPoint {
-  start: IPoint;
-  delta: IPoint;
-  raw: PointerEvent | MouseEvent;
-  containerOffset: IPoint;
-  keys: {
-    shift: boolean;
-    /** command or control */
-    cmd: boolean;
-    alt: boolean;
-  };
-  button?: number;
-  dragging: boolean;
-}
-
-function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
-  return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
-}
-
-function toSelectionEvent(
-  // MouseEvent for dblclick and contextmenu
-  e: PointerEvent | MouseEvent,
-  getBoundingClientRect: () => DOMRect,
-  startX: number,
-  startY: number,
-  last: SelectionEvent | null = null
-): SelectionEvent {
-  const rect = getBoundingClientRect();
-  const delta = { x: 0, y: 0 };
-  const start = { x: startX, y: startY };
-  const offsetX = e.clientX - rect.left;
-  const offsetY = e.clientY - rect.top;
-  const selectionEvent: SelectionEvent = {
-    x: offsetX,
-    y: offsetY,
-    raw: e,
-    // absolute position is still **relative** to the nearest positioned ancestor.
-    //  In our case, it is the editor. For example, if there is padding/margin in editor,
-    //    then the correct absolute `x`/`y` of mouse position is `containerOffset.x - x`
-    // Refs: https://developer.mozilla.org/en-US/docs/Web/CSS/position#absolute_positioning
-    containerOffset: {
-      x: rect.left,
-      y: rect.top,
-    },
-    delta,
-    start,
-    keys: {
-      shift: e.shiftKey,
-      cmd: e.metaKey || e.ctrlKey,
-      alt: e.altKey,
-    },
-    button: e.button,
-    dragging: !!last,
-  };
-  if (last) {
-    delta.x = offsetX - last.x;
-    delta.y = offsetY - last.y;
-  }
-  return selectionEvent;
 }
 
 function shouldFilterMouseEvent(event: Event): boolean {
@@ -108,137 +40,52 @@ export function initMouseEventHandlers(
   onSelectionChangeWithDebounce: (e: Event) => void,
   onSelectionChangeWithoutDebounce: (e: Event) => void
 ) {
-  let startX = -Infinity;
-  let startY = -Infinity;
-  let isDragging = false;
-  let last: SelectionEvent | null = null;
+  const recognition = new GestureRecognition(
+    container,
+    {
+      onClick: onContainerClick,
+      onDblClick: onContainerDblClick,
+      onTripleClick: onContainerTripleClick,
+      onDragStart: onContainerDragStart,
+      onDragMove: onContainerDragMove,
+      onDragEnd: onContainerDragEnd,
+      onPointerDown: ({ raw, clickCount }) => {
+        if (!isInsidePageTitle(raw.target) && !isDatabaseInput(raw.target)) {
+          raw.preventDefault();
+        }
+        if (clickCount > 3) {
+          raw.stopPropagation();
+        }
+        return;
+      },
+      onPointerMove: onContainerMouseMove,
+      onPointerOut: onContainerMouseOut,
+    },
+    {
+      eventFilter: selectionEvent => {
+        return shouldFilterMouseEvent(selectionEvent.raw);
+      },
+      eventProcessor: selectionEvent => {
+        const event = selectionEvent.raw;
+        const target = event.target;
+        if (event.type !== 'pointerout') {
+          if (!isInsidePageTitle(target) && !isDatabaseInput(target)) {
+            event.preventDefault();
+          }
+        }
+      },
+    }
+  );
+
   const getBoundingClientRect: () => DOMRect = () =>
     container.getBoundingClientRect();
-
-  const pointerOutHandler = (e: PointerEvent) =>
-    onContainerMouseOut(
-      toSelectionEvent(e, getBoundingClientRect, startX, startY)
-    );
-
-  const pointerDownHandler = (e: PointerEvent) => {
-    if (shouldFilterMouseEvent(e)) return;
-    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
-      e.preventDefault();
-    }
-    const rect = getBoundingClientRect();
-
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-    isDragging = false;
-    // e.button is 0 means left button
-    if (!e.button) {
-      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
-    }
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/detail
-    // 1: single click, 2: double click, 3: triple click
-    if (e.detail > 3) {
-      // We dont want to abort `format-quick-bar`.
-      e.stopPropagation();
-    }
-
-    document.addEventListener('pointerup', pointerUpHandler);
-    document.addEventListener('pointerout', pointerOutHandler);
-  };
-
-  const pointerMoveHandler = (e: PointerEvent) => {
-    if (shouldFilterMouseEvent(e)) return;
-    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
-      e.preventDefault();
-    }
-    const rect = getBoundingClientRect();
-
-    const a = { x: startX, y: startY };
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    const b = { x: offsetX, y: offsetY };
-
-    if (!last) {
-      onContainerMouseMove(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-      );
-      return;
-    }
-
-    if (isFarEnough(a, b) && !isDragging) {
-      isDragging = true;
-      onContainerDragStart(last);
-    }
-
-    if (isDragging) {
-      const current = toSelectionEvent(
-        e,
-        getBoundingClientRect,
-        startX,
-        startY,
-        last
-      );
-      onContainerDragMove(current);
-      onContainerMouseMove(current);
-      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
-    }
-  };
-
-  const pointerUpHandler = (e: PointerEvent) => {
-    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
-      e.preventDefault();
-    }
-
-    if (e.detail <= 1) {
-      if (isDragging) {
-        onContainerDragEnd(
-          toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
-        );
-      } else {
-        onContainerClick(
-          toSelectionEvent(e, getBoundingClientRect, startX, startY)
-        );
-      }
-    } else if (
-      e.detail === 3 &&
-      last &&
-      e.timeStamp - last.raw.timeStamp < 500
-    ) {
-      container.dispatchEvent(
-        new CustomEvent('tripleclick', {
-          detail: e,
-        })
-      );
-    }
-
-    startX = startY = -Infinity;
-    isDragging = false;
-    last = null;
-
-    document.removeEventListener('pointerup', pointerUpHandler);
-    document.removeEventListener('pointerout', pointerOutHandler);
-  };
 
   const contextMenuHandler = (e: MouseEvent) => {
     // e.preventDefault();
     // e.stopPropagation();
+    const rect = getBoundingClientRect();
     onContainerContextMenu(
-      toSelectionEvent(e, getBoundingClientRect, startX, startY)
-    );
-  };
-
-  const dblClickHandler = (e: MouseEvent) => {
-    if (shouldFilterMouseEvent(e)) return;
-    onContainerDblClick(
-      toSelectionEvent(e, getBoundingClientRect, startX, startY)
-    );
-  };
-
-  const tripleClickHandler = (e: Event) => {
-    const evt = (e as CustomEvent).detail;
-    if (shouldFilterMouseEvent(evt)) return;
-    onContainerTripleClick(
-      toSelectionEvent(evt, getBoundingClientRect, startX, startY)
+      toSelectionEvent(e, rect, -Infinity, -Infinity, false, 1)
     );
   };
 
@@ -248,7 +95,7 @@ export function initMouseEventHandlers(
    */
   const selectionChangeHandlerWithDebounce = debounce((e: Event) => {
     if (shouldFilterMouseEvent(e)) return;
-    if (isDragging) {
+    if (recognition.isDragging) {
       return;
     }
 
@@ -259,11 +106,7 @@ export function initMouseEventHandlers(
     onSelectionChangeWithoutDebounce(e);
   };
 
-  container.addEventListener('pointerdown', pointerDownHandler);
-  container.addEventListener('pointermove', pointerMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
-  container.addEventListener('dblclick', dblClickHandler);
-  container.addEventListener('tripleclick', tripleClickHandler);
   document.addEventListener(
     'selectionchange',
     selectionChangeHandlerWithDebounce
@@ -271,11 +114,8 @@ export function initMouseEventHandlers(
   document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
-    container.removeEventListener('pointerdown', pointerDownHandler);
-    container.removeEventListener('pointermove', pointerMoveHandler);
+    recognition.dispose();
     container.removeEventListener('contextmenu', contextMenuHandler);
-    container.removeEventListener('dblclick', dblClickHandler);
-    container.removeEventListener('tripleclick', tripleClickHandler);
     document.removeEventListener(
       'selectionchange',
       selectionChangeHandlerWithDebounce
