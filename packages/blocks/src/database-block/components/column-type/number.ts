@@ -1,5 +1,5 @@
-import type { Y } from '@blocksuite/store/index.js';
-import { VEditor } from '@blocksuite/virgo/virgo.js';
+import type { Y } from '@blocksuite/store';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
@@ -21,7 +21,6 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
-  value: number | undefined = undefined;
 
   @query('.affine-database-number')
   private _container!: HTMLDivElement;
