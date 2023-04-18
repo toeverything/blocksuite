@@ -198,7 +198,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
 
     pageMetas.forEach(pageMeta => {
       // newly added space can't be found
-      // unless explictly getMap after meta updated
+      // unless explicitly getMap after meta updated
       this.doc.getMap('space:' + pageMeta.id);
 
       if (!_prevPages.has(pageMeta.id)) {

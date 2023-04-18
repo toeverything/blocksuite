@@ -203,11 +203,7 @@ export class HtmlParser {
           (await this._contentParser.getParserHtmlText2Block('nodeParser')?.(
             childElement
           )) || [];
-
-        if (clipBlockInfos && clipBlockInfos.length) {
-          return clipBlockInfos;
-        }
-        return [];
+        return clipBlockInfos;
       }
     );
 

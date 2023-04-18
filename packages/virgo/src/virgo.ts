@@ -25,7 +25,7 @@ import {
 } from './utils/index.js';
 
 export interface VEditorOptions {
-  // it is a option to determine defult `_attributeRenderer`
+  // it is a option to determine default `_attributeRenderer`
   defaultMode: 'rich' | 'pure';
 }
 
@@ -135,7 +135,7 @@ export class VEditor<
 
     if (yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synclization'
+        'yText must not contain \r because it will break the range synchronization'
       );
     }
 
@@ -226,7 +226,7 @@ export class VEditor<
     throw new Error('failed to find leaf');
   }
 
-  // the number is releated to the VirgoLine's textLength
+  // the number is related to the VirgoLine's textLength
   getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
     assertExists(this._rootElement);
     const lineElements = Array.from(
@@ -373,7 +373,7 @@ export class VEditor<
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synclization'
+        'yText must not contain \r because it will break the range synchronization'
       );
     }
 

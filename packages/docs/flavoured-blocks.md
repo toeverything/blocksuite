@@ -95,7 +95,7 @@ const ListBlockSchema = defineBlockSchema({
   flavour: 'affine:list',
   // The `Text` here is used for defining built-in rich text type
   props: ({ Text }) => ({
-    // Supports strogly typed enums
+    // Supports strongly typed enums
     type: 'bulleted' as ListType,
     // Rich text content that supports inline formats
     text: Text(),
