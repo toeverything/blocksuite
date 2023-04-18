@@ -5,6 +5,8 @@ import { GestureRecognition, toSelectionEvent } from './gesture-recognition.js';
 import { isDatabaseInput, isInsidePageTitle } from './query.js';
 import { debounce } from './std.js';
 
+export type { IPoint, SelectionEvent } from './gesture-recognition.js';
+
 export interface Bound {
   x: number;
   y: number;
