@@ -349,6 +349,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _saveColumnTitle = (type: 'title' | 'normal', column?: Column) => {
+    // Prevent triggering again after press enter key
+    if (this._editingColumnId === '') return;
+
     const name = this._titleColumnInput.value;
     if (type === 'title') {
       // title column
