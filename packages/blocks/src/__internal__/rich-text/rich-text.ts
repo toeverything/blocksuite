@@ -72,6 +72,8 @@ export class RichText extends ShadowlessElement {
       keyboardBindings
     );
 
+    let ifPrefixSpace = false;
+
     this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
       keydown: keyDownHandler,
@@ -83,8 +85,19 @@ export class RichText extends ShadowlessElement {
           return ctx;
         }
 
-        const { data } = ctx;
+        const { data, event } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
+
+        // Overwrite the default behavior (Insert period when consecutive spaces) of IME.
+        if (event.inputType === 'insertText' && data === ' ') {
+          ifPrefixSpace = true;
+        } else if (data !== '. ' && data !== '。 ') {
+          ifPrefixSpace = false;
+        }
+        if (ifPrefixSpace && (data === '. ' || data === '。 ')) {
+          ctx.data = ' ';
+        }
+
         if (data && data.length > 0 && data !== '\n') {
           if (
             deltas.length > 1 ||
