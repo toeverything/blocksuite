@@ -61,8 +61,12 @@ export async function switchColumnType(
     );
   }
 
+  await clickColumnType(page, columnType);
+}
+
+export function clickColumnType(page: Page, columnType: ColumnType) {
   const typeMenu = page.locator(`.action.${columnType}`);
-  await typeMenu.click();
+  return typeMenu.click();
 }
 
 export function getDatabaseBodyRows(page: Page) {
@@ -262,11 +266,15 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const box = await getBoundingBox(column);
   const textElement = column.locator('.affine-database-column-text-input');
   const text = await textElement.innerText();
+  const typeIcon = column.locator('.affine-database-column-type-icon');
+  const renameIcon = column.locator('.affine-database-column-text-icon');
 
   return {
     column,
     box,
     text,
     textElement,
+    typeIcon,
+    renameIcon,
   };
 }

@@ -9,6 +9,7 @@ import {
   assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
   blurDatabaseSearch,
+  clickColumnType,
   clickDatabaseOutside,
   copyByKeyboard,
   dragBetweenCoords,
@@ -853,4 +854,37 @@ test('should the indicator display correctly when resize the window', async ({
       },
     }
   );
+});
+
+test('should title column support quick renaming', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await focusDatabaseHeader(page, 1);
+  const { text, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
+  await waitNextFrame(page);
+  await type(page, '123');
+  await clickDatabaseOutside(page);
+  expect(text).toBe('123');
+});
+
+test('should title column support quick changing of column type', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await initDatabaseDynamicRowWithData(page, 'b');
+  await focusDatabaseHeader(page, 1);
+  const { typeIcon } = await getDatabaseHeaderColumn(page, 1);
+  await typeIcon.click();
+  await waitNextFrame(page);
+  await clickColumnType(page, 'select');
+  const cell = getFirstColumnCell(page, 'select-selected');
+  expect(await cell.count()).toBe(1);
 });
