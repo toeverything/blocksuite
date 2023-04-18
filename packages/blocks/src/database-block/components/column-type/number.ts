@@ -1,102 +1,75 @@
+import type { Y } from '@blocksuite/store/index.js';
+import { VEditor } from '@blocksuite/virgo/virgo.js';
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
+import type { AffineVEditor } from '../../../__internal__/rich-text/virgo/types.js';
+import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-@customElement('affine-database-number-cell')
-class NumberCell extends DatabaseCellElement<number> {
-  static override styles = css`
-    :host {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-    }
-  `;
-
-  static override tag = literal`affine-database-number-cell`;
-
-  override render() {
-    return html` <span class="number">${this.cell?.value}</span> `;
-  }
-}
-
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellElement<number> {
+class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   static override styles = css`
     :host {
       width: 100%;
     }
 
-    .affine-database-number {
-      width: 100%;
-      padding: 0;
-      border: 0;
-      font-size: 16px;
-      color: var(--affine-text-primary-color);
-      font-family: var(--affine-font-family);
+    .affine-database-number:focus {
       outline: none;
-      background: var(--affine-white);
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-    }
-    .affine-database-number:focus-visible {
-      outline-offset: 0px;
-    }
-    .affine-database-number::-webkit-outer-spin-button,
-    .affine-database-number::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
     }
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
   value: number | undefined = undefined;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('keypress', (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && this.value) {
-        this.rowHost.setEditing(false);
-      }
-    });
+  @query('.affine-database-number')
+  private _container!: HTMLDivElement;
+
+  private _vEditor: AffineVEditor | null = null;
+
+  protected override firstUpdated() {
+    this._onInitVEditor();
   }
 
+  private _onInitVEditor = () => {
+    let value: Y.Text;
+    if (!this.cell?.value) {
+      const yText = new this.databaseModel.page.YText('');
+      this.databaseModel.updateCell(this.rowModel.id, {
+        columnId: this.column.id,
+        value: yText,
+      });
+      value = yText;
+    } else {
+      value = this.cell.value as Y.Text;
+    }
+
+    this._vEditor = new VEditor(value);
+    setupVirgoScroll(this.databaseModel.page, this._vEditor);
+    this._vEditor.mount(this._container);
+    this._vEditor.focusEnd();
+  };
+
   protected override render() {
-    return html`
-      <input
-        class="affine-database-number"
-        @input=${(event: Event) => {
-          this.value = (event.target as HTMLInputElement).valueAsNumber;
-        }}
-        @blur=${() => {
-          if (this.value) {
-            this.rowHost.setValue(this.value);
-          }
-        }}
-        type="number"
-        value=${this.cell?.value ?? ''}
-      />
-    `;
+    return html`<div class="affine-database-number"></div>`;
   }
 }
 
 @customElement('affine-database-number-column-property-editing')
-class NumberColumnPropertyEditing extends DatabaseCellElement<number> {
+class NumberColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
   static override tag = literal`affine-database-number-column-property-editing`;
 }
+
 export const NumberColumnRenderer = defineColumnRenderer(
   'number',
   () => ({
     decimal: 0,
   }),
-  () => null as number | null,
+  page => new page.YText(''),
   {
-    Cell: NumberCell,
-    CellEditing: NumberCellEditing,
+    Cell: NumberCellEditing,
+    CellEditing: false,
     ColumnPropertyEditing: NumberColumnPropertyEditing,
   },
   {
