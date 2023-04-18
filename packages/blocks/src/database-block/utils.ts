@@ -20,7 +20,7 @@ function isVisible(elem: HTMLElement) {
 export function onClickOutside(
   element: HTMLElement,
   callback: (element: HTMLElement, target: HTMLElement) => void,
-  event: 'click' | 'mousedown' = 'click',
+  event: 'click' | 'mousedown' | 'pointerdown' = 'click',
   reusable = false
 ): () => void {
   const outsideClickListener = (event: Event) => {

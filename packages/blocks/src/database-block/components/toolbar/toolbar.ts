@@ -269,7 +269,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
           removeListener();
         }
       },
-      'mousedown',
+      'pointerdown',
       true
     );
   };

@@ -154,9 +154,9 @@ export function initAddNewRecordHandlers(
   const stopPropagation = (e: Event) => {
     e.stopPropagation();
   };
-  disposables.addFromEvent(element, 'mousedown', stopPropagation);
-  disposables.addFromEvent(element, 'mousemove', stopPropagation);
-  disposables.addFromEvent(element, 'mouseup', stopPropagation);
+  disposables.addFromEvent(element, 'pointerdown', stopPropagation);
+  disposables.addFromEvent(element, 'pointermove', stopPropagation);
+  disposables.addFromEvent(element, 'pointerup', stopPropagation);
 
   disposables.addFromEvent(element, 'dragstart', onDragStart);
   disposables.addFromEvent(element, 'drag', onDrag);

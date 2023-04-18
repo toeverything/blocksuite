@@ -284,7 +284,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         }
         ele.remove();
       },
-      'mousedown'
+      'pointerdown'
     );
   };
 
