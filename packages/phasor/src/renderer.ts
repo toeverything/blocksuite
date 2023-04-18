@@ -6,6 +6,8 @@ import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
 export interface SurfaceViewport {
+  readonly left: number;
+  readonly top: number;
   readonly width: number;
   readonly height: number;
   readonly centerX: number;
@@ -29,6 +31,8 @@ export class Renderer implements SurfaceViewport {
   gridManager = new GridManager();
 
   private _container!: HTMLElement;
+  private _left = 0;
+  private _top = 0;
   private _width = 0;
   private _height = 0;
 
@@ -37,11 +41,17 @@ export class Renderer implements SurfaceViewport {
   private _centerY = 0.0;
   private _shouldUpdate = false;
 
-  private _resizeObserver!: ResizeObserver;
-
   constructor() {
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+  }
+
+  get left() {
+    return this._left;
+  }
+
+  get top() {
+    return this._top;
   }
 
   get width() {
@@ -134,13 +144,11 @@ export class Renderer implements SurfaceViewport {
     container.appendChild(this.canvas);
 
     this._resetSize();
-    this._resizeObserver = new ResizeObserver(() => this._onResize());
-    this._resizeObserver.observe(this.canvas);
 
     this._loop();
   }
 
-  private _onResize() {
+  onResize() {
     const oldWidth = this.width;
     const oldHeight = this.height;
 
@@ -168,6 +176,8 @@ export class Renderer implements SurfaceViewport {
     const bbox = canvas.getBoundingClientRect();
     canvas.width = Math.ceil(bbox.width * dpr);
     canvas.height = Math.ceil(bbox.height * dpr);
+    this._left = bbox.left;
+    this._top = bbox.top;
     this._width = bbox.width;
     this._height = bbox.height;
 
@@ -218,9 +228,5 @@ export class Renderer implements SurfaceViewport {
     }
 
     ctx.restore();
-  }
-
-  dispose() {
-    this._resizeObserver.disconnect();
   }
 }

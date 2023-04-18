@@ -58,6 +58,10 @@ export class SurfaceManager {
     this._renderer.attach(container);
   }
 
+  onResize() {
+    this._renderer.onResize();
+  }
+
   getElementsBound(): IBound | null {
     return getCommonBound([...this._elements.values()]);
   }
@@ -460,7 +464,6 @@ export class SurfaceManager {
 
   dispose() {
     this._yElements.unobserveDeep(this._handleYEvents);
-    this._renderer.dispose();
   }
 
   /** @internal Only for testing */
