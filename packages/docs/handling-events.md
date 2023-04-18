@@ -63,4 +63,4 @@ model.childrenUpdated.on(() => updateMyComponent());
 
 In the prebuilt AFFiNE editor, which is based on the [Lit](https://lit.dev/) framework, the UI component of each block subscribes to its model updates using this pattern.
 
-So far, the information we've covered should be sufficient for you to use `@blocksuite/store` to constuct basic collaborative application state. For rich-text content editing involving more intricate operations, we will continue to cover it in subsequent sections of the document.
+So far, the information we've covered should be sufficient for you to use `@blocksuite/store` to construct basic collaborative application state. For rich-text content editing involving more intricate operations, we will continue to cover it in subsequent sections of the document.

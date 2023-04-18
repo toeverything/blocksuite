@@ -7,8 +7,8 @@ export * from './space.js';
 export * from './store.js';
 export * from './text-adapter.js';
 export type { IdGenerator } from './utils/id-generator.js';
-import * as Y from 'yjs';
-export { Y };
+import type * as Y from 'yjs';
+export type { Y };
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,

@@ -41,14 +41,6 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
-  /**
-   * @deprecated Not used yet
-   */
-  codeBlockOptionUpdated?: Slot;
-  /**
-   * @deprecated Not used yet
-   */
-  nativeSelectionToggled: Slot<boolean>;
 }
 
 @customElement('affine-default-page')

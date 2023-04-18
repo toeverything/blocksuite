@@ -933,6 +933,8 @@ test('drag handle should work across multiple frames', async ({ page }) => {
   await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '000', '789', '123']);
+
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
 test('drag handle should add new frame when dragged outside frame', async ({
@@ -954,6 +956,7 @@ test('drag handle should add new frame when dragged outside frame', async ({
   await assertRichTexts(page, ['456', '789', '123']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
 test('block hub should drag and drop a card into existing frame', async ({

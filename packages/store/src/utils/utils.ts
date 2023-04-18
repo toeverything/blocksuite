@@ -15,7 +15,7 @@ import type {
   YBlocks,
 } from '../workspace/page.js';
 import type { Page } from '../workspace/page.js';
-import { createYArrayProxy } from '../yjs/index.js';
+import { createYArrayProxy, createYMapProxy, obj2YMap } from '../yjs/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -61,13 +61,19 @@ export function syncBlockProps(
       }
       return;
     }
-    if (!isPrimitive(value) && !Array.isArray(value)) {
+    if (
+      !isPrimitive(value) &&
+      !Array.isArray(value) &&
+      typeof value !== 'object'
+    ) {
       throw new Error('Only top level primitives are supported for now');
     }
 
     if (value !== undefined) {
       if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else if (typeof value === 'object') {
+        yBlock.set(`prop:${key}`, obj2YMap(value));
       } else {
         yBlock.set(`prop:${key}`, value);
       }
@@ -81,6 +87,8 @@ export function syncBlockProps(
         yBlock.set(`prop:${key}`, new Y.Text());
       } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else if (typeof value === 'object') {
+        yBlock.set(`prop:${key}`, obj2YMap(value));
       } else {
         yBlock.set(`prop:${key}`, value);
       }
@@ -103,7 +111,10 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     const key = prefixedKey.replace('prop:', '');
     const realValue = yBlock.get(prefixedKey);
     if (realValue instanceof Y.Map) {
-      props[key] = realValue;
+      const obj = createYMapProxy(realValue, {
+        deep: true,
+      });
+      props[key] = obj;
     } else if (realValue instanceof Y.Array) {
       const arr = createYArrayProxy(realValue);
       props[key] = arr;
