@@ -29,20 +29,23 @@ export default defineConfig({
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
           { text: 'Handling Events', link: '/handling-events' },
-          { text: 'Using Editor', link: '/using-editor' },
+          {
+            text: 'Attaching Editor',
+            link: '/attaching-editor',
+          },
           { text: 'Data Persistence', link: '/data-persistence' },
         ],
       },
       {
-        text: 'Editor Architecture',
+        text: 'AFFiNE Editor Overview',
         items: [
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
           {
-            text: 'Framework UI Patterns',
-            link: '/framework-ui-patterns',
+            text: 'Editor UI Architecture',
+            link: '/editor-ui-architecture',
             items: [
               {
                 text: '🚧 Rich Text Orchestration',
