@@ -5,6 +5,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  PenIcon,
   TextIcon,
 } from '@blocksuite/global/config';
 import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
@@ -24,7 +25,9 @@ import {
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { onClickOutside } from '../../utils.js';
-import { EditColumnPopup } from '../edit-column-popup.js';
+import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
+import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
+import { changeColumnType } from '../edit-column-popup/utils.js';
 import type { ColumnDragIndicator } from './column-move/column-drag-indicator.js';
 import { initMoveColumnHandlers } from './column-move/index.js';
 import { initChangeColumnWidthHandlers } from './column-width/index.js';
@@ -58,6 +61,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @state()
   private _editingColumnId = '';
 
+  @state()
+  private _changingColumnTypeId = '';
+
   @query('.affine-database-column-input')
   private _titleColumnInput!: HTMLInputElement;
 
@@ -78,6 +84,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _isHeaderHover = false;
   private _indicator: ColumnDragIndicator | null = null;
   private _editingColumnPopupIndex = -1;
+  private _columnTypePopup: ColumnTypePopup | null = null;
 
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
@@ -101,13 +108,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
       this._titleColumnInput.setSelectionRange(0, length);
-      onClickOutside(
-        this._titleColumnInput,
-        () => {
-          this.setEditingColumnId('');
-        },
-        'mousedown'
-      );
     }
 
     if (changedProperties.has('columns')) {
@@ -254,9 +254,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this._editingColumnPopupIndex = index;
 
     const currentEl = target as Element;
-    const reference = currentEl.classList.contains('affine-database-column')
-      ? target
-      : target.parentElement;
+    const reference = currentEl.closest('.affine-database-column');
     assertExists(reference);
 
     const editColumn = new EditColumnPopup();
@@ -288,28 +286,84 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     );
   };
 
+  private _onShowColumnTypePopup = (
+    event: MouseEvent,
+    columnId: string,
+    column: Column
+  ) => {
+    event.stopPropagation();
+    if (this._columnTypePopup) return;
+
+    this._changingColumnTypeId = columnId;
+    const popup = new ColumnTypePopup();
+    popup.columnId = columnId;
+    popup.columnType = column.type;
+    popup.changeColumnType = (columnId, type) => {
+      changeColumnType(columnId, type, column, this.targetModel);
+      this._changingColumnTypeId = '';
+      this._columnTypePopup = null;
+      popup.remove();
+      onRemoveListener();
+    };
+    this._columnTypePopup = popup;
+    document.body.appendChild(this._columnTypePopup);
+
+    const target = event.target as HTMLElement;
+    const reference = target.closest('.affine-database-column-content');
+    assertExists(reference);
+
+    createPopper(reference, this._columnTypePopup, {
+      placement: 'bottom-start',
+    });
+    const onRemoveListener = onClickOutside(
+      popup,
+      (ele, target) => {
+        if (!target.closest('.affine-database-column-content')) {
+          this._changingColumnTypeId = '';
+          this._columnTypePopup = null;
+          ele.remove();
+          onRemoveListener();
+        }
+      },
+      'mousedown',
+      true
+    );
+  };
+
   private _onKeydown = (
     event: KeyboardEvent,
     type: 'title' | 'normal',
     column?: Column
   ) => {
-    const name = (event.target as HTMLInputElement).value;
     if (event.key === 'Enter') {
       this.targetModel.page.captureSync();
-      if (type === 'title') {
-        // title column
-        this._onUpdateTitleColumn(name);
-      } else {
-        // other columns
-        assertExists(column);
-        this._onUpdateNormalColumn(name, column);
-      }
-      this.setEditingColumnId('');
+      this._saveColumnTitle(type, column);
       return;
     }
     if (event.key === 'Escape') {
       this.setEditingColumnId('');
       return;
+    }
+  };
+
+  private _saveColumnTitle = (type: 'title' | 'normal', column?: Column) => {
+    // Prevent triggering again after press enter key
+    if (this._editingColumnId === '') return;
+
+    const name = this._titleColumnInput.value;
+    if (type === 'title') {
+      // title column
+      this._onUpdateTitleColumn(name);
+    } else {
+      // other columns
+      assertExists(column);
+      this._onUpdateNormalColumn(name, column);
+    }
+    // To handle this situation:
+    // 1. click the pen icon, edit the title
+    // 2. then click the other column's pen icon, edit the title
+    if (this._editingColumnId === column?.id) {
+      this.setEditingColumnId('');
     }
   };
 
@@ -328,11 +382,17 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this.targetModel.applyColumnUpdate();
   };
 
+  private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
+    event.stopPropagation();
+    this.setEditingColumnId(columnId);
+  };
+
   override render() {
     const style = styleMap({
       width: `${this.targetModel.titleColumnWidth}px`,
     });
 
+    const isEditing = this._editingColumnId === '-1';
     return html`
       <div class="affine-database-column-header database-row">
         <div class="affine-database-column database-cell" style=${style}>
@@ -350,17 +410,27 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
               )}
           >
             <div class="affine-database-column-text">
-              ${TextIcon}
-              <div class="affine-database-column-text-input">
-                ${this._editingColumnId === '-1'
-                  ? html`<input
-                      class="affine-database-column-input"
-                      value=${this.targetModel.titleColumnName}
-                      @keydown=${(event: KeyboardEvent) =>
-                        this._onKeydown(event, 'title')}
-                    />`
-                  : this.targetModel.titleColumnName}
-              </div>
+              <div class="affine-database-column-type-icon">${TextIcon}</div>
+              ${isEditing
+                ? html`<input
+                    class="affine-database-column-input"
+                    value=${this.targetModel.titleColumnName}
+                    @keydown=${(event: KeyboardEvent) =>
+                      this._onKeydown(event, 'title')}
+                    @blur=${() => this._saveColumnTitle('title')}
+                  />`
+                : html`<div class="affine-database-column-text-content">
+                    <div class="affine-database-column-text-input">
+                      ${this.targetModel.titleColumnName}
+                    </div>
+                    <div
+                      class="affine-database-column-text-icon"
+                      @click=${(e: MouseEvent) =>
+                        this._onEditColumnTitle(e, '-1')}
+                    >
+                      ${PenIcon}
+                    </div>
+                  </div>`}
             </div>
           </div>
         </div>
@@ -371,6 +441,10 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
             const style = styleMap({
               width: `${column.width}px`,
             });
+            const isEditing = this._editingColumnId === column.id;
+            const isChangingColumnType =
+              this._changingColumnTypeId === column.id;
+
             return html`
               <div class="affine-database-column database-cell" style=${style}>
                 <div
@@ -387,17 +461,35 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     )}
                 >
                   <div class="affine-database-column-text ${column.type}">
-                    ${columnTypeIconMap[column.type]}
-                    <div class="affine-database-column-text-input">
-                      ${this._editingColumnId === column.id
-                        ? html`<input
-                            class="affine-database-column-input"
-                            value=${column.name}
-                            @keydown=${(event: KeyboardEvent) =>
-                              this._onKeydown(event, 'normal', column)}
-                          />`
-                        : column.name}
+                    <div
+                      class="affine-database-column-type-icon ${isEditing
+                        ? 'edit'
+                        : ''} ${isChangingColumnType ? 'active' : ''}"
+                      @click=${(e: MouseEvent) =>
+                        this._onShowColumnTypePopup(e, column.id, column)}
+                    >
+                      ${columnTypeIconMap[column.type]}
                     </div>
+                    ${isEditing
+                      ? html`<input
+                          class="affine-database-column-input"
+                          value=${column.name}
+                          @keydown=${(event: KeyboardEvent) =>
+                            this._onKeydown(event, 'normal', column)}
+                          @blur=${() => this._saveColumnTitle('normal', column)}
+                        />`
+                      : html`<div class="affine-database-column-text-content">
+                          <div class="affine-database-column-text-input">
+                            ${column.name}
+                          </div>
+                          <div
+                            class="affine-database-column-text-icon"
+                            @click=${(e: MouseEvent) =>
+                              this._onEditColumnTitle(e, column.id)}
+                          >
+                            ${PenIcon}
+                          </div>
+                        </div>`}
                   </div>
                   <div draggable="true" class="affine-database-column-move">
                     ${DatabaseDragIcon}

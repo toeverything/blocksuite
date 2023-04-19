@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { SelectTagAction, SelectTagActionType } from '../../../types.js';
 import { isDivider } from '../../../utils.js';
-import { actionStyles } from '../../edit-column-popup.js';
+import { actionStyles } from '../../edit-column-popup/styles.js';
 
 const tagActions: SelectTagAction[] = [
   {
