@@ -333,8 +333,7 @@ export async function downloadImage(model: BaseBlockModel) {
   if (!img) {
     return;
   }
-  const imgSrc = URL.createObjectURL(img);
-  const arrayBuffer = await (await fetch(imgSrc)).arrayBuffer();
+  const arrayBuffer = await img.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
   let fileType: string;
   if (
