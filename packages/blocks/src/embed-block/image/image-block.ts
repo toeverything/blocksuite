@@ -2,7 +2,6 @@ import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -188,19 +187,18 @@ export class ImageBlockComponent extends ShadowlessElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    const storage = await this.model.page.blobs;
-    assertExists(storage);
+    const storage = this.model.page.blobs;
 
     this._imageState = 'loading';
-    let url = await storage.get(this.model.sourceId);
-    if (!url) {
+    let blob = await storage.get(this.model.sourceId);
+    if (!blob) {
       this._imageState = 'waitUploaded';
       await this.waitImageUploaded();
       this._imageState = 'loading';
-      url = await storage.get(this.model.sourceId);
+      blob = await storage.get(this.model.sourceId);
     }
-    if (url) {
-      this._source = url;
+    if (blob) {
+      this._source = URL.createObjectURL(blob);
       this._imageState = 'ready';
     } else {
       this._imageState = 'failed';
