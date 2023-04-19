@@ -24,6 +24,7 @@ import {
 } from '../../../__internal__/utils/lit.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
+import type { ColumnRendererHelper } from '../../register.js';
 import { onClickOutside } from '../../utils.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
@@ -53,6 +54,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   @property()
   addColumn!: (index: number) => string;
+
+  @property()
+  columnRenderer!: ColumnRendererHelper;
 
   get tableContainer(): HTMLElement {
     return this.parentElement as HTMLElement;
@@ -270,6 +274,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     editColumn.targetModel = this.targetModel;
     editColumn.targetColumn = column;
     editColumn.columnIndex = index - 1;
+    editColumn.columnRenderer = this.columnRenderer;
     editColumn.closePopup = () => {
       this._editingColumnPopupIndex = -1;
       editColumn.remove();
@@ -307,7 +312,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     popup.columnId = columnId;
     popup.columnType = column.type;
     popup.changeColumnType = (columnId, type) => {
-      changeColumnType(columnId, type, column, this.targetModel);
+      changeColumnType(
+        columnId,
+        type,
+        column,
+        this.targetModel,
+        this.columnRenderer
+      );
       this._changingColumnTypeId = '';
       this._columnTypePopup = null;
       popup.remove();

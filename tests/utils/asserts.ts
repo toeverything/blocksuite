@@ -24,6 +24,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { locatorComponentToolbar } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,

@@ -5,7 +5,7 @@ import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -63,7 +63,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _selectedRect!: HTMLDivElement;
 
   @query('edgeless-component-toolbar')
-  private _componentToolbar!: EdgelessComponentToolbar;
+  private _componentToolbar?: EdgelessComponentToolbar;
 
   private _componentToolbarPopper: PopperInstance | null = null;
 
@@ -147,36 +147,36 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
 
-    this._componentToolbarPopper = createPopper(
-      this._selectedRect,
-      this._componentToolbar,
-      {
-        placement: 'top',
-        modifiers: [
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 12],
+    this._componentToolbarPopper = this._componentToolbar
+      ? createPopper(this._selectedRect, this._componentToolbar, {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 12],
+              },
             },
-          },
-          {
-            name: 'flip',
-            options: {
-              fallbackPlacements: ['bottom'],
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['bottom'],
+              },
             },
-          },
-        ],
-      }
-    );
+          ],
+        })
+      : null;
     _disposables.add(() => this._componentToolbarPopper?.destroy());
 
-    // This hook is not waiting all children updated.
-    // But children effect popper position. So we use ResizeObserver watching sizing change.
-    const resizeObserver = new ResizeObserver(() =>
-      this._componentToolbarPopper?.update()
-    );
-    resizeObserver.observe(this._componentToolbar);
-    _disposables.add(() => resizeObserver.disconnect());
+    if (this._componentToolbar) {
+      // This hook is not waiting all children updated.
+      // But children effect popper position. So we use ResizeObserver watching sizing change.
+      const resizeObserver = new ResizeObserver(() =>
+        this._componentToolbarPopper?.update()
+      );
+      resizeObserver.observe(this._componentToolbar);
+      _disposables.add(() => resizeObserver.disconnect());
+    }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -205,7 +205,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       resizeMode,
       (e: MouseEvent, direction: HandleDirection) => {
         const bounds = getSelectableBounds(this.state.selected);
-        _resizeManager.onMouseDown(e, direction, bounds);
+        _resizeManager.onMouseDown(e, direction, bounds, this.zoom);
       }
     );
 
@@ -221,19 +221,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           )
         : null;
 
+    const componentToolbar = this.state.active
+      ? nothing
+      : html`<edgeless-component-toolbar
+          .selected=${selected}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.state}
+        >
+        </edgeless-component-toolbar>`;
+
     return html`
       ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
         ${connectorHandles}
       </div>
-      <edgeless-component-toolbar
-        .selected=${selected}
-        .page=${this.page}
-        .surface=${this.surface}
-        .slots=${this.slots}
-        .selectionState=${this.state}
-      >
-      </edgeless-component-toolbar>
+      ${componentToolbar}
     `;
   }
 }

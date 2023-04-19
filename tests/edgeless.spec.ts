@@ -3,7 +3,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
-import { toHex } from '../packages/blocks/src/__internal__/utils/std.js';
 import {
   activeFrameInEdgeless,
   addBasicConnectorElement,
@@ -18,6 +17,7 @@ import {
   getFrameBoundBoxInEdgeless,
   getFrameRect,
   increaseZoomLevel,
+  locatorComponentToolbar,
   locatorEdgelessComponentToolButton,
   locatorEdgelessToolButton,
   openComponentToolbarMoreMenu,
@@ -41,7 +41,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getCurrentThemeCSSPropertyValue,
   initEmptyEdgelessState,
   initThreeParagraphs,
   locatorPanButton,
@@ -1381,4 +1380,22 @@ test('change shape stroke color', async ({ page }) => {
   ]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
+});
+
+test('when editing text in edgeless, should hide component toolbar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+
+  await selectFrameInEdgeless(page, ids.frameId);
+
+  const toolbar = locatorComponentToolbar(page);
+  await expect(toolbar).toBeVisible();
+
+  await page.mouse.click(0, 0);
+  await activeFrameInEdgeless(page, ids.frameId);
+  await expect(toolbar).toBeHidden();
 });
