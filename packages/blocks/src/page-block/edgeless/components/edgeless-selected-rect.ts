@@ -63,7 +63,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _selectedRect!: HTMLDivElement;
 
   @query('edgeless-component-toolbar')
-  private _componentToolbar!: EdgelessComponentToolbar;
+  private _componentToolbar?: EdgelessComponentToolbar;
 
   private _componentToolbarPopper: PopperInstance | null = null;
 
@@ -147,36 +147,36 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
 
-    this._componentToolbarPopper = createPopper(
-      this._selectedRect,
-      this._componentToolbar,
-      {
-        placement: 'top',
-        modifiers: [
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 12],
+    this._componentToolbarPopper = this._componentToolbar
+      ? createPopper(this._selectedRect, this._componentToolbar, {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 12],
+              },
             },
-          },
-          {
-            name: 'flip',
-            options: {
-              fallbackPlacements: ['bottom'],
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['bottom'],
+              },
             },
-          },
-        ],
-      }
-    );
+          ],
+        })
+      : null;
     _disposables.add(() => this._componentToolbarPopper?.destroy());
 
-    // This hook is not waiting all children updated.
-    // But children effect popper position. So we use ResizeObserver watching sizing change.
-    const resizeObserver = new ResizeObserver(() =>
-      this._componentToolbarPopper?.update()
-    );
-    resizeObserver.observe(this._componentToolbar);
-    _disposables.add(() => resizeObserver.disconnect());
+    if (this._componentToolbar) {
+      // This hook is not waiting all children updated.
+      // But children effect popper position. So we use ResizeObserver watching sizing change.
+      const resizeObserver = new ResizeObserver(() =>
+        this._componentToolbarPopper?.update()
+      );
+      resizeObserver.observe(this._componentToolbar);
+      _disposables.add(() => resizeObserver.disconnect());
+    }
   }
 
   override updated(changedProperties: Map<string, unknown>) {

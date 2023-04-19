@@ -301,8 +301,7 @@ export async function clickComponentToolbarMoreMenuButton(
     delete: 'Delete',
   }[button];
 
-  const btn = page
-    .locator('edgeless-component-toolbar edgeless-more-button')
+  const btn = locatorComponentToolbarMoreButton(page)
     .locator('.action-item')
     .filter({ hasText: text });
 
@@ -322,10 +321,14 @@ export async function zoomByMouseWheel(
   await page.keyboard.up(SHORT_KEY);
 }
 
+export function locatorComponentToolbar(page: Page) {
+  return page.locator('edgeless-component-toolbar');
+}
+
 function locatorComponentToolbarMoreButton(page: Page) {
-  const moreButton = page
-    .locator('edgeless-component-toolbar')
-    .locator('edgeless-more-button');
+  const moreButton = locatorComponentToolbar(page).locator(
+    'edgeless-more-button'
+  );
   return moreButton;
 }
 type Action =
@@ -365,23 +368,21 @@ export async function triggerComponentToolbarAction(
       break;
     }
     case 'changeFrameColor': {
-      const button = page
-        .locator('edgeless-component-toolbar')
-        .locator('edgeless-change-frame-button');
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-change-frame-button'
+      );
       await button.click();
       break;
     }
     case 'changeShapeFillColor': {
-      const button = page
-        .locator('edgeless-component-toolbar')
+      const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
         .locator('.fill-color-button');
       await button.click();
       break;
     }
     case 'changeShapeStrokeColor': {
-      const button = page
-        .locator('edgeless-component-toolbar')
+      const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
         .locator('.stroke-color-button');
       await button.click();
