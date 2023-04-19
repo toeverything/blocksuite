@@ -17,8 +17,9 @@ import {
   Store,
   type StoreOptions,
 } from '../store.js';
-import { BacklinkIndexer, SubpageProofreader } from './indexer/backlink.js';
+import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
+import { reviseSubpage } from './indexer/revise-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
@@ -76,11 +77,14 @@ export class Workspace {
     this._bindPageMetaEvents();
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
+    const backlinkIndexer = new BacklinkIndexer(blockIndexer);
     this.indexer = {
       search: new SearchIndexer(this.doc),
-      backlink: new BacklinkIndexer(blockIndexer),
+      backlink: backlinkIndexer,
     };
-    new SubpageProofreader(this.indexer.backlink, this);
+    backlinkIndexer.slots.indexUpdated.on(e => {
+      reviseSubpage(e, this, backlinkIndexer);
+    });
 
     // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
