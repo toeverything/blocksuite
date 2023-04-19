@@ -1,10 +1,11 @@
 import type { RowHost } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { DatabaseCellElement, getColumnRenderer } from '../register.js';
+import type { ColumnRendererHelper } from '../register.js';
+import { DatabaseCellElement } from '../register.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
@@ -28,6 +29,9 @@ export class DatabaseCellContainer
 
   @state()
   private _isEditing = false;
+
+  @property()
+  columnRenderer!: ColumnRendererHelper;
 
   setValue(value: unknown) {
     queueMicrotask(() => {
@@ -99,7 +103,7 @@ export class DatabaseCellContainer
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const renderer = getColumnRenderer(this.column.type);
+    const renderer = this.columnRenderer.get(this.column.type);
     const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
     if (this._isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
@@ -125,7 +129,6 @@ export class DatabaseCellContainer
       ></${previewTag}>
     `;
   }
-  /* eslint-enable lit/binding-positions, lit/no-invalid-html */
 }
 
 declare global {
