@@ -125,3 +125,37 @@ export function isEqual<T extends Allowed, U extends T>(
 export async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Returns an object with four arrays: add, remove and unchanged.
+ *
+ * add: elements in after that are not in before
+ * remove: elements in before that are not in after
+ * unchanged: elements in both before and after
+ */
+export function diffArray<T>(
+  before: T[],
+  after: T[],
+  compare = (a: T, b: T) => a === b
+) {
+  const add: T[] = [];
+  const remove: T[] = [];
+  const unchanged: T[] = [];
+
+  // Find elements in before that are not in after
+  for (const elem of before) {
+    if (!after.some(afterElem => compare(afterElem, elem))) {
+      remove.push(elem);
+    } else {
+      unchanged.push(elem);
+    }
+  }
+  // Find elements in after that are not in before
+  for (const elem of after) {
+    if (!before.some(beforeElem => compare(beforeElem, elem))) {
+      add.push(elem);
+    }
+  }
+
+  return { changed: add.length || remove.length, add, remove, unchanged };
+}

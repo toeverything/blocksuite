@@ -89,10 +89,16 @@ export class BacklinkIndexer implements TextIndexer {
       .filter(link => link.type === 'Subpage');
   }
 
+  /**
+   * @internal
+   */
   onRefreshIndex() {
     this._linkIndexMap = {};
   }
 
+  /**
+   * @internal
+   */
   onPageRemoved(pageId: PageId) {
     if (!this._linkIndexMap[pageId]) {
       return;
@@ -101,6 +107,9 @@ export class BacklinkIndexer implements TextIndexer {
     this.slots.indexUpdated.emit({ action: 'delete', pageId });
   }
 
+  /**
+   * @internal
+   */
   onBlockUpdated({ action, pageId, block, blockId }: IndexBlockEvent) {
     switch (action) {
       case 'add':
