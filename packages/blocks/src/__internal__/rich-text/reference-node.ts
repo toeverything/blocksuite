@@ -1,12 +1,7 @@
 import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import type {
-  BaseBlockModel,
-  DeltaOperation,
-  Page,
-  PageMeta,
-} from '@blocksuite/store';
+import type { Page, PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
   ZERO_WIDTH_NON_JOINER,
@@ -40,19 +35,12 @@ export type RefNodeSlots = {
    * Emit when the subpage is unlinked from the current page.
    *
    * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
+   *
+   * @deprecated
    */
   subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
 };
-
-function isRefPageInDelta(delta: DeltaOperation[], pageId: string) {
-  if (!delta.length) {
-    return false;
-  }
-  return delta.some(op => {
-    return op.attributes?.reference?.pageId === pageId;
-  });
-}
 
 @customElement('affine-reference')
 export class AffineReference extends WithDisposable(ShadowlessElement) {
@@ -99,8 +87,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   @state()
   private _refMeta?: PageMeta;
 
-  private _model?: BaseBlockModel;
-
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
     pageId: '0',
@@ -114,7 +100,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       );
     }
     const model = getModelByElement(this);
-    this._model = model;
     const page = model.page;
 
     this._updateRefMeta(page);
@@ -125,36 +110,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     );
 
     // TODO fix User may create a subpage ref node by paste or undo/redo.
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-    if (this._refAttribute.type !== 'Subpage') {
-      return;
-    }
-    const model = this._model;
-    assertExists(model, 'Failed to get model!');
-    const text = model.text;
-    assertExists(text, 'Failed to get text');
-    const delta = text.toDelta();
-
-    if (!isRefPageInDelta(delta, this._refAttribute.pageId)) {
-      // TODO fix event emit logic
-      // The subpage is deleted
-      this.host.slots.subpageUnlinked.emit({
-        pageId: this._refAttribute.pageId,
-      });
-      if (process.env.NODE_ENV === 'development') {
-        // Strict mode
-        this.host.slots.subpageUnlinked.emit({
-          pageId: this._refAttribute.pageId,
-          // @ts-expect-error
-          __dev:
-            'This event may be called multiple times, so you must ensure that the callback operation is idempotent.',
-        });
-      }
-    }
   }
 
   private _updateRefMeta = (page: Page) => {
@@ -177,16 +132,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       curMeta,
       `Failed to get current page meta! pageId: ${page.id}`
     );
-    // the ref page may no longer be a subpage of the current page,
-    // for example, if it is moved to the trash.
-    const isValidSubpage = curMeta.subpageIds.includes(refAttribute.pageId);
-    if (!isValidSubpage) {
-      // update meta
-      this._refMeta = undefined;
-      // TODO remove warn
-      console.warn('The subpage is not a valid subpage', refAttribute.pageId);
-      return;
-    }
     this._refMeta = page.workspace.meta.pageMetas.find(
       page => page.id === refAttribute.pageId
     );
