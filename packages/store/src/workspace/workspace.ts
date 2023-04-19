@@ -6,10 +6,8 @@ import type { AwarenessStore } from '../awareness.js';
 import type { BlockSchemaType } from '../base.js';
 import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
-import type {
-  BlobStorage,
-  BlobStorageCRUD,
-} from '../persistence/blob/types.js';
+import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
+import { sha } from '../persistence/blob/utils.js';
 import {
   type InlineSuggestionProvider,
   Store,
@@ -25,14 +23,12 @@ export type WorkspaceOptions = {
   experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
 } & StoreOptions;
 
-type StorageManager = Omit<BlobStorageCRUD, 'list'>;
-
 export class Workspace {
   static Y = Y;
 
   private _store: Store;
   private readonly _storages: BlobStorage[] = [];
-  private readonly _blobStorage: StorageManager;
+  private readonly _blobStorage: BlobManager;
 
   meta: WorkspaceMeta;
 
@@ -67,8 +63,9 @@ export class Workspace {
         return Promise.any(this._storages.map(s => s.crud.get(id)));
       },
       set: async value => {
+        const key = await sha(await value.arrayBuffer());
         const [id] = await Promise.all(
-          this._storages.map(s => s.crud.set(value))
+          this._storages.map(s => s.crud.set(key, value))
         );
         return id;
       },
