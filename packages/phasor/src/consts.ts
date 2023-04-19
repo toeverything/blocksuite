@@ -8,4 +8,7 @@ export interface IBound {
   h: number;
 }
 
-export type StrokeStyle = 'solid';
+export enum StrokeStyle {
+  Solid = 'solid',
+  Dashed = 'dashed',
+}

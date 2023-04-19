@@ -1,4 +1,5 @@
 import type { IBound } from '../../../consts.js';
+import { setLineDash } from '../../../utils/canvas.js';
 import { isPointIn } from '../../../utils/hit-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -66,6 +67,7 @@ export const RectMethods: ShapeMethods = {
       realFillColor,
       realStrokeColor,
       radius,
+      strokeStyle,
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -84,6 +86,7 @@ export const RectMethods: ShapeMethods = {
 
     if (strokeWidth > 0) {
       ctx.strokeStyle = realStrokeColor;
+      setLineDash(ctx, strokeStyle);
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }
