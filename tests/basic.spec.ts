@@ -373,3 +373,16 @@ test('change theme', async ({ page }) => {
   const nextEditorTheme = await getCurrentEditorTheme(page);
   expect(nextEditorTheme).toBe(expectNextTheme);
 });
+
+test('should be able to delete an emoji completely by pressing backspace once', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '🌷🙅‍♂️🏳️‍🌈');
+  await pressBackspace(page);
+  await pressBackspace(page);
+  await pressBackspace(page);
+  await assertText(page, '');
+});
