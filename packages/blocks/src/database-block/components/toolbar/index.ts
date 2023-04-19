@@ -138,18 +138,18 @@ export function initAddNewRecordHandlers(
   };
 
   const onDragEnd = () => {
-    // if (!dragConfig) return;
-    // const { index } = dragConfig;
-    // // clear data
-    // dragConfig = null;
-    // if (indicator) indicator.rect = null;
-    // if (dragPreview) {
-    //   dragPreview.remove();
-    //   dragPreview = null;
-    // }
-    // if (index !== -1) {
-    //   addRow(index);
-    // }
+    if (!dragConfig) return;
+    const { index } = dragConfig;
+    // clear data
+    dragConfig = null;
+    if (indicator) indicator.rect = null;
+    if (dragPreview) {
+      dragPreview.remove();
+      dragPreview = null;
+    }
+    if (index !== -1) {
+      addRow(index);
+    }
   };
 
   const stopPropagation = (e: Event) => {
