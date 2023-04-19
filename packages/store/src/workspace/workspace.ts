@@ -17,7 +17,7 @@ import {
   Store,
   type StoreOptions,
 } from '../store.js';
-import { BacklinkIndexer } from './indexer/backlink.js';
+import { BacklinkIndexer, SubpageProofreader } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
@@ -80,6 +80,9 @@ export class Workspace {
       search: new SearchIndexer(this.doc),
       backlink: new BacklinkIndexer(blockIndexer),
     };
+    new SubpageProofreader(this.indexer.backlink, this);
+
+    // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
       // For potentially batch-added blocks, it's best to build index asynchronously
       queueMicrotask(() => this.indexer.search.onPageCreated(id));
@@ -203,7 +206,6 @@ export class Workspace {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
       this.slots.pageRemoved.emit(id);
-      // TODO remove page from indexer
     });
   }
 

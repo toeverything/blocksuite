@@ -236,14 +236,18 @@ export class SubpageProofreader {
  * remove: elements in before that are not in after
  * unchanged: elements in both before and after
  */
-function diffArray<T>(before: T[], after: T[]) {
+function diffArray<T>(
+  before: T[],
+  after: T[],
+  compare = (a: T, b: T) => a === b
+) {
   const add: T[] = [];
   const remove: T[] = [];
   const unchanged: T[] = [];
 
   // Find elements in before that are not in after
   for (const elem of before) {
-    if (!after.includes(elem)) {
+    if (!after.some(afterElem => compare(afterElem, elem))) {
       remove.push(elem);
     } else {
       unchanged.push(elem);
@@ -251,7 +255,7 @@ function diffArray<T>(before: T[], after: T[]) {
   }
   // Find elements in after that are not in before
   for (const elem of after) {
-    if (!before.includes(elem)) {
+    if (!before.some(beforeElem => compare(beforeElem, elem))) {
       add.push(elem);
     }
   }
