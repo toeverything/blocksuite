@@ -23,7 +23,7 @@ export const createIndexeddbStorage = (database: string): BlobStorage => {
         await del(key, db);
       },
       list: async function* iter() {
-        for await (const [key, value] of await entries<string, Blob>(db)) {
+        for (const [key, value] of await entries<string, Blob>(db)) {
           yield [key, value];
         }
       },
