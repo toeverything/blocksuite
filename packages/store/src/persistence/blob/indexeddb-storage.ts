@@ -1,4 +1,4 @@
-import { createStore, del, entries, get, set } from 'idb-keyval';
+import { createStore, del, get, keys, set } from 'idb-keyval';
 
 import type { BlobStorage } from './types.js';
 import { sha } from './utils.js';
@@ -22,10 +22,8 @@ export const createIndexeddbStorage = (database: string): BlobStorage => {
       delete: async (key: string) => {
         await del(key, db);
       },
-      list: async function* iter() {
-        for (const [key, value] of await entries<string, Blob>(db)) {
-          yield [key, value];
-        }
+      list: async () => {
+        return keys<string>(db);
       },
     },
   };
