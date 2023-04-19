@@ -135,52 +135,7 @@ export class ImageBlockComponent extends ShadowlessElement {
   };
 
   @state()
-  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
-    'loading';
-
-  private waitImageUploaded() {
-    return new Promise<void>(resolve => {
-      // If we could not get message from awareness in 1000ms,
-      // we assume this image is not found.
-      const timer = setTimeout(resolve, 2000);
-
-      const isBlobUploadingOnInit =
-        this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
-
-      const disposeSlot = this.model.page.awarenessStore.slots.update.on(() => {
-        const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
-          this.model.sourceId
-        );
-
-        /**
-         * case:
-         * clientA send image, but network latency is high,
-         * clientB got ydoc, but doesn't get awareness,
-         * clientC has a good network, and send awareness because of cursor changed,
-         * clientB receives awareness change from clientC,
-         * this listener will be called,
-         * but clientB doesn't get uploading state from clientA.
-         */
-        if (
-          isBlobUploadingOnInit === isBlobUploading &&
-          isBlobUploading === false
-        ) {
-          return;
-        }
-
-        if (!isBlobUploading) {
-          clearTimeout(timer);
-          resolve();
-        }
-      });
-
-      this._imageReady.dispose = () => {
-        disposeSlot.dispose();
-        clearTimeout(timer);
-        resolve();
-      };
-    });
-  }
+  private _imageState: 'loading' | 'ready' | 'failed' = 'loading';
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -190,19 +145,13 @@ export class ImageBlockComponent extends ShadowlessElement {
     const storage = this.model.page.blobs;
 
     this._imageState = 'loading';
-    const timeout = 500;
-    let blob = await new Promise<Blob | null>((resolve, reject) => {
+    const timeout = 2000;
+    const blob = await new Promise<Blob | null>((resolve, reject) => {
       setTimeout(() => reject(new Error('timeout')), timeout);
       storage.get(this.model.sourceId).then(blob => {
         resolve(blob);
       });
     }).catch(() => null);
-    if (!blob) {
-      this._imageState = 'waitUploaded';
-      await this.waitImageUploaded();
-      this._imageState = 'loading';
-      blob = await storage.get(this.model.sourceId);
-    }
     if (blob) {
       this._source = URL.createObjectURL(blob);
       this._imageState = 'ready';

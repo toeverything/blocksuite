@@ -36,6 +36,9 @@ export class Workspace {
     pagesUpdated: new Slot(),
     pageAdded: new Slot<string>(),
     pageRemoved: new Slot<string>(),
+    // call this when a blob is updated, deleted or created
+    //  workspace will update re-fetch the blob and update the page
+    blobUpdate: new Slot<void>(),
   };
 
   indexer: {
