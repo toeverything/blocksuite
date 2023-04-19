@@ -2,11 +2,11 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
+import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
   DocProviderConstructor,
 } from './persistence/doc/index.js';
-import type { BlobStorage } from './persistence/new-blob/types.js';
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import {
