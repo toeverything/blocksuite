@@ -83,6 +83,16 @@ describe('blocksuite yjs', () => {
       const { obj3 } = proxy;
       obj3.id = 'obj3';
       expect((map.get('obj3') as Y.Map<string>).get('id')).toBe('obj3');
+
+      proxy.arr = [];
+      expect(map.get('arr')).toBeInstanceOf(Y.Array);
+      proxy.arr.push({ counter: 1 });
+      expect((map.get('arr') as Y.Array<Y.Map<number>>).get(0)).toBeInstanceOf(
+        Y.Map
+      );
+      expect(
+        (map.get('arr') as Y.Array<Y.Map<number>>).get(0).get('counter')
+      ).toBe(1);
     });
   });
 });
