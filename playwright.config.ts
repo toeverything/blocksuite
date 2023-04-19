@@ -7,7 +7,6 @@ import type {
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
   fullyParallel: true,
-  timeout: process.env.CI ? 50_000 : 30_000,
   webServer: {
     command: 'pnpm dev',
     port: 5173,
@@ -29,6 +28,8 @@ const config: PlaywrightTestConfig = {
     trace: 'on-first-retry',
     // Record video only when retrying a test for the first time.
     video: 'on-first-retry',
+    // Timeout for each action
+    actionTimeout: 5_000,
   },
   workers: 4,
   retries: 1,
@@ -40,7 +41,7 @@ const config: PlaywrightTestConfig = {
 
 if (process.env.CI) {
   config.retries = 3;
-  config.workers = '50%';
+  config.workers = '80%';
 }
 
 export default config;
