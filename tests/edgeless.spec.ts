@@ -1399,3 +1399,16 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await activeFrameInEdgeless(page, ids.frameId);
   await expect(toolbar).toBeHidden();
 });
+
+test('double click blank space to add text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await page.mouse.dblclick(30, 140);
+  await waitNextFrame(page);
+  await type(page, 'hello');
+  await waitNextFrame(page);
+
+  await assertEdgelessSelectedRect(page, [0, 100, 448, 72]);
+});
