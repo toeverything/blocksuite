@@ -254,9 +254,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this._editingColumnPopupIndex = index;
 
     const currentEl = target as Element;
-    const reference = currentEl.classList.contains('affine-database-column')
-      ? target
-      : target.parentElement;
+    const reference = currentEl.closest('.affine-database-column');
     assertExists(reference);
 
     const editColumn = new EditColumnPopup();
