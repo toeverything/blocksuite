@@ -116,22 +116,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refAttribute = this.delta.attributes?.reference;
     assertExists(refAttribute, 'Failed to get reference attribute!');
     this._refAttribute = refAttribute;
-
-    if (refAttribute.type === 'LinkedPage') {
-      this._refMeta = page.workspace.meta.pageMetas.find(
-        page => page.id === refAttribute.pageId
-      );
-      return;
-    }
-    // Subpage
-    const curMeta = page.workspace.meta.pageMetas.find(
-      page => page.id === page.id
-    );
-
-    assertExists(
-      curMeta,
-      `Failed to get current page meta! pageId: ${page.id}`
-    );
     this._refMeta = page.workspace.meta.pageMetas.find(
       page => page.id === refAttribute.pageId
     );
@@ -155,12 +139,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const refMeta = this._refMeta;
-    const isDisabled = !refMeta;
-    if (isDisabled && this._refAttribute.type === 'Subpage') {
-      return html`<v-text .str=${this.delta.insert}></v-text>`;
-    }
-
-    const title = isDisabled
+    const unavailable = !refMeta;
+    const title = unavailable
       ? // Maybe the page is deleted
         'Deleted page'
       : refMeta.title;
@@ -171,7 +151,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
     const style = affineTextStyles(
       attributes,
-      isDisabled
+      unavailable
         ? {
             color: 'var(--affine-text-disable-color)',
             fill: 'var(--affine-text-disable-color)',
