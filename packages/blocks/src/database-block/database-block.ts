@@ -19,15 +19,9 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnRenderer } from './register.js';
+import { getColumnRenderer, unRegisterColumnRenderer } from './register.js';
 import { SearchState } from './types.js';
 import { onClickOutside } from './utils.js';
-
-let once = true;
-if (once) {
-  registerInternalRenderer();
-  once = false;
-}
 
 const styles = css`
   affine-database {
@@ -153,8 +147,9 @@ export class DatabaseBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    const disposables = this._disposables;
+    registerInternalRenderer();
 
+    const disposables = this._disposables;
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
@@ -190,6 +185,7 @@ export class DatabaseBlockComponent
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+    unRegisterColumnRenderer();
   }
 
   private _setFilteredRowIds = (rowIds: string[]) => {

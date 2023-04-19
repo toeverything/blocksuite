@@ -84,6 +84,10 @@ export function registerColumnRenderer(renderer: ColumnRenderer) {
   registry.set(renderer.type, renderer);
 }
 
+export function unRegisterColumnRenderer() {
+  registry.clear();
+}
+
 export function listColumnRenderer(): ColumnRenderer[] {
   return [...registry.values()];
 }
