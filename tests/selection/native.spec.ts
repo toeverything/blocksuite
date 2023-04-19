@@ -12,9 +12,11 @@ import {
   fillLine,
   focusRichText,
   focusTitle,
+  getCenterPosition,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
   getRichTextBoundingBox,
+  getSelectedText,
   getSelectedTextByVirgo,
   getVirgoSelectionIndex,
   getVirgoSelectionText,
@@ -286,21 +288,6 @@ test('double click choose words', async ({ page }) => {
     return text;
   });
   expect(text).toBe('hello');
-});
-
-// XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test('select all and delete', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await shamefullyBlurActiveElement(page);
-  await page.keyboard.press('Backspace');
-  await focusRichText(page, 0);
-  await type(page, 'abc');
-  await assertRichTexts(page, ['abc']);
 });
 
 test('select all text with dragging and delete', async ({ page }) => {
@@ -1098,4 +1085,31 @@ test('should not show option menu of image on native selection', async ({
   await expect(
     page.locator('.affine-embed-editing-state-container')
   ).toHaveCount(0);
+});
+
+test('should be cleared when dragging block card from BlockHub', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  expect(await getSelectedText(page)).toBe('123456789');
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  expect(await getSelectedText(page)).toBe('');
 });

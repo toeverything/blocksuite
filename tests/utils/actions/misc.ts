@@ -472,6 +472,30 @@ export async function getSelectedTextByVirgo(page: Page) {
   });
 }
 
+export async function getSelectedText(page: Page) {
+  return await page.evaluate(() => {
+    let content = '';
+    const selection = window.getSelection() as Selection;
+
+    if (selection.rangeCount === 0) return content;
+
+    const range = selection.getRangeAt(0);
+    const components =
+      range.commonAncestorContainer.parentElement?.querySelectorAll(
+        'rich-text'
+      ) || [];
+
+    components.forEach(component => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { index, length } = component!.vEditor!.getVRange()!;
+      content +=
+        component?.vEditor?.yText.toString().slice(index, length) || '';
+    });
+
+    return content;
+  });
+}
+
 export async function setVirgoSelection(
   page: Page,
   index: number,
