@@ -1,4 +1,4 @@
-# Using Editor
+# Attaching Editor
 
 In the [Getting Started](./getting-started) section, we used a `SimpleAffineEditor`, which is a simple wrapper around the `EditorContainer` component. In this part, we will take a closer look at its [source code](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts):
 

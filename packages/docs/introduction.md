@@ -1,6 +1,6 @@
 # Introduction
 
-BlockSuite (_pronounced "block sweet"_) is a comprehensive project that aims to provide a progressive solution for building collaborative applications. It includes a block-based framework for composing rich content editors, as well as an out-of-the-box block editor tailored for the [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base. The core concept behind BlockSuite is block-based editing, where text editing and state management are all handled on a block-by-block basis. This is facilitated by using CRDT technology for distributed collaboration. Additionally, BlockSuite supports framework-agnostic rendering to ensure scalability and flexibility.
+BlockSuite (_pronounced "block sweet"_ 🍬) is a comprehensive project that aims to provide a progressive solution for building collaborative applications. It includes a block-based framework for composing rich content editors, as well as an out-of-the-box block editor tailored for the [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base. The core concept behind BlockSuite is block-based editing, where text editing and state management are all handled on a block-by-block basis. This is facilitated by using CRDT technology for distributed collaboration. Additionally, BlockSuite supports framework-agnostic rendering to ensure scalability and flexibility.
 
 ## Block-Based Editing
 
