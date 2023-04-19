@@ -284,7 +284,13 @@ export function getAttachedPoint(
     Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
   );
   if (distance < ATTACHED_DISTANCE) {
-    return { point: attachedPoint, position };
+    return {
+      point: attachedPoint,
+      position: {
+        x: (attachedPoint.x - rect.x) / rect.w,
+        y: (attachedPoint.y - rect.y) / rect.h,
+      },
+    };
   }
 
   return { point: { x, y }, position };
