@@ -10,13 +10,14 @@ export const createIndexeddbStorage = (database: string): BlobStorage => {
     return sha(await value.arrayBuffer());
   };
   return {
-    hash,
     crud: {
       get: async (key: string) => {
         return (await get<Blob>(key, db)) ?? null;
       },
       set: async (value: Blob) => {
-        await set(await hash(value), value, db);
+        const key = await hash(value);
+        await set(key, value, db);
+        return key;
       },
       delete: async (key: string) => {
         await del(key, db);

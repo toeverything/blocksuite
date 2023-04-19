@@ -1,7 +1,7 @@
 import type { BlobStorage } from './types.js';
 import { sha } from './utils.js';
 
-export const createMemoryStorage = (id: string): BlobStorage => {
+export const createMemoryStorage = (): BlobStorage => {
   const memoryStorage = new Map<string, Blob>();
   const hash = async (value: Blob) => {
     return sha(await value.arrayBuffer());
@@ -12,7 +12,9 @@ export const createMemoryStorage = (id: string): BlobStorage => {
         return memoryStorage.get(key) ?? null;
       },
       set: async (value: Blob) => {
-        memoryStorage.set(await hash(value), value);
+        const key = await hash(value);
+        memoryStorage.set(key, value);
+        return key;
       },
       delete: async (key: string) => {
         memoryStorage.delete(key);
@@ -23,6 +25,5 @@ export const createMemoryStorage = (id: string): BlobStorage => {
         }
       },
     },
-    hash,
   };
 };

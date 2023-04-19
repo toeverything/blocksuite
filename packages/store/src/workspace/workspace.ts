@@ -67,7 +67,10 @@ export class Workspace {
         return Promise.any(this._storages.map(s => s.crud.get(id)));
       },
       set: async value => {
-        await Promise.all(this._storages.map(s => s.crud.set(value)));
+        const [id] = await Promise.all(
+          this._storages.map(s => s.crud.set(value))
+        );
+        return id;
       },
       delete: async key => {
         await Promise.all(this._storages.map(s => s.crud.delete(key)));
