@@ -6,12 +6,16 @@ import './components/database-title.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { type Column } from '@blocksuite/global/database';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { asyncFocusRichText, type BlockHost } from '../__internal__/index.js';
+import {
+  asyncFocusRichText,
+  type BlockHost,
+  WithDisposable,
+} from '../__internal__/index.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
@@ -19,7 +23,6 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { getColumnRenderer, unRegisterColumnRenderer } from './register.js';
 import { SearchState } from './types.js';
 import { onClickOutside } from './utils.js';
 
@@ -97,7 +100,7 @@ const styles = css`
 
 @customElement('affine-database')
 export class DatabaseBlockComponent
-  extends ShadowlessElement
+  extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
   flavour = 'affine:database' as const;
@@ -139,7 +142,10 @@ export class DatabaseBlockComponent
   @state()
   private _hoverState = false;
 
-  private _disposables: DisposableGroup = new DisposableGroup();
+  private _columnRenderer = registerInternalRenderer();
+  get columnRenderer() {
+    return this._columnRenderer;
+  }
 
   get columns(): Column[] {
     return this.model.columns;
@@ -147,7 +153,6 @@ export class DatabaseBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    registerInternalRenderer();
 
     const disposables = this._disposables;
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
@@ -180,12 +185,6 @@ export class DatabaseBlockComponent
       'scroll',
       this._onDatabaseScroll
     );
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
-    unRegisterColumnRenderer();
   }
 
   private _setFilteredRowIds = (rowIds: string[]) => {
@@ -253,7 +252,7 @@ export class DatabaseBlockComponent
     this.model.page.captureSync();
     const currentColumns = this.model.columns;
     const defaultColumnType = 'multi-select';
-    const renderer = getColumnRenderer(defaultColumnType);
+    const renderer = this._columnRenderer.get(defaultColumnType);
     const schema: Omit<Column, 'id'> = {
       type: defaultColumnType,
       name: `Column ${currentColumns.length + 1}`,
@@ -298,6 +297,7 @@ export class DatabaseBlockComponent
               .columns=${this.columns}
               .targetModel=${this.model}
               .addColumn=${this._addColumn}
+              .columnRenderer=${this.columnRenderer}
             ></affine-database-column-header>
             ${rows}
           </div>

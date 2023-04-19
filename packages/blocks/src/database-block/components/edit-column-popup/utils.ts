@@ -6,14 +6,15 @@ import {
 import { assertExists } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { getColumnRenderer } from '../../register.js';
+import type { ColumnRendererHelper } from '../../register.js';
 import type { ColumnActionType } from '../../types.js';
 
 export function changeColumnType(
   columnId: string,
   targetType: ColumnType,
   targetColumn: Column | string,
-  targetModel: DatabaseBlockModel
+  targetModel: DatabaseBlockModel,
+  columnRenderer: ColumnRendererHelper
 ) {
   if (isTitleColumn(targetColumn)) return;
 
@@ -35,7 +36,7 @@ export function changeColumnType(
     targetModel.convertCellsByColumn(columnId, 'rich-text');
   } else {
     // incompatible types: clear the value of the column
-    const renderer = getColumnRenderer(targetType);
+    const renderer = columnRenderer.get(targetType);
     updateColumn(
       columnId,
       {

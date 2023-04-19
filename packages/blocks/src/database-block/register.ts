@@ -37,11 +37,6 @@ export interface ColumnRenderer<
   components: ColumnComponents;
 }
 
-/**
- * @internal
- */
-const registry = new Map<ColumnRenderer['type'], ColumnRenderer>();
-
 export interface ColumnComponents<
   Type extends string = string,
   Property extends Record<string, unknown> = Record<string, unknown>,
@@ -77,27 +72,26 @@ export function defineColumnRenderer<
   };
 }
 
-export function registerColumnRenderer(renderer: ColumnRenderer) {
-  if (registry.has(renderer.type)) {
-    throw new Error('cannot register twice for ' + renderer.type);
+export class ColumnRendererHelper {
+  private _columns = new Map<ColumnRenderer['type'], ColumnRenderer>();
+
+  register(renderer: ColumnRenderer) {
+    const columns = this._columns;
+    if (columns.has(renderer.type)) {
+      throw new Error('cannot register twice for ' + renderer.type);
+    }
+    columns.set(renderer.type, renderer);
   }
-  registry.set(renderer.type, renderer);
-}
 
-export function unRegisterColumnRenderer() {
-  registry.clear();
-}
-
-export function listColumnRenderer(): ColumnRenderer[] {
-  return [...registry.values()];
-}
-
-export function getColumnRenderer(
-  type: ColumnRenderer['type']
-): ColumnRenderer {
-  const renderer = registry.get(type);
-  if (!renderer) {
-    throw new Error('cannot find renderer');
+  get(type: ColumnRenderer['type']): ColumnRenderer {
+    const renderer = this._columns.get(type);
+    if (!renderer) {
+      throw new Error('cannot find renderer');
+    }
+    return renderer;
   }
-  return renderer;
+
+  list(): ColumnRenderer[] {
+    return [...this._columns.values()];
+  }
 }

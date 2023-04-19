@@ -98,6 +98,7 @@ export function DataBaseRowContainer(
                       .databaseModel=${databaseModel}
                       .rowModel=${child}
                       .column=${column}
+                      .columnRenderer=${databaseBlock.columnRenderer}
                     >
                     </affine-database-cell-container>
                   </div>

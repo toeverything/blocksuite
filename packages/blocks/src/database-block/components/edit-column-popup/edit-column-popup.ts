@@ -16,6 +16,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
+import type { ColumnRendererHelper } from '../../register.js';
 import type {
   ColumnAction,
   ColumnActionType,
@@ -96,6 +97,9 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
+  columnRenderer!: ColumnRendererHelper;
+
+  @property()
   targetColumn!: Column | string;
 
   /** base on database column index */
@@ -149,7 +153,13 @@ export class EditColumnPopup extends LitElement {
   };
 
   private _changeColumnType = (columnId: string, targetType: ColumnType) => {
-    changeColumnType(columnId, targetType, this.targetColumn, this.targetModel);
+    changeColumnType(
+      columnId,
+      targetType,
+      this.targetColumn,
+      this.targetModel,
+      this.columnRenderer
+    );
     this.closePopup();
   };
 
