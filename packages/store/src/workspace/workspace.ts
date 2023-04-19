@@ -63,7 +63,14 @@ export class Workspace {
 
     this._blobStorage = {
       get: async id => {
-        return Promise.any(this._storages.map(s => s.crud.get(id)));
+        const result = await Promise.allSettled(
+          this._storages.map(s => s.crud.get(id))
+        );
+        const answer = result.find(
+          (result): result is PromiseFulfilledResult<Blob | null> =>
+            result.status === 'fulfilled'
+        );
+        return answer?.value ?? null;
       },
       set: async value => {
         const key = await sha(await value.arrayBuffer());
