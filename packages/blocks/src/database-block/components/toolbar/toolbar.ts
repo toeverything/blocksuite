@@ -177,13 +177,19 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
 
+  private get readonly() {
+    return this.targetModel.page.readonly;
+  }
+
   override firstUpdated() {
-    initAddNewRecordHandlers(
-      this._newRecord,
-      this,
-      this._disposables,
-      this.addRow
-    );
+    if (!this.readonly) {
+      initAddNewRecordHandlers(
+        this._newRecord,
+        this,
+        this._disposables,
+        this.addRow
+      );
+    }
   }
 
   private get _databaseMap() {
@@ -283,6 +289,8 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   };
 
   private _onShowAction = () => {
+    if (this.readonly) return;
+
     if (this._toolbarAction) {
       this._closeToolbarAction();
       return;
@@ -313,6 +321,11 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this._searchInput.value = '';
     this.setFilteredRowIds([]);
     this.setSearchState(SearchState.SearchIcon);
+  };
+
+  private _onAddNewRecord = () => {
+    if (this.readonly) return;
+    this.addRow(0);
   };
 
   override render() {
@@ -358,24 +371,27 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container">
         ${searchTool}
       </div>
-      <div
-        class="affine-database-toolbar-item more-action ${isActiveMoreAction
-          ? 'active'
-          : ''}"
-        @click=${this._onShowAction}
-      >
-        ${MoreHorizontalIcon}
-      </div>
-      <div
-        class="has-tool-tip affine-database-toolbar-item new-record"
-        draggable="true"
-        @click=${() => this.addRow(0)}
-      >
-        ${PlusIcon}<span>New Record</span>
-        <tool-tip inert arrow tip-position="top" role="tooltip"
-          >You can drag this button to the desired location and add a record
-        </tool-tip>
-      </div>
+      ${this.readonly
+        ? null
+        : html`<div
+              class="affine-database-toolbar-item more-action ${isActiveMoreAction
+                ? 'active'
+                : ''}"
+              @click=${this._onShowAction}
+            >
+              ${MoreHorizontalIcon}
+            </div>
+            <div
+              class="has-tool-tip affine-database-toolbar-item new-record"
+              draggable="true"
+              @click=${this._onAddNewRecord}
+            >
+              ${PlusIcon}<span>New Record</span>
+              <tool-tip inert arrow tip-position="top" role="tooltip"
+                >You can drag this button to the desired location and add a
+                record
+              </tool-tip>
+            </div>`}
     </div>`;
   }
 }

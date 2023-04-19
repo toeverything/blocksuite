@@ -147,8 +147,12 @@ export class DatabaseBlockComponent
 
   private _disposables: DisposableGroup = new DisposableGroup();
 
-  get columns(): Column[] {
+  private get columns(): Column[] {
     return this.model.columns;
+  }
+
+  private get readonly() {
+    return this.model.page.readonly;
   }
 
   override connectedCallback() {
@@ -178,6 +182,7 @@ export class DatabaseBlockComponent
       this.querySelector('affine-database-column-header')?.requestUpdate();
     });
 
+    if (this.readonly) return;
     const tableContent = this._tableContainer.parentElement;
     assertExists(tableContent);
     this._disposables.addFromEvent(
@@ -238,6 +243,8 @@ export class DatabaseBlockComponent
   };
 
   private _addRow = (index?: number) => {
+    if (this.readonly) return;
+
     const currentSearchState = this._searchState;
     this._resetSearchState();
     this._resetHoverState();
@@ -254,6 +261,8 @@ export class DatabaseBlockComponent
   };
 
   private _addColumn = (index: number) => {
+    if (this.readonly) return;
+
     this.model.page.captureSync();
     const currentColumns = this.model.columns;
     const defaultColumnType = 'multi-select';
@@ -306,16 +315,18 @@ export class DatabaseBlockComponent
             ${rows}
           </div>
         </div>
-        <div class="affine-database-block-footer">
-          <div
-            class="affine-database-block-add-row"
-            data-test-id="affine-database-add-row-button"
-            role="button"
-            @click=${() => this._addRow()}
-          >
-            ${PlusIcon}<span>New Record</span>
-          </div>
-        </div>
+        ${this.readonly
+          ? null
+          : html`<div class="affine-database-block-footer">
+              <div
+                class="affine-database-block-add-row"
+                data-test-id="affine-database-add-row-button"
+                role="button"
+                @click=${() => this._addRow()}
+              >
+                ${PlusIcon}<span>New Record</span>
+              </div>
+            </div>`}
       </div>
     `;
   }

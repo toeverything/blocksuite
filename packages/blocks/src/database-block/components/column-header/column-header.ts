@@ -86,11 +86,17 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _editingColumnPopupIndex = -1;
   private _columnTypePopup: ColumnTypePopup | null = null;
 
+  private get readonly() {
+    return this.targetModel.page.readonly;
+  }
+
   setEditingColumnId = (id: string) => {
     this._editingColumnId = id;
   };
 
   override firstUpdated() {
+    if (this.readonly) return;
+
     this._initChangeColumnWidthHandlers();
     this._initHeaderMousemoveHandlers();
     this._initMoveColumnHandlers();
@@ -104,6 +110,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
+    if (this.readonly) return;
+
     if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
       this._titleColumnInput.focus();
       const length = this._titleColumnInput.value.length;
@@ -246,7 +254,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     column: Column | string,
     index: number
   ) => {
-    if (this._editingColumnId) return;
+    if (this._editingColumnId || this.readonly) return;
     if (this._editingColumnPopupIndex === index) {
       this._editingColumnPopupIndex = -1;
       return;
@@ -292,7 +300,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     column: Column
   ) => {
     event.stopPropagation();
-    if (this._columnTypePopup) return;
+    if (this._columnTypePopup || this.readonly) return;
 
     this._changingColumnTypeId = columnId;
     const popup = new ColumnTypePopup();
@@ -387,12 +395,17 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this.setEditingColumnId(columnId);
   };
 
+  private _onAddColumn = () => {
+    if (this.readonly) return;
+    this.addColumn(this.targetModel.columns.length);
+  };
+
   override render() {
     const style = styleMap({
       width: `${this.targetModel.titleColumnWidth}px`,
     });
 
-    const isEditing = this._editingColumnId === '-1';
+    const isEditing = this._editingColumnId === '-1' && !this.readonly;
     return html`
       <div class="affine-database-column-header database-row">
         <div class="affine-database-column database-cell" style=${style}>
@@ -423,13 +436,15 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     <div class="affine-database-column-text-input">
                       ${this.targetModel.titleColumnName}
                     </div>
-                    <div
-                      class="affine-database-column-text-icon"
-                      @click=${(e: MouseEvent) =>
-                        this._onEditColumnTitle(e, '-1')}
-                    >
-                      ${PenIcon}
-                    </div>
+                    ${this.readonly
+                      ? null
+                      : html`<div
+                          class="affine-database-column-text-icon"
+                          @click=${(e: MouseEvent) =>
+                            this._onEditColumnTitle(e, '-1')}
+                        >
+                          ${PenIcon}
+                        </div>`}
                   </div>`}
             </div>
           </div>
@@ -441,7 +456,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
             const style = styleMap({
               width: `${column.width}px`,
             });
-            const isEditing = this._editingColumnId === column.id;
+            const isEditing =
+              this._editingColumnId === column.id && !this.readonly;
             const isChangingColumnType =
               this._changingColumnTypeId === column.id;
 
@@ -482,50 +498,63 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                           <div class="affine-database-column-text-input">
                             ${column.name}
                           </div>
-                          <div
-                            class="affine-database-column-text-icon"
-                            @click=${(e: MouseEvent) =>
-                              this._onEditColumnTitle(e, column.id)}
-                          >
-                            ${PenIcon}
-                          </div>
+                          ${this.readonly
+                            ? null
+                            : html`<div
+                                class="affine-database-column-text-icon"
+                                @click=${(e: MouseEvent) =>
+                                  this._onEditColumnTitle(e, column.id)}
+                              >
+                                ${PenIcon}
+                              </div>`}
                         </div>`}
                   </div>
-                  <div draggable="true" class="affine-database-column-move">
-                    ${DatabaseDragIcon}
-                  </div>
+                  ${this.readonly
+                    ? null
+                    : html`<div
+                        draggable="true"
+                        class="affine-database-column-move"
+                      >
+                        ${DatabaseDragIcon}
+                      </div>`}
                 </div>
-                <div
-                  class="affine-database-column-drag-handle ${this
-                    ._widthChangingIndex === index
-                    ? 'dragging'
-                    : ''}"
-                ></div>
+                ${this.readonly
+                  ? null
+                  : html`<div
+                      class="affine-database-column-drag-handle ${this
+                        ._widthChangingIndex === index
+                        ? 'dragging'
+                        : ''}"
+                    ></div>`}
               </div>
             `;
           }
         )}
         <div class="affine-database-column database-cell add-column-button">
-          <div
-            class="affine-database-column-drag-handle  ${this
-              ._widthChangingIndex === this.columns.length
-              ? 'dragging'
-              : ''}"
-          ></div>
-          <div
-            class="header-add-column-button"
-            @click=${() => this.addColumn(this.targetModel.columns.length)}
-          >
-            ${DatabaseAddColumn}
-          </div>
+          ${this.readonly
+            ? null
+            : html`<div
+                  class="affine-database-column-drag-handle  ${this
+                    ._widthChangingIndex === this.columns.length
+                    ? 'dragging'
+                    : ''}"
+                ></div>
+                <div
+                  class="header-add-column-button"
+                  @click=${this._onAddColumn}
+                >
+                  ${DatabaseAddColumn}
+                </div>`}
         </div>
-        <div
-          class="affine-database-add-column-button"
-          data-test-id="affine-database-add-column-button"
-          @click=${() => this.addColumn(this.targetModel.columns.length)}
-        >
-          ${DatabaseAddColumn}
-        </div>
+        ${this.readonly
+          ? null
+          : html`<div
+              class="affine-database-add-column-button"
+              data-test-id="affine-database-add-column-button"
+              @click=${this._onAddColumn}
+            >
+              ${DatabaseAddColumn}
+            </div>`}
       </div>
     `;
   }
