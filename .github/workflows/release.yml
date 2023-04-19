@@ -8,6 +8,9 @@ on:
 # Pending until other workflows done
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  id-token: write
+
 jobs:
   release:
     name: Try publishing npm@latest release

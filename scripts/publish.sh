@@ -22,9 +22,9 @@ do
   pnpm build
 
   if [ "$NIGHTLY" = "true" ]; then
-    pnpm publish --no-git-checks --tag nightly
+    pnpm publish --provenance --no-git-checks --tag nightly
   else
-    pnpm publish
+    pnpm publish --provenance
   fi
 
   cd ../../
