@@ -145,17 +145,16 @@ export class ImageBlockComponent extends ShadowlessElement {
     const storage = this.model.page.blobs;
 
     this._imageState = 'loading';
-    const timeout = 2000;
-    const blob = await new Promise<Blob | null>((resolve, reject) => {
-      setTimeout(() => reject(new Error('timeout')), timeout);
-      storage.get(this.model.sourceId).then(blob => {
-        resolve(blob);
-      });
-    }).catch(() => null);
-    if (blob) {
-      this._source = URL.createObjectURL(blob);
-      this._imageState = 'ready';
-    } else {
+    try {
+      const blob = await storage.get(this.model.sourceId);
+      if (blob) {
+        this._source = URL.createObjectURL(blob);
+        this._imageState = 'ready';
+      } else {
+        this._imageState = 'failed';
+      }
+    } catch (e) {
+      console.error('Failed to load image', e);
       this._imageState = 'failed';
     }
     if (width && height) {
