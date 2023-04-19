@@ -329,10 +329,11 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
 }
 
 export async function downloadImage(model: BaseBlockModel) {
-  const imgSrc = await getUrlByModel(model);
-  if (!imgSrc) {
+  const img = await getUrlByModel(model);
+  if (!img) {
     return;
   }
+  const imgSrc = URL.createObjectURL(img);
   const arrayBuffer = await (await fetch(imgSrc)).arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
   let fileType: string;
