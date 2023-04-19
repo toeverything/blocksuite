@@ -3,15 +3,13 @@ import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import type { AwarenessStore } from '../awareness.js';
-import { BlobUploadState } from '../awareness.js';
 import type { BlockSchemaType } from '../base.js';
 import { BlockSchema } from '../base.js';
-import type { BlobStorage } from '../persistence/blob/index.js';
-import {
-  type BlobOptionsGetter,
-  BlobSyncState,
-  getBlobStorage,
-} from '../persistence/blob/index.js';
+import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
+import type {
+  BlobStorage,
+  BlobStorageCRUD,
+} from '../persistence/blob/types.js';
 import {
   type InlineSuggestionProvider,
   Store,
@@ -27,13 +25,14 @@ export type WorkspaceOptions = {
   experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
 } & StoreOptions;
 
+type StorageManager = Omit<BlobStorageCRUD, 'list'>;
+
 export class Workspace {
   static Y = Y;
 
   private _store: Store;
-  private readonly _blobStorage: Promise<BlobStorage | null>;
-  private _blobOptionsGetter?: BlobOptionsGetter = (k: string) =>
-    ({ api: '/api/workspace' }[k]);
+  private readonly _storages: BlobStorage[] = [];
+  private readonly _blobStorage: StorageManager;
 
   meta: WorkspaceMeta;
 
@@ -58,19 +57,22 @@ export class Workspace {
   }: WorkspaceOptions) {
     this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
     this._store = new Store(storeOptions);
-    if (storeOptions.blobOptionsGetter) {
-      this._blobOptionsGetter = storeOptions.blobOptionsGetter;
-    }
 
-    if (!storeOptions.isSSR) {
-      this._blobStorage = getBlobStorage(storeOptions.id, k => {
-        return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
-      });
-      this._initBlobStorage();
-    } else {
-      // blob storage is not reachable in server side
-      this._blobStorage = Promise.resolve(null);
-    }
+    this._storages = (storeOptions.blobStorages ?? [createMemoryStorage]).map(
+      fn => fn(storeOptions.id)
+    );
+
+    this._blobStorage = {
+      get: async id => {
+        return Promise.any(this._storages.map(s => s.crud.get(id)));
+      },
+      set: async value => {
+        await Promise.all(this._storages.map(s => s.crud.set(value)));
+      },
+      delete: async key => {
+        await Promise.all(this._storages.map(s => s.crud.delete(key)));
+      },
+    };
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
     this._bindPageMetaEvents();
@@ -158,30 +160,6 @@ export class Workspace {
       : (`space:${pageId}` as const);
 
     return this._pages.get(prefixedPageId) ?? null;
-  }
-
-  private _initBlobStorage() {
-    this._blobStorage.then(blobStorage => {
-      blobStorage?.slots.onBlobSyncStateChange.on(state => {
-        const blobId = state.id;
-        const syncState = state.state;
-        if (
-          syncState === BlobSyncState.Waiting ||
-          syncState === BlobSyncState.Syncing
-        ) {
-          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploading);
-          return;
-        }
-
-        if (
-          syncState === BlobSyncState.Success ||
-          syncState === BlobSyncState.Failed
-        ) {
-          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploaded);
-          return;
-        }
-      });
-    });
   }
 
   private _bindPageMetaEvents() {
@@ -292,10 +270,6 @@ export class Workspace {
 
   search(query: QueryContent) {
     return this.indexer.search.search(query);
-  }
-
-  setGettingBlobOptions(blobOptionsGetter: BlobOptionsGetter) {
-    this._blobOptionsGetter = blobOptionsGetter;
   }
 
   /**

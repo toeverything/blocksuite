@@ -3,12 +3,9 @@ import { createStore, del, entries, get, set } from 'idb-keyval';
 import type { BlobStorage } from './types.js';
 import { sha } from './utils.js';
 
-export const createIndexeddbStorage = (
-  type: string,
-  database: string
-): BlobStorage => {
+export const createIndexeddbStorage = (database: string): BlobStorage => {
   // don't change the db name, it's for backward compatibility
-  const db = createStore(`${database}_${type}`, type);
+  const db = createStore(`${database}_blob`, 'blob');
   const hash = async (value: Blob) => {
     return sha(await value.arrayBuffer());
   };
