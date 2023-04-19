@@ -5,7 +5,7 @@ import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -221,19 +221,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           )
         : null;
 
+    const componentToolbar = this.state.active
+      ? nothing
+      : html`<edgeless-component-toolbar
+          .selected=${selected}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.state}
+        >
+        </edgeless-component-toolbar>`;
+
     return html`
       ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
         ${connectorHandles}
       </div>
-      <edgeless-component-toolbar
-        .selected=${selected}
-        .page=${this.page}
-        .surface=${this.surface}
-        .slots=${this.slots}
-        .selectionState=${this.state}
-      >
-      </edgeless-component-toolbar>
+      ${componentToolbar}
     `;
   }
 }
