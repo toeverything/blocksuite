@@ -804,6 +804,7 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
   expect(await rows.count()).toBe(3);
 
   await type(page, '1');
+  await waitNextFrame(page);
   await assertDatabaseTitleColumnText(page, '1');
 });
 
