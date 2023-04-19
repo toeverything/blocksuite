@@ -34,7 +34,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
 
     .database-title [data-virgo-text='true'] {
-      white-space: pre;
+      display: block;
+      white-space: pre !important;
     }
 
     .database-title.ellipsis [data-virgo-text='true'] {
@@ -124,6 +125,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       <div
         class="database-title ${isEmpty ? 'database-title-empty' : ''}"
         data-block-is-database-title="true"
+        title=${this.targetModel.title.toString()}
       ></div>
     </div>`;
   }
