@@ -1,7 +1,4 @@
-import {
-  isControlledKeyboardEvent,
-  isPrintableKeyEvent,
-} from '../__internal__/utils/std.js';
+import { isControlledKeyboardEvent } from '../__internal__/utils/std.js';
 
 export const createKeydownObserver = ({
   target,
@@ -23,18 +20,50 @@ export const createKeydownObserver = ({
   let query = '';
   const keyDownListener = (e: KeyboardEvent) => {
     e.stopPropagation();
-    if (
-      // Abort when press modifier key to avoid weird behavior
+
+    if (e.defaultPrevented) return;
+
+    if (isControlledKeyboardEvent(e)) {
+      const isOnlyCmd = (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey;
+      // Ctrl/Cmd + alphabet key
+      if (isOnlyCmd && e.key.length === 1) {
+        switch (e.key) {
+          // Previous command
+          case 'P':
+          case 'p': {
+            onMove(-1);
+            e.preventDefault();
+            return;
+          }
+          // Next command
+          case 'N':
+          case 'n': {
+            onMove(1);
+            e.preventDefault();
+            return;
+          }
+        }
+      }
+
+      // Pressing **only** modifier key is allowed and will be ignored
+      // Because we don't know the user's intention
+      // Aborting here will cause the above hotkeys to not work
+      if (e.key === 'Control' || e.key === 'Meta' || e.key === 'Alt') {
+        return;
+      }
+
+      // Abort when press modifier key + any other key to avoid weird behavior
       // e.g. press ctrl + a to select all or press ctrl + v to paste
-      isControlledKeyboardEvent(e) ||
-      e.key === 'Escape'
-    ) {
       abortController.abort();
       return;
     }
 
-    if (!isPrintableKeyEvent(e)) {
+    if (isControlledKeyboardEvent(e) || e.key.length !== 1) {
       switch (e.key) {
+        case 'Escape': {
+          abortController.abort();
+          return;
+        }
         case 'Backspace': {
           if (!query.length) {
             abortController.abort();
@@ -45,6 +74,10 @@ export const createKeydownObserver = ({
         }
         case 'Enter': {
           if (e.isComposing) {
+            return;
+          }
+          if (e.shiftKey) {
+            abortController.abort();
             return;
           }
           onConfirm();
@@ -61,11 +94,19 @@ export const createKeydownObserver = ({
           return;
         }
         case 'ArrowUp': {
+          if (e.shiftKey) {
+            abortController.abort();
+            return;
+          }
           onMove(-1);
           e.preventDefault();
           return;
         }
         case 'ArrowDown': {
+          if (e.shiftKey) {
+            abortController.abort();
+            return;
+          }
           onMove(1);
           e.preventDefault();
           return;
