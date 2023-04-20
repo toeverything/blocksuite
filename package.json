@@ -9,7 +9,6 @@
     "packages/global",
     "packages/phasor",
     "packages/playground",
-    "packages/react",
     "packages/store",
     "packages/virgo",
     "packages/connector"

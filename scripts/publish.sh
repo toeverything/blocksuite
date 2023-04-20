@@ -8,7 +8,6 @@ packages=(
   "global"
   "phasor"
   # "playground" # NOT PUBLISHED
-  "react"
   "store"
   "virgo"
   "connector"

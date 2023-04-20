@@ -23,7 +23,7 @@ export class FrameResizeObserver {
     this._observer = new ResizeObserver(
       throttle<ResizeObserverEntry[][], typeof this._onResize>(
         this._onResize,
-        100
+        1000 / 60
       )
     );
   }

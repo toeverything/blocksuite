@@ -15,12 +15,16 @@ export const createIndexeddbStorage = (database: string): BlobStorage => {
       get: async (key: string) => {
         const get = (await idbPromise).get;
         const db = await dbPromise;
-        return (await get<Blob>(key, db)) ?? null;
+        const res = await get<ArrayBuffer>(key, db);
+        if (res) {
+          return new Blob([res]);
+        }
+        return null;
       },
       set: async (key: string, value: Blob) => {
         const set = (await idbPromise).set;
         const db = await dbPromise;
-        await set(key, value, db);
+        await set(key, await value.arrayBuffer(), db);
         return key;
       },
       delete: async (key: string) => {

@@ -278,6 +278,7 @@ export class EdgelessPageBlockComponent
           this.style.setProperty('--affine-zoom', `${newZoom}`);
           this.components.dragHandle?.setScale(newZoom);
         }
+        this.components.dragHandle?.hide();
         if (this._selection.selectedBlocks.length) {
           slots.selectedBlocksUpdated.emit(this._selection.selectedBlocks);
         }

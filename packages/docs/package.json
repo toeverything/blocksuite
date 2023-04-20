@@ -18,7 +18,6 @@
     "@algolia/client-search": "^4.15.0",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
-    "@blocksuite/react": "workspace:*",
     "@blocksuite/store": "workspace:*"
   }
 }

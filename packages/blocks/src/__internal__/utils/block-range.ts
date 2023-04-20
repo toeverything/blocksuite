@@ -301,6 +301,7 @@ export function getTextNodeByModel(model: BaseBlockModel, offset = 0) {
   }
 
   const vEditor = getVirgoByModel(model);
+  // TODO this assert is unreliable
   assertExists(vEditor);
   const [leaf, leafOffset] = vEditor.getTextPoint(offset);
   return [leaf, leafOffset] as const;

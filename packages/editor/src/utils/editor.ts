@@ -104,7 +104,7 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.slots.selectedRectsUpdated.emit([]);
+        defaultPageBlock.selection.clear();
       }
     },
     getAllowedBlocks: () => {
