@@ -1,6 +1,5 @@
-import { getStrokePoints } from 'perfect-freehand';
-
 import type { IBound } from '../../consts.js';
+import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
 import { Utils } from '../../utils/tl-utils.js';
