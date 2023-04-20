@@ -219,10 +219,11 @@ export class Workspace {
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
-  setPageMeta(pageId: string, props: Partial<PageMeta>) {
-    if ('subpageIds' in props) {
-      console.warn('You should not update subpageIds directly.');
-    }
+  setPageMeta(
+    pageId: string,
+    // You should not update subpageIds directly.
+    props: Partial<PageMeta & { subpageIds: never }>
+  ) {
     this.meta.setPageMeta(pageId, props);
   }
 

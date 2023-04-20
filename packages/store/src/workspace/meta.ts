@@ -89,6 +89,9 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
+  /**
+   * @internal Use {@link Workspace.setPageMeta} instead
+   */
   setPageMeta(id: string, props: Partial<PageMeta>) {
     const pages = (this.pages?.toJSON() as PageMeta[]) ?? [];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
