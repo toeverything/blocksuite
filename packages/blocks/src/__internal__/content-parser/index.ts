@@ -4,11 +4,11 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
-import { getFileFromClipboard } from '../clipboard/utils.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
+import { getFileFromClipboard } from './util.js';
 
 type ParseHtml2BlockFunc = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +80,6 @@ export class ContentParser {
   }
 
   async file2Blocks(clipboardData: DataTransfer) {
-    await import('../clipboard/index.js');
     const file = getFileFromClipboard(clipboardData);
     if (file) {
       if (file.type.includes('image')) {
