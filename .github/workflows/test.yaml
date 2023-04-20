@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         id: pnpm-install
