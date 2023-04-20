@@ -15,11 +15,6 @@ const allPackages = [
 
 const createPattern = packageName => [
   {
-    group: ['perfect-freehand'],
-    message: 'Don directly import perfect-freehand',
-    allowTypeImports: true,
-  },
-  {
     group: ['**/dist', '**/dist/**'],
     message: 'Don not import from dist',
     allowTypeImports: false,
