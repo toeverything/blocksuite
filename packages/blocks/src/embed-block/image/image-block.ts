@@ -144,7 +144,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
-  @state()
   private _retryCount = 0;
 
   override async firstUpdated() {
