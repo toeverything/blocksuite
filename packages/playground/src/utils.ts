@@ -7,6 +7,7 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
+import type { DocProvider, Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
@@ -14,17 +15,31 @@ import {
   DebugDocProvider,
   type DocProviderConstructor,
   Generator,
-  IndexedDBDocProvider,
   Utils,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
+import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
+
+class IndexedDBProviderWrapper implements DocProvider {
+  #provider: IndexedDBProvider;
+  constructor(id: string, doc: Y.Doc) {
+    this.#provider = createIndexedDBProvider(id, doc);
+  }
+  connect() {
+    this.#provider.connect();
+  }
+  disconnect() {
+    this.#provider.disconnect();
+  }
+}
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
@@ -132,7 +147,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   }
 
   if (providerArgs.includes('indexeddb')) {
-    providers.push(IndexedDBDocProvider);
+    providers.push(IndexedDBProviderWrapper);
     idGenerator = Generator.UUIDv4; // works in production
   }
 
