@@ -7,10 +7,13 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
+import type { BlobStorage } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
   createIndexeddbStorage,
+  createMemoryStorage,
+  createSimpleServerStorage,
   DebugDocProvider,
   type DocProviderConstructor,
   Generator,
@@ -24,6 +27,7 @@ import { fileOpen } from 'browser-fs-access';
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
 export const defaultMode =
@@ -124,6 +128,7 @@ export async function tryInitExternalContent(
  */
 export function createWorkspaceOptions(): WorkspaceOptions {
   const providers: DocProviderConstructor[] = [];
+  const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   if (providerArgs.includes('webrtc')) {
@@ -134,6 +139,18 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   if (providerArgs.includes('indexeddb')) {
     providers.push(IndexedDBDocProvider);
     idGenerator = Generator.UUIDv4; // works in production
+  }
+
+  if (blobStorageArgs.includes('memory')) {
+    blobStorages.push(createMemoryStorage);
+  }
+
+  if (blobStorageArgs.includes('indexeddb')) {
+    blobStorages.push(createIndexeddbStorage);
+  }
+
+  if (blobStorageArgs.includes('mock')) {
+    blobStorages.push(createSimpleServerStorage);
   }
 
   if (isE2E) {
@@ -147,7 +164,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     id: room,
     providers,
     idGenerator,
-    blobStorages: [createIndexeddbStorage],
+    blobStorages,
     defaultFlags: {
       enable_toggle_block: featureArgs.includes('toggle'),
       enable_set_remote_flag: true,

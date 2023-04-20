@@ -159,6 +159,23 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  private _fetchError = (e: unknown) => {
+    // Do have the id but cannot find the blob
+    //  this is probably because the blob is not uploaded yet
+    this._imageState = 'waitUploaded';
+    this._retryCount++;
+    console.warn('Cannot find blob, retrying', this._retryCount);
+    if (this._retryCount < ImageBlockComponent.maxRetryCount) {
+      setTimeout(() => {
+        this._fetchImage();
+        // 1s, 2s, 3s
+      }, 1000 * this._retryCount);
+    } else {
+      console.error(e);
+      this._imageState = 'failed';
+    }
+  };
+
   private _fetchImage = () => {
     if (this._imageState === 'ready') {
       return;
@@ -171,24 +188,10 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
           this._source = URL.createObjectURL(blob);
           this._imageState = 'ready';
         } else {
-          // Do have the id but cannot find the blob
-          //  this is probably because the blob is not uploaded yet
-          this._imageState = 'waitUploaded';
-          this._retryCount++;
-          if (this._retryCount < ImageBlockComponent.maxRetryCount) {
-            setTimeout(() => {
-              this._fetchImage();
-              // 1s, 4s, 16s
-            }, 1000 << ((this._retryCount - 1) * 2));
-          } else {
-            this._imageState = 'failed';
-          }
+          this._fetchError(new Error('Cannot find blob'));
         }
       })
-      .catch(e => {
-        console.error('Failed to load image', e);
-        this._imageState = 'failed';
-      });
+      .catch(this._fetchError);
   };
 
   override connectedCallback() {

@@ -105,13 +105,15 @@ async function initEmptyEditor(
 export async function enterPlaygroundRoom(
   page: Page,
   flags?: Partial<BlockSuiteFlags>,
-  room?: string
+  room?: string,
+  blobStorage?: ('memory' | 'indexeddb' | 'mock')[]
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {

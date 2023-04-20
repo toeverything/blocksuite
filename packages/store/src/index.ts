@@ -3,6 +3,7 @@ export * from './awareness.js';
 export * from './base.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
 export { createMemoryStorage } from './persistence/blob/memory-storage.js';
+export { createSimpleServerStorage } from './persistence/blob/mock-server-storage.js';
 export type {
   BlobManager,
   BlobStorage,
