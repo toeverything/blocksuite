@@ -494,7 +494,10 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
   }
 
-  static calcTarget(
+  /**
+   * Calculates the drop target.
+   */
+  static calcDropTarget(
     point: Point,
     model: BaseBlockModel,
     element: Element,
@@ -522,8 +525,8 @@ export class DragHandle extends WithDisposable(LitElement) {
     const height = 3 * scale;
     const { rect: domRect, flag } = getDropRectByPoint(point, model, element);
 
-    // empty database
     if (flag === 1) {
+      // empty database
       const rect = Rect.fromDOMRect(domRect);
       rect.top -= height / 2;
       rect.height = height;
@@ -532,6 +535,27 @@ export class DragHandle extends WithDisposable(LitElement) {
       return {
         type,
         rect,
+        modelState: {
+          model,
+          rect: domRect,
+          element: element as BlockComponentElement,
+        },
+      };
+    } else if (flag === 2) {
+      // not empty database
+      const distanceToTop = Math.abs(domRect.top - point.y);
+      const distanceToBottom = Math.abs(domRect.bottom - point.y);
+      const before = distanceToTop < distanceToBottom;
+      type = before ? 'before' : 'after';
+
+      return {
+        type,
+        rect: Rect.fromLWTH(
+          domRect.left,
+          domRect.width,
+          (before ? domRect.top - 1 : domRect.bottom) - height / 2,
+          height
+        ),
         modelState: {
           model,
           rect: domRect,
@@ -764,7 +788,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         !isContainedIn(this._draggingElements, element)
       ) {
         const model = getModelByBlockElement(element);
-        const result = DragHandle.calcTarget(
+        const result = DragHandle.calcDropTarget(
           point,
           model,
           element,

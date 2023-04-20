@@ -729,7 +729,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      const result = DragHandle.calcTarget(
+      const result = DragHandle.calcDropTarget(
         point,
         model,
         element,
