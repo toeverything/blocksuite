@@ -15,6 +15,9 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+  /**
+   * Note: YOU SHOULD NOT UPDATE THIS FIELD MANUALLY.
+   */
   subpageIds: string[];
 
   [key: string]: string | number | boolean | undefined | (string | number)[];
