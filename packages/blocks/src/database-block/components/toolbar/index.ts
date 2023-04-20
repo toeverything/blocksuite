@@ -31,23 +31,26 @@ class NewRecordPreview extends ShadowlessElement {
               rgba(96, 70, 254, 0.3),
               rgba(96, 70, 254, 0.3)
             ),
-            linear-gradient(0deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.04)),
-            var(--affine-icon-color);
-          /* light/floatButtonShadow */
+            linear-gradient(
+              0deg,
+              var(--affine-hover-color),
+              var(--affine-hover-color)
+            ),
+            var(--affine-white);
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-            0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
+            0px 0px 0px 0.5px var(--affine-black-10);
           cursor: none;
           user-select: none;
           pointer-events: none;
           caret-color: transparent;
           z-index: 100;
         }
-        .affine-database-new-record-preview {
-        }
         affine-database-new-record-preview svg {
           width: 16px;
           height: 16px;
-          color: var(--affine-primary-color);
+        }
+        affine-database-new-record-preview path {
+          fill: var(--affine-brand-color);
         }
       </style>
       ${PlusIcon}
@@ -137,7 +140,6 @@ export function initAddNewRecordHandlers(
   const onDragEnd = () => {
     if (!dragConfig) return;
     const { index } = dragConfig;
-
     // clear data
     dragConfig = null;
     if (indicator) indicator.rect = null;
@@ -145,7 +147,6 @@ export function initAddNewRecordHandlers(
       dragPreview.remove();
       dragPreview = null;
     }
-
     if (index !== -1) {
       addRow(index);
     }

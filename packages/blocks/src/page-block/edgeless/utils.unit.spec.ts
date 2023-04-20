@@ -30,7 +30,7 @@ describe('page-block edgeless utils', () => {
     const ret = getAttachedPoint(10, 50, rect);
     expect(ret).toMatchObject({
       point: { x: 10, y: 60 },
-      position: { x: 0, y: 0.4 },
+      position: { x: 0, y: 0.5 },
     });
   });
 

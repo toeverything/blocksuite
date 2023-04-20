@@ -30,9 +30,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _handlers: {
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
+    // corresponding to native input event and used to take over default behavior in virgo
     virgoInput?: (
       ctx: VHandlerContext<TextAttributes, InputEvent>
     ) => VHandlerContext<TextAttributes, InputEvent>;
+    // corresponding to native compositionend event and used to take over default behavior in virgo
     virgoCompositionEnd?: (
       ctx: VHandlerContext<TextAttributes, CompositionEvent>
     ) => VHandlerContext<TextAttributes, CompositionEvent>;

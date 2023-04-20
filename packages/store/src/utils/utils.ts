@@ -15,7 +15,8 @@ import type {
   YBlocks,
 } from '../workspace/page.js';
 import type { Page } from '../workspace/page.js';
-import { createYArrayProxy, createYMapProxy, obj2YMap } from '../yjs/index.js';
+import { createYProxy, isPureObject } from '../yjs/index.js';
+import { native2Y } from '../yjs/utils.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -70,10 +71,8 @@ export function syncBlockProps(
     }
 
     if (value !== undefined) {
-      if (Array.isArray(value)) {
-        yBlock.set(`prop:${key}`, Y.Array.from(value));
-      } else if (typeof value === 'object') {
-        yBlock.set(`prop:${key}`, obj2YMap(value));
+      if (Array.isArray(value) || isPureObject(value)) {
+        yBlock.set(`prop:${key}`, native2Y(value, true));
       } else {
         yBlock.set(`prop:${key}`, value);
       }
@@ -85,10 +84,8 @@ export function syncBlockProps(
     if (!yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined) {
       if (value instanceof Text) {
         yBlock.set(`prop:${key}`, new Y.Text());
-      } else if (Array.isArray(value)) {
-        yBlock.set(`prop:${key}`, Y.Array.from(value));
-      } else if (typeof value === 'object') {
-        yBlock.set(`prop:${key}`, obj2YMap(value));
+      } else if (Array.isArray(value) || isPureObject(value)) {
+        yBlock.set(`prop:${key}`, native2Y(value, true));
       } else {
         yBlock.set(`prop:${key}`, value);
       }
@@ -111,13 +108,15 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     const key = prefixedKey.replace('prop:', '');
     const realValue = yBlock.get(prefixedKey);
     if (realValue instanceof Y.Map) {
-      const obj = createYMapProxy(realValue, {
+      const value = createYProxy(realValue, {
         deep: true,
       });
-      props[key] = obj;
+      props[key] = value;
     } else if (realValue instanceof Y.Array) {
-      const arr = createYArrayProxy(realValue);
-      props[key] = arr;
+      const value = createYProxy(realValue, {
+        deep: true,
+      });
+      props[key] = value;
     } else {
       props[key] = prefixedProps[prefixedKey];
     }

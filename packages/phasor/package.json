@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "fractional-indexing": "^3.2.0",
-    "perfect-freehand": "^1.2.0"
+    "fractional-indexing": "^3.2.0"
   }
 }

@@ -34,7 +34,7 @@ export class AffineLink extends ShadowlessElement {
   private _isHovering = false;
 
   static override styles = css`
-    a {
+    affine-link > a {
       white-space: nowrap;
       word-break: break-word;
       color: var(--affine-link-color);
@@ -43,11 +43,11 @@ export class AffineLink extends ShadowlessElement {
       cursor: pointer;
     }
 
-    a:hover [data-virgo-text='true'] {
+    affine-link > a:hover [data-virgo-text='true'] {
       text-decoration: underline;
     }
 
-    a > v-text {
+    affine-link > a > v-text {
       white-space: break-spaces;
     }
   `;

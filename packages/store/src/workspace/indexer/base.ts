@@ -94,9 +94,11 @@ export class BlockIndexer {
       assertExists(page, `Failed to find page '${pageId}'`);
       const dispose = this._indexPage(pageId, page);
       if (disposeMap[pageId]) {
-        throw new Error(
-          `Unexpected dispose fn! ${pageId} maybe already observed`
+        console.warn(
+          `Duplicated pageAdded event! ${pageId} already observed`,
+          disposeMap
         );
+        return;
       }
       disposeMap[pageId] = dispose;
     });

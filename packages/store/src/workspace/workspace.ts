@@ -3,15 +3,11 @@ import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import type { AwarenessStore } from '../awareness.js';
-import { BlobUploadState } from '../awareness.js';
 import type { BlockSchemaType } from '../base.js';
 import { BlockSchema } from '../base.js';
-import type { BlobStorage } from '../persistence/blob/index.js';
-import {
-  type BlobOptionsGetter,
-  BlobSyncState,
-  getBlobStorage,
-} from '../persistence/blob/index.js';
+import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
+import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
+import { sha } from '../persistence/blob/utils.js';
 import {
   type InlineSuggestionProvider,
   Store,
@@ -19,6 +15,7 @@ import {
 } from '../store.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
+import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
@@ -31,9 +28,8 @@ export class Workspace {
   static Y = Y;
 
   private _store: Store;
-  private readonly _blobStorage: Promise<BlobStorage | null>;
-  private _blobOptionsGetter?: BlobOptionsGetter = (k: string) =>
-    ({ api: '/api/workspace' }[k]);
+  private readonly _storages: BlobStorage[] = [];
+  private readonly _blobStorage: BlobManager;
 
   meta: WorkspaceMeta;
 
@@ -41,6 +37,9 @@ export class Workspace {
     pagesUpdated: new Slot(),
     pageAdded: new Slot<string>(),
     pageRemoved: new Slot<string>(),
+    // call this when a blob is updated, deleted or created
+    //  workspace will update re-fetch the blob and update the page
+    blobUpdate: new Slot<void>(),
   };
 
   indexer: {
@@ -58,28 +57,63 @@ export class Workspace {
   }: WorkspaceOptions) {
     this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
     this._store = new Store(storeOptions);
-    if (storeOptions.blobOptionsGetter) {
-      this._blobOptionsGetter = storeOptions.blobOptionsGetter;
-    }
 
-    if (!storeOptions.isSSR) {
-      this._blobStorage = getBlobStorage(storeOptions.id, k => {
-        return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
-      });
-      this._initBlobStorage();
-    } else {
-      // blob storage is not reachable in server side
-      this._blobStorage = Promise.resolve(null);
-    }
+    this._storages = (storeOptions.blobStorages ?? [createMemoryStorage]).map(
+      fn => fn(storeOptions.id)
+    );
+
+    this._blobStorage = {
+      get: async id => {
+        let found = false;
+        let count = 0;
+        return new Promise(res => {
+          this._storages.forEach(storage =>
+            storage.crud.get(id).then(result => {
+              if (result && !found) {
+                found = true;
+                res(result);
+              }
+              if (++count === this._storages.length && !found) {
+                res(null);
+              }
+            })
+          );
+        });
+      },
+      set: async value => {
+        const key = await sha(await value.arrayBuffer());
+        await Promise.all(this._storages.map(s => s.crud.set(key, value)));
+        return key;
+      },
+      delete: async key => {
+        await Promise.all(this._storages.map(s => s.crud.delete(key)));
+      },
+      list: async () => {
+        const keys = new Set<string>();
+        await Promise.all(
+          this._storages.map(async s => {
+            const list = await s.crud.list();
+            list.forEach(key => keys.add(key));
+          })
+        );
+        return Array.from(keys);
+      },
+    };
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
     this._bindPageMetaEvents();
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
+    const backlinkIndexer = new BacklinkIndexer(blockIndexer);
     this.indexer = {
       search: new SearchIndexer(this.doc),
-      backlink: new BacklinkIndexer(blockIndexer),
+      backlink: backlinkIndexer,
     };
+    backlinkIndexer.slots.indexUpdated.on(e => {
+      normalizeSubpage(e, this, backlinkIndexer);
+    });
+
+    // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
       // For potentially batch-added blocks, it's best to build index asynchronously
       queueMicrotask(() => this.indexer.search.onPageCreated(id));
@@ -160,30 +194,6 @@ export class Workspace {
     return this._pages.get(prefixedPageId) ?? null;
   }
 
-  private _initBlobStorage() {
-    this._blobStorage.then(blobStorage => {
-      blobStorage?.slots.onBlobSyncStateChange.on(state => {
-        const blobId = state.id;
-        const syncState = state.state;
-        if (
-          syncState === BlobSyncState.Waiting ||
-          syncState === BlobSyncState.Syncing
-        ) {
-          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploading);
-          return;
-        }
-
-        if (
-          syncState === BlobSyncState.Success ||
-          syncState === BlobSyncState.Failed
-        ) {
-          this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploaded);
-          return;
-        }
-      });
-    });
-  }
-
   private _bindPageMetaEvents() {
     this.meta.pageMetaAdded.on(pageId => {
       const page = new Page({
@@ -203,7 +213,6 @@ export class Workspace {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
       this.slots.pageRemoved.emit(id);
-      // TODO remove page from indexer
     });
   }
 
@@ -292,10 +301,6 @@ export class Workspace {
 
   search(query: QueryContent) {
     return this.indexer.search.search(query);
-  }
-
-  setGettingBlobOptions(blobOptionsGetter: BlobOptionsGetter) {
-    this._blobOptionsGetter = blobOptionsGetter;
   }
 
   /**

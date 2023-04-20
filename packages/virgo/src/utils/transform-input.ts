@@ -57,13 +57,13 @@ function handleDelete(vRange: VRange, editor: VEditor) {
     }
 
     if (vRange.index > 0) {
-      // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-      const tmpString = editor.yText.toString().slice(0, vRange.index);
-      const deletedCharacter = [...tmpString].slice(-1).join('');
+      const originalString = editor.yText.toString().slice(0, vRange.index);
+      const segments = [...new Intl.Segmenter().segment(originalString)];
+      const deletedLength = segments[segments.length - 1].segment.length;
       editor.slots.updated.once(() => {
         editor.slots.vRangeUpdated.emit([
           {
-            index: vRange.index - deletedCharacter.length,
+            index: vRange.index - deletedLength,
             length: 0,
           },
           'input',
@@ -71,8 +71,8 @@ function handleDelete(vRange: VRange, editor: VEditor) {
       });
 
       editor.deleteText({
-        index: vRange.index - deletedCharacter.length,
-        length: deletedCharacter.length,
+        index: vRange.index - deletedLength,
+        length: deletedLength,
       });
     }
   }

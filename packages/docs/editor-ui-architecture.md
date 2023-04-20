@@ -1,4 +1,4 @@
-# Framework UI Patterns
+# Editor UI Architecture
 
 In the previous sections of the documentation, we primarily introduced the concept of the data layer in BlockSuite. To serve the AFFiNE knowledge base, the BlockSuite project has built the `@blocksuite/editor` package around the data layer. The `EditorContainer` provided by this package can be used as long as it is connected to the `page` instance.
 

@@ -4,8 +4,6 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
-import { getFileFromClipboard } from '../clipboard/utils.js';
-import { getServiceOrRegister } from '../service.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
@@ -80,6 +78,7 @@ export class ContentParser {
     return this._convertHtml2Blocks(htmlEl);
   }
   async file2Blocks(clipboardData: DataTransfer) {
+    const { getFileFromClipboard } = await import('../clipboard/utils.js');
     const file = getFileFromClipboard(clipboardData);
     if (file) {
       if (file.type.includes('image')) {
@@ -157,6 +156,7 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
@@ -206,7 +206,7 @@ export class ContentParser {
       );
       childText && children.push(childText);
     }
-
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2html(model, {
@@ -230,6 +230,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2Text(model, {

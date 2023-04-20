@@ -78,8 +78,8 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor() {
-    super();
+  private get readonly() {
+    return this.databaseModel.page.readonly;
   }
 
   private _handleClick() {
@@ -101,6 +101,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
     });
+    this.vEditor.setReadonly(this.readonly);
     if (focus) {
       this.vEditor.focusEnd();
     }
@@ -176,8 +177,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
       const page = this.databaseModel.page;
       page.captureSync();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const text = new Text(this.cell.value as any);
+      const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
         index: vRange.index + 1,
@@ -189,13 +189,13 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   override update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (this.cell && !this.vEditor) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.vEditor = new VEditor(this.cell.value as any);
+      this.vEditor = new VEditor(this.cell.value as string);
       setupVirgoScroll(this.databaseModel.page, this.vEditor);
       this.vEditor.mount(this._container);
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
       });
+      this.vEditor.setReadonly(this.readonly);
     } else if (!this.cell && this.vEditor) {
       this.vEditor.unmount();
       this.vEditor = null;
@@ -208,10 +208,10 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   }
 
   override disconnectedCallback() {
+    super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
     this.vEditor?.unmount();
     this.vEditor = null;
-    super.disconnectedCallback();
   }
 
   override render() {

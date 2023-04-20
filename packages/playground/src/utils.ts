@@ -10,6 +10,7 @@ import * as globalUtils from '@blocksuite/global/utils';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
+  createIndexeddbStorage,
   DebugDocProvider,
   type DocProviderConstructor,
   Generator,
@@ -146,6 +147,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     id: room,
     providers,
     idGenerator,
+    blobStorages: [createIndexeddbStorage],
     defaultFlags: {
       enable_toggle_block: featureArgs.includes('toggle'),
       enable_set_remote_flag: true,

@@ -20,7 +20,8 @@ import {
   getRichTextByModel,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
-import { actionConfig, formatConfig } from '../../page-block/utils/const.js';
+import { actionConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   getCurrentCombinedFormat,
   onModelElementUpdated,

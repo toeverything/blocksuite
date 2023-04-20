@@ -1,4 +1,4 @@
-import { HOTKEYS } from '@blocksuite/global/config';
+import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
 
 import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
@@ -10,7 +10,6 @@ import {
   handleUp,
 } from '../utils/index.js';
 import { DEFAULT_SELECTED_COLOR } from './components/color-panel.js';
-import { FRAME_BACKGROUND_COLORS } from './components/component-toolbar/change-frame-button.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

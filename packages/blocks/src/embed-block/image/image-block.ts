@@ -2,7 +2,6 @@ import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -136,79 +135,46 @@ export class ImageBlockComponent extends ShadowlessElement {
   };
 
   @state()
-  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
-    'loading';
-
-  private waitImageUploaded() {
-    return new Promise<void>(resolve => {
-      // If we could not get message from awareness in 1000ms,
-      // we assume this image is not found.
-      const timer = setTimeout(resolve, 2000);
-
-      const isBlobUploadingOnInit =
-        this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
-
-      const disposeSlot = this.model.page.awarenessStore.slots.update.on(() => {
-        const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
-          this.model.sourceId
-        );
-
-        /**
-         * case:
-         * clientA send image, but network latency is high,
-         * clientB got ydoc, but doesn't get awareness,
-         * clientC has a good network, and send awareness because of cursor changed,
-         * clientB receives awareness change from clientC,
-         * this listener will be called,
-         * but clientB doesn't get uploading state from clientA.
-         */
-        if (
-          isBlobUploadingOnInit === isBlobUploading &&
-          isBlobUploading === false
-        ) {
-          return;
-        }
-
-        if (!isBlobUploading) {
-          clearTimeout(timer);
-          resolve();
-        }
-      });
-
-      this._imageReady.dispose = () => {
-        disposeSlot.dispose();
-        clearTimeout(timer);
-        resolve();
-      };
-    });
-  }
+  private _imageState: 'loading' | 'ready' | 'failed' = 'loading';
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    const storage = await this.model.page.blobs;
-    assertExists(storage);
 
     this._imageState = 'loading';
-    let url = await storage.get(this.model.sourceId);
-    if (!url) {
-      this._imageState = 'waitUploaded';
-      await this.waitImageUploaded();
-      this._imageState = 'loading';
-      url = await storage.get(this.model.sourceId);
-    }
-    if (url) {
-      this._source = url;
-      this._imageState = 'ready';
-    } else {
-      this._imageState = 'failed';
-    }
     if (width && height) {
       this.resizeImg.style.width = width + 'px';
       this.resizeImg.style.height = height + 'px';
     }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const storage = this.model.page.blobs;
+    storage
+      .get(this.model.sourceId)
+      .then(blob => {
+        if (blob) {
+          this._source = URL.createObjectURL(blob);
+          this._imageState = 'ready';
+        } else {
+          this._imageState = 'failed';
+        }
+      })
+      .catch(e => {
+        console.error('Failed to load image', e);
+        this._imageState = 'failed';
+      });
+  }
+
+  override disconnectedCallback() {
+    this._imageReady.dispose();
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
   }
 
   override render() {
@@ -251,11 +217,6 @@ export class ImageBlockComponent extends ShadowlessElement {
         </div>
       </affine-embed>
     `;
-  }
-
-  override disconnectedCallback() {
-    this._imageReady.dispose();
-    super.disconnectedCallback();
   }
 }
 

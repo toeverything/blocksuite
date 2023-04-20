@@ -3,7 +3,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
-import { toHex } from '../packages/blocks/src/__internal__/utils/std.js';
 import {
   activeFrameInEdgeless,
   addBasicConnectorElement,
@@ -18,6 +17,7 @@ import {
   getFrameBoundBoxInEdgeless,
   getFrameRect,
   increaseZoomLevel,
+  locatorComponentToolbar,
   locatorEdgelessComponentToolButton,
   locatorEdgelessToolButton,
   openComponentToolbarMoreMenu,
@@ -41,7 +41,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getCurrentThemeCSSPropertyValue,
   initEmptyEdgelessState,
   initThreeParagraphs,
   locatorPanButton,
@@ -350,7 +349,7 @@ test('add Text', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 448, 72]);
 });
 
-test.skip('add empty Text', async ({ page }) => {
+test('add empty Text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -366,14 +365,14 @@ test.skip('add empty Text', async ({ page }) => {
 
   // assert add text success
   await page.mouse.move(30, 40);
-  await assertEdgelessHoverRect(page, [0, 0, 448, 104]);
+  await assertEdgelessSelectedRect(page, [0, 0, 448, 104]);
 
   // click out of text
   await page.mouse.click(0, 200);
 
   // assert empty text is removed
   await page.mouse.move(30, 40);
-  await assertEdgelessNonHoverRect(page);
+  await assertEdgelessNonSelectedRect(page);
 });
 
 test('always keep at least 1 frame block', async ({ page }) => {
@@ -1381,4 +1380,35 @@ test('change shape stroke color', async ({ page }) => {
   ]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
+});
+
+test('when editing text in edgeless, should hide component toolbar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+
+  await selectFrameInEdgeless(page, ids.frameId);
+
+  const toolbar = locatorComponentToolbar(page);
+  await expect(toolbar).toBeVisible();
+
+  await page.mouse.click(0, 0);
+  await activeFrameInEdgeless(page, ids.frameId);
+  await expect(toolbar).toBeHidden();
+});
+
+test('double click blank space to add text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await page.mouse.dblclick(30, 140);
+  await waitNextFrame(page);
+  await type(page, 'hello');
+  await waitNextFrame(page);
+
+  await assertEdgelessSelectedRect(page, [0, 100, 448, 72]);
 });
