@@ -1,3 +1,4 @@
+import { BLOCK_CHILDREN_CONTAINER_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { IPoint, SelectionEvent } from '../../../__internal__/index.js';
@@ -48,7 +49,7 @@ export class EmbedResizeManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width <= 700 && width >= 50) {
+    if (width < BLOCK_CHILDREN_CONTAINER_WIDTH && width >= 50) {
       if (this._dragMoveTarget === 'right') {
         left =
           this._dropContainerSize.left -
