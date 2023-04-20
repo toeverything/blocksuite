@@ -281,8 +281,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@toeverything/y-indexeddb':
-        specifier: 0.5.4-canary.6
-        version: 0.5.4-canary.6(yjs@13.5.50)
+        specifier: 0.5.4-canary.7
+        version: 0.5.4-canary.7(yjs@13.5.50)
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
@@ -1425,8 +1425,8 @@ packages:
     resolution: {integrity: sha512-PiYD2zUOewNAtfJKU9tBZfyv3NeFlTlUe5LSGTTplvBcM0iuHrNVnd30+HIcUGJQhi3Uf0Ng9FRi/kPqm/q6ZA==}
     dev: false
 
-  /@toeverything/y-indexeddb@0.5.4-canary.6(yjs@13.5.50):
-    resolution: {integrity: sha512-u7Jl7rAVnJxm+cSoLZTY6Snoj3nS3xrpJsaehp6hwFbyMCNG2aoHb7iMlAN/0jexvS+Jbg0GVj+L2gozjfM5Kw==}
+  /@toeverything/y-indexeddb@0.5.4-canary.7(yjs@13.5.50):
+    resolution: {integrity: sha512-vPKzshX9MLBl+GvcmQj8kpGo8a5V0tLuHGWUu0ojwyqtzpOh5sElyIf3TYFK8mQhWQM4NoQkb7Fp49LSqrMgyQ==}
     peerDependencies:
       yjs: ^13.5.51
     dependencies:
