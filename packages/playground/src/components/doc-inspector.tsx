@@ -8,12 +8,11 @@ export async function createViewer(value: Record<string, unknown>) {
   const { createViewerHook } = await import('@rich-data/viewer');
   const { createJsonPlugins } = await import('@rich-data/json-plugin');
   const inspector = document.getElementById('inspector') as HTMLElement;
-  const { useViewer, Provider } = createViewerHook({
+  const { Viewer, Provider } = createViewerHook({
     plugins: createJsonPlugins(),
   });
   const root = createRoot(inspector);
   const App = () => {
-    const { Viewer } = useViewer();
     return <Viewer value={value} />;
   };
   root.render(
