@@ -47,7 +47,7 @@ export function normalizeSubpage(
   }
   // add block or update block
   if (!page) {
-    console.error(`Unable to normalize doc! Page ${pageId} found`);
+    console.error(`Unable to normalize doc! Page ${pageId} not found`);
     return;
   }
   const curPageMeta = pageMetas.find(meta => meta.id === pageId);

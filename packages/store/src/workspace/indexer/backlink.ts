@@ -22,7 +22,9 @@ type LinkedNode = {
 /**
  * Please sync type with {@link AffineTextAttributes} manually
  */
-type TextDelta = DeltaInsert<BaseTextAttributes & { reference: LinkedNode }>;
+type TextDelta = DeltaInsert<
+  BaseTextAttributes & { reference: Omit<LinkedNode, 'blockId'> }
+>;
 
 export type IndexUpdatedEvent =
   | {
@@ -78,6 +80,9 @@ export class BacklinkIndexer implements TextIndexer {
     );
   }
 
+  /**
+   * Get the list of backlinks for a given page
+   */
   public getBacklink(targetPageId: PageId) {
     // TODO add inverted index
     const backlinkList: {
@@ -97,16 +102,6 @@ export class BacklinkIndexer implements TextIndexer {
   }
 
   /**
-   * Returns all pages that have a subpage node to the given page.
-   *
-   * In most cases, there should be only one page. But it can not be guaranteed.
-   */
-  public getParentPageNodes(subpageId: PageId) {
-    const backlinks = this.getBacklink(subpageId);
-    return backlinks.filter(link => link.type === 'Subpage');
-  }
-
-  /**
    * Returns all subpage nodes in the given page.
    */
   public getSubpageNodes(pageId: PageId) {
@@ -123,7 +118,8 @@ export class BacklinkIndexer implements TextIndexer {
    * Delete the specified subpage nodes from the workspace.
    */
   public removeSubpageNode(workspace: Workspace, subpageId: PageId) {
-    const subpageNodes = this.getParentPageNodes(subpageId);
+    const backlinks = this.getBacklink(subpageId);
+    const subpageNodes = backlinks.filter(link => link.type === 'Subpage');
     if (subpageNodes.length > 1) {
       console.warn('Unexpected subpage node count', subpageId, subpageNodes);
     }
@@ -219,7 +215,7 @@ export class BacklinkIndexer implements TextIndexer {
     const links = deltas
       .filter(delta => delta.attributes && delta.attributes.reference)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      .map(delta => delta.attributes!.reference!);
+      .map(delta => ({ ...delta.attributes!.reference!, blockId }));
     if (
       !links.length &&
       (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId])
