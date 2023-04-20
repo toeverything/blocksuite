@@ -211,16 +211,10 @@ export class BacklinkIndexer implements TextIndexer {
     blockId: BlockId;
     deltas: TextDelta[];
   }) {
-    if (!deltas.length) return;
     const links = deltas
       .filter(delta => delta.attributes && delta.attributes.reference)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       .map(delta => ({ ...delta.attributes!.reference!, blockId }));
-    if (
-      !links.length &&
-      (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId])
-    )
-      return;
 
     const before = this._linkIndexMap[pageId]?.[blockId] ?? [];
     const diff = diffArray(before, links);

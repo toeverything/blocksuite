@@ -159,10 +159,16 @@ export class BlockIndexer {
         if (e.target !== e.currentTarget) {
           // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:frame'
           if (e.keysChanged.has('prop:text')) {
-            console.warn(
-              'Unexpected prop:text changed! Please update text indexer',
-              e
-            );
+            // update block text by `page.updateBlock(paragraph, { text: new page.Text() })` API
+            const blockId = e.path[0] as string;
+            const block = yPage.get(blockId);
+            assertExists(block);
+            this._indexBlock({
+              action: 'update',
+              pageId,
+              blockId,
+              block,
+            });
           }
           return;
         }
