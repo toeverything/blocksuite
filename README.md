@@ -50,7 +50,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [AFFiNE Alpha Editor](https://app.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/apps/web))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
-- 📄 [Documentation](https://block-suite.com/introduction.html)
+- 📄 [Documentation](https://blocksuite.affine.pro/introduction.html)
 - 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
@@ -60,7 +60,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 
 ## Getting Started
 
-To learn how to start using BlockSuite, visit [block-suite.com](https://block-suite.com/introduction.html).
+To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.html).
 
 ## Current Status (`@blocksuite/editor`)
 
