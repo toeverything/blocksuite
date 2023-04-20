@@ -16,5 +16,14 @@ export default defineConfig({
       reporter: ['lcov'],
       reportsDirectory: '../../.coverage/global',
     },
+    /**
+     * Custom handler for console.log in tests.
+     *
+     * Return `false` to ignore the log.
+     */
+    onConsoleLog(log, type) {
+      console.warn(`Unexpected ${type} log`, log);
+      throw new Error(log);
+    },
   },
 });
