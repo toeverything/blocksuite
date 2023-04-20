@@ -88,6 +88,16 @@ export class Workspace {
       delete: async key => {
         await Promise.all(this._storages.map(s => s.crud.delete(key)));
       },
+      list: async () => {
+        const keys = new Set<string>();
+        await Promise.all(
+          this._storages.map(async s => {
+            const list = await s.crud.list();
+            list.forEach(key => keys.add(key));
+          })
+        );
+        return Array.from(keys);
+      },
     };
 
     this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
