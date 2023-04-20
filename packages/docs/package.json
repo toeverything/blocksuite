@@ -16,7 +16,7 @@
     "preview": "vitepress preview"
   },
   "dependencies": {
-    "@algolia/client-search": "^4.15.0",
+    "@algolia/client-search": "^4.17.0",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*"

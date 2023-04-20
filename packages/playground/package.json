@@ -19,19 +19,19 @@
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@lit-labs/react": "^1.1.1",
-    "@rich-data/json-plugin": "^3.0.0-20230329005843-d296129",
-    "@rich-data/viewer": "^3.0.0-20230329005843-d296129",
+    "@rich-data/json-plugin": "3.0.0-20230404235326-387ed97",
+    "@rich-data/viewer": "3.0.0-20230404235326-387ed97",
     "@shoelace-style/shoelace": "2.0.0",
     "@toeverything/y-indexeddb": "0.5.4-canary.7",
     "browser-fs-access": "^0.32.1",
-    "lit": "^2.6.1",
+    "lit": "^2.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.5.50"
+    "yjs": "^13.5.53"
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@types/dat.gui": "^0.7.7",
+    "@types/dat.gui": "^0.7.9",
     "@types/micromatch": "^4.0.2",
     "dat.gui": "^0.7.9",
     "magic-string": "^0.29.0"
