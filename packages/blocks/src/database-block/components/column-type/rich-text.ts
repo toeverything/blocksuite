@@ -78,8 +78,8 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor() {
-    super();
+  private get readonly() {
+    return this.databaseModel.page.readonly;
   }
 
   private _handleClick() {
@@ -101,6 +101,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
     });
+    this.vEditor.setReadonly(this.readonly);
     if (focus) {
       this.vEditor.focusEnd();
     }
@@ -194,6 +195,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       this.vEditor.bindHandlers({
         keydown: this._handleKeyDown,
       });
+      this.vEditor.setReadonly(this.readonly);
     } else if (!this.cell && this.vEditor) {
       this.vEditor.unmount();
       this.vEditor = null;
@@ -206,10 +208,10 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   }
 
   override disconnectedCallback() {
+    super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
     this.vEditor?.unmount();
     this.vEditor = null;
-    super.disconnectedCallback();
   }
 
   override render() {
