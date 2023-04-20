@@ -1,3 +1,5 @@
+import type { CssVariableName } from '@blocksuite/blocks';
+
 import { SHORT_KEY } from './index.js';
 
 export * from './consts/block-hub.js';
@@ -36,3 +38,12 @@ export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 export const BLOCK_CHILDREN_CONTAINER_WIDTH = 720 - 24 * 2;
 export const DRAG_HANDLE_OFFSET_LEFT = 1;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
+
+export const FRAME_BACKGROUND_COLORS: CssVariableName[] = [
+  '--affine-background-secondary-color',
+  '--affine-tag-yellow',
+  '--affine-tag-red',
+  '--affine-tag-green',
+  '--affine-tag-blue',
+  '--affine-tag-purple',
+];

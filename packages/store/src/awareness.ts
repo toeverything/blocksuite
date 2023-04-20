@@ -41,13 +41,6 @@ export type RawAwarenessState<
   flags: Flags;
   request?: Request<Flags>[];
   response?: Response[];
-  /**
-   * After insert a blob block with cloud sync,
-   * uploading will trigger automatically,
-   * blob id will add to this property,
-   * and will remove after finish.
-   */
-  blobUploading?: string[];
 };
 
 interface AwarenessEvent<
@@ -56,11 +49,6 @@ interface AwarenessEvent<
   id: number;
   type: 'add' | 'update' | 'remove';
   state?: RawAwarenessState<Flags>;
-}
-
-export enum BlobUploadState {
-  Uploading = 0,
-  Uploaded = 1,
 }
 
 export class AwarenessStore<
@@ -118,47 +106,6 @@ export class AwarenessStore<
     } else {
       return false;
     }
-  }
-
-  setBlobState(blobId: string, state: BlobUploadState) {
-    const uploading = [
-      ...(this.awareness.getLocalState()?.blobUploading ?? []),
-    ];
-
-    if (state === BlobUploadState.Uploading) {
-      if (!uploading.includes(blobId)) {
-        uploading.push(blobId);
-      }
-    } else if (state === BlobUploadState.Uploaded) {
-      const position = uploading.findIndex(id => id === blobId);
-      if (position > -1) {
-        uploading.splice(position, 1);
-      }
-    }
-
-    this.awareness.setLocalStateField('blobUploading', uploading);
-  }
-
-  getBlobState(blobId: string) {
-    // FIXME: if clientA and clientB both upload a same image,
-    // both clients could not show image correctly.
-    const found = [...this.awareness.getStates().entries()].find(
-      ([clientId, state]) => {
-        // assume local blob always exist, because we cache it in indexedDB
-        if (clientId === this.awareness.clientID) {
-          return;
-        }
-
-        const uploading: string[] = state?.blobUploading ?? [];
-        return uploading.includes(blobId);
-      }
-    );
-
-    return found ? BlobUploadState.Uploading : BlobUploadState.Uploaded;
-  }
-
-  isBlobUploading(blobId: string) {
-    return this.getBlobState(blobId) === BlobUploadState.Uploading;
   }
 
   setRemoteFlag<Key extends keyof Flags>(

@@ -6,7 +6,7 @@ import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
-} from '../../models.js';
+} from '../../services.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
