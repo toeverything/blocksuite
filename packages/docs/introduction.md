@@ -30,9 +30,9 @@ Also, thanks to the capability of CRDT to serialize any local state updates into
 - Incremental distribution of update data over the network, with updates being distributable via pluggable providers over different network protocol layers.
 - Serialization of the entire application state into standardized data formats, allowing for reading and writing with compatible [Rust implementations](https://github.com/y-crdt/y-crdt) outside the browser.
 
-The CRDT-based state management capabilities in BlockSuite are a prerequisite for building local-first applications, which leads to significant improvements in developer experience and user experience. To support the AFFiNE project, the accompanying [OctoBase](https://github.com/toeverything/OctoBase) project has been developed together with BlockSuite, providing underlying pluggable persistence and data synchronization support for local-first collaborative applications.
+The CRDT-based state management capabilities in BlockSuite are a prerequisite for building local-first applications, which leads to significant improvements in developer experience and user experience. To support the AFFiNE project, the accompanying [OctoBase](https://github.com/toeverything/OctoBase) project has been developed together with BlockSuite, providing underlying pluggable persistence and data synchronization support.
 
-By leveraging CRDT-driven state management, BlockSuite offers a powerful solution for handling complex content editing and the development of local-first application.
+By leveraging CRDT-driven state management, BlockSuite offers a powerful solution for handling complex structural content updates.
 
 ## Framework Agnostic Rendering
 
