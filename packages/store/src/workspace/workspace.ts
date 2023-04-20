@@ -19,6 +19,7 @@ import {
 } from '../store.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
+import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
@@ -76,10 +77,16 @@ export class Workspace {
     this._bindPageMetaEvents();
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
+    const backlinkIndexer = new BacklinkIndexer(blockIndexer);
     this.indexer = {
       search: new SearchIndexer(this.doc),
-      backlink: new BacklinkIndexer(blockIndexer),
+      backlink: backlinkIndexer,
     };
+    backlinkIndexer.slots.indexUpdated.on(e => {
+      normalizeSubpage(e, this, backlinkIndexer);
+    });
+
+    // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
       // For potentially batch-added blocks, it's best to build index asynchronously
       queueMicrotask(() => this.indexer.search.onPageCreated(id));
@@ -203,7 +210,6 @@ export class Workspace {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
       this.slots.pageRemoved.emit(id);
-      // TODO remove page from indexer
     });
   }
 
