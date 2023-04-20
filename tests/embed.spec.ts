@@ -115,28 +115,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
   );
 });
 
-const mockImageId = '_e2e_test_image_id_';
-
-async function initMockImage(page: Page) {
-  await page.evaluate(() => {
-    const { page } = window;
-    page.captureSync();
-    const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    page.addBlock(
-      'affine:embed',
-      {
-        type: 'image',
-        sourceId: '_e2e_test_image_id_',
-        width: 200,
-        height: 180,
-      },
-      frameId
-    );
-    page.captureSync();
-  });
-}
-
 test('popup menu should follow position of image when scrolling', async ({
   page,
 }) => {
