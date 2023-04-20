@@ -7,7 +7,7 @@ import type { BacklinkIndexer, IndexUpdatedEvent } from './backlink.js';
  * Check if the page has been deleted,
  * then remove the pageId from the subpageIds
  */
-export function reviseSubpage(
+export function normalizeSubpage(
   { action, pageId, blockId }: IndexUpdatedEvent,
   workspace: Workspace,
   backlinkIndexer: BacklinkIndexer
@@ -31,7 +31,7 @@ export function reviseSubpage(
   }
   const page = workspace.getPage(pageId);
   if (!page) {
-    console.warn('Failed to revise doc! Page not found', pageId);
+    console.warn(`Unable to normalize doc! Page ${pageId} found`);
     return;
   }
   const pageMetas = workspace.meta.pageMetas;
