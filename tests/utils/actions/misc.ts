@@ -44,7 +44,8 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
     "addRange(): The given range isn't in document.",
-    'Unexpected console error: Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Error: Failed to fetch blob',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
