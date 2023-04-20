@@ -24,7 +24,7 @@ export const createIndexeddbStorage = (database: string): BlobStorage => {
       set: async (key: string, value: Blob) => {
         const set = (await idbPromise).set;
         const db = await dbPromise;
-        await set(key, value.arrayBuffer(), db);
+        await set(key, await value.arrayBuffer(), db);
         return key;
       },
       delete: async (key: string) => {
