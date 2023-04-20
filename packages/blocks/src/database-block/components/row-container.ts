@@ -50,7 +50,6 @@ export function DataBaseRowContainer(
         align-items: center;
         min-height: 44px;
         padding: 0 8px;
-        border-right: 1px solid var(--affine-border-color);
         transform: translateX(0);
       }
       .affine-database-block-row-cell-content > affine-paragraph > .text {
@@ -58,6 +57,7 @@ export function DataBaseRowContainer(
       }
       .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+        border-right: 1px solid var(--affine-border-color);
       }
       .database-cell:last-child affine-database-cell-container {
         border-right: none;
