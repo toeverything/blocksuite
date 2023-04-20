@@ -8,7 +8,7 @@ export interface OptionalAttributes {
   };
 }
 export type DeltaOperation = {
-  insert?: any;
+  insert?: string;
   delete?: number;
   retain?: number;
 } & OptionalAttributes;
