@@ -81,10 +81,8 @@ export class Workspace {
       },
       set: async value => {
         const key = await sha(await value.arrayBuffer());
-        const [id] = await Promise.all(
-          this._storages.map(s => s.crud.set(key, value))
-        );
-        return id;
+        await Promise.all(this._storages.map(s => s.crud.set(key, value)));
+        return key;
       },
       delete: async key => {
         await Promise.all(this._storages.map(s => s.crud.delete(key)));
