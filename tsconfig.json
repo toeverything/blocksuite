@@ -67,5 +67,9 @@
     {
       "path": "./tests"
     }
-  ]
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
 }
