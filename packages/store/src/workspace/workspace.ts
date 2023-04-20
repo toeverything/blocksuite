@@ -124,10 +124,6 @@ export class Workspace {
     return this._store.id;
   }
 
-  get connected(): boolean {
-    return this._store.connected;
-  }
-
   get isEmpty() {
     if (this.doc.store.clients.size === 0) return true;
 
@@ -140,14 +136,6 @@ export class Workspace {
     }
     return flag;
   }
-
-  connect = () => {
-    this._store.connect();
-  };
-
-  disconnect = () => {
-    this._store.disconnect();
-  };
 
   get awarenessStore(): AwarenessStore {
     return this._store.awarenessStore;
