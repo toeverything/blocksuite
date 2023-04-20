@@ -1,4 +1,3 @@
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { type EditorProps, useBlockSuiteStore } from '@blocksuite/react';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import dynamic from 'next/dynamic';
@@ -98,6 +97,9 @@ export const PageManger = () => {
         <Editor
           page={() => currentPage}
           onInit={async (page, editor) => {
+            const { ContentParser } = await import(
+              '@blocksuite/blocks/content-parser'
+            );
             const pageBlockId = page.addBlock('affine:page', {
               title: new page.Text('Welcome to BlockSuite React example'),
             });
