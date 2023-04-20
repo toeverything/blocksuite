@@ -247,6 +247,7 @@ test('import markdown', async ({ page }) => {
 `;
   await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, frameId, clipData);
+  await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);
@@ -266,6 +267,7 @@ test('copy clipItems format', async ({ page }) => {
 `;
 
   await importMarkdown(page, frameId, clipData);
+  await page.waitForTimeout(100);
   await setSelection(page, 4, 1, 5, 1);
   await assertClipItems(page, 'text/plain', 'bc');
   await assertClipItems(
