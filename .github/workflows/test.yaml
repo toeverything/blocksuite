@@ -9,7 +9,6 @@ on:
       - '.vscode'
       - '**.md'
       - 'scripts/**'
-      - 'packages/react/examples/**'
       - 'packages/docs/**'
   pull_request:
     branches:
