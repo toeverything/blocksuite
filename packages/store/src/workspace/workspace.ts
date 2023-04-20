@@ -68,7 +68,8 @@ export class Workspace {
         );
         const answer = result.find(
           (result): result is PromiseFulfilledResult<Blob | null> =>
-            result.status === 'fulfilled'
+            // find the first storage that has the blob
+            result.status === 'fulfilled' && !!result.value
         );
         return answer?.value ?? null;
       },
