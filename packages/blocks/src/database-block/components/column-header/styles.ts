@@ -40,7 +40,6 @@ export const styles = css`
     width: 100%;
     height: 100%;
     padding: 8px;
-    border-right: 1px solid var(--affine-border-color);
   }
   .affine-database-column:last-child .affine-database-column-content {
     border-right: none;
