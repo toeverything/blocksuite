@@ -63,15 +63,21 @@ export class Workspace {
 
     this._blobStorage = {
       get: async id => {
-        const result = await Promise.allSettled(
-          this._storages.map(s => s.crud.get(id))
-        );
-        const answer = result.find(
-          (result): result is PromiseFulfilledResult<Blob | null> =>
-            // find the first storage that has the blob
-            result.status === 'fulfilled' && !!result.value
-        );
-        return answer?.value ?? null;
+        let found = false;
+        let count = 0;
+        return new Promise(res => {
+          this._storages.forEach(storage =>
+            storage.crud.get(id).then(result => {
+              if (result && !found) {
+                found = true;
+                res(result);
+              }
+              if (++count === this._storages.length && !found) {
+                res(null);
+              }
+            })
+          );
+        });
       },
       set: async value => {
         const key = await sha(await value.arrayBuffer());
