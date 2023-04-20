@@ -51,9 +51,6 @@
       "path": "./packages/store"
     },
     {
-      "path": "./packages/react"
-    },
-    {
       "path": "./packages/phasor"
     },
     {
