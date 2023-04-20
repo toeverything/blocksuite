@@ -1,6 +1,7 @@
 // https://github.com/tldraw/tldraw/blob/31f0f02adf58b909f59764f62de09e97542eb2b1/packages/core/src/utils/utils.ts
 // Credits to tldraw
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { StrokePoint } from '../perfect-freehand/types.js';
 import { Vec } from './vec.js';
 
