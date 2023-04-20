@@ -26,9 +26,9 @@
     "@popperjs/core": "^2.11.7",
     "hotkeys-js": "^3.10.1",
     "lit": "^2.7.2",
-    "marked": "^4.3.0",
+    "marked": "=4.2.12",
     "shiki": "^0.14.1",
-    "turndown": "^7.1.2",
+    "turndown": "=7.1.1",
     "zod": "^3.21.4"
   },
   "exports": {
