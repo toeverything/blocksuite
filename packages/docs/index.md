@@ -20,8 +20,8 @@ hero:
 features:
   - title: 📝 Block-Based Editing
     details: BlockSuite breaks down rich content into discrete <code>contenteditable</code> blocks, avoiding pitfalls using traditional monolith rich text container.
-  - title: 🧬 CRDT-Driven State Management
-    details: By leveraging CRDT technology, BlockSuite supports zero-cost time travel, real-time collaboration, and pluggable persistence backends right out of the box.
-  - title: 🎨 Framework Agnostic Rendering
-    details: BlockSuite offers Web Components and hybrid canvas-based renderers, facilitating the creation of diverse collaborative applications.
+  - title: 🧬 Inherently Collaborative
+    details: By harnessing the power of CRDT, any application built with BlockSuite effortlessly supports real-time collaboration right from the start.
+  - title: 🔌 Pluggable Persistence
+    details: With its provider-based architecture, BlockSuite facilitates incremental state synchronization without explictly handling asynchronous requests.
 ---
