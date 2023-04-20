@@ -158,7 +158,8 @@ function getTextPointFromElementByOffset(
 function AInsideB(a: Node, b: Node): boolean {
   return (
     b.compareDocumentPosition(a) === Node.DOCUMENT_POSITION_CONTAINED_BY ||
-    b.compareDocumentPosition(a) === 20
+    b.compareDocumentPosition(a) ===
+      (Node.DOCUMENT_POSITION_CONTAINED_BY | Node.DOCUMENT_POSITION_FOLLOWING)
   );
 }
 
