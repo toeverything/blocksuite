@@ -1,5 +1,4 @@
 /// <reference types="@blocksuite/global" />
-/// <reference types="./env.d.ts" />
 
 export type { StrokeStyle } from './consts.js';
 export type {
