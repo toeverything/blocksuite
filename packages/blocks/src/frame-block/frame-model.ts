@@ -1,7 +1,6 @@
+import { FRAME_BACKGROUND_COLORS } from '@blocksuite/global/config';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-
-import { FRAME_BACKGROUND_COLORS } from '../page-block/edgeless/components/component-toolbar/change-frame-button.js';
 
 export const FrameBlockSchema = defineBlockSchema({
   flavour: 'affine:frame',
