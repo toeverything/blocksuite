@@ -1,5 +1,6 @@
 import '../../../components/drag-handle.js';
 
+import { BLOCK_CHILDREN_CONTAINER_WIDTH } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -366,7 +367,7 @@ export class DefaultSelectionManager {
       if (model.type === 'image') {
         const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
-        const isLarge = rect.width > 680;
+        const isLarge = rect.width > BLOCK_CHILDREN_CONTAINER_WIDTH;
         tempRect.right += isLarge ? 0 : 60;
 
         if (tempRect.isPointIn(point)) {
@@ -575,7 +576,7 @@ export class DefaultSelectionManager {
     }
   }
 
-  selectOneBlock(element: Element | null | undefined, rect?: DOMRect) {
+  selectOneBlock(element?: Element | null, rect?: DOMRect) {
     // clear selection first
     this.clear();
     // rich-text should be unfocused
