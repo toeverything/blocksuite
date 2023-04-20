@@ -48,7 +48,6 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init) ([🔗 source](./packages/playground/src/main.ts))
   - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
   - [AFFiNE Alpha Editor](https://app.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/apps/web))
-  - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 - 📄 [Documentation](https://block-suite.com/introduction.html)
@@ -97,7 +96,6 @@ To learn how to start using BlockSuite, visit [block-suite.com](https://block-su
   - ✅ Block tree update API
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
-  - ✅ React hooks integration
   - 🚧 Dynamic component registration
   - 📌 Dynamic block registration
 
