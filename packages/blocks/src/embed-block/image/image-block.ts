@@ -142,25 +142,39 @@ export class ImageBlockComponent extends ShadowlessElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    const storage = this.model.page.blobs;
 
     this._imageState = 'loading';
-    try {
-      const blob = await storage.get(this.model.sourceId);
-      if (blob) {
-        this._source = URL.createObjectURL(blob);
-        this._imageState = 'ready';
-      } else {
-        this._imageState = 'failed';
-      }
-    } catch (e) {
-      console.error('Failed to load image', e);
-      this._imageState = 'failed';
-    }
     if (width && height) {
       this.resizeImg.style.width = width + 'px';
       this.resizeImg.style.height = height + 'px';
     }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const storage = this.model.page.blobs;
+    storage
+      .get(this.model.sourceId)
+      .then(blob => {
+        if (blob) {
+          this._source = URL.createObjectURL(blob);
+          this._imageState = 'ready';
+        } else {
+          this._imageState = 'failed';
+        }
+      })
+      .catch(e => {
+        console.error('Failed to load image', e);
+        this._imageState = 'failed';
+      });
+  }
+
+  override disconnectedCallback() {
+    this._imageReady.dispose();
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
   }
 
   override render() {
@@ -203,11 +217,6 @@ export class ImageBlockComponent extends ShadowlessElement {
         </div>
       </affine-embed>
     `;
-  }
-
-  override disconnectedCallback() {
-    this._imageReady.dispose();
-    super.disconnectedCallback();
   }
 }
 
