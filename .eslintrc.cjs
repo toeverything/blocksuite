@@ -55,8 +55,6 @@ module.exports = {
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
     'packages/global/dist/*',
-    'packages/react/dist/*',
-    'packages/react/examples/next/.next/*',
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',

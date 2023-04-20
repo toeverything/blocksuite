@@ -97,7 +97,6 @@ To learn how to start using BlockSuite, visit [block-suite.com](https://block-su
   - ✅ Block tree update API
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
-  - ✅ React hooks integration
   - 🚧 Dynamic component registration
   - 📌 Dynamic block registration
 

@@ -19,7 +19,6 @@ on:
       - '.vscode'
       - '**.md'
       - 'scripts/**'
-      - 'packages/react/examples/**'
       - 'packages/docs/**'
 
 jobs:
