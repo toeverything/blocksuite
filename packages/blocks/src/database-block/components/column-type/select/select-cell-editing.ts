@@ -26,7 +26,7 @@ import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const styles = css`
-  :host {
+  affine-database-select-cell-editing {
     z-index: 2;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);

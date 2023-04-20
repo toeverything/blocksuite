@@ -40,6 +40,7 @@ export const styles = css`
     width: 100%;
     height: 100%;
     padding: 8px;
+    border-right: 1px solid var(--affine-border-color);
   }
   .affine-database-column:last-child .affine-database-column-content {
     border-right: none;
@@ -81,6 +82,8 @@ export const styles = css`
     display: flex;
     align-items: center;
     gap: 4px;
+    /* https://stackoverflow.com/a/36247448/15443637 */
+    overflow: hidden;
     color: var(--affine-text-secondary-color);
     font-size: 14px;
     font-weight: 600;
@@ -114,6 +117,7 @@ export const styles = css`
     display: flex;
     align-items: center;
     margin-right: 6px;
+    overflow: hidden;
   }
   .affine-database-column-content:hover .affine-database-column-text-icon {
     opacity: 1;

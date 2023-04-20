@@ -26,7 +26,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   @query('.affine-database-number')
   private _container!: HTMLDivElement;
 
-  private _vEditor: AffineVEditor | null = null;
+  private vEditor: AffineVEditor | null = null;
 
   protected override firstUpdated() {
     this._onInitVEditor();
@@ -56,12 +56,12 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       return regex.test(str);
     };
 
-    this._vEditor = new VEditor(value);
-    setupVirgoScroll(this.databaseModel.page, this._vEditor);
-    this._vEditor.mount(this._container);
-    this._vEditor.bindHandlers({
+    this.vEditor = new VEditor(value);
+    setupVirgoScroll(this.databaseModel.page, this.vEditor);
+    this.vEditor.mount(this._container);
+    this.vEditor.bindHandlers({
       paste: (event: ClipboardEvent) => {
-        const vEditor = this._vEditor;
+        const vEditor = this.vEditor;
         assertExists(vEditor);
         const data = event.clipboardData?.getData('text/plain');
         if (data) {
@@ -88,12 +88,26 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
         }
         return ctx;
       },
+      keydown: event => {
+        if (!this.vEditor) return;
+        if (event.key === 'Enter') {
+          if (event.shiftKey) {
+            // soft enter
+          } else {
+            // exit editing
+            this.rowHost.setEditing(false);
+            this._container.blur();
+          }
+          event.preventDefault();
+          return;
+        }
+      },
     });
-    this._vEditor.focusEnd();
+    this.vEditor.focusEnd();
   };
 
   protected override render() {
-    return html`<div class="affine-database-number"></div>`;
+    return html`<div class="affine-database-number number"></div>`;
   }
 }
 
