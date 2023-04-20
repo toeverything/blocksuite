@@ -45,10 +45,10 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage(pageId = defaultPageId, parentId?: string) {
+function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage(pageId, parentId);
+  return workspace.createPage(pageId);
 }
 
 describe('basic', () => {
@@ -83,12 +83,23 @@ describe('basic', () => {
 });
 
 describe('pageMeta', () => {
-  it('can create subpage', () => {
+  it('can create subpage', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
     const parentPage = workspace.createPage(defaultPageId);
-    const subpage = workspace.createPage('subpage0', parentPage.id);
+    const subpage = workspace.createPage('subpage0');
+    parentPage.addBlock('affine:page');
+    parentPage.addBlock('affine:paragraph', {
+      text: parentPage.Text.fromDelta([
+        {
+          insert: ' ',
+          attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
+        },
+      ]),
+    });
+    // wait for the backlink index to be updated
+    await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 
