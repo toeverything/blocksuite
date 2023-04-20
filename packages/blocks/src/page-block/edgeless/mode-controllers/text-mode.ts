@@ -2,12 +2,8 @@ import type {
   SelectionEvent,
   TextMouseMode,
 } from '../../../__internal__/index.js';
-import {
-  handleNativeRangeAtPoint,
-  noop,
-  Point,
-} from '../../../__internal__/index.js';
-import { DEFAULT_FRAME_WIDTH } from '../utils.js';
+import { noop } from '../../../__internal__/index.js';
+import { addText, DEFAULT_FRAME_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class TextModeController extends MouseModeController<TextMouseMode> {
@@ -18,31 +14,7 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   private _dragStartEvent: SelectionEvent | null = null;
 
   private _addText(e: SelectionEvent, width = DEFAULT_FRAME_WIDTH) {
-    const frameId = this._edgeless.addFrameWithPoint(
-      new Point(e.x, e.y),
-      width
-    );
-    this._page.addBlock('affine:paragraph', {}, frameId);
-    this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
-
-    // Wait for mouseMode updated
-    requestAnimationFrame(() => {
-      const element = this._blocks.find(b => b.id === frameId);
-      if (element) {
-        const selectionState = {
-          selected: [element],
-          active: true,
-        };
-        this._edgeless.slots.selectionUpdated.emit(selectionState);
-
-        // Waiting dom updated, `frame mask` is removed
-        this._edgeless.updateComplete.then(() => {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
-        });
-      }
-    });
+    addText(this._edgeless, this._page, e, width);
   }
 
   onContainerClick(e: SelectionEvent): void {

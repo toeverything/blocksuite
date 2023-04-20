@@ -13,6 +13,7 @@ import {
   getCurrentEditorTheme,
   getCurrentHTMLTheme,
   initEmptyParagraphState,
+  pressArrowLeft,
   pressBackspace,
   pressEnter,
   redoByClick,
@@ -385,4 +386,20 @@ test('should be able to delete an emoji completely by pressing backspace once', 
   await pressBackspace(page);
   await pressBackspace(page);
   await assertText(page, '');
+});
+
+test('delete emoji in the middle of the text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1🌷1🙅‍♂️1🏳️‍🌈1👨‍👩‍👧‍👦1');
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await assertText(page, '11111');
 });

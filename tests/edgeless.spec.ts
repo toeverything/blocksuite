@@ -349,7 +349,7 @@ test('add Text', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 448, 72]);
 });
 
-test.skip('add empty Text', async ({ page }) => {
+test('add empty Text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -365,14 +365,14 @@ test.skip('add empty Text', async ({ page }) => {
 
   // assert add text success
   await page.mouse.move(30, 40);
-  await assertEdgelessHoverRect(page, [0, 0, 448, 104]);
+  await assertEdgelessSelectedRect(page, [0, 0, 448, 104]);
 
   // click out of text
   await page.mouse.click(0, 200);
 
   // assert empty text is removed
   await page.mouse.move(30, 40);
-  await assertEdgelessNonHoverRect(page);
+  await assertEdgelessNonSelectedRect(page);
 });
 
 test('always keep at least 1 frame block', async ({ page }) => {
@@ -1398,4 +1398,17 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await page.mouse.click(0, 0);
   await activeFrameInEdgeless(page, ids.frameId);
   await expect(toolbar).toBeHidden();
+});
+
+test('double click blank space to add text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await page.mouse.dblclick(30, 140);
+  await waitNextFrame(page);
+  await type(page, 'hello');
+  await waitNextFrame(page);
+
+  await assertEdgelessSelectedRect(page, [0, 100, 448, 72]);
 });

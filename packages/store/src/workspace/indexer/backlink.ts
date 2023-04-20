@@ -1,4 +1,4 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { diffArray, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { BaseTextAttributes } from '@blocksuite/virgo/index';
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import { Text } from 'yjs';
@@ -13,14 +13,32 @@ type LinkedNode = { type: 'LinkedPage' | 'Subpage'; pageId: PageId };
  */
 type TextDelta = DeltaInsert<BaseTextAttributes & { reference: LinkedNode }>;
 
-export class BacklinkIndexer {
+export type IndexUpdatedEvent =
+  | {
+      action: 'delete';
+      pageId: PageId;
+      blockId?: BlockId;
+    }
+  | {
+      action: 'add' | 'update';
+      pageId: PageId;
+      blockId: BlockId;
+    };
+
+type TextIndexer = {
+  onPageRemoved: (pageId: PageId) => void;
+  onBlockUpdated: ({ action, pageId, block, blockId }: IndexBlockEvent) => void;
+  onRefreshIndex: () => void;
+};
+
+export class BacklinkIndexer implements TextIndexer {
   private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};
   private _disposables = new DisposableGroup();
   public slots = {
     /**
      * Note: sys:children update will not trigger event
      */
-    indexUpdated: new Slot<{ pageId: PageId; blockId?: BlockId }>(),
+    indexUpdated: new Slot<IndexUpdatedEvent>(),
   };
 
   constructor(blockIndexer: BlockIndexer) {
@@ -55,21 +73,43 @@ export class BacklinkIndexer {
     return backlinkList;
   }
 
-  // private _reviseDoc() {
-  // }
+  getParentPageNodes(subpageId: PageId) {
+    const backlinks = this.getBacklink(subpageId);
+    return backlinks.filter(
+      link => link.type === 'Subpage' && link.pageId === subpageId
+    );
+  }
 
+  getSubpageNodes(pageId: PageId) {
+    if (!(pageId in this._linkIndexMap)) {
+      return [];
+    }
+    return Object.values(this._linkIndexMap[pageId])
+      .flat()
+      .filter(link => link.type === 'Subpage');
+  }
+
+  /**
+   * @internal
+   */
   onRefreshIndex() {
     this._linkIndexMap = {};
   }
 
+  /**
+   * @internal
+   */
   onPageRemoved(pageId: PageId) {
     if (!this._linkIndexMap[pageId]) {
       return;
     }
     this._linkIndexMap[pageId] = {};
-    this.slots.indexUpdated.emit({ pageId });
+    this.slots.indexUpdated.emit({ action: 'delete', pageId });
   }
 
+  /**
+   * @internal
+   */
   onBlockUpdated({ action, pageId, block, blockId }: IndexBlockEvent) {
     switch (action) {
       case 'add':
@@ -82,7 +122,7 @@ export class BacklinkIndexer {
           return;
         }
         const deltas: TextDelta[] = text.toDelta();
-        this._indexDelta(pageId, blockId, deltas);
+        this._indexDelta({ action, pageId, blockId, deltas });
         return;
       }
       case 'delete': {
@@ -92,7 +132,17 @@ export class BacklinkIndexer {
     }
   }
 
-  private _indexDelta(pageId: PageId, blockId: BlockId, deltas: TextDelta[]) {
+  private _indexDelta({
+    action,
+    pageId,
+    blockId,
+    deltas,
+  }: {
+    action: IndexBlockEvent['action'];
+    pageId: PageId;
+    blockId: BlockId;
+    deltas: TextDelta[];
+  }) {
     if (!deltas.length) return;
     const links = deltas
       .filter(delta => delta.attributes && delta.attributes.reference)
@@ -104,22 +154,30 @@ export class BacklinkIndexer {
     )
       return;
 
+    const before = this._linkIndexMap[pageId]?.[blockId] ?? [];
+    const diff = diffArray(before, links);
+    if (!diff.changed) return;
+
     this._linkIndexMap[pageId] = {
       ...this._linkIndexMap[pageId],
       [blockId]: links,
     };
-    this.slots.indexUpdated.emit({ pageId, blockId });
+    this.slots.indexUpdated.emit({ action: action, pageId, blockId });
   }
 
   private _removeIndex(pageId: PageId, blockId: BlockId) {
     if (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId]) {
       return;
     }
-    this._linkIndexMap[pageId] = {
-      ...this._linkIndexMap[pageId],
-      [blockId]: [],
-    };
-    this.slots.indexUpdated.emit({ pageId, blockId });
+    const previousLink = this._linkIndexMap[pageId][blockId];
+    delete this._linkIndexMap[pageId][blockId];
+    if (previousLink.length) {
+      this.slots.indexUpdated.emit({
+        action: 'delete',
+        pageId,
+        blockId,
+      });
+    }
   }
 
   dispose() {
