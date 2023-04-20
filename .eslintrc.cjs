@@ -7,7 +7,6 @@ const allPackages = [
   'global',
   'phasor',
   'playground',
-  'react',
   'store',
   'virgo',
   'connector',
