@@ -31,7 +31,7 @@ const config: PlaywrightTestConfig = {
     // Timeout for each action
     actionTimeout: 5_000,
   },
-  workers: 4,
+  workers: '80%',
   retries: 1,
   // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
   // default 'list' when running locally
@@ -41,7 +41,6 @@ const config: PlaywrightTestConfig = {
 
 if (process.env.CI) {
   config.retries = 3;
-  config.workers = '80%';
 }
 
 export default config;

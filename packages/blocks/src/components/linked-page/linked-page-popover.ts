@@ -217,7 +217,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const pageName = this._query;
     const workspace = this._page.workspace;
     const id = workspace.idGenerator();
-    const page = this._page.workspace.createPage(id, this._page.id);
+    const page = this._page.workspace.createPage(id);
 
     initDefaultBlocks(page, pageName);
     this._insertLinkedNode('Subpage', page.id);

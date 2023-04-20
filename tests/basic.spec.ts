@@ -378,6 +378,10 @@ test('change theme', async ({ page }) => {
 test('should be able to delete an emoji completely by pressing backspace once', async ({
   page,
 }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -389,6 +393,10 @@ test('should be able to delete an emoji completely by pressing backspace once', 
 });
 
 test('delete emoji in the middle of the text', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

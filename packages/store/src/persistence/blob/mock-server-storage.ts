@@ -6,7 +6,7 @@ import type { BlobStorage } from './types.js';
  * PUT: set blob
  * DELETE: delete blob
  */
-export const createSimpleServerStorage = (id: string): BlobStorage => {
+export function createSimpleServerStorage(id: string): BlobStorage {
   const localCache = new Map<string, Blob>();
   return {
     crud: {
@@ -45,4 +45,4 @@ export const createSimpleServerStorage = (id: string): BlobStorage => {
       },
     },
   };
-};
+}
