@@ -34,6 +34,10 @@ export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
 
+export async function switchEditorEmbedMode(page: Page) {
+  await page.click('sl-button[content="Add container offset"]');
+}
+
 export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
@@ -418,4 +422,25 @@ export async function changeShapeStrokeColor(
     .locator('.color-panel-container.stroke-color')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
+}
+
+export async function resizeConnectorByStartCapitalHandler(
+  page: Page,
+  delta: { x: number; y: number },
+  steps = 1
+) {
+  const handler = page.locator(
+    '.affine-edgeless-selected-rect .line-controller.line-start'
+  );
+  const box = await handler.boundingBox();
+  if (box === null) throw new Error();
+  const offset = 5;
+  await dragBetweenCoords(
+    page,
+    { x: box.x + offset, y: box.y + offset },
+    { x: box.x + delta.x + offset, y: box.y + delta.y + offset },
+    {
+      steps,
+    }
+  );
 }

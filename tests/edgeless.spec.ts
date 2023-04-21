@@ -22,10 +22,12 @@ import {
   locatorEdgelessToolButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
+  resizeConnectorByStartCapitalHandler,
   selectBrushColor,
   selectBrushSize,
   selectFrameInEdgeless,
   setMouseMode,
+  switchEditorEmbedMode,
   switchEditorMode,
   triggerComponentToolbarAction,
   updateExistedBrushElementSize,
@@ -1315,6 +1317,47 @@ test('resize element which attaches connector', async ({ page }) => {
 
   await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
   await assertEdgelessHoverRect(page, [160, 200, 140, 100]);
+});
+
+test('resize connector by capital resize handler', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+
+  await resizeConnectorByStartCapitalHandler(page, { x: -20, y: -20 }, 10);
+  await assertEdgelessSelectedRect(page, [80, 80, 120, 120]);
+});
+
+test('resize connector by capital resize handler in embed mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await switchEditorEmbedMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+
+  await resizeConnectorByStartCapitalHandler(page, { x: -20, y: -20 }, 10);
+  await assertEdgelessSelectedRect(page, [80, 80, 120, 120]);
 });
 
 test('change frame color', async ({ page }) => {
