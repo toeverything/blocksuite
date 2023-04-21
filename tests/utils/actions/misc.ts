@@ -192,7 +192,7 @@ export async function waitNextFrame(
 export async function waitForPageReady(page: Page) {
   await page.evaluate(
     () =>
-      new Promise<void>((resolve, reject) => {
+      new Promise<void>(resolve => {
         window.addEventListener('blocksuite:page-ready', () => resolve(), {
           once: true,
         });
