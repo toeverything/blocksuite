@@ -272,14 +272,14 @@ export function SingleConnectorHandles(
       }
     </style>
     <div
-      class="line-controller"
+      class="line-controller line-start"
       style=${styleMap(start)}
       @mousedown=${(e: MouseEvent) => {
         capMousedown(e, surface, page, element, 'start', mode, requestUpdate);
       }}
     ></div>
     <div
-      class="line-controller"
+      class="line-controller line-end"
       style=${styleMap(end)}
       @mousedown=${(e: MouseEvent) => {
         capMousedown(e, surface, page, element, 'end', mode, requestUpdate);
