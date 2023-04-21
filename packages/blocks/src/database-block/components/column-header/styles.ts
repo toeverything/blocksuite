@@ -37,6 +37,7 @@ export const styles = css`
   .affine-database-column-content {
     display: flex;
     align-items: center;
+    gap: 6px;
     width: 100%;
     height: 100%;
     padding: 8px;
@@ -116,7 +117,6 @@ export const styles = css`
     flex: 1;
     display: flex;
     align-items: center;
-    margin-right: 6px;
     overflow: hidden;
   }
   .affine-database-column-content:hover .affine-database-column-text-icon {
