@@ -146,17 +146,6 @@ export class Store {
         })
     );
   }
-
-  connect = () => {
-    this.providers.forEach(provider => provider.connect?.());
-    this.connected = true;
-  };
-
-  disconnect = () => {
-    this.providers.forEach(provider => provider.disconnect?.());
-    this.connected = false;
-  };
-
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }

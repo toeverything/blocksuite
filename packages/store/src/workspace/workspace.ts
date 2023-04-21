@@ -124,10 +124,6 @@ export class Workspace {
     return this._store.id;
   }
 
-  get connected(): boolean {
-    return this._store.connected;
-  }
-
   get isEmpty() {
     if (this.doc.store.clients.size === 0) return true;
 
@@ -140,14 +136,6 @@ export class Workspace {
     }
     return flag;
   }
-
-  connect = () => {
-    this._store.connect();
-  };
-
-  disconnect = () => {
-    this._store.disconnect();
-  };
 
   get awarenessStore(): AwarenessStore {
     return this._store.awarenessStore;
@@ -216,12 +204,9 @@ export class Workspace {
     });
   }
 
-  createPage(pageId: string, parentId?: string) {
+  createPage(pageId: string) {
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
-    }
-    if (parentId && !this._hasPage(parentId)) {
-      throw new Error('parent page not found');
     }
 
     this.meta.addPageMeta({
@@ -230,30 +215,15 @@ export class Workspace {
       createDate: +new Date(),
       subpageIds: [],
     });
-
-    if (parentId) {
-      const parentPage = this.getPage(parentId) as Page;
-      const parentPageMeta = this.meta.getPageMeta(parentId);
-      assertExists(parentPageMeta);
-      // Compatibility process: the old data not has `subpageIds`, it should be an empty array
-      const subpageIds = [...(parentPageMeta.subpageIds ?? []), pageId];
-
-      this.setPageMeta(parentId, {
-        subpageIds,
-      });
-
-      parentPage.slots.subpageUpdated.emit({
-        type: 'add',
-        id: pageId,
-        subpageIds,
-      });
-    }
-
     return this.getPage(pageId) as Page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
-  setPageMeta(pageId: string, props: Partial<PageMeta>) {
+  setPageMeta(
+    pageId: string,
+    // You should not update subpageIds directly.
+    props: Partial<PageMeta & { subpageIds: never }>
+  ) {
     this.meta.setPageMeta(pageId, props);
   }
 
@@ -264,30 +234,18 @@ export class Workspace {
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
     assertExists(pageMeta);
-    const parentId = this.meta.pageMetas.find(meta =>
-      meta.subpageIds.includes(pageId)
-    )?.id;
 
-    if (pageMeta.subpageIds?.length) {
+    if (pageMeta.subpageIds.length) {
+      // remove subpages first
       pageMeta.subpageIds.forEach((subpageId: string) => {
+        if (subpageId === pageId) {
+          console.error(
+            'Unexpected subpage found when remove page! A page cannot be its own subpage',
+            pageMeta
+          );
+          return;
+        }
         this.removePage(subpageId);
-      });
-    }
-
-    if (parentId) {
-      const parentPageMeta = this.meta.getPageMeta(parentId);
-      assertExists(parentPageMeta);
-      const parentPage = this.getPage(parentId) as Page;
-      const subpageIds = parentPageMeta.subpageIds.filter(
-        (subpageId: string) => subpageId !== pageMeta.id
-      );
-      this.setPageMeta(parentPage.id, {
-        subpageIds,
-      });
-      parentPage.slots.subpageUpdated.emit({
-        type: 'delete',
-        id: pageId,
-        subpageIds,
       });
     }
 
@@ -295,6 +253,7 @@ export class Workspace {
     if (!page) return;
 
     page.dispose();
+    this.indexer.backlink.removeSubpageNode(this, pageId);
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
   }

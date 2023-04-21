@@ -19,10 +19,10 @@ import type {
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
-  getTextNodesFromElement,
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
+import { getTextNodesFromElement } from './utils/text.js';
 
 export interface VEditorOptions {
   // it is a option to determine default `_attributeRenderer`
