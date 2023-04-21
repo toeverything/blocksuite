@@ -45,6 +45,7 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
     'Error: Failed to fetch blob',
     'Error: Cannot find blob',
+    'Cannot find blob',
     //#endregion
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
