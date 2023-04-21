@@ -355,7 +355,7 @@ export class EdgelessPageBlockComponent
    * Adds a new frame with the given point on the editor-container.
    *
    * @param: point Point
-   * @returns: string
+   * @returns: The id of new frame
    */
   addFrameWithPoint(
     point: Point,
