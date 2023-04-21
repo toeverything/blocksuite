@@ -177,3 +177,11 @@ export async function fillLine(page: Page, toNext = false) {
     }
   }
 }
+
+export async function pressForwardDelete(page: Page) {
+  if (IS_MAC) {
+    await page.keyboard.press('Control+d', { delay: 50 });
+  } else {
+    await page.keyboard.press('Delete', { delay: 50 });
+  }
+}
