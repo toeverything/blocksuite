@@ -64,13 +64,20 @@ export class Workspace {
 
     this._blobStorage = {
       get: async id => {
+        let found = false;
+        let count = 0;
         return new Promise(res => {
           this._storages.forEach(storage =>
             storage.crud.get(id).then(result => {
-              result && res(result);
+              if (result && !found) {
+                found = true;
+                res(result);
+              }
+              if (++count === this._storages.length && !found) {
+                res(null);
+              }
             })
           );
-          res(null);
         });
       },
       set: async value => {
