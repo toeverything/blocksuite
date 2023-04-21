@@ -108,7 +108,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
+  await enterPlaygroundRoom(pageB, {}, room, true);
   await waitNextFrame(pageB);
 
   // wait until pageB content updated
@@ -129,7 +129,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
+  await enterPlaygroundRoom(pageB, {}, room, true);
   await waitNextFrame(pageB);
   await focusRichText(pageB);
 
