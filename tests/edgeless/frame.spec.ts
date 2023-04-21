@@ -6,6 +6,7 @@ import {
   getFrameBoundBoxInEdgeless,
   getFrameRect,
   locatorComponentToolbar,
+  locatorEdgelessToolButton,
   selectFrameInEdgeless,
   setMouseMode,
   switchEditorMode,
@@ -412,6 +413,18 @@ test('double click blank space to add text', async ({ page }) => {
   await waitNextFrame(page);
 
   await assertEdgelessSelectedRect(page, [0, 100, 448, 72]);
+});
+
+test('double click toolbar zoom button, should not add text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const zoomOutButton = locatorEdgelessToolButton(page, 'zoomOut', false);
+  await zoomOutButton.dblclick();
+  await assertEdgelessNonSelectedRect(page);
 });
 
 test('change frame color', async ({ page }) => {
