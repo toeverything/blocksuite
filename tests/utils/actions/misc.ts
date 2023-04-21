@@ -32,10 +32,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   const ignoredMessages = [
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
-    // embed.spec.ts
-    'Failed to load resource: the server responded with a status of 404 (Not Found)',
-    // embed.spec.ts
-    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
@@ -44,6 +40,13 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
     "addRange(): The given range isn't in document.",
+    //#region embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    'Error: Failed to fetch blob',
+    'Error: Cannot find blob',
+    'Cannot find blob',
+    //#endregion
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -122,6 +125,7 @@ export async function enterPlaygroundRoom(
   page: Page,
   flags?: Partial<BlockSuiteFlags>,
   room?: string,
+  blobStorage?: ('memory' | 'indexeddb' | 'mock')[],
   noInit?: boolean
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
@@ -129,6 +133,7 @@ export async function enterPlaygroundRoom(
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
