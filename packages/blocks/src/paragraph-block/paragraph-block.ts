@@ -62,6 +62,12 @@ function TipsPlaceholder(model: BaseBlockModel) {
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends ShadowlessElement {
   static override styles = css`
+    .affine-edgeless-block-child
+      .affine-block-element:first-child
+      .affine-paragraph-block-container.text {
+      margin-top: 0px;
+    }
+
     .affine-paragraph-block-container {
       position: relative;
       border-radius: 5px;
