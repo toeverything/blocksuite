@@ -145,8 +145,8 @@ export const database: InitFn = (workspace: Workspace) => {
   const databaseId = page.addBlock(
     'affine:database',
     {
-      // columns: [col1, col2, col3],
       columns: [],
+      cells: {},
       titleColumnName: 'Title',
       titleColumnWidth: 200,
     },

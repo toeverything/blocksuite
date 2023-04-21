@@ -45,7 +45,18 @@ export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
 }
 
 export function toPlainValue(v: unknown): unknown {
-  return v instanceof YMap || v instanceof YArray ? v.toJSON() : v;
+  if (v instanceof YMap) {
+    const obj: Record<string, unknown> = {};
+    v.forEach((value, key) => {
+      obj[key] = toPlainValue(value);
+    });
+
+    return obj;
+  }
+  if (v instanceof YArray) {
+    return v.toArray().map(x => toPlainValue(x));
+  }
+  return v;
 }
 
 export type UnRecord = Record<string, unknown>;
