@@ -190,14 +190,14 @@ export async function waitNextFrame(
 }
 
 export async function waitForPageReady(page: Page) {
-  await page.evaluate(() => {
-    return new Promise<void>((resolve, reject) => {
-      window.addEventListener('blocksuite:page-ready', () => resolve(), {
-        once: true,
-      });
-      setTimeout(() => reject(new Error('Timeout')), 5000);
-    });
-  });
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        window.addEventListener('blocksuite:page-ready', () => resolve(), {
+          once: true,
+        });
+      })
+  );
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {
