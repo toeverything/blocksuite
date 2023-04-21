@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
 import type { BlobStorage } from '@blocksuite/store';
+import type { DocProvider, Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
@@ -17,11 +18,12 @@ import {
   DebugDocProvider,
   type DocProviderConstructor,
   Generator,
-  IndexedDBDocProvider,
   Utils,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
+import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
@@ -30,9 +32,24 @@ const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
+class IndexedDBProviderWrapper implements DocProvider {
+  #provider: IndexedDBProvider;
+  constructor(id: string, doc: Y.Doc) {
+    this.#provider = createIndexedDBProvider(id, doc);
+  }
+  connect() {
+    this.#provider.connect();
+  }
+  disconnect() {
+    this.#provider.disconnect();
+  }
+}
+
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
-export const initParam = params.get('init');
+export const initParam = providerArgs.includes('indexeddb')
+  ? null
+  : params.get('init');
 export const isE2E = room.startsWith('playwright');
 
 declare global {
@@ -137,7 +154,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   }
 
   if (providerArgs.includes('indexeddb')) {
-    providers.push(IndexedDBDocProvider);
+    providers.push(IndexedDBProviderWrapper);
     idGenerator = Generator.UUIDv4; // works in production
   }
 
