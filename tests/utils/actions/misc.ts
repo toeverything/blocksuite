@@ -19,6 +19,12 @@ import {
   type,
 } from './keyboard.js';
 
+declare global {
+  interface WindowEventMap {
+    'blocksuite:page-ready': CustomEvent<string>;
+  }
+}
+
 export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -102,6 +108,9 @@ async function initEmptyEditor(
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
+        window.dispatchEvent(
+          new CustomEvent('blocksuite:page-ready', { detail: page.id })
+        );
       }
       if (noInit) {
         workspace.slots.pageAdded.on(pageId => {
@@ -178,6 +187,17 @@ export async function waitNextFrame(
   frameTimeout = NEXT_FRAME_TIMEOUT
 ) {
   await page.waitForTimeout(frameTimeout);
+}
+
+export async function waitForPageReady(page: Page) {
+  await page.evaluate(() => {
+    return new Promise<void>((resolve, reject) => {
+      window.addEventListener('blocksuite:page-ready', () => resolve(), {
+        once: true,
+      });
+      setTimeout(() => reject(new Error('Timeout')), 5000);
+    });
+  });
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {

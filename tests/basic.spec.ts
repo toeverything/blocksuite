@@ -25,6 +25,7 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
+  waitForPageReady,
   waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -91,7 +92,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room, undefined, true);
-  await waitNextFrame(pageB);
+  await waitForPageReady(pageB);
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
@@ -109,7 +110,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room, undefined, true);
-  await waitNextFrame(pageB);
+  await waitForPageReady(pageB);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -130,7 +131,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room, undefined, true);
-  await waitNextFrame(pageB);
+  await waitForPageReady(pageB);
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
