@@ -930,6 +930,9 @@ export function getDatabaseBlockRowsElement(element: Element) {
   return element.querySelector('.affine-database-block-rows');
 }
 
+/**
+ * Returns a flag for the drop target.
+ */
 export enum DropFlags {
   Normal,
   Database,
