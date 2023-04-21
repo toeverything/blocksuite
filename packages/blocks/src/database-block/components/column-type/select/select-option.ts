@@ -1,19 +1,17 @@
 import type { SelectTag } from '@blocksuite/global/database';
 import type { VEditor } from '@blocksuite/virgo';
-import { css, html, LitElement } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { ShadowlessElement } from '../../../../std.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
-export class SelectOption extends LitElement {
+export class SelectOption extends ShadowlessElement {
   static override styles = css`
-    :host * {
-      box-sizing: border-box;
-    }
     .select-option-text {
       display: inline-block;
       min-width: 2px;
@@ -24,6 +22,9 @@ export class SelectOption extends LitElement {
     }
     .select-option-text:focus {
       outline: none;
+    }
+
+    .select-option-text [data-virgo-text='true'] {
     }
   `;
 

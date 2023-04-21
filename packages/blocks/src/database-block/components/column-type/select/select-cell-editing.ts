@@ -97,6 +97,10 @@ const styles = css`
     background: var(--affine-selected-color);
   }
   .select-option-new-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     height: 28px;
     padding: 2px 10px;
     border-radius: 4px;
@@ -131,6 +135,7 @@ const styles = css`
   }
   .select-option-text-container {
     flex: 1;
+    overflow: hidden;
   }
   .select-option-text {
     display: none;
