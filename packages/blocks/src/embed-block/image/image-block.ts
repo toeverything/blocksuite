@@ -30,6 +30,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: center;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
+      overflow: hidden;
     }
     .affine-image-wrapper img {
       max-width: 100%;
