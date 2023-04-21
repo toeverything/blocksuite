@@ -28,8 +28,8 @@ export class AffineImageBlockNotFoundCard extends ShadowlessElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 453px;
-      height: 104px;
+      width: 100%;
+      height: 100%;
       margin: 0 auto;
       border: 1px solid var(--affine-border-color);
       border-radius: 10px;

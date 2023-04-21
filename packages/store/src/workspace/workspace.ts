@@ -68,15 +68,23 @@ export class Workspace {
         let count = 0;
         return new Promise(res => {
           this._storages.forEach(storage =>
-            storage.crud.get(id).then(result => {
-              if (result && !found) {
-                found = true;
-                res(result);
-              }
-              if (++count === this._storages.length && !found) {
-                res(null);
-              }
-            })
+            storage.crud
+              .get(id)
+              .then(result => {
+                if (result && !found) {
+                  found = true;
+                  res(result);
+                }
+                if (++count === this._storages.length && !found) {
+                  res(null);
+                }
+              })
+              .catch(e => {
+                console.error(e);
+                if (++count === this._storages.length && !found) {
+                  res(null);
+                }
+              })
           );
         });
       },
