@@ -92,14 +92,32 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
           }
         }
       },
-      virgoInput(ctx) {
-        if (ctx.data && !isNumeric(ctx.data)) {
+      virgoInput: ctx => {
+        const vEditor = this.vEditor;
+        assertExists(vEditor);
+        const originText = vEditor.yText.toString();
+        const vRange = vEditor.getVRange();
+        if (!vRange) return ctx;
+        const text =
+          originText.slice(0, vRange.index) +
+          ctx.data +
+          originText.slice(vRange.index + vRange.length);
+        if (ctx.data && !isNumeric(text)) {
           ctx.data = '';
         }
         return ctx;
       },
-      virgoCompositionEnd(ctx) {
-        if (ctx.data && !isNumeric(ctx.data)) {
+      virgoCompositionEnd: ctx => {
+        const vEditor = this.vEditor;
+        assertExists(vEditor);
+        const originText = vEditor.yText.toString();
+        const vRange = vEditor.getVRange();
+        if (!vRange) return ctx;
+        const text =
+          originText.slice(0, vRange.index) +
+          ctx.data +
+          originText.slice(vRange.index + vRange.length);
+        if (ctx.data && !isNumeric(text)) {
           ctx.data = '';
         }
         return ctx;
