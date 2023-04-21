@@ -140,6 +140,7 @@ export class EdgelessToolbar extends LitElement {
     return html`
       <div
         class="edgeless-toolbar-container"
+        @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @mouseup=${stopPropagation}
       >
