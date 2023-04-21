@@ -90,7 +90,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, false);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, false);
   await waitNextFrame(pageB);
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
@@ -108,7 +108,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, true);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await waitNextFrame(pageB);
 
   // wait until pageB content updated
@@ -129,7 +129,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, true);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await waitNextFrame(pageB);
   await focusRichText(pageB);
 
