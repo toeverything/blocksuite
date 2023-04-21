@@ -19,6 +19,12 @@ import {
   type,
 } from './keyboard.js';
 
+declare global {
+  interface WindowEventMap {
+    'blocksuite:page-ready': CustomEvent<string>;
+  }
+}
+
 export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -32,10 +38,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   const ignoredMessages = [
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
-    // embed.spec.ts
-    'Failed to load resource: the server responded with a status of 404 (Not Found)',
-    // embed.spec.ts
-    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
@@ -44,6 +46,13 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
     "addRange(): The given range isn't in document.",
+    //#region embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    'Error: Failed to fetch blob',
+    'Error: Cannot find blob',
+    'Cannot find blob',
+    //#endregion
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -60,59 +69,82 @@ function generateRandomRoomId() {
  */
 async function initEmptyEditor(
   page: Page,
-  flags: Partial<BlockSuiteFlags> = {}
+  flags: Partial<BlockSuiteFlags> = {},
+  noInit = false
 ) {
-  await page.evaluate(flags => {
-    const { workspace } = window;
-    const page = workspace.createPage('page0');
+  await page.evaluate(
+    ([flags, noInit]) => {
+      const { workspace } = window;
+      async function initPage(page: ReturnType<typeof workspace.createPage>) {
+        for (const [key, value] of Object.entries(flags)) {
+          page.awarenessStore.setFlag(key as keyof typeof flags, value);
+        }
 
-    for (const [key, value] of Object.entries(flags)) {
-      page.awarenessStore.setFlag(key as keyof typeof flags, value);
-    }
+        const editor = document.createElement('editor-container');
+        editor.page = page;
+        editor.autofocus = true;
+        editor.slots.pageLinkClicked.on(({ pageId }) => {
+          const newPage = workspace.getPage(pageId);
+          if (!newPage) {
+            throw new Error(`Failed to jump to page ${pageId}`);
+          }
+          editor.page = newPage;
+        });
 
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-    editor.autofocus = true;
-    editor.slots.pageLinkClicked.on(({ pageId }) => {
-      const newPage = workspace.getPage(pageId);
-      if (!newPage) {
-        throw new Error(`Failed to jump to page ${pageId}`);
+        const debugMenu = document.createElement('debug-menu');
+        debugMenu.workspace = workspace;
+        debugMenu.editor = editor;
+
+        // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+        const appRoot = document.querySelector('#app');
+        if (!appRoot) {
+          throw new Error('Cannot find app root element(#app).');
+        }
+        appRoot.appendChild(editor);
+        document.body.appendChild(debugMenu);
+        editor.createBlockHub().then(blockHub => {
+          document.body.appendChild(blockHub);
+        });
+        window.debugMenu = debugMenu;
+        window.editor = editor;
+        window.page = page;
+        window.dispatchEvent(
+          new CustomEvent('blocksuite:page-ready', { detail: page.id })
+        );
       }
-      editor.page = newPage;
-    });
-
-    const debugMenu = document.createElement('debug-menu');
-    debugMenu.workspace = workspace;
-    debugMenu.editor = editor;
-
-    // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
-    const appRoot = document.querySelector('#app');
-    if (!appRoot) {
-      throw new Error('Cannot find app root element(#app).');
-    }
-    appRoot.appendChild(editor);
-    document.body.appendChild(debugMenu);
-    editor.createBlockHub().then(blockHub => {
-      document.body.appendChild(blockHub);
-    });
-    window.debugMenu = debugMenu;
-    window.editor = editor;
-    window.page = page;
-  }, flags);
+      if (noInit) {
+        workspace.slots.pageAdded.on(pageId => {
+          const page = workspace.getPage(pageId);
+          if (!page) {
+            throw new Error(`Failed to get page ${pageId}`);
+          }
+          initPage(page);
+        });
+      } else {
+        const page = workspace.createPage('page0');
+        initPage(page);
+      }
+    },
+    [flags, noInit] as const
+  );
   await waitNextFrame(page);
 }
 
 export async function enterPlaygroundRoom(
   page: Page,
   flags?: Partial<BlockSuiteFlags>,
-  room?: string
+  room?: string,
+  blobStorage?: ('memory' | 'indexeddb' | 'mock')[],
+  noInit?: boolean
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
+  const readyPromise = waitForPageReady(page);
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
       throw new Error('window.$blocksuite is not object');
@@ -139,7 +171,8 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"`);
   });
 
-  await initEmptyEditor(page, flags);
+  await initEmptyEditor(page, flags, noInit);
+  await readyPromise;
   return room;
 }
 
@@ -156,6 +189,17 @@ export async function waitNextFrame(
   frameTimeout = NEXT_FRAME_TIMEOUT
 ) {
   await page.waitForTimeout(frameTimeout);
+}
+
+export async function waitForPageReady(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>(resolve => {
+        window.addEventListener('blocksuite:page-ready', () => resolve(), {
+          once: true,
+        });
+      })
+  );
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {

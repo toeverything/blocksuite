@@ -6,12 +6,16 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type BlockHost, ShadowlessElement } from '../../__internal__/index.js';
+import {
+  type BlockHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/index.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends ShadowlessElement {
+export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-image > affine-embed {
       display: block;
@@ -134,8 +138,13 @@ export class ImageBlockComponent extends ShadowlessElement {
     },
   };
 
+  static maxRetryCount = 3;
+
   @state()
-  private _imageState: 'loading' | 'ready' | 'failed' = 'loading';
+  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
+    'loading';
+
+  private _retryCount = 0;
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -143,15 +152,33 @@ export class ImageBlockComponent extends ShadowlessElement {
     // exclude padding and border width
     const { width, height } = this.model;
 
-    this._imageState = 'loading';
     if (width && height) {
       this.resizeImg.style.width = width + 'px';
       this.resizeImg.style.height = height + 'px';
     }
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
+  private _fetchError = (e: unknown) => {
+    // Do have the id but cannot find the blob
+    //  this is probably because the blob is not uploaded yet
+    this._imageState = 'waitUploaded';
+    this._retryCount++;
+    console.warn('Cannot find blob, retrying', this._retryCount);
+    if (this._retryCount < ImageBlockComponent.maxRetryCount) {
+      setTimeout(() => {
+        this._fetchImage();
+        // 1s, 2s, 3s
+      }, 1000 * this._retryCount);
+    } else {
+      console.error(e);
+      this._imageState = 'failed';
+    }
+  };
+
+  private _fetchImage = () => {
+    if (this._imageState === 'ready') {
+      return;
+    }
     const storage = this.model.page.blobs;
     storage
       .get(this.model.sourceId)
@@ -160,13 +187,19 @@ export class ImageBlockComponent extends ShadowlessElement {
           this._source = URL.createObjectURL(blob);
           this._imageState = 'ready';
         } else {
-          this._imageState = 'failed';
+          this._fetchError(new Error('Cannot find blob'));
         }
       })
-      .catch(e => {
-        console.error('Failed to load image', e);
-        this._imageState = 'failed';
-      });
+      .catch(this._fetchError);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._imageState = 'loading';
+    this._fetchImage();
+    this._disposables.add(
+      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
+    );
   }
 
   override disconnectedCallback() {
