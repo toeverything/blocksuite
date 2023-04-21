@@ -10,5 +10,6 @@ export interface IBound {
 
 export enum StrokeStyle {
   Solid = 'solid',
-  Dashed = 'dashed',
+  Dashed = 'dash',
+  None = 'none',
 }

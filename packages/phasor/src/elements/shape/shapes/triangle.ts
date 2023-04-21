@@ -1,4 +1,4 @@
-import type { IBound } from '../../../consts.js';
+import { type IBound, StrokeStyle } from '../../../consts.js';
 import { setLineDash } from '../../../utils/canvas.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
@@ -39,7 +39,7 @@ export const TriangleMethods: ShapeMethods = {
       ctx.fill(path);
     }
 
-    if (strokeWidth > 0) {
+    if (strokeWidth > 0 && strokeStyle !== StrokeStyle.None) {
       ctx.strokeStyle = realStrokeColor;
       setLineDash(ctx, strokeStyle);
       ctx.lineWidth = strokeWidth;

@@ -99,8 +99,8 @@ export class EdgelessBrushMenu extends LitElement {
     }
 
     .brush-size-button .thick {
-      width: 16px;
-      height: 15px;
+      width: 10px;
+      height: 10px;
     }
 
     menu-divider {

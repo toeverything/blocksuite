@@ -128,7 +128,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
-        @tool.click=${() => this._colorSelectorPopper?.toggle()}
+        @click=${() => this._colorSelectorPopper?.toggle()}
       >
         ${this._renderSelectedColor(selectedBackground)}
       </edgeless-tool-icon-button>
