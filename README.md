@@ -13,8 +13,8 @@
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
-[![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
+[![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 
 ---
@@ -32,15 +32,16 @@ BlockSuite (_pronounced "block sweet"_ 🍬) is the open-source editor project b
 
 ## Introduction
 
-BlockSuite works very differently than traditional rich text frameworks:
+BlockSuite works very differently than traditional rich text frameworks. Feature highlights:
 
-- For the data model, BlockSuite eliminates the need to work with data-driven DSLs (e.g., _operations_, _actions_, _commands_, _transforms_). Instead, it utilizes [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) as the single source of truth, offering a strongly-typed block tree model built on [Yjs](https://github.com/yjs/yjs). With BlockSuite, manipulating blocks becomes as simple as updating a todo list. Moreover, by fully harnessing the power of CRDT, it supports zero-cost time travel, real-time collaboration, and out-of-the-box pluggable persistence backends.
-- For rich text editing, BlockSuite seamlessly organizes rich text content into discrete blocks. In BlockSuite, a document with 100 paragraphs can be rendered into 100 text blocks or 100 individual rich text editor instances, effectively eliminating the outdated practice of consolidating all content into a single, risky [`contenteditable`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) monolith.
-- At the rendering layer, BlockSuite remains framework agnostic. It doesn't limit the block tree rendering to the DOM. Not only does it implement its entire document editing UI using [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but it also offers a hybrid [canvas-based renderer](./packages/phasor/) for whiteboard content sections. Both renderers can coexist on the same page and share a unified centralized data store.
+- 📝 **Block-Based Editing**: BlockSuite breaks down rich content into discrete contenteditable blocks, avoiding pitfalls using traditional monolith rich text container.
+- 🧬 **Inherently Collaborative**: By harnessing the power of CRDT, any application built with BlockSuite effortlessly supports real-time collaboration right from the start.
+- 🧩 **Framework Agnostic**: With UI components implemented using Web Components, BlockSuite provides editors that can be easily embedded and eliminates the risk of vendor lock-in.
+- 🔌 **Pluggable Persistence**: With its provider-based architecture, BlockSuite facilitates incremental state synchronization without explictly handling asynchronous requests.
+- 📏 **Compact Rich Text**: BlockSuite builds its own rich text component. With minimal responsibilities that benefits from the block-based architecture, this component is light, simple and reliable.
+- 🎨 **Hybrid Infinite Canvas**: A high performance canvas-based renderer is also provided by BlockSuite, fulfilling needs for whiteboard functionalities.
 
-BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more foundational modules as reusable packages for this in the BlockSuite project.
-
-Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used in AFFiNE Alpha. Note that this editor is also a web component and is completely framework-independent!
+Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.html) for a detailed overview!
 
 ## Resources
 
@@ -60,7 +61,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 
 ## Getting Started
 
-To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.html).
+To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/getting-started.html).
 
 ## Current Status (`@blocksuite/editor`)
 
@@ -96,8 +97,7 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
   - ✅ Block tree update API
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
-  - 🚧 Dynamic component registration
-  - 📌 Dynamic block registration
+  - 🚧 Block schema
 
 Icons above correspond to the following meanings:
 
