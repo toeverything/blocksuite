@@ -262,7 +262,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     event.preventDefault();
 
     if (this._editor.isReadonly || this._isComposing) return;
-
+    this._onSelectionChange();
     const vRange = this._editor.getVRange();
     if (!vRange) return;
 
