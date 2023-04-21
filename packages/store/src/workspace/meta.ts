@@ -15,6 +15,9 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+  /**
+   * Note: YOU SHOULD NOT UPDATE THIS FIELD MANUALLY.
+   */
   subpageIds: string[];
 
   [key: string]: string | number | boolean | undefined | (string | number)[];
@@ -86,6 +89,9 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
+  /**
+   * @internal Use {@link Workspace.setPageMeta} instead
+   */
   setPageMeta(id: string, props: Partial<PageMeta>) {
     const pages = (this.pages?.toJSON() as PageMeta[]) ?? [];
     const index = pages.findIndex((page: PageMeta) => id === page.id);

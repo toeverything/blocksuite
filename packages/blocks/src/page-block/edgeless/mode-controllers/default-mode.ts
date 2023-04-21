@@ -100,6 +100,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
+    this._edgeless.clearSelectedBlocks();
+
     const currentSelected = this.blockSelectionState.selected;
     if (currentSelected.length !== 1) {
       this._setSelectionState([selected], false);

@@ -80,6 +80,9 @@ export class Page extends Space<FlatBlockMap> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    /**
+     * @deprecated
+     */
     subpageUpdated: new Slot<{
       type: 'add' | 'delete';
       id: string;

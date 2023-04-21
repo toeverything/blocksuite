@@ -437,6 +437,15 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  /**
+   * Clear selected blocks.
+   */
+  clearSelectedBlocks() {
+    if (this.getSelection().selectedBlocks.length) {
+      this.slots.selectedBlocksUpdated.emit([]);
+    }
+  }
+
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
