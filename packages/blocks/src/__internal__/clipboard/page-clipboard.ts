@@ -9,7 +9,7 @@ import {
   clipboardData2Blocks,
   copyBlocks,
   shouldClipboardHandlerContinue,
-} from './util/utils.js';
+} from './utils/commons.js';
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
