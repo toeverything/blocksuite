@@ -144,6 +144,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
+  const readyPromise = waitForPageReady(page);
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
       throw new Error('window.$blocksuite is not object');
@@ -171,6 +172,7 @@ export async function enterPlaygroundRoom(
   });
 
   await initEmptyEditor(page, flags, noInit);
+  await readyPromise;
   return room;
 }
 
