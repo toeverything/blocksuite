@@ -30,14 +30,24 @@ function capMousedown(
   connectorMode: ConnectorMode,
   requestUpdate: () => void
 ) {
+  const startX = event.clientX;
+  const startY = event.clientY;
+  const elementX = element.x;
+  const elementY = element.y;
+
   const originControllers = element.controllers.map(c => ({
     ...c,
     x: c.x + element.x,
     y: c.y + element.y,
   }));
   const mousemove = (mouseMoveEvent: MouseEvent) => {
-    const { x, y } = mouseMoveEvent;
-    const [modelX, modelY] = surface.toModelCoord(x, y);
+    const { clientX, clientY } = mouseMoveEvent;
+    const deltaX = clientX - startX;
+    const deltaY = clientY - startY;
+    const modelX = elementX + deltaX;
+    const modelY = elementY + deltaY;
+    const [x, y] = surface.toViewCoord(modelX, modelY);
+
     const { start, end } = getConnectorAttachedInfo(element, surface, page);
 
     const picked = pickBy(
