@@ -210,6 +210,7 @@ export class VEditor<
     let index = 0;
     for (const vLine of vLines) {
       const texts = VEditor.getTextNodesFromElement(vLine);
+
       for (const text of texts) {
         if (!text.textContent) {
           throw new Error('text element should have textContent');
