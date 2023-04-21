@@ -527,7 +527,9 @@ test.describe('switch column type', () => {
     expect(await selectCell.innerText()).toBe('abc');
 
     await switchColumnType(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
   });
 });
 

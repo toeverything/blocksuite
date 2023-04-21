@@ -337,9 +337,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   };
 
   private _showSelectAction = (index: number) => {
-    const selectOption = this.shadowRoot
-      ?.querySelectorAll('.select-option')
-      .item(index);
+    const selectOption = this.querySelectorAll('.select-option').item(index);
     assertExists(selectOption);
 
     const action = new SelectActionPopup();

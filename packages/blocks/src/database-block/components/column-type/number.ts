@@ -28,6 +28,22 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
 
   private vEditor: AffineVEditor | null = null;
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('click', this._onClick);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('click', this._onClick);
+    this.vEditor?.unmount();
+    this.vEditor = null;
+  }
+
+  private _onClick = () => {
+    this.databaseModel.page.captureSync();
+  };
+
   protected override firstUpdated() {
     this._onInitVEditor();
   }
