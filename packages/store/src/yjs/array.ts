@@ -29,19 +29,25 @@ export function createYArrayProxy<T = unknown>(
       }
 
       const index = Number(p);
-      if (!Number.isNaN(index)) {
-        if (deep && (isPureObject(value) || Array.isArray(value))) {
-          const _y = native2Y(
-            value as Record<string, unknown> | unknown[],
-            deep
-          );
-          yArray.insert(index, [_y]);
-          const _value = createYProxy(_y, config);
-          return Reflect.set(target, p, _value, receiver);
-        }
-
-        yArray.insert(index, [value]);
+      if (Number.isNaN(index)) {
+        return Reflect.set(target, p, value, receiver);
       }
+
+      const apply = (value: unknown) => {
+        if (index < yArray.length) {
+          yArray.delete(index, 1);
+        }
+        yArray.insert(index, [value]);
+      };
+
+      if (deep && (isPureObject(value) || Array.isArray(value))) {
+        const y = native2Y(value as Record<string, unknown> | unknown[], deep);
+        apply(y);
+        const _value = createYProxy(y, config);
+        return Reflect.set(target, p, _value, receiver);
+      }
+
+      apply(value);
       return Reflect.set(target, p, value, receiver);
     },
     get: (target, p, receiver) => {
