@@ -562,8 +562,7 @@ export class DefaultSelectionManager {
       // updates editing
       if (hoverEditingState && isImage(activeComponent)) {
         const isOutside =
-          rect.right + 60 <
-          this.state.viewport.left + this.state.viewport.clientWidth;
+          rect.right + 60 < viewport.left + viewport.clientWidth;
 
         // when image size is too large, the option popup should show inside
         rect.x = rect.right + (isOutside ? 10 : -50);
