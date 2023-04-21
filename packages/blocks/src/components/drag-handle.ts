@@ -12,6 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type BlockComponentElement,
+  DropFlags,
   type EditingState,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByElement,
@@ -525,7 +526,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     const height = 3 * scale;
     const { rect: domRect, flag } = getDropRectByPoint(point, model, element);
 
-    if (flag === 1) {
+    if (flag === DropFlags.EmptyDatabase) {
       // empty database
       const rect = Rect.fromDOMRect(domRect);
       rect.top -= height / 2;
@@ -541,7 +542,7 @@ export class DragHandle extends WithDisposable(LitElement) {
           element: element as BlockComponentElement,
         },
       };
-    } else if (flag === 2) {
+    } else if (flag === DropFlags.Database) {
       // not empty database
       const distanceToTop = Math.abs(domRect.top - point.y);
       const distanceToBottom = Math.abs(domRect.bottom - point.y);

@@ -930,6 +930,12 @@ export function getDatabaseBlockRowsElement(element: Element) {
   return element.querySelector('.affine-database-block-rows');
 }
 
+export enum DropFlags {
+  Normal,
+  Database,
+  EmptyDatabase,
+}
+
 /**
  * Gets the drop rect by block and point.
  */
@@ -939,12 +945,11 @@ export function getDropRectByPoint(
   element: Element
 ): {
   rect: DOMRect;
-  flag: number;
+  flag: DropFlags;
 } {
   const result = {
     rect: getRectByBlockElement(element),
-    // 0: others, 1: empty database, 2: database
-    flag: 0,
+    flag: DropFlags.Normal,
   };
 
   const isDatabase = matchFlavours(model, ['affine:database'] as const);
@@ -960,7 +965,7 @@ export function getDropRectByPoint(
   if (tempElement) {
     // If the database is empty
     if (isDatabase && model.isEmpty()) {
-      result.flag = 1;
+      result.flag = DropFlags.EmptyDatabase;
       const table = getDatabaseBlockTableElement(element);
       assertExists(table);
       const bounds = table.getBoundingClientRect();
@@ -975,7 +980,7 @@ export function getDropRectByPoint(
         1
       );
     } else {
-      result.flag = 2;
+      result.flag = DropFlags.Database;
       result.rect = tempElement.getBoundingClientRect();
     }
   }
