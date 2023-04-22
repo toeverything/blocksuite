@@ -5,6 +5,7 @@
   "private": true,
   "keywords": [],
   "author": "toeverything",
+  "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
   "devDependencies": {
     "vitepress": "1.0.0-alpha.60"

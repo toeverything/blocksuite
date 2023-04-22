@@ -8,6 +8,9 @@ on:
 # Pending until other workflows done
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  id-token: write
+
 jobs:
   release:
     name: Try publishing npm@latest release
@@ -45,3 +48,4 @@ jobs:
         run: ./scripts/publish.sh
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

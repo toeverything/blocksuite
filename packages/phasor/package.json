@@ -4,6 +4,7 @@
   "description": "Hybrid canvas renderer.",
   "main": "src/index.ts",
   "type": "module",
+  "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc",
     "test:unit": "vitest --run",
