@@ -48,7 +48,7 @@ export default defineConfig({
             link: '/editor-ui-architecture',
             items: [
               {
-                text: '🚧 Host-Based Portability',
+                text: 'Host-Based Portability',
                 link: '/host-based-portability',
               },
               {
