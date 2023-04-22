@@ -13,7 +13,7 @@ import { SelectCellEditing } from './select-cell-editing.js';
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellElement<SelectTag[]> {
   static override styles = css`
-    :host {
+    affine-database-select-cell {
       display: flex;
       align-items: center;
       width: calc(100% + 8px);
