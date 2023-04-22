@@ -35,6 +35,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
       height: 28px;
       padding: 2px 10px;
       border-radius: 4px;
+      white-space: nowrap;
       background: var(--affine-tag-white);
     }
   `;
