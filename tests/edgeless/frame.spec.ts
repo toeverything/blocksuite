@@ -407,6 +407,7 @@ test('double click blank space to add text', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
+  await waitNextFrame(page);
   await page.mouse.dblclick(30, 140);
   await waitNextFrame(page);
   await type(page, 'hello');

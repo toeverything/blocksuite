@@ -82,7 +82,8 @@ export function deleteModelsByRange(
     return;
   }
   if (blockRange.type === 'Block') {
-    return handleBlockSelectionBatchDelete(page, blockRange.models);
+    handleBlockSelectionBatchDelete(page, blockRange.models);
+    return;
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -128,7 +129,7 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  return vEditor.setVRange({
+  vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });
@@ -457,7 +458,17 @@ function formatBlockRange(
   if (blockRange.type === 'Native') {
     const allTextUpdated = blockRange.models
       .filter(model => !matchFlavours(model, ['affine:code']))
-      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+      .map(
+        model =>
+          // We can not use `onModelTextUpdated` here because it is asynchronous, which
+          // will make updated event emit before we observe it.
+          new Promise(resolve => {
+            const vEditor = getVirgoByModel(model);
+            vEditor?.slots.updated.once(() => {
+              resolve(vEditor);
+            });
+          })
+      );
 
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
