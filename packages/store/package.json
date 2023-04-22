@@ -4,6 +4,7 @@
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
+  "repository": "toeverything/blocksuite",
   "scripts": {
     "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
