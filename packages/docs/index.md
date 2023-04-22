@@ -19,8 +19,8 @@ hero:
 
 features:
   - title: 📝 Block-Based Editing
-    details: BlockSuite breaks down rich content into discrete <code>contenteditable</code> blocks, avoiding pitfalls using traditional monolith rich text container.
-  - title: 🧬 Inherently Collaborative
+    details: BlockSuite breaks down rich content into discrete <code>contenteditable</code> blocks, avoiding pitfalls using traditional monolithic rich text container.
+  - title: 🧬 Intrinsically Collaborative
     details: By harnessing the power of CRDT, any application built with BlockSuite effortlessly supports real-time collaboration right from the start.
   - title: 🧩 Framework Agnostic
     details: With UI components implemented using Web Components, BlockSuite provides editors that can be easily embedded and eliminates the risk of vendor lock-in.
