@@ -7,6 +7,9 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  id-token: write
+
 jobs:
   nightly-release:
     name: Publish npm@nightly release
@@ -50,3 +53,4 @@ jobs:
         env:
           NIGHTLY: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

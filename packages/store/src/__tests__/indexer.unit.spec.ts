@@ -5,17 +5,11 @@ import { describe, expect, it } from 'vitest';
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { Slot } from '../index.js';
 import { Generator, Workspace } from '../index.js';
-import { BlockIndexer } from '../workspace/indexer/base.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   return { id: 'test-workspace', idGenerator, isSSR: true };
-}
-
-function waitOnce<T>(slot: Slot<T>) {
-  return new Promise<T>(resolve => slot.once(val => resolve(val)));
 }
 
 export const BlockSchemas = [ParagraphBlockSchema, PageBlockSchema];
@@ -182,9 +176,6 @@ describe('backlink works', () => {
 
     paragraph2.text.delete(0, paragraph2.text.length);
     page1.updateBlock(paragraph4, { text: new page1.Text() });
-
-    // wait for the backlink index to be updated
-    // await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {

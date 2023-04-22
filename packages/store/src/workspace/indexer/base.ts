@@ -109,10 +109,7 @@ export class BlockIndexer {
       assertExists(page, `Failed to find page '${pageId}'`);
       const dispose = this._indexPage(pageId, page);
       if (disposeMap[pageId]) {
-        console.warn(
-          `Duplicated pageAdded event! ${pageId} already observed`,
-          disposeMap
-        );
+        // It's possible because the `pageAdded` event is emitted once a new block is added to the page
         return;
       }
       disposeMap[pageId] = dispose;

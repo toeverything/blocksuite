@@ -121,6 +121,11 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
 
 function handleForwardDelete(editor: VEditor, vRange: VRange) {
   if (vRange.index < editor.yText.length) {
+    const originalString = editor.yText.toString();
+    const segments = [...new Intl.Segmenter().segment(originalString)];
+    const slicedString = originalString.slice(0, vRange.index);
+    const slicedSegments = [...new Intl.Segmenter().segment(slicedString)];
+    const deletedLength = segments[slicedSegments.length].segment.length;
     editor.slots.vRangeUpdated.emit([
       {
         index: vRange.index,
@@ -130,7 +135,7 @@ function handleForwardDelete(editor: VEditor, vRange: VRange) {
     ]);
     editor.deleteText({
       index: vRange.index,
-      length: 1,
+      length: deletedLength,
     });
   }
 }
