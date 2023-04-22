@@ -25,7 +25,7 @@
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
     "ky": "^0.33.3",
-    "lib0": "^0.2.73",
+    "lib0": "^0.2.74",
     "merge": "^2.1.1",
     "nanoid": "^4.0.2",
     "y-protocols": "^1.0.5",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "lit": "^2.7.2",
-    "yjs": "^13.5.53"
+    "yjs": "^13.6.0"
   },
   "peerDependencies": {
     "yjs": "^13"
