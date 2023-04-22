@@ -32,6 +32,9 @@ describe('blocksuite yjs', () => {
 
       proxy.splice(1, 1);
       expect(arr.length).toBe(1);
+
+      proxy[0] = 2;
+      expect(arr.length).toBe(1);
     });
 
     test('readonly', () => {

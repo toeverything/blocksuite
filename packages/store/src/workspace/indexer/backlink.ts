@@ -1,26 +1,69 @@
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  diffArray,
+  DisposableGroup,
+  Slot,
+} from '@blocksuite/global/utils';
 import type { BaseTextAttributes } from '@blocksuite/virgo/index';
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import { Text } from 'yjs';
 
+import type { DeltaOperation } from '../../text-adapter.js';
+import type { Workspace } from '../workspace.js';
 import type { BlockIndexer, IndexBlockEvent } from './base.js';
 
 type PageId = string;
 type BlockId = string;
-type LinkedNode = { type: 'LinkedPage' | 'Subpage'; pageId: PageId };
+type LinkedNode = {
+  type: 'LinkedPage' | 'Subpage';
+  pageId: PageId;
+  blockId: BlockId;
+};
 /**
  * Please sync type with {@link AffineTextAttributes} manually
  */
-type TextDelta = DeltaInsert<BaseTextAttributes & { reference: LinkedNode }>;
+type TextDelta = DeltaInsert<
+  BaseTextAttributes & { reference: Omit<LinkedNode, 'blockId'> }
+>;
 
-export class BacklinkIndexer {
+export type IndexUpdatedEvent =
+  | {
+      action: 'delete';
+      pageId: PageId;
+      blockId?: BlockId;
+    }
+  | {
+      action: 'add' | 'update';
+      pageId: PageId;
+      blockId: BlockId;
+    };
+
+type TextIndexer = {
+  onPageRemoved: (pageId: PageId) => void;
+  onBlockUpdated: ({ action, pageId, block, blockId }: IndexBlockEvent) => void;
+  onRefreshIndex: () => void;
+};
+
+/**
+ * Please sync type with {@link AffineTextAttributes} manually
+ */
+function isSubpageDelta(delta: DeltaOperation, pageId: PageId) {
+  return (
+    delta.attributes &&
+    delta.attributes.reference &&
+    delta.attributes.reference.type === 'Subpage' &&
+    delta.attributes.reference.pageId === pageId
+  );
+}
+
+export class BacklinkIndexer implements TextIndexer {
   private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};
   private _disposables = new DisposableGroup();
   public slots = {
     /**
      * Note: sys:children update will not trigger event
      */
-    indexUpdated: new Slot<{ pageId: PageId; blockId?: BlockId }>(),
+    indexUpdated: new Slot<IndexUpdatedEvent>(),
   };
 
   constructor(blockIndexer: BlockIndexer) {
@@ -37,7 +80,10 @@ export class BacklinkIndexer {
     );
   }
 
-  getBacklink(targetPageId: PageId) {
+  /**
+   * Get the list of backlinks for a given page
+   */
+  public getBacklink(targetPageId: PageId) {
     // TODO add inverted index
     const backlinkList: {
       pageId: PageId;
@@ -55,21 +101,83 @@ export class BacklinkIndexer {
     return backlinkList;
   }
 
-  // private _reviseDoc() {
-  // }
+  /**
+   * Returns all subpage nodes in the given page.
+   */
+  public getSubpageNodes(pageId: PageId) {
+    if (!(pageId in this._linkIndexMap)) {
+      // page not found
+      return [];
+    }
+    return Object.values(this._linkIndexMap[pageId])
+      .flat()
+      .filter(link => link.type === 'Subpage');
+  }
 
+  /**
+   * Delete the specified subpage nodes from the workspace.
+   */
+  public removeSubpageNode(workspace: Workspace, subpageId: PageId) {
+    const backlinks = this.getBacklink(subpageId);
+    const subpageNodes = backlinks.filter(link => link.type === 'Subpage');
+    if (subpageNodes.length > 1) {
+      console.warn('Unexpected subpage node count', subpageId, subpageNodes);
+    }
+
+    subpageNodes.forEach(({ pageId, blockId }) => {
+      const page = workspace.getPage(pageId);
+      if (!page) {
+        console.warn(
+          'Failed to remove subpage node from page! page not found!'
+        );
+        return;
+      }
+      const block = page.getBlockById(blockId);
+      if (!block) {
+        console.warn(
+          block,
+          'Failed to remove subpage node from page! block not found! pageId: ' +
+            `${page.id}, blockId: ${blockId}`
+        );
+        return;
+      }
+      const text = block.text;
+      assertExists(text);
+
+      page.transact(() => {
+        let accIdx = 0;
+        text.toDelta().forEach(delta => {
+          const deltaLen = delta.insert?.length ?? 0;
+          if (isSubpageDelta(delta, subpageId)) {
+            text.format(accIdx, deltaLen, { reference: null });
+          }
+          accIdx += deltaLen ?? 0;
+        });
+      }, false);
+    });
+  }
+
+  /**
+   * @internal
+   */
   onRefreshIndex() {
     this._linkIndexMap = {};
   }
 
+  /**
+   * @internal
+   */
   onPageRemoved(pageId: PageId) {
     if (!this._linkIndexMap[pageId]) {
       return;
     }
     this._linkIndexMap[pageId] = {};
-    this.slots.indexUpdated.emit({ pageId });
+    this.slots.indexUpdated.emit({ action: 'delete', pageId });
   }
 
+  /**
+   * @internal
+   */
   onBlockUpdated({ action, pageId, block, blockId }: IndexBlockEvent) {
     switch (action) {
       case 'add':
@@ -82,7 +190,7 @@ export class BacklinkIndexer {
           return;
         }
         const deltas: TextDelta[] = text.toDelta();
-        this._indexDelta(pageId, blockId, deltas);
+        this._indexDelta({ action, pageId, blockId, deltas });
         return;
       }
       case 'delete': {
@@ -92,34 +200,46 @@ export class BacklinkIndexer {
     }
   }
 
-  private _indexDelta(pageId: PageId, blockId: BlockId, deltas: TextDelta[]) {
-    if (!deltas.length) return;
+  private _indexDelta({
+    action,
+    pageId,
+    blockId,
+    deltas,
+  }: {
+    action: IndexBlockEvent['action'];
+    pageId: PageId;
+    blockId: BlockId;
+    deltas: TextDelta[];
+  }) {
     const links = deltas
       .filter(delta => delta.attributes && delta.attributes.reference)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      .map(delta => delta.attributes!.reference!);
-    if (
-      !links.length &&
-      (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId])
-    )
-      return;
+      .map(delta => ({ ...delta.attributes!.reference!, blockId }));
+
+    const before = this._linkIndexMap[pageId]?.[blockId] ?? [];
+    const diff = diffArray(before, links);
+    if (!diff.changed) return;
 
     this._linkIndexMap[pageId] = {
       ...this._linkIndexMap[pageId],
       [blockId]: links,
     };
-    this.slots.indexUpdated.emit({ pageId, blockId });
+    this.slots.indexUpdated.emit({ action: action, pageId, blockId });
   }
 
   private _removeIndex(pageId: PageId, blockId: BlockId) {
     if (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId]) {
       return;
     }
-    this._linkIndexMap[pageId] = {
-      ...this._linkIndexMap[pageId],
-      [blockId]: [],
-    };
-    this.slots.indexUpdated.emit({ pageId, blockId });
+    const previousLink = this._linkIndexMap[pageId][blockId];
+    delete this._linkIndexMap[pageId][blockId];
+    if (previousLink.length) {
+      this.slots.indexUpdated.emit({
+        action: 'delete',
+        pageId,
+        blockId,
+      });
+    }
   }
 
   dispose() {

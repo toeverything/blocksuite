@@ -1,7 +1,14 @@
 /// <reference types="@blocksuite/global" />
 export * from './awareness.js';
 export * from './base.js';
-export * from './persistence/blob/index.js';
+export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
+export { createMemoryStorage } from './persistence/blob/memory-storage.js';
+export { createSimpleServerStorage } from './persistence/blob/mock-server-storage.js';
+export type {
+  BlobManager,
+  BlobStorage,
+  BlobStorageCRUD,
+} from './persistence/blob/types.js';
 export * from './persistence/doc/index.js';
 export * from './space.js';
 export * from './store.js';

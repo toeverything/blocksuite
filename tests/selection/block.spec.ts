@@ -9,6 +9,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  getCenterPosition,
   getIndexCoordinate,
   getRichTextBoundingBox,
   initEmptyParagraphState,
@@ -1091,4 +1092,33 @@ test('should not show option menu of image on block selection', async ({
     page.locator('.affine-embed-editing-state-container')
   ).toHaveCount(0);
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(2);
+});
+
+test('should be cleared when dragging block card from BlockHub', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
+
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });

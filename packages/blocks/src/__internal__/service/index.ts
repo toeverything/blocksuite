@@ -89,7 +89,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     block: BaseBlockModel,
     deltaLeaf: DeltaOperation
   ) {
-    let text: string = deltaLeaf.insert;
+    let text = deltaLeaf.insert ?? '';
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
       return text;

@@ -33,6 +33,10 @@ export class DatabaseCellContainer
   @property()
   columnRenderer!: ColumnRendererHelper;
 
+  private get readonly() {
+    return this.databaseModel.page.readonly;
+  }
+
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
@@ -77,6 +81,8 @@ export class DatabaseCellContainer
   }
 
   _onClick = (event: Event) => {
+    if (this.readonly) return;
+
     this._isEditing = true;
     this.removeEventListener('click', this._onClick);
     setTimeout(() => {
@@ -105,7 +111,11 @@ export class DatabaseCellContainer
   override render() {
     const renderer = this.columnRenderer.get(this.column.type);
     const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
-    if (this._isEditing && renderer.components.CellEditing !== false) {
+    if (
+      !this.readonly &&
+      this._isEditing &&
+      renderer.components.CellEditing !== false
+    ) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}

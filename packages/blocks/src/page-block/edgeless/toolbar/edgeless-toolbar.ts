@@ -4,6 +4,7 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
+  FRAME_BACKGROUND_COLORS,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -19,7 +20,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import { FRAME_BACKGROUND_COLORS } from '../components/component-toolbar/change-frame-button.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -140,6 +140,7 @@ export class EdgelessToolbar extends LitElement {
     return html`
       <div
         class="edgeless-toolbar-container"
+        @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @mouseup=${stopPropagation}
       >

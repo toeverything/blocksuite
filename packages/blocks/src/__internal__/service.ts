@@ -1,5 +1,6 @@
-import type { BlockServiceInstanceByKey } from '../models.js';
-import { type BlockService, blockService, type Flavour } from '../models.js';
+import type { Flavour } from '../models.js';
+import type { BlockServiceInstanceByKey } from '../services.js';
+import { type BlockService, blockService } from '../services.js';
 import { BaseService } from './service/index.js';
 
 const services = new Map<string, BaseService>();

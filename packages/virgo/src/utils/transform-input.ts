@@ -57,7 +57,7 @@ function handleDelete(vRange: VRange, editor: VEditor) {
     }
 
     if (vRange.index > 0) {
-      const originalString = editor.yText.toString();
+      const originalString = editor.yText.toString().slice(0, vRange.index);
       const segments = [...new Intl.Segmenter().segment(originalString)];
       const deletedLength = segments[segments.length - 1].segment.length;
       editor.slots.updated.once(() => {

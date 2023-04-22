@@ -1,5 +1,9 @@
 import './utils/declare-test-window.js';
 
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -115,148 +119,6 @@ test('enter shortcut on focusing embed block and its caption', async ({
   );
 });
 
-const mockImageId = '_e2e_test_image_id_';
-
-async function initMockImage(page: Page) {
-  await page.evaluate(() => {
-    const { page } = window;
-    page.captureSync();
-    const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    page.addBlock(
-      'affine:embed',
-      {
-        type: 'image',
-        sourceId: '_e2e_test_image_id_',
-        width: 200,
-        height: 180,
-      },
-      frameId
-    );
-    page.captureSync();
-  });
-}
-
-/**
- * image loading sequences:
- * 1. image block get sourceId from model
- * 2. (loading) query image data by sourceId
- * 3. (delivering) if step 2 return empty, wait for awareness notify, and setTimeout 2s
- * 4. (loading) if out of setTimeout or get message for awareness, query image data again
- * 5. (success) if get image data successfully, show image
- * 6. (not found) else show not found placeholder
- */
-test('image loading', async ({ page }) => {
-  const room = await enterPlaygroundRoom(page);
-
-  // block image data request, force wait 100ms for loading test, always return 404
-  await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
-    async route => {
-      await page.waitForTimeout(100);
-      return route.fulfill({
-        status: 404,
-      });
-    }
-  );
-
-  await initMockImage(page);
-
-  const loadingContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
-    .innerText();
-  expect(loadingContent).toBe('Loading content...');
-
-  await page.waitForTimeout(100);
-
-  await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toContainText('Delivering content...');
-
-  await page.waitForTimeout(3000);
-
-  const imageNotFound = page.locator('.affine-image-block-not-found-card');
-  await expect(imageNotFound).toBeVisible();
-});
-
-test('image loaded successfully', async ({ page }) => {
-  const room = await enterPlaygroundRoom(page);
-
-  await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
-    async route => {
-      return route.fulfill({
-        status: 200,
-        body: Buffer.from(
-          'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
-          'base64'
-        ),
-      });
-    }
-  );
-
-  await initMockImage(page);
-
-  await page.waitForTimeout(100);
-
-  const img = page.locator('.affine-image-wrapper img');
-  await expect(img).toBeVisible();
-});
-
-test('image get message from awareness', async ({ page, browser }) => {
-  const room = await enterPlaygroundRoom(page);
-
-  const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-
-  let firstCall = true;
-  await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
-    async route => {
-      // first call to get data, return 404, so image block waits awareness message
-      if (firstCall) {
-        firstCall = false;
-        return route.fulfill({
-          status: 404,
-        });
-      }
-
-      // second call is after got awareness message
-      return route.fulfill({
-        status: 200,
-        body: Buffer.from(
-          'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
-          'base64'
-        ),
-      });
-    }
-  );
-
-  await pageB.evaluate(async () => {
-    const { page } = window;
-    page.awarenessStore.setBlobState('_e2e_test_image_id_', /* uploading */ 0);
-  });
-
-  await initMockImage(page);
-
-  await page.waitForTimeout(100);
-
-  await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toHaveText('Delivering content...');
-
-  await pageB.evaluate(async () => {
-    const { page } = window;
-    page.awarenessStore.setBlobState('_e2e_test_image_id_', /* uploaded */ 1);
-  });
-
-  // do not wait longer than 2s, because after 2s, `get image data` maybe call due to timeout
-  await page.waitForTimeout(100);
-
-  const img = page.locator('.affine-image-wrapper img');
-  await expect(img).toBeVisible();
-});
-
 test('popup menu should follow position of image when scrolling', async ({
   page,
 }) => {
@@ -352,4 +214,140 @@ test('select image should not show format bar', async ({ page }) => {
   await page.mouse.wheel(0, rect.y + rect.height);
   await expect(formatQuickBar).not.toBeVisible();
   await page.mouse.click(0, 0);
+});
+
+const mockImageId = '_e2e_test_image_id_';
+
+async function initMockImage(page: Page) {
+  await page.evaluate(() => {
+    const { page } = window;
+    page.captureSync();
+    const pageId = page.addBlock('affine:page');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock(
+      'affine:embed',
+      {
+        type: 'image',
+        sourceId: '_e2e_test_image_id_',
+        width: 200,
+        height: 180,
+      },
+      frameId
+    );
+    page.captureSync();
+  });
+}
+
+test('image loading but failed', async ({ page }) => {
+  const room = await enterPlaygroundRoom(page, undefined, undefined, ['mock']);
+
+  const timeout = 2000;
+
+  // block image data request, force wait 100ms for loading test,
+  // always return 404
+  await page.route(
+    `**/api/workspace/${room}/blob/${mockImageId}`,
+    async route => {
+      await page.waitForTimeout(timeout);
+      // broken image
+      return route.fulfill({
+        status: 404,
+      });
+    }
+  );
+
+  await initMockImage(page);
+
+  const loadingContent = await page
+    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .innerText();
+  expect(loadingContent).toBe('Loading content...');
+
+  await page.waitForTimeout(timeout);
+
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toContainText('Delivering content...');
+
+  // 1s + 2s + 3s
+  await page.waitForTimeout(6000);
+
+  const imageNotFound = page.locator('.affine-image-block-not-found-card');
+  await expect(imageNotFound).toBeVisible();
+});
+
+test('image loading but success', async ({ page }) => {
+  const room = await enterPlaygroundRoom(page, undefined, undefined, ['mock']);
+  const imageBuffer = await readFile(
+    fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
+  );
+
+  const timeout = 2000;
+  let count = 0;
+
+  // block image data request, force wait 100ms for loading test,
+  // always return 404
+  await page.route(
+    `**/api/workspace/${room}/blob/${mockImageId}`,
+    async route => {
+      await page.waitForTimeout(timeout);
+      count++;
+      if (count === 3) {
+        return route.fulfill({
+          status: 200,
+          body: imageBuffer,
+        });
+      }
+      // broken image
+      return route.fulfill({
+        status: 404,
+      });
+    }
+  );
+
+  await initMockImage(page);
+
+  const loadingContent = await page
+    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .innerText();
+  expect(loadingContent).toBe('Loading content...');
+
+  await page.waitForTimeout(timeout);
+
+  await expect(
+    page.locator('.affine-image-block-loading-card .affine-image-block-content')
+  ).toContainText('Delivering content...');
+
+  // 1s + 2s + 3s
+  await page.waitForTimeout(6000);
+
+  const img = page.locator('.affine-image-wrapper img');
+  await expect(img).toBeVisible();
+  const src = await img.getAttribute('src');
+  expect(src).toBeDefined();
+});
+
+test('image loaded successfully', async ({ page }) => {
+  const room = await enterPlaygroundRoom(page, undefined, undefined, ['mock']);
+  const imageBuffer = await readFile(
+    fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
+  );
+  await page.route(
+    `**/api/workspace/${room}/blob/${mockImageId}`,
+    async route => {
+      return route.fulfill({
+        status: 200,
+        body: imageBuffer,
+      });
+    }
+  );
+
+  await initMockImage(page);
+
+  await page.waitForTimeout(1000);
+
+  const img = page.locator('.affine-image-wrapper img');
+  await expect(img).toBeVisible();
+  const src = await img.getAttribute('src');
+  expect(src).toBeDefined();
 });

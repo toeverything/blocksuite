@@ -13,6 +13,7 @@ import {
   getCurrentEditorTheme,
   getCurrentHTMLTheme,
   initEmptyParagraphState,
+  pressArrowLeft,
   pressBackspace,
   pressEnter,
   redoByClick,
@@ -24,6 +25,7 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
+  waitForPageReady,
   waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -89,8 +91,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
@@ -107,8 +108,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -128,8 +128,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
@@ -377,6 +376,10 @@ test('change theme', async ({ page }) => {
 test('should be able to delete an emoji completely by pressing backspace once', async ({
   page,
 }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -385,4 +388,24 @@ test('should be able to delete an emoji completely by pressing backspace once', 
   await pressBackspace(page);
   await pressBackspace(page);
   await assertText(page, '');
+});
+
+test('delete emoji in the middle of the text', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1🌷1🙅‍♂️1🏳️‍🌈1👨‍👩‍👧‍👦1');
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await assertText(page, '11111');
 });

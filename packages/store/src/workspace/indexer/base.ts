@@ -4,7 +4,6 @@ import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
 import type { BlockSuiteDoc, BlockSuiteDocData } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
-import type { Workspace } from '../workspace.js';
 
 type PageId = string;
 
@@ -24,7 +23,10 @@ export type IndexBlockEvent =
 
 export class BlockIndexer {
   private readonly _doc: Y.Doc;
-  private readonly _workspaceSlots: Workspace['slots'];
+  private readonly _workspaceSlots: {
+    pageAdded: Slot<string>;
+    pageRemoved: Slot<string>;
+  };
   private _disposables = new DisposableGroup();
 
   public slots = {
@@ -42,7 +44,10 @@ export class BlockIndexer {
       immediately = false,
       slots,
     }: {
-      readonly slots: Workspace['slots'];
+      readonly slots: {
+        pageAdded: Slot<string>;
+        pageRemoved: Slot<string>;
+      };
       immediately?: boolean;
     }
   ) {
@@ -51,17 +56,19 @@ export class BlockIndexer {
 
     if (immediately) {
       this._initIndex();
-    } else {
-      if ('requestIdleCallback' in globalThis) {
-        requestIdleCallback(() => {
-          this._initIndex();
-        });
-      } else {
-        setTimeout(() => {
-          this._initIndex();
-        }, 0);
-      }
+      return;
     }
+    // lazy init
+    if ('requestIdleCallback' in globalThis) {
+      requestIdleCallback(() => {
+        this._initIndex();
+      });
+      return;
+    }
+    // fallback to setTimeout
+    setTimeout(() => {
+      this._initIndex();
+    }, 0);
   }
 
   private _initIndex() {
@@ -70,6 +77,12 @@ export class BlockIndexer {
     if (!share.has('space:meta')) {
       throw new Error("Failed to initialize indexer: 'space:meta' not found");
     }
+
+    let disposeMap: Record<string, (() => void) | null> = {};
+    this._disposables.add(() => {
+      Object.values(disposeMap).forEach(fn => fn?.());
+      disposeMap = {};
+    });
 
     Array.from(doc.share.keys())
       // filter out 'space:meta'
@@ -80,23 +93,24 @@ export class BlockIndexer {
       .map(pageId => ({ pageId, page: this._getPage(pageId) }))
       .forEach(({ pageId, page }) => {
         assertExists(page, `Failed to find page '${pageId}'`);
-        this._indexPage(pageId, page);
+        const dispose = this._indexPage(pageId, page);
+        if (disposeMap[pageId]) {
+          console.warn(
+            `Duplicated pageAdded event! ${pageId} already observed`,
+            disposeMap
+          );
+          return;
+        }
+        disposeMap[pageId] = dispose;
       });
-
-    let disposeMap: Record<string, (() => void) | null> = {};
-    this._disposables.add(() => {
-      Object.values(disposeMap).forEach(fn => fn?.());
-      disposeMap = {};
-    });
 
     this._workspaceSlots.pageAdded.on(pageId => {
       const page = this._getPage(pageId);
       assertExists(page, `Failed to find page '${pageId}'`);
       const dispose = this._indexPage(pageId, page);
       if (disposeMap[pageId]) {
-        throw new Error(
-          `Unexpected dispose fn! ${pageId} maybe already observed`
-        );
+        // It's possible because the `pageAdded` event is emitted once a new block is added to the page
+        return;
       }
       disposeMap[pageId] = dispose;
     });
@@ -142,10 +156,16 @@ export class BlockIndexer {
         if (e.target !== e.currentTarget) {
           // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:frame'
           if (e.keysChanged.has('prop:text')) {
-            console.warn(
-              'Unexpected prop:text changed! Please update text indexer',
-              e
-            );
+            // update block text by `page.updateBlock(paragraph, { text: new page.Text() })` API
+            const blockId = e.path[0] as string;
+            const block = yPage.get(blockId);
+            assertExists(block);
+            this._indexBlock({
+              action: 'update',
+              pageId,
+              blockId,
+              block,
+            });
           }
           return;
         }

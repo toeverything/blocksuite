@@ -32,11 +32,12 @@ import {
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
-import { actionConfig, formatConfig } from './const.js';
+import { actionConfig } from './const.js';
 import {
   deleteModelsByRange,
   updateBlockType,
 } from './container-operations.js';
+import { formatConfig } from './format-config.js';
 
 export function bindCommonHotkey(page: Page) {
   if (page.readonly) return;

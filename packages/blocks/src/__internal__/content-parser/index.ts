@@ -4,8 +4,7 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
-import { getFileFromClipboard } from '../clipboard/utils.js';
-import { getServiceOrRegister } from '../service.js';
+import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
@@ -79,6 +78,7 @@ export class ContentParser {
     this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
   }
+
   async file2Blocks(clipboardData: DataTransfer) {
     const file = getFileFromClipboard(clipboardData);
     if (file) {
@@ -157,10 +157,12 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
   }
+
   public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
     this._parsers[name] = func;
   }
@@ -206,7 +208,7 @@ export class ContentParser {
       );
       childText && children.push(childText);
     }
-
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2html(model, {
@@ -230,6 +232,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2Text(model, {
@@ -244,10 +247,10 @@ export class ContentParser {
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
-        const clipBlockInfos =
+        return (
           (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
-          [];
-        return clipBlockInfos;
+          []
+        );
       }
     );
 

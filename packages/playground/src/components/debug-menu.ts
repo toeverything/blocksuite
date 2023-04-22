@@ -586,7 +586,7 @@ function getTabGroupTemplate({
                 const tabGroup =
                   document.querySelector<SlTabGroup>('.tabs-closable');
                 if (!tabGroup) throw new Error('tab group not found');
-                const otherPage = workspace.meta.pageMetas.find(
+                const otherPage = pageList.find(
                   metaPage => page.id !== metaPage.id
                 );
                 if (!otherPage) throw new Error('no other page found');
@@ -595,7 +595,21 @@ function getTabGroupTemplate({
               workspace.removePage(page.id);
             }}
           >
-            ${page.title || 'Untitled'}
+            <div>
+              <div>${page.title || 'Untitled'}</div>
+              <div>
+                ${page.subpageIds
+                  .map(
+                    pageId =>
+                      (
+                        pageList.find(meta => meta.id === pageId) ?? {
+                          title: 'Page Not Found',
+                        }
+                      ).title || 'Untitled'
+                  )
+                  .join(',')}
+              </div>
+            </div>
           </sl-tab>`
       )}
     </sl-tab-group>`;

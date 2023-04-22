@@ -11,6 +11,7 @@ import {
   getRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  isEmpty,
   noop,
   Point,
   Rect,
@@ -27,6 +28,7 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
+  addText,
   getXYWH,
   handleElementChangedEffectForConnector,
   isConnectorAndBindingsAllSelected,
@@ -98,6 +100,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
+    this._edgeless.clearSelectedBlocks();
+
     const currentSelected = this.blockSelectionState.selected;
     if (currentSelected.length !== 1) {
       this._setSelectionState([selected], false);
@@ -222,7 +226,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => !b.children.length);
+    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
     // always keep at least one frame block
     if (emptyBlocks.length === this._blocks.length) {
       emptyBlocks.shift();
@@ -286,6 +290,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
+    const selected = this._pick(e.x, e.y);
+    if (!selected) {
+      addText(this._edgeless, this._page, e);
+      return;
+    }
+
     if (
       e.raw.target &&
       e.raw.target instanceof HTMLElement &&

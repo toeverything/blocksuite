@@ -2,7 +2,7 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
-import type { BlobOptionsGetter } from './persistence/blob/index.js';
+import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
   DocProviderConstructor,
@@ -70,7 +70,7 @@ export interface StoreOptions<
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
-  blobOptionsGetter?: BlobOptionsGetter;
+  blobStorages?: ((id: string) => BlobStorage)[];
 }
 
 const flagsPreset = {
@@ -146,17 +146,6 @@ export class Store {
         })
     );
   }
-
-  connect = () => {
-    this.providers.forEach(provider => provider.connect?.());
-    this.connected = true;
-  };
-
-  disconnect = () => {
-    this.providers.forEach(provider => provider.disconnect?.());
-    this.connected = false;
-  };
-
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }

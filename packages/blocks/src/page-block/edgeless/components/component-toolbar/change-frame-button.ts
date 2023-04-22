@@ -2,6 +2,7 @@ import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
+import { FRAME_BACKGROUND_COLORS } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -18,15 +19,6 @@ import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
-
-export const FRAME_BACKGROUND_COLORS: CssVariableName[] = [
-  '--affine-background-secondary-color',
-  '--affine-tag-yellow',
-  '--affine-tag-red',
-  '--affine-tag-green',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-];
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]

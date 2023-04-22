@@ -2,17 +2,20 @@ import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type BlockHost, ShadowlessElement } from '../../__internal__/index.js';
+import {
+  type BlockHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '../../__internal__/index.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends ShadowlessElement {
+export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-image > affine-embed {
       display: block;
@@ -135,80 +138,76 @@ export class ImageBlockComponent extends ShadowlessElement {
     },
   };
 
+  static maxRetryCount = 3;
+
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
-  private waitImageUploaded() {
-    return new Promise<void>(resolve => {
-      // If we could not get message from awareness in 1000ms,
-      // we assume this image is not found.
-      const timer = setTimeout(resolve, 2000);
-
-      const isBlobUploadingOnInit =
-        this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
-
-      const disposeSlot = this.model.page.awarenessStore.slots.update.on(() => {
-        const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
-          this.model.sourceId
-        );
-
-        /**
-         * case:
-         * clientA send image, but network latency is high,
-         * clientB got ydoc, but doesn't get awareness,
-         * clientC has a good network, and send awareness because of cursor changed,
-         * clientB receives awareness change from clientC,
-         * this listener will be called,
-         * but clientB doesn't get uploading state from clientA.
-         */
-        if (
-          isBlobUploadingOnInit === isBlobUploading &&
-          isBlobUploading === false
-        ) {
-          return;
-        }
-
-        if (!isBlobUploading) {
-          clearTimeout(timer);
-          resolve();
-        }
-      });
-
-      this._imageReady.dispose = () => {
-        disposeSlot.dispose();
-        clearTimeout(timer);
-        resolve();
-      };
-    });
-  }
+  private _retryCount = 0;
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    const storage = await this.model.page.blobs;
-    assertExists(storage);
 
-    this._imageState = 'loading';
-    let url = await storage.get(this.model.sourceId);
-    if (!url) {
-      this._imageState = 'waitUploaded';
-      await this.waitImageUploaded();
-      this._imageState = 'loading';
-      url = await storage.get(this.model.sourceId);
-    }
-    if (url) {
-      this._source = url;
-      this._imageState = 'ready';
-    } else {
-      this._imageState = 'failed';
-    }
     if (width && height) {
       this.resizeImg.style.width = width + 'px';
       this.resizeImg.style.height = height + 'px';
     }
+  }
+
+  private _fetchError = (e: unknown) => {
+    // Do have the id but cannot find the blob
+    //  this is probably because the blob is not uploaded yet
+    this._imageState = 'waitUploaded';
+    this._retryCount++;
+    console.warn('Cannot find blob, retrying', this._retryCount);
+    if (this._retryCount < ImageBlockComponent.maxRetryCount) {
+      setTimeout(() => {
+        this._fetchImage();
+        // 1s, 2s, 3s
+      }, 1000 * this._retryCount);
+    } else {
+      console.error(e);
+      this._imageState = 'failed';
+    }
+  };
+
+  private _fetchImage = () => {
+    if (this._imageState === 'ready') {
+      return;
+    }
+    const storage = this.model.page.blobs;
+    storage
+      .get(this.model.sourceId)
+      .then(blob => {
+        if (blob) {
+          this._source = URL.createObjectURL(blob);
+          this._imageState = 'ready';
+        } else {
+          this._fetchError(new Error('Cannot find blob'));
+        }
+      })
+      .catch(this._fetchError);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._imageState = 'loading';
+    this._fetchImage();
+    this._disposables.add(
+      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
+    );
+  }
+
+  override disconnectedCallback() {
+    this._imageReady.dispose();
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
   }
 
   override render() {
@@ -251,11 +250,6 @@ export class ImageBlockComponent extends ShadowlessElement {
         </div>
       </affine-embed>
     `;
-  }
-
-  override disconnectedCallback() {
-    this._imageReady.dispose();
-    super.disconnectedCallback();
   }
 }
 

@@ -14,7 +14,10 @@ export function isVElement(element: unknown): element is HTMLElement {
 }
 
 export function isVLine(element: unknown): element is HTMLElement {
-  return element instanceof HTMLElement && element instanceof VirgoLine;
+  return (
+    element instanceof HTMLElement &&
+    (element instanceof VirgoLine || element.parentElement instanceof VirgoLine)
+  );
 }
 
 export function isVRoot(element: unknown): element is HTMLElement {
