@@ -26,7 +26,7 @@ import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const styles = css`
-  :host {
+  affine-database-select-cell-editing {
     z-index: 2;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
@@ -342,9 +342,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   };
 
   private _showSelectAction = (index: number) => {
-    const selectOption = this.shadowRoot
-      ?.querySelectorAll('.select-option')
-      .item(index);
+    const selectOption = this.querySelectorAll('.select-option').item(index);
     assertExists(selectOption);
 
     const action = new SelectActionPopup();

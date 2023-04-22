@@ -17,6 +17,7 @@ export interface PageMeta {
   createDate: number;
   /**
    * Note: YOU SHOULD NOT UPDATE THIS FIELD MANUALLY.
+   * @deprecated
    */
   subpageIds: string[];
 

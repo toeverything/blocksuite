@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 
 import {
   assertColumnWidth,
+  assertDatabaseCellNumberText,
   assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
   assertDatabaseSearching,
@@ -428,7 +429,9 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
 
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
     expect(await cell.innerText()).toBe('123');
@@ -492,15 +495,19 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
 
     await initDatabaseDynamicRowWithData(page, '123abc', true);
-    const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.innerText()).toBe('123');
+    getFirstColumnCell(page, 'number');
+    await assertDatabaseCellNumberText(page, {
+      text: '123',
+    });
 
     await switchColumnType(page, 'rich-text');
     await initDatabaseDynamicRowWithData(page, 'abc');
     await assertDatabaseCellRichTexts(page, { text: '123abc' });
 
     await switchColumnType(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
   });
 
   test('switch number to select', async ({ page }) => {
@@ -520,7 +527,9 @@ test.describe('switch column type', () => {
     expect(await selectCell.innerText()).toBe('abc');
 
     await switchColumnType(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
   });
 });
 
