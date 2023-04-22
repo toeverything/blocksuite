@@ -82,7 +82,7 @@ export function deleteModelsByRange(
     return;
   }
   if (blockRange.type === 'Block') {
-    return handleBlockSelectionBatchDelete(page, blockRange.models);
+    handleBlockSelectionBatchDelete(page, blockRange.models);
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -126,11 +126,6 @@ export function deleteModelsByRange(
   startModel.text.join(endModel.text);
   blockRange.models.slice(1).forEach(model => {
     page.deleteBlock(model);
-  });
-
-  return vEditor.setVRange({
-    index: blockRange.startOffset,
-    length: 0,
   });
 }
 
