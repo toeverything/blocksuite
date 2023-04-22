@@ -88,7 +88,7 @@ export function deleteModelsByRange(
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
   if (!startModel.text || !endModel.text) {
-    return;
+    throw new Error('startModel or endModel does not have text');
   }
 
   const vEditor = getVirgoByModel(startModel);
@@ -97,6 +97,25 @@ export function deleteModelsByRange(
   // Only select one block
   if (startModel === endModel) {
     page.captureSync();
+    if (
+      blockRange.startOffset === blockRange.endOffset &&
+      blockRange.startOffset > 0
+    ) {
+      // startModel.text.delete(blockRange.startOffset - 1, 1);
+      // vEditor.setVRange({
+      //   index: blockRange.startOffset - 1,
+      //   length: 0,
+      // });
+      return;
+    }
+    startModel.text.delete(
+      blockRange.startOffset,
+      blockRange.endOffset - blockRange.startOffset
+    );
+    vEditor.setVRange({
+      index: blockRange.startOffset,
+      length: 0,
+    });
     return;
   }
   page.captureSync();
