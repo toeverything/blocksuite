@@ -377,6 +377,10 @@ test.describe('reference node', () => {
   test('should not merge consecutive identical reference nodes for rendering', async ({
     page,
   }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2136',
+    });
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusRichText(page);
