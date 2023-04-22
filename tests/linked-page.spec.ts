@@ -373,6 +373,22 @@ test.describe('reference node', () => {
 </affine:page>`
     );
   });
+
+  test('should not merge consecutive identical reference nodes for rendering', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '[[');
+    await pressEnter(page);
+    await type(page, '[[');
+    await pressEnter(page);
+
+    const { refNode } = getLinkedPagePopover(page);
+    await assertRichTexts(page, ['  ']);
+    await expect(refNode).toHaveCount(2);
+  });
 });
 
 test.describe('linked page popover', () => {
