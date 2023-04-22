@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, type Page } from '@blocksuite/store';
 
-import { copyBlocks } from '../../__internal__/clipboard/util/utils.js';
+import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { showDatabaseModal } from '../../components/database-modal/index.js';
 import { toast } from '../../components/toast.js';

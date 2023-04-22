@@ -64,7 +64,7 @@ function toggleStyle(
 @customElement('affine-database-rich-text-cell')
 class TextCell extends DatabaseCellElement<Y.Text> {
   static override styles = css`
-    :host {
+    affine-database-rich-text-cell {
       display: flex;
       align-items: center;
       width: 100%;

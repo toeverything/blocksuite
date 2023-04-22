@@ -24,15 +24,15 @@ import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/std.js';
 import type { Clipboard } from './type.js';
 import {
-  createSurfaceClipboardItems,
-  getSurfaceClipboardData,
-  performNativeCopy,
-} from './util/index.js';
-import {
   clipboardData2Blocks,
   copyBlocks,
   getBlockClipboardInfo,
-} from './util/utils.js';
+} from './utils/commons.js';
+import {
+  createSurfaceClipboardItems,
+  getSurfaceClipboardData,
+  performNativeCopy,
+} from './utils/index.js';
 
 export class EdgelessClipboard implements Clipboard {
   private _page!: Page;

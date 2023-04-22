@@ -83,11 +83,13 @@ export function bindCommonHotkey(page: Page) {
   });
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
+    e.preventDefault();
     if (page.canUndo) clearSelection(page);
     page.undo();
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
+    e.preventDefault();
     if (page.canRedo) clearSelection(page);
     page.redo();
   });
