@@ -76,7 +76,6 @@ export default defineConfig({
           { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
           { text: '🚧 <code>@blocksuite/phasor</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/connector</code>', link: '' },
         ],
       },
       {

@@ -37,7 +37,7 @@ BlockSuite works very differently than traditional rich text frameworks. Feature
 - 📝 **Block-Based Editing**: BlockSuite breaks down rich content into discrete contenteditable blocks, avoiding pitfalls using traditional monolithic rich text container.
 - 🧬 **Intrinsically Collaborative**: By harnessing the power of CRDT, any application built with BlockSuite effortlessly supports real-time collaboration right from the start.
 - 🧩 **Framework Agnostic**: With UI components implemented using Web Components, BlockSuite provides editors that can be easily embedded and eliminates the risk of vendor lock-in.
-- 🔌 **Pluggable Persistence**: With its provider-based architecture, BlockSuite facilitates incremental state synchronization without explictly handling asynchronous requests.
+- 🎯 **Incremental State Sync**: The state updates in BlockSuite can be incrementally encoded as standardized binaries, enabling efficient data synchronization over various network protocols.
 - 📏 **Compact Rich Text**: BlockSuite builds its own rich text component. With minimal responsibilities that benefits from the block-based architecture, this component is light, simple and reliable.
 - 🎨 **Hybrid Infinite Canvas**: A high performance canvas-based renderer is also provided by BlockSuite, fulfilling needs for whiteboard functionalities.
 
