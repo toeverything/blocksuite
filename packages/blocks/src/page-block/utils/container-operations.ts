@@ -8,11 +8,11 @@ import {
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
-import type { VEditor } from '@blocksuite/virgo';
 
 import {
   almostEqual,
   asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
   getBlockElementByModel,
@@ -28,6 +28,7 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   type BlockRange,
@@ -456,7 +457,17 @@ function formatBlockRange(
   if (blockRange.type === 'Native') {
     const allTextUpdated = blockRange.models
       .filter(model => !matchFlavours(model, ['affine:code']))
-      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+      .map(
+        model =>
+          // We can not use `onModelTextUpdated` here because it is asynchronous, which
+          // will make updated event emit before we observe it.
+          new Promise(resolve => {
+            const vEditor = getVirgoByModel(model);
+            vEditor?.slots.updated.once(() => {
+              resolve(vEditor);
+            });
+          })
+      );
 
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
@@ -490,13 +501,13 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
-export function onModelTextUpdated(
+export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (vEditor: VEditor) => void
+  callback: (text: RichText) => void
 ) {
-  const vEditor = getVirgoByModel(model);
-  vEditor?.slots.updated.once(() => {
-    callback(vEditor);
+  const richText = await asyncGetRichTextByModel(model);
+  richText?.vEditor?.slots.updated.once(() => {
+    callback(richText);
   });
 }
 
