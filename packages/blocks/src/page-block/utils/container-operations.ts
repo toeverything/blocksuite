@@ -8,11 +8,11 @@ import {
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
+import type { VEditor } from '@blocksuite/virgo';
 
 import {
   almostEqual,
   asyncGetBlockElementByModel,
-  asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
   getBlockElementByModel,
@@ -28,7 +28,6 @@ import {
   type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   type BlockRange,
@@ -491,13 +490,13 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
-export async function onModelTextUpdated(
+export function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (text: RichText) => void
+  callback: (vEditor: VEditor) => void
 ) {
-  const richText = await asyncGetRichTextByModel(model);
-  richText?.vEditor?.slots.updated.once(() => {
-    callback(richText);
+  const vEditor = getVirgoByModel(model);
+  vEditor?.slots.updated.once(() => {
+    callback(vEditor);
   });
 }
 
