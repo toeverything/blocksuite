@@ -145,8 +145,8 @@ export const database: InitFn = (workspace: Workspace) => {
   const databaseId = page.addBlock(
     'affine:database',
     {
-      // columns: [col1, col2, col3],
       columns: [],
+      cells: {},
       titleColumnName: 'Title',
       titleColumnWidth: 200,
     },
@@ -191,9 +191,11 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
+  const num = new page.YText();
+  num.insert(0, '0.1');
   database.updateCell(p1, {
     columnId: col1,
-    value: 0.1,
+    value: num,
   });
 
   database.updateCell(p2, {

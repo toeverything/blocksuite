@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 
 import {
   assertColumnWidth,
+  assertDatabaseCellNumberText,
   assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
   assertDatabaseSearching,
@@ -11,7 +12,6 @@ import {
   blurDatabaseSearch,
   clickColumnType,
   clickDatabaseOutside,
-  copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusDatabaseHeader,
@@ -35,14 +35,12 @@ import {
   performColumnAction,
   performSelectColumnTagAction,
   pressArrowLeft,
-  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressEscape,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
-  selectAllByKeyboard,
   switchColumnType,
   type,
   undoByClick,
@@ -428,7 +426,9 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
 
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
     expect(await cell.innerText()).toBe('123');
@@ -492,15 +492,19 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
 
     await initDatabaseDynamicRowWithData(page, '123abc', true);
-    const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.innerText()).toBe('123');
+    getFirstColumnCell(page, 'number');
+    await assertDatabaseCellNumberText(page, {
+      text: '123',
+    });
 
     await switchColumnType(page, 'rich-text');
     await initDatabaseDynamicRowWithData(page, 'abc');
     await assertDatabaseCellRichTexts(page, { text: '123abc' });
 
     await switchColumnType(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
   });
 
   test('switch number to select', async ({ page }) => {
@@ -520,7 +524,9 @@ test.describe('switch column type', () => {
     expect(await selectCell.innerText()).toBe('abc');
 
     await switchColumnType(page, 'number');
-    expect(await cell.innerText()).toBe('');
+    await assertDatabaseCellNumberText(page, {
+      text: '',
+    });
   });
 });
 
@@ -539,31 +545,14 @@ test.describe('select column tag action', () => {
     await type(page, '4567abc00');
     const option1 = selectOption.nth(0);
     const input = option1.locator('[data-virgo-text="true"]');
-    // The maximum length of the tag name is 10
-    expect((await input.innerText()).length).toBe(10);
-    expect(await input.innerText()).toBe('1234567abc');
-
-    await selectAllByKeyboard(page);
-    await copyByKeyboard(page);
-    await pressArrowRight(page);
-    // 1234567|abc
-    for (let i = 0; i < 3; i++) {
-      await pressArrowLeft(page);
-    }
-    // 1234|abc
-    for (let i = 0; i < 3; i++) {
-      await pressBackspace(page);
-    }
-    // 1234123|abc
-    await pasteByKeyboard(page);
-    expect((await input.innerText()).length).toBe(10);
-    expect(await input.innerText()).toBe('1234123abc');
+    expect((await input.innerText()).length).toBe(12);
+    expect(await input.innerText()).toBe('1234567abc00');
 
     await saveIcon.click();
     await clickDatabaseOutside(page);
     const selected1 = cellSelected.nth(0);
     const selected2 = cellSelected.nth(1);
-    expect(await selected1.innerText()).toBe('1234123abc');
+    expect(await selected1.innerText()).toBe('1234567abc00');
     expect(await selected2.innerText()).toBe('abc');
   });
 

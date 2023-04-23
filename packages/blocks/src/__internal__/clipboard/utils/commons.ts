@@ -10,14 +10,14 @@ import {
   resetNativeSelection,
 } from '../../utils/index.js';
 import { ClipboardItem } from '../clipboard-item.js';
-import markdownUtils from './markdown-utils.js';
+import markdownUtils from './markdown.js';
 import {
   CLIPBOARD_MIMETYPE,
   createHTMLStringForCustomData,
   extractCustomDataFromHTMLString,
   isPureFileInClipboard,
   performNativeCopy,
-} from './pure-util.js';
+} from './pure.js';
 
 export function shouldClipboardHandlerContinue(page: Page) {
   const range = getCurrentBlockRange(page);

@@ -1,6 +1,8 @@
 import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { BlockHost } from '../../index.js';
+import { REFERENCE_NODE } from '../reference-node.js';
 import type { AffineTextSchema } from './types.js';
 
 export const attributeRenderer: AffineTextSchema['textRenderer'] =
@@ -24,10 +26,21 @@ export const attributeRenderer: AffineTextSchema['textRenderer'] =
       return html`<affine-link .host=${host} .delta=${delta}></affine-link>`;
     }
     if (attributes.reference) {
-      return html`<affine-reference
-        .host=${host}
-        .delta=${delta}
-      ></affine-reference>`;
+      // https://github.com/toeverything/blocksuite/issues/2136
+      return html`${repeat(
+        Array.from(delta.insert).map((_, index) => ({
+          delta: {
+            insert: REFERENCE_NODE,
+            attributes,
+          },
+          index,
+        })),
+        item => item.index,
+        item => html`<affine-reference
+          .host=${host}
+          .delta=${item.delta}
+        ></affine-reference>`
+      )}`;
     }
 
     return defaultTemplate;

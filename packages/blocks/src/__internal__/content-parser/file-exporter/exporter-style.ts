@@ -107,6 +107,6 @@ export const globalCSS = css`
   }
   body {
     font-family: var(--affine-font-family);
-    color: var(--affine-primary-color);
+    color: var(--affine-text-primary-color);
   }
 `;

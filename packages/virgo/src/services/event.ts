@@ -245,15 +245,13 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           ctx.attributes ?? ({} as TextAttributes)
         );
 
-        this._editor.slots.updated.once(() => {
-          this._editor.slots.vRangeUpdated.emit([
-            {
-              index: newVRange.index + data.length,
-              length: 0,
-            },
-            'input',
-          ]);
-        });
+        this._editor.slots.vRangeUpdated.emit([
+          {
+            index: newVRange.index + data.length,
+            length: 0,
+          },
+          'input',
+        ]);
       }
     }
   };

@@ -48,7 +48,7 @@ export default defineConfig({
             link: '/editor-ui-architecture',
             items: [
               {
-                text: '🚧 Host-Based Portability',
+                text: 'Host-Based Portability',
                 link: '/host-based-portability',
               },
               {
@@ -76,7 +76,6 @@ export default defineConfig({
           { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
           { text: '🚧 <code>@blocksuite/phasor</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/connector</code>', link: '' },
         ],
       },
       {
