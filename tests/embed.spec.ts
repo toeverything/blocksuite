@@ -1,7 +1,6 @@
 import './utils/declare-test-window.js';
 
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { Page } from '@playwright/test';
