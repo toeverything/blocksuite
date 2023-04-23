@@ -9,12 +9,15 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: 'Playground',
+        text: '🎢 Playground',
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
-      { text: 'Docs', link: '/introduction' },
+      { text: '📚 Docs', link: '/introduction' },
       { text: '🚧 API', link: '' },
-      { text: '🚧 Examples', link: '' },
+      {
+        text: '📣 Releases',
+        link: 'https://github.com/toeverything/blocksuite/releases',
+      },
     ],
 
     sidebar: [
