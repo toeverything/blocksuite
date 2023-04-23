@@ -5,11 +5,7 @@ import { getService } from '../../__internal__/service.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
 import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
-import {
-  clipboardData2Blocks,
-  copyBlocks,
-  shouldClipboardHandlerContinue,
-} from './utils/commons.js';
+import { clipboardData2Blocks, copyBlocks } from './utils/commons.js';
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
@@ -30,7 +26,8 @@ export class PageClipboard implements Clipboard {
   }
 
   private _onPaste = async (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page) || !e.clipboardData) {
+    const range = getCurrentBlockRange(this._page);
+    if (!e.clipboardData || !range) {
       return;
     }
     e.preventDefault();
@@ -41,9 +38,7 @@ export class PageClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    await deleteModelsByRange(this._page);
-
-    const range = getCurrentBlockRange(this._page);
+    deleteModelsByRange(this._page, range);
 
     const focusedBlockModel = range?.models[0];
     assertExists(focusedBlockModel);
@@ -54,26 +49,28 @@ export class PageClipboard implements Clipboard {
     this._page.captureSync();
   };
 
-  private _onCopy = (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page)) {
+  private _onCopy = (
+    e: ClipboardEvent,
+    range = getCurrentBlockRange(this._page)
+  ) => {
+    if (!range) {
       return;
     }
     e.preventDefault();
     this._page.captureSync();
 
-    const range = getCurrentBlockRange(this._page);
-    assertExists(range);
     copyBlocks(range);
 
     this._page.captureSync();
   };
 
   private _onCut = (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page)) {
+    const range = getCurrentBlockRange(this._page);
+    if (!range) {
       return;
     }
     e.preventDefault();
-    this._onCopy(e);
-    deleteModelsByRange(this._page);
+    this._onCopy(e, range);
+    deleteModelsByRange(this._page, range);
   };
 }
