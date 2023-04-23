@@ -190,6 +190,10 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     const vLines = Array.from(rootElement.querySelectorAll('v-line'));
     await Promise.all(vLines.map(line => line.updateComplete));
 
+    // We need to synchronize the selection immediately after rendering is completed,
+    // otherwise there is a possibility of an error in the cursor position
+    this._editor.rangeService.syncVRange();
+
     this._editor.slots.updated.emit();
   };
 }

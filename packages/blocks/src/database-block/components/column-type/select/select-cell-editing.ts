@@ -34,9 +34,6 @@ const styles = css`
   .affine-database-select-cell-select {
     font-size: var(--affine-font-sm);
   }
-  .affine-database-select-cell-select * {
-    box-sizing: border-box;
-  }
   .select-input-container {
     display: flex;
     align-items: center;
@@ -80,6 +77,15 @@ const styles = css`
     border-radius: 4px;
     color: var(--affine-black-90);
     background: var(--affine-tertiary-color);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .select-selected-text {
+    width: calc(100% - 16px);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   .select-selected > .close-icon {
     display: flex;
@@ -97,6 +103,10 @@ const styles = css`
     background: var(--affine-selected-color);
   }
   .select-option-new-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     height: 28px;
     padding: 2px 10px;
     border-radius: 4px;
@@ -130,7 +140,8 @@ const styles = css`
     display: flex;
   }
   .select-option-text-container {
-    flex: 1;
+    width: calc(100% - 28px);
+    overflow: hidden;
   }
   .select-option-text {
     display: none;
@@ -160,6 +171,12 @@ const styles = css`
   }
   .editing {
     background: var(--affine-hover-color);
+  }
+  .editing .select-option-text [data-virgo-text='true'] {
+    display: block;
+    white-space: pre !important;
+    overflow: unset;
+    text-overflow: unset;
   }
   .editing .select-option-icon {
     display: flex;
@@ -428,14 +445,14 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
             const style = styleMap({
               backgroundColor: item.color,
             });
-            return html`<span class="select-selected" style=${style}>
-              ${item.value}
+            return html`<div class="select-selected" style=${style}>
+              <div class="select-selected-text">${item.value}</div>
               <span
                 class="close-icon"
                 @click=${() => this._onDeleteSelected(selectedTag, item)}
                 >${DatabaseSearchClose}</span
               >
-            </span>`;
+            </div>`;
           })}
           <input
             class="select-input"

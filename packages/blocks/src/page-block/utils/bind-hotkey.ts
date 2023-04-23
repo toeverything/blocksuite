@@ -28,6 +28,7 @@ import {
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
+  getVirgoByModel,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
@@ -378,7 +379,12 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     blockRange.models.slice(1, -1).forEach(model => {
       page.deleteBlock(model);
     });
-    focusBlockByModel(endModel, 'start');
+
+    // Virgo will addRange after update finished so we need to wait for it.
+    const vEditor = getVirgoByModel(endModel);
+    vEditor?.slots.updated.once(() => {
+      focusBlockByModel(endModel, 'start');
+    });
     return;
   });
 

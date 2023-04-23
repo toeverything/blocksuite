@@ -1,5 +1,5 @@
 import { PlusIcon } from '@blocksuite/global/config';
-import type { DisposableGroup } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -66,14 +66,14 @@ export type ColumnConfig = {
 export function initAddNewRecordHandlers(
   element: HTMLElement,
   container: HTMLElement,
-  disposables: DisposableGroup,
   addRow: (index: number) => void
 ) {
   let dragConfig: ColumnConfig | null = null;
   let dragPreview: NewRecordPreview | null = null;
 
   const database = container.closest('affine-database');
-  assertExists(database);
+  if (!database) return;
+
   const rowContainer = database.querySelector<HTMLElement>(
     '.affine-database-block-rows'
   );
@@ -152,6 +152,7 @@ export function initAddNewRecordHandlers(
     }
   };
 
+  const disposables = new DisposableGroup();
   const stopPropagation = (e: Event) => {
     e.stopPropagation();
   };
@@ -162,6 +163,7 @@ export function initAddNewRecordHandlers(
   disposables.addFromEvent(element, 'dragstart', onDragStart);
   disposables.addFromEvent(element, 'drag', onDrag);
   disposables.addFromEvent(element, 'dragend', onDragEnd);
+  return disposables;
 }
 
 function getClosestRow(
