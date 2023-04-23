@@ -47,9 +47,9 @@ Or equivalently, you can also use the declarative style:
 
 However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and [data persistence](./data-persistence) features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
 
-- The `packages/store` package is a data store built for general-purpose state management.
-- The `packages/blocks` package holds the default BlockSuite editable blocks.
-- The `packages/editor` package ships a complete BlockSuite-based editor.
+- The [`@blocksuite/store`](https://github.com/toeverything/blocksuite/tree/master/packages/store) package is a data store built for general-purpose state management.
+- The [`@blocksuite/blocks`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks) package holds the default BlockSuite editable blocks.
+- The [`@blocksuite/editor`](https://github.com/toeverything/blocksuite/tree/master/packages/editor) package ships a complete BlockSuite-based editor.
 
 ```sh
 pnpm i \
