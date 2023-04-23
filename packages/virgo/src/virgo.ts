@@ -61,6 +61,7 @@ export class VEditor<
     updated: Slot;
     vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
+    scrollUpdated: Slot<number>;
   };
 
   get yText() {
@@ -155,9 +156,11 @@ export class VEditor<
       updated: new Slot(),
       vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
+      scrollUpdated: new Slot<number>(),
     };
 
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
+    this.slots.scrollUpdated.on(this.rangeService.onScrollUpdated);
   }
 
   mount(rootElement: HTMLElement) {

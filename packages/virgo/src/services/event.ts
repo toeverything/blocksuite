@@ -89,6 +89,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
+    rootElement.addEventListener('scroll', this._onScroll);
 
     this.bindHandlers();
   };
@@ -288,5 +289,9 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       newVRange,
       this._editor as VEditor
     );
+  };
+
+  private _onScroll = (event: Event) => {
+    this._editor.slots.scrollUpdated.emit(this._editor.rootElement.scrollLeft);
   };
 }
