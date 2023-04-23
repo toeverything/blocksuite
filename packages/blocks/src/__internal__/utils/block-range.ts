@@ -3,9 +3,8 @@ import {
   type BaseBlockModel,
   type Page,
 } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
+import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import type { RichText } from '../rich-text/rich-text.js';
 import {
   getDefaultPage,
   getModelByElement,
@@ -147,6 +146,7 @@ export function nativeRangeToBlockRange(range: Range): BlockRange | null {
   const endOffset = endVRange.index + endVRange.length;
   return {
     type: 'Native',
+    // nativeRange: range,
     startOffset,
     endOffset,
     models,
@@ -255,8 +255,10 @@ export function getExtendBlockRange(
 export function getVRangeByNode(node: Node): VRange | null {
   if (!node.parentElement) return null;
 
-  const richText = node.parentElement.closest('rich-text') as RichText;
-  const vEditor = richText?.vEditor;
+  const virgoElement: VEditor['_rootElement'] = node.parentElement.closest(
+    '[data-virgo-root="true"]'
+  );
+  const vEditor = virgoElement?.virgoEditor;
   if (!vEditor) return null;
 
   return vEditor.getVRange();

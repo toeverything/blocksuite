@@ -87,6 +87,7 @@ export function deleteModelsByRange(
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
+  // TODO handle database
   if (!startModel.text || !endModel.text) {
     throw new Error('startModel or endModel does not have text');
   }
