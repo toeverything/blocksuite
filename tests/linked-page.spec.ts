@@ -373,6 +373,26 @@ test.describe('reference node', () => {
 </affine:page>`
     );
   });
+
+  test('should not merge consecutive identical reference nodes for rendering', async ({
+    page,
+  }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2136',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '[[');
+    await pressEnter(page);
+    await type(page, '[[');
+    await pressEnter(page);
+
+    const { refNode } = getLinkedPagePopover(page);
+    await assertRichTexts(page, ['  ']);
+    await expect(refNode).toHaveCount(2);
+  });
 });
 
 test.describe('linked page popover', () => {

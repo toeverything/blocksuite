@@ -1,9 +1,10 @@
 {
   "name": "@blocksuite/connector",
-  "version": "0.5.0-alpha.3",
+  "version": "0.5.0-alpha.4",
   "description": "Library for creating orthogonal connectors with pathfinding support",
   "main": "src/index.ts",
   "type": "module",
+  "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc",
     "test:unit": "vitest --run",

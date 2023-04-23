@@ -21,7 +21,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
-    if (origin === 'native') {
+    if (origin !== 'other') {
       return;
     }
 

@@ -9,7 +9,7 @@ import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { copyBlocks } from '../../../__internal__/clipboard/util/utils.js';
+import { copyBlocks } from '../../../__internal__/clipboard/utils/commons.js';
 import { toast } from '../../../components/toast.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type {

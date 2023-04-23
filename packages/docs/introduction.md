@@ -10,9 +10,11 @@ BlockSuite introduces a new paradigm for rich text editing known as block-based 
 
 ![block-based-editing](./images/block-based-editing.png)
 
-For example, in a BlockSuite document containing two paragraphs, an image, and a table with ten text cells, you can have 12 rich text editor instances coexisting. The image component can be implemented using any regular UI framework without needing to be placed within a `contenteditable` element. This design allows for seamless integration and interaction between various components, while maintaining compatibility and stability across different UI frameworks.
+For example, in a BlockSuite-based document containing two paragraphs, an image, and a table with 10 text rows, you can have 12 rich text editor instances coexisting. The image component can be implemented using any common UI framework without needing to be placed within a `contenteditable` container. This allows for seamless integration and interaction between various components, while maintaining compatibility and stability across different UI frameworks.
 
 To further enhance block-based editing functionality, BlockSuite has also developed its own lightweight rich text editing component called _[Virgo](https://github.com/toeverything/blocksuite/tree/master/packages/virgo)_. It's a web component designed to function like an input box for flat rich text content, rather than a heavy rich text container. This significantly reduces redundancy, allowing for stable rich text editing capability to be achieved with minimal code. In practice, you can use any UI framework to build collaborative editors by embedding Virgo and reusing the BlockSuite data store.
+
+![flat-rich-text-components](./images/flat-rich-text-components.png)
 
 Block-based editing enables the use of popular UI frameworks for rendering nested block content while avoiding the instability often associated with `contenteditable` elements.
 
@@ -44,8 +46,8 @@ Based on the CRDT-native architecture design, BlockSuite can effectively separat
 This is demonstrated in two ways:
 
 - The block tree in BlockSuite provides a subscription-based API, allowing it to be used as a state store with different frontend frameworks. This provides a development experience similar to using popular state management libraries.
-- The AFFiNE Editor, included with BlockSuite, uses [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) to build its foundational block components. This means that not only can any frontend framework be used to develop blocks within AFFiNE, but the editor can also be embedded as a standardized web component in any framework.
+- The AFFiNE editor, included with BlockSuite, uses [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) to build its foundational block components. This means that not only can any frontend framework be used to develop blocks within AFFiNE, but the editor can also be embedded as a standardized web component in any framework.
 
-However, the rendering capabilities in BlockSuite are not limited to the DOM. For example, to support the whiteboard feature in AFFiNE, BlockSuite has implemented the _Phasor_ rendering library. This library enables the rendering of the CRDT model onto a canvas and allows it to share historical state with the main document.
+However, the rendering capabilities in BlockSuite are not limited to the DOM. For example, to support the whiteboard feature in AFFiNE, BlockSuite has implemented the _[Phasor](https://github.com/toeverything/blocksuite/tree/master/packages/phasor)_ rendering library. This library enables the rendering of the CRDT model onto a canvas and allows it to share historical state with the main document.
 
 To summarize, BlockSuite offers excellent flexibility in rendering. It allows for seamless integration with various UI frameworks and provides easy embedding of the collaborative editor into other applications.
