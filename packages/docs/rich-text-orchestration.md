@@ -49,7 +49,7 @@ In BlockSuite, regardless of the complexity of the block tree, the rendered Virg
 
 BlockSuite can determine that the selection passes through the rich text instances `[Text1, Text2, Text3]` and also recognize the selected parts of `Text1` and `Text3`, respectively.
 
-This approach enables cross-rich text instance operations through a simple block update API that aligns with unidirectional data flow (as opposed to directly modifying the DOM view). For instance, if the user presses the delete key at this juncture, the complete operation process executed in the host is as follows:
+This approach enables cross-rich text instance operations through a simple block update API that aligns with [unidirectional data flow](./unidirectional-data-flow) (as opposed to directly modifying the DOM view). For instance, if the user presses the delete key at this juncture, the complete operation process executed in the host is as follows:
 
 1. Disable the native DOM deletion behavior using `e.preventDefault()`.
 2. Manually delete the right half of the content in the first block.
