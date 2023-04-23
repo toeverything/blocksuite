@@ -55,7 +55,7 @@ type ExtendBlockRange = {
   models: [BaseBlockModel];
 };
 
-export function getCurrentBlockRange(page: Page): BlockRange | null {
+export function getCurrentBlockRange(page: Page) {
   // check exist block selection
   const pageBlock = getDefaultPage(page);
   if (pageBlock) {
@@ -68,7 +68,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
       .filter(Boolean);
     if (models.length) {
       return {
-        type: 'Block',
+        type: 'Block' as const,
         startOffset: 0,
         endOffset: models[models.length - 1].text?.length ?? 0,
         models,
@@ -78,7 +78,11 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   // check exist native selection
   if (hasNativeSelection()) {
     const range = getCurrentNativeRange();
-    return nativeRangeToBlockRange(range);
+    const blockRange = nativeRangeToBlockRange(range);
+    if (!blockRange) {
+      return null;
+    }
+    return { ...blockRange, nativeRange: range };
   }
   return null;
 }
@@ -127,7 +131,7 @@ export function blockRangeToNativeRange(
   return range;
 }
 
-export function nativeRangeToBlockRange(range: Range): BlockRange | null {
+export function nativeRangeToBlockRange(range: Range) {
   // TODO check range is in page
   const models = getModelsByRange(range);
   if (!models.length) {
@@ -146,11 +150,10 @@ export function nativeRangeToBlockRange(range: Range): BlockRange | null {
   const endOffset = endVRange.index + endVRange.length;
   return {
     type: 'Native',
-    // nativeRange: range,
     startOffset,
     endOffset,
     models,
-  };
+  } satisfies BlockRange;
 }
 
 /**
