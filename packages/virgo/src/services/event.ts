@@ -256,12 +256,18 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       }
     }
   };
-
+  private _firstRecomputeInFrame = true;
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
     if (this._editor.isReadonly || this._isComposing) return;
-    this._onSelectionChange();
+    if (this._firstRecomputeInFrame) {
+      this._firstRecomputeInFrame = false;
+      this._onSelectionChange();
+      requestAnimationFrame(() => {
+        this._firstRecomputeInFrame = true;
+      });
+    }
     const vRange = this._editor.getVRange();
     if (!vRange) return;
 
