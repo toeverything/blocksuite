@@ -4,6 +4,7 @@ import { html } from 'lit';
 import * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
+import { ZERO_WIDTH_SPACE } from './consts.js';
 import {
   VirgoAttributeService,
   VirgoDeltaService,
@@ -223,7 +224,7 @@ export class VEditor<
         index += text.textContent.length;
       }
 
-      index += 1;
+      index += vLine.textContent === ZERO_WIDTH_SPACE ? 0 : 1;
     }
 
     throw new Error('failed to find leaf');
