@@ -52,7 +52,7 @@ export default defineConfig({
                 link: '/host-based-portability',
               },
               {
-                text: '🚧 Rich Text Orchestration',
+                text: 'Rich Text Orchestration',
                 link: '/rich-text-orchestration',
               },
               {

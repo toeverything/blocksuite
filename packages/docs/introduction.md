@@ -14,6 +14,8 @@ For example, in a BlockSuite-based document containing two paragraphs, an image,
 
 To further enhance block-based editing functionality, BlockSuite has also developed its own lightweight rich text editing component called _[Virgo](https://github.com/toeverything/blocksuite/tree/master/packages/virgo)_. It's a web component designed to function like an input box for flat rich text content, rather than a heavy rich text container. This significantly reduces redundancy, allowing for stable rich text editing capability to be achieved with minimal code. In practice, you can use any UI framework to build collaborative editors by embedding Virgo and reusing the BlockSuite data store.
 
+![flat-rich-text-components](./images/flat-rich-text-components.png)
+
 Block-based editing enables the use of popular UI frameworks for rendering nested block content while avoiding the instability often associated with `contenteditable` elements.
 
 ## CRDT-Driven State Management
