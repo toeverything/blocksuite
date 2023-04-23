@@ -30,6 +30,11 @@ export interface VEditorOptions {
   defaultMode: 'rich' | 'pure';
 }
 
+type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
+  HTMLElement & {
+    virgoEditor: VEditor<T>;
+  };
+
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
 > {
@@ -38,7 +43,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
-  private _rootElement: HTMLElement | null = null;
+  private _rootElement: VirgoElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
   private _eventService: VirgoEventService<TextAttributes> =
@@ -165,7 +170,9 @@ export class VEditor<
   }
 
   mount(rootElement: HTMLElement) {
-    this._rootElement = rootElement;
+    const virgoElement = rootElement as VirgoElement<TextAttributes>;
+    virgoElement.virgoEditor = this;
+    this._rootElement = virgoElement;
     this._rootElement.replaceChildren();
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
