@@ -56,7 +56,7 @@ export default defineConfig({
                 link: '/rich-text-orchestration',
               },
               {
-                text: '🚧 Framework Integration',
+                text: 'Framework Integration',
                 link: '/framework-integration',
               },
             ],
@@ -81,9 +81,14 @@ export default defineConfig({
       {
         text: 'Developing BlockSuite',
         items: [
-          { text: '🚧 Building Packages', link: '' },
-          { text: '🚧 Running Tests', link: '' },
-          { text: '🚧 Making Contributions', link: '' },
+          {
+            text: 'Building Packages',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md',
+          },
+          {
+            text: 'Running Tests',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#testing',
+          },
         ],
       },
     ],

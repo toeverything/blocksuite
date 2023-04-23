@@ -1,6 +1,6 @@
 # Rich Text Orchestration
 
-In typical web applications, it is usually unnecessary to address the native drag-select highlight state as a type of user input. Nonetheless, in the case of rich content editors, these states are essential. That's why BlockSuite not only offers the Virgo rich text component but also establishes a corresponding cross-block selection state processing mechanism on the host. This enables users to engage in intuitive editing.
+In typical web applications, it is usually unnecessary to address the native drag-select highlight state as a type of user input. However, in the case of rich content editors, these states are essential. That's why BlockSuite not only offers the Virgo rich text component but also establishes a corresponding cross-block selection state processing mechanism on the host. This enables users to engage in intuitive editing.
 
 Below we will introduce how BlockSuite models complex structures of rich text documents.
 
@@ -56,7 +56,7 @@ This approach enables cross-rich text instance operations through a simple block
 3. Manually delete the second block.
 4. Manually delete the left half of the content in the third block.
 
-Subsequently, the UI components will be updated based on the slot events triggered by these operations..
+Subsequently, the UI components will be updated based on the slot events triggered by these operations.
 
 Since`page` records all block operations that occur at this time, the cross-block updates implemented in this manner can be undone and redone reliably.
 
