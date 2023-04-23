@@ -48,8 +48,8 @@ export default defineConfig({
             link: '/editor-ui-architecture',
             items: [
               {
-                text: 'Host-Based Portability',
-                link: '/host-based-portability',
+                text: 'Editors as Hosts',
+                link: '/editors-as-hosts',
               },
               {
                 text: 'Rich Text Orchestration',
@@ -61,7 +61,10 @@ export default defineConfig({
               },
             ],
           },
-          { text: '🚧 Defining Editable Block', link: '' },
+          {
+            text: 'Defining Editable Blocks',
+            link: '/defining-editable-blocks',
+          },
         ],
       },
       {

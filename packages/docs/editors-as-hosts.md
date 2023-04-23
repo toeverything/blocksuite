@@ -1,4 +1,4 @@
-# Host-Based Portability
+# 🚧 Editors as Hosts
 
 ::: info
 🚧 The implementation of this section is still under development and may be subject to change.
