@@ -51,7 +51,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-white-90);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
