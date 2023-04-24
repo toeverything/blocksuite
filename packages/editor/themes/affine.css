@@ -7,6 +7,13 @@
 
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 :root {
+  --affine-editor-width: 720px;
+
+  --affine-theme-mode: light;
+  --affine-editor-mode: page;
+  /* --affine-palette-transparent: special values added for the sake of logical consistency. */
+  --affine-palette-transparent: #00000000;
+
   --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
     0px 3px 16px -6px rgba(24, 39, 75, 0.04);
   --affine-modal-shadow: 0px 4px 24px #161616;
@@ -39,7 +46,7 @@
   --affine-popover-radius: 10px;
   --affine-zoom: 1;
   --affine-scale: calc(1 / var(--affine-zoom));
-  --affine-theme-mode: light;
+
   --affine-brand-color: #5438ff;
   --affine-tertiary-color: #f3f0ff;
   --affine-primary-color: #5438ff;
