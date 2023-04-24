@@ -668,3 +668,19 @@ test('copy when text frame active in edgeless', async ({ page }) => {
   await pasteByKeyboard(page, false);
   await assertText(page, '5551234');
 });
+
+test('copy and paste to selection block selection', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2265',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page, false);
+  await assertRichTexts(page, ['1234', '']);
+});
