@@ -227,8 +227,25 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           } else {
             const [text] = this._editor.getTextPoint(newVRange.index);
             const vText = text.parentElement?.closest('v-text');
-            if (vText && vText.str !== text.textContent) {
-              text.textContent = vText.str;
+            if (vText) {
+              if (vText.str !== text.textContent) {
+                text.textContent = vText.str;
+              }
+            } else {
+              const forgedVText = text.parentElement?.closest(
+                '[data-virgo-text="true"]'
+              );
+              if (forgedVText instanceof HTMLElement) {
+                if (forgedVText.dataset.virgoTextValue) {
+                  if (forgedVText.dataset.virgoTextValue !== text.textContent) {
+                    text.textContent = forgedVText.dataset.virgoTextValue;
+                  }
+                } else {
+                  throw new Error(
+                    'We detect a forged v-text node but it has no data-virgo-text-value attribute.'
+                  );
+                }
+              }
             }
           }
 

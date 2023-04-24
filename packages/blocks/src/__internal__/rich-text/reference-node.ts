@@ -185,6 +185,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         class="affine-reference-title"
         data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
+        data-virgo-text-value=${ZERO_WIDTH_NON_JOINER}
         >${ZERO_WIDTH_NON_JOINER}</span
       ></span
     >`;

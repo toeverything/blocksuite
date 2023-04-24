@@ -136,23 +136,6 @@ export class RichText extends ShadowlessElement {
 
           ctx.attributes = attributes ?? null;
         }
-
-        if (vRange.index >= 0) {
-          const range = getCurrentNativeRange();
-          const container = range.startContainer;
-
-          if (
-            container instanceof Text &&
-            container.parentElement?.dataset.virgoText === 'true'
-          ) {
-            const [text] = vEditor.getTextPoint(vRange.index);
-            const affineReference =
-              text.parentElement?.closest('affine-reference');
-            if (affineReference && text.textContent !== ZERO_WIDTH_NON_JOINER) {
-              text.textContent = ZERO_WIDTH_NON_JOINER;
-            }
-          }
-        }
         return ctx;
       },
     });
