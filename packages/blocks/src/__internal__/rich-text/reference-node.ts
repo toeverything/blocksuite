@@ -69,8 +69,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       white-space: break-spaces;
     }
 
+    .affine-reference-title {
+      color: var(--affine-text-primary-color);
+    }
     .affine-reference-title::before {
       content: attr(data-title);
+      color: var(--affine-link-color);
     }
   `;
 
