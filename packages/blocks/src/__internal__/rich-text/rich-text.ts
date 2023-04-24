@@ -1,9 +1,9 @@
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
-import { VEditor, ZERO_WIDTH_NON_JOINER } from '@blocksuite/virgo';
+import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { type BlockHost, getCurrentNativeRange } from '../utils/index.js';
+import { type BlockHost } from '../utils/index.js';
 import { ShadowlessElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
