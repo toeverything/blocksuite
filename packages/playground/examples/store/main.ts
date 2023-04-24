@@ -1,7 +1,10 @@
-import type { BaseBlockModel,Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { type Page,Workspace } from '@blocksuite/store';
 
-import { TodoSchema } from './schema';
+import {
+  type TodoContainerBlockModel,
+  type TodoItemBlockModel,
+  TodoSchema,
+} from './schema';
 
 function initPage() {
   const workspace = new Workspace({ id: 'todo' });
@@ -11,7 +14,7 @@ function initPage() {
   return page;
 }
 
-function bindEvents(page: Page, container: BaseBlockModel) {
+function bindEvents(page: Page, container: TodoContainerBlockModel) {
   const addInput = document.querySelector('.input-add') as HTMLInputElement;
   const addButton = document.querySelector('.button-add') as HTMLButtonElement;
   const containerDiv = document.querySelector('.container') as HTMLDivElement;
@@ -19,7 +22,7 @@ function bindEvents(page: Page, container: BaseBlockModel) {
     const content = addInput.value;
     if (content !== '') {
       const id = page.addBlock('todo:item', { content }, container);
-      const todoItemBlock = page.getBlockById(id);
+      const todoItemBlock = page.getBlockById(id) as TodoItemBlockModel;
       todoItemBlock.propsUpdated.on(() => {
         render(container);
       });
@@ -30,23 +33,25 @@ function bindEvents(page: Page, container: BaseBlockModel) {
   containerDiv.addEventListener('click', event => {
     const target = event.target as HTMLElement;
     if (target.classList.contains('button-done')) {
-      const todoItemBlock = page.getBlockById(target.parentElement?.dataset.id);
+      const todoItemBlock = page.getBlockById(
+        target.parentElement?.dataset.id as string
+      ) as TodoItemBlockModel;
       page.updateBlock(todoItemBlock, { done: !todoItemBlock.done });
     }
   });
 }
 
-function todoItemTemplate(todo: BaseBlockModel) {
+function todoItemTemplate(todo: TodoItemBlockModel) {
   return `<div class="todo-item" data-id="${todo.id}">
   <button class="button-done">done</button>
   <span class="content ${todo.done ? 'done' : ''}">${todo.content}</span>
 </div>`;
 }
 
-function render(container: BaseBlockModel) {
-  const todoBlocks = container.children;
+function render(container: TodoContainerBlockModel) {
+  const todoBlocks = container.children as Array<TodoItemBlockModel>;
   const todoDivs = todoBlocks
-    .map((block: BaseBlockModel) => todoItemTemplate(block))
+    .map((block: TodoItemBlockModel) => todoItemTemplate(block))
     .join('\n');
   const containerDiv = document.querySelector('.container') as HTMLDivElement;
   containerDiv.innerHTML = todoDivs;
@@ -55,7 +60,9 @@ function render(container: BaseBlockModel) {
 function main() {
   const page = initPage();
   window.page = page;
-  const container = page.getBlockByFlavour('todo:container')[0];
+  const container = page.getBlockByFlavour(
+    'todo:container'
+  )[0] as TodoContainerBlockModel;
   bindEvents(page, container);
   container.childrenUpdated.on(() => {
     render(container);

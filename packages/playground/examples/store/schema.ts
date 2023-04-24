@@ -1,4 +1,4 @@
-import { defineBlockSchema } from '@blocksuite/store';
+import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 const TodoContainerBlockSchema = defineBlockSchema({
@@ -12,8 +12,8 @@ const TodoContainerBlockSchema = defineBlockSchema({
 
 const TodoItemBlockSchema = defineBlockSchema({
   flavour: 'todo:item',
-  props: (content: string) => ({
-    content: content,
+  props: () => ({
+    content: '',
     done: false,
   }),
   metadata: {
@@ -24,3 +24,7 @@ const TodoItemBlockSchema = defineBlockSchema({
 });
 
 export const TodoSchema = [TodoContainerBlockSchema, TodoItemBlockSchema];
+export type TodoContainerBlockModel = SchemaToModel<
+  typeof TodoContainerBlockSchema
+>;
+export type TodoItemBlockModel = SchemaToModel<typeof TodoItemBlockSchema>;
