@@ -13,23 +13,21 @@ export class EdgelessToolIconButton extends LitElement {
       align-items: center;
       padding: 4px;
       color: var(--affine-text-secondary-color);
-      margin-right: 8px;
-      margin-top: 8px;
-      margin-bottom: 8px;
+      margin: 8px;
       border-radius: 5px;
       cursor: pointer;
-    }
-
-    .icon-container:first-child {
-      margin-left: 8px;
     }
 
     .icon-container:hover {
       background: var(--affine-hover-color);
     }
 
-    .icon-container[active] {
+    .icon-container.active-mode-color[active] {
       color: var(--affine-primary-color);
+    }
+
+    .icon-container.active-mode-background[active] {
+      background: var(--affine-hover-color);
     }
 
     .icon-container[disabled] {
@@ -49,26 +47,34 @@ export class EdgelessToolIconButton extends LitElement {
   @property()
   active = false;
 
-  private _dispatchClickEvent() {
-    if (this.disabled) return;
+  @property()
+  activeMode: 'color' | 'background' = 'color';
 
-    this.dispatchEvent(
-      new CustomEvent<void>('tool.click', {
-        composed: true,
-        bubbles: true,
-      })
+  constructor() {
+    super();
+
+    this.addEventListener(
+      'click',
+      event => {
+        if (this.disabled) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+      },
+      { capture: true }
     );
   }
 
   override render() {
     const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
+    const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
+
     return html`
       <div
-        class="icon-container has-tool-tip"
+        class=${classnames}
         role="button"
         ?disabled=${this.disabled}
         ?active=${this.active}
-        @click=${this._dispatchClickEvent}
       >
         <slot></slot>
         ${tooltip
