@@ -53,7 +53,7 @@ export class EdgelessShapeMenu extends LitElement {
               .disabled=${disabled}
               .tooltip=${tooltip}
               .active=${this.selectedShape === name}
-              @tool.click=${() => {
+              @click=${() => {
                 if (disabled) return;
 
                 this._onSelect(name);
