@@ -1,5 +1,12 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 export const VARIABLES = [
+  '--affine-editor-width',
+
+  '--affine-theme-mode',
+  '--affine-editor-mode',
+  /* --affine-palette-transparent: special values added for the sake of logical consistency. */
+  '--affine-palette-transparent',
+
   '--affine-popover-shadow',
   '--affine-modal-shadow',
   '--affine-tooltip-shadow',
@@ -22,7 +29,7 @@ export const VARIABLES = [
   '--affine-popover-radius',
   '--affine-zoom',
   '--affine-scale',
-  '--affine-theme-mode',
+
   '--affine-brand-color',
   '--affine-primary-color',
   '--affine-secondary-color',
@@ -103,9 +110,6 @@ export const VARIABLES = [
   '--affine-palette-shape-black',
   '--affine-palette-shape-grey',
   '--affine-tooltip',
-
-  // --affine-palette-transparent: special values added for the sake of logical consistency.
-  '--affine-palette-transparent',
 ] as const;
 
 type VariablesType = typeof VARIABLES;
