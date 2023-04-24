@@ -1,4 +1,4 @@
-import { type Page,Workspace } from '@blocksuite/store';
+import { type Page, Workspace } from '@blocksuite/store';
 
 import {
   type TodoContainerBlockModel,
@@ -59,7 +59,6 @@ function render(container: TodoContainerBlockModel) {
 
 function main() {
   const page = initPage();
-  window.page = page;
   const container = page.getBlockByFlavour(
     'todo:container'
   )[0] as TodoContainerBlockModel;
