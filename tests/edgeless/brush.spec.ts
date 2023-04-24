@@ -94,7 +94,7 @@ test('add brush element with different size', async ({ page }) => {
   await switchEditorMode(page);
 
   await setMouseMode(page, 'brush');
-  await selectBrushSize(page, 16);
+  await selectBrushSize(page, 10);
   const color = '--affine-palette-line-blue';
   await selectBrushColor(page, color);
 
@@ -106,12 +106,12 @@ test('add brush element with different size', async ({ page }) => {
     await pickColorAtPoints(page, [
       // Select two points on the top and bottom border of the line,
       // their color should be the same as the specified color
-      [110, 92],
-      [110, 107],
+      [110, 95],
+      [110, 104],
       // Select two points close to the upper and lower boundaries of the line,
       // their color should be different from the specified color
-      [110, 91],
-      [110, 108],
+      [110, 94],
+      [110, 105],
     ]);
 
   await assertEdgelessColorSameWithHexColor(page, color, topEdge);
@@ -134,7 +134,7 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   await updateExistedBrushElementSize(page, 'thick');
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 116, 116]);
+  await assertEdgelessHoverRect(page, [98, 98, 110, 110]);
 
   // change to thin
   await page.mouse.click(110, 110);

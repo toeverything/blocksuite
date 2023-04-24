@@ -214,8 +214,8 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function selectBrushSize(page: Page, size: 4 | 16) {
-  const sizeMap = { 4: 'thin', 16: 'thick' };
+export async function selectBrushSize(page: Page, size: 4 | 10) {
+  const sizeMap = { 4: 'thin', 10: 'thick' };
   const sizeButton = page.locator(
     `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
   );
