@@ -84,7 +84,7 @@ if (isE2E) {
   Object.defineProperty(globalThis, 'rebuildPageTree', {
     value: async function rebuildPageTree(doc: Y.Doc, pages: string[]) {
       const pageTree = doc
-        .getMap<Y.Array<Y.Map<any>>>('space:meta')
+        .getMap<Y.Array<Y.Map<unknown>>>('space:meta')
         .get('pages');
       if (pageTree) {
         const pageIds = pageTree.map(p => p.get('id') as string).filter(v => v);
