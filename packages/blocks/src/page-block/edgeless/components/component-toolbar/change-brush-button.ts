@@ -51,7 +51,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-white-90);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -86,8 +86,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .brush-size-button .thick {
-      width: 16px;
-      height: 16px;
+      width: 10px;
+      height: 10px;
     }
   `;
 
@@ -161,7 +161,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Thin'}
-        @tool.click=${() => this._setBrushSize(BrushSize.Thin)}
+        @click=${() => this._setBrushSize(BrushSize.Thin)}
       >
         <div
           class="brush-size-button"
@@ -172,7 +172,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Thick'}
-        @tool.click=${() => this._setBrushSize(BrushSize.Thick)}
+        @click=${() => this._setBrushSize(BrushSize.Thick)}
       >
         <div
           class="brush-size-button"
@@ -185,7 +185,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
-        @tool.click=${() => this._colorPanelPopper?.toggle()}
+        @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="brush-size-button">
           <div class="thick" style=${styleMap(style)}></div>
