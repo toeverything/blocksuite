@@ -433,12 +433,12 @@ test('ZERO_WIDTH_SPACE should be counted by one cursor position', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.waitForTimeout(100);
+  await waitNextFrame(page);
   await page.keyboard.press(`Shift+Enter`, { delay: 50 });
   await type(page, 'asdfg');
-  await page.waitForTimeout(100);
+  await waitNextFrame(page);
   await pressEnter(page);
-  await page.waitForTimeout(100);
+  await waitNextFrame(page);
   await undoByKeyboard(page);
   await pressBackspace(page);
   const line = page.locator('v-line').last();
