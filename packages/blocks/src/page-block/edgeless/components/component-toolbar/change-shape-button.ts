@@ -277,6 +277,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         });
       });
     });
+    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
@@ -287,6 +288,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         });
       });
     });
+    this._forceUpdateSelection();
   }
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
