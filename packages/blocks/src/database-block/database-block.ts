@@ -162,10 +162,6 @@ export class DatabaseBlockComponent
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
-
-    const onStopPropagation = (event: Event) => event.stopPropagation();
-    disposables.addFromEvent(this, 'mousedown', onStopPropagation);
-    disposables.addFromEvent(this, 'mousemove', onStopPropagation);
   }
 
   override firstUpdated() {
