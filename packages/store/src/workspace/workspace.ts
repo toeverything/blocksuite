@@ -235,6 +235,9 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
+  /**
+   * @deprecated
+   */
   shiftPage(pageId: string, newIndex: number) {
     this.meta.shiftPageMeta(pageId, newIndex);
   }
