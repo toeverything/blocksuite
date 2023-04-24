@@ -4,7 +4,6 @@ import { html } from 'lit';
 import * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
-import { ZERO_WIDTH_SPACE } from './consts.js';
 import {
   VirgoAttributeService,
   VirgoDeltaService,
@@ -23,7 +22,7 @@ import {
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
-import { getTextNodesFromElement } from './utils/text.js';
+import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 
 export interface VEditorOptions {
   // it is a option to determine default `_attributeRenderer`
@@ -228,10 +227,10 @@ export class VEditor<
         if (index + text.textContent.length >= rangeIndex) {
           return [text, rangeIndex - index];
         }
-        index += text.textContent.length;
+        index += calculateTextLength(text);
       }
 
-      index += vLine.textContent === ZERO_WIDTH_SPACE ? 0 : 1;
+      index += 1;
     }
 
     throw new Error('failed to find leaf');
