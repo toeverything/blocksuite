@@ -25,23 +25,10 @@
 
       /* CSS variables. You need to handle all places where `CSS variables` are marked. */
       html[class='dark sl-theme-dark'] {
-        --affine-theme-mode: dark;
-        --affine-editor-mode: page;
-
         --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
           0px 3px 16px -6px rgba(24, 39, 75, 0.04);
-        --affine-font-h1: 28px;
-        --affine-font-h2: 26px;
-        --affine-font-h3: 24px;
-        --affine-font-h4: 22px;
-        --affine-font-h5: 20px;
-        --affine-font-h6: 18px;
-        --affine-font-base: 16px;
-        --affine-font-sm: 14px;
-        --affine-font-xs: 12px;
-        --affine-line-height: calc(1em + 8px);
-        --affine-z-index-modal: 1000;
-        --affine-z-index-popover: 100;
+        --affine-modal-shadow: 0px 4px 24px #161616;
+        --affine-tooltip-shadow: 0px 0px 4px rgba(0, 0, 0, 0.14);
         --affine-font-family: Avenir Next, Poppins, apple-system,
           BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC,
           Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
@@ -54,95 +41,103 @@
           monospace, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma,
           PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
           Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-h-1: 28px;
+        --affine-font-h-2: 26px;
+        --affine-font-h-3: 24px;
+        --affine-font-h-4: 22px;
+        --affine-font-h-5: 20px;
+        --affine-font-h-6: 18px;
+        --affine-font-base: 16px;
+        --affine-font-sm: 14px;
+        --affine-font-xs: 12px;
+        --affine-line-height: calc(1em + 8px);
+        --affine-z-index-modal: 1000;
+        --affine-z-index-popover: 100;
         --affine-paragraph-space: 8px;
         --affine-popover-radius: 10px;
         --affine-zoom: 1;
         --affine-scale: calc(1 / var(--affine-zoom));
-
-        --affine-brand-color: rgb(84, 56, 255);
-        --affine-primary-color: rgb(118, 95, 254);
-        --affine-secondary-color: rgb(144, 150, 245);
-        --affine-tertiary-color: rgb(30, 30, 30);
-        --affine-hover-color: rgba(255, 255, 255, 0.1);
-        --affine-icon-color: rgb(168, 168, 160);
-        --affine-border-color: rgb(57, 57, 57);
-        --affine-divider-color: rgb(114, 114, 114);
-        --affine-placeholder-color: rgb(62, 62, 63);
-        --affine-quote-color: rgb(147, 144, 163);
-        --affine-link-color: rgb(185, 191, 227);
-        --affine-edgeless-grid-color: rgb(49, 49, 49);
-        --affine-success-color: rgb(77, 213, 181);
-        --affine-warning-color: rgb(255, 123, 77);
-        --affine-error-color: rgb(212, 140, 130);
-        --affine-processing-color: rgb(195, 215, 255);
-        --affine-text-emphasis-color: rgb(208, 205, 220);
-        --affine-text-primary-color: rgb(234, 234, 234);
-        --affine-text-secondary-color: rgb(156, 156, 160);
-        --affine-text-disable-color: rgb(119, 117, 125);
-        --affine-black-10: rgba(255, 255, 255, 0.1);
-        --affine-black-30: rgba(255, 255, 255, 0.3);
-        --affine-black-50: rgba(255, 255, 255, 0.5);
-        --affine-black-60: rgba(255, 255, 255, 0.6);
-        --affine-black-80: rgba(255, 255, 255, 0.8);
-        --affine-black-90: rgba(255, 255, 255, 0.9);
-        --affine-black: rgb(255, 255, 255);
+        --affine-theme-mode: dark;
+        --affine-brand-color: #5438ff;
+        --affine-primary-color: #765ffe;
+        --affine-secondary-color: #9096f5;
+        --affine-tertiary-color: #1e1e1e;
+        --affine-hover-color: hsla(0, 0%, 100%, 0.1);
+        --affine-icon-color: #a8a8a0;
+        --affine-icon-secondary: hsla(60, 4%, 64%, 0.6);
+        --affine-border-color: #393939;
+        --affine-divider-color: #727272;
+        --affine-placeholder-color: #3e3e3f;
+        --affine-quote-color: #9390a3;
+        --affine-link-color: #b9bfe3;
+        --affine-edgeless-grid-color: #313131;
+        --affine-success-color: #4dd5b5;
+        --affine-warning-color: #ff7b4d;
+        --affine-error-color: #d48c82;
+        --affine-processing-color: #c3d7ff;
+        --affine-text-emphasis-color: #d0cddc;
+        --affine-text-primary-color: #eaeaea;
+        --affine-text-secondary-color: #9c9ca0;
+        --affine-text-disable-color: #77757d;
+        --affine-black-10: hsla(0, 0%, 100%, 0.1);
+        --affine-black-30: hsla(0, 0%, 100%, 0.3);
+        --affine-black-50: hsla(0, 0%, 100%, 0.5);
+        --affine-black-60: hsla(0, 0%, 100%, 0.6);
+        --affine-black-80: hsla(0, 0%, 100%, 0.8);
+        --affine-black-90: hsla(0, 0%, 100%, 0.9);
+        --affine-black: #fff;
         --affine-white-10: rgba(0, 0, 0, 0.1);
         --affine-white-30: rgba(0, 0, 0, 0.3);
         --affine-white-50: rgba(0, 0, 0, 0.5);
         --affine-white-60: rgba(0, 0, 0, 0.6);
         --affine-white-80: rgba(0, 0, 0, 0.8);
         --affine-white-90: rgba(0, 0, 0, 0.9);
-        --affine-white: rgb(0, 0, 0);
-        --affine-background-code-block: rgb(41, 44, 51);
-        --affine-background-tertiary-color: rgb(30, 30, 30);
-        --affine-background-processing-color: rgb(255, 255, 255);
-        --affine-background-error-color: rgb(255, 255, 255);
-        --affine-background-warning-color: rgb(255, 255, 255);
-        --affine-background-success-color: rgb(255, 255, 255);
-        --affine-background-primary-color: rgb(20, 20, 20);
-        --affine-background-hover-color: rgb(47, 47, 47);
-        --affine-background-secondary-color: rgb(32, 32, 32);
+        --affine-white: #000;
+        --affine-background-code-block: #292c33;
+        --affine-background-tertiary-color: #1e1e1e;
+        --affine-background-processing-color: #fff;
+        --affine-background-error-color: #fff;
+        --affine-background-warning-color: #fff;
+        --affine-background-success-color: #fff;
+        --affine-background-primary-color: #141414;
+        --affine-background-secondary-color: #202020;
         --affine-background-modal-color: rgba(0, 0, 0, 0.8);
-        --affine-background-overlay-panel-color: rgb(30, 30, 30);
-        --affine-tag-blue: rgb(10, 84, 170);
-        --affine-tag-green: rgb(55, 135, 79);
-        --affine-tag-teal: rgb(33, 145, 138);
-        --affine-tag-white: rgb(84, 84, 84);
-        --affine-tag-purple: rgb(59, 38, 141);
-        --affine-tag-red: rgb(139, 63, 63);
-        --affine-tag-pink: rgb(194, 132, 132);
-        --affine-tag-yellow: rgb(187, 165, 61);
-        --affine-tag-orange: rgb(231, 161, 58);
-        --affine-tag-gray: rgb(41, 41, 41);
-
-        /* --affine-palette-transparent: special values added for the sake of logical consistency. */
-        --affine-palette-transparent: #00000000;
-
-        --affine-palette-line-yellow: rgb(255, 232, 56);
-        --affine-palette-line-orange: rgb(255, 175, 56);
-        --affine-palette-line-tangerine: rgb(255, 99, 31);
-        --affine-palette-line-red: rgb(252, 63, 85);
-        --affine-palette-line-magenta: rgb(255, 56, 179);
-        --affine-palette-line-purple: rgb(182, 56, 255);
-        --affine-palette-line-navy: rgb(59, 37, 204);
-        --affine-palette-line-blue: rgb(79, 144, 255);
-        --affine-palette-line-green: rgb(16, 203, 134);
-        --affine-palette-line-grey: rgb(153, 153, 153);
-        --affine-palette-line-white: rgb(255, 255, 255);
-        --affine-palette-line-black: rgb(0, 0, 0);
-
-        --affine-palette-shape-yellow: rgb(255, 241, 136);
-        --affine-palette-shape-orange: rgb(255, 207, 136);
-        --affine-palette-shape-tangerine: rgb(255, 161, 121);
-        --affine-palette-shape-red: rgb(253, 140, 153);
-        --affine-palette-shape-magenta: rgb(255, 136, 209);
-        --affine-palette-shape-purple: rgb(211, 136, 255);
-        --affine-palette-shape-navy: rgb(137, 124, 224);
-        --affine-palette-shape-blue: rgb(149, 188, 255);
-        --affine-palette-shape-green: rgb(112, 224, 182);
-        --affine-palette-shape-grey: rgb(194, 194, 194);
-        --affine-palette-shape-white: rgb(255, 255, 255);
-        --affine-palette-shape-black: rgb(0, 0, 0);
+        --affine-background-overlay-panel-color: #1e1e1e;
+        --affine-tag-blue: #0a54aa;
+        --affine-tag-green: #37874f;
+        --affine-tag-teal: #21918a;
+        --affine-tag-white: #545454;
+        --affine-tag-purple: #3b268d;
+        --affine-tag-red: #8b3f3f;
+        --affine-tag-pink: #c28484;
+        --affine-tag-yellow: #bba53d;
+        --affine-tag-orange: #e7a13a;
+        --affine-tag-gray: #292929;
+        --affine-palette-line-yellow: #ffe838;
+        --affine-palette-line-orange: #ffaf38;
+        --affine-palette-line-tangerine: #ff631f;
+        --affine-palette-line-red: #fc3f55;
+        --affine-palette-line-magenta: #ff38b3;
+        --affine-palette-line-purple: #b638ff;
+        --affine-palette-line-navy: #3b25cc;
+        --affine-palette-line-blue: #4f90ff;
+        --affine-palette-line-green: #10cb86;
+        --affine-palette-line-white: #fff;
+        --affine-palette-line-black: #000;
+        --affine-palette-line-grey: #999;
+        --affine-palette-shape-yellow: #fff188;
+        --affine-palette-shape-orange: #ffcf88;
+        --affine-palette-shape-tangerine: #ffa179;
+        --affine-palette-shape-red: #fd8c99;
+        --affine-palette-shape-magenta: #ff88d1;
+        --affine-palette-shape-purple: #d388ff;
+        --affine-palette-shape-navy: #897ce0;
+        --affine-palette-shape-blue: #95bcff;
+        --affine-palette-shape-green: #70e0b6;
+        --affine-palette-shape-white: #fff;
+        --affine-palette-shape-black: #000;
+        --affine-palette-shape-grey: #c2c2c2;
+        --affine-tooltip: #eaeaea;
       }
     </style>
   </head>
