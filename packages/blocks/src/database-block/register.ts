@@ -9,10 +9,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import { ShadowlessElement } from '../std.js';
+import { ShadowlessElement, WithDisposable } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
-export abstract class DatabaseCellElement<Value> extends ShadowlessElement {
+export abstract class DatabaseCellElement<Value> extends WithDisposable(
+  ShadowlessElement
+) {
   static tag: ReturnType<typeof literal>;
   @property()
   rowHost!: RowHost<Value>;
