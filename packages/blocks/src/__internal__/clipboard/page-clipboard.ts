@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
-import { getCurrentBlockRange } from '../utils/index.js';
+import { getCurrentBlockRange, type SerializedBlock } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import { clipboardData2Blocks, copyBlocks } from './utils/commons.js';
 
@@ -33,7 +33,9 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
 
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
-    if (!blocks.length) {
+    const normalizedBlocks = normalizePasteBlocks(this._page, blocks);
+
+    if (!normalizedBlocks.length) {
       return;
     }
     this._page.captureSync();
@@ -44,7 +46,7 @@ export class PageClipboard implements Clipboard {
     assertExists(focusedBlockModel);
     const service = getService(focusedBlockModel.flavour);
     assertExists(range);
-    await service.json2Block(focusedBlockModel, blocks, range);
+    await service.json2Block(focusedBlockModel, normalizedBlocks, range);
 
     this._page.captureSync();
   };
@@ -73,4 +75,31 @@ export class PageClipboard implements Clipboard {
     this._onCopy(e, range);
     deleteModelsByRange(this._page, range);
   };
+}
+
+/**
+ * Replace Subpage reference to LinkedPage reference when try to paste duplicated subpage
+ */
+function normalizePasteBlocks(page: Page, blocks: SerializedBlock[]) {
+  const backlinkIndexer = page.workspace.indexer.backlink;
+  blocks
+    .filter(block => block.text)
+    .map(block => block.text)
+    .flat()
+    .forEach(text => {
+      if (
+        text &&
+        text.attributes &&
+        text.attributes.reference &&
+        text.attributes.reference.type === 'Subpage'
+      ) {
+        const node = text.attributes.reference;
+        const parentPage = backlinkIndexer.getParentPage(node.pageId);
+        // Each subpage can only be referenced once in a workspace
+        if (parentPage) {
+          node.type = 'LinkedPage';
+        }
+      }
+    });
+  return blocks;
 }

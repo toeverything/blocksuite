@@ -7,6 +7,7 @@ import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
+  type SerializedBlock,
 } from '../../utils/index.js';
 import { ClipboardItem } from '../clipboard-item.js';
 import markdownUtils from './markdown.js';
@@ -131,7 +132,7 @@ export async function clipboardData2Blocks(
   clipboardData: ClipboardEvent['clipboardData']
 ) {
   if (!clipboardData) {
-    return;
+    return [];
   }
 
   const contentParser = new ContentParser(page);
@@ -147,7 +148,7 @@ export async function clipboardData2Blocks(
     );
 
     if (blockSuiteClipboardData) {
-      return JSON.parse(blockSuiteClipboardData);
+      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
     }
   }
 
