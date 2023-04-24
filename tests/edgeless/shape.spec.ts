@@ -4,8 +4,12 @@ import { expect } from '@playwright/test';
 import {
   changeShapeFillColor,
   changeShapeStrokeColor,
+  changeShapeStrokeStyle,
+  changeShapeStrokeWidth,
   clickComponentToolbarMoreMenuButton,
   locatorEdgelessToolButton,
+  locatorShapeStrokeStyleButton,
+  locatorShapeStrokeWidthButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
   setMouseMode,
@@ -335,4 +339,60 @@ test('shape element should not move when the selected state is inactive', async 
   );
 
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+});
+
+test('change shape stroke width', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+  await changeShapeStrokeColor(page, '--affine-palette-line-navy');
+
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await changeShapeStrokeWidth(page, 'l');
+
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  const activeButton = locatorShapeStrokeWidthButton(page, 'l');
+  const className = await activeButton.evaluate(ele => ele.className);
+  expect(className.includes(' active')).toBeTruthy();
+
+  const pickedColor = await pickColorAtPoints(page, [
+    [start.x + 20, start.y],
+    [start.x + 20, start.y + 9],
+  ]);
+  expect(pickedColor[0]).toBe(pickedColor[1]);
+});
+
+test('change shape stroke style', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+  await changeShapeStrokeColor(page, '--affine-palette-line-navy');
+
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await changeShapeStrokeStyle(page, 'none');
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  const activeButton = locatorShapeStrokeStyleButton(page, 'none');
+  const className = await activeButton.evaluate(ele => ele.className);
+  expect(className.includes(' active')).toBeTruthy();
+
+  const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
+  expect(pickedColor[0]).toBe('#000000');
 });

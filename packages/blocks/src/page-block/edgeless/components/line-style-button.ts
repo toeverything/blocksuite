@@ -57,7 +57,9 @@ export function LineStyleButton({
   tooltip: tooltipFromProps,
   onClick,
 }: LineStyleButtonProps) {
-  const classnames = `edgeless-component-line-style-button mode-${mode}`;
+  const classnames = `edgeless-component-line-style-button mode-${mode} ${
+    active ? 'active' : ''
+  }`;
   const icon = getModeIcon(mode);
   const tooltip =
     tooltipFromProps !== undefined ? tooltipFromProps : getModeTooltip(mode);
