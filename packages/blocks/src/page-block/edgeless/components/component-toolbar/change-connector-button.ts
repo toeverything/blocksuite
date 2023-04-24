@@ -59,7 +59,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-white-90);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -192,7 +192,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Straight line'}
-        @tool.click=${() => this._setConnectorMode(ConnectorMode.Straight)}
+        @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
       >
         <div
           class="connector-mode-button"
@@ -203,7 +203,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
-        @tool.click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
+        @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
       >
         <div
           class="connector-mode-button"
@@ -216,7 +216,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       <edgeless-tool-icon-button
         .tooltip=${'Color'}
         .active=${false}
-        @tool.click=${() => this._colorPanelPopper?.toggle()}
+        @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="connector-color-button">
           <div class="color" style=${styleMap(style)}></div>

@@ -4,7 +4,6 @@ import { ContentParser } from '../../content-parser/index.js';
 import { getService } from '../../service.js';
 import {
   type BlockRange,
-  getCurrentBlockRange,
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
@@ -18,12 +17,6 @@ import {
   isPureFileInClipboard,
   performNativeCopy,
 } from './pure.js';
-
-export function shouldClipboardHandlerContinue(page: Page) {
-  const range = getCurrentBlockRange(page);
-  // TODO: getCurrentBlockRange should not return 'affine:page', delete this check after fix
-  return range && !range.models.find(model => model.flavour === 'affine:page');
-}
 
 export function getBlockClipboardInfo(
   model: BaseBlockModel,

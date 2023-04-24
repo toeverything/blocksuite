@@ -6,6 +6,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import { DisposableGroup } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -176,6 +177,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _newRecord!: HTMLDivElement;
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
+  private _recordAddDisposables = new DisposableGroup();
 
   private get readonly() {
     return this.targetModel.page.readonly;
@@ -183,12 +185,30 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     if (!this.readonly) {
-      initAddNewRecordHandlers(
-        this._newRecord,
-        this,
-        this._disposables,
-        this.addRow
-      );
+      this._initAddRecordHandlers();
+    }
+  }
+
+  override updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+
+    if (!this.readonly) {
+      this._initAddRecordHandlers();
+    }
+  }
+
+  private _initAddRecordHandlers() {
+    // remove previous handlers
+    this._recordAddDisposables.dispose();
+
+    const disposables = initAddNewRecordHandlers(
+      this._newRecord,
+      this,
+      this.addRow
+    );
+    if (disposables) {
+      // bind new handlers
+      this._recordAddDisposables = disposables;
     }
   }
 
@@ -275,7 +295,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
           removeListener();
         }
       },
-      'mousedown',
+      'click',
       true
     );
   };

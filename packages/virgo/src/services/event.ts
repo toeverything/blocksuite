@@ -89,6 +89,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
+    rootElement.addEventListener('scroll', this._onScroll);
 
     this.bindHandlers();
   };
@@ -226,8 +227,25 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           } else {
             const [text] = this._editor.getTextPoint(newVRange.index);
             const vText = text.parentElement?.closest('v-text');
-            if (vText && vText.str !== text.textContent) {
-              text.textContent = vText.str;
+            if (vText) {
+              if (vText.str !== text.textContent) {
+                text.textContent = vText.str;
+              }
+            } else {
+              const forgedVText = text.parentElement?.closest(
+                '[data-virgo-text="true"]'
+              );
+              if (forgedVText instanceof HTMLElement) {
+                if (forgedVText.dataset.virgoTextValue) {
+                  if (forgedVText.dataset.virgoTextValue !== text.textContent) {
+                    text.textContent = forgedVText.dataset.virgoTextValue;
+                  }
+                } else {
+                  throw new Error(
+                    'We detect a forged v-text node but it has no data-virgo-text-value attribute.'
+                  );
+                }
+              }
             }
           }
 
@@ -245,24 +263,28 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           ctx.attributes ?? ({} as TextAttributes)
         );
 
-        this._editor.slots.updated.once(() => {
-          this._editor.slots.vRangeUpdated.emit([
-            {
-              index: newVRange.index + data.length,
-              length: 0,
-            },
-            'input',
-          ]);
-        });
+        this._editor.slots.vRangeUpdated.emit([
+          {
+            index: newVRange.index + data.length,
+            length: 0,
+          },
+          'input',
+        ]);
       }
     }
   };
-
+  private _firstRecomputeInFrame = true;
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
     if (this._editor.isReadonly || this._isComposing) return;
-    this._onSelectionChange();
+    if (this._firstRecomputeInFrame) {
+      this._firstRecomputeInFrame = false;
+      this._onSelectionChange();
+      requestAnimationFrame(() => {
+        this._firstRecomputeInFrame = true;
+      });
+    }
     const vRange = this._editor.getVRange();
     if (!vRange) return;
 
@@ -288,5 +310,9 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       newVRange,
       this._editor as VEditor
     );
+  };
+
+  private _onScroll = (event: Event) => {
+    this._editor.slots.scrollUpdated.emit(this._editor.rootElement.scrollLeft);
   };
 }

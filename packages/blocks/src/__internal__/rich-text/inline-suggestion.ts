@@ -17,7 +17,10 @@ import {
 } from 'lit';
 
 import { debounce } from '../utils/index.js';
-import { getCurrentNativeRange } from '../utils/selection.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+} from '../utils/selection.js';
 import type { AffineVEditor } from './virgo/types.js';
 
 export class InlineSuggestionController implements ReactiveController {
@@ -88,6 +91,7 @@ export class InlineSuggestionController implements ReactiveController {
 
   private _updatePosition() {
     const richTextRect = this.host.getBoundingClientRect();
+    if (!hasNativeSelection()) return;
     const range = getCurrentNativeRange();
     const rangeRect = range.getBoundingClientRect();
 

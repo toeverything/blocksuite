@@ -351,6 +351,12 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  /**
+   * Adds a new frame with the given point on the editor-container.
+   *
+   * @param: point Point
+   * @returns: The id of new frame
+   */
   addFrameWithPoint(
     point: Point,
     width = DEFAULT_FRAME_WIDTH,
@@ -378,6 +384,9 @@ export class EdgelessPageBlockComponent
    */
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
+    const { left, top } = this.surface.viewport;
+    point.x -= left;
+    point.y -= top;
     const frameId = this.addFrameWithPoint(point);
     const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
@@ -398,10 +407,12 @@ export class EdgelessPageBlockComponent
   /** Moves selected blocks into a new frame at the given point. */
   moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point, rect?: DOMRect) {
     this.page.captureSync();
+    const { left, top, zoom } = this.surface.viewport;
     const width = rect?.width
-      ? rect.width / this.surface.viewport.zoom +
-        EDGELESS_BLOCK_CHILD_PADDING * 2
+      ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
       : DEFAULT_FRAME_WIDTH;
+    point.x -= left;
+    point.y -= top;
     const frameId = this.addFrameWithPoint(point, width);
     this.page.moveBlocks(
       blocks,

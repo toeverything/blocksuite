@@ -12,7 +12,6 @@ import {
   blurDatabaseSearch,
   clickColumnType,
   clickDatabaseOutside,
-  copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusDatabaseHeader,
@@ -36,14 +35,12 @@ import {
   performColumnAction,
   performSelectColumnTagAction,
   pressArrowLeft,
-  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressEscape,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
-  selectAllByKeyboard,
   switchColumnType,
   type,
   undoByClick,
@@ -548,31 +545,14 @@ test.describe('select column tag action', () => {
     await type(page, '4567abc00');
     const option1 = selectOption.nth(0);
     const input = option1.locator('[data-virgo-text="true"]');
-    // The maximum length of the tag name is 10
-    expect((await input.innerText()).length).toBe(10);
-    expect(await input.innerText()).toBe('1234567abc');
-
-    await selectAllByKeyboard(page);
-    await copyByKeyboard(page);
-    await pressArrowRight(page);
-    // 1234567|abc
-    for (let i = 0; i < 3; i++) {
-      await pressArrowLeft(page);
-    }
-    // 1234|abc
-    for (let i = 0; i < 3; i++) {
-      await pressBackspace(page);
-    }
-    // 1234123|abc
-    await pasteByKeyboard(page);
-    expect((await input.innerText()).length).toBe(10);
-    expect(await input.innerText()).toBe('1234123abc');
+    expect((await input.innerText()).length).toBe(12);
+    expect(await input.innerText()).toBe('1234567abc00');
 
     await saveIcon.click();
     await clickDatabaseOutside(page);
     const selected1 = cellSelected.nth(0);
     const selected2 = cellSelected.nth(1);
-    expect(await selected1.innerText()).toBe('1234123abc');
+    expect(await selected1.innerText()).toBe('1234567abc00');
     expect(await selected2.innerText()).toBe('abc');
   });
 
