@@ -7,7 +7,9 @@
 export * from './block-range.js';
 export * from './common-operations.js';
 export * from './filesys.js';
-export * from './gesture.js';
+export { initMouseEventHandlers } from './gesture/gesture.js';
+export type { SelectionEvent } from './gesture/selection-event.js';
+export { createDragEvent, isPinchEvent } from './gesture/utils.js';
 export * from './hotkey.js';
 export * from './lit.js';
 export * from './query.js';
