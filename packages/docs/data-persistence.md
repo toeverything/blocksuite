@@ -32,7 +32,7 @@ workspace.register(AffineSchemas);
 The content in this workspace will be automatically synchronized to an IndexedDB table named `foo`. Now you can add a button to the page and execute the following code when it is clicked:
 
 ```ts
-const page = workspace.createPage('page0');
+const page = workspace.createPage();
 page.addBlock('affine:page', { title: new Text('hello') });
 ```
 

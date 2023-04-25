@@ -17,11 +17,7 @@ export class SimpleAffineEditor extends LitElement {
     super();
 
     this.workspace = new Workspace({ id: 'foo' }).register(AffineSchemas);
-    this.page = this.workspace.createPage('page0');
-
-    const pageBlockId = this.page.addBlock('affine:page');
-    const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);
-    this.page.addBlock('affine:paragraph', {}, frameId);
+    this.page = this.workspace.createPage({ init: true });
   }
 
   override connectedCallback() {
