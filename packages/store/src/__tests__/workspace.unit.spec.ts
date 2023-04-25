@@ -87,7 +87,7 @@ describe('pageMeta', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const parentPage = workspace.createPage(defaultPageId);
+    const parentPage = workspace.createPage({ id: defaultPageId });
     const subpage = workspace.createPage({ id: 'subpage0' });
     parentPage.addBlock('affine:page');
     parentPage.addBlock('affine:paragraph', {

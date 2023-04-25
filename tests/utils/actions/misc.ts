@@ -121,7 +121,7 @@ async function initEmptyEditor(
           initPage(page);
         });
       } else {
-        const page = workspace.createPage({ pageId: 'page0' });
+        const page = workspace.createPage({ id: 'page0' });
         initPage(page);
       }
     },
