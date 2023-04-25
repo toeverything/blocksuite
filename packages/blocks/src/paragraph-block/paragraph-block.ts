@@ -20,6 +20,12 @@ import {
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
+function tipsPlaceholderPreventDefault(event: Event) {
+  // Call event.preventDefault() to keep the mouse event from being sent as well.
+  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
+  event.preventDefault();
+}
+
 function TipsPlaceholder(model: BaseBlockModel) {
   if (!matchFlavours(model, ['affine:paragraph'] as const)) {
     throw new Error("TipsPlaceholder can't be used for this model");
@@ -41,7 +47,11 @@ function TipsPlaceholder(model: BaseBlockModel) {
       blockHub.toggleMenu(true);
     };
     return html`
-      <div class="tips-placeholder" @click=${onClick}>
+      <div
+        class="tips-placeholder"
+        @click=${onClick}
+        @pointerdown=${tipsPlaceholderPreventDefault}
+      >
         Click ${BlockHubIcon20} to insert blocks, type '/' for commands
       </div>
     `;
