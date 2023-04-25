@@ -15,11 +15,8 @@ However, the more powerful aspect of the Git model is that you only need to conn
 Code example:
 
 ```ts
-import {
-  Workspace,
-  AffineSchemas,
-  IndexedDBDocProvider,
-} from '@blocksuite/store';
+import { Workspace, IndexedDBDocProvider } from '@blocksuite/store';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 
 const workspace = new Workspace({
   id: 'foo',
