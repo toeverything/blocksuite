@@ -17,7 +17,7 @@ Code example:
 ```ts
 import {
   Workspace,
-  AffineSchema,
+  AffineSchemas,
   IndexedDBDocProvider,
 } from '@blocksuite/store';
 
@@ -26,10 +26,10 @@ const workspace = new Workspace({
   providers: [IndexedDBDocProvider],
 });
 
-workspace.register(AffineSchema);
+workspace.register(AffineSchemas);
 ```
 
-The content in this workspace will be automatically synchronized to an indexedDB table named `foo`. Now you can add a button to the page and execute the following code when it is clicked:
+The content in this workspace will be automatically synchronized to an IndexedDB table named `foo`. Now you can add a button to the page and execute the following code when it is clicked:
 
 ```ts
 const page = workspace.createPage('page0');

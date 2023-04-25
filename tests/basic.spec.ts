@@ -426,3 +426,21 @@ test('delete emoji forward', async ({ page }) => {
   await pressForwardDelete(page);
   await assertText(page, '11111');
 });
+
+test('ZERO_WIDTH_SPACE should be counted by one cursor position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await waitNextFrame(page);
+  await page.keyboard.press(`Shift+Enter`, { delay: 50 });
+  await type(page, 'asdfg');
+  await waitNextFrame(page);
+  await pressEnter(page);
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  await pressBackspace(page);
+  const line = page.locator('v-line').last();
+  expect(await line.innerText()).toBe('asdf');
+});

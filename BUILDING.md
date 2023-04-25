@@ -10,35 +10,12 @@
 
 ## Prerequisites
 
-We suggest develop our product under Node.js LTS(Long-term support) version.
-
-### Option 1: Manually install node.js
-
-install [Node LTS version](https://nodejs.org/en/download)
-
-> Up to now, the major node.js version is 18.x
-
-### Option 2: Use node version manager
-
-Install [nvm](https://github.com/nvm-sh/nvm):
-
-```sh
-nvm install --lts
-nvm use --lts
-```
-
-## Setup Environment
-
-```sh
-# enable built-in pnpm support
-corepack enable
-# install dependencies
-pnpm install
-```
+Please ensure you have installed [Node.js](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/).
 
 ## Play with Playground
 
 ```sh
+pnpm install
 pnpm dev
 ```
 

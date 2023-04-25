@@ -137,7 +137,6 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
         }
       },
     });
-    this.vEditor.focusEnd();
   };
 
   protected override render() {

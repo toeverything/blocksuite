@@ -94,7 +94,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
-        @tool.click=${() => {
+        @click=${() => {
           this._setMouseMode({
             type: 'shape',
             shape: 'rect',

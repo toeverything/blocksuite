@@ -106,7 +106,7 @@ export class EdgelessConnectorToolButton extends LitElement {
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
-        @tool.click=${() => {
+        @click=${() => {
           this._trySetConnectorMode();
           this._toggleMenu();
         }}

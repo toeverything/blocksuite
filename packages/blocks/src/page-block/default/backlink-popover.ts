@@ -29,8 +29,8 @@ const styles = css`
 
     user-select: none;
     font-family: var(--affine-font-family);
-    fill: var(--affine-secondary-text-color);
-    color: var(--affine-secondary-text-color);
+    fill: var(--affine-text-secondary-color);
+    color: var(--affine-text-secondary-color);
     pointer-events: auto;
   }
 
@@ -51,7 +51,7 @@ const styles = css`
   .backlink-popover {
     position: absolute;
     left: 0;
-    bottom: 0;
+    bottom: -8px;
 
     display: flex;
     flex-direction: column;
@@ -135,14 +135,20 @@ export class BacklinkButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const backlinks = this._backlinks;
-    if (!backlinks.length) {
+    // Only show linked page backlinks
+    const linkedBacklinks = this._backlinks.filter(
+      ({ type }) => type === 'LinkedPage'
+    );
+    if (!linkedBacklinks.length) {
       return null;
     }
     return html`<div class="btn" @click=${this.onClick}>
-        ${DualLinkIcon16}<span>Backlinks(${backlinks.length})</span>${ArrowDownIcon}
+        ${DualLinkIcon16}<span>Backlinks (${linkedBacklinks.length})</span
+        >${ArrowDownIcon}
       </div>
-      ${this._showPopover ? backlinkPopover(this.host, backlinks) : null}`;
+      ${this._showPopover
+        ? backlinkPopover(this.host, linkedBacklinks)
+        : null}`;
   }
 }
 

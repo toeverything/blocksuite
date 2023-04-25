@@ -13,8 +13,11 @@ export default defineConfig({
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
       { text: 'Docs', link: '/introduction' },
-      { text: '🚧 API', link: '' },
-      { text: '🚧 Examples', link: '' },
+      // { text: 'API', link: '' },
+      {
+        text: 'Releases',
+        link: 'https://github.com/toeverything/blocksuite/releases',
+      },
     ],
 
     sidebar: [
@@ -48,20 +51,23 @@ export default defineConfig({
             link: '/editor-ui-architecture',
             items: [
               {
-                text: 'Host-Based Portability',
-                link: '/host-based-portability',
+                text: 'Editors as Hosts',
+                link: '/editors-as-hosts',
               },
               {
-                text: '🚧 Rich Text Orchestration',
+                text: 'Rich Text Orchestration',
                 link: '/rich-text-orchestration',
               },
               {
-                text: '🚧 Framework Integration',
+                text: 'Framework Integration',
                 link: '/framework-integration',
               },
             ],
           },
-          { text: '🚧 Defining Editable Block', link: '' },
+          {
+            text: 'Defining Editable Blocks',
+            link: '/defining-editable-blocks',
+          },
         ],
       },
       {
@@ -81,9 +87,14 @@ export default defineConfig({
       {
         text: 'Developing BlockSuite',
         items: [
-          { text: '🚧 Building Packages', link: '' },
-          { text: '🚧 Running Tests', link: '' },
-          { text: '🚧 Making Contributions', link: '' },
+          {
+            text: 'Building Packages',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md',
+          },
+          {
+            text: 'Running Tests',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#testing',
+          },
         ],
       },
     ],
