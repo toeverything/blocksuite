@@ -19,6 +19,7 @@ import {
   getConnectorAttachedInfo,
   getXYWH,
   pickBy,
+  stopPropagation,
 } from '../utils.js';
 
 function capMousedown(
@@ -277,6 +278,7 @@ export function SingleConnectorHandles(
       @mousedown=${(e: MouseEvent) => {
         capMousedown(e, surface, page, element, 'start', mode, requestUpdate);
       }}
+      @pointerdown=${stopPropagation}
     ></div>
     <div
       class="line-controller line-end"
@@ -284,6 +286,7 @@ export function SingleConnectorHandles(
       @mousedown=${(e: MouseEvent) => {
         capMousedown(e, surface, page, element, 'end', mode, requestUpdate);
       }}
+      @pointerdown=${stopPropagation}
     ></div>
     ${repeat(
       controllerHandles,
@@ -307,6 +310,7 @@ export function SingleConnectorHandles(
               requestUpdate
             );
           }}
+          @pointerdown=${stopPropagation}
         ></div>`;
       }
     )}

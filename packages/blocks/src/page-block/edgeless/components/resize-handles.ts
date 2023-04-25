@@ -1,6 +1,8 @@
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { stopPropagation } from '../utils.js';
+
 export enum HandleDirection {
   Left = 'left',
   Right = 'right',
@@ -48,6 +50,7 @@ function ResizeHandle(
       aria-label=${`handle-${handleDirection}`}
       style=${styleMap(style)}
       @mousedown=${handlerMouseDown}
+      @pointerdown=${stopPropagation}
     ></div>
   `;
 }
