@@ -110,7 +110,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       keydown: this._handleKeyDown,
     });
     this.vEditor.setReadonly(this.readonly);
-    this.vEditor.focusEnd();
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {

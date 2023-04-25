@@ -93,7 +93,6 @@ export class BlockIndexer {
       .map(pageId => ({ pageId, page: this._getPage(pageId) }))
       .forEach(({ pageId, page }) => {
         assertExists(page, `Failed to find page '${pageId}'`);
-        const dispose = this._indexPage(pageId, page);
         if (disposeMap[pageId]) {
           console.warn(
             `Duplicated pageAdded event! ${pageId} already observed`,
@@ -101,17 +100,18 @@ export class BlockIndexer {
           );
           return;
         }
+        const dispose = this._indexPage(pageId, page);
         disposeMap[pageId] = dispose;
       });
 
     this._workspaceSlots.pageAdded.on(pageId => {
       const page = this._getPage(pageId);
       assertExists(page, `Failed to find page '${pageId}'`);
-      const dispose = this._indexPage(pageId, page);
       if (disposeMap[pageId]) {
         // It's possible because the `pageAdded` event is emitted once a new block is added to the page
         return;
       }
+      const dispose = this._indexPage(pageId, page);
       disposeMap[pageId] = dispose;
     });
     this._workspaceSlots.pageRemoved.on(pageId => {

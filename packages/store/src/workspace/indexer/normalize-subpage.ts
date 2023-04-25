@@ -8,6 +8,8 @@ import type { BacklinkIndexer, IndexUpdatedEvent } from './backlink.js';
  * update the subpageIds in the pageMeta
  *
  * You need to ensure that all operations on pageMeta are **idempotent**.
+ *
+ * @deprecated
  */
 export function normalizeSubpage(
   { action, pageId, blockId }: IndexUpdatedEvent,
