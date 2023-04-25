@@ -23,8 +23,8 @@ export class HandleResizeManager {
     this._onResizeEnd = onResizeEnd;
   }
 
-  onMouseDown = (
-    e: MouseEvent,
+  onPointerDown = (
+    e: PointerEvent,
     direction: HandleDirection,
     bounds: Map<string, Bound>,
     zoom: number
@@ -43,7 +43,7 @@ export class HandleResizeManager {
       y: e.clientY,
     };
 
-    const _onMouseMove = (e: MouseEvent) => {
+    const _onPointerMove = (e: PointerEvent) => {
       const direction = this._dragDirection;
       const { x: startX, y: startY } = this._startDragPos;
 
@@ -137,17 +137,17 @@ export class HandleResizeManager {
       this._onResizeMove(newBounds);
     };
 
-    const _onMouseUp = (_: MouseEvent) => {
+    const _onPointerUp = (_: PointerEvent) => {
       this._onResizeEnd();
 
       this._startDragPos = { x: 0, y: 0 };
       this._bounds.clear();
       this._commonBound = [0, 0, 0, 0];
 
-      window.removeEventListener('mousemove', _onMouseMove);
-      window.removeEventListener('mouseup', _onMouseUp);
+      window.removeEventListener('pointermove', _onPointerMove);
+      window.removeEventListener('pointerup', _onPointerUp);
     };
-    window.addEventListener('mousemove', _onMouseMove);
-    window.addEventListener('mouseup', _onMouseUp);
+    window.addEventListener('pointermove', _onPointerMove);
+    window.addEventListener('pointerup', _onPointerUp);
   };
 }

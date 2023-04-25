@@ -1,8 +1,6 @@
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../utils.js';
-
 export enum HandleDirection {
   Left = 'left',
   Right = 'right',
@@ -25,7 +23,7 @@ function ResizeHandle(
   centerX: number,
   centerY: number,
   handleDirection: HandleDirection,
-  onMouseDown?: (e: MouseEvent, direction: HandleDirection) => void
+  onPointerDown?: (e: PointerEvent, direction: HandleDirection) => void
 ) {
   const style = {
     position: 'absolute',
@@ -39,18 +37,25 @@ function ResizeHandle(
     border: '2px var(--affine-primary-color) solid',
     background: 'white',
     cursor: directionCursors[handleDirection],
+    /**
+     * Fix: pointerEvent stops firing after a short time.
+     * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+     * up to the one that implements the gesture (in other words, the first containing scrolling element)
+     * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+     */
+    touchAction: 'none',
   };
 
-  const handlerMouseDown = (e: MouseEvent) => {
-    onMouseDown && onMouseDown(e, handleDirection);
+  const handlerPointerDown = (e: PointerEvent) => {
+    e.stopPropagation();
+    onPointerDown && onPointerDown(e, handleDirection);
   };
 
   return html`
     <div
       aria-label=${`handle-${handleDirection}`}
       style=${styleMap(style)}
-      @mousedown=${handlerMouseDown}
-      @pointerdown=${stopPropagation}
+      @pointerdown=${handlerPointerDown}
     ></div>
   `;
 }
@@ -59,7 +64,7 @@ export type ResizeMode = 'corner' | 'edge' | 'none';
 export function ResizeHandles(
   rect: DOMRect,
   resizeMode: ResizeMode,
-  onMouseDown: (e: MouseEvent, direction: HandleDirection) => void
+  onPointerDown: (e: PointerEvent, direction: HandleDirection) => void
 ) {
   switch (resizeMode) {
     case 'corner': {
@@ -72,25 +77,25 @@ export function ResizeHandles(
         topLeft[0],
         topLeft[1],
         HandleDirection.TopLeft,
-        onMouseDown
+        onPointerDown
       );
       const handleTopRight = ResizeHandle(
         topRight[0],
         topRight[1],
         HandleDirection.TopRight,
-        onMouseDown
+        onPointerDown
       );
       const handleBottomLeft = ResizeHandle(
         bottomLeft[0],
         bottomLeft[1],
         HandleDirection.BottomLeft,
-        onMouseDown
+        onPointerDown
       );
       const handleBottomRight = ResizeHandle(
         bottomRight[0],
         bottomRight[1],
         HandleDirection.BottomRight,
-        onMouseDown
+        onPointerDown
       );
 
       // prettier-ignore
@@ -109,13 +114,13 @@ export function ResizeHandles(
         leftCenter[0],
         leftCenter[1],
         HandleDirection.Left,
-        onMouseDown
+        onPointerDown
       );
       const handleRight = ResizeHandle(
         rightCenter[0],
         rightCenter[1],
         HandleDirection.Right,
-        onMouseDown
+        onPointerDown
       );
 
       return html` ${handleLeft} ${handleRight} `;
