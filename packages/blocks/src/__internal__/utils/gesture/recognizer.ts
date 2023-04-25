@@ -1,4 +1,4 @@
-import { assertExists, DisposableGroup } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 
 import { type SelectionEvent, toSelectionEvent } from './selection-event.js';
 import { isFarEnough } from './utils.js';

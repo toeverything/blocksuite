@@ -154,6 +154,7 @@ export function initMouseEventHandlers(
   document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
+    recognizer.dispose();
     container.removeEventListener('contextmenu', contextMenuHandler);
     document.removeEventListener(
       'selectionchange',
