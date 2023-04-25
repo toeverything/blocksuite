@@ -122,7 +122,7 @@ test.describe('multiple page', () => {
     await switchToPage(page, id);
     await focusTitle(page);
     await type(page, 'title1');
-    await pressEnter(page);
+    await focusRichText(page);
     await type(page, 'page1');
     await assertRichTexts(page, ['page1']);
 
