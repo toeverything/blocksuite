@@ -1,4 +1,3 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import type { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -7,6 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { ShadowlessElement, WithDisposable } from '../../../../std.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
+import type { SelectTag } from '../../../types.js';
 import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')

@@ -1,49 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
-declare module 'y-protocols/awareness.js' {
-  export class Awareness<
-    State extends Record<string, unknown> = Record<string, unknown>
-  > {
-    constructor<
-      State extends Record<string, unknown> = Record<string, unknown>
-    >(doc: Y.Doc): Awareness<State>;
-    clientID: number;
-    destroy(): void;
-    getStates(): Map<number, State>;
-    getLocalState(): State;
-    setLocalState(state: State): void;
-    setLocalStateField<Field extends keyof State>(
-      field: Field,
-      value: State[Field]
-    ): void;
-    on(
-      event: 'change',
-      callback: (
-        diff: {
-          added: number[];
-          removed: number[];
-          updated: number[];
-        },
-        transactionOrigin: string | number
-      ) => void
-    ): void;
-    on(
-      event: 'update',
-      callback: (
-        diff: {
-          added: number[];
-          removed: number[];
-          updated: number[];
-        },
-        transactionOrigin: string | number
-      ) => void
-    ): void;
-    on(event: 'destroy', callback: () => void): void;
-    off(event: 'change' | 'update' | 'destroy', callback: AnyFunction): void;
-  }
-}
-
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
 declare module NodeJS {
   interface ProcessEnv {

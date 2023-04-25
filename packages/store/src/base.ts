@@ -1,5 +1,5 @@
 import { Slot } from '@blocksuite/global/utils';
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 import { z } from 'zod';
 
 import { Text } from './text-adapter.js';
@@ -11,6 +11,8 @@ const ElementTagSchema = z.object({
   _$litStatic$: z.string(),
   r: z.symbol(),
 });
+const ParentSchema = z.array(z.string()).optional();
+const ContentSchema = z.array(z.string()).optional();
 const role = ['root', 'hub', 'content'] as const;
 const RoleSchema = z.enum(role);
 
@@ -18,14 +20,10 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Map: <T>() => Y.Map<T>;
-  Array: <T>() => Y.Array<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Map: <T>() => new Y.Map<T>(),
-  Array: <T>() => new Y.Array<T>(),
 });
 
 export const BlockSchema = z.object({
@@ -34,6 +32,8 @@ export const BlockSchema = z.object({
     role: RoleSchema,
     flavour: FlavourSchema,
     tag: ElementTagSchema,
+    parent: ParentSchema,
+    children: ContentSchema,
     props: z
       .function()
       .args(z.custom<InternalPrimitives>())
@@ -77,6 +77,8 @@ export function defineBlockSchema<
     version: number;
     role: Role;
     tag: StaticValue;
+    parent?: string[];
+    children?: string[];
   }>,
   Model extends BaseBlockModel<Props>
 >(options: {
@@ -104,6 +106,8 @@ export function defineBlockSchema({
     version: number;
     role: RoleType;
     tag: StaticValue;
+    parent?: string[];
+    children?: string[];
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   toModel?: () => BaseBlockModel;
@@ -113,6 +117,8 @@ export function defineBlockSchema({
     model: {
       tag: metadata.tag,
       role: metadata.role,
+      parent: metadata.parent,
+      children: metadata.children,
       flavour,
       props,
       toModel,

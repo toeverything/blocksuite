@@ -1,10 +1,10 @@
-import type { RowHost } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { ColumnRendererHelper } from '../register.js';
 import { DatabaseCellElement } from '../register.js';
+import type { RowHost } from '../types.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
