@@ -21,7 +21,7 @@ export class TestApp extends LitElement {
 
   private _createPage() {
     const id = `${this.pages.length}`;
-    this.workspace.createPage(id);
+    this.workspace.createPage({ pageId: id });
     this.workspace.setPageMeta(id, { title: this.input.value });
     this.input.value = '';
   }

@@ -22,7 +22,7 @@ export class SimpleAffineEditor extends LitElement {
     super();
 
     this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
-    this.page = this.workspace.createPage('page0');
+    this.page = this.workspace.createPage({ pageId: 'page0' });
 
     const pageBlockId = this.page.addBlock('affine:page');
     const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);

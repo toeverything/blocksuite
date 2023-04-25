@@ -1,5 +1,4 @@
 import { DualLinkIcon, PageIcon } from '@blocksuite/global/config';
-import type { Page } from '@blocksuite/store';
 import {
   assertExists,
   type BaseBlockModel,
@@ -39,15 +38,6 @@ function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
     index: idx,
     length: 0,
   });
-}
-
-function initDefaultBlocks(page: Page, pageName: string) {
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new page.Text(pageName),
-  });
-  page.addBlock('affine:surface', {}, null);
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  page.addBlock('affine:paragraph', {}, frameId);
 }
 
 const DEFAULT_PAGE_NAME = 'Untitled';
@@ -205,20 +195,23 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _createPage() {
     const pageName = this._query;
-    const workspace = this._page.workspace;
-    const id = workspace.idGenerator();
-    const page = this._page.workspace.createPage(id);
+    const page = this._page.workspace.createPage({
+      init: {
+        title: pageName,
+      },
+    });
 
-    initDefaultBlocks(page, pageName);
     this._insertLinkedNode('LinkedPage', page.id);
   }
+
   // private _createSubpage() {
   //   const pageName = this._query;
-  //   const workspace = this._page.workspace;
-  //   const id = workspace.idGenerator();
-  //   const page = this._page.workspace.createPage(id);
+  //   const page = this._page.workspace.createPage({
+  //     init: {
+  //       title: pageName,
+  //     },
+  //   });
 
-  //   initDefaultBlocks(page, pageName);
   //   this._insertLinkedNode('Subpage', page.id);
   // }
 
