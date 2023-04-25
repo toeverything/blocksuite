@@ -81,6 +81,7 @@ if (isE2E) {
       Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
     },
   });
+
   Object.defineProperty(globalThis, 'rebuildPageTree', {
     value: async function rebuildPageTree(doc: Y.Doc, pages: string[]) {
       const pageTree = doc
@@ -102,6 +103,7 @@ if (isE2E) {
       }
     },
   });
+
   Object.defineProperty(globalThis, 'debugFromFile', {
     value: async function debuggerFromFile() {
       const file = await fileOpen({
@@ -118,6 +120,7 @@ if (isE2E) {
     },
   });
 }
+
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
