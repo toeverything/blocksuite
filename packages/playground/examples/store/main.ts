@@ -9,7 +9,7 @@ import {
 function initPage() {
   const workspace = new Workspace({ id: 'todo' });
   workspace.register(TodoSchema);
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage({ id: 'page0' });
   page.addBlock('todo:container');
   return page;
 }
