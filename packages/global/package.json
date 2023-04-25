@@ -13,7 +13,6 @@
   "sideEffects": false,
   "exports": {
     ".": "./index.d.ts",
-    "./database": "./src/database.ts",
     "./types": "./src/types.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
@@ -26,7 +25,6 @@
     "access": "public",
     "exports": {
       ".": "./index.d.ts",
-      "./database": "./dist/database.js",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
       "./error": "./dist/error.js",

@@ -1,9 +1,9 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import type { SelectTag } from '../../types.js';
 import { SelectMode } from '../../types.js';
 
 @customElement('affine-database-multi-select-cell')
