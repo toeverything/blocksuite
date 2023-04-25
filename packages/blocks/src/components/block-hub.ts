@@ -180,6 +180,7 @@ const styles = css`
     justify-content: center;
     align-items: center;
     margin-bottom: 8px;
+    position: relative;
     border-radius: 5px;
     fill: var(--affine-text-secondary-color);
     height: 36px;
