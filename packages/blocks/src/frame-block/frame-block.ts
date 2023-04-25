@@ -10,6 +10,9 @@ import type { FrameBlockModel } from './frame-model.js';
 @customElement('affine-frame')
 export class FrameBlockComponent extends ShadowlessElement {
   static override styles = css`
+    .affine-frame-block-container {
+      overflow: hidden;
+    }
     .affine-frame-block-container.selected {
       background-color: var(--affine-hover-color);
     }
