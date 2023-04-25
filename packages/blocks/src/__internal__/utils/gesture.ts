@@ -188,12 +188,13 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (e.detail <= 1) {
+    if (e.detail < 2) {
       if (isDragging) {
         onContainerDragEnd(
           toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
         );
       } else {
+        console.log('click');
         onContainerClick(
           toSelectionEvent(e, getBoundingClientRect, startX, startY)
         );

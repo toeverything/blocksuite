@@ -106,8 +106,6 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.state.resetStartRange(e);
-
     const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
@@ -227,14 +225,41 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
+    this.state.resetStartRange(e);
+
+    const {
+      raw: { target, clientX, clientY, pageX },
+      keys: { shift },
+    } = e;
+    const { type, viewport } = this.state;
+
     // do nothing when clicking on scrollbar
-    const { viewport } = this.state;
+    if (pageX >= viewport.clientWidth + viewport.left) return;
 
-    if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
-
-    const target = e.raw.target;
+    // do nothing when clicking on drag-handle
     if (isElement(target) && isDragHandle(target as Element)) {
       return;
+    }
+
+    // shift + click
+    // * native: select text
+    // * block: select blocks
+    if (shift) {
+      if (type === 'native') {
+        // TODO
+        return;
+      }
+      if (type === 'block') {
+        const element = getClosestBlockElementByPoint(
+          new Point(clientX, clientY),
+          {
+            rect: this.container.innerRect,
+          }
+        );
+        // TODO
+
+        return;
+      }
     }
 
     // clear selection first
@@ -245,19 +270,16 @@ export class DefaultSelectionManager {
       document.querySelectorAll('.affine-embed-wrapper-caption')
     );
     allCaptions.forEach(el => {
-      if (el !== e.raw.target) {
+      if (el !== target) {
         (el as HTMLInputElement).blur();
       }
     });
 
     let clickBlockInfo = null;
 
-    const element = getClosestBlockElementByPoint(
-      new Point(e.raw.clientX, e.raw.clientY),
-      {
-        rect: this.container.innerRect,
-      }
-    );
+    const element = getClosestBlockElementByPoint(new Point(clientX, clientY), {
+      rect: this.container.innerRect,
+    });
 
     if (element) {
       clickBlockInfo = {
@@ -300,7 +322,7 @@ export class DefaultSelectionManager {
       return;
     }
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
-    if (e.keys.shift) return;
+    if (shift) return;
     handleNativeRangeClick(this.page, e);
   };
 
