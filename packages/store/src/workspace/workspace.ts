@@ -212,12 +212,17 @@ export class Workspace {
     });
   }
 
-  createPage(options: { id?: string; init?: true | { title: string } } = {}) {
+  createPage(
+    options: { id?: string; init?: true | { title: string } } | string = {}
+  ) {
     // Migration guide
     if (typeof options === 'string') {
       options = { id: options };
       console.warn(
-        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ pageId })` instead'
+        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ id: pageId })` instead'
+      );
+      console.warn(
+        'More details see https://github.com/toeverything/blocksuite/pull/2272'
       );
     }
     // End of migration guide. Remove this in the next major version
