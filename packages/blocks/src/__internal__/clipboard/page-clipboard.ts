@@ -44,9 +44,9 @@ export class PageClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByRange(this._page, range);
-
-    const focusedBlockModel = range?.models[0];
+    const focusedBlockModel = deleteModelsByRange(this._page, range);
+    // This assert is unreliable
+    // but it's reasonable to paste nothing when focus block is not found
     assertExists(focusedBlockModel);
     const service = getService(focusedBlockModel.flavour);
     assertExists(range);
