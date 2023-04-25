@@ -55,7 +55,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 72]);
+  await assertFrameXYWH(page, [0, 0, 720, 80]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -64,7 +64,7 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, 720, 72]);
+  await assertFrameXYWH(page, [0, 100, 720, 80]);
 });
 
 test('resize frame in edgeless mode', async ({ page }) => {
@@ -119,7 +119,7 @@ test('add Text', async ({ page }) => {
   await assertRichTexts(page, ['', 'hello']);
 
   await page.mouse.move(30, 40);
-  await assertEdgelessSelectedRect(page, [0, 0, 448, 72]);
+  await assertEdgelessSelectedRect(page, [0, 0, 448, 80]);
 });
 
 test('add empty Text', async ({ page }) => {
@@ -138,7 +138,7 @@ test('add empty Text', async ({ page }) => {
 
   // assert add text success
   await page.mouse.move(30, 40);
-  await assertEdgelessSelectedRect(page, [0, 0, 448, 104]);
+  await assertEdgelessSelectedRect(page, [0, 0, 448, 112]);
 
   // click out of text
   await page.mouse.click(0, 200);
@@ -356,7 +356,7 @@ test('when the selection is always a frame, it should remain in an active state'
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [84, 412, 448, 104]);
+  await assertEdgelessSelectedRect(page, [84, 408, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
@@ -413,7 +413,7 @@ test('double click blank space to add text', async ({ page }) => {
   await type(page, 'hello');
   await waitNextFrame(page);
 
-  await assertEdgelessSelectedRect(page, [0, 100, 448, 72]);
+  await assertEdgelessSelectedRect(page, [0, 100, 448, 80]);
 });
 
 test('double click toolbar zoom button, should not add text', async ({
