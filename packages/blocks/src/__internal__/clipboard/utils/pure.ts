@@ -23,7 +23,7 @@ export function extractCustomDataFromHTMLString(
 ) {
   const dom = new DOMParser().parseFromString(html, 'text/html');
   const ele = dom.querySelector(`blocksuite[data-type="${type}"]`);
-  return ele?.innerHTML;
+  return ele?.getAttribute('data-clipboard');
 }
 
 export function getSurfaceClipboardData(e: ClipboardEvent) {
@@ -125,5 +125,8 @@ export function createHTMLStringForCustomData(
   data: string,
   type: CLIPBOARD_MIMETYPE
 ) {
-  return `<blocksuite style="display: none" data-type="${type}">${data}</blocksuite>`;
+  return `<blocksuite style="display: none" data-type="${type}" data-clipboard="${data.replace(
+    /"/g,
+    '&quot;'
+  )}"></blocksuite>`;
 }
