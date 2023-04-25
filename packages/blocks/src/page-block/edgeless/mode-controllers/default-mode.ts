@@ -173,7 +173,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleBlockDragMove(block: TopLevelBlockModel, e: SelectionEvent) {
-    console.log('e.delta', e.delta);
     const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
     const { zoom } = this._edgeless.surface.viewport;
     const xywh = JSON.stringify([
@@ -338,7 +337,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    console.log('drag type', this.dragType);
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;

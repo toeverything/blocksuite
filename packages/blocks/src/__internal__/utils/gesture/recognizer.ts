@@ -27,7 +27,8 @@ export class Recognizer {
 
   private _startX = -Infinity;
   private _startY = -Infinity;
-  private _lastSelectionEventForDrag: SelectionEvent | null = null;
+  private _dragStartEvent: SelectionEvent | null = null;
+  private _lastDragMoveEvent: SelectionEvent | null = null;
   private _dragging = false;
 
   constructor(target: HTMLElement, callbacks: Callbacks = {}) {
@@ -92,7 +93,8 @@ export class Recognizer {
 
     this._startX = selectionEvent.x;
     this._startY = selectionEvent.y;
-    this._lastSelectionEventForDrag = selectionEvent;
+    this._dragStartEvent = selectionEvent;
+    this._lastDragMoveEvent = selectionEvent;
     this._lastPointerDownEvent = event;
 
     this._dispatchEvent('onPointerDown', selectionEvent);
@@ -101,7 +103,7 @@ export class Recognizer {
   };
 
   private _pointermove = (event: PointerEvent) => {
-    const lastSelectionEvent = this._lastSelectionEventForDrag;
+    const lastSelectionEvent = this._lastDragMoveEvent;
     const selectionEvent = toSelectionEvent({
       event,
       getBoundingClientRect: this._getTargetBoundingRect,
@@ -109,16 +111,14 @@ export class Recognizer {
       startY: this._startY,
       last: lastSelectionEvent,
     });
-    this._lastSelectionEventForDrag = selectionEvent;
+    this._lastDragMoveEvent = selectionEvent;
 
     assertExists(lastSelectionEvent);
+    assertExists(this._dragStartEvent);
 
-    if (
-      !this._dragging &&
-      isFarEnough({ x: this._startX, y: this._startY }, selectionEvent)
-    ) {
+    if (!this._dragging && isFarEnough(this._dragStartEvent, selectionEvent)) {
       this._dragging = true;
-      this._dispatchEvent('onDragStart', lastSelectionEvent);
+      this._dispatchEvent('onDragStart', this._dragStartEvent);
     }
 
     if (this._dragging) {
@@ -143,7 +143,7 @@ export class Recognizer {
       getBoundingClientRect: this._getTargetBoundingRect,
       startX: this._startX,
       startY: this._startY,
-      last: this._lastSelectionEventForDrag,
+      last: this._lastDragMoveEvent,
     });
 
     this._dispatchEvent('onPointerUp', selectionEvent);
@@ -161,7 +161,7 @@ export class Recognizer {
 
     this._startX = -Infinity;
     this._startY = -Infinity;
-    this._lastSelectionEventForDrag = null;
+    this._lastDragMoveEvent = null;
     this._dragging = false;
 
     document.removeEventListener('pointermove', this._pointermove);
