@@ -74,7 +74,8 @@ export class Recognizer {
   private _pointerdown = (event: PointerEvent) => {
     if (
       this._lastPointerDownEvent &&
-      event.timeStamp - this._lastPointerDownEvent.timeStamp < 500
+      event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&
+      !isFarEnough(event, this._lastPointerDownEvent)
     ) {
       this._pointerDownCount++;
     } else {
