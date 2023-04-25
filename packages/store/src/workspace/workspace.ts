@@ -212,10 +212,19 @@ export class Workspace {
     });
   }
 
-  createPage({
-    pageId = this.idGenerator(),
-    init,
-  }: { pageId?: string; init?: true | { title: string } } = {}) {
+  createPage(
+    options: { pageId?: string; init?: true | { title: string } } = {}
+  ) {
+    // Migration guide
+    if (typeof options === 'string') {
+      options = { pageId: options };
+      console.warn(
+        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ pageId })` instead'
+      );
+    }
+    // End of migration guide. Remove this in the next major version
+
+    const { pageId = this.idGenerator(), init } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
