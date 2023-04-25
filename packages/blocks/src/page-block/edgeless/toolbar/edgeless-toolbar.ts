@@ -143,6 +143,7 @@ export class EdgelessToolbar extends LitElement {
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @mouseup=${stopPropagation}
+        @pointerdown=${stopPropagation}
       >
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
