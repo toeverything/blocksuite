@@ -94,7 +94,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }} --headed
+        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }} --debug
         env:
           COVERAGE: true
 
