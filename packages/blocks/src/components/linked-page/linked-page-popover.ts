@@ -1,4 +1,4 @@
-import { DualLinkIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
+import { DualLinkIcon, PageIcon } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import {
   assertExists,
@@ -98,13 +98,13 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         icon: DualLinkIcon,
         action: () => this._createPage(),
       },
-      {
-        key: 'create-subpage',
-        name: `Create "${displayPageName}" subpage`,
-        active: filteredPageList.length + 1 === this._activatedItemIndex,
-        icon: NewPageIcon,
-        action: () => this._createSubpage(),
-      },
+      // {
+      //   key: 'create-subpage',
+      //   name: `Create "${displayPageName}" subpage`,
+      //   active: filteredPageList.length + 1 === this._activatedItemIndex,
+      //   icon: NewPageIcon,
+      //   action: () => this._createSubpage(),
+      // },
     ];
   }
 
@@ -212,16 +212,15 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     initDefaultBlocks(page, pageName);
     this._insertLinkedNode('LinkedPage', page.id);
   }
+  // private _createSubpage() {
+  //   const pageName = this._query;
+  //   const workspace = this._page.workspace;
+  //   const id = workspace.idGenerator();
+  //   const page = this._page.workspace.createPage(id);
 
-  private _createSubpage() {
-    const pageName = this._query;
-    const workspace = this._page.workspace;
-    const id = workspace.idGenerator();
-    const page = this._page.workspace.createPage(id);
-
-    initDefaultBlocks(page, pageName);
-    this._insertLinkedNode('Subpage', page.id);
-  }
+  //   initDefaultBlocks(page, pageName);
+  //   this._insertLinkedNode('Subpage', page.id);
+  // }
 
   override render() {
     const MAX_HEIGHT = 396;
@@ -234,7 +233,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._actionList.slice(0, -2).map(
+    const pageList = this._actionList.slice(0, -1).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"
@@ -250,7 +249,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       >`
     );
 
-    const createList = this._actionList.slice(-2).map(
+    const createList = this._actionList.slice(-1).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"
@@ -260,7 +259,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         @click=${action}
         @mousemove=${() => {
           // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-          this._activatedItemIndex = this._actionList.length - 2 + index;
+          this._activatedItemIndex = this._actionList.length - 1 + index;
         }}
         >${icon}</icon-button
       >`
