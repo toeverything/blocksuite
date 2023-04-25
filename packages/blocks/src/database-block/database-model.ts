@@ -1,7 +1,8 @@
-import type { Cell, Column, SelectTag } from '@blocksuite/global/database';
 import { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
+
+import type { Cell, Column, SelectTag } from './types.js';
 
 export type Props = {
   title: Text;

@@ -5,7 +5,6 @@ import './components/toolbar/toolbar.js';
 import './components/database-title.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
-import { type Column } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -23,6 +22,7 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import type { Column } from './types.js';
 import { SearchState } from './types.js';
 import { onClickOutside } from './utils.js';
 
