@@ -18,8 +18,6 @@ const config: PlaywrightTestConfig = {
     },
   },
   use: {
-    // headless has to be true, otherwise the clipboard tests will fail
-    headless: true,
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
       'chromium',
