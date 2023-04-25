@@ -1,4 +1,4 @@
-import type { StrokeStyle } from '../../consts.js';
+import { StrokeStyle } from '../../consts.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
@@ -13,7 +13,7 @@ export class ShapeElement extends BaseElement {
   fillColor = '#ffffff';
   strokeWidth = 4;
   strokeColor = '#000000';
-  strokeStyle: StrokeStyle = 'solid';
+  strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
   constructor(id: string, shapeType: ShapeType) {
     super(id);

@@ -8,8 +8,8 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  shouldClipboardHandlerContinue,
-} from './utils.js';
+  normalizePasteBlocks,
+} from './utils/commons.js';
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
@@ -30,50 +30,53 @@ export class PageClipboard implements Clipboard {
   }
 
   private _onPaste = async (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page) || !e.clipboardData) {
+    const range = getCurrentBlockRange(this._page);
+    if (!e.clipboardData || !range) {
       return;
     }
     e.preventDefault();
 
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
-    if (!blocks.length) {
+    const normalizedBlocks = normalizePasteBlocks(this._page, blocks);
+
+    if (!normalizedBlocks.length) {
       return;
     }
     this._page.captureSync();
 
-    await deleteModelsByRange(this._page);
-
-    const range = getCurrentBlockRange(this._page);
-
-    const focusedBlockModel = range?.models[0];
+    const focusedBlockModel = deleteModelsByRange(this._page, range);
+    // This assert is unreliable
+    // but it's reasonable to paste nothing when focus block is not found
     assertExists(focusedBlockModel);
     const service = getService(focusedBlockModel.flavour);
     assertExists(range);
-    await service.json2Block(focusedBlockModel, blocks, range);
+    await service.json2Block(focusedBlockModel, normalizedBlocks, range);
 
     this._page.captureSync();
   };
 
-  private _onCopy = (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page)) {
+  private _onCopy = (
+    e: ClipboardEvent,
+    range = getCurrentBlockRange(this._page)
+  ) => {
+    if (!range) {
       return;
     }
     e.preventDefault();
     this._page.captureSync();
 
-    const range = getCurrentBlockRange(this._page);
-    assertExists(range);
     copyBlocks(range);
 
     this._page.captureSync();
   };
 
   private _onCut = (e: ClipboardEvent) => {
-    if (!shouldClipboardHandlerContinue(this._page)) {
+    const range = getCurrentBlockRange(this._page);
+    if (!range) {
       return;
     }
     e.preventDefault();
-    this._onCopy(e);
-    deleteModelsByRange(this._page);
+    this._onCopy(e, range);
+    deleteModelsByRange(this._page, range);
   };
 }

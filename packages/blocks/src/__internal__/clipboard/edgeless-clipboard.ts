@@ -26,11 +26,13 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  createSurfaceClipboardItems,
   getBlockClipboardInfo,
+} from './utils/commons.js';
+import {
+  createSurfaceClipboardItems,
   getSurfaceClipboardData,
   performNativeCopy,
-} from './utils.js';
+} from './utils/index.js';
 
 export class EdgelessClipboard implements Clipboard {
   private _page!: Page;

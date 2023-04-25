@@ -69,8 +69,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       white-space: break-spaces;
     }
 
+    .affine-reference-title {
+      color: var(--affine-text-primary-color);
+    }
     .affine-reference-title::before {
       content: attr(data-title);
+      color: var(--affine-link-color);
     }
   `;
 
@@ -181,6 +185,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         class="affine-reference-title"
         data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
+        data-virgo-text-value=${ZERO_WIDTH_NON_JOINER}
         >${ZERO_WIDTH_NON_JOINER}</span
       ></span
     >`;

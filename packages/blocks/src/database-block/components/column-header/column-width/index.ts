@@ -25,7 +25,7 @@ export function initChangeColumnWidthHandlers(
 ) {
   let changeColumnWidthConfig: ColumnWidthConfig | null = null;
 
-  const onColumnWidthMousedown = (event: MouseEvent, index: number) => {
+  const onColumnWidthPointerdown = (event: PointerEvent, index: number) => {
     // all rows cell in current column
     const currentColumnCells = Array.from(
       tableContainer.querySelectorAll<HTMLElement>(
@@ -53,7 +53,7 @@ export function initChangeColumnWidthHandlers(
     changeActiveColumnIndex(index);
   };
 
-  const onColumnWidthMousemove = (event: MouseEvent) => {
+  const onColumnWidthPointermove = (event: PointerEvent) => {
     if (!changeColumnWidthConfig) return;
 
     const {
@@ -134,7 +134,7 @@ export function initChangeColumnWidthHandlers(
     changeColumnWidthConfig.rafId = requestAnimationFrame(onUpdateDOM);
   };
 
-  const onColumnWidthMouseup = (event: MouseEvent) => {
+  const onColumnWidthPointerup = (event: PointerEvent) => {
     changeActiveColumnIndex(-1);
     if (!changeColumnWidthConfig) return;
     const { rafId, index, rowCells } = changeColumnWidthConfig;
@@ -163,12 +163,12 @@ export function initChangeColumnWidthHandlers(
     '.affine-database-column-drag-handle'
   );
   dragHandles.forEach((dragHandle, index) => {
-    disposables.addFromEvent(dragHandle, 'mousedown', (event: MouseEvent) =>
-      onColumnWidthMousedown(event, index)
+    disposables.addFromEvent(dragHandle, 'pointerdown', (event: PointerEvent) =>
+      onColumnWidthPointerdown(event, index)
     );
   });
 
-  disposables.addFromEvent(document, 'mousemove', onColumnWidthMousemove);
-  disposables.addFromEvent(document, 'mouseup', onColumnWidthMouseup);
+  disposables.addFromEvent(document, 'pointermove', onColumnWidthPointermove);
+  disposables.addFromEvent(document, 'pointerup', onColumnWidthPointerup);
   return disposables;
 }

@@ -3,9 +3,11 @@ import { expect } from '@playwright/test';
 import { addNewPage, switchToPage } from 'utils/actions/click.js';
 import {
   copyByKeyboard,
+  pasteByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
+  selectAllByKeyboard,
   type,
   undoByKeyboard,
 } from 'utils/actions/keyboard.js';
@@ -373,6 +375,26 @@ test.describe('reference node', () => {
 </affine:page>`
     );
   });
+
+  test('should not merge consecutive identical reference nodes for rendering', async ({
+    page,
+  }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2136',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '[[');
+    await pressEnter(page);
+    await type(page, '[[');
+    await pressEnter(page);
+
+    const { refNode } = getLinkedPagePopover(page);
+    await assertRichTexts(page, ['  ']);
+    await expect(refNode).toHaveCount(2);
+  });
 });
 
 test.describe('linked page popover', () => {
@@ -457,5 +479,144 @@ test.describe('linked page popover', () => {
     await pressEnter(page);
     await expect(linkedPagePopover).toBeHidden();
     await assertExistRefText('page2');
+  });
+});
+
+test.describe('linked page with clipboard', () => {
+  test('paste subpage should paste as linked page', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    const { createLinkedPage, createSubpage } = getLinkedPagePopover(page);
+
+    await createSubpage('page0');
+    await createLinkedPage('page1');
+
+    await selectAllByKeyboard(page);
+    await copyByKeyboard(page);
+    await focusRichText(page);
+    await pasteByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert=" "
+        reference={
+          Object {
+            "pageId": "3",
+            "type": "Subpage",
+          }
+        }
+      />
+      <text
+        insert=" "
+        reference={
+          Object {
+            "pageId": "8",
+            "type": "LinkedPage",
+          }
+        }
+      />
+      <text
+        insert=" "
+        reference={
+          Object {
+            "pageId": "3",
+            "type": "LinkedPage",
+          }
+        }
+      />
+      <text
+        insert=" "
+        reference={
+          Object {
+            "pageId": "8",
+            "type": "LinkedPage",
+          }
+        }
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+      paragraphId
+    );
+  });
+
+  test(' duplicated subpage should paste as linked page', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { frameId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    const { createLinkedPage, createSubpage } = getLinkedPagePopover(page);
+
+    await createLinkedPage('page0');
+    await createSubpage('page1');
+
+    await type(page, '/duplicate');
+    await pressEnter(page);
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert=" "
+          reference={
+            Object {
+              "pageId": "3",
+              "type": "LinkedPage",
+            }
+          }
+        />
+        <text
+          insert=" "
+          reference={
+            Object {
+              "pageId": "8",
+              "type": "LinkedPage",
+            }
+          }
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert=" "
+          reference={
+            Object {
+              "pageId": "3",
+              "type": "LinkedPage",
+            }
+          }
+        />
+        <text
+          insert=" "
+          reference={
+            Object {
+              "pageId": "8",
+              "type": "Subpage",
+            }
+          }
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:frame>`,
+      frameId
+    );
   });
 });

@@ -13,6 +13,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private readonly _editor: VEditor<TextAttributes>;
 
   private _vRange: VRange | null = null;
+  private _lastScrollLeft = 0;
 
   constructor(editor: VEditor<TextAttributes>) {
     this._editor = editor;
@@ -21,7 +22,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
-    if (origin === 'native') {
+    if (origin !== 'other') {
       return;
     }
 
@@ -106,6 +107,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     };
   };
 
+  onScrollUpdated = (scrollLeft: number) => {
+    this._lastScrollLeft = scrollLeft;
+  };
+
   private _applyVRange = (vRange: VRange): void => {
     const newRange = this.toDomRange(vRange);
 
@@ -146,9 +151,13 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       const rootRect = root.getBoundingClientRect();
       const rangeRect = range.getBoundingClientRect();
 
-      const moveX = rangeRect.left - rootRect.right;
+      const moveX = Math.max(
+        this._lastScrollLeft,
+        rangeRect.left - rootRect.right
+      );
 
       root.scrollLeft = moveX;
+      this._lastScrollLeft = moveX;
     }
   };
 }

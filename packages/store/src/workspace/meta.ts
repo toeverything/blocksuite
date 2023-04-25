@@ -15,6 +15,10 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+  /**
+   * Note: YOU SHOULD NOT UPDATE THIS FIELD MANUALLY.
+   * @deprecated
+   */
   subpageIds: string[];
 
   [key: string]: string | number | boolean | undefined | (string | number)[];
@@ -86,6 +90,9 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
+  /**
+   * @internal Use {@link Workspace.setPageMeta} instead
+   */
   setPageMeta(id: string, props: Partial<PageMeta>) {
     const pages = (this.pages?.toJSON() as PageMeta[]) ?? [];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
@@ -104,7 +111,11 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
-  /** Adjust the index of a page inside the pageMetss list */
+  /**
+   * Adjust the index of a page inside the pageMetss list
+   *
+   * @deprecated
+   */
   shiftPageMeta(pageId: string, newIndex: number) {
     const pageMetas = (this.pages ?? new Y.Array()).toJSON() as PageMeta[];
     const index = pageMetas.findIndex((page: PageMeta) => pageId === page.id);

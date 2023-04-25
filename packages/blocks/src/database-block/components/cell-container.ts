@@ -1,5 +1,4 @@
 import type { RowHost } from '@blocksuite/global/database';
-import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -17,7 +16,7 @@ export class DatabaseCellContainer
   implements RowHost
 {
   static override styles = css`
-    :host {
+    affine-database-cell-container {
       display: flex;
       align-items: center;
       width: 100%;
@@ -50,7 +49,6 @@ export class DatabaseCellContainer
   }
 
   setEditing = (isEditing: boolean) => {
-    assertExists(this.shadowRoot);
     this._isEditing = isEditing;
     if (!this._isEditing) {
       setTimeout(() => {
@@ -78,6 +76,11 @@ export class DatabaseCellContainer
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    this._disposables.addFromEvent(this, 'mousedown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
   }
 
   _onClick = (event: Event) => {

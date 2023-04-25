@@ -20,6 +20,7 @@ import {
 import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
@@ -287,7 +288,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             model.flavour,
             {
               type: model.type,
-              text: page.Text.fromDelta(model.text.toDelta()),
+              text: page.Text.fromDelta(
+                normalizeDelta(page, model.text.toDelta())
+              ),
               // @ts-expect-error
               checked: model.checked,
             },

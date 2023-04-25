@@ -40,7 +40,10 @@ export class Space<
     return `space:${this.id}`;
   }
 
-  transact(fn: () => void) {
-    this.doc.transact(fn, this.doc.clientID);
+  /**
+   * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
+   */
+  transact(fn: () => void, shouldTransact = true) {
+    this.doc.transact(fn, shouldTransact ? this.doc.clientID : undefined);
   }
 }

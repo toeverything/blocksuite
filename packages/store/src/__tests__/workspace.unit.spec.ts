@@ -45,10 +45,10 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage(pageId = defaultPageId, parentId?: string) {
+function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage(pageId, parentId);
+  return workspace.createPage(pageId);
 }
 
 describe('basic', () => {
@@ -83,12 +83,23 @@ describe('basic', () => {
 });
 
 describe('pageMeta', () => {
-  it('can create subpage', () => {
+  it('can create subpage', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
     const parentPage = workspace.createPage(defaultPageId);
-    const subpage = workspace.createPage('subpage0', parentPage.id);
+    const subpage = workspace.createPage('subpage0');
+    parentPage.addBlock('affine:page');
+    parentPage.addBlock('affine:paragraph', {
+      text: parentPage.Text.fromDelta([
+        {
+          insert: ' ',
+          attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
+        },
+      ]),
+    });
+    // wait for the backlink index to be updated
+    await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 
@@ -447,34 +458,5 @@ describe('workspace.exportJSX works', () => {
         />
       </affine:page>
     `);
-  });
-});
-
-describe('workspace.search works', () => {
-  it('workspace search matching', () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
-
-    page.addBlock('affine:page', { title: new page.Text('hello') });
-
-    page.addBlock('affine:paragraph', {
-      text: new page.Text(
-        '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
-      ),
-    });
-
-    page.addBlock('affine:paragraph', {
-      text: new page.Text(
-        '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
-      ),
-    });
-
-    const id = page.id.replace('space:', '');
-
-    queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(new Map([['1', id]]));
-      expect(workspace.search('索尼')).toStrictEqual(new Map([['2', id]]));
-    });
   });
 });

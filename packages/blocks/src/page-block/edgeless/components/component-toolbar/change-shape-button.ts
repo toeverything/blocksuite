@@ -2,7 +2,11 @@ import '../tool-icon-button.js';
 import '../color-panel.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
-import type { ShapeElement, SurfaceManager } from '@blocksuite/phasor';
+import {
+  type ShapeElement,
+  StrokeStyle,
+  type SurfaceManager,
+} from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -18,6 +22,14 @@ import { ShapeComponentConfigMap } from '../../toolbar/shape-tool/shape-menu-con
 import type { ColorEvent } from '../color-panel.js';
 import { isTransparent } from '../color-panel.js';
 import { ColorUnit } from '../color-panel.js';
+import type { LineSizeButtonProps } from '../line-size-button.js';
+import { LineSizeButton, lineSizeButtonStyles } from '../line-size-button.js';
+import type { LineStyleButtonProps } from '../line-style-button.js';
+import {
+  LineStylesPanel,
+  type LineStylesPanelClickedButton,
+  lineStylesPanelStyles,
+} from '../line-styles-panel.js';
 import type { EdgelessToolIconButton } from '../tool-icon-button.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -51,6 +63,36 @@ function getMostCommonStrokeColor(
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
   return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
+}
+
+function getMostCommonLineSize(
+  elements: ShapeElement[]
+): LineSizeButtonProps['size'] | null {
+  const sizes = countBy(elements, (ele: ShapeElement) => {
+    return ele.strokeWidth === 4 ? 's' : 'l';
+  });
+  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  return max ? (max[0] as LineSizeButtonProps['size']) : null;
+}
+
+function getMostCommonLineStyle(
+  elements: ShapeElement[]
+): LineStyleButtonProps['mode'] | null {
+  const sizes = countBy(elements, (ele: ShapeElement) => {
+    switch (ele.strokeStyle) {
+      case StrokeStyle.Solid: {
+        return 'solid';
+      }
+      case StrokeStyle.Dashed: {
+        return 'dash';
+      }
+      case StrokeStyle.None: {
+        return 'none';
+      }
+    }
+  });
+  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
 const FILL_COLORS: CssVariableName[] = [
@@ -87,60 +129,71 @@ export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[9];
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      fill: none;
-      stroke: currentColor;
-      color: var(--affine-text-primary-color);
-    }
+  static override styles = [
+    lineSizeButtonStyles,
+    lineStylesPanelStyles,
+    css`
+      :host {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        fill: none;
+        stroke: currentColor;
+        color: var(--affine-text-primary-color);
+      }
 
-    menu-divider {
-      height: 24px;
-    }
+      menu-divider {
+        height: 24px;
+      }
 
-    edgeless-shape-menu {
-      display: none;
-    }
+      edgeless-shape-menu {
+        display: none;
+      }
 
-    edgeless-shape-menu[data-show] {
-      display: block;
-    }
+      edgeless-shape-menu[data-show] {
+        display: block;
+      }
 
-    .color-panel-container {
-      display: none;
-      padding: 4px;
-      justify-content: center;
-      align-items: center;
-      background: var(--affine-page-background);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
-      border-radius: 8px;
-    }
+      .color-panel-container {
+        display: none;
+        padding: 4px;
+        justify-content: center;
+        align-items: center;
+        background: var(--affine-white);
+        box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+        border-radius: 8px;
+      }
 
-    .color-panel-container[data-show] {
-      display: block;
-    }
+      .color-panel-container[data-show] {
+        display: block;
+      }
 
-    .shape-color-button-indicator {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
-      height: 24px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+      .shape-color-button-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 24px;
+        height: 24px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        cursor: pointer;
+      }
 
-    .shape-color-button-indicator div {
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-    }
-  `;
+      .shape-color-button-indicator div {
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+      }
+
+      .line-style-panel {
+        display: none;
+      }
+      .line-style-panel[data-show] {
+        display: flex;
+      }
+    `,
+  ];
 
   @property()
   elements: ShapeElement[] = [];
@@ -180,6 +233,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _strokeColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @query('.line-styles-button')
+  private _lineStylesButton!: EdgelessToolIconButton;
+  @query('.line-style-panel')
+  private _lineStylesPanel!: HTMLDivElement;
+  private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
   private _forceUpdateSelection() {
     // FIXME: force update selection, because connector mode changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
@@ -207,6 +267,50 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       });
     });
     this._forceUpdateSelection();
+  }
+
+  private _setShapeStrokeWidth(strokeWidth: number) {
+    this.page.transact(() => {
+      this.elements.forEach(ele => {
+        this.surface.updateElementProps(ele.id, {
+          strokeWidth,
+        });
+      });
+    });
+    this._forceUpdateSelection();
+  }
+
+  private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
+    this.page.transact(() => {
+      this.elements.forEach(ele => {
+        this.surface.updateElementProps(ele.id, {
+          strokeStyle,
+        });
+      });
+    });
+    this._forceUpdateSelection();
+  }
+
+  private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
+    if (type === 'size') {
+      const strokeWidth = value === 's' ? 4 : 10;
+      this._setShapeStrokeWidth(strokeWidth);
+    } else if (type === 'lineStyle') {
+      switch (value) {
+        case 'solid': {
+          this._setShapeStrokeStyle(StrokeStyle.Solid);
+          break;
+        }
+        case 'dash': {
+          this._setShapeStrokeStyle(StrokeStyle.Dashed);
+          break;
+        }
+        case 'none': {
+          this._setShapeStrokeStyle(StrokeStyle.None);
+          break;
+        }
+      }
+    }
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
@@ -253,6 +357,14 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     );
     _disposables.add(this._strokeColorMenuPopper);
 
+    this._lineStylesPanelPopper = createButtonPopper(
+      this._lineStylesButton,
+      this._lineStylesPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+
     super.firstUpdated(changedProperties);
   }
 
@@ -266,13 +378,15 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       getMostCommonFillColor(this.elements) ?? FILL_COLORS[0];
     const selectedStrokeColor =
       getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
+    const selectedLineSize = getMostCommonLineSize(this.elements) ?? 's';
+    const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
 
     return html`
       <edgeless-tool-icon-button
         class="change-shape-button"
         .tooltip=${this._popperShow ? '' : 'Switch type'}
         .active=${false}
-        @tool.click=${() => this._shapeMenuPopper?.toggle()}
+        @click=${() => this._shapeMenuPopper?.toggle()}
       >
         ${icon}
       </edgeless-tool-icon-button>
@@ -285,7 +399,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         class="fill-color-button"
         .tooltip=${this._popperShow ? '' : 'Shape color'}
         .active=${false}
-        @tool.click=${() => this._fillColorMenuPopper?.toggle()}
+        @click=${() => this._fillColorMenuPopper?.toggle()}
       >
         ${ColorUnit(selectedFillColor)}
       </edgeless-tool-icon-button>
@@ -302,7 +416,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         class="stroke-color-button"
         .tooltip=${this._popperShow ? '' : 'Border color'}
         .active=${false}
-        @tool.click=${() => this._strokeColorMenuPopper?.toggle()}
+        @click=${() => this._strokeColorMenuPopper?.toggle()}
       >
         ${ColorUnit(selectedStrokeColor, { hollowCircle: true })}
       </edgeless-tool-icon-button>
@@ -315,6 +429,24 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         >
         </edgeless-color-panel>
       </div>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      ${LineSizeButton({
+        className: 'line-styles-button',
+        size: selectedLineSize,
+        tooltip: this._popperShow ? '' : 'Line style',
+        onClick: () => {
+          this._lineStylesPanelPopper?.toggle();
+        },
+      })}
+      ${LineStylesPanel({
+        selectedLineSize,
+        selectedLineStyle,
+        onClick: event => {
+          this._setShapeStyles(event);
+        },
+      })}
     `;
   }
 }

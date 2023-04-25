@@ -34,6 +34,10 @@ export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
 
+export async function switchEditorEmbedMode(page: Page) {
+  await page.click('sl-button[content="Add container offset"]');
+}
+
 export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
@@ -210,8 +214,8 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function selectBrushSize(page: Page, size: 4 | 16) {
-  const sizeMap = { 4: 'thin', 16: 'thick' };
+export async function selectBrushSize(page: Page, size: 4 | 10) {
+  const sizeMap = { 4: 'thin', 10: 'thick' };
   const sizeButton = page.locator(
     `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
   );
@@ -336,7 +340,8 @@ type Action =
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
-  | 'changeShapeStrokeColor';
+  | 'changeShapeStrokeColor'
+  | 'changeShapeStrokeWidth';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -388,6 +393,13 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
+    case 'changeShapeStrokeWidth': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-shape-button')
+        .locator('.line-styles-button');
+      await button.click();
+      break;
+    }
   }
 }
 
@@ -418,4 +430,53 @@ export async function changeShapeStrokeColor(
     .locator('.color-panel-container.stroke-color')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
+}
+
+export async function resizeConnectorByStartCapitalHandler(
+  page: Page,
+  delta: { x: number; y: number },
+  steps = 1
+) {
+  const handler = page.locator(
+    '.affine-edgeless-selected-rect .line-controller.line-start'
+  );
+  const box = await handler.boundingBox();
+  if (box === null) throw new Error();
+  const offset = 5;
+  await dragBetweenCoords(
+    page,
+    { x: box.x + offset, y: box.y + offset },
+    { x: box.x + delta.x + offset, y: box.y + delta.y + offset },
+    {
+      steps,
+    }
+  );
+}
+
+export function locatorShapeStrokeWidthButton(page: Page, size: 's' | 'l') {
+  return page
+    .locator('edgeless-change-shape-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-size-button.size-${size}`);
+}
+export async function changeShapeStrokeWidth(page: Page, size: 's' | 'l') {
+  const button = locatorShapeStrokeWidthButton(page, size);
+  await button.click();
+}
+
+export function locatorShapeStrokeStyleButton(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  return page
+    .locator('edgeless-change-shape-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+}
+export async function changeShapeStrokeStyle(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  const button = locatorShapeStrokeStyleButton(page, mode);
+  await button.click();
 }

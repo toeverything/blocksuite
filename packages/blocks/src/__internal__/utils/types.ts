@@ -84,7 +84,7 @@ export type ShapeMouseMode = {
 
 export enum BrushSize {
   Thin = 4,
-  Thick = 16,
+  Thick = 10,
 }
 
 export type BrushMouseMode = {

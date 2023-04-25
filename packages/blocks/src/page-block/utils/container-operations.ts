@@ -17,7 +17,7 @@ import {
   type ExtendedModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
-  getDefaultPageBlock,
+  getDefaultPage,
   getVirgoByModel,
   handleNativeRangeDblClick,
   handleNativeRangeTripleClick,
@@ -63,15 +63,17 @@ export function handleBlockSelectionBatchDelete(
     parentModel,
     index
   );
+  const newBlock = page.getBlockById(id);
 
   // Try clean block selection
-  const defaultPageBlock = getDefaultPageBlock(models[0]);
-  if (!defaultPageBlock.selection) {
+  const defaultPageBlock = getDefaultPage(models[0].page);
+  if (!defaultPageBlock) {
     // In the edgeless mode
-    return;
+    return null;
   }
   defaultPageBlock.selection.clear();
-  return id && asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id);
+  return newBlock;
 }
 
 export function deleteModelsByRange(
@@ -79,13 +81,15 @@ export function deleteModelsByRange(
   blockRange = getCurrentBlockRange(page)
 ) {
   if (!blockRange) {
-    return;
+    return null;
   }
   if (blockRange.type === 'Block') {
-    return handleBlockSelectionBatchDelete(page, blockRange.models);
+    const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
+    return newBlock;
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
+  // TODO handle database
   if (!startModel.text || !endModel.text) {
     throw new Error('startModel or endModel does not have text');
   }
@@ -105,7 +109,7 @@ export function deleteModelsByRange(
       //   index: blockRange.startOffset - 1,
       //   length: 0,
       // });
-      return;
+      return startModel;
     }
     startModel.text.delete(
       blockRange.startOffset,
@@ -115,7 +119,7 @@ export function deleteModelsByRange(
       index: blockRange.startOffset,
       length: 0,
     });
-    return;
+    return startModel;
   }
   page.captureSync();
   startModel.text.delete(
@@ -128,10 +132,11 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  return vEditor.setVRange({
+  vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });
+  return startModel;
 }
 
 /**
@@ -457,7 +462,17 @@ function formatBlockRange(
   if (blockRange.type === 'Native') {
     const allTextUpdated = blockRange.models
       .filter(model => !matchFlavours(model, ['affine:code']))
-      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+      .map(
+        model =>
+          // We can not use `onModelTextUpdated` here because it is asynchronous, which
+          // will make updated event emit before we observe it.
+          new Promise(resolve => {
+            const vEditor = getVirgoByModel(model);
+            vEditor?.slots.updated.once(() => {
+              resolve(vEditor);
+            });
+          })
+      );
 
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
