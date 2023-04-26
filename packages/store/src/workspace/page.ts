@@ -724,7 +724,7 @@ export class Page extends Space<FlatBlockMap> {
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
-    if (model.role === 'root') {
+    if (model.flavour === 'affine:page') {
       isRoot = true;
     }
     this._blockMap.set(id, model);
