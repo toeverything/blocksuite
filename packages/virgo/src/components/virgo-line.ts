@@ -1,6 +1,8 @@
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { ZERO_WIDTH_SPACE } from '../consts.js';
+
 @customElement('v-line')
 export class VirgoLine extends LitElement {
   @property({ attribute: false })
@@ -29,6 +31,10 @@ export class VirgoLine extends LitElement {
   }
 
   override render() {
+    if (this.elements.length === 0) {
+      return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
+    }
+
     return html`<div>${this.elements}</div>`;
   }
 
