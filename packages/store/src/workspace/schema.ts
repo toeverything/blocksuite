@@ -1,5 +1,6 @@
 import { SchemaValidateError } from '@blocksuite/global/error';
 import { assertExists } from '@blocksuite/global/utils';
+import { minimatch } from 'minimatch';
 
 import type { BlockSchemaType } from '../base.js';
 import type { Workspace } from './workspace.js';
@@ -109,8 +110,10 @@ export class Schema {
   }
 
   private _matchFlavour(childFlavour: string, parentFlavour: string) {
-    // TODO: support glob match here, ex: database-* should match database-col and database-row
-    return childFlavour === parentFlavour;
+    return (
+      minimatch(childFlavour, parentFlavour) ||
+      minimatch(parentFlavour, childFlavour)
+    );
   }
 
   private _validateParent(
@@ -120,8 +123,8 @@ export class Schema {
     const _childFlavour = child.model.flavour;
     const _parentFlavour = parent.model.flavour;
 
-    const parentValidFlavours = parent.model.children || ['*'];
     const childValidFlavours = child.model.parent || ['*'];
+    const parentValidFlavours = parent.model.children || ['*'];
 
     return parentValidFlavours.some(parentValidFlavour => {
       return childValidFlavours.some(childValidFlavour => {
@@ -137,7 +140,10 @@ export class Schema {
           return this._matchFlavour(_childFlavour, parentValidFlavour);
         }
 
-        return this._matchFlavour(childValidFlavour, parentValidFlavour);
+        return (
+          this._matchFlavour(_childFlavour, parentValidFlavour) &&
+          this._matchFlavour(childValidFlavour, _parentFlavour)
+        );
       });
     });
   }

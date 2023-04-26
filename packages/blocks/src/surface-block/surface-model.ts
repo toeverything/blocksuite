@@ -7,6 +7,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
     version: 1,
     role: 'root',
     tag: literal`affine-surface`,
+    parent: ['affine:page'],
     children: [],
   },
 });

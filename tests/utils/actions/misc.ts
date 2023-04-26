@@ -4,6 +4,7 @@ import '../declare-test-window.js';
 import type {
   CssVariableName,
   DatabaseBlockModel,
+  ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';

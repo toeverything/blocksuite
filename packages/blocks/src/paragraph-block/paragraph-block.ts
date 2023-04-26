@@ -18,7 +18,7 @@ import {
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
-import type { ParagraphBlockModel } from './paragraph-model.js';
+import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
