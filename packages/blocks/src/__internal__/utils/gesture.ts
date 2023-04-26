@@ -194,7 +194,6 @@ export function initMouseEventHandlers(
           toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
         );
       } else {
-        console.log('click');
         onContainerClick(
           toSelectionEvent(e, getBoundingClientRect, startX, startY)
         );

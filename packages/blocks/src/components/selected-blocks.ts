@@ -37,9 +37,9 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     this.mouseRoot.dispatchEvent(
       new MouseEvent('mouseup', {
         bubbles: true,
-        shiftKey,
         clientX,
         clientY,
+        shiftKey,
       })
     );
   }
