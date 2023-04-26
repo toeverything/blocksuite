@@ -26,10 +26,8 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import {
-  isPinchEvent,
-  type SelectionEvent,
-} from '../../__internal__/utils/gesture.js';
+import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
+import { isPinchEvent } from '../../__internal__/utils/index.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
