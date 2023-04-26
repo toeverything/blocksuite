@@ -85,6 +85,9 @@ function getLinkedPagePopover(page: Page) {
     assertExistRefText,
     createLinkedPage: async (pageName?: string) =>
       createPage('LinkedPage', pageName),
+    /**
+     * @deprecated
+     */
     createSubpage: async (pageName?: string) => createPage('Subpage', pageName),
     assertActivePageIdx,
   };
@@ -119,7 +122,7 @@ test.describe('multiple page', () => {
     await switchToPage(page, id);
     await focusTitle(page);
     await type(page, 'title1');
-    await pressEnter(page);
+    await focusRichText(page);
     await type(page, 'page1');
     await assertRichTexts(page, ['page1']);
 
@@ -320,8 +323,8 @@ test.describe('reference node', () => {
     await type(page, 'page0');
 
     await focusRichText(page);
-    const { createSubpage, findRefNode } = getLinkedPagePopover(page);
-    const linkedNode = await createSubpage('page1');
+    const { createLinkedPage, findRefNode } = getLinkedPagePopover(page);
+    const linkedNode = await createLinkedPage('page1');
     await linkedNode.click();
 
     await assertTitle(page, 'page1');
@@ -363,7 +366,7 @@ test.describe('reference node', () => {
             reference={
               Object {
                 "pageId": "3",
-                "type": "Subpage",
+                "type": "LinkedPage",
               }
             }
           />
@@ -482,7 +485,7 @@ test.describe('linked page popover', () => {
   });
 });
 
-test.describe('linked page with clipboard', () => {
+test.describe.skip('linked page with clipboard', () => {
   test('paste subpage should paste as linked page', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);

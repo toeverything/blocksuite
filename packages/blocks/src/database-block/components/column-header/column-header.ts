@@ -8,7 +8,6 @@ import {
   PenIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import { type Column, ColumnInsertPosition } from '@blocksuite/global/database';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { type TemplateResult } from 'lit';
@@ -25,6 +24,8 @@ import {
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnRendererHelper } from '../../register.js';
+import type { Column } from '../../types.js';
+import { ColumnInsertPosition } from '../../types.js';
 import { onClickOutside } from '../../utils.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';

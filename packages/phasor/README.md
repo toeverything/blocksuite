@@ -1,7 +1,7 @@
 # `@blocksuite/phasor`
 
-Hybrid canvas renderer.
+Hybrid canvas renderer used in [AFFiNE](https://affine.pro/).
 
 ## Documentation
 
-TBD
+Checkout [blocksuite.affine.pro](https://blocksuite.affine.pro/) for comprehensive documentation.

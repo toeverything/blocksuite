@@ -261,7 +261,7 @@ export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
 
 export async function activeFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
-  await page.mouse.dblclick(bound.x, bound.y);
+  await page.mouse.dblclick(bound.x + 8, bound.y + 8);
 }
 
 export async function selectFrameInEdgeless(page: Page, frameId: string) {

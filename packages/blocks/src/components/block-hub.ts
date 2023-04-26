@@ -166,12 +166,13 @@ const styles = css`
     align-items: center;
     position: fixed;
     width: 44px;
-    background: var(--affine-white-90);
+    background: var(--affine-background-primary-color);
     border-radius: 10px;
   }
 
   .block-hub-menu-container[expanded] {
     box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+    background: var(--affine-background-overlay-panel-color);
   }
 
   .block-hub-icon-container {
@@ -180,7 +181,6 @@ const styles = css`
     align-items: center;
     margin-bottom: 8px;
     position: relative;
-    background: var(--affine-white-90);
     border-radius: 5px;
     fill: var(--affine-text-secondary-color);
     height: 36px;
@@ -202,7 +202,6 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: var(--affine-white-90);
     border-radius: 10px;
     fill: var(--affine-text-secondary-color);
   }
@@ -214,8 +213,8 @@ const styles = css`
   .new-icon:hover {
     box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
       -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+    background: var(--affine-white);
     fill: var(--affine-primary-color);
-    background: var(--affine-white-90);
   }
 
   .icon-expanded {

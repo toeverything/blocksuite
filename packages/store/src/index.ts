@@ -1,4 +1,6 @@
 /// <reference types="@blocksuite/global" />
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../shim.d.ts" />
 export * from './awareness.js';
 export * from './base.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';

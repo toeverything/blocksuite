@@ -18,7 +18,7 @@ describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -53,8 +53,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page = workspace.createPage('page0');
-    const subpage = workspace.createPage('page1');
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
 
     page.addBlock('affine:page');
     const text = page.Text.fromDelta([
@@ -102,8 +102,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
+    const page0 = workspace.createPage({ id: 'page0' });
+    const page1 = workspace.createPage({ id: 'page1' });
 
     page0.addBlock('affine:page');
     page0.addBlock('affine:paragraph', {
@@ -200,9 +200,9 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page = workspace.createPage('page0');
-    const subpage = workspace.createPage('page1');
-    const subpage2 = workspace.createPage('page2');
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
+    const subpage2 = workspace.createPage({ id: 'page2' });
 
     page.addBlock('affine:page');
     const text = page.Text.fromDelta([
