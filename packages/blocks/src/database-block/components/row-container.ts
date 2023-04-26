@@ -1,3 +1,5 @@
+import './cell-container.js';
+
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';

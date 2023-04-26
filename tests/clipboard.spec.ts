@@ -641,7 +641,7 @@ test('copy phasor element and text frame in edgeless mode', async ({
   );
 
   await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
-  await assertEdgelessSelectedRect(page, [90, 100, 720, 268]);
+  await assertEdgelessSelectedRect(page, [90, 100, 720, 272]);
 
   await copyByKeyboard(page);
 
@@ -649,7 +649,7 @@ test('copy phasor element and text frame in edgeless mode', async ({
 
   await pasteByKeyboard(page, false);
 
-  await assertEdgelessSelectedRect(page, [40, 266, 720, 268]);
+  await assertEdgelessSelectedRect(page, [40, 264, 720, 272]);
 });
 
 test('copy when text frame active in edgeless', async ({ page }) => {
@@ -667,4 +667,20 @@ test('copy when text frame active in edgeless', async ({ page }) => {
   await type(page, '555');
   await pasteByKeyboard(page, false);
   await assertText(page, '5551234');
+});
+
+test('copy and paste to selection block selection', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2265',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page, false);
+  await assertRichTexts(page, ['1234', '']);
 });

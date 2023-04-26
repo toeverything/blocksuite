@@ -139,8 +139,8 @@ importers:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
       marked:
         specifier: ^4.2.12
         version: 4.2.12
@@ -194,8 +194,8 @@ importers:
         specifier: workspace:*
         version: link:../global
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
       marked:
         specifier: ^4.2.12
         version: 4.2.12
@@ -226,8 +226,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
 
   packages/phasor:
     dependencies:
@@ -287,8 +287,8 @@ importers:
         specifier: ^0.32.1
         version: 0.32.1
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -355,8 +355,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
       yjs:
         specifier: ^13.5.50
         version: 13.5.50
@@ -371,8 +371,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.2
+        version: 2.7.2
       yjs:
         specifier: ^13.5.50
         version: 13.5.50
@@ -1299,6 +1299,9 @@ packages:
   /@lit-labs/ssr-dom-shim@1.0.0:
     resolution: {integrity: sha512-ic93MBXfApIFTrup4a70M/+ddD8xdt2zxxj9sRwHQzhS9ag/syqkD8JPdTXsc1gUy2K8TTirhlCqyTEM/sifNw==}
 
+  /@lit-labs/ssr-dom-shim@1.1.0:
+    resolution: {integrity: sha512-92uQ5ARf7UXYrzaFcAX3T2rTvaS9Z1//ukV+DqjACM4c8s0ZBQd7ayJU5Dh2AFLD/Ayuyz4uMmxQec8q3U4Ong==}
+
   /@lit/reactive-element@1.6.0:
     resolution: {integrity: sha512-33H04h4tx9NVEADti0haZTNxssCnqZlMlyjri5k9kwDWAe2W1iENroZt7VWwmsPhlWUD8sSoPXSHqd0DdL29Pw==}
     dependencies:
@@ -1403,7 +1406,7 @@ packages:
       '@lit-labs/react': 1.1.1
       '@shoelace-style/animations': 1.1.0
       '@shoelace-style/localize': 3.0.4
-      lit: 2.6.1
+      lit: 2.7.2
       qr-creator: 1.0.0
     dev: false
 
@@ -4138,23 +4141,24 @@ packages:
       wrap-ansi: 7.0.0
     dev: true
 
-  /lit-element@3.2.2:
-    resolution: {integrity: sha512-6ZgxBR9KNroqKb6+htkyBwD90XGRiqKDHVrW/Eh0EZ+l+iC+u+v+w3/BA5NGi4nizAVHGYvQBHUDuSmLjPp7NQ==}
+  /lit-element@3.3.1:
+    resolution: {integrity: sha512-Gl+2409uXWbf7n6cCl7Kzasm7zjT9xmdwi2BhLNi70sRKAgRkqueDu5mSIH3hPYMM0/vqBCdPXod3NbGkRA2ww==}
     dependencies:
+      '@lit-labs/ssr-dom-shim': 1.1.0
       '@lit/reactive-element': 1.6.0
-      lit-html: 2.6.0
+      lit-html: 2.7.2
 
-  /lit-html@2.6.0:
-    resolution: {integrity: sha512-slNAAYfvC7LxeryDOnPFl5uTpxGYGJ6UR9SFmfY+gQ+sf30z1atDPXlgjcSTtwymNdlwDhfGjq+EemQRXp9z1g==}
+  /lit-html@2.7.2:
+    resolution: {integrity: sha512-ZJCfKlA2XELu5tn7XuzOziGFGvf1SeQm+ngLWoJ8bXtSkRrrR3ms6SWy+gsdxeYwySLij5xAhdd2C3EX0ftxdQ==}
     dependencies:
       '@types/trusted-types': 2.0.2
 
-  /lit@2.6.1:
-    resolution: {integrity: sha512-DT87LD64f8acR7uVp7kZfhLRrHkfC/N4BVzAtnw9Yg8087mbBJ//qedwdwX0kzDbxgPccWRW6mFwGbRQIxy0pw==}
+  /lit@2.7.2:
+    resolution: {integrity: sha512-9QnZmG5mIKPRja96cpndMclLSi0Qrz2BXD6EbqNqCKMMjOWVm/BwAeXufFk2jqFsNmY07HOzU8X+8aTSVt3yrA==}
     dependencies:
       '@lit/reactive-element': 1.6.0
-      lit-element: 3.2.2
-      lit-html: 2.6.0
+      lit-element: 3.3.1
+      lit-html: 2.7.2
 
   /load-json-file@4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}

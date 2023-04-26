@@ -1,7 +1,7 @@
-import type { Cell, Column } from '@blocksuite/global/database';
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { Cell, Column } from '../../database-block/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   BlockServiceInstanceByKey,
@@ -84,7 +84,7 @@ export type ShapeMouseMode = {
 
 export enum BrushSize {
   Thin = 4,
-  Thick = 16,
+  Thick = 10,
 }
 
 export type BrushMouseMode = {

@@ -1,10 +1,10 @@
-import type { RowHost } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { ColumnRendererHelper } from '../register.js';
 import { DatabaseCellElement } from '../register.js';
+import type { RowHost } from '../types.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
@@ -76,6 +76,11 @@ export class DatabaseCellContainer
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    this._disposables.addFromEvent(this, 'mousedown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
   }
 
   _onClick = (event: Event) => {

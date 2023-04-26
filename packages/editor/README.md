@@ -1,7 +1,7 @@
 # `@blocksuite/editor`
 
-Default BlockSuite-based editor built for AFFiNE.
+Default BlockSuite-based editor built for [AFFiNE](https://affine.pro).
 
 ## Documentation
 
-TBD
+Checkout [blocksuite.affine.pro](https://blocksuite.affine.pro/) for comprehensive documentation.

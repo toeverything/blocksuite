@@ -1064,25 +1064,21 @@ test('should not show option menu of image on block selection', async ({
   ).toHaveCount(1);
 
   await pressEnter(page);
-  await type(page, '123');
 
   const imageRect = await page.locator('affine-image').boundingBox();
-  const richTextRect = await page.locator('rich-text').boundingBox();
-  if (!imageRect || !richTextRect) {
+  if (!imageRect) {
     throw new Error();
   }
-
-  await page.mouse.click(0, 0);
 
   await dragBetweenCoords(
     page,
     {
-      x: richTextRect.x + richTextRect.width + 1,
-      y: richTextRect.y + richTextRect.height + 1,
+      x: imageRect.x + imageRect.width + 10,
+      y: imageRect.y + imageRect.height / 2 + 10,
     },
     {
-      x: imageRect.x + imageRect.width - 1,
-      y: imageRect.y + imageRect.height - 1,
+      x: imageRect.x - 100,
+      y: imageRect.y + imageRect.height / 2,
     }
   );
 
@@ -1091,7 +1087,7 @@ test('should not show option menu of image on block selection', async ({
   await expect(
     page.locator('.affine-embed-editing-state-container')
   ).toHaveCount(0);
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(2);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
 });
 
 test('should be cleared when dragging block card from BlockHub', async ({
@@ -1121,4 +1117,30 @@ test('should be cleared when dragging block card from BlockHub', async ({
   );
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
+});
+
+test('should select with shift-click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const firstRect = await page.locator('[data-block-id="2"]').boundingBox();
+  if (!firstRect) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    { x: firstRect.x + firstRect.width + 10, y: firstRect.y - 10 },
+    { x: firstRect.x + firstRect.width - 10, y: firstRect.y + 10 },
+    { steps: 50 }
+  );
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await page.click('[data-block-id="4"]', {
+    modifiers: ['Shift'],
+  });
+
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
 });

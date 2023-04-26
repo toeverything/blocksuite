@@ -24,7 +24,7 @@ A `Page` in BlockSuite serves as the actual container for organizing blocks, all
 Here is how we create a new page with id `page0` within the workspace:
 
 ```ts
-const page = workspace.createPage('page0');
+const page = workspace.createPage({ id: 'page0' });
 ```
 
 The `page` instance provides a set of core APIs for performing block operations, e.g., `page.addBlock`, `page.updateBlock`, and `page.deleteBlock`. These APIs will be further introduced in the following sections of the document.

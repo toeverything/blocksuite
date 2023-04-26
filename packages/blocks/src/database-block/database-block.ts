@@ -5,7 +5,6 @@ import './components/toolbar/toolbar.js';
 import './components/database-title.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
-import { type Column } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -18,11 +17,13 @@ import {
 } from '../__internal__/index.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
+import { stopPropagation } from '../page-block/edgeless/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import type { Column } from './types.js';
 import { SearchState } from './types.js';
 import { onClickOutside } from './utils.js';
 
@@ -285,7 +286,10 @@ export class DatabaseBlockComponent
     );
 
     return html`
-      <div class="affine-database-block-container">
+      <div
+        class="affine-database-block-container"
+        @pointerdown=${stopPropagation}
+      >
         <div class="affine-database-block-title-container">
           <affine-database-title
             .addRow=${this._addRow}

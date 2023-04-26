@@ -140,9 +140,9 @@ export function initMoveColumnHandlers(
   );
   columnMoveElements.forEach(moveElement => {
     // prevent block selection and drag-handle
-    disposables.addFromEvent(moveElement, 'mousedown', stopPropagation);
-    disposables.addFromEvent(moveElement, 'mousemove', stopPropagation);
-    disposables.addFromEvent(moveElement, 'mouseup', stopPropagation);
+    disposables.addFromEvent(moveElement, 'pointerdown', stopPropagation);
+    disposables.addFromEvent(moveElement, 'pointermove', stopPropagation);
+    disposables.addFromEvent(moveElement, 'pointerup', stopPropagation);
     disposables.addFromEvent(moveElement, 'click', stopPropagation);
 
     // init drag event

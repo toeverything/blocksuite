@@ -81,6 +81,29 @@ if (isE2E) {
       Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
     },
   });
+
+  Object.defineProperty(globalThis, 'rebuildPageTree', {
+    value: async function rebuildPageTree(doc: Y.Doc, pages: string[]) {
+      const pageTree = doc
+        .getMap<Y.Array<Y.Map<unknown>>>('space:meta')
+        .get('pages');
+      if (pageTree) {
+        const pageIds = pageTree.map(p => p.get('id') as string).filter(v => v);
+        for (const page of pages) {
+          if (!pageIds.includes(page)) {
+            const map = new Workspace.Y.Map([
+              ['id', page],
+              ['title', ''],
+              ['createDate', +new Date()],
+              ['subpageIds', []],
+            ]);
+            pageTree.push([map]);
+          }
+        }
+      }
+    },
+  });
+
   Object.defineProperty(globalThis, 'debugFromFile', {
     value: async function debuggerFromFile() {
       const file = await fileOpen({
@@ -97,6 +120,7 @@ if (isE2E) {
     },
   });
 }
+
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 

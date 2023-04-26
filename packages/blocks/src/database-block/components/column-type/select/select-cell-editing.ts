@@ -6,7 +6,6 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import type { SelectTag } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
@@ -20,6 +19,7 @@ import {
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
 import { DatabaseCellElement } from '../../../register.js';
+import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import { getTagColor, onClickOutside } from '../../../utils.js';
 import type { SelectOption } from './select-option.js';

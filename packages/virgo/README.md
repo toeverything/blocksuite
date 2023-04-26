@@ -48,7 +48,7 @@ console.log(yText.toDelta());
 */
 ```
 
-You will see that there is a `type` attribute in the Delta format, which is used to represent the type of text segements, like base text (bold, italic, line-break, inline-code, link, etc.). This format makes it easy implementing customized inline elements.
+You will see that there is a `type` attribute in the Delta format, which is used to represent the type of text segments, like base text (bold, italic, line-break, inline-code, link, etc.). This format makes it easy implementing customized inline elements.
 
 ## Usage
 
@@ -67,6 +67,6 @@ vEditor.mount(editorContainer);
 ```
 
 You can go to [virgo playground](https://blocksuite-toeverything.vercel.app/examples/virgo/)
-for onlinet testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
+for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
 
 > 🚧 The documentation about customizing inline elements and detailed APIs are still in progress. Stay tuned!

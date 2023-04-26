@@ -166,7 +166,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
-        @tool.click=${() => this._actionsMenuPopper?.toggle()}
+        @click=${() => this._actionsMenuPopper?.toggle()}
       >
         ${MoreHorizontalIcon}
       </edgeless-tool-icon-button>

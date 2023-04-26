@@ -20,6 +20,12 @@ import {
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
+function tipsPlaceholderPreventDefault(event: Event) {
+  // Call event.preventDefault() to keep the mouse event from being sent as well.
+  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
+  event.preventDefault();
+}
+
 function TipsPlaceholder(model: BaseBlockModel) {
   if (!matchFlavours(model, ['affine:paragraph'] as const)) {
     throw new Error("TipsPlaceholder can't be used for this model");
@@ -41,7 +47,11 @@ function TipsPlaceholder(model: BaseBlockModel) {
       blockHub.toggleMenu(true);
     };
     return html`
-      <div class="tips-placeholder" @click=${onClick}>
+      <div
+        class="tips-placeholder"
+        @click=${onClick}
+        @pointerdown=${tipsPlaceholderPreventDefault}
+      >
         Click ${BlockHubIcon20} to insert blocks, type '/' for commands
       </div>
     `;
@@ -70,7 +80,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       background-color: var(--affine-hover-color);
     }
     .h1 {
-      font-size: var(--affine-font-h1);
+      font-size: var(--affine-font-h-1);
       line-height: calc(1em + 12px);
       margin-top: calc(var(--affine-paragraph-space) + 24px);
     }
@@ -78,7 +88,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: calc(var(--affine-font-base) + 8px);
     }
     .h2 {
-      font-size: var(--affine-font-h2);
+      font-size: var(--affine-font-h-2);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 20px);
     }
@@ -86,7 +96,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: calc(var(--affine-font-base) + 6px);
     }
     .h3 {
-      font-size: var(--affine-font-h3);
+      font-size: var(--affine-font-h-3);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 16px);
     }
@@ -94,7 +104,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: calc(var(--affine-font-base) + 4px);
     }
     .h4 {
-      font-size: var(--affine-font-h4);
+      font-size: var(--affine-font-h-4);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 12px);
     }
@@ -102,7 +112,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: calc(var(--affine-font-base) + 2px);
     }
     .h5 {
-      font-size: var(--affine-font-h5);
+      font-size: var(--affine-font-h-5);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 8px);
     }
@@ -110,7 +120,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       font-size: calc(var(--affine-font-base));
     }
     .h6 {
-      font-size: var(--affine-font-h6);
+      font-size: var(--affine-font-h-6);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 4px);
     }

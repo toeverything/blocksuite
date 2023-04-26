@@ -1,4 +1,3 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -8,6 +7,7 @@ import {
   DatabaseCellElement,
   defineColumnRenderer,
 } from '../../../register.js';
+import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')

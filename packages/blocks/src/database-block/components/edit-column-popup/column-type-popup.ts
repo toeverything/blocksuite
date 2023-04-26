@@ -6,11 +6,10 @@ import {
   DatabaseSelect,
   TextIcon,
 } from '@blocksuite/global/config';
-import type { ColumnType } from '@blocksuite/global/database';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ColumnHeader } from '../../types.js';
+import type { ColumnHeader, ColumnType } from '../../types.js';
 import { actionStyles } from './styles.js';
 
 const columnTypes: ColumnHeader[] = [

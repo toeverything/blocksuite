@@ -125,12 +125,12 @@ html[class='dark'] {
 
   --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
     0px 3px 16px -6px rgba(24, 39, 75, 0.04);
-  --affine-font-h1: 28px;
-  --affine-font-h2: 26px;
-  --affine-font-h3: 24px;
-  --affine-font-h4: 22px;
-  --affine-font-h5: 20px;
-  --affine-font-h6: 18px;
+  --affine-font-h-1: 28px;
+  --affine-font-h-2: 26px;
+  --affine-font-h-3: 24px;
+  --affine-font-h-4: 22px;
+  --affine-font-h-5: 20px;
+  --affine-font-h-6: 18px;
   --affine-font-base: 16px;
   --affine-font-sm: 14px;
   --affine-font-xs: 12px;

@@ -203,9 +203,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const resizeHandles = ResizeHandles(
       selectedRect,
       resizeMode,
-      (e: MouseEvent, direction: HandleDirection) => {
+      (e: PointerEvent, direction: HandleDirection) => {
         const bounds = getSelectableBounds(this.state.selected);
-        _resizeManager.onMouseDown(e, direction, bounds, this.zoom);
+        _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
       }
     );
 

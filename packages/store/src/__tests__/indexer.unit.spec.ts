@@ -18,7 +18,7 @@ describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -53,8 +53,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page = workspace.createPage('page0');
-    const subpage = workspace.createPage('page1');
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
 
     page.addBlock('affine:page');
     const text = page.Text.fromDelta([
@@ -102,8 +102,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
+    const page0 = workspace.createPage({ id: 'page0' });
+    const page1 = workspace.createPage({ id: 'page1' });
 
     page0.addBlock('affine:page');
     page0.addBlock('affine:paragraph', {
@@ -193,5 +193,137 @@ describe('backlink works', () => {
 
     expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([]);
     expect(backlinkIndexer.getSubpageNodes(page1.id)).toStrictEqual([]);
+  });
+
+  it('backlink indexer can remove subpage node', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+    const backlinkIndexer = workspace.indexer.backlink;
+
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
+    const subpage2 = workspace.createPage({ id: 'page2' });
+
+    page.addBlock('affine:page');
+    const text = page.Text.fromDelta([
+      {
+        insert: ' ',
+        attributes: { reference: { type: 'LinkedPage', pageId: subpage.id } },
+      },
+      {
+        insert: ' ',
+        attributes: { reference: { type: 'Subpage', pageId: subpage2.id } },
+      },
+    ]);
+    page.addBlock('affine:paragraph', {
+      text,
+    });
+    const text2 = page.Text.fromDelta([
+      {
+        insert: ' ',
+        attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
+      },
+      {
+        insert: ' ',
+        attributes: {
+          reference: { type: 'LinkedPage', pageId: subpage2.id },
+        },
+      },
+    ]);
+    page.addBlock('affine:paragraph', {
+      text: text2,
+    });
+
+    // wait for the backlink index to be updated
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(backlinkIndexer.getSubpageNodes(page.id)).toStrictEqual([
+      {
+        blockId: '1',
+        pageId: subpage2.id,
+        type: 'Subpage',
+      },
+      {
+        blockId: '2',
+        pageId: subpage.id,
+        type: 'Subpage',
+      },
+    ]);
+
+    backlinkIndexer.removeSubpageNode(workspace, subpage.id);
+
+    expect(backlinkIndexer.getSubpageNodes(page.id)).toStrictEqual([
+      {
+        blockId: '1',
+        pageId: subpage2.id,
+        type: 'Subpage',
+      },
+    ]);
+
+    expect(text.toDelta()).toStrictEqual([
+      {
+        attributes: {
+          reference: {
+            pageId: 'page1',
+            type: 'LinkedPage',
+          },
+        },
+        insert: ' ',
+      },
+      {
+        attributes: {
+          reference: {
+            pageId: 'page2',
+            type: 'Subpage',
+          },
+        },
+        insert: ' ',
+      },
+    ]);
+    expect(text2.toDelta()).toStrictEqual([
+      {
+        insert: ' ',
+      },
+      {
+        attributes: {
+          reference: {
+            pageId: 'page2',
+            type: 'LinkedPage',
+          },
+        },
+        insert: ' ',
+      },
+    ]);
+
+    backlinkIndexer.removeSubpageNode(workspace, subpage2.id);
+
+    expect(text.toDelta()).toStrictEqual([
+      {
+        attributes: {
+          reference: {
+            pageId: 'page1',
+            type: 'LinkedPage',
+          },
+        },
+        insert: ' ',
+      },
+      {
+        insert: ' ',
+      },
+    ]);
+    expect(text2.toDelta()).toStrictEqual([
+      {
+        insert: ' ',
+      },
+      {
+        attributes: {
+          reference: {
+            pageId: 'page2',
+            type: 'LinkedPage',
+          },
+        },
+        insert: ' ',
+      },
+    ]);
   });
 });
