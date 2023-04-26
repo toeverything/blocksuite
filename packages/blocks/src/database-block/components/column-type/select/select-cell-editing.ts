@@ -259,7 +259,13 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     selectedValue: SelectTag[]
   ) => {
     const inputValue = this._inputValue.trim();
-    if (event.key === 'Enter' && inputValue !== '') {
+
+    if (event.key === 'Backspace' && inputValue === '') {
+      this._onDeleteSelected(
+        selectedValue,
+        selectedValue[selectedValue.length - 1]
+      );
+    } else if (event.key === 'Enter' && inputValue !== '') {
       const selectTag = this.selectionList.find(
         item => item.value === inputValue
       );
