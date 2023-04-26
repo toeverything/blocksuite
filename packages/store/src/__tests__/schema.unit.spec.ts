@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { literal } from 'lit/static-html.js';
 import { describe, expect, it } from 'vitest';
 
 // Use manual per-module import/export to support vitest environment on Node.js
@@ -9,6 +10,7 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import { SchemaValidateError } from '../../../global/src/error/index.js';
+import { defineBlockSchema } from '../base';
 import { Generator } from '../store';
 import { Workspace } from '../workspace';
 
@@ -17,12 +19,40 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
+const TestCustomFrameBlockSchema = defineBlockSchema({
+  flavour: 'affine:frame-block-video',
+  props: internal => ({
+    text: internal.Text(),
+  }),
+  metadata: {
+    version: 1,
+    role: 'content',
+    tag: literal`affine-frame-block-video`,
+    parent: ['affine:frame'],
+  },
+});
+
+const TestInvalidFrameBlockSchema = defineBlockSchema({
+  flavour: 'affine:frame-invalid-block-video',
+  props: internal => ({
+    text: internal.Text(),
+  }),
+  metadata: {
+    version: 1,
+    role: 'content',
+    tag: literal`affine-invalid-frame-block-video`,
+    parent: ['affine:frame'],
+  },
+});
+
 const BlockSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
   ListBlockSchema,
   FrameBlockSchema,
   DividerBlockSchema,
+  TestCustomFrameBlockSchema,
+  TestInvalidFrameBlockSchema,
 ];
 
 const defaultPageId = 'page0';
@@ -54,5 +84,19 @@ describe('schema', () => {
     expect(() =>
       page.addBlock('affine:paragraph', {}, paragraphId)
     ).not.toThrow();
+  });
+
+  it('should glob match works', () => {
+    const page = createTestPage();
+    const pageId = page.addBlock('affine:page', {});
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+
+    expect(() =>
+      page.addBlock('affine:frame-block-video', {}, frameId)
+    ).not.toThrow();
+
+    expect(() =>
+      page.addBlock('affine:frame-invalid-block-video', {}, frameId)
+    ).toThrow();
   });
 });

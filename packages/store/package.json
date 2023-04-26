@@ -27,6 +27,7 @@
     "ky": "^0.33.3",
     "lib0": "^0.2.68",
     "merge": "^2.1.1",
+    "minimatch": "^9.0.0",
     "nanoid": "^4.0.1",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.5",
@@ -34,7 +35,7 @@
   },
   "devDependencies": {
     "lit": "^2.7.2",
-    "yjs": "^13.5.50"
+    "yjs": "^13.6.0"
   },
   "peerDependencies": {
     "yjs": "^13"
