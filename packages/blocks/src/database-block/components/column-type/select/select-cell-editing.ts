@@ -274,6 +274,14 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   private _onSelect = (selectedValue: SelectTag[], select: SelectTag) => {
     // when editing, do not select
     if (this._editingIndex !== -1) return;
+
+    const isExist =
+      selectedValue.findIndex(item => item.value === select.value) > -1;
+    if (isExist) {
+      this.rowHost.setEditing(false);
+      return;
+    }
+
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
     if (!isSelected) {
