@@ -1113,3 +1113,18 @@ test('should be cleared when dragging block card from BlockHub', async ({
 
   expect(await getSelectedText(page)).toBe('');
 });
+
+test('should select with shift-click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [1, 1]);
+  expect(await getSelectedText(page)).toBe('1234');
+
+  await page.click('[data-block-id="4"]', {
+    modifiers: ['Shift'],
+  });
+  expect(await getSelectedText(page)).toBe('123456789');
+});
