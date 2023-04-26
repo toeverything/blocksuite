@@ -390,8 +390,15 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .item(index) as SelectOption;
 
     const selection = [...this.selectionList];
+    const value = selectOption.getSelectionValue();
+    const isExist =
+      selection.findIndex(
+        (select, i) => i !== index && select.value === value
+      ) > -1;
+    if (isExist) return;
+
     const oldSelect = selection[index];
-    const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
+    const newSelect = { ...oldSelect, value };
     selection[index] = newSelect;
     this.databaseModel.updateColumn({
       ...this.column,
