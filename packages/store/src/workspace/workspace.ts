@@ -1,6 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
-import type { z } from 'zod';
 
 import type { AwarenessStore } from '../awareness.js';
 import type { BlockSchemaType } from '../base.js';
@@ -19,6 +18,7 @@ import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
+import { Schema } from './schema.js';
 
 export type WorkspaceOptions = {
   experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
@@ -28,6 +28,8 @@ export class Workspace {
   static Y = Y;
 
   private _store: Store;
+
+  private readonly _schema: Schema;
   private readonly _storages: BlobStorage[] = [];
   private readonly _blobStorage: BlobManager;
 
@@ -47,8 +49,6 @@ export class Workspace {
     backlink: BacklinkIndexer;
   };
 
-  flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
-
   readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
   constructor({
@@ -56,6 +56,8 @@ export class Workspace {
     ...storeOptions
   }: WorkspaceOptions) {
     this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+    this._schema = new Schema(this);
+
     this._store = new Store(storeOptions);
 
     this._storages = (storeOptions.blobStorages ?? [createMemoryStorage]).map(
@@ -170,10 +172,14 @@ export class Workspace {
     return this._store.idGenerator;
   }
 
+  get schema() {
+    return this._schema;
+  }
+
   register(blockSchema: BlockSchemaType[]) {
     blockSchema.forEach(schema => {
       BlockSchema.parse(schema);
-      this.flavourSchemaMap.set(schema.model.flavour, schema);
+      this.schema.flavourSchemaMap.set(schema.model.flavour, schema);
     });
     return this;
   }

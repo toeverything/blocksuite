@@ -114,6 +114,10 @@ export class Page extends Space<FlatBlockMap> {
     return this._workspace;
   }
 
+  get schema() {
+    return this._workspace.schema;
+  }
+
   get meta() {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
@@ -131,7 +135,7 @@ export class Page extends Space<FlatBlockMap> {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
     if (!root) return root;
 
-    const rootSchema = this._workspace.flavourSchemaMap.get(root.flavour);
+    const rootSchema = this.schema.flavourSchemaMap.get(root.flavour);
     if (rootSchema?.model.role !== 'root') {
       console.error('data broken');
     }
@@ -301,11 +305,11 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getSchemaByFlavour(flavour: string) {
-    return this.workspace.flavourSchemaMap.get(flavour);
+    return this.schema.flavourSchemaMap.get(flavour);
   }
 
   getInitialPropsByFlavour(flavour: string) {
-    const schema = this.workspace.flavourSchemaMap.get(flavour);
+    const schema = this.schema.flavourSchemaMap.get(flavour);
     assertExists(schema);
     return schema.model.props?.(internalPrimitives) ?? {};
   }
@@ -353,6 +357,14 @@ export class Page extends Space<FlatBlockMap> {
     ) {
       throw new Error('database is not enabled');
     }
+    const parentModel =
+      typeof parent === 'string' ? this.getBlockById(parent) : parent;
+
+    this.schema.validate(
+      flavour,
+      parentModel?.flavour,
+      blockProps.children?.map(child => child.flavour)
+    );
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
@@ -407,6 +419,10 @@ export class Page extends Space<FlatBlockMap> {
     const firstBlock = blocks[0];
     const currentParent = this.getParent(firstBlock);
 
+    blocks.forEach(block => {
+      this.schema.validate(block.flavour, currentParent?.flavour);
+    });
+
     // the blocks must have the same parent (siblings)
     if (blocks.some(block => this.getParent(block) !== currentParent)) {
       console.error('the blocks must have the same parent');
@@ -446,6 +462,14 @@ export class Page extends Space<FlatBlockMap> {
       console.error('cannot modify data in readonly mode');
       return;
     }
+
+    const parent = this.getParent(model);
+    this.schema.validate(
+      model.flavour,
+      parent?.flavour,
+      props.children?.map(child => child.flavour)
+    );
+
     const yBlock = this._yBlocks.get(model.id);
     assertExists(yBlock);
 
@@ -462,7 +486,7 @@ export class Page extends Space<FlatBlockMap> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
       syncBlockProps(schema, yBlock, props, this._ignoredKeys);
     });
@@ -653,7 +677,7 @@ export class Page extends Space<FlatBlockMap> {
     props: Omit<BlockProps, 'children'>,
     block: YBlock
   ) {
-    const schema = this.workspace.flavourSchemaMap.get(props.flavour);
+    const schema = this.schema.flavourSchemaMap.get(props.flavour);
     if (!schema) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     } else if (!props.id) {
