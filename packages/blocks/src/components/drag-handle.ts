@@ -708,13 +708,13 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     this._draggingElements = draggingBlockElements;
 
-    this._createDragPreview(
-      e,
-      getBlockElementsExcludeSubtrees(
-        draggingBlockElements
-      ) as BlockComponentElement[],
-      draggable
-    );
+    // this._createDragPreview(
+    //   e,
+    //   getBlockElementsExcludeSubtrees(
+    //     draggingBlockElements
+    //   ) as BlockComponentElement[],
+    //   draggable
+    // );
 
     this.setDragType(true);
   };

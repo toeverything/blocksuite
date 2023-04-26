@@ -183,13 +183,13 @@ export const database: InitFn = (workspace: Workspace) => {
     },
     databaseId
   );
-  const p2 = page.addBlock(
-    'affine:paragraph',
-    {
-      text: new page.Text('text2'),
-    },
-    databaseId
-  );
+  // const p2 = page.addBlock(
+  //   'affine:paragraph',
+  //   {
+  //     text: new page.Text('text2'),
+  //   },
+  //   databaseId
+  // );
 
   const num = new page.YText();
   num.insert(0, '0.1');
@@ -198,18 +198,18 @@ export const database: InitFn = (workspace: Workspace) => {
     value: num,
   });
 
-  database.updateCell(p2, {
-    columnId: col2,
-    value: [selection[1]],
-  });
+  // database.updateCell(p2, {
+  //   columnId: col2,
+  //   value: [selection[1]],
+  // });
 
-  const text = new page.YText();
-  text.insert(0, '123');
-  text.insert(0, 'code');
-  database.updateCell(p2, {
-    columnId: col3,
-    value: text,
-  });
+  // const text = new page.YText();
+  // text.insert(0, '123');
+  // text.insert(0, 'code');
+  // database.updateCell(p2, {
+  //   columnId: col3,
+  //   value: text,
+  // });
 
   // Add a paragraph after database
   page.addBlock('affine:paragraph', {}, frameId);

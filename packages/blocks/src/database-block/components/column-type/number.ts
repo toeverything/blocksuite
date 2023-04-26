@@ -28,14 +28,30 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
 
   private vEditor: AffineVEditor | null = null;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('click', this._onClick);
+  // override connectedCallback(): void {
+  //   super.connectedCallback();
+  //   console.log('number connectedCallback');
+  // }
+
+  override firstUpdated() {
+    console.log('number firstUpdated');
+    this._disposables.addFromEvent(this, 'click', this._onClick);
+    this._onInitVEditor();
+  }
+
+  protected override updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
+
+    if (changedProperties.has('cell') && !this.vEditor) {
+      console.log('number updated', this._container, this);
+      this._onInitVEditor();
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('click', this._onClick);
+    console.log('number disconnectedCallback');
+
     this.vEditor?.unmount();
     this.vEditor = null;
   }
@@ -43,10 +59,6 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   private _onClick = () => {
     this.databaseModel.page.captureSync();
   };
-
-  protected override firstUpdated() {
-    this._onInitVEditor();
-  }
 
   private _onInitVEditor = () => {
     let value: Y.Text;
