@@ -545,13 +545,20 @@ export class Page extends Space<FlatBlockMap> {
     }
     const parent = this.getParent(model);
     const index = parent?.children.indexOf(model) ?? -1;
+    const { bringChildrenTo } = options;
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
-    if (options.bringChildrenTo === 'parent' && parent) {
+    if (bringChildrenTo === 'parent' && parent) {
+      model.children.forEach(child => {
+        this.schema.validate(child.flavour, parent.flavour);
+      });
       parent.children.unshift(...model.children);
-    } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-      options.bringChildrenTo.children.push(...model.children);
+    } else if (bringChildrenTo instanceof BaseBlockModel) {
+      model.children.forEach(child => {
+        this.schema.validate(child.flavour, bringChildrenTo.flavour);
+      });
+      bringChildrenTo.children.push(...model.children);
     }
     this._blockMap.delete(model.id);
 

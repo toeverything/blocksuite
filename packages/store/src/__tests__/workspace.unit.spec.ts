@@ -89,15 +89,20 @@ describe('pageMeta', () => {
 
     const parentPage = workspace.createPage(defaultPageId);
     const subpage = workspace.createPage('subpage0');
-    parentPage.addBlock('affine:page');
-    parentPage.addBlock('affine:paragraph', {
-      text: parentPage.Text.fromDelta([
-        {
-          insert: ' ',
-          attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
-        },
-      ]),
-    });
+    const pageId = parentPage.addBlock('affine:page', {}, parentPage.id);
+    const frameId = parentPage.addBlock('affine:frame', {}, pageId);
+    parentPage.addBlock(
+      'affine:paragraph',
+      {
+        text: parentPage.Text.fromDelta([
+          {
+            insert: ' ',
+            attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
+          },
+        ]),
+      },
+      frameId
+    );
     // wait for the backlink index to be updated
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
@@ -158,40 +163,51 @@ describe('addBlock', () => {
 
   it('can add multi models', () => {
     const page = createTestPage();
-    page.addBlock('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:paragraph');
-    page.addBlocks([
-      { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
-      { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
-    ]);
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlocks(
+      [
+        { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
+        { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
+      ],
+      frameId
+    );
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
-        'sys:children': ['1', '2', '3'],
+        'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
         'prop:title': '',
       },
       '1': {
-        'sys:children': [],
-        'sys:flavour': 'affine:paragraph',
+        'sys:children': ['2', '3', '4'],
+        'sys:flavour': 'affine:frame',
         'sys:id': '1',
-        'prop:text': '',
-        'prop:type': 'text',
+        'prop:background': '--affine-background-secondary-color',
+        'prop:xywh': '[0,0,720,480]',
       },
       '2': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
         'prop:text': '',
-        'prop:type': 'h1',
+        'prop:type': 'text',
       },
       '3': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'prop:text': '',
+        'prop:type': 'h1',
+      },
+      '4': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
         'prop:text': '',
         'prop:type': 'h2',
       },
@@ -216,15 +232,21 @@ describe('addBlock', () => {
   it('can add block to root', async () => {
     const page = createTestPage();
 
-    queueMicrotask(() => page.addBlock('affine:page'));
+    let frameId: string;
+
+    queueMicrotask(() => {
+      const pageId = page.addBlock('affine:page', {});
+      frameId = page.addBlock('affine:frame', {}, pageId);
+    });
     await waitOnce(page.slots.rootAdded);
     const { root } = page;
     if (!root) throw new Error('root is null');
 
     assert.equal(root.flavour, 'affine:page');
 
-    page.addBlock('affine:paragraph');
-    assert.equal(root.children[0].flavour, 'affine:paragraph');
+    page.addBlock('affine:paragraph', {}, frameId);
+    assert.equal(root.children[0].flavour, 'affine:frame');
+    assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(page)[spaceId]['0']['sys:children'];
@@ -333,8 +355,9 @@ describe('deleteBlock', () => {
   it('can delete model with parent', () => {
     const page = createTestPage();
     const root = createRoot(page);
+    const frameId = page.addBlock('affine:frame', {}, root.id);
 
-    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph', {}, frameId);
 
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
@@ -345,26 +368,40 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
+        'sys:children': ['2'],
+        'sys:flavour': 'affine:frame',
+        'sys:id': '1',
+        'prop:background': '--affine-background-secondary-color',
+        'prop:xywh': '[0,0,720,480]',
+      },
+      '2': {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
-        'sys:id': '1',
+        'sys:id': '2',
         'prop:text': '',
         'prop:type': 'text',
       },
     });
 
-    page.deleteBlock(root.children[0]);
+    page.deleteBlock(root.children[0].children[0]);
 
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'prop:title': '',
-        'sys:children': [],
+        'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
+      '1': {
+        'sys:children': [],
+        'sys:flavour': 'affine:frame',
+        'sys:id': '1',
+        'prop:background': '--affine-background-secondary-color',
+        'prop:xywh': '[0,0,720,480]',
+      },
     });
-    assert.equal(root.children.length, 0);
+    assert.equal(root.children.length, 1);
   });
 });
 
@@ -372,13 +409,14 @@ describe('getBlock', () => {
   it('can get block by id', () => {
     const page = createTestPage();
     const root = createRoot(page);
+    const frameId = page.addBlock('affine:frame', {}, root.id);
 
-    page.addBlock('affine:paragraph');
-    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, frameId);
 
-    const text = page.getBlockById('2') as BaseBlockModel;
+    const text = page.getBlockById('3') as BaseBlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
-    assert.equal(root.children.indexOf(text), 1);
+    assert.equal(root.children[0].children.indexOf(text), 1);
 
     const invalid = page.getBlockById('😅');
     assert.equal(invalid, null);
@@ -387,12 +425,15 @@ describe('getBlock', () => {
   it('can get parent', () => {
     const page = createTestPage();
     const root = createRoot(page);
+    const frameId = page.addBlock('affine:frame', {}, root.id);
 
-    page.addBlock('affine:paragraph');
-    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, frameId);
 
-    const result = page.getParent(root.children[1]) as BaseBlockModel;
-    assert.equal(result, root);
+    const result = page.getParent(
+      root.children[0].children[1]
+    ) as BaseBlockModel;
+    assert.equal(result, root.children[0]);
 
     const invalid = page.getParentById(root.id, root);
     assert.equal(invalid, null);
@@ -401,14 +442,17 @@ describe('getBlock', () => {
   it('can get previous sibling', () => {
     const page = createTestPage();
     const root = createRoot(page);
+    const frameId = page.addBlock('affine:frame', {}, root.id);
 
-    page.addBlock('affine:paragraph');
-    page.addBlock('affine:paragraph');
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, frameId);
 
-    const result = page.getPreviousSibling(root.children[1]) as BaseBlockModel;
-    assert.equal(result, root.children[0]);
+    const result = page.getPreviousSibling(
+      root.children[0].children[1]
+    ) as BaseBlockModel;
+    assert.equal(result, root.children[0].children[0]);
 
-    const invalid = page.getPreviousSibling(root.children[0]);
+    const invalid = page.getPreviousSibling(root.children[0].children[0]);
     assert.equal(invalid, null);
   });
 });
@@ -442,20 +486,25 @@ describe('workspace.exportJSX works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage('page0');
 
-    page.addBlock('affine:page', {
+    const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:paragraph');
-    page.addBlock('affine:paragraph');
+    const frameId = page.addBlock('affine:frame', {}, pageId);
+    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, frameId);
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
-        <affine:paragraph
-          prop:type="text"
-        />
-        <affine:paragraph
-          prop:type="text"
-        />
+        <affine:frame
+          prop:background="--affine-background-secondary-color"
+        >
+          <affine:paragraph
+            prop:type="text"
+          />
+          <affine:paragraph
+            prop:type="text"
+          />
+        </affine:frame>
       </affine:page>
     `);
   });
