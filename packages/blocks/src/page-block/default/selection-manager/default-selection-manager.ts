@@ -233,7 +233,8 @@ export class DefaultSelectionManager {
       keys: { shift },
     } = e;
     const { state } = this;
-    const { type, viewport } = state;
+    const { viewport } = state;
+    let { type } = state;
 
     // do nothing when clicking on scrollbar
     if (pageX >= viewport.clientWidth + viewport.left) return;
@@ -247,6 +248,9 @@ export class DefaultSelectionManager {
     // * native: select texts
     // * block: select blocks
     if (shift) {
+      if (type === 'none') {
+        type = state.type = 'native';
+      }
       if (type === 'native') {
         state.lastPoint = new Point(clientX, clientY);
         handleNativeRangeDragMove(state.startRange, e);
@@ -260,10 +264,10 @@ export class DefaultSelectionManager {
       return;
     }
 
-    state.resetStartRange(e);
-
     // clear selection first
     this.clear();
+
+    state.resetStartRange(e);
 
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
