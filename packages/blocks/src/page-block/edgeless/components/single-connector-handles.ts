@@ -32,14 +32,21 @@ function capPointerdown(
 ) {
   const startX = event.clientX;
   const startY = event.clientY;
-  const elementX = element.x;
-  const elementY = element.y;
 
   const originControllers = element.controllers.map(c => ({
     ...c,
     x: c.x + element.x,
     y: c.y + element.y,
   }));
+
+  const anchorPoint =
+    position === 'start'
+      ? originControllers[0]
+      : originControllers[originControllers.length - 1];
+
+  const elementX = anchorPoint.x;
+  const elementY = anchorPoint.y;
+
   const pointermove = (mousePointerEvent: PointerEvent) => {
     const { clientX, clientY } = mousePointerEvent;
     const deltaX = clientX - startX;
