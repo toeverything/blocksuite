@@ -237,7 +237,7 @@ describe('addBlock', () => {
     let frameId: string;
 
     queueMicrotask(() => {
-      const pageId = page.addBlock('affine:page', {});
+      const pageId = page.addBlock('affine:page');
       frameId = page.addBlock('affine:frame', {}, pageId);
     });
     await waitOnce(page.slots.rootAdded);
