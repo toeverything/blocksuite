@@ -161,9 +161,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     // every chunk is a line
     const lines = chunks.map(chunk => {
       const elementTs: TemplateResult<1>[] = [];
-      if (chunk.length === 0) {
-        elementTs.push(html`<v-element></v-element>`);
-      } else {
+      if (chunk.length > 0) {
         chunk.forEach(delta => {
           const element = renderElement(
             delta,

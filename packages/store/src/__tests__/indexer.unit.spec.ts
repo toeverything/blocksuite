@@ -23,7 +23,7 @@ describe('workspace.search works', () => {
   it('workspace search matching', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
@@ -69,8 +69,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page = workspace.createPage('page0');
-    const subpage = workspace.createPage('page1');
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
@@ -126,8 +126,8 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
+    const page0 = workspace.createPage({ id: 'page0' });
+    const page1 = workspace.createPage({ id: 'page1' });
 
     const page0Id = page0.addBlock('affine:page');
     const frame0Id = page0.addBlock('affine:frame', {}, page0Id);
@@ -244,9 +244,9 @@ describe('backlink works', () => {
     const workspace = new Workspace(options).register(BlockSchemas);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page = workspace.createPage('page0');
-    const subpage = workspace.createPage('page1');
-    const subpage2 = workspace.createPage('page2');
+    const page = workspace.createPage({ id: 'page0' });
+    const subpage = workspace.createPage({ id: 'page1' });
+    const subpage2 = workspace.createPage({ id: 'page2' });
 
     const pageId = page.addBlock('affine:page');
     const frameId = page.addBlock('affine:frame', {}, pageId);

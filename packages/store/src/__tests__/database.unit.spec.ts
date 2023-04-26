@@ -50,7 +50,7 @@ describe('DatabaseManager', () => {
   beforeEach(() => {
     const options = createTestOptions();
     workspace = new Workspace(options).register(AffineSchemas);
-    page = workspace.createPage('page0');
+    page = workspace.createPage({ id: 'page0' });
     page.awarenessStore.setFlag('enable_database', true);
 
     pageBlockId = page.addBlock('affine:page', {

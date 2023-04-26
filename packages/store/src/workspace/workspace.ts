@@ -218,7 +218,27 @@ export class Workspace {
     });
   }
 
-  createPage(pageId: string) {
+  /**
+   * By default, only an empty page will be created.
+   * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
+   * will be created in the page simultaneously.
+   */
+  createPage(
+    options: { id?: string; init?: true | { title: string } } | string = {}
+  ) {
+    // Migration guide
+    if (typeof options === 'string') {
+      options = { id: options };
+      console.warn(
+        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ id: pageId })` instead'
+      );
+      console.warn(
+        'More details see https://github.com/toeverything/blocksuite/pull/2272'
+      );
+    }
+    // End of migration guide. Remove this in the next major version
+
+    const { id: pageId = this.idGenerator(), init } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
@@ -229,7 +249,22 @@ export class Workspace {
       createDate: +new Date(),
       subpageIds: [],
     });
-    return this.getPage(pageId) as Page;
+    const page = this.getPage(pageId) as Page;
+
+    if (init) {
+      const pageBlockId = page.addBlock(
+        'affine:page',
+        typeof init === 'boolean'
+          ? undefined
+          : {
+              title: new page.Text(init.title),
+            }
+      );
+      page.addBlock('affine:surface', {}, null);
+      const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+      page.addBlock('affine:paragraph', {}, frameId);
+    }
+    return page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */

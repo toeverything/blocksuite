@@ -1118,3 +1118,29 @@ test('should be cleared when dragging block card from BlockHub', async ({
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
+
+test('should select with shift-click', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const firstRect = await page.locator('[data-block-id="2"]').boundingBox();
+  if (!firstRect) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    { x: firstRect.x + firstRect.width + 10, y: firstRect.y - 10 },
+    { x: firstRect.x + firstRect.width - 10, y: firstRect.y + 10 },
+    { steps: 50 }
+  );
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await page.click('[data-block-id="4"]', {
+    modifiers: ['Shift'],
+  });
+
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
+});

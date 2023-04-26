@@ -48,7 +48,7 @@ function createRoot(page: Page) {
 function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage(pageId);
+  return workspace.createPage({ id: pageId });
 }
 
 describe('basic', () => {
@@ -57,7 +57,7 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
     const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -103,18 +103,20 @@ describe('pageMeta', () => {
       },
       frameId
     );
+
     // wait for the backlink index to be updated
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 
+  // TODO deprecated test
   it('can shift subpage', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
-    const page2 = workspace.createPage('page2');
+    const page0 = workspace.createPage({ id: 'page0' });
+    const page1 = workspace.createPage({ id: 'page1' });
+    const page2 = workspace.createPage({ id: 'page2' });
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(m => m.id),
@@ -258,8 +260,8 @@ describe('addBlock', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
-    const page0 = workspace.createPage('page0');
-    const page1 = workspace.createPage('page1');
+    const page0 = workspace.createPage({ id: 'page0' });
+    const page1 = workspace.createPage({ id: 'page1' });
     // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
@@ -280,7 +282,7 @@ describe('addBlock', () => {
   it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    workspace.createPage('page0');
+    workspace.createPage({ id: 'page0' });
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title }) => ({
@@ -462,7 +464,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -476,7 +478,7 @@ describe('workspace.exportJSX works', () => {
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    workspace.createPage('page0');
+    workspace.createPage({ id: 'page0' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
@@ -484,7 +486,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage('page0');
+    const page = workspace.createPage({ id: 'page0' });
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),

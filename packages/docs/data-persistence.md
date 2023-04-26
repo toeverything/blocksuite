@@ -15,11 +15,8 @@ However, the more powerful aspect of the Git model is that you only need to conn
 Code example:
 
 ```ts
-import {
-  Workspace,
-  AffineSchemas,
-  IndexedDBDocProvider,
-} from '@blocksuite/store';
+import { Workspace, IndexedDBDocProvider } from '@blocksuite/store';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 
 const workspace = new Workspace({
   id: 'foo',
@@ -32,7 +29,7 @@ workspace.register(AffineSchemas);
 The content in this workspace will be automatically synchronized to an IndexedDB table named `foo`. Now you can add a button to the page and execute the following code when it is clicked:
 
 ```ts
-const page = workspace.createPage('page0');
+const page = workspace.createPage();
 page.addBlock('affine:page', { title: new Text('hello') });
 ```
 

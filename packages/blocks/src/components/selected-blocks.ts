@@ -32,13 +32,14 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     }
   `;
 
-  private _onMouseUp({ clientX, clientY }: MouseEvent) {
+  private _onMouseUp({ clientX, clientY, shiftKey }: MouseEvent) {
     this.removeAttribute('data-grab');
     this.mouseRoot.dispatchEvent(
       new MouseEvent('mouseup', {
         bubbles: true,
         clientX,
         clientY,
+        shiftKey,
       })
     );
   }
