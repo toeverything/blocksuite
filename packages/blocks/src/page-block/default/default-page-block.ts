@@ -467,7 +467,7 @@ export class DefaultPageBlockComponent
     const resizeObserver = new ResizeObserver(
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
-          if (target === this.pageBlockContainer) {
+          if (target === this.viewportElement) {
             this.selection.updateViewport();
             this.selection.updateRects();
             break;
@@ -475,7 +475,7 @@ export class DefaultPageBlockComponent
         }
       }
     );
-    resizeObserver.observe(this.pageBlockContainer);
+    resizeObserver.observe(this.viewportElement);
     this._resizeObserver = resizeObserver;
   }
 

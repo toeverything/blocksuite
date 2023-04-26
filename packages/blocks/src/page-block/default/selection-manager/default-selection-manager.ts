@@ -682,16 +682,25 @@ export class DefaultSelectionManager {
   selectedBlocksWithShiftClick(x: number, y: number) {
     const { state } = this;
     const { viewport, selectedBlocks } = state;
-    const { scrollLeft, scrollTop } = viewport;
     const lastIndex = selectedBlocks.length - 1;
+
+    if (lastIndex === -1) return;
+
+    const { left, top, scrollLeft, scrollTop } = viewport;
     const hasOneBlock = lastIndex === 0;
     const first = selectedBlocks[0];
     const last = hasOneBlock ? first : selectedBlocks[lastIndex];
     const firstRect = getRectByBlockElement(first);
     const lastRect = hasOneBlock ? firstRect : getRectByBlockElement(last);
     const rect = Rect.fromPoints(
-      new Point(firstRect.left + scrollLeft, firstRect.top + scrollTop),
-      new Point(lastRect.right + scrollLeft, lastRect.bottom + scrollTop)
+      new Point(
+        firstRect.left - left + scrollLeft,
+        firstRect.top - top + scrollTop
+      ),
+      new Point(
+        lastRect.right - left + scrollLeft,
+        lastRect.bottom - top + scrollTop
+      )
     );
     const point = new Point(x + scrollLeft, y + scrollTop);
 
