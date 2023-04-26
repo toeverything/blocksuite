@@ -80,7 +80,7 @@ export class Schema {
     }
   }
 
-  _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {
+  private _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {
     const childRole = child.model.role;
     const parentRole = parent.model.role;
     const childFlavour = child.model.flavour;
@@ -108,12 +108,15 @@ export class Schema {
     }
   }
 
-  _matchFlavour(childFlavour: string, parentFlavour: string) {
+  private _matchFlavour(childFlavour: string, parentFlavour: string) {
     // TODO: support glob match here, ex: database-* should match database-col and database-row
     return childFlavour === parentFlavour;
   }
 
-  _validateParent(child: BlockSchemaType, parent: BlockSchemaType): boolean {
+  private _validateParent(
+    child: BlockSchemaType,
+    parent: BlockSchemaType
+  ): boolean {
     const _childFlavour = child.model.flavour;
     const _parentFlavour = parent.model.flavour;
 
