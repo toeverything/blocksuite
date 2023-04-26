@@ -4,6 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSchemaType } from '../base.js';
 import type { Workspace } from './workspace.js';
 
+const SCHEMA_NOT_FOUND_MESSAGE =
+  'Schema not found. The block flavour may not be registered.';
+
 export class Schema {
   workspace: Workspace;
 
@@ -19,12 +22,18 @@ export class Schema {
     childFlavours?: string[]
   ): void => {
     const schema = this.flavourSchemaMap.get(flavour);
-    assertExists(schema);
+    assertExists(
+      schema,
+      new SchemaValidateError(flavour, SCHEMA_NOT_FOUND_MESSAGE)
+    );
 
     const validateChildren = () => {
       childFlavours?.forEach(childFlavour => {
         const childSchema = this.flavourSchemaMap.get(childFlavour);
-        assertExists(childSchema);
+        assertExists(
+          childSchema,
+          new SchemaValidateError(childFlavour, SCHEMA_NOT_FOUND_MESSAGE)
+        );
         this.validateSchema(childSchema, schema);
       });
     };
@@ -49,7 +58,10 @@ export class Schema {
     }
 
     const parentSchema = this.flavourSchemaMap.get(parentFlavour);
-    assertExists(parentSchema);
+    assertExists(
+      parentSchema,
+      new SchemaValidateError(parentFlavour, SCHEMA_NOT_FOUND_MESSAGE)
+    );
 
     this.validateSchema(schema, parentSchema);
     validateChildren();

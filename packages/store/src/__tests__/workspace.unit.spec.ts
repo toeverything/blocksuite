@@ -4,10 +4,10 @@
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
+// Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
-// Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
