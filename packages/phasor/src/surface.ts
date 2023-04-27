@@ -8,7 +8,11 @@ import type {
   TransformPropertyValue,
 } from './elements/base-element.js';
 import { defaultTransformPropertyValue } from './elements/base-element.js';
-import type { BrushProps } from './elements/brush/types.js';
+import type {
+  BrushProps,
+  CreateBrushProps,
+  SerializedBrushProps,
+} from './elements/brush/types.js';
 import type {
   ConnectorProps,
   Controller,
@@ -96,26 +100,28 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
-  addBrushElement(
-    bound: IBound,
-    points: number[][] = [],
-    props?: {
-      color?: string;
-      lineWidth?: number;
-    }
-  ): string {
+  addBrushElement(properties: CreateBrushProps) {
     const id = generateElementId();
     const element = new BrushElement(id);
     element.transformPropertyValue = this._transformPropertyValue;
-
-    setXYWH(element, bound);
-    element.points = points;
-
-    if (props) {
-      BrushElement.updateProps(element, props);
-    }
+    const updated = BrushElement.getUpdatedSerializedProps(element, properties);
+    BrushElement.applySerializedProps(element, updated);
 
     return this._addElement(element);
+  }
+
+  updateBrushElement(id: string, properties: Partial<SerializedBrushProps>) {
+    const element = this._elements.get(id);
+    assertExists(element);
+    const updated = BrushElement.getUpdatedSerializedProps(
+      element as BrushElement,
+      properties
+    );
+    this._transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      updateYElementProps(yElement, updated);
+    });
   }
 
   addConnectorElement(properties: CreateConnectorProps) {
@@ -129,15 +135,6 @@ export class SurfaceManager {
     ConnectorElement.applySerializedProps(element, updated);
 
     return this._addElement(element);
-  }
-
-  updateBrushElementPoints(id: string, bound: IBound, points: number[][]) {
-    this._transact(() => {
-      const yElement = this._yElements.get(id) as Y.Map<unknown>;
-      assertExists(yElement);
-      yElement.set('points', JSON.stringify(points));
-      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
-    });
   }
 
   updateConnectorElement(
@@ -193,6 +190,16 @@ export class SurfaceManager {
       assertExists(ElementCtor);
 
       if (element.type === 'connector') {
+        const updated = ElementCtors[element.type].getUpdatedSerializedProps(
+          element,
+          { xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h) }
+        );
+        const yElement = this._yElements.get(id) as Y.Map<unknown>;
+        assertExists(yElement);
+        updateYElementProps(yElement, updated);
+        return;
+      }
+      if (element.type === 'brush') {
         const updated = ElementCtors[element.type].getUpdatedSerializedProps(
           element,
           { xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h) }
@@ -434,7 +441,7 @@ export class SurfaceManager {
             break;
           }
           case 'points': {
-            const points: number[][] = JSON.parse(yElement.get(key) as string);
+            const points = yElement.get(key) as number[][];
             (element as BrushElement).points = points;
             break;
           }

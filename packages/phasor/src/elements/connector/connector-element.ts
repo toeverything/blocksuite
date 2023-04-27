@@ -1,9 +1,8 @@
-import { type IBound, StrokeStyle } from '../../consts.js';
+import { StrokeStyle } from '../../consts.js';
 import { Bound, getBoundFromPoints } from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
-import { simplePick } from '../../utils/std.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
+import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { drawArrow } from './draw-arrow.js';
 import { drawOrthogonal } from './draw-orthogonal.js';
@@ -89,20 +88,7 @@ export class ConnectorElement extends BaseElement {
     return element;
   }
 
-  static applySerializedProps(
-    element: ConnectorElement,
-    props: Partial<SerializedConnectorProps>
-  ) {
-    Object.assign(element, { ...props });
-
-    const { xywh } = props;
-    if (xywh) {
-      const [x, y, w, h] = deserializeXYWH(xywh);
-      Object.assign(element, { x, y, w, h });
-    }
-  }
-
-  static getUpdatedSerializedProps(
+  static override getUpdatedSerializedProps(
     element: ConnectorElement,
     props: Partial<SerializedConnectorProps>
   ) {
@@ -142,47 +128,10 @@ export class ConnectorElement extends BaseElement {
     return updated;
   }
 
-  static override getProps(
-    element: BaseElement,
-    rawProps: Record<string, unknown>
+  static override applySerializedProps(
+    element: ConnectorElement,
+    props: Partial<SerializedConnectorProps>
   ) {
-    const props = simplePick(rawProps, [
-      'index',
-      'mode',
-      'color',
-      'lineWidth',
-      'strokeStyle',
-      'xywh',
-      'controllers',
-      'startElement',
-      'endElement',
-    ]);
-
-    return props;
-  }
-
-  /**
-   * @deprecated
-   */
-  static override getBoundProps(
-    element: BaseElement,
-    bound: IBound
-  ): Record<string, string> {
-    const elementH = Math.max(element.h, 1);
-    const elementW = Math.max(element.w, 1);
-    const boundH = Math.max(bound.h, 1);
-    const boundW = Math.max(bound.w, 1);
-    const controllers = (element as ConnectorElement).controllers.map(v => {
-      return {
-        ...v,
-        x: boundW * (v.x / elementW),
-        y: boundH * (v.y / elementH),
-      };
-    });
-
-    return {
-      xywh: serializeXYWH(bound.x, bound.y, boundW, boundH),
-      controllers: JSON.stringify(controllers),
-    };
+    super.applySerializedProps(element, props);
   }
 }

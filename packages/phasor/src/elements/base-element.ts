@@ -1,5 +1,5 @@
 import type { IBound } from '../consts.js';
-import { serializeXYWH } from '../utils/xywh.js';
+import { deserializeXYWH, serializeXYWH } from '../utils/xywh.js';
 
 export interface SurfaceElement {
   id: string;
@@ -69,5 +69,24 @@ export abstract class BaseElement implements SurfaceElement {
     rawProps: Record<string, unknown>
   ): Record<string, unknown> {
     return rawProps;
+  }
+
+  static applySerializedProps(element: object, props: Record<string, unknown>) {
+    Object.assign(element, { ...props });
+
+    const { xywh } = props;
+    if (xywh) {
+      const [x, y, w, h] = deserializeXYWH(xywh as string);
+      Object.assign(element, { x, y, w, h });
+    }
+  }
+
+  static getUpdatedSerializedProps(
+    element: object,
+    props: Record<string, unknown>
+  ) {
+    const updated = { ...props };
+
+    return updated;
   }
 }
