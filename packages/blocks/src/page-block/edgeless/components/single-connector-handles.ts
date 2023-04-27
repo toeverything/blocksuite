@@ -94,27 +94,17 @@ function capPointerdown(
       );
     }
 
-    const bound = getBrushBoundFromPoints(
-      routes.map(r => [r.x, r.y]),
-      0
-    );
-    const controllers = routes.map(v => {
-      return {
-        ...v,
-        x: v.x - bound.x,
-        y: v.y - bound.y,
-      };
-    });
-
     if (position === 'start') {
-      surface.updateConnectorElement(element.id, bound, controllers, {
+      surface.updateConnectorElement(element.id, {
+        controllers: routes,
         startElement:
           picked && attachedPointPosition
             ? { id: picked.id, position: attachedPointPosition }
             : undefined,
       });
     } else {
-      surface.updateConnectorElement(element.id, bound, controllers, {
+      surface.updateConnectorElement(element.id, {
+        controllers: routes,
         endElement:
           picked && attachedPointPosition
             ? { id: picked.id, position: attachedPointPosition }
@@ -218,19 +208,9 @@ function centerControllerPointerdown(
       absoluteControllers[position + 1] = newPoint1;
     }
 
-    const bound = getBrushBoundFromPoints(
-      absoluteControllers.map(r => [r.x, r.y]),
-      0
-    );
-
-    const newControllers = simplifyPath(
-      absoluteControllers.map(c => ({
-        ...c,
-        x: c.x - bound.x,
-        y: c.y - bound.y,
-      }))
-    );
-    surface.updateConnectorElement(element.id, bound, newControllers);
+    surface.updateConnectorElement(element.id, {
+      controllers: simplifyPath(absoluteControllers),
+    });
 
     requestUpdate();
   };

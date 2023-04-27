@@ -1,4 +1,6 @@
 import type { IBound } from '../consts.js';
+import { Utils } from './tl-utils.js';
+import { deserializeXYWH, serializeXYWH } from './xywh.js';
 
 export class Bound implements IBound {
   x: number;
@@ -11,6 +13,15 @@ export class Bound implements IBound {
     this.y = y;
     this.w = w;
     this.h = h;
+  }
+
+  serialize() {
+    return serializeXYWH(this.x, this.y, this.w, this.h);
+  }
+
+  static deserialize(s: string) {
+    const [x, y, w, h] = deserializeXYWH(s);
+    return new Bound(x, y, w, h);
   }
 }
 
@@ -49,4 +60,9 @@ export function contains(a: IBound, b: IBound): boolean {
   return (
     a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
   );
+}
+
+export function getBoundFromPoints(points: number[][]) {
+  const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
+  return new Bound(minX, minY, width, height);
 }

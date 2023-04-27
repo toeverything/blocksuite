@@ -185,12 +185,16 @@ export class EdgelessChangeConnectorButton extends LitElement {
           const controllers = [
             element.controllers[0],
             element.controllers[element.controllers.length - 1],
-          ];
-          const bound = getBrushBoundFromPoints(
-            controllers.map(c => [c.x + element.x, c.y + element.y]),
-            0
-          );
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+          ].map(c => {
+            return {
+              ...c,
+              x: c.x + element.x,
+              y: c.y + element.y,
+            };
+          });
+
+          this.surface.updateConnectorElement(element.id, {
+            controllers,
             mode,
           });
         } else {
@@ -206,18 +210,9 @@ export class EdgelessChangeConnectorButton extends LitElement {
             end.point,
             []
           );
-          const bound = getBrushBoundFromPoints(
-            route.map(r => [r.x, r.y]),
-            0
-          );
-          const controllers = route.map(r => {
-            return {
-              ...r,
-              x: r.x - bound.x,
-              y: r.y - bound.y,
-            };
-          });
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+
+          this.surface.updateConnectorElement(element.id, {
+            controllers: route,
             mode,
           });
         }

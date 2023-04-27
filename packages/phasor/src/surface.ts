@@ -9,7 +9,12 @@ import type {
 } from './elements/base-element.js';
 import { defaultTransformPropertyValue } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
-import type { ConnectorProps, Controller } from './elements/connector/types.js';
+import type {
+  ConnectorProps,
+  Controller,
+  CreateConnectorProps,
+  SerializedConnectorProps,
+} from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -26,6 +31,7 @@ import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
+import { updateYElementProps } from './utils/operation.js';
 import { generateElementId } from './utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
@@ -112,18 +118,15 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
-  addConnectorElement(
-    bound: IBound,
-    controllers: Controller[],
-    properties: ConnectorProps = {}
-  ) {
+  addConnectorElement(properties: CreateConnectorProps) {
     const id = generateElementId();
     const element = new ConnectorElement(id);
     element.transformPropertyValue = this._transformPropertyValue;
-
-    setXYWH(element, bound);
-    element.controllers = controllers;
-    ConnectorElement.updateProps(element, properties);
+    const updated = ConnectorElement.getUpdatedSerializedProps(
+      element,
+      properties
+    );
+    ConnectorElement.applySerializedProps(element, updated);
 
     return this._addElement(element);
   }
@@ -139,26 +142,26 @@ export class SurfaceManager {
 
   updateConnectorElement(
     id: string,
-    bound: IBound,
-    controllers: Controller[],
-    properties: ConnectorProps = {}
+    properties: Partial<SerializedConnectorProps>
   ) {
+    const element = this._elements.get(id);
+    assertExists(element);
+    const updated = ConnectorElement.getUpdatedSerializedProps(
+      element as ConnectorElement,
+      properties
+    );
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      yElement.set('controllers', JSON.stringify(controllers));
-      yElement.set('xywh', serializeXYWH(bound.x, bound.y, bound.w, bound.h));
-      for (const [key, value] of Object.entries(properties)) {
-        yElement.set(key, value);
-      }
+      updateYElementProps(yElement, updated);
     });
-    if (properties.startElement) {
-      this._addBinding(properties.startElement.id, id);
-      this._addBinding(id, properties.startElement.id);
+    if (updated.startElement) {
+      this._addBinding(updated.startElement.id, id);
+      this._addBinding(id, updated.startElement.id);
     }
-    if (properties.endElement) {
-      this._addBinding(properties.endElement.id, id);
-      this._addBinding(id, properties.endElement.id);
+    if (updated.endElement) {
+      this._addBinding(updated.endElement.id, id);
+      this._addBinding(id, updated.endElement.id);
     }
   }
 
@@ -189,6 +192,16 @@ export class SurfaceManager {
       const ElementCtor = ElementCtors[element.type];
       assertExists(ElementCtor);
 
+      if (element.type === 'connector') {
+        const updated = ElementCtors[element.type].getUpdatedSerializedProps(
+          element,
+          { xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h) }
+        );
+        const yElement = this._yElements.get(id) as Y.Map<unknown>;
+        assertExists(yElement);
+        updateYElementProps(yElement, updated);
+        return;
+      }
       const props = ElementCtor.getBoundProps(element, bound);
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
@@ -363,9 +376,7 @@ export class SurfaceManager {
   private _createYElement(element: Omit<PhasorElement, 'id'>) {
     const serialized = element.serialize();
     const yElement = new Y.Map<unknown>();
-    for (const [key, value] of Object.entries(serialized)) {
-      yElement.set(key, value);
-    }
+    updateYElementProps(yElement, serialized);
     return yElement;
   }
 
@@ -428,9 +439,7 @@ export class SurfaceManager {
             break;
           }
           case 'controllers': {
-            const controllers: Controller[] = JSON.parse(
-              yElement.get(key) as string
-            );
+            const controllers = yElement.get(key) as Controller[];
             (element as ConnectorElement).controllers = controllers;
             break;
           }

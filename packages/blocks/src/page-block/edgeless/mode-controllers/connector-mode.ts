@@ -4,6 +4,7 @@ import {
   Bound,
   deserializeXYWH,
   getBrushBoundFromPoints,
+  StrokeStyle,
 } from '@blocksuite/phasor';
 
 import type {
@@ -85,25 +86,23 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     this._draggingStartPoint = startPoint;
 
-    const bound = new Bound(modelX, modelY, 1, 1);
-    const id = this._surface.addConnectorElement(
-      bound,
-      [
-        { x: 0, y: 0 },
-        { x: 1, y: 1 },
+    const id = this._surface.addConnectorElement({
+      color,
+      mode,
+      controllers: [
+        { x: modelX, y: modelY },
+        { x: modelX + 1, y: modelY + 1 },
       ],
-      {
-        mode,
-        color,
-        startElement:
-          this._draggingStartElement && startPosition
-            ? {
-                id: this._draggingStartElement.id,
-                position: startPosition,
-              }
-            : undefined,
-      }
-    );
+      lineWidth: 4,
+      strokeStyle: StrokeStyle.Solid,
+      startElement:
+        this._draggingStartElement && startPosition
+          ? {
+              id: this._draggingStartElement.id,
+              position: startPosition,
+            }
+          : undefined,
+    });
     this._draggingElementId = id;
 
     this._draggingArea = {
@@ -155,22 +154,12 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       mode
     );
 
-    const bound = getBrushBoundFromPoints(
-      routes.map(r => [r.x, r.y]),
-      0
-    );
-    const controllers = routes.map(v => {
-      return {
-        ...v,
-        x: v.x - bound.x,
-        y: v.y - bound.y,
-      };
-    });
-
-    this._surface.updateConnectorElement(id, bound, controllers, {
+    this._surface.updateConnectorElement(id, {
+      controllers: routes,
       endElement:
         end && endPosition ? { id: end.id, position: endPosition } : undefined,
     });
+
     this._edgeless.slots.surfaceUpdated.emit();
   }
 

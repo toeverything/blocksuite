@@ -1,4 +1,5 @@
 import { type IBound, StrokeStyle } from '../../consts.js';
+import { Bound, getBoundFromPoints } from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
@@ -13,6 +14,7 @@ import type {
   SerializedConnectorProps,
 } from './types.js';
 import { ConnectorMode } from './types.js';
+import { validateConnectorProps } from './utils.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
@@ -74,34 +76,70 @@ export class ConnectorElement extends BaseElement {
       startElement: this.startElement,
       endElement: this.endElement,
 
-      controllers: JSON.stringify(this.controllers),
+      controllers: this.controllers,
     };
   }
 
   static deserialize(data: Record<string, unknown>): ConnectorElement {
+    if (!validateConnectorProps(data)) {
+      throw new Error('Invalid connector props');
+    }
     const element = new ConnectorElement(data.id as string);
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-
-    const { controllers, startElement, endElement, mode, color } =
-      ConnectorElement.getProps(element, data) as SerializedConnectorProps;
-    ConnectorElement.updateProps(element, {
-      controllers: controllers?.length ? JSON.parse(controllers) : [],
-      startElement,
-      endElement,
-      mode,
-      color,
-    });
-
+    ConnectorElement.applySerializedProps(element, data);
     return element;
   }
 
-  static updateProps(
+  static applySerializedProps(
     element: ConnectorElement,
-    props: Record<string, unknown>
+    props: Partial<SerializedConnectorProps>
   ) {
-    Object.assign(element, props);
+    Object.assign(element, { ...props });
+
+    const { xywh } = props;
+    if (xywh) {
+      const [x, y, w, h] = deserializeXYWH(xywh);
+      Object.assign(element, { x, y, w, h });
+    }
+  }
+
+  static getUpdatedSerializedProps(
+    element: ConnectorElement,
+    props: Partial<SerializedConnectorProps>
+  ) {
+    const updated = { ...props };
+
+    const { controllers, xywh } = props;
+    if (controllers?.length) {
+      const bound = getBoundFromPoints(controllers.map(({ x, y }) => [x, y]));
+      const relativeControllers = controllers.map(c => {
+        return {
+          ...c,
+          x: c.x - bound.x,
+          y: c.y - bound.y,
+        };
+      });
+      updated.controllers = relativeControllers;
+      updated.xywh = bound.serialize();
+    }
+
+    if (xywh) {
+      const bound = Bound.deserialize(xywh);
+      const elementH = Math.max(element.h, 1);
+      const elementW = Math.max(element.w, 1);
+      const boundH = Math.max(bound.h, 1);
+      const boundW = Math.max(bound.w, 1);
+      const controllers = element.controllers.map(v => {
+        return {
+          ...v,
+          x: boundW * (v.x / elementW),
+          y: boundH * (v.y / elementH),
+        };
+      });
+      updated.xywh = serializeXYWH(bound.x, bound.y, boundW, boundH);
+      updated.controllers = controllers;
+    }
+
+    return updated;
   }
 
   static override getProps(
@@ -123,6 +161,9 @@ export class ConnectorElement extends BaseElement {
     return props;
   }
 
+  /**
+   * @deprecated
+   */
   static override getBoundProps(
     element: BaseElement,
     bound: IBound

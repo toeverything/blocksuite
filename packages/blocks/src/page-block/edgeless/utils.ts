@@ -429,18 +429,9 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        const bound = getBrushBoundFromPoints(
-          routes.map(r => [r.x, r.y]),
-          0
-        );
-        const newControllers = routes.map(v => {
-          return {
-            ...v,
-            x: v.x - bound.x,
-            y: v.y - bound.y,
-          };
+        surface.updateConnectorElement(id, {
+          controllers: routes,
         });
-        surface.updateConnectorElement(id, bound, newControllers);
       }
     });
   }

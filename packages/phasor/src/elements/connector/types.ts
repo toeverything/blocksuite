@@ -28,9 +28,9 @@ export type Controller = {
 export type SerializedConnectorProps = {
   id: string;
   index: string;
-  type: string;
   xywh: string;
 
+  type: 'connector';
   mode: ConnectorMode;
   lineWidth: number;
   color: string;
@@ -40,9 +40,13 @@ export type SerializedConnectorProps = {
   endElement?: AttachedElement;
 
   // relative to element x,y.
-  // JSON.stringify(Controller[])
-  controllers: string;
+  controllers: Controller[];
 };
+
+export type CreateConnectorProps = Omit<
+  SerializedConnectorProps,
+  'id' | 'index' | 'xywh' | 'type'
+>;
 
 export type ConnectorProps = Partial<
   Pick<

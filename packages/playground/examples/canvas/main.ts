@@ -1,4 +1,9 @@
-import type { DebugElement } from '@blocksuite/phasor';
+import {
+  ConnectorMode,
+  type Controller,
+  type DebugElement,
+  StrokeStyle,
+} from '@blocksuite/phasor';
 import {
   Bound,
   SurfaceManager,
@@ -83,61 +88,71 @@ function addShapeElements(surface: SurfaceManager) {
 }
 
 function addConnectorElements(surface: SurfaceManager) {
-  surface.addConnectorElement(new Bound(500, 0, 100, 100), [
-    { x: 0, y: 0 },
-    { x: 30, y: 0 },
-    { x: 30, y: 50 },
-    { x: 60, y: 50 },
-    { x: 60, y: 100 },
-    { x: 100, y: 100 },
+  function addConnector(controllers: Controller[]) {
+    surface.addConnectorElement({
+      controllers,
+      strokeStyle: StrokeStyle.Solid,
+      lineWidth: 4,
+      color: '#000',
+      mode: ConnectorMode.Orthogonal,
+    });
+  }
+
+  addConnector([
+    { x: 500, y: 0 },
+    { x: 530, y: 0 },
+    { x: 530, y: 50 },
+    { x: 560, y: 50 },
+    { x: 560, y: 100 },
+    { x: 600, y: 100 },
   ]);
 
   // right
-  surface.addConnectorElement(new Bound(500, 120, 100, 10), [
-    { x: 0, y: 0 },
-    { x: 100, y: 0 },
+  addConnector([
+    { x: 500, y: 120 },
+    { x: 600, y: 120 },
   ]);
 
   // left
-  surface.addConnectorElement(new Bound(500, 260, 100, 10), [
-    { x: 100, y: 0 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 600, y: 260 },
+    { x: 500, y: 260 },
   ]);
 
   // top
-  surface.addConnectorElement(new Bound(480, 140, 10, 100), [
-    { x: 0, y: 100 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 480, y: 240 },
+    { x: 480, y: 140 },
   ]);
 
   // bottom
-  surface.addConnectorElement(new Bound(620, 140, 10, 100), [
-    { x: 0, y: 0 },
-    { x: 0, y: 100 },
+  addConnector([
+    { x: 620, y: 140 },
+    { x: 620, y: 240 },
   ]);
 
   // right-bottom
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
-    { x: 0, y: 0 },
-    { x: 100, y: 100 },
+  addConnector([
+    { x: 500, y: 150 },
+    { x: 600, y: 250 },
   ]);
 
   // left-top
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
-    { x: 100, y: 100 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 600, y: 230 },
+    { x: 500, y: 130 },
   ]);
 
   // left-bottom
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
-    { x: 100, y: 0 },
-    { x: 0, y: 100 },
+  addConnector([
+    { x: 600, y: 130 },
+    { x: 500, y: 230 },
   ]);
 
   // right-top
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
-    { x: 0, y: 100 },
-    { x: 100, y: 0 },
+  addConnector([
+    { x: 500, y: 250 },
+    { x: 600, y: 150 },
   ]);
 }
 
