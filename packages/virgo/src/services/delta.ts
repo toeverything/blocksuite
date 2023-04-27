@@ -161,9 +161,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     // every chunk is a line
     const lines = chunks.map(chunk => {
       const elementTs: TemplateResult<1>[] = [];
-      if (chunk.length === 0) {
-        elementTs.push(html`<v-element></v-element>`);
-      } else {
+      if (chunk.length > 0) {
         chunk.forEach(delta => {
           const element = renderElement(
             delta,
@@ -189,6 +187,10 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
     const vLines = Array.from(rootElement.querySelectorAll('v-line'));
     await Promise.all(vLines.map(line => line.updateComplete));
+
+    // We need to synchronize the selection immediately after rendering is completed,
+    // otherwise there is a possibility of an error in the cursor position
+    this._editor.rangeService.syncVRange();
 
     this._editor.slots.updated.emit();
   };

@@ -64,7 +64,7 @@ function toggleStyle(
 @customElement('affine-database-rich-text-cell')
 class TextCell extends DatabaseCellElement<Y.Text> {
   static override styles = css`
-    :host {
+    affine-database-rich-text-cell {
       display: flex;
       align-items: center;
       width: 100%;
@@ -82,19 +82,28 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     return this.databaseModel.page.readonly;
   }
 
+  protected override firstUpdated() {
+    this._onInitVEditor();
+    this._disposables.addFromEvent(this, 'click', this._handleClick);
+  }
+
   private _handleClick() {
     this.databaseModel.page.captureSync();
-    if (!this.cell && !this.vEditor) {
+  }
+
+  private _onInitVEditor() {
+    let value: Y.Text;
+    if (!this.cell?.value) {
       const yText = new this.databaseModel.page.YText();
       this.databaseModel.updateCell(this.rowModel.id, {
         columnId: this.column.id,
         value: yText,
       });
-      this._initVEditor(yText, true);
+      value = yText;
+    } else {
+      value = this.cell.value as Y.Text;
     }
-  }
 
-  private _initVEditor(value: Y.Text, focus = false) {
     this.vEditor = new VEditor(value);
     setupVirgoScroll(this.databaseModel.page, this.vEditor);
     this.vEditor.mount(this._container);
@@ -102,9 +111,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       keydown: this._handleKeyDown,
     });
     this.vEditor.setReadonly(this.readonly);
-    if (focus) {
-      this.vEditor.focusEnd();
-    }
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
@@ -185,34 +191,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       });
     }
   };
-
-  override update(changedProperties: Map<string, unknown>) {
-    super.update(changedProperties);
-    if (this.cell && !this.vEditor) {
-      this.vEditor = new VEditor(this.cell.value as string);
-      setupVirgoScroll(this.databaseModel.page, this.vEditor);
-      this.vEditor.mount(this._container);
-      this.vEditor.bindHandlers({
-        keydown: this._handleKeyDown,
-      });
-      this.vEditor.setReadonly(this.readonly);
-    } else if (!this.cell && this.vEditor) {
-      this.vEditor.unmount();
-      this.vEditor = null;
-    }
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('click', this._handleClick);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeEventListener('click', this._handleClick);
-    this.vEditor?.unmount();
-    this.vEditor = null;
-  }
 
   override render() {
     return html`

@@ -304,12 +304,7 @@ export function handleUnindent(
     children: previousSiblings,
   });
 
-  // 3. append child blocks after the target block to the target block
-  page.updateBlock(model, {
-    children: [...model.children, ...nextSiblings],
-  });
-
-  // 4. insert target block to the grand block
+  // 3. insert target block to the grand block
   const index = grandParent.children.indexOf(parent);
   page.updateBlock(grandParent, {
     children: [
@@ -317,6 +312,11 @@ export function handleUnindent(
       model,
       ...grandParent.children.slice(index + 1),
     ],
+  });
+
+  // 4. append child blocks after the target block to the target block
+  page.updateBlock(model, {
+    children: [...model.children, ...nextSiblings],
   });
 
   // 5. If the target block is a numbered list, update the prefix of next siblings

@@ -1,18 +1,15 @@
-import type {
-  Cell,
-  Column,
-  ColumnType,
-  RowHost,
-} from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
+import { ShadowlessElement, WithDisposable } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import type { Cell, Column, ColumnType, RowHost } from './types.js';
 
-export abstract class DatabaseCellElement<Value> extends LitElement {
+export abstract class DatabaseCellElement<Value> extends WithDisposable(
+  ShadowlessElement
+) {
   static tag: ReturnType<typeof literal>;
   @property()
   rowHost!: RowHost<Value>;

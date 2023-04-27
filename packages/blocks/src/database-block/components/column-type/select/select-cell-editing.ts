@@ -6,7 +6,6 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import type { SelectTag } from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
@@ -20,22 +19,20 @@ import {
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
 import { DatabaseCellElement } from '../../../register.js';
+import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import { getTagColor, onClickOutside } from '../../../utils.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const styles = css`
-  :host {
+  affine-database-select-cell-editing {
     z-index: 2;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-popover-shadow);
   }
   .affine-database-select-cell-select {
     font-size: var(--affine-font-sm);
-  }
-  .affine-database-select-cell-select * {
-    box-sizing: border-box;
   }
   .select-input-container {
     display: flex;
@@ -80,6 +77,15 @@ const styles = css`
     border-radius: 4px;
     color: var(--affine-black-90);
     background: var(--affine-tertiary-color);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .select-selected-text {
+    width: calc(100% - 16px);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   .select-selected > .close-icon {
     display: flex;
@@ -97,6 +103,10 @@ const styles = css`
     background: var(--affine-selected-color);
   }
   .select-option-new-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     height: 28px;
     padding: 2px 10px;
     border-radius: 4px;
@@ -130,7 +140,8 @@ const styles = css`
     display: flex;
   }
   .select-option-text-container {
-    flex: 1;
+    width: calc(100% - 28px);
+    overflow: hidden;
   }
   .select-option-text {
     display: none;
@@ -160,6 +171,12 @@ const styles = css`
   }
   .editing {
     background: var(--affine-hover-color);
+  }
+  .editing .select-option-text [data-virgo-text='true'] {
+    display: block;
+    white-space: pre !important;
+    overflow: unset;
+    text-overflow: unset;
   }
   .editing .select-option-icon {
     display: flex;
@@ -242,7 +259,13 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     selectedValue: SelectTag[]
   ) => {
     const inputValue = this._inputValue.trim();
-    if (event.key === 'Enter' && inputValue !== '') {
+
+    if (event.key === 'Backspace' && inputValue === '') {
+      this._onDeleteSelected(
+        selectedValue,
+        selectedValue[selectedValue.length - 1]
+      );
+    } else if (event.key === 'Enter' && inputValue !== '') {
       const selectTag = this.selectionList.find(
         item => item.value === inputValue
       );
@@ -257,6 +280,14 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   private _onSelect = (selectedValue: SelectTag[], select: SelectTag) => {
     // when editing, do not select
     if (this._editingIndex !== -1) return;
+
+    const isExist =
+      selectedValue.findIndex(item => item.value === select.value) > -1;
+    if (isExist) {
+      this.rowHost.setEditing(false);
+      return;
+    }
+
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
     if (!isSelected) {
@@ -337,9 +368,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   };
 
   private _showSelectAction = (index: number) => {
-    const selectOption = this.shadowRoot
-      ?.querySelectorAll('.select-option')
-      .item(index);
+    const selectOption = this.querySelectorAll('.select-option').item(index);
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
@@ -375,8 +404,15 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .item(index) as SelectOption;
 
     const selection = [...this.selectionList];
+    const value = selectOption.getSelectionValue();
+    const isExist =
+      selection.findIndex(
+        (select, i) => i !== index && select.value === value
+      ) > -1;
+    if (isExist) return;
+
     const oldSelect = selection[index];
-    const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
+    const newSelect = { ...oldSelect, value };
     selection[index] = newSelect;
     this.databaseModel.updateColumn({
       ...this.column,
@@ -430,14 +466,14 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
             const style = styleMap({
               backgroundColor: item.color,
             });
-            return html`<span class="select-selected" style=${style}>
-              ${item.value}
+            return html`<div class="select-selected" style=${style}>
+              <div class="select-selected-text">${item.value}</div>
               <span
                 class="close-icon"
                 @click=${() => this._onDeleteSelected(selectedTag, item)}
                 >${DatabaseSearchClose}</span
               >
-            </span>`;
+            </div>`;
           })}
           <input
             class="select-input"

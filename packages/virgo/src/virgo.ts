@@ -22,12 +22,17 @@ import {
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
-import { getTextNodesFromElement } from './utils/text.js';
+import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 
 export interface VEditorOptions {
   // it is a option to determine default `_attributeRenderer`
   defaultMode: 'rich' | 'pure';
 }
+
+type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
+  HTMLElement & {
+    virgoEditor: VEditor<T>;
+  };
 
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
@@ -37,7 +42,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
-  private _rootElement: HTMLElement | null = null;
+  private _rootElement: VirgoElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
   private _eventService: VirgoEventService<TextAttributes> =
@@ -61,6 +66,7 @@ export class VEditor<
     updated: Slot;
     vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
+    scrollUpdated: Slot<number>;
   };
 
   get yText() {
@@ -155,13 +161,17 @@ export class VEditor<
       updated: new Slot(),
       vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
+      scrollUpdated: new Slot<number>(),
     };
 
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
+    this.slots.scrollUpdated.on(this.rangeService.onScrollUpdated);
   }
 
   mount(rootElement: HTMLElement) {
-    this._rootElement = rootElement;
+    const virgoElement = rootElement as VirgoElement<TextAttributes>;
+    virgoElement.virgoEditor = this;
+    this._rootElement = virgoElement;
     this._rootElement.replaceChildren();
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
@@ -217,7 +227,7 @@ export class VEditor<
         if (index + text.textContent.length >= rangeIndex) {
           return [text, rangeIndex - index];
         }
-        index += text.textContent.length;
+        index += calculateTextLength(text);
       }
 
       index += 1;

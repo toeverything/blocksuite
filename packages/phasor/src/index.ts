@@ -1,6 +1,6 @@
 /// <reference types="@blocksuite/global" />
 
-export type { StrokeStyle } from './consts.js';
+export { StrokeStyle } from './consts.js';
 export type {
   AttachedElement,
   AttachedElementPosition,

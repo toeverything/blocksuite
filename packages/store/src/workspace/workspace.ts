@@ -1,6 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
-import type { z } from 'zod';
 
 import type { AwarenessStore } from '../awareness.js';
 import type { BlockSchemaType } from '../base.js';
@@ -19,6 +18,7 @@ import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
+import { Schema } from './schema.js';
 
 export type WorkspaceOptions = {
   experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
@@ -28,6 +28,8 @@ export class Workspace {
   static Y = Y;
 
   private _store: Store;
+
+  private readonly _schema: Schema;
   private readonly _storages: BlobStorage[] = [];
   private readonly _blobStorage: BlobManager;
 
@@ -47,8 +49,6 @@ export class Workspace {
     backlink: BacklinkIndexer;
   };
 
-  flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
-
   readonly inlineSuggestionProvider?: InlineSuggestionProvider;
 
   constructor({
@@ -56,6 +56,8 @@ export class Workspace {
     ...storeOptions
   }: WorkspaceOptions) {
     this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+    this._schema = new Schema(this);
+
     this._store = new Store(storeOptions);
 
     this._storages = (storeOptions.blobStorages ?? [createMemoryStorage]).map(
@@ -170,10 +172,14 @@ export class Workspace {
     return this._store.idGenerator;
   }
 
+  get schema() {
+    return this._schema;
+  }
+
   register(blockSchema: BlockSchemaType[]) {
     blockSchema.forEach(schema => {
       BlockSchema.parse(schema);
-      this.flavourSchemaMap.set(schema.model.flavour, schema);
+      this.schema.flavourSchemaMap.set(schema.model.flavour, schema);
     });
     return this;
   }
@@ -212,7 +218,27 @@ export class Workspace {
     });
   }
 
-  createPage(pageId: string) {
+  /**
+   * By default, only an empty page will be created.
+   * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
+   * will be created in the page simultaneously.
+   */
+  createPage(
+    options: { id?: string; init?: true | { title: string } } | string = {}
+  ) {
+    // Migration guide
+    if (typeof options === 'string') {
+      options = { id: options };
+      console.warn(
+        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ id: pageId })` instead'
+      );
+      console.warn(
+        'More details see https://github.com/toeverything/blocksuite/pull/2272'
+      );
+    }
+    // End of migration guide. Remove this in the next major version
+
+    const { id: pageId = this.idGenerator(), init } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
@@ -223,7 +249,22 @@ export class Workspace {
       createDate: +new Date(),
       subpageIds: [],
     });
-    return this.getPage(pageId) as Page;
+    const page = this.getPage(pageId) as Page;
+
+    if (init) {
+      const pageBlockId = page.addBlock(
+        'affine:page',
+        typeof init === 'boolean'
+          ? undefined
+          : {
+              title: new page.Text(init.title),
+            }
+      );
+      page.addBlock('affine:surface', {}, null);
+      const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+      page.addBlock('affine:paragraph', {}, frameId);
+    }
+    return page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
@@ -235,6 +276,9 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
+  /**
+   * @deprecated
+   */
   shiftPage(pageId: string, newIndex: number) {
     this.meta.shiftPageMeta(pageId, newIndex);
   }

@@ -14,8 +14,10 @@ import {
   getCurrentHTMLTheme,
   initEmptyParagraphState,
   pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
+  pressForwardDelete,
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
@@ -25,7 +27,6 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
-  waitForPageReady,
   waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -408,4 +409,38 @@ test('delete emoji in the middle of the text', async ({ page }) => {
   await pressArrowLeft(page, 1);
   await pressBackspace(page);
   await assertText(page, '11111');
+});
+
+test('delete emoji forward', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1🌷1🙅‍♂️1🏳️‍🌈1👨‍👩‍👧‍👦1');
+  await pressArrowLeft(page, 8);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await assertText(page, '11111');
+});
+
+test('ZERO_WIDTH_SPACE should be counted by one cursor position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await waitNextFrame(page);
+  await page.keyboard.press(`Shift+Enter`, { delay: 50 });
+  await type(page, 'asdfg');
+  await waitNextFrame(page);
+  await pressEnter(page);
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  await pressBackspace(page);
+  const line = page.locator('v-line').last();
+  expect(await line.innerText()).toBe('asdf');
 });

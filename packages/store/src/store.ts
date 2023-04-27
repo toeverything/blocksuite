@@ -96,7 +96,6 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
-  connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor(
@@ -141,7 +140,6 @@ export class Store {
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(id, this.doc, {
-          // @ts-expect-error
           awareness: this.awarenessStore.awareness,
         })
     );

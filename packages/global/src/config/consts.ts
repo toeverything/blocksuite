@@ -1,6 +1,6 @@
 import type { CssVariableName } from '@blocksuite/blocks';
 
-import { SHORT_KEY } from './index.js';
+import { SHORT_KEY } from './consts/platform.js';
 
 export * from './consts/block-hub.js';
 export * from './consts/platform.js';

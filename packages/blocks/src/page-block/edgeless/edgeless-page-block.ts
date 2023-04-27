@@ -115,6 +115,20 @@ export class EdgelessPageBlockComponent
       z-index: 1;
       pointer-events: none;
     }
+
+    .affine-block-children-container.edgeless {
+      padding-left: 0;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      /**
+       * Fix: pointerEvent stops firing after a short time.
+       * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+       * up to the one that implements the gesture (in other words, the first containing scrolling element)
+       * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+       */
+      touch-action: none;
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -351,6 +365,12 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  /**
+   * Adds a new frame with the given point on the editor-container.
+   *
+   * @param: point Point
+   * @returns: The id of new frame
+   */
   addFrameWithPoint(
     point: Point,
     width = DEFAULT_FRAME_WIDTH,
@@ -378,6 +398,9 @@ export class EdgelessPageBlockComponent
    */
   addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
     this.page.captureSync();
+    const { left, top } = this.surface.viewport;
+    point.x -= left;
+    point.y -= top;
     const frameId = this.addFrameWithPoint(point);
     const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
@@ -398,10 +421,12 @@ export class EdgelessPageBlockComponent
   /** Moves selected blocks into a new frame at the given point. */
   moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point, rect?: DOMRect) {
     this.page.captureSync();
+    const { left, top, zoom } = this.surface.viewport;
     const width = rect?.width
-      ? rect.width / this.surface.viewport.zoom +
-        EDGELESS_BLOCK_CHILD_PADDING * 2
+      ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
       : DEFAULT_FRAME_WIDTH;
+    point.x -= left;
+    point.y -= top;
     const frameId = this.addFrameWithPoint(point, width);
     this.page.moveBlocks(
       blocks,
@@ -551,10 +576,6 @@ export class EdgelessPageBlockComponent
       >
         <style>
           .affine-block-children-container.edgeless {
-            padding-left: 0;
-            position: relative;
-            overflow: hidden;
-            height: 100%;
             background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: var(--affine-background-primary-color);

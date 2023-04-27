@@ -71,17 +71,15 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     this._initTitleVEditor();
+    const disposables = this._disposables;
 
-    this._disposables.addFromEvent(
-      this._titleContainer,
-      'focus',
-      this._onTitleFocus
-    );
-    this._disposables.addFromEvent(
-      this._titleContainer,
-      'blur',
-      this._onTitleBlur
-    );
+    disposables.addFromEvent(this._titleContainer, 'focus', this._onTitleFocus);
+    disposables.addFromEvent(this._titleContainer, 'blur', this._onTitleBlur);
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
   private _initTitleVEditor() {

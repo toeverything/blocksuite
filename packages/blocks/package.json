@@ -1,9 +1,10 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.5.0-alpha.3",
+  "version": "0.5.0",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
+  "repository": "toeverything/blocksuite",
   "scripts": {
     "build": "tsc",
     "test:unit": "vitest --run",
@@ -24,7 +25,7 @@
     "@blocksuite/connector": "workspace:*",
     "@popperjs/core": "^2.11.6",
     "hotkeys-js": "^3.10.1",
-    "lit": "^2.6.1",
+    "lit": "^2.7.2",
     "marked": "^4.2.12",
     "shiki": "^0.14.1",
     "turndown": "^7.1.1",

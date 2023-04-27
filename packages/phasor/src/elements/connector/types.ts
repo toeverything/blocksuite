@@ -1,3 +1,5 @@
+import type { StrokeStyle } from '../../consts.js';
+
 export enum ConnectorMode {
   Straight,
   Orthogonal,
@@ -32,6 +34,7 @@ export type SerializedConnectorProps = {
   mode: ConnectorMode;
   lineWidth: number;
   color: string;
+  strokeStyle: StrokeStyle;
 
   startElement?: AttachedElement;
   endElement?: AttachedElement;
@@ -44,6 +47,11 @@ export type SerializedConnectorProps = {
 export type ConnectorProps = Partial<
   Pick<
     SerializedConnectorProps,
-    'mode' | 'lineWidth' | 'color' | 'startElement' | 'endElement'
+    | 'mode'
+    | 'lineWidth'
+    | 'color'
+    | 'startElement'
+    | 'endElement'
+    | 'strokeStyle'
   >
 >;

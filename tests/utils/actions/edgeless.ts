@@ -214,8 +214,8 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function selectBrushSize(page: Page, size: 4 | 16) {
-  const sizeMap = { 4: 'thin', 16: 'thick' };
+export async function selectBrushSize(page: Page, size: 4 | 10) {
+  const sizeMap = { 4: 'thin', 10: 'thick' };
   const sizeButton = page.locator(
     `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
   );
@@ -261,7 +261,7 @@ export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
 
 export async function activeFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
-  await page.mouse.dblclick(bound.x, bound.y);
+  await page.mouse.dblclick(bound.x + 8, bound.y + 8);
 }
 
 export async function selectFrameInEdgeless(page: Page, frameId: string) {
@@ -340,7 +340,10 @@ type Action =
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
-  | 'changeShapeStrokeColor';
+  | 'changeShapeStrokeColor'
+  | 'changeShapeStrokeStyles'
+  | 'changeConnectorStrokeColor'
+  | 'changeConnectorStrokeStyles';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -389,6 +392,27 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
         .locator('.stroke-color-button');
+      await button.click();
+      break;
+    }
+    case 'changeShapeStrokeStyles': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-shape-button')
+        .locator('.line-styles-button');
+      await button.click();
+      break;
+    }
+    case 'changeConnectorStrokeColor': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-connector-button')
+        .locator('.connector-color-button');
+      await button.click();
+      break;
+    }
+    case 'changeConnectorStrokeStyles': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-connector-button')
+        .locator('.line-styles-button');
       await button.click();
       break;
     }
@@ -443,4 +467,71 @@ export async function resizeConnectorByStartCapitalHandler(
       steps,
     }
   );
+}
+
+export function locatorShapeStrokeWidthButton(page: Page, size: 's' | 'l') {
+  return page
+    .locator('edgeless-change-shape-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-size-button.size-${size}`);
+}
+export async function changeShapeStrokeWidth(page: Page, size: 's' | 'l') {
+  const button = locatorShapeStrokeWidthButton(page, size);
+  await button.click();
+}
+
+export function locatorShapeStrokeStyleButton(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  return page
+    .locator('edgeless-change-shape-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+}
+export async function changeShapeStrokeStyle(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  const button = locatorShapeStrokeStyleButton(page, mode);
+  await button.click();
+}
+
+export async function changeConnectorStrokeColor(
+  page: Page,
+  color: CssVariableName
+) {
+  const colorButton = page
+    .locator('edgeless-change-connector-button')
+    .locator('.color-panel-container')
+    .locator(`.color-unit[aria-label="${color}"]`);
+  await colorButton.click();
+}
+
+export function locatorConnectorStrokeWidthButton(page: Page, size: 's' | 'l') {
+  return page
+    .locator('edgeless-change-connector-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-size-button.size-${size}`);
+}
+export async function changeConnectorStrokeWidth(page: Page, size: 's' | 'l') {
+  const button = locatorConnectorStrokeWidthButton(page, size);
+  await button.click();
+}
+
+export function locatorConnectorStrokeStyleButton(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  return page
+    .locator('edgeless-change-connector-button')
+    .locator('.line-style-panel')
+    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+}
+export async function changeConnectorStrokeStyle(
+  page: Page,
+  mode: 'solid' | 'dash' | 'none'
+) {
+  const button = locatorConnectorStrokeStyleButton(page, mode);
+  await button.click();
 }

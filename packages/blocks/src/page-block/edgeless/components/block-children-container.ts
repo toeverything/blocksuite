@@ -1,4 +1,7 @@
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
+import {
+  EDGELESS_BLOCK_CHILD_PADDING,
+  FRAME_BACKGROUND_COLORS,
+} from '@blocksuite/global/config';
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -46,7 +49,7 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: `var(${background})`,
+    background: `var(${background || FRAME_BACKGROUND_COLORS[0]})`,
     pointerEvents: 'all',
     zIndex: '0',
     boxSizing: 'border-box',

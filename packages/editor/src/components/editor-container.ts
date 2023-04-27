@@ -76,7 +76,13 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   slots: CommonSlots = {
     pageLinkClicked: new Slot(),
+    /**
+     * @deprecated
+     */
     subpageLinked: new Slot(),
+    /**
+     * @deprecated
+     */
     subpageUnlinked: new Slot(),
   };
 

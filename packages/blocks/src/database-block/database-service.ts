@@ -1,5 +1,3 @@
-import type { Column } from '@blocksuite/global/database';
-import type { Cell } from '@blocksuite/global/database';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -9,8 +7,9 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import type { SerializedBlock } from '../std.js';
+import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import type { Cell, Column } from './types.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   initDatabaseBlock(
@@ -21,13 +20,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   ) {
     // By default, database has 3 empty rows
     for (let i = 0; i < 3; i++) {
-      page.addBlock(
+      const id = page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text(''),
         },
         databaseId
       );
+      if (i === 0) asyncFocusRichText(page, id);
     }
     if (isAppendNewRow) {
       // Add a paragraph after database

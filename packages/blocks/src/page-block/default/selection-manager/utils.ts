@@ -11,7 +11,7 @@ import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js'
 import type {
   IPoint,
   SelectionEvent,
-} from '../../../__internal__/utils/gesture.js';
+} from '../../../__internal__/utils/gesture/index.js';
 import type { DefaultSelectionSlots } from '../default-page-block.js';
 import type { DefaultSelectionManager, PageSelectionState } from './index.js';
 

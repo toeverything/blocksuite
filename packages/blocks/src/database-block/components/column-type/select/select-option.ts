@@ -1,29 +1,40 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import type { VEditor } from '@blocksuite/virgo';
-import { css, html, LitElement } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { ShadowlessElement, WithDisposable } from '../../../../std.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
+import type { SelectTag } from '../../../types.js';
 import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
-export class SelectOption extends LitElement {
+export class SelectOption extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    :host * {
-      box-sizing: border-box;
+    affine-database-select-option {
+      display: flex;
+      align-items: center;
     }
     .select-option-text {
       display: inline-block;
       min-width: 2px;
       height: 100%;
+      max-width: 100%;
       padding: 2px 10px;
-      background: var(--affine-tag-pink);
       border-radius: 4px;
+      background: var(--affine-tag-pink);
+      overflow: hidden;
     }
     .select-option-text:focus {
       outline: none;
+    }
+
+    .select-option-text [data-virgo-text='true'] {
+      display: block;
+      white-space: nowrap !important;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   `;
 
@@ -65,7 +76,7 @@ export class SelectOption extends LitElement {
     return this._vEditor.yText.toString();
   }
 
-  override firstUpdated() {
+  private _onInitVEditor() {
     this._vEditor = initLimitedLengthVEditor({
       yText: this.select.value,
       container: this._container,
@@ -91,6 +102,25 @@ export class SelectOption extends LitElement {
       },
     });
   }
+
+  override firstUpdated() {
+    this._disposables.addFromEvent(
+      this._container,
+      'focus',
+      this._onOptionFocus
+    );
+    this._disposables.addFromEvent(this._container, 'blur', this._onOptionBlur);
+
+    this._onInitVEditor();
+  }
+
+  private _onOptionFocus = () => {
+    this._container.classList.remove('ellipsis');
+  };
+
+  private _onOptionBlur = () => {
+    this._container.classList.add('ellipsis');
+  };
 
   override render() {
     const style = styleMap({

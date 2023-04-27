@@ -1,13 +1,9 @@
-import {
-  type Column,
-  ColumnInsertPosition,
-  type ColumnType,
-} from '@blocksuite/global/database';
 import { assertExists } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnRendererHelper } from '../../register.js';
-import type { ColumnActionType } from '../../types.js';
+import type { Column, ColumnActionType, ColumnType } from '../../types.js';
+import { ColumnInsertPosition } from '../../types.js';
 
 export function changeColumnType(
   columnId: string,

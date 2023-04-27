@@ -1,4 +1,4 @@
-import type { ColumnType } from '@blocksuite/global/database';
+import type { ColumnType } from '@blocksuite/blocks';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
@@ -187,11 +187,40 @@ export async function assertDatabaseCellRichTexts(
       const cell = row?.querySelector(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
-      const cellEditContainer = cell?.querySelector(
-        'affine-database-cell-container'
-      );
-      const richText = cellEditContainer?.shadowRoot?.querySelector<RichText>(
+      const richText = cell?.querySelector<RichText>(
         'affine-database-rich-text-cell'
+      );
+      if (!richText) throw new Error('Missing database rich text cell');
+      return richText.vEditor.yText.toString();
+    },
+    { rowIndex, columnIndex }
+  );
+  expect(actualTexts).toEqual(text);
+}
+
+export async function assertDatabaseCellNumberText(
+  page: Page,
+  {
+    rowIndex = 0,
+    columnIndex = 1,
+    text,
+  }: {
+    rowIndex?: number;
+    columnIndex?: number;
+    text: string;
+  }
+) {
+  const actualTexts = await page.evaluate(
+    ({ rowIndex, columnIndex }) => {
+      const rows = document.querySelector('.affine-database-block-rows');
+      const row = rows?.querySelector(
+        `.database-row:nth-child(${rowIndex + 1})`
+      );
+      const cell = row?.querySelector(
+        `.database-cell:nth-child(${columnIndex + 1})`
+      );
+      const richText = cell?.querySelector<RichText>(
+        'affine-database-number-cell-editing'
       );
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.vEditor.yText.toString();

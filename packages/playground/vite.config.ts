@@ -43,6 +43,7 @@ export default defineConfig({
           'examples/workspace/index.html'
         ),
         'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
+        'examples/store': resolve(__dirname, 'examples/store/index.html'),
       },
     },
   },

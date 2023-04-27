@@ -4,7 +4,7 @@ import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
-import { getFileFromClipboard } from '../clipboard/util/pure-util.js';
+import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
@@ -79,13 +79,13 @@ export class ContentParser {
     return this._convertHtml2Blocks(htmlEl);
   }
 
-  async file2Blocks(clipboardData: DataTransfer) {
+  async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
     const file = getFileFromClipboard(clipboardData);
     if (file) {
       if (file.type.includes('image')) {
         // TODO: upload file to file server
         // XXX: should use blob storage here?
-        const storage = await this._page.blobs;
+        const storage = this._page.blobs;
         assertExists(storage);
         const id = await storage.set(file);
         return [
@@ -93,6 +93,7 @@ export class ContentParser {
             flavour: 'affine:embed',
             type: 'image',
             sourceId: id,
+            children: [],
           },
         ];
       }

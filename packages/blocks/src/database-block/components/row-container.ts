@@ -1,3 +1,5 @@
+import './cell-container.js';
+
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -48,10 +50,14 @@ export function DataBaseRowContainer(
       .affine-database-block-row-cell-content {
         display: flex;
         align-items: center;
+        height: 100%;
         min-height: 44px;
         padding: 0 8px;
         border-right: 1px solid var(--affine-border-color);
         transform: translateX(0);
+      }
+      .affine-database-block-row-cell-content > affine-paragraph {
+        width: 100%;
       }
       .affine-database-block-row-cell-content > affine-paragraph > .text {
         margin-top: unset;

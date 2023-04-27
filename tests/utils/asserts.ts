@@ -24,7 +24,6 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
-import { locatorComponentToolbar } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -74,7 +73,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,72]',
+      'prop:xywh': '[0,0,720,80]',
       'prop:background': '--affine-background-secondary-color',
     },
     '2': {

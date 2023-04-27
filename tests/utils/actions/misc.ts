@@ -4,6 +4,7 @@ import '../declare-test-window.js';
 import type {
   CssVariableName,
   DatabaseBlockModel,
+  ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -121,7 +122,7 @@ async function initEmptyEditor(
           initPage(page);
         });
       } else {
-        const page = workspace.createPage('page0');
+        const page = workspace.createPage({ id: 'page0' });
         initPage(page);
       }
     },

@@ -1,4 +1,3 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -8,12 +7,13 @@ import {
   DatabaseCellElement,
   defineColumnRenderer,
 } from '../../../register.js';
+import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellElement<SelectTag[]> {
   static override styles = css`
-    :host {
+    affine-database-select-cell {
       display: flex;
       align-items: center;
       width: calc(100% + 8px);
@@ -35,6 +35,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
       height: 28px;
       padding: 2px 10px;
       border-radius: 4px;
+      white-space: nowrap;
       background: var(--affine-tag-white);
     }
   `;
