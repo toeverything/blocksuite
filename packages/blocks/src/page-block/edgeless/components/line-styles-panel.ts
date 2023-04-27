@@ -33,12 +33,14 @@ interface LineStylesPanelProps {
   onClick?: (clickedButton: LineStylesPanelClickedButton) => void;
   selectedLineSize?: LineSizeButtonProps['size'];
   selectedLineStyle?: LineStyleButtonProps['mode'];
+  lineStyle?: LineStyleButtonProps['mode'][];
 }
 
 export function LineStylesPanel({
   onClick,
   selectedLineSize,
   selectedLineStyle,
+  lineStyle = ['solid', 'dash', 'none'],
 }: LineStylesPanelProps = {}) {
   const lineSizeButtons = repeat(
     ['s', 'l'] as const,
@@ -58,7 +60,7 @@ export function LineStylesPanel({
   );
 
   const lineStyleButtons = repeat(
-    ['solid', 'dash', 'none'] as const,
+    lineStyle,
     mode => mode,
     mode => {
       return LineStyleButton({

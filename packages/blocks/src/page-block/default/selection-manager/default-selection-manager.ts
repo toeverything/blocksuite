@@ -1,6 +1,5 @@
 import '../../../components/drag-handle.js';
 
-import { BLOCK_CHILDREN_CONTAINER_WIDTH } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -8,6 +7,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 
+import type { EmbedBlockDoubleClickData } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -22,6 +22,7 @@ import {
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
+  handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
   isDatabase,
@@ -37,7 +38,10 @@ import {
   type SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import type { EmbedBlockComponent } from '../../../embed-block/index.js';
+import type {
+  EmbedBlockComponent,
+  EmbedBlockModel,
+} from '../../../embed-block/index.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
@@ -106,8 +110,6 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.state.resetStartRange(e);
-
     const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
@@ -227,37 +229,64 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
+    const {
+      x,
+      y,
+      raw: { target, clientX, clientY, pageX },
+      keys: { shift },
+    } = e;
+    const { state } = this;
+    const { viewport } = state;
+    let { type } = state;
+
     // do nothing when clicking on scrollbar
-    const { viewport } = this.state;
+    if (pageX >= viewport.clientWidth + viewport.left) return;
 
-    if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
-
-    const target = e.raw.target;
+    // do nothing when clicking on drag-handle
     if (isElement(target) && isDragHandle(target as Element)) {
+      return;
+    }
+
+    // shift + click
+    // * native: select texts
+    // * block: select blocks
+    if (shift) {
+      if (type === 'none') {
+        type = state.type = 'native';
+      }
+      if (type === 'native') {
+        state.lastPoint = new Point(clientX, clientY);
+        handleNativeRangeDragMove(state.startRange, e);
+        return;
+      }
+      if (type === 'block') {
+        this.selectedBlocksWithShiftClick(x, y);
+        return;
+      }
+
       return;
     }
 
     // clear selection first
     this.clear();
 
+    state.resetStartRange(e);
+
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
       document.querySelectorAll('.affine-embed-wrapper-caption')
     );
     allCaptions.forEach(el => {
-      if (el !== e.raw.target) {
+      if (el !== target) {
         (el as HTMLInputElement).blur();
       }
     });
 
     let clickBlockInfo = null;
 
-    const element = getClosestBlockElementByPoint(
-      new Point(e.raw.clientX, e.raw.clientY),
-      {
-        rect: this.container.innerRect,
-      }
-    );
+    const element = getClosestBlockElementByPoint(new Point(clientX, clientY), {
+      rect: this.container.innerRect,
+    });
 
     if (element) {
       clickBlockInfo = {
@@ -271,7 +300,7 @@ export class DefaultSelectionManager {
       const { model, element } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
-      this.state.focusedBlock = element;
+      state.focusedBlock = element;
     }
 
     if (
@@ -283,24 +312,21 @@ export class DefaultSelectionManager {
     ) {
       window.getSelection()?.removeAllRanges();
 
-      this.state.activeComponent = clickBlockInfo.element;
+      state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
-        this.state.type = 'embed';
-        this.state.selectedEmbeds.push(
-          this.state.activeComponent as EmbedBlockComponent
-        );
+        state.type = 'embed';
+        state.selectedEmbeds.push(state.activeComponent as EmbedBlockComponent);
         this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
-        this.state.type = 'block';
-        this.state.selectedBlocks.push(this.state.activeComponent);
+        state.type = 'block';
+        state.selectedBlocks.push(state.activeComponent);
         this.slots.selectedRectsUpdated.emit([clickBlockInfo.rect]);
       }
       return;
     }
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
-    if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
 
@@ -310,6 +336,40 @@ export class DefaultSelectionManager {
 
     // switch native selection
     NativeDragHandlers.onStart(this, e);
+
+    // The following code is for the fullscreen image modal
+    // fixme:
+    //  remove dispatch a custom event
+    //  once we have a better way to handle this
+    //  like plugin system.
+    {
+      const {
+        raw: { clientX, clientY },
+      } = e;
+
+      const element = getClosestBlockElementByPoint(
+        new Point(clientX, clientY),
+        {
+          rect: this.container.innerRect,
+        }
+      );
+
+      if (element) {
+        const targetModel = getModelByBlockElement(element) as EmbedBlockModel;
+        if (targetModel.flavour === 'affine:embed') {
+          window.dispatchEvent(
+            new CustomEvent<EmbedBlockDoubleClickData>(
+              'affine.embed-block-db-click',
+              {
+                detail: {
+                  blockId: targetModel.id,
+                },
+              }
+            )
+          );
+        }
+      }
+    }
 
     showFormatQuickBarByClicks(
       'double',
@@ -367,12 +427,14 @@ export class DefaultSelectionManager {
       if (model.type === 'image') {
         const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
-        const isLarge = rect.width > BLOCK_CHILDREN_CONTAINER_WIDTH;
-        tempRect.right += isLarge ? 0 : 60;
+        const isOutside =
+          rect.right + 60 <
+          this.state.viewport.left + this.state.viewport.clientWidth;
+        tempRect.right += isOutside ? 60 : 0;
 
         if (tempRect.isPointIn(point)) {
           // when image size is too large, the option popup should show inside
-          rect.x = rect.right + (isLarge ? -50 : 10);
+          rect.x = rect.right + (isOutside ? 10 : -50);
           hoverEditingState.rect = rect;
           shouldClear = false;
         }
@@ -551,7 +613,7 @@ export class DefaultSelectionManager {
   }
 
   refreshEmbedRects(hoverEditingState: EditingState | null = null) {
-    const { activeComponent, selectedEmbeds } = this.state;
+    const { activeComponent, selectedEmbeds, viewport } = this.state;
     if (activeComponent && selectedEmbeds.length) {
       const rect = getSelectedStateRectByBlockElement(activeComponent);
       const embedRects = [
@@ -560,8 +622,11 @@ export class DefaultSelectionManager {
 
       // updates editing
       if (hoverEditingState && isImage(activeComponent)) {
+        const isOutside =
+          rect.right + 60 < viewport.left + viewport.clientWidth;
+
         // when image size is too large, the option popup should show inside
-        rect.x = rect.right + (rect.width > 680 ? -50 : 10);
+        rect.x = rect.right + (isOutside ? 10 : -50);
         hoverEditingState.rect = rect;
       }
 
@@ -658,6 +723,92 @@ export class DefaultSelectionManager {
       selectedBlocks as BlockComponentElement[],
       rects
     );
+  }
+
+  selectedBlocksWithShiftClick(x: number, y: number) {
+    const { state } = this;
+    const { viewport, selectedBlocks } = state;
+    const lastIndex = selectedBlocks.length - 1;
+
+    if (lastIndex === -1) return;
+
+    const { left, top, scrollLeft, scrollTop } = viewport;
+    const hasOneBlock = lastIndex === 0;
+    const first = selectedBlocks[0];
+    const last = hasOneBlock ? first : selectedBlocks[lastIndex];
+    const firstRect = getRectByBlockElement(first);
+    const lastRect = hasOneBlock ? firstRect : getRectByBlockElement(last);
+    const rect = Rect.fromPoints(
+      new Point(
+        firstRect.left - left + scrollLeft,
+        firstRect.top - top + scrollTop
+      ),
+      new Point(
+        lastRect.right - left + scrollLeft,
+        lastRect.bottom - top + scrollTop
+      )
+    );
+    const point = new Point(x + scrollLeft, y + scrollTop);
+
+    let start;
+    let end;
+    let pos = true;
+
+    if (hasOneBlock) {
+      if (rect.isPointIn(point)) {
+        return;
+      }
+
+      if (point.y < rect.top) {
+        start = point;
+        end = rect.max;
+        pos = false;
+      } else {
+        start = rect.min;
+        end = point;
+      }
+    } else {
+      if (rect.isPointIn(point)) {
+        if (point.y >= rect.top + rect.height / 2) {
+          start = point;
+          end = rect.max;
+          pos = false;
+        } else {
+          start = rect.min;
+          end = point;
+        }
+      } else if (point.y < rect.top) {
+        start = point;
+        end = rect.max;
+        pos = false;
+      } else {
+        start = rect.min;
+        end = point;
+      }
+    }
+
+    if (start && end) {
+      this.selectBlocksByDraggingArea(
+        state.blockCache,
+        Rect.fromPoints(start, end).toDOMRect(),
+        viewport,
+        true
+      );
+    }
+
+    const direction = pos ? 'center-bottom' : 'center-top';
+    showFormatQuickBar({
+      page: this.page,
+      container: this.container,
+      direction,
+      anchorEl: {
+        // After update block type, the block selection will be cleared and refreshed.
+        // So we need to get the targe block's rect dynamic.
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, state);
+        },
+      },
+    });
   }
 
   setSelectedBlocks(

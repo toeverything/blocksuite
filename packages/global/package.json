@@ -17,7 +17,7 @@
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
     "./config": "./src/config/index.ts",
-    "./error": "./src/error.ts"
+    "./error": "./src/error/index.ts"
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -27,7 +27,7 @@
       ".": "./index.d.ts",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
-      "./error": "./dist/error.js",
+      "./error": "./dist/error/index.js",
       "./config": "./dist/config/index.js"
     },
     "files": [
@@ -40,10 +40,10 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "lit": "^2.6.1"
+    "lit": "^2.7.2"
   },
   "peerDependencies": {
-    "lit": "^2.6"
+    "lit": "^2.7"
   },
   "peerDependenciesMeta": {
     "lit": {

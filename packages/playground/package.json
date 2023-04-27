@@ -24,10 +24,10 @@
     "@shoelace-style/shoelace": "2.0.0",
     "@toeverything/y-indexeddb": "0.5.4-canary.7",
     "browser-fs-access": "^0.32.1",
-    "lit": "^2.6.1",
+    "lit": "^2.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.5.50"
+    "yjs": "^13.6.0"
   },
   "license": "MPL-2.0",
   "devDependencies": {

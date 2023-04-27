@@ -354,12 +354,12 @@ test('change shape stroke width', async ({ page }) => {
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeWidth(page, 'l');
 
   await waitNextFrame(page);
 
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   const activeButton = locatorShapeStrokeWidthButton(page, 'l');
   const className = await activeButton.evaluate(ele => ele.className);
   expect(className.includes(' active')).toBeTruthy();
@@ -384,11 +384,11 @@ test('change shape stroke style', async ({ page }) => {
   await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeStyle(page, 'none');
   await waitNextFrame(page);
 
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeWidth');
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   const activeButton = locatorShapeStrokeStyleButton(page, 'none');
   const className = await activeButton.evaluate(ele => ele.className);
   expect(className.includes(' active')).toBeTruthy();

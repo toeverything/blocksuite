@@ -7,6 +7,7 @@ export const DividerBlockSchema = defineBlockSchema({
     version: 1,
     role: 'content',
     tag: literal`affine-divider`,
+    children: [],
   },
 });
 

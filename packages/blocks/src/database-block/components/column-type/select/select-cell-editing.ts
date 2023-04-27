@@ -259,7 +259,13 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     selectedValue: SelectTag[]
   ) => {
     const inputValue = this._inputValue.trim();
-    if (event.key === 'Enter' && inputValue !== '') {
+
+    if (event.key === 'Backspace' && inputValue === '') {
+      this._onDeleteSelected(
+        selectedValue,
+        selectedValue[selectedValue.length - 1]
+      );
+    } else if (event.key === 'Enter' && inputValue !== '') {
       const selectTag = this.selectionList.find(
         item => item.value === inputValue
       );
@@ -274,6 +280,14 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   private _onSelect = (selectedValue: SelectTag[], select: SelectTag) => {
     // when editing, do not select
     if (this._editingIndex !== -1) return;
+
+    const isExist =
+      selectedValue.findIndex(item => item.value === select.value) > -1;
+    if (isExist) {
+      this.rowHost.setEditing(false);
+      return;
+    }
+
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
     if (!isSelected) {
@@ -390,8 +404,15 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       .item(index) as SelectOption;
 
     const selection = [...this.selectionList];
+    const value = selectOption.getSelectionValue();
+    const isExist =
+      selection.findIndex(
+        (select, i) => i !== index && select.value === value
+      ) > -1;
+    if (isExist) return;
+
     const oldSelect = selection[index];
-    const newSelect = { ...oldSelect, value: selectOption.getSelectionValue() };
+    const newSelect = { ...oldSelect, value };
     selection[index] = newSelect;
     this.databaseModel.updateColumn({
       ...this.column,

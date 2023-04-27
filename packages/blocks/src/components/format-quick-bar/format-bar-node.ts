@@ -20,6 +20,7 @@ import {
   getRichTextByModel,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
+import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import { actionConfig } from '../../page-block/utils/const.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
@@ -328,7 +329,11 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       left: this.left,
       top: this.top,
     });
-    return html` <div class="format-quick-bar" style="${styles}">
+    return html` <div
+      class="format-quick-bar"
+      style="${styles}"
+      @pointerdown=${stopPropagation}
+    >
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}

@@ -10,8 +10,18 @@ export const FrameBlockSchema = defineBlockSchema({
   }),
   metadata: {
     version: 1,
-    role: 'content',
+    role: 'hub',
     tag: literal`affine-frame`,
+    parent: ['affine:page'],
+    children: [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+      'affine:divider',
+      'affine:database',
+      'affine:embed',
+      'affine:frame-block-*',
+    ],
   },
 });
 

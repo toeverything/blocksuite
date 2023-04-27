@@ -11,7 +11,7 @@ import type {
   EdgelessPageBlockComponent,
 } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import type { Point, Rect } from './rect.js';
+import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
@@ -488,7 +488,7 @@ export function isToggleIcon(element: unknown): element is SVGPathElement {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute('data-block-is-database-input') === 'true'
+    element.getAttribute('data-virgo-root') === 'true'
   );
 }
 
@@ -810,10 +810,16 @@ export function getRectByBlockElement(
 export function getSelectedStateRectByBlockElement(
   element: Element | BlockComponentElement
 ) {
-  if (isImage(element))
-    return (
-      element.querySelector('.resizable-img') ?? element
-    ).getBoundingClientRect();
+  if (isImage(element)) {
+    const wrapper = element.querySelector('.affine-image-wrapper');
+    const resizable = element.querySelector('.resizable-img');
+    assertExists(wrapper);
+    assertExists(resizable);
+    const w = Rect.fromDOM(wrapper);
+    const r = Rect.fromDOM(resizable);
+    const d = w.intersect(r);
+    return d.toDOMRect();
+  }
   return getRectByBlockElement(element);
 }
 

@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, test } from 'vitest';
 
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
+import type {
+  Cell,
+  Column,
+  SelectTag,
+} from '../../../blocks/src/database-block/types.js';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { Cell, Column, SelectTag } from '../../../global/src/database.js';
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator } from '../index.js';
 import { Workspace } from '../index.js';
@@ -165,9 +169,13 @@ describe('DatabaseManager', () => {
   });
 
   test('getCell', () => {
-    const modelId = page.addBlock('affine:paragraph', {
-      text: new page.Text('paragraph'),
-    });
+    const modelId = page.addBlock(
+      'affine:paragraph',
+      {
+        text: new page.Text('paragraph'),
+      },
+      frameBlockId
+    );
     const column: Column = {
       id: 'testColumnId',
       name: 'Test Column',
@@ -198,7 +206,7 @@ describe('DatabaseManager', () => {
       {
         text: new page.Text('text3'),
       },
-      'databaseId'
+      databaseBlockId
     );
 
     db.updateCell(newRowId, {

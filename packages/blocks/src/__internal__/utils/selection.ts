@@ -11,7 +11,7 @@ import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
-import type { IPoint, SelectionEvent } from './gesture.js';
+import type { IPoint, SelectionEvent } from './gesture/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,

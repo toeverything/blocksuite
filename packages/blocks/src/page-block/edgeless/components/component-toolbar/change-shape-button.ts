@@ -364,6 +364,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         this._popperShow = display === 'show';
       }
     );
+    _disposables.add(this._lineStylesPanelPopper);
 
     super.firstUpdated(changedProperties);
   }
