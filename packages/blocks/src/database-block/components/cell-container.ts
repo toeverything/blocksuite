@@ -83,7 +83,7 @@ export class DatabaseCellContainer
     this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
   }
 
-  _onClick = (event: Event) => {
+  private _onClick = (event: Event) => {
     if (this.readonly) return;
 
     this._isEditing = true;
@@ -95,7 +95,7 @@ export class DatabaseCellContainer
           this.addEventListener('click', this._onClick);
           this._isEditing = false;
         },
-        'mousedown'
+        'click'
       );
     });
   };
