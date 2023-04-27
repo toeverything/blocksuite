@@ -51,9 +51,6 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   override disconnectedCallback() {
     super.disconnectedCallback();
     console.log('number disconnectedCallback');
-
-    this.vEditor?.unmount();
-    this.vEditor = null;
   }
 
   private _onClick = () => {
