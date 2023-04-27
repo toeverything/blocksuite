@@ -63,8 +63,8 @@ function toggleStyle(
 
 @customElement('affine-database-rich-text-cell')
 class TextCell extends DatabaseCellElement<Y.Text> {
-  static styles = css`
-    :host {
+  static override styles = css`
+    affine-database-rich-text-cell {
       display: flex;
       align-items: center;
       width: 100%;
@@ -73,39 +73,43 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   `;
 
   vEditor: AffineVEditor | null = null;
-  static tag = literal`affine-database-rich-text-cell`;
+  static override tag = literal`affine-database-rich-text-cell`;
 
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor() {
-    super();
+  private get readonly() {
+    return this.databaseModel.page.readonly;
+  }
+
+  protected override firstUpdated() {
+    this._onInitVEditor();
   }
 
   private _handleClick() {
     this.databaseModel.page.captureSync();
-    if (!this.cell) {
-      if (!this.cell && !this.vEditor) {
-        const yText = new this.databaseModel.page.YText();
-        this.databaseModel.page.db.updateCell(this.rowModel.id, {
-          columnId: this.column.id,
-          value: yText,
-        });
-        this._initVEditor(yText, true);
-      }
-    }
   }
 
-  private _initVEditor(value: Y.Text, focus = false) {
+  private _onInitVEditor() {
+    let value: Y.Text;
+    if (!this.cell?.value) {
+      const yText = new this.databaseModel.page.YText();
+      this.databaseModel.updateCell(this.rowModel.id, {
+        columnId: this.column.id,
+        value: yText,
+      });
+      value = yText;
+    } else {
+      value = this.cell.value as Y.Text;
+    }
+
     this.vEditor = new VEditor(value);
     setupVirgoScroll(this.databaseModel.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
     });
-    if (focus) {
-      this.vEditor.focusEnd();
-    }
+    this.vEditor.setReadonly(this.readonly);
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
@@ -178,8 +182,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
       const page = this.databaseModel.page;
       page.captureSync();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const text = new Text(this.cell.value as any);
+      const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
         index: vRange.index + 1,
@@ -188,35 +191,19 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     }
   };
 
-  update(changedProperties: Map<string, unknown>) {
-    super.update(changedProperties);
-    if (this.cell && !this.vEditor) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.vEditor = new VEditor(this.cell.value as any);
-      setupVirgoScroll(this.databaseModel.page, this.vEditor);
-      this.vEditor.mount(this._container);
-      this.vEditor.bindHandlers({
-        keydown: this._handleKeyDown,
-      });
-    } else if (!this.cell && this.vEditor) {
-      this.vEditor.unmount();
-      this.vEditor = null;
-    }
-  }
-
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._handleClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
     this.vEditor?.unmount();
     this.vEditor = null;
-    super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         .rich-text-container {
@@ -231,7 +218,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
 @customElement('affine-database-rich-text-column-property-editing')
 class TextColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
-  static tag = literal`affine-database-rich-text-column-property-editing`;
+  static override tag = literal`affine-database-rich-text-column-property-editing`;
 }
 
 export const RichTextColumnRenderer = defineColumnRenderer(

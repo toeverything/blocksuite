@@ -1,10 +1,11 @@
 {
   "name": "@blocksuite/docs",
-  "version": "0.5.0-alpha.2",
+  "version": "0.5.0",
   "description": "BlockSuite documentation",
   "private": true,
   "keywords": [],
   "author": "toeverything",
+  "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
   "devDependencies": {
     "vitepress": "1.0.0-alpha.60"
@@ -18,7 +19,6 @@
     "@algolia/client-search": "^4.15.0",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
-    "@blocksuite/react": "workspace:*",
     "@blocksuite/store": "workspace:*"
   }
 }

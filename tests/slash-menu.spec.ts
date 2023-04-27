@@ -10,6 +10,7 @@ import {
 import {
   enterPlaygroundRoom,
   focusRichText,
+  getVirgoSelectionText,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -118,7 +119,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test('should slash menu position correct', async () => {
+  test('should position slash menu correctly', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
@@ -126,6 +127,63 @@ test.describe('slash menu should show and hide correctly', () => {
     const { x, y } = box;
     assertAlmostEqual(x, 120, 6);
     assertAlmostEqual(y, 167, 8);
+  });
+
+  test('should move up down with arrow key', async () => {
+    await page.keyboard.press('ArrowDown');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const maybeActivatedItem = slashItems.nth(1);
+    await expect(maybeActivatedItem).toHaveText(['Heading 1']);
+    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(slashMenu).toBeVisible();
+
+    const maybeActivatedItem2 = slashItems.nth(2);
+    await expect(maybeActivatedItem2).toHaveText(['Heading 2']);
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
+    page.keyboard.press(`${SHORT_KEY}+N`);
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const maybeActivatedItem = slashItems.nth(1);
+    await expect(maybeActivatedItem).toHaveText(['Heading 1']);
+    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+
+    page.keyboard.press(`${SHORT_KEY}+P`);
+    await expect(slashMenu).toBeVisible();
+
+    const maybeActivatedItem2 = slashItems.nth(0);
+    await expect(maybeActivatedItem2).toHaveText(['Text']);
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('should allow only pressing modifier key', async () => {
+    page.keyboard.press(SHORT_KEY);
+    await expect(slashMenu).toBeVisible();
+
+    page.keyboard.press('Shift');
+    await expect(slashMenu).toBeVisible();
+  });
+
+  test('should allow other hotkey to passthrough', async () => {
+    page.keyboard.press(`${SHORT_KEY}+A`);
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/']);
+
+    const selected = await getVirgoSelectionText(page);
+    expect(selected).toBe('/');
   });
 
   test('left arrow should active left panel', async () => {
@@ -170,55 +228,6 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 });
 
-test('should slash menu search and keyboard works', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  const slashMenu = page.locator(`.slash-menu`);
-  const slashItems = slashMenu.locator('format-bar-button');
-
-  await type(page, '/');
-  await expect(slashMenu).toBeVisible();
-  // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(27);
-  await type(page, 'todo');
-  await expect(slashItems).toHaveCount(1);
-  await expect(slashItems).toHaveText(['To-do List']);
-  await page.keyboard.press('Enter');
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:frame>
-  <affine:list
-    prop:checked={false}
-    prop:type="todo"
-  />
-</affine:frame>`,
-    frameId
-  );
-
-  await type(page, '/');
-  await expect(slashMenu).toBeVisible();
-  // first item should be selected by default
-  await expect(slashItems.first()).toHaveAttribute('hover', '');
-
-  // assert keyboard navigation works
-  await page.keyboard.press('ArrowDown');
-  await expect(slashItems.first()).not.toHaveAttribute('hover', '');
-  await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
-
-  // search should reset the active item
-  await type(page, 'co');
-  await expect(slashItems).toHaveCount(2);
-  await expect(slashItems).toHaveText(['Code Block', 'Copy']);
-  await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await type(page, 'p');
-  await expect(slashItems).toHaveCount(1);
-  // assert backspace works
-  await page.keyboard.press('Backspace');
-  await expect(slashItems).toHaveCount(2);
-});
-
 test('should clean slash string after soft enter', async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',
@@ -236,7 +245,7 @@ test('should clean slash string after soft enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:paragraph
+  <affine:paragraph
   prop:text="hello\n"
   prop:type="text"
 />`,
@@ -244,25 +253,94 @@ test('should clean slash string after soft enter', async ({ page }) => {
   );
 });
 
-test('slash menu supports fuzzy query', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
+test.describe('slash search', () => {
+  test('should slash menu search and keyboard works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { frameId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+    const slashMenu = page.locator(`.slash-menu`);
+    const slashItems = slashMenu.locator('format-bar-button');
 
-  await type(page, '/');
-  const slashMenu = page.locator(`.slash-menu`);
-  await expect(slashMenu).toBeVisible();
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    // Update the snapshot if you add new slash commands
+    await type(page, 'todo');
+    await expect(slashItems).toHaveCount(1);
+    await expect(slashItems).toHaveText(['To-do List']);
+    await page.keyboard.press('Enter');
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
+  <affine:list
+    prop:checked={false}
+    prop:type="todo"
+  />
+</affine:frame>`,
+      frameId
+    );
 
-  const slashItems = slashMenu.locator('format-bar-button');
-  await type(page, 'c');
-  await expect(slashItems).toHaveText([
-    'Code Block',
-    'Italic',
-    'Copy',
-    'Duplicate',
-  ]);
-  await type(page, 'b');
-  await expect(slashItems).toHaveText(['Code Block']);
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    // first item should be selected by default
+    await expect(slashItems.first()).toHaveAttribute('hover', '');
+
+    // assert keyboard navigation works
+    await page.keyboard.press('ArrowDown');
+    await expect(slashItems.first()).not.toHaveAttribute('hover', '');
+    await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
+
+    // search should reset the active item
+    await type(page, 'co');
+    await expect(slashItems).toHaveCount(2);
+    await expect(slashItems).toHaveText(['Code Block', 'Copy']);
+    await expect(slashItems.first()).toHaveAttribute('hover', '');
+    await type(page, 'p');
+    await expect(slashItems).toHaveCount(1);
+    // assert backspace works
+    await page.keyboard.press('Backspace');
+    await expect(slashItems).toHaveCount(2);
+  });
+
+  test('slash menu supports fuzzy search', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    await type(page, 'c');
+    await expect(slashItems).toHaveText([
+      'Code Block',
+      'Italic',
+      'Copy',
+      'Duplicate',
+    ]);
+    await type(page, 'b');
+    await expect(slashItems).toHaveText(['Code Block']);
+  });
+
+  test('slash menu supports alias search', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await type(page, '/');
+    const slashMenu = page.locator(`.slash-menu`);
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    await type(page, 'database');
+    await expect(slashItems).toHaveCount(2);
+    await expect(slashItems).toHaveText(['Table View', 'Kanban View']);
+    await type(page, 'v');
+    await expect(slashItems).toHaveCount(0);
+  });
 });
 
 test.describe('slash menu with code block', () => {

@@ -1,18 +1,15 @@
-import type {
-  Cell,
-  Column,
-  ColumnType,
-  RowHost,
-} from '@blocksuite/global/database';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
+import { ShadowlessElement, WithDisposable } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import type { Cell, Column, ColumnType, RowHost } from './types.js';
 
-export abstract class DatabaseCellElement<Value> extends LitElement {
+export abstract class DatabaseCellElement<Value> extends WithDisposable(
+  ShadowlessElement
+) {
   static tag: ReturnType<typeof literal>;
   @property()
   rowHost!: RowHost<Value>;
@@ -23,7 +20,7 @@ export abstract class DatabaseCellElement<Value> extends LitElement {
   @property()
   column!: Column;
   @property()
-  cell!: Cell | null;
+  cell: Cell | null = null;
 }
 
 export interface ColumnRenderer<
@@ -36,11 +33,6 @@ export interface ColumnRenderer<
   propertyCreator: () => Property;
   components: ColumnComponents;
 }
-
-/**
- * @internal
- */
-const registry = new Map<ColumnRenderer['type'], ColumnRenderer>();
 
 export interface ColumnComponents<
   Type extends string = string,
@@ -77,23 +69,26 @@ export function defineColumnRenderer<
   };
 }
 
-export function registerColumnRenderer(renderer: ColumnRenderer) {
-  if (registry.has(renderer.type)) {
-    throw new Error('cannot register twice for ' + renderer.type);
-  }
-  registry.set(renderer.type, renderer);
-}
+export class ColumnRendererHelper {
+  private _columns = new Map<ColumnRenderer['type'], ColumnRenderer>();
 
-export function listColumnRenderer(): ColumnRenderer[] {
-  return [...registry.values()];
-}
-
-export function getColumnRenderer(
-  type: ColumnRenderer['type']
-): ColumnRenderer {
-  const renderer = registry.get(type);
-  if (!renderer) {
-    throw new Error('cannot find renderer');
+  register(renderer: ColumnRenderer) {
+    const columns = this._columns;
+    if (columns.has(renderer.type)) {
+      throw new Error('cannot register twice for ' + renderer.type);
+    }
+    columns.set(renderer.type, renderer);
   }
-  return renderer;
+
+  get(type: ColumnRenderer['type']): ColumnRenderer {
+    const renderer = this._columns.get(type);
+    if (!renderer) {
+      throw new Error('cannot find renderer');
+    }
+    return renderer;
+  }
+
+  list(): ColumnRenderer[] {
+    return [...this._columns.values()];
+  }
 }

@@ -11,7 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
 import type { EmbedBlockModel } from '../../embed-block/index.js';
-import { blockService } from '../../models.js';
+import { blockService } from '../../services.js';
 import { hasService, registerService } from '../service.js';
 import type { BlockHost } from '../utils/types.js';
 import { BaseService } from './index.js';

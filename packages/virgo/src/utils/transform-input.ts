@@ -1,10 +1,12 @@
 import type { VRange } from '../types.js';
 import type { VEditor } from '../virgo.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
-function handleInsertText(
+function handleInsertText<TextAttributes extends BaseTextAttributes>(
   vRange: VRange,
   data: string | null,
-  editor: VEditor
+  editor: VEditor,
+  attributes: TextAttributes
 ) {
   if (vRange.index >= 0 && data) {
     editor.slots.vRangeUpdated.emit([
@@ -14,8 +16,7 @@ function handleInsertText(
       },
       'input',
     ]);
-
-    editor.insertText(vRange, data);
+    editor.insertText(vRange, data, attributes);
   }
 }
 
@@ -28,7 +29,6 @@ function handleInsertParagraph(vRange: VRange, editor: VEditor) {
       },
       'input',
     ]);
-
     editor.insertLineBreak(vRange);
   }
 }
@@ -43,26 +43,24 @@ function handleDelete(vRange: VRange, editor: VEditor) {
         },
         'input',
       ]);
-
       editor.deleteText(vRange);
       return;
     }
 
     if (vRange.index > 0) {
-      // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-      const tmpString = editor.yText.toString().slice(0, vRange.index);
-      const deletedCharacter = [...tmpString].slice(-1).join('');
+      const originalString = editor.yText.toString().slice(0, vRange.index);
+      const segments = [...new Intl.Segmenter().segment(originalString)];
+      const deletedLength = segments[segments.length - 1].segment.length;
       editor.slots.vRangeUpdated.emit([
         {
-          index: vRange.index - deletedCharacter.length,
+          index: vRange.index - deletedLength,
           length: 0,
         },
         'input',
       ]);
-
       editor.deleteText({
-        index: vRange.index - deletedCharacter.length,
-        length: deletedCharacter.length,
+        index: vRange.index - deletedLength,
+        length: deletedLength,
       });
     }
   }
@@ -82,7 +80,6 @@ function handleWordDelete(editor: VEditor, vRange: VRange) {
       },
       'input',
     ]);
-
     editor.deleteText({
       index: vRange.index - deleteLength,
       length: deleteLength,
@@ -99,7 +96,6 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
       },
       'input',
     ]);
-
     editor.deleteText(vRange);
     return;
   }
@@ -116,7 +112,6 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
       },
       'input',
     ]);
-
     editor.deleteText({
       index: vRange.index - deleteLength,
       length: deleteLength,
@@ -126,6 +121,11 @@ function handleLineDelete(editor: VEditor, vRange: VRange) {
 
 function handleForwardDelete(editor: VEditor, vRange: VRange) {
   if (vRange.index < editor.yText.length) {
+    const originalString = editor.yText.toString();
+    const segments = [...new Intl.Segmenter().segment(originalString)];
+    const slicedString = originalString.slice(0, vRange.index);
+    const slicedSegments = [...new Intl.Segmenter().segment(slicedString)];
+    const deletedLength = segments[slicedSegments.length].segment.length;
     editor.slots.vRangeUpdated.emit([
       {
         index: vRange.index,
@@ -133,17 +133,17 @@ function handleForwardDelete(editor: VEditor, vRange: VRange) {
       },
       'input',
     ]);
-
     editor.deleteText({
       index: vRange.index,
-      length: 1,
+      length: deletedLength,
     });
   }
 }
 
-export function transformInput(
+export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
   data: string | null,
+  attributes: TextAttributes,
   vRange: VRange,
   editor: VEditor
 ) {
@@ -151,7 +151,7 @@ export function transformInput(
   // [Input Events Level 2](https://w3c.github.io/input-events/#interface-InputEvent-Attributes)
   switch (inputType) {
     case 'insertText': {
-      handleInsertText(vRange, data, editor);
+      handleInsertText(vRange, data, editor, attributes);
       return;
     }
 

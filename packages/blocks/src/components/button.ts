@@ -11,7 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('icon-button')
 export class IconButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       box-sizing: border-box;
       display: flex;
@@ -24,8 +24,8 @@ export class IconButton extends LitElement {
       background: transparent;
       cursor: pointer;
       user-select: none;
-      fill: var(--affine-icon-color);
       font-family: var(--affine-font-family);
+      fill: var(--affine-icon-color);
       color: var(--affine-popover-color);
       pointer-events: auto;
     }
@@ -37,7 +37,7 @@ export class IconButton extends LitElement {
     }
 
     :host(:hover) {
-      background: var(--affine-hover-background);
+      background: var(--affine-hover-color);
       fill: var(--affine-primary-color);
       color: var(--affine-primary-color);
     }
@@ -51,14 +51,14 @@ export class IconButton extends LitElement {
     :host([disabled]),
     :host(:disabled) {
       background: transparent;
-      color: var(--affine-disable-color);
-      fill: var(--affine-icon-color);
+      color: var(--affine-text-disable-color);
+      fill: var(--affine-text-disable-color);
       cursor: not-allowed;
     }
 
     /* You can add a 'hover' attribute to the button to show the hover style */
     :host([hover]) {
-      background: var(--affine-hover-background);
+      background: var(--affine-hover-color);
       fill: var(--affine-primary-color);
       color: var(--affine-primary-color);
     }
@@ -88,7 +88,7 @@ export class IconButton extends LitElement {
   text: string | null = null;
 
   @property()
-  disabled = false;
+  disabled: false | '' = false;
 
   constructor() {
     super();
@@ -100,6 +100,18 @@ export class IconButton extends LitElement {
         this.click();
       }
     });
+
+    // Prevent click event when disabled
+    this.addEventListener(
+      'click',
+      event => {
+        if (this.disabled === '') {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
   }
 
   override connectedCallback() {

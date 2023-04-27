@@ -1,21 +1,21 @@
-import type { SelectTag } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-import { SelectMode } from './select.js';
+import type { SelectTag } from '../../types.js';
+import { SelectMode } from '../../types.js';
 
 @customElement('affine-database-multi-select-cell')
 class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 100%;
     }
   `;
-  static tag = literal`affine-database-multi-select-cell`;
+  static override tag = literal`affine-database-multi-select-cell`;
 
-  render() {
+  override render() {
     return html`
       <affine-database-select-cell
         .rowHost=${this.rowHost}
@@ -30,9 +30,9 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
 
 @customElement('affine-database-multi-select-cell-editing')
 class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
-  static tag = literal`affine-database-multi-select-cell-editing`;
+  static override tag = literal`affine-database-multi-select-cell-editing`;
 
-  render() {
+  override render() {
     return html`
       <affine-database-select-cell-editing
         data-is-editing-cell="true"
@@ -51,7 +51,7 @@ class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 class MultiSelectColumnPropertyEditing extends DatabaseCellElement<
   SelectTag[]
 > {
-  static tag = literal`affine-database-multi-select-column-property-editing`;
+  static override tag = literal`affine-database-multi-select-column-property-editing`;
 }
 
 export const MultiSelectColumnRenderer = defineColumnRenderer(

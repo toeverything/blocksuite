@@ -61,6 +61,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerDragEnd(e: SelectionEvent): void;
   abstract onContainerClick(e: SelectionEvent): void;
   abstract onContainerDblClick(e: SelectionEvent): void;
+  abstract onContainerTripleClick(e: SelectionEvent): void;
   abstract onContainerMouseMove(e: SelectionEvent): void;
   abstract onContainerMouseOut(e: SelectionEvent): void;
   abstract onContainerContextMenu(e: SelectionEvent): void;

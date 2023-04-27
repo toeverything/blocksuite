@@ -1,5 +1,43 @@
-import type { ColumnType } from '@blocksuite/global/database';
 import type { TemplateResult } from 'lit';
+
+export interface RowHost<Value = unknown> extends HTMLElement {
+  setEditing(isEditing: boolean): void;
+  setHeight(height: number): void;
+  setValue(value: Value): void;
+  updateColumnProperty(
+    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
+  ): void;
+}
+
+export type ColumnType =
+  | 'rich-text'
+  | 'select'
+  | 'multi-select'
+  | 'number'
+  | 'progress';
+
+export interface Column extends Record<string, unknown> {
+  id: string;
+  type: ColumnType;
+  width: number; // px
+  hide: boolean;
+}
+
+export type Cell = {
+  columnId: Column['id'];
+  value: unknown;
+};
+
+export const enum ColumnInsertPosition {
+  Left = 'left',
+  Right = 'right',
+}
+
+/** select tag property */
+export type SelectTag = {
+  color: string;
+  value: string;
+};
 
 export type ColumnHeader = {
   type: ColumnType;
@@ -49,3 +87,19 @@ export type SelectTagAction = ActionMenuItem<SelectTagActionType> | Divider;
 export type ToolbarAction = ActionMenuItem<ToolbarActionType> | Divider;
 
 export type SwitchViewAction = ActionMenuItem<SwitchViewActionType>;
+
+export const enum SearchState {
+  /** show search input */
+  SearchInput = 'input',
+  /** show search icon */
+  SearchIcon = 'icon',
+  /** searching */
+  Searching = 'searching',
+  /** show more action */
+  Action = 'action',
+}
+
+export const enum SelectMode {
+  Multi = 'multi',
+  Single = 'single',
+}

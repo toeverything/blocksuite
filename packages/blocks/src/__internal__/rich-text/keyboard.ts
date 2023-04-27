@@ -1,4 +1,4 @@
-import { ALLOW_DEFAULT } from '@blocksuite/global/config';
+import { ALLOW_DEFAULT, IS_IOS, IS_MAC } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
@@ -7,11 +7,8 @@ import { showLinkedPagePopover } from '../../components/linked-page/index.js';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
-import { IS_IOS, IS_MAC } from '../utils/std.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import type { AffineVEditor } from './virgo/types.js';
-
-const SHORTKEY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
 // Type definitions is ported from quill
 // https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
@@ -70,11 +67,14 @@ export function createKeyboardBindings(
     ...blockKeyBinding,
 
     linkedPage: {
-      key: ['[', '@'],
+      key: ['[', '【', '@'],
       shiftKey: null,
       handler(range, { event, prefix }) {
-        if (event.key === '[' && !prefix.endsWith('[')) {
-          // not end with `[[`
+        if (
+          (event.key === '[' || event.key === '【') &&
+          !prefix.endsWith(event.key)
+        ) {
+          // not end with `[[` or `【【`
           return ALLOW_DEFAULT;
         }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
@@ -84,7 +84,7 @@ export function createKeyboardBindings(
         }
 
         this.vEditor.slots.rangeUpdated.once(() => {
-          if (event.key === '[') {
+          if (event.key === '[' || event.key === '【') {
             // Convert to `@`
             this.vEditor.deleteText({ index: range.index - 1, length: 2 });
             this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');
@@ -139,6 +139,8 @@ export function createKeyboardBindings(
   return keyboardBindings;
 }
 
+const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
+
 export function createKeyDownHandler(
   vEditor: AffineVEditor,
   bindings: KeyboardBindings
@@ -146,7 +148,7 @@ export function createKeyDownHandler(
   const bindingStore: Record<string, KeyboardBinding[]> = {};
   function normalize(binding: KeyboardBinding): KeyboardBinding {
     if (binding.shortKey) {
-      binding[SHORTKEY] = binding.shortKey;
+      binding[SHORT_KEY_PROPERTY] = binding.shortKey;
       delete binding.shortKey;
     }
     return binding;

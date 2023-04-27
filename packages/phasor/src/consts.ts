@@ -8,6 +8,8 @@ export interface IBound {
   h: number;
 }
 
-export type Color = `#${string}`;
-
-export type StrokeStyle = 'solid';
+export enum StrokeStyle {
+  Solid = 'solid',
+  Dashed = 'dash',
+  None = 'none',
+}

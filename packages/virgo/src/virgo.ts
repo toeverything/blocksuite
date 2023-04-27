@@ -19,15 +19,20 @@ import type {
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
-  getTextNodesFromElement,
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
+import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 
 export interface VEditorOptions {
-  // it is a option to determine defult `_attributeRenderer`
+  // it is a option to determine default `_attributeRenderer`
   defaultMode: 'rich' | 'pure';
 }
+
+type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
+  HTMLElement & {
+    virgoEditor: VEditor<T>;
+  };
 
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
@@ -37,7 +42,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
-  private _rootElement: HTMLElement | null = null;
+  private _rootElement: VirgoElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
   private _eventService: VirgoEventService<TextAttributes> =
@@ -52,7 +57,8 @@ export class VEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
-  shouldScrollIntoView = true;
+  shouldLineScrollIntoView = true;
+  shouldCursorScrollIntoView = true;
 
   slots: {
     mounted: Slot;
@@ -60,6 +66,7 @@ export class VEditor<
     updated: Slot;
     vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
+    scrollUpdated: Slot<number>;
   };
 
   get yText() {
@@ -134,7 +141,7 @@ export class VEditor<
 
     if (yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synclization'
+        'yText must not contain \r because it will break the range synchronization'
       );
     }
 
@@ -154,13 +161,17 @@ export class VEditor<
       updated: new Slot(),
       vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
+      scrollUpdated: new Slot<number>(),
     };
 
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
+    this.slots.scrollUpdated.on(this.rangeService.onScrollUpdated);
   }
 
   mount(rootElement: HTMLElement) {
-    this._rootElement = rootElement;
+    const virgoElement = rootElement as VirgoElement<TextAttributes>;
+    virgoElement.virgoEditor = this;
+    this._rootElement = virgoElement;
     this._rootElement.replaceChildren();
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
@@ -216,7 +227,7 @@ export class VEditor<
         if (index + text.textContent.length >= rangeIndex) {
           return [text, rangeIndex - index];
         }
-        index += text.textContent.length;
+        index += calculateTextLength(text);
       }
 
       index += 1;
@@ -225,7 +236,7 @@ export class VEditor<
     throw new Error('failed to find leaf');
   }
 
-  // the number is releated to the VirgoLine's textLength
+  // the number is related to the VirgoLine's textLength
   getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
     assertExists(this._rootElement);
     const lineElements = Array.from(
@@ -359,10 +370,20 @@ export class VEditor<
     });
   }
 
+  setText(
+    text: string,
+    attributes: TextAttributes = {} as TextAttributes
+  ): void {
+    this._transact(() => {
+      this.yText.delete(0, this.yText.length);
+      this.yText.insert(0, text, attributes);
+    });
+  }
+
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synclization'
+        'yText must not contain \r because it will break the range synchronization'
       );
     }
 

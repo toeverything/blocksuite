@@ -140,7 +140,9 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="A"
@@ -189,7 +191,9 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="B"
@@ -244,7 +248,9 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -300,7 +306,9 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -379,7 +387,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
@@ -420,7 +428,9 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="A"
@@ -473,7 +483,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
@@ -482,7 +492,9 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -585,7 +597,7 @@ test('should create preview when dragging', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(
@@ -618,7 +630,7 @@ test('should cover all selected blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');
@@ -673,7 +685,7 @@ test('should drag and drop blocks under block-level selection', async ({
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');
@@ -721,7 +733,7 @@ test('should trigger click event on editor container when clicking on blocks und
     }
   );
 
-  const blockSelections = page.locator('affine-page-selected-rects > *');
+  const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(2);
   await expect(page.locator('*:focus')).toHaveCount(0);
 
@@ -739,4 +751,117 @@ test('should trigger click event on editor container when clicking on blocks und
   await page.mouse.up();
   await expect(blockSelections).toHaveCount(0);
   await expect(page.locator('*:focus')).toHaveCount(1);
+});
+
+test('should get to selected block when dragging unselected block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '456');
+  await assertRichTexts(page, ['123', '456']);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect1 = await editors.nth(1).boundingBox();
+
+  if (!editorRect0 || !editorRect1) {
+    throw new Error();
+  }
+
+  await page.mouse.move(
+    editorRect1.x + 5,
+    editorRect1.y + editorRect1.height / 2
+  );
+
+  await page.mouse.move(
+    editorRect1.x - 20,
+    editorRect1.y + editorRect1.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+
+  const blockSelections = page.locator('affine-selected-blocks > *');
+  await expect(blockSelections).toHaveCount(1);
+
+  await page.mouse.move(
+    editorRect0.x - 20,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    editorRect1.x - 20,
+    editorRect1.y + editorRect1.height / 2 + 1,
+    {
+      steps: 10,
+    }
+  );
+  await page.mouse.up();
+
+  await expect(blockSelections).toHaveCount(1);
+
+  await assertRichTexts(page, ['456', '123']);
+});
+
+test('should clear the currently selected block when clicked again', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '456');
+  await assertRichTexts(page, ['123', '456']);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect1 = await editors.nth(1).boundingBox();
+
+  if (!editorRect0 || !editorRect1) {
+    throw new Error();
+  }
+
+  await page.mouse.move(
+    editorRect1.x + 5,
+    editorRect1.y + editorRect1.height / 2
+  );
+
+  await page.mouse.move(
+    editorRect1.x - 20,
+    editorRect1.y + editorRect1.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+
+  const blockSelections = page.locator('affine-selected-blocks > *');
+  await expect(blockSelections).toHaveCount(1);
+
+  let selectedBlockRect = await blockSelections.nth(0).boundingBox();
+
+  if (!selectedBlockRect) {
+    throw new Error();
+  }
+
+  expect(editorRect1).toEqual(selectedBlockRect);
+
+  await page.mouse.move(
+    editorRect0.x - 20,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await expect(blockSelections).toHaveCount(1);
+
+  selectedBlockRect = await blockSelections.nth(0).boundingBox();
+
+  if (!selectedBlockRect) {
+    throw new Error();
+  }
+
+  expect(editorRect0).toEqual(selectedBlockRect);
 });

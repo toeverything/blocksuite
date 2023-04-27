@@ -11,18 +11,139 @@
         height: 100%;
         margin: 0;
         padding: 0;
-        background-color: var(--affine-page-background);
+        background-color: var(--affine-white-90);
         transition: background-color 0.3s;
       }
 
       * {
         box-sizing: border-box;
       }
+
       .affine-default-page-block-title-container {
         margin-top: 78px;
       }
+
+      /* CSS variables. You need to handle all places where `CSS variables` are marked. */
+      html[class='dark sl-theme-dark'] {
+        --affine-theme-mode: dark;
+
+        --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
+          0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+        --affine-modal-shadow: 0px 4px 24px #161616;
+        --affine-tooltip-shadow: 0px 0px 4px rgba(0, 0, 0, 0.14);
+        --affine-font-family: Avenir Next, Poppins, apple-system,
+          BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC,
+          Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+          Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-number-family: Roboto Mono, apple-system,
+          BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC,
+          Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+          Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-code-family: Space Mono, Consolas, Menlo, Monaco, Courier,
+          monospace, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma,
+          PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+          Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        --affine-font-h-1: 28px;
+        --affine-font-h-2: 26px;
+        --affine-font-h-3: 24px;
+        --affine-font-h-4: 22px;
+        --affine-font-h-5: 20px;
+        --affine-font-h-6: 18px;
+        --affine-font-base: 16px;
+        --affine-font-sm: 14px;
+        --affine-font-xs: 12px;
+        --affine-line-height: calc(1em + 8px);
+        --affine-z-index-modal: 1000;
+        --affine-z-index-popover: 100;
+        --affine-paragraph-space: 8px;
+        --affine-popover-radius: 10px;
+        --affine-zoom: 1;
+        --affine-scale: calc(1 / var(--affine-zoom));
+
+        --affine-brand-color: #5438ff;
+        --affine-primary-color: #765ffe;
+        --affine-secondary-color: #9096f5;
+        --affine-tertiary-color: #1e1e1e;
+        --affine-hover-color: hsla(0, 0%, 100%, 0.1);
+        --affine-icon-color: #a8a8a0;
+        --affine-icon-secondary: hsla(60, 4%, 64%, 0.6);
+        --affine-border-color: #393939;
+        --affine-divider-color: #727272;
+        --affine-placeholder-color: #3e3e3f;
+        --affine-quote-color: #9390a3;
+        --affine-link-color: #b9bfe3;
+        --affine-edgeless-grid-color: #313131;
+        --affine-success-color: #4dd5b5;
+        --affine-warning-color: #ff7b4d;
+        --affine-error-color: #d48c82;
+        --affine-processing-color: #c3d7ff;
+        --affine-text-emphasis-color: #d0cddc;
+        --affine-text-primary-color: #eaeaea;
+        --affine-text-secondary-color: #9c9ca0;
+        --affine-text-disable-color: #77757d;
+        --affine-black-10: hsla(0, 0%, 100%, 0.1);
+        --affine-black-30: hsla(0, 0%, 100%, 0.3);
+        --affine-black-50: hsla(0, 0%, 100%, 0.5);
+        --affine-black-60: hsla(0, 0%, 100%, 0.6);
+        --affine-black-80: hsla(0, 0%, 100%, 0.8);
+        --affine-black-90: hsla(0, 0%, 100%, 0.9);
+        --affine-black: #fff;
+        --affine-white-10: rgba(0, 0, 0, 0.1);
+        --affine-white-30: rgba(0, 0, 0, 0.3);
+        --affine-white-50: rgba(0, 0, 0, 0.5);
+        --affine-white-60: rgba(0, 0, 0, 0.6);
+        --affine-white-80: rgba(0, 0, 0, 0.8);
+        --affine-white-90: rgba(0, 0, 0, 0.9);
+        --affine-white: #000;
+        --affine-background-code-block: #292c33;
+        --affine-background-tertiary-color: #1e1e1e;
+        --affine-background-processing-color: #fff;
+        --affine-background-error-color: #fff;
+        --affine-background-warning-color: #fff;
+        --affine-background-success-color: #fff;
+        --affine-background-primary-color: #141414;
+        --affine-background-secondary-color: #202020;
+        --affine-background-modal-color: rgba(0, 0, 0, 0.8);
+        --affine-background-overlay-panel-color: #1e1e1e;
+        --affine-tag-blue: #0a54aa;
+        --affine-tag-green: #37874f;
+        --affine-tag-teal: #21918a;
+        --affine-tag-white: #545454;
+        --affine-tag-purple: #3b268d;
+        --affine-tag-red: #8b3f3f;
+        --affine-tag-pink: #c28484;
+        --affine-tag-yellow: #bba53d;
+        --affine-tag-orange: #e7a13a;
+        --affine-tag-gray: #292929;
+        --affine-palette-line-yellow: #ffe838;
+        --affine-palette-line-orange: #ffaf38;
+        --affine-palette-line-tangerine: #ff631f;
+        --affine-palette-line-red: #fc3f55;
+        --affine-palette-line-magenta: #ff38b3;
+        --affine-palette-line-purple: #b638ff;
+        --affine-palette-line-navy: #3b25cc;
+        --affine-palette-line-blue: #4f90ff;
+        --affine-palette-line-green: #10cb86;
+        --affine-palette-line-white: #fff;
+        --affine-palette-line-black: #000;
+        --affine-palette-line-grey: #999;
+        --affine-palette-shape-yellow: #fff188;
+        --affine-palette-shape-orange: #ffcf88;
+        --affine-palette-shape-tangerine: #ffa179;
+        --affine-palette-shape-red: #fd8c99;
+        --affine-palette-shape-magenta: #ff88d1;
+        --affine-palette-shape-purple: #d388ff;
+        --affine-palette-shape-navy: #897ce0;
+        --affine-palette-shape-blue: #95bcff;
+        --affine-palette-shape-green: #70e0b6;
+        --affine-palette-shape-white: #fff;
+        --affine-palette-shape-black: #000;
+        --affine-palette-shape-grey: #c2c2c2;
+        --affine-tooltip: #eaeaea;
+      }
     </style>
   </head>
+
   <body>
     <script type="module" src="./src/main.ts"></script>
     <div id="app">

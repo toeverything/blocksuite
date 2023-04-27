@@ -1,10 +1,10 @@
-import type { RowHost } from '@blocksuite/global/database';
-import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { DatabaseCellElement, getColumnRenderer } from '../register.js';
+import type { ColumnRendererHelper } from '../register.js';
+import { DatabaseCellElement } from '../register.js';
+import type { RowHost } from '../types.js';
 import { onClickOutside } from '../utils.js';
 
 /** affine-database-cell-container padding */
@@ -15,8 +15,8 @@ export class DatabaseCellContainer
   extends DatabaseCellElement<unknown>
   implements RowHost
 {
-  static styles = css`
-    :host {
+  static override styles = css`
+    affine-database-cell-container {
       display: flex;
       align-items: center;
       width: 100%;
@@ -29,19 +29,26 @@ export class DatabaseCellContainer
   @state()
   private _isEditing = false;
 
+  @property()
+  columnRenderer!: ColumnRendererHelper;
+
+  private get readonly() {
+    return this.databaseModel.page.readonly;
+  }
+
   setValue(value: unknown) {
     queueMicrotask(() => {
       this.databaseModel.page.captureSync();
-      this.databaseModel.page.db.updateCell(this.rowModel.id, {
+      this.databaseModel.updateCell(this.rowModel.id, {
         columnId: this.column.id,
         value,
       });
+      this.databaseModel.applyColumnUpdate();
       this.requestUpdate();
     });
   }
 
   setEditing = (isEditing: boolean) => {
-    assertExists(this.shadowRoot);
     this._isEditing = isEditing;
     if (!this._isEditing) {
       setTimeout(() => {
@@ -55,7 +62,7 @@ export class DatabaseCellContainer
   ) {
     const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.page.db.updateColumn({
+    this.databaseModel.updateColumn({
       ...this.column,
       ...newProperty,
     });
@@ -65,13 +72,20 @@ export class DatabaseCellContainer
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    this._disposables.addFromEvent(this, 'mousedown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
   }
 
   _onClick = (event: Event) => {
+    if (this.readonly) return;
+
     this._isEditing = true;
     this.removeEventListener('click', this._onClick);
     setTimeout(() => {
@@ -86,24 +100,25 @@ export class DatabaseCellContainer
     });
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._onClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this.removeEventListener('click', this._onClick);
     super.disconnectedCallback();
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-  render() {
-    const renderer = getColumnRenderer(this.column.type);
-    const cell = this.databaseModel.page.db.getCell(
-      this.rowModel.id,
-      this.column.id
-    );
-    if (this._isEditing && renderer.components.CellEditing !== false) {
+  override render() {
+    const renderer = this.columnRenderer.get(this.column.type);
+    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
+    if (
+      !this.readonly &&
+      this._isEditing &&
+      renderer.components.CellEditing !== false
+    ) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}
@@ -127,7 +142,6 @@ export class DatabaseCellContainer
       ></${previewTag}>
     `;
   }
-  /* eslint-enable lit/binding-positions, lit/no-invalid-html */
 }
 
 declare global {

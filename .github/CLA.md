@@ -58,3 +58,10 @@ Example:
 - zhangyi, @hanchayi, 2023/03/16
 - Victor Nanka, @victornanka, 2023/03/21
 - Aditya Sharma, @adityash1, 2023/03/31
+- yuusheng, @yuusheng, 2023/04/04
+- BaoLei, @blurname, 2023/04/08
+- luke358, @luke358, 2023/04/13
+- Skye Sun, @skyesun, 2023/04/14
+- John Faucett, @DataDaoDe, 2023/04/15
+- ZiJian Zuo, @zuozijian3720, 2023/04/21
+- boomyao, @boomyao, 2023/04/26

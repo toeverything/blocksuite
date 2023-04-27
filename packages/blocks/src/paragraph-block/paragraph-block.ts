@@ -18,7 +18,13 @@ import {
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
-import type { ParagraphBlockModel } from './paragraph-model.js';
+import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+
+function tipsPlaceholderPreventDefault(event: Event) {
+  // Call event.preventDefault() to keep the mouse event from being sent as well.
+  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
+  event.preventDefault();
+}
 
 function TipsPlaceholder(model: BaseBlockModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) {
@@ -41,7 +47,11 @@ function TipsPlaceholder(model: BaseBlockModel) {
       blockHub.toggleMenu(true);
     };
     return html`
-      <div class="tips-placeholder" @click=${onClick}>
+      <div
+        class="tips-placeholder"
+        @click=${onClick}
+        @pointerdown=${tipsPlaceholderPreventDefault}
+      >
         Click ${BlockHubIcon20} to insert blocks, type '/' for commands
       </div>
     `;
@@ -61,64 +71,58 @@ function TipsPlaceholder(model: BaseBlockModel) {
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
       border-radius: 5px;
     }
     .affine-paragraph-block-container.selected {
-      background-color: var(--affine-selected-color);
+      background-color: var(--affine-hover-color);
     }
     .h1 {
-      font-size: var(--affine-font-h1);
+      font-size: var(--affine-font-h-1);
       line-height: calc(1em + 12px);
       margin-top: calc(var(--affine-paragraph-space) + 24px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h1 code {
       font-size: calc(var(--affine-font-base) + 8px);
     }
     .h2 {
-      font-size: var(--affine-font-h2);
+      font-size: var(--affine-font-h-2);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 20px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h2 code {
       font-size: calc(var(--affine-font-base) + 6px);
     }
     .h3 {
-      font-size: var(--affine-font-h3);
+      font-size: var(--affine-font-h-3);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 16px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h3 code {
       font-size: calc(var(--affine-font-base) + 4px);
     }
     .h4 {
-      font-size: var(--affine-font-h4);
+      font-size: var(--affine-font-h-4);
       line-height: calc(1em + 10px);
       margin-top: calc(var(--affine-paragraph-space) + 12px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h4 code {
       font-size: calc(var(--affine-font-base) + 2px);
     }
     .h5 {
-      font-size: var(--affine-font-h5);
+      font-size: var(--affine-font-h-5);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 8px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h5 code {
       font-size: calc(var(--affine-font-base));
     }
     .h6 {
-      font-size: var(--affine-font-h6);
+      font-size: var(--affine-font-h-6);
       line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 4px);
-      --affine-link-color: var(--affine-link-color2);
     }
     .h6 code {
       font-size: calc(var(--affine-font-base) - 2px);
@@ -192,7 +196,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._updatePlaceholder();
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
       this.requestUpdate();
@@ -240,7 +244,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._placeholderDisposables = new DisposableGroup();
   };
 
-  render() {
+  override render() {
     const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(
       this.model,

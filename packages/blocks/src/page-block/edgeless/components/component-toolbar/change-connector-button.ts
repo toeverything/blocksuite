@@ -1,13 +1,9 @@
 import '../tool-icon-button.js';
-import '../../toolbar/brush-tool/color-panel.js';
+import '../color-panel.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
-import type {
-  Color,
-  ConnectorElement,
-  SurfaceManager,
-} from '@blocksuite/phasor';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
+import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
+import { getBrushBoundFromPoints, StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
@@ -15,85 +11,134 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type {
-  ColorEvent,
-  EdgelessColorPanel,
-} from '../../toolbar/brush-tool/color-panel.js';
 import {
   generateConnectorPath,
   getConnectorAttachedInfo,
 } from '../../utils.js';
+import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
+import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
+import type { LineSizeButtonProps } from '../line-size-button.js';
+import { LineSizeButton, lineSizeButtonStyles } from '../line-size-button.js';
+import type { LineStyleButtonProps } from '../line-style-button.js';
+import {
+  LineStylesPanel,
+  type LineStylesPanelClickedButton,
+  lineStylesPanelStyles,
+} from '../line-styles-panel.js';
+import type { EdgelessToolIconButton } from '../tool-icon-button.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: ConnectorElement[]): Color | undefined {
+function getMostCommonColor(
+  elements: ConnectorElement[]
+): CssVariableName | null {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as Color) : undefined;
+  return max ? (max[0] as CssVariableName) : null;
 }
 
-function getMostCommonMode(
-  elements: ConnectorElement[]
-): ConnectorMode | undefined {
+function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   const modes = countBy(elements, (ele: ConnectorElement) => ele.mode);
   const max = maxBy(Object.entries(modes), ([k, count]) => count);
-  return max ? (Number(max[0]) as ConnectorMode) : undefined;
+  return max ? (Number(max[0]) as ConnectorMode) : null;
+}
+
+function getMostCommonLineWidth(
+  elements: ConnectorElement[]
+): LineSizeButtonProps['size'] | null {
+  const sizes = countBy(elements, (ele: ConnectorElement) => {
+    return ele.lineWidth === 4 ? 's' : 'l';
+  });
+  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  return max ? (max[0] as LineSizeButtonProps['size']) : null;
+}
+
+function getMostCommonLineStyle(
+  elements: ConnectorElement[]
+): LineStyleButtonProps['mode'] | null {
+  const sizes = countBy(elements, (ele: ConnectorElement) => {
+    switch (ele.strokeStyle) {
+      case StrokeStyle.Solid: {
+        return 'solid';
+      }
+      case StrokeStyle.Dashed: {
+        return 'dash';
+      }
+      case StrokeStyle.None: {
+        return 'none';
+      }
+    }
+  });
+  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends LitElement {
-  static styles = css`
-    :host {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      fill: none;
-      stroke: none;
-      color: var(--affine-text-color);
-    }
+  static override styles = [
+    lineSizeButtonStyles,
+    lineStylesPanelStyles,
+    css`
+      :host {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        fill: none;
+        stroke: none;
+        color: var(--affine-text-primary-color);
+      }
 
-    menu-divider {
-      height: 24px;
-    }
+      menu-divider {
+        height: 24px;
+      }
 
-    .color-panel-container {
-      display: none;
-      padding: 4px;
-      justify-content: center;
-      align-items: center;
-      background: var(--affine-page-background);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
-      border-radius: 8px;
-    }
+      .color-panel-container {
+        display: none;
+        padding: 4px;
+        justify-content: center;
+        align-items: center;
+        background: var(--affine-white);
+        box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+        border-radius: 8px;
+      }
 
-    .color-panel-container[data-show] {
-      display: block;
-    }
+      .color-panel-container[data-show] {
+        display: block;
+      }
 
-    .connector-mode-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
-      height: 24px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+      .connector-mode-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 24px;
+        height: 24px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        cursor: pointer;
+      }
 
-    .connector-mode-button[active] {
-      background-color: var(--affine-hover-background);
-    }
+      .connector-mode-button[active] {
+        background-color: var(--affine-hover-color);
+      }
 
-    .connector-color-button .color {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-    }
-  `;
+      .connector-color-button .color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+      }
+
+      .line-style-panel {
+        display: none;
+      }
+      .line-style-panel[data-show] {
+        display: flex;
+      }
+    `,
+  ];
 
   @property()
   elements: ConnectorElement[] = [];
@@ -117,6 +162,20 @@ export class EdgelessChangeConnectorButton extends LitElement {
     null;
 
   private _disposables: DisposableGroup = new DisposableGroup();
+
+  @query('.line-styles-button')
+  private _lineStylesButton!: EdgelessToolIconButton;
+  @query('.line-style-panel')
+  private _lineStylesPanel!: HTMLDivElement;
+  private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
+  private _popperShow = false;
+
+  private _forceUpdateSelection() {
+    // FIXME: force update selection, because connector mode changed
+    this.slots.selectionUpdated.emit({ ...this.selectionState });
+  }
 
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
@@ -164,11 +223,10 @@ export class EdgelessChangeConnectorButton extends LitElement {
         }
       }
     });
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
+    this._forceUpdateSelection();
   }
 
-  private _setConnectorColor(color: Color) {
+  private _setConnectorColor(color: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
@@ -177,26 +235,83 @@ export class EdgelessChangeConnectorButton extends LitElement {
     });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  private _setShapeStrokeWidth(lineWidth: number) {
+    this.page.transact(() => {
+      this.elements.forEach(ele => {
+        this.surface.updateElementProps(ele.id, {
+          lineWidth,
+        });
+      });
+    });
+    this._forceUpdateSelection();
+  }
+
+  private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
+    this.page.transact(() => {
+      this.elements.forEach(ele => {
+        this.surface.updateElementProps(ele.id, {
+          strokeStyle,
+        });
+      });
+    });
+    this._forceUpdateSelection();
+  }
+
+  private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
+    if (type === 'size') {
+      const strokeWidth = value === 's' ? 4 : 10;
+      this._setShapeStrokeWidth(strokeWidth);
+    } else if (type === 'lineStyle') {
+      switch (value) {
+        case 'solid': {
+          this._setShapeStrokeStyle(StrokeStyle.Solid);
+          break;
+        }
+        case 'dash': {
+          this._setShapeStrokeStyle(StrokeStyle.Dashed);
+          break;
+        }
+        case 'none': {
+          this._setShapeStrokeStyle(StrokeStyle.None);
+          break;
+        }
+      }
+    }
+  }
+
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
     _disposables.add(this._colorPanelPopper);
+
+    this._lineStylesPanelPopper = createButtonPopper(
+      this._lineStylesButton,
+      this._lineStylesPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._lineStylesPanelPopper);
+
     super.firstUpdated(changedProperties);
   }
 
-  render() {
-    const selectedColor = getMostCommonColor(this.elements);
+  override render() {
+    const selectedColor =
+      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
     const style = {
-      backgroundColor: selectedColor ?? '#fff',
+      backgroundColor: `var(${selectedColor})`,
     };
 
     const selectedMode = getMostCommonMode(this.elements);
+    const selectedLineSize = getMostCommonLineWidth(this.elements) ?? 's';
+    const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Straight line'}
-        @tool.click=${() => this._setConnectorMode(ConnectorMode.Straight)}
+        @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
       >
         <div
           class="connector-mode-button"
@@ -207,7 +322,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
-        @tool.click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
+        @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
       >
         <div
           class="connector-mode-button"
@@ -220,7 +335,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       <edgeless-tool-icon-button
         .tooltip=${'Color'}
         .active=${false}
-        @tool.click=${() => this._colorPanelPopper?.toggle()}
+        @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="connector-color-button">
           <div class="color" style=${styleMap(style)}></div>
@@ -233,6 +348,23 @@ export class EdgelessChangeConnectorButton extends LitElement {
         >
         </edgeless-color-panel>
       </div>
+
+      ${LineSizeButton({
+        className: 'line-styles-button',
+        size: selectedLineSize,
+        tooltip: this._popperShow ? '' : 'Line style',
+        onClick: () => {
+          this._lineStylesPanelPopper?.toggle();
+        },
+      })}
+      ${LineStylesPanel({
+        selectedLineSize,
+        selectedLineStyle,
+        lineStyle: ['solid', 'dash'],
+        onClick: event => {
+          this._setShapeStyles(event);
+        },
+      })}
     `;
   }
 }

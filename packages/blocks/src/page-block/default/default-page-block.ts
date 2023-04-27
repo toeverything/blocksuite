@@ -1,13 +1,4 @@
 /// <reference types="vite/client" />
-import {
-  asyncFocusRichText,
-  type BlockHost,
-  type EditingState,
-  hotkey,
-  HOTKEY_SCOPE,
-  Rect,
-  type SelectionPosition,
-} from '@blocksuite/blocks/std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
@@ -16,6 +7,17 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
+import type {
+  BlockHost,
+  EditingState,
+  SelectionPosition,
+} from '../../__internal__/index.js';
+import {
+  asyncFocusRichText,
+  hotkey,
+  HOTKEY_SCOPE,
+  Rect,
+} from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import {
@@ -39,14 +41,6 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
-  /**
-   * @deprecated Not used yet
-   */
-  codeBlockOptionUpdated?: Slot;
-  /**
-   * @deprecated Not used yet
-   */
-  nativeSelectionToggled: Slot<boolean>;
 }
 
 @customElement('affine-default-page')
@@ -54,7 +48,7 @@ export class DefaultPageBlockComponent
   extends WithDisposable(ShadowlessElement)
   implements BlockHost
 {
-  static styles = css`
+  static override styles = css`
     .affine-default-viewport {
       position: relative;
       overflow-x: hidden;
@@ -63,18 +57,18 @@ export class DefaultPageBlockComponent
     }
 
     .affine-default-page-block-container {
+      display: flex;
+      flex-direction: column;
       width: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
       font-weight: 400;
       max-width: var(--affine-editor-width);
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-
-      min-height: calc(100% - 78px);
       padding-bottom: 150px;
 
       /* Leave a place for drag-handle */
@@ -174,7 +168,7 @@ export class DefaultPageBlockComponent
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
-    pageLinkClicked: new Slot<{ pageId: string }>(),
+    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -221,13 +215,17 @@ export class DefaultPageBlockComponent
     );
 
     this.model.title.yText.observe(() => {
-      this.page.workspace.setPageMeta(this.page.id, {
-        title: this.model.title.toString(),
-      });
+      this._updateTitleInMeta();
       this.requestUpdate();
     });
     this._titleVEditor.setReadonly(this.page.readonly);
   }
+
+  private _updateTitleInMeta = () => {
+    this.page.workspace.setPageMeta(this.page.id, {
+      title: this.model.title.toString(),
+    });
+  };
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
     if (e.isComposing || this.page.readonly) return;
@@ -294,7 +292,8 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    if (type === 'block') {
+    if (type.startsWith('block')) {
+      e.preventDefault();
       const { viewportElement } = this;
       const { scrollTop, scrollHeight, clientHeight } = viewport;
       const max = scrollHeight - clientHeight;
@@ -309,16 +308,16 @@ export class DefaultPageBlockComponent
         top = Math.max(top, -scrollTop);
       }
 
-      const { draggingArea } = state;
-      if (draggingArea) {
-        e.preventDefault();
+      viewport.scrollTop += top;
+      // FIXME: need smooth
+      viewportElement.scrollTop += top;
 
-        viewport.scrollTop += top;
-        // FIXME: need smooth
-        viewportElement.scrollTop += top;
-
-        draggingArea.end.y += top;
-        selection.updateDraggingArea(draggingArea);
+      if (type === 'block') {
+        const { draggingArea } = state;
+        if (draggingArea) {
+          draggingArea.end.y += top;
+          selection.updateDraggingArea(draggingArea);
+        }
       }
     }
 
@@ -334,22 +333,33 @@ export class DefaultPageBlockComponent
 
     if (type === 'block') {
       selection.refreshDraggingArea(viewport);
-    } else if (type === 'embed') {
+      return;
+    }
+
+    if (type === 'embed') {
       selection.refreshEmbedRects(this._embedEditingState);
-    } else if (type === 'native') {
-      const { startRange, rangePoint } = selection.state;
-      if (startRange && rangePoint) {
-        // Create a synthetic `mousemove` MouseEvent
-        const evt = new MouseEvent('mousemove', {
-          clientX: rangePoint.x,
-          clientY: rangePoint.y,
-        });
-        this.mouseRoot.dispatchEvent(evt);
-      }
+      return;
+    }
+
+    let point;
+
+    if (type === 'native') {
+      point = selection.state.startRange && selection.state.lastPoint;
+    } else if (type === 'block:drag') {
+      point = selection.state.lastPoint;
+    }
+
+    if (point) {
+      // Create a synthetic `mousemove` MouseEvent
+      const evt = new MouseEvent('mousemove', {
+        clientX: point.x,
+        clientY: point.y,
+      });
+      this.mouseRoot.dispatchEvent(evt);
     }
   };
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
       if (this.model && !this._titleVEditor) {
         this._initTitleVEditor();
@@ -357,7 +367,7 @@ export class DefaultPageBlockComponent
     }
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
         page: this.page,
@@ -377,7 +387,7 @@ export class DefaultPageBlockComponent
         if (
           draggingBlockIds &&
           draggingBlockIds.length === 1 &&
-          Utils.doesInsideBlockByFlavour(
+          Utils.isInsideBlockByFlavour(
             this.page,
             draggingBlockIds[0],
             'affine:database'
@@ -469,7 +479,7 @@ export class DefaultPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     const { page, selection } = this;
 
     hotkey.setScope(HOTKEY_SCOPE.AFFINE_PAGE);
@@ -478,11 +488,12 @@ export class DefaultPageBlockComponent
     bindHotkeys(page, selection);
     hotkey.enableHotkey();
 
+    this._initDragHandle();
     this._initSlotEffects();
     this._initFrameSizeEffect();
     this._initResizeEffect();
 
-    this.viewportElement.addEventListener('wheel', this._onWheel);
+    this.mouseRoot.addEventListener('wheel', this._onWheel);
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
@@ -491,8 +502,6 @@ export class DefaultPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
     this.clipboard.init(this.page);
-
-    this._initDragHandle();
   }
 
   override disconnectedCallback() {
@@ -508,11 +517,11 @@ export class DefaultPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.viewportElement.removeEventListener('wheel', this._onWheel);
+    this.mouseRoot.removeEventListener('wheel', this._onWheel);
     this.viewportElement.removeEventListener('scroll', this._onScroll);
   }
 
-  render() {
+  override render() {
     requestAnimationFrame(() => {
       this.selection.refreshRemoteSelection();
     });
@@ -546,17 +555,21 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
+            <backlink-button .host=${this} .page=${this.page}></backlink-button>
           </div>
           ${childrenContainer}
         </div>
-        <affine-page-selected-rects
-          .viewport=${viewport}
+        <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}
           .state=${{
             rects: this._selectedRects,
-            grab: !this._draggingArea,
+            grab: !draggingArea,
           }}
-        ></affine-page-selected-rects>
+          .offset=${{
+            x: -viewport.left + viewport.scrollLeft,
+            y: -viewport.top + viewport.scrollTop,
+          }}
+        ></affine-selected-blocks>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>
     `;

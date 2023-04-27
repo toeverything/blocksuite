@@ -1,12 +1,13 @@
-import type {
-  MouseMode,
-  SelectionEvent,
-  TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import { initMouseEventHandlers, noop } from '@blocksuite/blocks/std';
 import type { PhasorElement } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
+import type {
+  BlockComponentElement,
+  MouseMode,
+  SelectionEvent,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
+import { initMouseEventHandlers, noop } from '../../__internal__/index.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
@@ -32,7 +33,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
-  /* The selected block or surface element */
+  /* The selected frame or surface element */
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
@@ -50,6 +51,9 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
 
+  // selected blocks
+  selectedBlocks: BlockComponentElement[] = [];
+
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
 
@@ -58,6 +62,10 @@ export class EdgelessSelectionManager {
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
+
+  get lastMousePos() {
+    return this._lastMousePos;
+  }
 
   get isActive() {
     return this.currentController.isActive;
@@ -126,6 +134,7 @@ export class EdgelessSelectionManager {
       this._onContainerDragEnd,
       this._onContainerClick,
       this._onContainerDblClick,
+      this._onContainerTripleClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
       this._onContainerContextMenu,
@@ -160,6 +169,10 @@ export class EdgelessSelectionManager {
 
   private _onContainerDblClick = (e: SelectionEvent) => {
     return this.currentController.onContainerDblClick(e);
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    return this.currentController.onContainerTripleClick(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
@@ -218,7 +231,7 @@ export class EdgelessSelectionManager {
       this._container.components.dragHandle?.hide();
     }
 
-    if (!hovered) {
+    if (!hovered || this.blockSelectionState.active) {
       return null;
     }
 

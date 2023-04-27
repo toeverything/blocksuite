@@ -32,7 +32,6 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
-        'examples/blob': resolve(__dirname, 'examples/blob/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
         'examples/canvas/connector': resolve(
           __dirname,
@@ -44,6 +43,7 @@ export default defineConfig({
           'examples/workspace/index.html'
         ),
         'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
+        'examples/store': resolve(__dirname, 'examples/store/index.html'),
       },
     },
   },

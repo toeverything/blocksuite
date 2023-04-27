@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid';
+
 export function simplePick<T extends object, K extends keyof T>(
   obj: T,
   keys: K[]
@@ -8,4 +10,8 @@ export function simplePick<T extends object, K extends keyof T>(
     }
     return acc;
   }, {} as Pick<T, K>);
+}
+
+export function generateElementId() {
+  return nanoid(10);
 }

@@ -1,23 +1,30 @@
+import type { SelectionEvent } from '../../../__internal__/index.js';
 import {
   handleNativeRangeDragMove,
-  type SelectionEvent,
-} from '@blocksuite/blocks/std';
-
+  noop,
+  Point,
+} from '../../../__internal__/index.js';
 import type { DefaultSelectionManager } from './default-selection-manager.js';
+import { autoScroll } from './utils.js';
 
 export const NativeDragHandlers = {
   onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     selection.state.resetStartRange(e);
     selection.state.type = 'native';
-    selection.slots.nativeSelectionToggled.emit(false);
   },
 
   onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
-    selection.state.updateRangePoint(e.raw.clientX, e.raw.clientY);
-    handleNativeRangeDragMove(selection.state.startRange, e);
+    autoScroll(selection, e, {
+      init() {
+        selection.state.lastPoint = new Point(e.raw.clientX, e.raw.clientY);
+        handleNativeRangeDragMove(selection.state.startRange, e);
+      },
+      onMove: noop,
+      onScroll: noop,
+    });
   },
 
   onEnd(selection: DefaultSelectionManager, _: SelectionEvent) {
-    selection.slots.nativeSelectionToggled.emit(true);
+    selection.state.clearRaf();
   },
 };

@@ -1,8 +1,15 @@
 import '../../../components/drag-handle.js';
 
+import { BLOCK_CHILDREN_CONTAINER_WIDTH } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+} from '@blocksuite/store';
+
 import {
   type BlockComponentElement,
-  createDragEvent,
   type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -15,28 +22,24 @@ import {
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
+  handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
   isDatabase,
   isDatabaseInput,
+  isDragHandle,
+  isElement,
   isEmbed,
   isImage,
   isInsidePageTitle,
-  isPageSelectedRects,
+  isSelectedBlocks,
   Point,
   Rect,
   type SelectionEvent,
-} from '@blocksuite/blocks/std';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-} from '@blocksuite/store';
-
+} from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type { EmbedBlockComponent } from '../../../embed-block/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -49,6 +52,7 @@ import type {
 import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
+import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState, type PageViewport } from './selection-state.js';
 import {
   filterBlocksExcludeSubtrees,
@@ -63,7 +67,7 @@ export class DefaultSelectionManager {
   readonly page: Page;
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  private readonly _container: DefaultPageBlockComponent;
+  readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
 
@@ -80,7 +84,7 @@ export class DefaultSelectionManager {
   }) {
     this.page = page;
     this.slots = slots;
-    this._container = container;
+    this.container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
     this._disposables.add(
@@ -91,6 +95,7 @@ export class DefaultSelectionManager {
         this._onContainerDragEnd,
         this._onContainerClick,
         this._onContainerDblClick,
+        this._onContainerTripleClick,
         this._onContainerMouseMove,
         this._onContainerMouseOut,
         this._onContainerContextMenu,
@@ -102,11 +107,20 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.state.resetStartRange(e);
-    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    const target = e.raw.target;
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
       return;
     }
+
+    if (
+      isElement(target) &&
+      (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
+    ) {
+      PreviewDragHandlers.onStart(this, e);
+      return;
+    }
+
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -118,17 +132,8 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (isPageSelectedRects(e.raw.target)) {
-      this.state.type = 'block:drag';
-      this._container.components.dragHandle?.onDragStart(
-        createDragEvent('dragstart', e.raw),
-        true
-      );
-      return;
-    }
-
     // disable dragHandle button
-    this._container.components.dragHandle?.setPointerEvents('none');
+    this.container.components.dragHandle?.setPointerEvents('none');
 
     // clear selection first
     this.clear();
@@ -149,10 +154,7 @@ export class DefaultSelectionManager {
     if (this.page.readonly) return;
 
     if (this.state.type === 'block:drag') {
-      this._container.components.dragHandle?.onDrag(
-        createDragEvent('drag', e.raw),
-        true
-      );
+      PreviewDragHandlers.onMove(this, e);
       return;
     }
 
@@ -166,14 +168,10 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    this._container.components.dragHandle?.setPointerEvents('auto');
+    this.container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'block:drag') {
-      this._container.components.dragHandle?.onDragEnd(
-        createDragEvent('dragend', e.raw),
-        true
-      );
-      this.state.type = 'block';
+      PreviewDragHandlers.onEnd(this, e);
       return;
     }
     if (this.state.type === 'native') {
@@ -191,7 +189,7 @@ export class DefaultSelectionManager {
       if (selectedType === 'Caret') return;
       showFormatQuickBar({
         page: this.page,
-        container: this._container,
+        container: this.container,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {
@@ -214,7 +212,7 @@ export class DefaultSelectionManager {
       const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
-        container: this._container,
+        container: this.container,
         direction,
         anchorEl: {
           // After update block type, the block selection will be cleared and refreshed.
@@ -228,32 +226,64 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
-    // do nothing when clicking on scrollbar
-    const { viewport } = this.state;
+    const {
+      x,
+      y,
+      raw: { target, clientX, clientY, pageX },
+      keys: { shift },
+    } = e;
+    const { state } = this;
+    const { viewport } = state;
+    let { type } = state;
 
-    if (e.raw.pageX >= viewport.clientWidth + viewport.left) return;
+    // do nothing when clicking on scrollbar
+    if (pageX >= viewport.clientWidth + viewport.left) return;
+
+    // do nothing when clicking on drag-handle
+    if (isElement(target) && isDragHandle(target as Element)) {
+      return;
+    }
+
+    // shift + click
+    // * native: select texts
+    // * block: select blocks
+    if (shift) {
+      if (type === 'none') {
+        type = state.type = 'native';
+      }
+      if (type === 'native') {
+        state.lastPoint = new Point(clientX, clientY);
+        handleNativeRangeDragMove(state.startRange, e);
+        return;
+      }
+      if (type === 'block') {
+        this.selectedBlocksWithShiftClick(x, y);
+        return;
+      }
+
+      return;
+    }
 
     // clear selection first
     this.clear();
+
+    state.resetStartRange(e);
 
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
       document.querySelectorAll('.affine-embed-wrapper-caption')
     );
     allCaptions.forEach(el => {
-      if (el !== e.raw.target) {
+      if (el !== target) {
         (el as HTMLInputElement).blur();
       }
     });
 
     let clickBlockInfo = null;
 
-    const element = getClosestBlockElementByPoint(
-      new Point(e.raw.clientX, e.raw.clientY),
-      {
-        rect: this._container.innerRect,
-      }
-    );
+    const element = getClosestBlockElementByPoint(new Point(clientX, clientY), {
+      rect: this.container.innerRect,
+    });
 
     if (element) {
       clickBlockInfo = {
@@ -267,7 +297,7 @@ export class DefaultSelectionManager {
       const { model, element } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
-      this.state.focusedBlock = element;
+      state.focusedBlock = element;
     }
 
     if (
@@ -276,25 +306,21 @@ export class DefaultSelectionManager {
     ) {
       window.getSelection()?.removeAllRanges();
 
-      this.state.activeComponent = clickBlockInfo.element;
+      state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
-        this.state.type = 'embed';
-        this.state.selectedEmbeds.push(
-          this.state.activeComponent as EmbedBlockComponent
-        );
+        state.type = 'embed';
+        state.selectedEmbeds.push(state.activeComponent as EmbedBlockComponent);
         this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
-        this.state.type = 'block';
-        this.state.selectedBlocks.push(this.state.activeComponent);
+        state.type = 'block';
+        state.selectedBlocks.push(state.activeComponent);
         this.slots.selectedRectsUpdated.emit([clickBlockInfo.rect]);
       }
       return;
     }
-    const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
-    if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
 
@@ -302,7 +328,26 @@ export class DefaultSelectionManager {
     // clear selection first
     this.clear();
 
-    showFormatQuickBarByDoubleClick(e, this.page, this._container, this.state);
+    // switch native selection
+    NativeDragHandlers.onStart(this, e);
+
+    showFormatQuickBarByClicks(
+      'double',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
+  };
+
+  private _onContainerTripleClick = (e: SelectionEvent) => {
+    showFormatQuickBarByClicks(
+      'triple',
+      e,
+      this.page,
+      this.container,
+      this.state
+    );
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -318,7 +363,7 @@ export class DefaultSelectionManager {
     let hoverEditingState = null;
 
     const element = getClosestBlockElementByPoint(point.clone(), {
-      rect: this._container.innerRect,
+      rect: this.container.innerRect,
     });
 
     // dont show option menu of image on selecting
@@ -330,7 +375,7 @@ export class DefaultSelectionManager {
       };
     }
 
-    this._container.components.dragHandle?.onContainerMouseMove(
+    this.container.components.dragHandle?.onContainerMouseMove(
       e,
       hoverEditingState
     );
@@ -342,7 +387,7 @@ export class DefaultSelectionManager {
       if (model.type === 'image') {
         const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
-        const isLarge = rect.width > 680;
+        const isLarge = rect.width > BLOCK_CHILDREN_CONTAINER_WIDTH;
         tempRect.right += isLarge ? 0 : 60;
 
         if (tempRect.isPointIn(point)) {
@@ -379,7 +424,7 @@ export class DefaultSelectionManager {
     }
 
     // Exclude selection change outside the editor
-    if (!selection.containsNode(this._container, true)) {
+    if (!selection.containsNode(this.container, true)) {
       return;
     }
 
@@ -400,7 +445,7 @@ export class DefaultSelectionManager {
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      container: this._container,
+      container: this.container,
       direction,
       anchorEl: {
         getBoundingClientRect: () => {
@@ -415,26 +460,28 @@ export class DefaultSelectionManager {
   };
 
   get viewportElement() {
-    return this._container.viewportElement;
+    return this.container.viewportElement;
   }
 
   // clear selection: `block`, `block:drag`, `embed`, `native`
   clear() {
     const { state, slots } = this;
-    const { type } = state;
-    if (type.startsWith('block')) {
+    let { type } = state;
+
+    if (type === 'block:drag') {
+      // clear `drag preview`
+      PreviewDragHandlers.clear(this);
+      type = 'block';
+    }
+
+    if (type === 'block') {
       state.clearBlockSelection();
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
 
       // clear `format quick bar`
-      document.dispatchEvent(new Event('selectionchange'));
-      // clear `drag preview`
-      if (type === 'block:drag') {
-        this._container.components.dragHandle?.onDragEnd(
-          createDragEvent('dragend')
-        );
-      }
+      // document.dispatchEvent(new MouseEvent('mousedown'));
+      this.container.querySelector('format-quick-bar')?.remove();
     } else if (type === 'embed') {
       state.clearEmbedSelection();
       slots.embedRectsUpdated.emit([]);
@@ -457,7 +504,7 @@ export class DefaultSelectionManager {
   }
 
   updateViewport() {
-    const { viewportElement } = this._container;
+    const { viewportElement } = this.container;
     const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
       viewportElement;
     const { top, left } = viewportElement.getBoundingClientRect();
@@ -543,13 +590,13 @@ export class DefaultSelectionManager {
   }
 
   refreshRemoteSelection() {
-    const element = this._container.querySelector('remote-selection');
+    const element = this.container.querySelector('remote-selection');
     if (element) {
       element.requestUpdate();
     }
   }
 
-  selectOneBlock(element: Element | null, rect?: DOMRect) {
+  selectOneBlock(element?: Element | null, rect?: DOMRect) {
     // clear selection first
     this.clear();
     // rich-text should be unfocused
@@ -563,7 +610,7 @@ export class DefaultSelectionManager {
       rect = getRectByBlockElement(this.state.focusedBlock);
     }
 
-    // find subtrees of focused block ement
+    // find subtrees of focused block element
     const selectedBlocks = getBlockElementsIncludeSubtrees([element]);
 
     // only current focused block element
@@ -581,7 +628,7 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
     this.state.focusedBlock = null;
 
-    const selectedBlocks = getBlockElementsByElement(this._container);
+    const selectedBlocks = getBlockElementsByElement(this.container);
 
     // clear subtrees
     const rects = getBlockElementsExcludeSubtrees(selectedBlocks).map(
@@ -633,6 +680,92 @@ export class DefaultSelectionManager {
     );
   }
 
+  selectedBlocksWithShiftClick(x: number, y: number) {
+    const { state } = this;
+    const { viewport, selectedBlocks } = state;
+    const lastIndex = selectedBlocks.length - 1;
+
+    if (lastIndex === -1) return;
+
+    const { left, top, scrollLeft, scrollTop } = viewport;
+    const hasOneBlock = lastIndex === 0;
+    const first = selectedBlocks[0];
+    const last = hasOneBlock ? first : selectedBlocks[lastIndex];
+    const firstRect = getRectByBlockElement(first);
+    const lastRect = hasOneBlock ? firstRect : getRectByBlockElement(last);
+    const rect = Rect.fromPoints(
+      new Point(
+        firstRect.left - left + scrollLeft,
+        firstRect.top - top + scrollTop
+      ),
+      new Point(
+        lastRect.right - left + scrollLeft,
+        lastRect.bottom - top + scrollTop
+      )
+    );
+    const point = new Point(x + scrollLeft, y + scrollTop);
+
+    let start;
+    let end;
+    let pos = true;
+
+    if (hasOneBlock) {
+      if (rect.isPointIn(point)) {
+        return;
+      }
+
+      if (point.y < rect.top) {
+        start = point;
+        end = rect.max;
+        pos = false;
+      } else {
+        start = rect.min;
+        end = point;
+      }
+    } else {
+      if (rect.isPointIn(point)) {
+        if (point.y >= rect.top + rect.height / 2) {
+          start = point;
+          end = rect.max;
+          pos = false;
+        } else {
+          start = rect.min;
+          end = point;
+        }
+      } else if (point.y < rect.top) {
+        start = point;
+        end = rect.max;
+        pos = false;
+      } else {
+        start = rect.min;
+        end = point;
+      }
+    }
+
+    if (start && end) {
+      this.selectBlocksByDraggingArea(
+        state.blockCache,
+        Rect.fromPoints(start, end).toDOMRect(),
+        viewport,
+        true
+      );
+    }
+
+    const direction = pos ? 'center-bottom' : 'center-top';
+    showFormatQuickBar({
+      page: this.page,
+      container: this.container,
+      direction,
+      anchorEl: {
+        // After update block type, the block selection will be cleared and refreshed.
+        // So we need to get the targe block's rect dynamic.
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction, state);
+        },
+      },
+    });
+  }
+
   setSelectedBlocks(
     selectedBlocks: BlockComponentElement[],
     rects?: DOMRect[]
@@ -649,7 +782,6 @@ export class DefaultSelectionManager {
     this.slots.draggingAreaUpdated.dispose();
     this.slots.embedEditingStateUpdated.dispose();
     this.slots.embedRectsUpdated.dispose();
-    this.slots.nativeSelectionToggled.dispose();
     this._disposables.dispose();
   }
 }

@@ -137,7 +137,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -186,7 +188,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -208,7 +212,9 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -295,7 +301,9 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -333,7 +341,9 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -375,7 +385,9 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -417,7 +429,9 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -474,7 +488,9 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -513,7 +529,9 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -545,7 +563,9 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text={
       <>
@@ -612,7 +632,9 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -643,7 +665,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="h1"
@@ -655,7 +679,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="h6"
@@ -668,7 +694,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -682,7 +710,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -695,7 +725,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -708,7 +740,9 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -750,7 +784,9 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="ho"
     prop:type="text"
@@ -764,7 +800,9 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -787,7 +825,9 @@ test('should cut work multiple line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="19"
     prop:type="text"
@@ -797,11 +837,13 @@ test('should cut work multiple line', async ({ page }) => {
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
-  expect(text).toBe('2345678');
+  expect(text).toBe(`23\n456\n78`);
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -971,4 +1013,26 @@ test('should cut in title works', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertRichTexts(page, ['hello']);
+});
+
+test('should support ctrl/cmd+g convert to database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+
+  await page.keyboard.press(`${SHORT_KEY}+g`);
+  const tableView = page.locator('.modal-view-item.table');
+  await tableView.click();
+  const database = page.locator('affine-database');
+  await expect(database).toBeVisible();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
 });

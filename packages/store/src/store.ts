@@ -2,7 +2,7 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
-import type { BlobOptionsGetter } from './persistence/blob/index.js';
+import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
   DocProviderConstructor,
@@ -70,7 +70,7 @@ export interface StoreOptions<
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
-  blobOptionsGetter?: BlobOptionsGetter;
+  blobStorages?: ((id: string) => BlobStorage)[];
 }
 
 const flagsPreset = {
@@ -96,7 +96,6 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
-  connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor(
@@ -141,22 +140,10 @@ export class Store {
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(id, this.doc, {
-          // @ts-expect-error
           awareness: this.awarenessStore.awareness,
         })
     );
   }
-
-  connect = () => {
-    this.providers.forEach(provider => provider.connect?.());
-    this.connected = true;
-  };
-
-  disconnect = () => {
-    this.providers.forEach(provider => provider.disconnect?.());
-    this.connected = false;
-  };
-
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }

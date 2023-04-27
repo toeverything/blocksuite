@@ -120,29 +120,10 @@ export const showFormatQuickBar = async ({
     abortController.abort();
   };
 
-  const selectionChangeHandler = () => {
-    const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      abortController.abort();
-      return;
-    }
-    // If the selection is collapsed, abort the format quick bar
-    if (
-      blockRange.type === 'Native' &&
-      blockRange.models.length === 1 &&
-      blockRange.startOffset === blockRange.endOffset
-    ) {
-      abortController.abort();
-      return;
-    }
-    updatePos();
-  };
-
   const popstateHandler = () => {
     abortController.abort();
   };
   document.addEventListener('mousedown', mouseDownHandler);
-  document.addEventListener('selectionchange', selectionChangeHandler);
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
 
@@ -151,8 +132,7 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mouseup', mouseDownHandler);
-    document.removeEventListener('selectionchange', selectionChangeHandler);
+    document.removeEventListener('mousedown', mouseDownHandler);
     window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSlot.dispose();
   });

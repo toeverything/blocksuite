@@ -2,6 +2,7 @@ import '../tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
+import './change-frame-button.js';
 import './more-button.js';
 
 import type {
@@ -23,7 +24,7 @@ import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { Selectable } from '../../selection-manager.js';
-import { isTopLevelBlock } from '../../utils.js';
+import { isTopLevelBlock, stopPropagation } from '../../utils.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -34,7 +35,7 @@ type CategorizedElements = {
 
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       user-select: none;
@@ -44,7 +45,7 @@ export class EdgelessComponentToolbar extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: var(--affine-page-background);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -85,6 +86,8 @@ export class EdgelessComponentToolbar extends LitElement {
           .elements=${shapeElements}
           .page=${this.page}
           .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
         >
         </edgeless-change-shape-button>`
       : null;
@@ -117,9 +120,22 @@ export class EdgelessComponentToolbar extends LitElement {
       : null;
   }
 
-  render() {
+  private _getFrameButton(blocks?: TopLevelBlockModel[]) {
+    return blocks?.length
+      ? html`<edgeless-change-frame-button
+          .frames=${blocks}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
+        >
+        </edgeless-change-frame-button>`
+      : null;
+  }
+
+  override render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector } = groupedSelected;
+    const { shape, brush, connector, frame } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -134,12 +150,13 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getShapeButton(shape),
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
+          this._getFrameButton(frame),
         ].filter(b => !!b);
 
     const divider = !buttons.length
       ? nothing
       : html`<menu-divider .vertical=${true}></menu-divider>`;
-    return html`<div class="container">
+    return html`<div class="container" @pointerdown=${stopPropagation}>
       ${join(buttons, () => '')} ${divider}
       <edgeless-more-button
         .elements=${this.selected}

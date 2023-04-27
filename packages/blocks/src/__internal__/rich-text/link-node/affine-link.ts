@@ -33,8 +33,8 @@ export class AffineLink extends ShadowlessElement {
 
   private _isHovering = false;
 
-  static styles = css`
-    a {
+  static override styles = css`
+    affine-link > a {
       white-space: nowrap;
       word-break: break-word;
       color: var(--affine-link-color);
@@ -43,18 +43,12 @@ export class AffineLink extends ShadowlessElement {
       cursor: pointer;
     }
 
-    /*
-    a:visited {
-      color: var(--affine-link-visited-color);
-    }
-    */
-
-    a:hover [data-virgo-text='true'] {
+    affine-link > a:hover [data-virgo-text='true'] {
       text-decoration: underline;
     }
 
-    a > v-text {
-      white-space: pre-wrap;
+    affine-link > a > v-text {
+      white-space: break-spaces;
     }
   `;
 
@@ -196,7 +190,7 @@ export class AffineLink extends ShadowlessElement {
     }, 0);
   }
 
-  render() {
+  override render() {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
       : styleMap({});

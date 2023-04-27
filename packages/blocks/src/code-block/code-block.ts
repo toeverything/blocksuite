@@ -4,6 +4,7 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -20,15 +21,17 @@ import {
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
+import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
-  static styles = css`
+  static override styles = css`
     code-block {
       position: relative;
       z-index: 1;
@@ -39,7 +42,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
-      background: var(--affine-code-block-background);
+      background: var(--affine-background-code-block);
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -91,10 +94,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       min-width: 101px;
     }
 
-    .affine-code-block-container.selected {
-      background-color: var(--affine-selected-color);
-    }
-
     .affine-code-block-container rich-text {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
@@ -106,7 +105,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       text-align: right;
       left: 20px;
       line-height: var(--affine-line-height);
-      color: var(--affine-line-number-color);
+      color: var(--affine-text-secondary-color);
     }
 
     .affine-code-block-container .rich-text-container {
@@ -134,7 +133,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-code-block-container.wrap affine-code-line span {
-      white-space: pre-wrap;
+      white-space: break-spaces;
     }
 
     .affine-code-block-container .virgo-editor::-webkit-scrollbar {
@@ -148,7 +147,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-page-background);
+      background-color: var(--affine-white-90);
       margin: 0;
     }
 
@@ -182,32 +181,20 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
-  private _documentMutationObserver: MutationObserver = new MutationObserver(
-    async () => {
-      if (!this._highlighter) return;
-      const richText = this.querySelector('rich-text');
-      const vEditor = richText?.vEditor;
-      if (!vEditor) return;
-
-      // update code-line theme
-      setTimeout(() => {
-        vEditor.requestUpdate();
-      });
-    }
-  );
+  private _themeChangeObserver: Disposable | null = null;
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: Lang) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
-      theme: mode === 'dark' ? 'github-dark' : 'github-light',
-      themes: ['github-light', 'github-dark'],
+      theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
+      themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang],
       paths: {
         // TODO: use local path
         wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
-        themes: 'https://cdn.jsdelivr.net/npm/shiki/themes',
+        themes: 'https://cdn.jsdelivr.net/',
         languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
       },
     });
@@ -288,7 +275,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
-    this._documentMutationObserver.disconnect();
+    this._themeChangeObserver?.dispose();
   }
 
   private _onClickWrapBtn() {
@@ -297,7 +284,19 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     this._wrap = container.classList.toggle('wrap');
   }
 
-  protected firstUpdated() {
+  protected override firstUpdated() {
+    this._themeChangeObserver = listenToThemeChange(this, async a => {
+      if (!this._highlighter) return;
+      const richText = this.querySelector('rich-text');
+      const vEditor = richText?.vEditor;
+      if (!vEditor) return;
+
+      // update code-line theme
+      setTimeout(() => {
+        vEditor.requestUpdate();
+      });
+    });
+
     if (this.model.language === 'Plain Text') {
       this._highlighter = null;
       return;
@@ -311,13 +310,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     } else {
       this._highlighter = null;
     }
-
-    this._documentMutationObserver.observe(document.documentElement, {
-      attributes: true,
-    });
   }
 
-  updated() {
+  override updated() {
     if (this.model.language !== this._preLang) {
       this._preLang = this.model.language;
 
@@ -449,7 +444,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     render(lineNumbers, lineNumbersContainer);
   }
 
-  render() {
+  override render() {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,

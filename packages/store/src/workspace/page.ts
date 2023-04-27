@@ -1,6 +1,5 @@
 import { debug } from '@blocksuite/global/debug';
-import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours, Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
@@ -16,20 +15,22 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { DatabaseManager } from './database.js';
+import { createYProxy } from '../yjs/index.js';
+import type { PageMeta } from './meta.js';
 import { tryMigrate } from './migrations.js';
-import type { PageMeta, Workspace } from './workspace.js';
+import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
 /** JSON-serializable properties of a block */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BlockProps = Record<string, any> & {
+export type BlockProps = {
   id: string;
   flavour: string;
   text?: Text;
   children?: BaseBlockModel[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [index: string]: any;
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -47,49 +48,58 @@ type FlatBlockMap = {
   [key: string]: YBlock;
 };
 
+type PageOptions = {
+  id: string;
+  workspace: Workspace;
+  doc: BlockSuiteDoc;
+  awarenessStore: AwarenessStore;
+  idGenerator?: IdGenerator;
+};
+
 export class Page extends Space<FlatBlockMap> {
-  private _workspace: Workspace;
-  private _idGenerator: IdGenerator;
+  private readonly _workspace: Workspace;
+  private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | BaseBlockModel[] | null = null;
+  private _root: (BaseBlockModel | null)[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
   // TODO use schema
-  private _ignoredKeys = new Set<string>(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Object.keys(new BaseBlockModel(this, { id: null! }))
-  );
+  private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
 
   readonly slots = {
     historyUpdated: new Slot(),
-    rootAdded: new Slot<BaseBlockModel | BaseBlockModel[]>(),
+    rootAdded: new Slot<(BaseBlockModel | null)[]>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
+    onYEvent: new Slot<{
+      event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
+    }>(),
     blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    /**
+     * @deprecated
+     */
     subpageUpdated: new Slot<{
       type: 'add' | 'delete';
       id: string;
       subpageIds: string[];
     }>(),
   };
-  readonly db: DatabaseManager;
 
-  constructor(
-    workspace: Workspace,
-    id: string,
-    doc: BlockSuiteDoc,
-    awarenessStore: AwarenessStore,
-    idGenerator: IdGenerator = uuidv4
-  ) {
+  constructor({
+    id,
+    workspace,
+    doc,
+    awarenessStore,
+    idGenerator = uuidv4,
+  }: PageOptions) {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
-    this.db = new DatabaseManager(this);
   }
 
   get readonly() {
@@ -102,6 +112,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get workspace() {
     return this._workspace;
+  }
+
+  get schema() {
+    return this._workspace.schema;
   }
 
   get meta() {
@@ -119,7 +133,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get root() {
     const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    if (root && root.flavour !== 'affine:page') {
+    if (!root) return root;
+
+    const rootSchema = this.schema.flavourSchemaMap.get(root.flavour);
+    if (rootSchema?.model.role !== 'root') {
       console.error('data broken');
     }
     return root;
@@ -192,7 +209,7 @@ export class Page extends Space<FlatBlockMap> {
     this._history.clear();
   }
 
-  createId() {
+  generateId() {
     return this._idGenerator();
   }
 
@@ -288,32 +305,27 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getSchemaByFlavour(flavour: string) {
-    return this.workspace.flavourSchemaMap.get(flavour);
+    return this.schema.flavourSchemaMap.get(flavour);
   }
 
-  getInitialPropsMapByFlavour(flavour: string) {
-    return this.workspace.flavourInitialPropsMap.get(flavour);
+  getInitialPropsByFlavour(flavour: string) {
+    const schema = this.schema.flavourSchemaMap.get(flavour);
+    assertExists(schema);
+    return schema.model.props?.(internalPrimitives) ?? {};
   }
 
   @debug('CRUD')
-  addBlocks<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
+  addBlocks(
     blocks: Array<{
-      flavour: Flavour;
-      blockProps?: Partial<
-        ALLProps[Flavour] &
-          Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-      >;
+      flavour: string;
+      blockProps?: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>>;
     }>,
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string[] {
     const ids: string[] = [];
     blocks.forEach(block => {
-      const id = this.addBlock<ALLProps, Flavour>(
+      const id = this.addBlock(
         block.flavour,
         block.blockProps ?? {},
         parent,
@@ -327,16 +339,9 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  addBlock<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ALLProps extends Record<string, any> = BlockModelProps,
-    Flavour extends keyof ALLProps & string = keyof ALLProps & string
-  >(
-    flavour: Flavour,
-    blockProps: Partial<
-      ALLProps[Flavour] &
-        Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
-    > = {},
+  addBlock(
+    flavour: string,
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -352,6 +357,14 @@ export class Page extends Space<FlatBlockMap> {
     ) {
       throw new Error('database is not enabled');
     }
+    const parentModel =
+      typeof parent === 'string' ? this.getBlockById(parent) : parent;
+
+    this.schema.validate(
+      flavour,
+      parentModel?.flavour,
+      blockProps.children?.map(child => child.flavour)
+    );
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
@@ -363,18 +376,11 @@ export class Page extends Space<FlatBlockMap> {
       this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initInternalProps(yBlock, clonedProps);
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
-      assertExists(defaultProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      syncBlockProps(
-        schema,
-        defaultProps,
-        yBlock,
-        clonedProps,
-        this._ignoredKeys
-      );
+      initInternalProps(yBlock, clonedProps);
+
+      syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent) ?? null;
@@ -391,18 +397,9 @@ export class Page extends Space<FlatBlockMap> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
-
-      if (flavour === 'affine:page') {
-        this.workspace.setPageMeta(this.id, {
-          title: blockProps.title?.toString(),
-        });
-      }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'add',
-      id,
-    });
+    this.slots.blockUpdated.emit({ type: 'add', id });
 
     return id;
   }
@@ -421,6 +418,10 @@ export class Page extends Space<FlatBlockMap> {
 
     const firstBlock = blocks[0];
     const currentParent = this.getParent(firstBlock);
+
+    blocks.forEach(block => {
+      this.schema.validate(block.flavour, currentParent?.flavour);
+    });
 
     // the blocks must have the same parent (siblings)
     if (blocks.some(block => this.getParent(block) !== currentParent)) {
@@ -461,7 +462,16 @@ export class Page extends Space<FlatBlockMap> {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const yBlock = this._yBlocks.get(model.id) as YBlock;
+
+    const parent = this.getParent(model);
+    this.schema.validate(
+      model.flavour,
+      parent?.flavour,
+      props.children?.map(child => child.flavour)
+    );
+
+    const yBlock = this._yBlocks.get(model.id);
+    assertExists(yBlock);
 
     this.transact(() => {
       // TODO diff children changes
@@ -476,13 +486,9 @@ export class Page extends Space<FlatBlockMap> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(
-        model.flavour
-      );
-      assertExists(defaultProps);
-      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
-      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, yBlock, props, this._ignoredKeys);
     });
 
     model.propsUpdated.emit();
@@ -502,16 +508,13 @@ export class Page extends Space<FlatBlockMap> {
     assertExists(parent);
 
     const targetIndex =
-      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+      parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length > 1) {
       const blocks: Array<{
-        flavour: keyof BlockModelProps;
-        blockProps: Partial<
-          BlockModelProps &
-            Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
-        >;
+        flavour: string;
+        blockProps: Partial<BlockProps & Omit<BlockProps, 'id' | 'flavour'>>;
       }> = [];
       props.forEach(prop => {
         const { flavour, ...blockProps } = prop;
@@ -542,13 +545,20 @@ export class Page extends Space<FlatBlockMap> {
     }
     const parent = this.getParent(model);
     const index = parent?.children.indexOf(model) ?? -1;
+    const { bringChildrenTo } = options;
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
-    if (options.bringChildrenTo === 'parent' && parent) {
+    if (bringChildrenTo === 'parent' && parent) {
+      model.children.forEach(child => {
+        this.schema.validate(child.flavour, parent.flavour);
+      });
       parent.children.unshift(...model.children);
-    } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-      options.bringChildrenTo.children.push(...model.children);
+    } else if (bringChildrenTo instanceof BaseBlockModel) {
+      model.children.forEach(child => {
+        this.schema.validate(child.flavour, bringChildrenTo.flavour);
+      });
+      bringChildrenTo.children.push(...model.children);
     }
     this._blockMap.delete(model.id);
 
@@ -566,7 +576,7 @@ export class Page extends Space<FlatBlockMap> {
         if (index > -1) {
           yChildren.delete(index, 1);
         }
-        if (options.bringChildrenTo === 'parent' && parent) {
+        if (options.bringChildrenTo === 'parent') {
           yChildren.unshift(children);
         } else if (options.bringChildrenTo instanceof BaseBlockModel) {
           this.updateBlock(options.bringChildrenTo, {
@@ -576,10 +586,7 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id: model.id,
-    });
+    this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
   }
 
   trySyncFromExistingDoc() {
@@ -612,6 +619,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.textUpdated.dispose();
     this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
+    this.slots.onYEvent.dispose();
 
     this._yBlocks.unobserveDeep(this._handleYEvents);
     this._yBlocks.clear();
@@ -672,25 +680,37 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(props: Omit<BlockProps, 'children'>) {
-    const schema = this.workspace.flavourSchemaMap.get(props.flavour);
+  private _createBlockModel(
+    props: Omit<BlockProps, 'children'>,
+    block: YBlock
+  ) {
+    const schema = this.schema.flavourSchemaMap.get(props.flavour);
     if (!schema) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     } else if (!props.id) {
       throw new Error('Block id is not defined');
     }
-    const blockModel = new BaseBlockModel(
-      this,
-      props as PropsWithId<Omit<BlockProps, 'children'>>
-    );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    blockModel.flavour = schema.model.flavour as any;
-    blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.props(internalPrimitives);
+    const blockModel = schema.model.toModel
+      ? schema.model.toModel()
+      : new BaseBlockModel();
+
+    blockModel.id = props.id;
+    const modelProps = schema.model.props?.(internalPrimitives) ?? {};
     Object.entries(modelProps).forEach(([key, value]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (blockModel as any)[key] = props[key] ?? value;
+      // @ts-ignore
+      blockModel[key] =
+        value instanceof Text
+          ? new Text(block.get(`prop:${key}`) as Y.Text)
+          : props[key] ?? value;
     });
+    blockModel.page = this;
+    blockModel.yBlock = block;
+    blockModel.flavour = schema.model.flavour;
+    blockModel.role = schema.model.role;
+    blockModel.tag = schema.model.tag;
+
+    blockModel.onCreated();
+
     return blockModel;
   }
 
@@ -699,42 +719,15 @@ export class Page extends Space<FlatBlockMap> {
     let isRoot = false;
     let isSurface = false;
 
-    const props = toBlockProps(yBlock) as BlockProps;
-    const model = this._createBlockModel({ ...props, id });
+    const props = toBlockProps(yBlock);
+    const model = this._createBlockModel({ ...props, id }, yBlock);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
     if (model.flavour === 'affine:page') {
       isRoot = true;
     }
-    this._blockMap.set(props.id, model);
-
-    const initialProps = this.workspace.flavourInitialPropsMap.get(
-      model.flavour
-    );
-    assertExists(initialProps);
-    Object.entries(initialProps).forEach(([key, value]) => {
-      if (value instanceof Text) {
-        const yText = yBlock.get(`prop:${key}`) as Y.Text;
-        Object.assign(model, { [key]: new Text(yText) });
-      }
-    });
-
-    if (matchFlavours(model, ['affine:page'])) {
-      model.cells = yBlock.get('ext:cells') as Y.Map<Y.Map<unknown>>;
-      model.columns = yBlock.get('ext:columns') as Y.Map<unknown>;
-
-      const titleText = yBlock.get('prop:title') as Y.Text;
-      model.title = new Text(titleText);
-    }
-
-    // TODO use schema
-    if (model.flavour === 'affine:database') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<string>
-      ).toArray();
-    }
+    this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
@@ -758,11 +751,15 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if (isRoot) {
-      this._root = model;
-      this.slots.rootAdded.emit(model);
+      this._root = Array.isArray(this._root)
+        ? [model, this._root[1]]
+        : [model, null];
+      this.slots.rootAdded.emit(this._root);
       this.workspace.slots.pageAdded.emit(this.id);
     } else if (isSurface) {
-      this._root = [this.root as BaseBlockModel, model];
+      this._root = Array.isArray(this._root)
+        ? [this._root[0], model]
+        : [null, model];
       this.slots.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
@@ -776,7 +773,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
-    if (model === this._root) {
+    if (model === this._root?.[0]) {
       this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event
@@ -815,8 +812,10 @@ export class Page extends Space<FlatBlockMap> {
       }
       const value = event.target.get(key);
       hasPropsUpdate = true;
-      if (value instanceof Y.Array) {
-        props[key.replace('prop:', '')] = value.toArray();
+      if (value instanceof Y.Map || value instanceof Y.Array) {
+        props[key.replace('prop:', '')] = createYProxy(value, {
+          deep: true,
+        });
       } else {
         props[key.replace('prop:', '')] = value;
       }
@@ -885,27 +884,10 @@ export class Page extends Space<FlatBlockMap> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
-      } else if (
-        event.path.includes('ext:columns') ||
-        event.path.includes('ext:cells')
-      ) {
-        const blocks = this.getBlockByFlavour('affine:database');
-        blocks.forEach(block => {
-          // todo: refactor here
-          //  force update all blocks that used tagSchema, which is not efficient
-          //  but it's ok for now
-          block.propsUpdated.emit();
-        });
-      }
-    } else {
-      if (event.path.includes('ext:cells')) {
-        // todo: refactor here
-        const blockId = event.path[2] as string;
-        const block = this.getBlockById(blockId);
-        assertExists(block);
-        block.propsUpdated.emit();
       }
     }
+
+    this.slots.onYEvent.emit({ event });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).

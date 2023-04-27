@@ -7,6 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { DEFAULT_SELECTED_COLOR } from '../../components/color-panel.js';
 import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
@@ -42,7 +43,7 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
 
 @customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -78,11 +79,11 @@ export class EdgelessBrushToolButton extends LitElement {
     this.edgeless.slots.mouseModeUpdated.emit({
       type: 'brush',
       lineWidth: 4,
-      color: '#010101',
+      color: DEFAULT_SELECTED_COLOR,
     });
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'brush') {
         this._brushMenu?.dispose();
@@ -95,20 +96,20 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._brushMenu?.dispose();
     this._brushMenu = null;
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
-        @tool.click=${() => {
+        @click=${() => {
           this._trySetBrushMode();
           this._toggleBrushMenu();
         }}

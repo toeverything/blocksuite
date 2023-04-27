@@ -1,7 +1,6 @@
 import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -9,6 +8,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { WithDisposable } from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
@@ -47,12 +47,12 @@ function Actions(onClick: (action: Action) => void) {
 
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     .more-actions-container {
@@ -61,7 +61,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       padding: 8px 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       font-size: 16px;
@@ -84,7 +84,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     }
 
     .action-item:hover {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .action-item[data-disabled] {
@@ -146,7 +146,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this._actionsMenuPopper?.hide();
   };
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._actionsMenuPopper = createButtonPopper(
@@ -160,13 +160,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
+  override render() {
     const actions = Actions(this._runAction);
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
-        @tool.click=${() => this._actionsMenuPopper?.toggle()}
+        @click=${() => this._actionsMenuPopper?.toggle()}
       >
         ${MoreHorizontalIcon}
       </edgeless-tool-icon-button>

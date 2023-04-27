@@ -22,22 +22,22 @@ const ELEMENT_TAG = 'affine-image-block-not-found-card' as const;
 
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockNotFoundCard extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-image-block-not-found-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 453px;
-      height: 104px;
+      width: 100%;
+      height: 100%;
       margin: 0 auto;
-      border: 1px solid #ebeeff;
+      border: 1px solid var(--affine-border-color);
       border-radius: 10px;
-      background: #fbfbff;
+      background: var(--affine-background-primary-color);
     }
   `;
 
-  render() {
+  override render() {
     return html`
       <div class="affine-image-block-not-found-card">${notFoundIcon}</div>
     `;

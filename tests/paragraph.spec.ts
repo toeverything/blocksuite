@@ -389,7 +389,9 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -418,7 +420,9 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -456,7 +460,9 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -475,7 +481,9 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -517,7 +525,9 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame>
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
   <affine:paragraph
     prop:text="123"
     prop:type="text"

@@ -4,6 +4,7 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
+  FRAME_BACKGROUND_COLORS,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -27,7 +28,7 @@ const FIT_TO_SCREEN_PADDING = 200;
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       position: absolute;
       z-index: 2;
@@ -43,7 +44,7 @@ export class EdgelessToolbar extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: var(--affine-page-background);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
@@ -63,7 +64,7 @@ export class EdgelessToolbar extends LitElement {
       width: 1px;
       height: 24px;
       margin: 0 7px;
-      background-color: #e3e2e4;
+      background-color: var(--affine-divider-color);
     }
 
     .zoom-percent {
@@ -82,7 +83,7 @@ export class EdgelessToolbar extends LitElement {
 
     .zoom-percent:hover {
       color: var(--affine-primary-color);
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
   `;
 
@@ -131,7 +132,7 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.slots.viewportUpdated.emit();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
     const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
@@ -139,20 +140,26 @@ export class EdgelessToolbar extends LitElement {
     return html`
       <div
         class="edgeless-toolbar-container"
+        @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @mouseup=${stopPropagation}
+        @pointerdown=${stopPropagation}
       >
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          @tool.click=${() => this._setMouseMode({ type: 'default' })}
+          @click=${() => this._setMouseMode({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
-          @tool.click=${() => this._setMouseMode({ type: 'text' })}
+          @click=${() =>
+            this._setMouseMode({
+              type: 'text',
+              background: FRAME_BACKGROUND_COLORS[0],
+            })}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>
@@ -164,7 +171,7 @@ export class EdgelessToolbar extends LitElement {
           .disabled=${true}
           .tooltip=${'Image'}
           .active=${false}
-          @tool.click=${() => console.log('Image')}
+          @click=${() => console.log('Image')}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>
@@ -179,21 +186,20 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          @tool.click=${() =>
-            this._setMouseMode({ type: 'pan', panning: false })}
+          @click=${() => this._setMouseMode({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}
-          @tool.click=${() => this._zoomToFit()}
+          @click=${() => this._zoomToFit()}
         >
           ${ViewBarIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @tool.click=${() => this._setZoom(Math.max(viewport.zoom - 0.1, 0.1))}
+          @click=${() => this._setZoom(Math.max(viewport.zoom - 0.1, 0.1))}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -202,7 +208,7 @@ export class EdgelessToolbar extends LitElement {
         </span>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
-          @tool.click=${() => this._setZoom(viewport.zoom + 0.1)}
+          @click=${() => this._setZoom(viewport.zoom + 0.1)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

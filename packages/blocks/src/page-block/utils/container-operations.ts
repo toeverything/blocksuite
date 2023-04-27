@@ -1,21 +1,4 @@
-import {
-  almostEqual,
-  asyncGetBlockElementByModel,
-  asyncGetRichTextByModel,
-  type BlockComponentElement,
-  type ExtendedModel,
-  getBlockElementByModel,
-  getClosestBlockElementByElement,
-  getDefaultPageBlock,
-  getVirgoByModel,
-  handleNativeRangeDblClick,
-  hasNativeSelection,
-  isCollapsedNativeSelection,
-  isMultiBlockRange,
-  resetNativeSelection,
-  type SelectionEvent,
-  type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -26,6 +9,25 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
+import {
+  almostEqual,
+  asyncGetBlockElementByModel,
+  asyncGetRichTextByModel,
+  type BlockComponentElement,
+  type ExtendedModel,
+  getBlockElementByModel,
+  getClosestBlockElementByElement,
+  getDefaultPage,
+  getVirgoByModel,
+  handleNativeRangeDblClick,
+  handleNativeRangeTripleClick,
+  hasNativeSelection,
+  isCollapsedNativeSelection,
+  isMultiBlockRange,
+  resetNativeSelection,
+  type SelectionEvent,
+  type TopLevelBlockModel,
+} from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -45,7 +47,6 @@ import type {
 import { calcCurrentSelectionPosition } from './position.js';
 
 const DEFAULT_SPACING = 64;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -62,15 +63,17 @@ export function handleBlockSelectionBatchDelete(
     parentModel,
     index
   );
+  const newBlock = page.getBlockById(id);
 
   // Try clean block selection
-  const defaultPageBlock = getDefaultPageBlock(models[0]);
-  if (!defaultPageBlock.selection) {
+  const defaultPageBlock = getDefaultPage(models[0].page);
+  if (!defaultPageBlock) {
     // In the edgeless mode
-    return;
+    return null;
   }
   defaultPageBlock.selection.clear();
-  return id && asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id);
+  return newBlock;
 }
 
 export function deleteModelsByRange(
@@ -78,13 +81,15 @@ export function deleteModelsByRange(
   blockRange = getCurrentBlockRange(page)
 ) {
   if (!blockRange) {
-    return;
+    return null;
   }
   if (blockRange.type === 'Block') {
-    return handleBlockSelectionBatchDelete(page, blockRange.models);
+    const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
+    return newBlock;
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
+  // TODO handle database
   if (!startModel.text || !endModel.text) {
     throw new Error('startModel or endModel does not have text');
   }
@@ -104,7 +109,7 @@ export function deleteModelsByRange(
       //   index: blockRange.startOffset - 1,
       //   length: 0,
       // });
-      return;
+      return startModel;
     }
     startModel.text.delete(
       blockRange.startOffset,
@@ -114,7 +119,7 @@ export function deleteModelsByRange(
       index: blockRange.startOffset,
       length: 0,
     });
-    return;
+    return startModel;
   }
   page.captureSync();
   startModel.text.delete(
@@ -127,10 +132,11 @@ export function deleteModelsByRange(
     page.deleteBlock(model);
   });
 
-  return vEditor.setVRange({
+  vEditor.setVRange({
     index: blockRange.startOffset,
     length: 0,
   });
+  return startModel;
 }
 
 /**
@@ -218,6 +224,7 @@ export function updateBlockType(
     }
     return [newModel];
   }
+
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
   models.forEach(model => {
@@ -259,7 +266,7 @@ function transformBlock(
   const blockProps: {
     type?: string;
     text?: Text;
-    children?: BlockSuiteInternal.IBaseBlockProps[];
+    children?: BaseBlockModel[];
   } = {
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
@@ -455,7 +462,17 @@ function formatBlockRange(
   if (blockRange.type === 'Native') {
     const allTextUpdated = blockRange.models
       .filter(model => !matchFlavours(model, ['affine:code']))
-      .map(model => new Promise(resolve => onModelTextUpdated(model, resolve)));
+      .map(
+        model =>
+          // We can not use `onModelTextUpdated` here because it is asynchronous, which
+          // will make updated event emit before we observe it.
+          new Promise(resolve => {
+            const vEditor = getVirgoByModel(model);
+            vEditor?.slots.updated.once(() => {
+              resolve(vEditor);
+            });
+          })
+      );
 
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(blockRange);
@@ -541,14 +558,18 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
   });
 }
 
-// Show format quick bar when double clicking on text
-export function showFormatQuickBarByDoubleClick(
+// Show format quick bar when double/triple clicking on text
+export function showFormatQuickBarByClicks(
+  type: 'double' | 'triple',
   e: SelectionEvent,
   page: Page,
   container?: HTMLElement,
   state?: PageSelectionState
 ) {
-  const range = handleNativeRangeDblClick(page, e);
+  const range =
+    type === 'double'
+      ? handleNativeRangeDblClick(page, e)
+      : handleNativeRangeTripleClick(e);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;
   if (page.readonly) return;

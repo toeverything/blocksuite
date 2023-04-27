@@ -1,3 +1,7 @@
+import {
+  EDGELESS_BLOCK_CHILD_PADDING,
+  FRAME_BACKGROUND_COLORS,
+} from '@blocksuite/global/config';
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -11,7 +15,6 @@ import type {
   FrameBlockModel,
   TopLevelBlockModel,
 } from '../../../index.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../utils/container-operations.js';
 
 function EdgelessMask() {
   const style = {
@@ -20,6 +23,7 @@ function EdgelessMask() {
     left: '0',
     bottom: '0',
     right: '0',
+    zIndex: '1',
   };
   return html`
     <div class="affine-edgeless-mask" style=${styleMap(style)}></div>
@@ -32,7 +36,7 @@ function EdgelessBlockChild(
   viewport: SurfaceViewport,
   active: boolean
 ) {
-  const { xywh } = model;
+  const { xywh, background } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
@@ -45,10 +49,11 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: 'white',
+    background: `var(${background || FRAME_BACKGROUND_COLORS[0]})`,
     pointerEvents: 'all',
     zIndex: '0',
     boxSizing: 'border-box',
+    borderRadius: '4px',
   };
 
   const mask = active ? nothing : EdgelessMask();

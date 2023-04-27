@@ -1,7 +1,7 @@
 # `@blocksuite/store`
 
-BlockSuite data store built for general purpose state management.
+BlockSuite data store built for general purpose state management. Used in [AFFiNE](https://affine.pro/).
 
 ## Documentation
 
-TBD
+Checkout [blocksuite.affine.pro](https://blocksuite.affine.pro/) for comprehensive documentation.

@@ -1,9 +1,19 @@
-import { HOTKEYS } from '@blocksuite/global/config';
+import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
 
 import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
-import { bindCommonHotkey, handleDown, handleUp } from '../utils/index.js';
+import {
+  bindCommonHotkey,
+  deleteModelsByRange,
+  handleDown,
+  handleUp,
+} from '../utils/index.js';
+import { DEFAULT_SELECTED_COLOR } from './components/color-panel.js';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from './components/component-toolbar/change-shape-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
 
@@ -57,6 +67,9 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
 
   hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
+    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
+    deleteModelsByRange(edgeless.page);
+
     const { selected } = edgeless.getSelection().blockSelectionState;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
@@ -81,16 +94,26 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener('h', () =>
     setMouseMode(edgeless, { type: 'pan', panning: false })
   );
-  hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
+  hotkey.addListener('t', () =>
+    setMouseMode(edgeless, {
+      type: 'text',
+      background: FRAME_BACKGROUND_COLORS[0],
+    })
+  );
   hotkey.addListener('p', () =>
     setMouseMode(edgeless, {
       type: 'brush',
-      color: '#000',
+      color: DEFAULT_SELECTED_COLOR,
       lineWidth: BrushSize.Thin,
     })
   );
   hotkey.addListener('s', () =>
-    setMouseMode(edgeless, { type: 'shape', shape: 'rect', color: '#000000' })
+    setMouseMode(edgeless, {
+      type: 'shape',
+      shape: 'rect',
+      fillColor: DEFAULT_SHAPE_FILL_COLOR,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+    })
   );
 
   // issue #1814

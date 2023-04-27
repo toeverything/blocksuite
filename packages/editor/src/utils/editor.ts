@@ -8,9 +8,10 @@ import {
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
+  type BlockComponentElement,
+  getClosestFrameBlockElementById,
   getHoveringFrame,
-  isInEmptyDatabaseByPoint,
-  Point,
+  type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -28,11 +29,11 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: async (e, end, point) => {
+    onDropCallback: async (e, point, end, type) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const blocks = [];
+      const models = [];
       const props = JSON.parse(data);
       const isDatabase = props.flavour === 'affine:database';
       if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
@@ -40,68 +41,70 @@ export const createBlockHub: (
         return;
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        blocks.push(...(await uploadImageFromLocal(page)));
+        models.push(...(await uploadImageFromLocal(page)));
       } else {
-        blocks.push(props);
+        models.push(props);
       }
 
-      if (end) {
-        const { rect, model, element } = end;
-
-        let ids: string[] = [];
+      let parentId;
+      let focusId;
+      if (end && type !== 'none') {
+        const { model } = end;
 
         page.captureSync();
 
-        if (isInEmptyDatabaseByPoint(point, model, element, blocks)) {
-          ids = page.addBlocks(blocks, model);
+        if (type === 'database') {
+          const ids = page.addBlocks(models, model);
+          focusId = ids[0];
+          parentId = model.id;
         } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
-          ids = page.addSiblingBlocks(
-            model,
-            blocks,
-            distanceToTop < distanceToBottom ? 'before' : 'after'
-          );
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const ids = page.addSiblingBlocks(model, models, type);
+          focusId = ids[0];
+          parentId = parent.id;
         }
 
-        if (ids.length) {
+        if (focusId) {
           // database init basic structure
           if (isDatabase) {
             const service = await getServiceOrRegister(props.flavour);
-            service.initDatabaseBlock(page, model, ids[0]);
+            service.initDatabaseBlock(page, model, focusId);
           }
-
-          asyncFocusRichText(page, ids[0]);
         }
-      }
 
-      if (editor.mode === 'page') {
-        tryUpdateFrameSize(page, 1);
-        return;
+        if (editor.mode === 'page') {
+          asyncFocusRichText(page, focusId);
+          tryUpdateFrameSize(page, 1);
+          return;
+        }
       }
 
       // In edgeless mode.
-      const edgelessPageBlock = getEdgelessPage(page);
-      assertExists(edgelessPageBlock);
+      const pageBlock = getEdgelessPage(page);
+      assertExists(pageBlock);
 
-      // Creates new frame block.
-      if (!end) {
-        const ids = edgelessPageBlock.addNewFrame(
-          blocks,
-          new Point(e.clientX, e.clientY)
-        );
-        if (ids.length) {
-          asyncFocusRichText(page, ids[0]);
-        }
+      let frameId;
+      if (focusId && parentId) {
+        const targetFrameBlock = getClosestFrameBlockElementById(
+          parentId,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(targetFrameBlock);
+        frameId = targetFrameBlock.model.id;
+      } else {
+        // Creates new frame block on blank area.
+        const result = pageBlock.addNewFrame(models, point);
+        frameId = result.frameId;
+        focusId = result.ids[0];
       }
-
-      tryUpdateFrameSize(page, edgelessPageBlock.surface.viewport.zoom);
+      pageBlock.setSelection(frameId, true, focusId, point);
     },
     onDragStarted: () => {
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.slots.selectedRectsUpdated.emit([]);
+        defaultPageBlock.selection.clear();
       }
     },
     getAllowedBlocks: () => {

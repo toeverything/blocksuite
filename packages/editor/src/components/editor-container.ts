@@ -11,10 +11,11 @@ import {
   getDefaultPageBlock,
   getServiceOrRegister,
   ShadowlessElement,
+  ThemeObserver,
 } from '@blocksuite/blocks';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
@@ -38,15 +39,17 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  autofocus = false;
+  override autofocus = false;
 
   @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
 
-  @state()
-  private showGrid = false;
+  @property()
+  showGrid = true;
+
+  readonly themeObserver = new ThemeObserver();
 
   get model() {
     return [this.page.root, this.page.surface] as [
@@ -73,11 +76,17 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   slots: CommonSlots = {
     pageLinkClicked: new Slot(),
+    /**
+     * @deprecated
+     */
     subpageLinked: new Slot(),
+    /**
+     * @deprecated
+     */
     subpageUnlinked: new Slot(),
   };
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     const keydown = (e: KeyboardEvent) => {
@@ -124,14 +133,6 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
       }
     );
 
-    this._disposables.addFromEvent(
-      window,
-      'affine:switch-edgeless-display-mode',
-      ({ detail }) => {
-        this.showGrid = detail;
-      }
-    );
-
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
@@ -152,14 +153,17 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+
+    this.themeObserver.observer(document.documentElement);
+    this._disposables.add(this.themeObserver);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
 
@@ -173,7 +177,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
@@ -193,7 +197,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
     return createBlockHub(this, this.page);
   }
 
-  render() {
+  override render() {
     if (!this.model || !this.pageBlockModel) return null;
 
     const pageContainer = keyed(
@@ -242,6 +246,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
           position: relative;
           overflow: hidden;
           font-family: var(--affine-font-family);
+          background: var(--affine-background-primary-color);
         }
       </style>
       <div class="affine-editor-container">${blockRoot}</div>

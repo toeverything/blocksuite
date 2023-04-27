@@ -32,7 +32,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (!parent) {
     return;
   }
-  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+  if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
     // todo: jump into next row
     return;
   }
@@ -292,12 +292,7 @@ export function handleUnindent(
     children: previousSiblings,
   });
 
-  // 3. append child blocks after the target block to the target block
-  page.updateBlock(model, {
-    children: [...model.children, ...nextSiblings],
-  });
-
-  // 4. insert target block to the grand block
+  // 3. insert target block to the grand block
   const index = grandParent.children.indexOf(parent);
   page.updateBlock(grandParent, {
     children: [
@@ -305,6 +300,11 @@ export function handleUnindent(
       model,
       ...grandParent.children.slice(index + 1),
     ],
+  });
+
+  // 4. append child blocks after the target block to the target block
+  page.updateBlock(model, {
+    children: [...model.children, ...nextSiblings],
   });
 
   // 5. If the target block is a numbered list, update the prefix of next siblings
@@ -335,7 +335,7 @@ function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!Utils.doesInsideBlockByFlavour(page, model, 'affine:database'))
+  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
     return false;
 
   return true;

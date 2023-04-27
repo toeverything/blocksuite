@@ -4,7 +4,11 @@
 
 import './declare-test-window.js';
 
-import type { FrameBlockModel, PageBlockModel } from '@blocksuite/blocks';
+import type {
+  CssVariableName,
+  FrameBlockModel,
+  PageBlockModel,
+} from '@blocksuite/blocks';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -12,6 +16,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
+import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
@@ -31,6 +36,7 @@ import {
 import {
   captureHistory,
   getCurrentEditorPageId,
+  getCurrentThemeCSSPropertyValue,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -58,8 +64,6 @@ export const defaultStore: SerializedStore = {
   },
   'space:page0': {
     '0': {
-      'ext:cells': {},
-      'ext:columns': {},
       'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',
@@ -69,7 +73,8 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,72]',
+      'prop:xywh': '[0,0,720,80]',
+      'prop:background': '--affine-background-secondary-color',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -631,8 +636,8 @@ export async function assertEdgelessNonHoverRect(page: Page) {
   await expect(hoverRect).toBeHidden();
 }
 
-export function assertSameColor(c1: `#${string}`, c2: `#${string}`) {
-  expect(c1.toLowerCase()).toEqual(c2.toLowerCase());
+export function assertSameColor(c1?: `#${string}`, c2?: `#${string}`) {
+  expect(c1?.toLowerCase()).toEqual(c2?.toLowerCase());
 }
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -664,26 +669,6 @@ export async function assertEdgelessNonSelectedRect(page: Page) {
   await expect(rect).toBeHidden();
 }
 
-export async function assertDatabaseCellRichTexts(
-  page: Page,
-  selector: string,
-  texts: string
-) {
-  const actualTexts = await page.evaluate(selector => {
-    const richText = document
-      .querySelector<RichText>(selector)
-      ?.shadowRoot?.querySelector<RichText>('affine-database-rich-text-cell');
-    if (!richText) throw new Error('Missing database rich text cell');
-    return richText.vEditor.yText.toString();
-  }, selector);
-  expect(actualTexts).toEqual(texts);
-}
-
-export async function assertDatabaseTitleText(page: Page, text: string) {
-  const dbTitle = page.locator('[data-block-is-database-title="true"]');
-  expect(await dbTitle.textContent()).toEqual(text);
-}
-
 export async function assertSelectionInFrame(page: Page, frameId: string) {
   const closestFrameId = await page.evaluate(() => {
     const selection = window.getSelection();
@@ -691,4 +676,36 @@ export async function assertSelectionInFrame(page: Page, frameId: string) {
     return frame?.getAttribute('data-block-id');
   });
   expect(closestFrameId).toEqual(frameId);
+}
+
+export async function assertEdgelessFrameBackground(
+  page: Page,
+  frameId: string,
+  color: CssVariableName
+) {
+  const backgroundColor = await page
+    .locator(`affine-frame[data-block-id="${frameId}"]`)
+    .evaluate(ele => {
+      const frameWrapper = ele.closest<HTMLDivElement>(
+        '.affine-edgeless-block-child'
+      );
+      if (!frameWrapper) {
+        throw new Error(`Could not find frame: ${frameId}`);
+      }
+      return frameWrapper.style.background;
+    });
+
+  expect(backgroundColor).toEqual(`var(${color})`);
+}
+
+export async function assertEdgelessColorSameWithHexColor(
+  page: Page,
+  edgelessColor: CssVariableName,
+  hexColor: `#${string}`
+) {
+  const themeColor = await getCurrentThemeCSSPropertyValue(page, edgelessColor);
+  expect(themeColor).toBeTruthy();
+  const edgelessHexColor = toHex(themeColor as string);
+
+  assertSameColor(hexColor, edgelessHexColor as `#${string}`);
 }

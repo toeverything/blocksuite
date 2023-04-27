@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.5.0-alpha.2",
+  "version": "0.5.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/blocks",
@@ -9,7 +9,6 @@
     "packages/global",
     "packages/phasor",
     "packages/playground",
-    "packages/react",
     "packages/store",
     "packages/virgo",
     "packages/connector"
@@ -19,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.1.1",
+  "packageManager": "pnpm@8.3.1",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
@@ -35,6 +34,7 @@
     "test:headed": "playwright test --debug",
     "test:store": "pnpm --filter @blocksuite/store test",
     "test:virgo": "pnpm --filter @blocksuite/virgo test",
+    "test:node": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/node-import-test.ts",
     "format": "prettier --write --cache packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
@@ -80,6 +80,7 @@
     "nyc": "^15.1.0",
     "prettier": "^2.8.5",
     "pretty-format": "^29.5.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.2",
     "vite": "^4.2.0",
     "vite-plugin-istanbul": "^4.0.1",

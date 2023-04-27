@@ -3,6 +3,7 @@ import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
+import type { ListType } from '../../list-block/index.js';
 import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
@@ -33,7 +34,7 @@ export function isCollapsedAtBlockStart(vEditor: VEditor) {
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-export function doesInSamePath(
+export function isInSamePath(
   page: Page,
   children: BaseBlockModel,
   father: BaseBlockModel

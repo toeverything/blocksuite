@@ -114,16 +114,24 @@ export async function strikethrough(page: Page) {
 export async function copyByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
 }
+
 export async function cutByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
 }
-export async function pasteByKeyboard(page: Page) {
-  const doesEditorActive = await page.evaluate(() =>
-    document.activeElement?.closest('editor-container')
-  );
-  if (!doesEditorActive) {
-    await page.click('editor-container');
+
+/**
+ * Notice: this method will try to click closest editor by default
+ */
+export async function pasteByKeyboard(page: Page, forceFocus = true) {
+  if (forceFocus) {
+    const isEditorActive = await page.evaluate(() =>
+      document.activeElement?.closest('editor-container')
+    );
+    if (!isEditorActive) {
+      await page.click('editor-container');
+    }
   }
+
   await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
 }
 
@@ -167,5 +175,13 @@ export async function fillLine(page: Page, toNext = false) {
     if (!toNext) {
       page.keyboard.press('Backspace');
     }
+  }
+}
+
+export async function pressForwardDelete(page: Page) {
+  if (IS_MAC) {
+    await page.keyboard.press('Control+d', { delay: 50 });
+  } else {
+    await page.keyboard.press('Delete', { delay: 50 });
   }
 }

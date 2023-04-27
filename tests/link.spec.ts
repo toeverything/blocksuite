@@ -80,7 +80,9 @@ test('basic link', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:paragraph
       prop:text={
         <>

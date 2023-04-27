@@ -3,34 +3,111 @@ import './button.js';
 import {
   ArrowDownIcon,
   type BlockConfig,
-  CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { restoreSelection } from '../../__internal__/utils/block-range.js';
+import {
+  getCurrentBlockRange,
+  restoreSelection,
+} from '../../__internal__/utils/block-range.js';
 import {
   getRichTextByModel,
   WithDisposable,
 } from '../../__internal__/utils/index.js';
-import { formatConfig } from '../../page-block/utils/const.js';
+import { stopPropagation } from '../../page-block/edgeless/utils.js';
+import { actionConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   getCurrentCombinedFormat,
   onModelElementUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
-import { toast } from '../toast.js';
 import { formatQuickBarStyle } from './styles.js';
+
+type ParagraphType = `${string}/${string}`;
+type ParagraphPanelType = 'top' | 'bottom' | 'hidden';
+
+function ParagraphPanel(
+  showParagraphPanel: ParagraphPanelType,
+  paragraphPanelMaxHeight: string | null,
+  paragraphType: ParagraphType,
+  models: BaseBlockModel[],
+  positionUpdated: Slot,
+  onHover: () => void,
+  onHoverEnd: () => void,
+  onUpdateModels: (models: BaseBlockModel[]) => void,
+  onParagraphTypeChange: (type: ParagraphType) => void
+) {
+  if (showParagraphPanel === 'hidden') {
+    return html``;
+  }
+  const styles = styleMap({
+    left: '0',
+    top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
+    bottom: showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
+    maxHeight: paragraphPanelMaxHeight,
+  });
+  const updateParagraphType = (
+    flavour: BlockConfig['flavour'],
+    type?: string
+  ) => {
+    // Already in the target format, should convert back to text
+    const alreadyTargetType = paragraphType === `${flavour}/${type}`;
+    const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+    const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
+    const targetType = alreadyTargetType ? defaultType : type;
+    const newModels = updateBlockType(models, targetFlavour, targetType);
+
+    // Reset selection if the target is code block
+    if (targetFlavour === 'affine:code') {
+      if (newModels.length !== 1) {
+        throw new Error("Failed to reset selection! New model length isn't 1");
+      }
+      const codeModel = newModels[0];
+      onModelElementUpdated(codeModel, () => {
+        restoreSelection({
+          type: 'Block',
+          startOffset: 0,
+          endOffset: codeModel.text?.length ?? 0,
+          models: [codeModel],
+        });
+      });
+    }
+    onUpdateModels(newModels);
+    onParagraphTypeChange(`${targetFlavour}/${targetType}`);
+    positionUpdated.emit();
+  };
+
+  return html` <div
+    class="paragraph-panel"
+    style="${styles}"
+    @mouseover="${onHover}"
+    @mouseout="${onHoverEnd}"
+  >
+    ${paragraphConfig.map(
+      ({ flavour, type, name, icon }) => html`<format-bar-button
+        width="100%"
+        style="padding-left: 12px; justify-content: flex-start;"
+        text="${name}"
+        data-testid="${flavour}/${type}"
+        @click="${() => updateParagraphType(flavour, type)}"
+      >
+        ${icon}
+      </format-bar-button>`
+    )}
+  </div>`;
+}
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
-  static styles = formatQuickBarStyle;
+  static override styles = formatQuickBarStyle;
 
   @property()
   page!: Page;
@@ -52,7 +129,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   models: BaseBlockModel[] = [];
 
   @state()
-  private _paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
+  private _paragraphType: ParagraphType = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
   private _paragraphPanelHoverDelay = 150;
@@ -61,7 +138,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   private _paragraphPanelTimer = 0;
 
   @state()
-  private _showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+  private _showParagraphPanel: ParagraphPanelType = 'hidden';
 
   paragraphPanelMaxHeight: string | null = null;
 
@@ -71,7 +148,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     const startModel = this.models[0];
@@ -86,6 +163,8 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     this.abortController.signal.addEventListener('abort', () => {
       this.remove();
     });
+
+    document.addEventListener('selectionchange', this._selectionChangeHandler);
 
     const mutationObserver = new MutationObserver(() => {
       if (!this.page) {
@@ -111,6 +190,12 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       });
     });
     this._disposables.add(() => mutationObserver.disconnect());
+    this._disposables.add(() =>
+      document.removeEventListener(
+        'selectionchange',
+        this._selectionChangeHandler
+      )
+    );
   }
 
   private _onHover() {
@@ -141,74 +226,24 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     clearTimeout(this._paragraphPanelTimer);
   }
 
-  private _onCopy() {
-    // Will forward to the `CopyCutManager`
-    this.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
-    toast('Copied to clipboard');
-  }
-
-  private _paragraphPanelTemplate() {
-    if (this._showParagraphPanel === 'hidden') {
-      return html``;
+  private _selectionChangeHandler = () => {
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      this.abortController.abort();
+      return;
     }
-    const styles = styleMap({
-      left: '0',
-      top: this._showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: this._showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
-      maxHeight: this.paragraphPanelMaxHeight,
-    });
-    const updateParagraphType = (
-      flavour: BlockConfig['flavour'],
-      type?: string
-    ) => {
-      // Already in the target format, should convert back to text
-      const alreadyTargetType = this._paragraphType === `${flavour}/${type}`;
-      const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
-      const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
-      const targetType = alreadyTargetType ? defaultType : type;
-      const newModels = updateBlockType(this.models, targetFlavour, targetType);
-
-      // Reset selection if the target is code block
-      if (targetFlavour === 'affine:code') {
-        if (newModels.length !== 1) {
-          throw new Error(
-            "Failed to reset selection! New model length isn't 1"
-          );
-        }
-        const codeModel = newModels[0];
-        onModelElementUpdated(codeModel, () => {
-          restoreSelection({
-            type: 'Block',
-            startOffset: 0,
-            endOffset: codeModel.text?.length ?? 0,
-            models: [codeModel],
-          });
-        });
-      }
-      this.models = newModels;
-      this._paragraphType = `${targetFlavour}/${targetType}`;
-      this.positionUpdated.emit();
-    };
-
-    return html` <div
-      class="paragraph-panel"
-      style="${styles}"
-      @mouseover="${this._onHover}"
-      @mouseout="${this._onHoverEnd}"
-    >
-      ${paragraphConfig.map(
-        ({ flavour, type, name, icon }) => html` <format-bar-button
-          width="100%"
-          style="padding-left: 12px; justify-content: flex-start;"
-          text="${name}"
-          data-testid="${flavour}/${type}"
-          @click="${() => updateParagraphType(flavour, type)}"
-        >
-          ${icon}
-        </format-bar-button>`
-      )}
-    </div>`;
-  }
+    // If the selection is collapsed, abort the format quick bar
+    if (
+      blockRange.type === 'Native' &&
+      blockRange.models.length === 1 &&
+      blockRange.startOffset === blockRange.endOffset
+    ) {
+      this.abortController.abort();
+      return;
+    }
+    this._format = getCurrentCombinedFormat(this.page);
+    this.positionUpdated.emit();
+  };
 
   override render() {
     const page = this.page;
@@ -221,6 +256,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       );
       return html``;
     }
+
     const paragraphIcon =
       paragraphConfig.find(
         ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
@@ -234,7 +270,17 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
-    const paragraphPanel = this._paragraphPanelTemplate();
+    const paragraphPanel = ParagraphPanel(
+      this._showParagraphPanel,
+      this.paragraphPanelMaxHeight,
+      this._paragraphType,
+      this.models,
+      this.positionUpdated,
+      this._onHover,
+      this._onHoverEnd,
+      newModels => (this.models = newModels),
+      paragraphType => (this._paragraphType = paragraphType)
+    );
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
@@ -258,20 +304,36 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         </format-bar-button>`
       );
 
-    const actionItems = html` <format-bar-button
-      class="has-tool-tip"
-      data-testid="copy"
-      @click=${() => this._onCopy()}
-    >
-      ${CopyIcon}
-      <tool-tip inert role="tooltip">Copy</tool-tip>
-    </format-bar-button>`;
+    const actionItems = actionConfig
+      .filter(({ showWhen = () => true }) => showWhen(page))
+      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
+        const enabled = enabledWhen(page);
+        const toolTip = enabled
+          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
+          : html`<tool-tip tip-position="top" inert role="tooltip"
+              >${disabledToolTip}</tool-tip
+            >`;
+        return html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?disabled=${!enabled}
+          @click=${() => {
+            if (enabled) action({ page });
+          }}
+        >
+          ${icon}${toolTip}
+        </format-bar-button>`;
+      });
 
     const styles = styleMap({
       left: this.left,
       top: this.top,
     });
-    return html` <div class="format-quick-bar" style="${styles}">
+    return html` <div
+      class="format-quick-bar"
+      style="${styles}"
+      @pointerdown=${stopPropagation}
+    >
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}

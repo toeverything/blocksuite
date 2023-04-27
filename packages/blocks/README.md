@@ -1,7 +1,7 @@
 # `@blocksuite/blocks`
 
-Default BlockSuite editable blocks.
+Default BlockSuite editable blocks. Used in [AFFiNE](https://affine.pro/).
 
 ## Documentation
 
-TBD
+Checkout [blocksuite.affine.pro](https://blocksuite.affine.pro/) for comprehensive documentation.

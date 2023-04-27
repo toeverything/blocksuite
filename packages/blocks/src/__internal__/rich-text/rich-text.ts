@@ -14,7 +14,7 @@ const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
 
 @customElement('rich-text')
 export class RichText extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-rich-text {
       height: 100%;
       width: 100%;
@@ -53,7 +53,7 @@ export class RichText extends ShadowlessElement {
   private _inlineSuggestController: InlineSuggestionController =
     new InlineSuggestionController(this);
 
-  firstUpdated() {
+  override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor(this.model.text.yText);
     setupVirgoScroll(this.model.page, this._vEditor);
@@ -72,19 +72,33 @@ export class RichText extends ShadowlessElement {
       keyboardBindings
     );
 
+    let ifPrefixSpace = false;
+
     this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
       keydown: keyDownHandler,
-      virgoInput: e => {
+      virgoInput: ctx => {
         const vEditor = this._vEditor;
         assertExists(vEditor);
         const vRange = vEditor.getVRange();
         if (!vRange || vRange.length !== 0) {
-          return false;
+          return ctx;
         }
 
+        const { data, event } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (e.data && e.data !== '\n') {
+
+        // Overwrite the default behavior (Insert period when consecutive spaces) of IME.
+        if (event.inputType === 'insertText' && data === ' ') {
+          ifPrefixSpace = true;
+        } else if (data !== '. ' && data !== '。 ') {
+          ifPrefixSpace = false;
+        }
+        if (ifPrefixSpace && (data === '. ' || data === '。 ')) {
+          ctx.data = ' ';
+        }
+
+        if (data && data.length > 0 && data !== '\n') {
           if (
             deltas.length > 1 ||
             (deltas.length === 1 && vRange.index !== 0)
@@ -96,26 +110,21 @@ export class RichText extends ShadowlessElement {
               });
             }
 
-            vEditor.insertText(vRange, e.data, attributes);
-            vEditor.setVRange({
-              index: vRange.index + e.data.length,
-              length: 0,
-            });
-            return true;
+            ctx.attributes = attributes ?? null;
           }
         }
 
-        return false;
+        return ctx;
       },
-      virgoCompositionEnd: e => {
-        const { data } = e;
+      virgoCompositionEnd: ctx => {
         const vEditor = this._vEditor;
         assertExists(vEditor);
         const vRange = vEditor.getVRange();
         if (!vRange || vRange.length !== 0) {
-          return false;
+          return ctx;
         }
 
+        const { data } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
         if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
           const attributes = deltas[0][0].attributes;
@@ -125,14 +134,9 @@ export class RichText extends ShadowlessElement {
             });
           }
 
-          vEditor.insertText(vRange, data, attributes);
-          vEditor.setVRange({
-            index: vRange.index + data.length,
-            length: 0,
-          });
-          return true;
+          ctx.attributes = attributes ?? null;
         }
-        return false;
+        return ctx;
       },
     });
 
@@ -148,13 +152,13 @@ export class RichText extends ShadowlessElement {
     }
   }
 
-  updated() {
+  override updated() {
     if (this._vEditor) {
       this._vEditor.setReadonly(this.model.page.readonly);
     }
   }
 
-  render() {
+  override render() {
     return html`<div
         class="affine-rich-text virgo-editor"
         @keydown=${this._inlineSuggestController.onKeyDown}

@@ -13,8 +13,11 @@ export default defineConfig({
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
       { text: 'Docs', link: '/introduction' },
-      { text: '🚧 API', link: '' },
-      { text: '🚧 Examples', link: '' },
+      // { text: 'API', link: '' },
+      {
+        text: 'Releases',
+        link: 'https://github.com/toeverything/blocksuite/releases',
+      },
     ],
 
     sidebar: [
@@ -26,32 +29,44 @@ export default defineConfig({
         text: 'Using BlockSuite',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
+          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
+          { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
+          { text: 'Handling Events', link: '/handling-events' },
           {
-            text: '🚧 Fundamental Concepts',
-            link: '',
-            items: [
-              { text: '🚧 Workspaces and Pages', link: '' },
-              { text: '🚧 Flavoured Blocks', link: '' },
-            ],
+            text: 'Attaching Editor',
+            link: '/attaching-editor',
           },
-          { text: '🚧 Collaboration and Data Persistence', link: '' },
-          { text: '🚧 Defining Your Block', link: '' },
-          { text: '🚧 Building Your Framework', link: '' },
-          { text: 'Editor Example', link: '/editor-example' },
-          // { text: 'Runtime API Examples', link: '/api-examples' }, // Vitepress demo
+          { text: 'Data Persistence', link: '/data-persistence' },
         ],
       },
       {
-        text: 'Architecture In-Depth',
+        text: 'AFFiNE Editor Overview',
         items: [
-          { text: '🚧 Unidirectional Data Flow', link: '' },
           {
-            text: '🚧 Common Patterns',
+            text: 'Unidirectional Data Flow',
+            link: '/unidirectional-data-flow',
+          },
+          {
+            text: 'Editor UI Architecture',
+            link: '/editor-ui-architecture',
             items: [
-              { text: '🚧 Controlled Components', link: '' },
-              { text: '🚧 Rich Text Orchestration', link: '' },
-              { text: '🚧 Container Blocks', link: '' },
+              {
+                text: 'Editors as Hosts',
+                link: '/editors-as-hosts',
+              },
+              {
+                text: 'Rich Text Orchestration',
+                link: '/rich-text-orchestration',
+              },
+              {
+                text: 'Framework Integration',
+                link: '/framework-integration',
+              },
             ],
+          },
+          {
+            text: 'Defining Editable Blocks',
+            link: '/defining-editable-blocks',
           },
         ],
       },
@@ -60,11 +75,26 @@ export default defineConfig({
         items: [],
       },
       {
+        text: 'Packages',
+        items: [
+          { text: '🚧 <code>@blocksuite/store</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/blocks</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/phasor</code>', link: '' },
+        ],
+      },
+      {
         text: 'Developing BlockSuite',
         items: [
-          { text: '🚧 Building the Packages', link: '' },
-          { text: '🚧 Making Contributions', link: '' },
-          { text: '🚧 Testing', link: '' },
+          {
+            text: 'Building Packages',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md',
+          },
+          {
+            text: 'Running Tests',
+            link: 'https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#testing',
+          },
         ],
       },
     ],

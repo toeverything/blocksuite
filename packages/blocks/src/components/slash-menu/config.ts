@@ -20,6 +20,7 @@ import {
 import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
@@ -30,7 +31,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { copyBlock } from '../../page-block/default/utils.js';
-import { formatConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   onModelTextUpdated,
   updateBlockType,
@@ -39,6 +40,7 @@ import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
+  alias?: string[];
   icon: TemplateResult<1>;
   divider?: boolean;
   disabled?: boolean;
@@ -61,6 +63,15 @@ function insertContent(model: BaseBlockModel, text: string) {
     index: index + text.length,
     length: 0,
   });
+}
+
+function formatDate(date: Date) {
+  // yyyy-mm-dd
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const strTime = `${year}-${month}-${day}`;
+  return strTime;
 }
 
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
@@ -162,18 +173,17 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         divider: true,
         action: ({ model }) => {
           const date = new Date();
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
         name: 'Tomorrow',
         icon: TomorrowIcon,
         action: ({ model }) => {
+          // yyyy-mm-dd
           const date = new Date();
           date.setDate(date.getDate() + 1);
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
@@ -182,8 +192,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         action: ({ model }) => {
           const date = new Date();
           date.setDate(date.getDate() - 1);
-          const strTime = date.toISOString().split('T')[0];
-          insertContent(model, strTime);
+          insertContent(model, formatDate(date));
         },
       },
       {
@@ -210,6 +219,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Table View',
+        alias: ['database'],
         icon: DatabaseTableViewIcon,
         divider: true,
         action: async ({ page, model }) => {
@@ -229,6 +239,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Kanban View',
+        alias: ['database'],
         icon: DatabaseKanbanViewIcon,
         disabled: true,
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -277,7 +288,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             model.flavour,
             {
               type: model.type,
-              text: page.Text.fromDelta(model.text.toDelta()),
+              text: page.Text.fromDelta(
+                normalizeDelta(page, model.text.toDelta())
+              ),
               // @ts-expect-error
               checked: model.checked,
             },

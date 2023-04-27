@@ -1,7 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
@@ -9,13 +8,13 @@ import { codeLanguages } from '../utils/code-languages.js';
 // TODO extract to a common list component
 @customElement('lang-list')
 export class LangList extends ShadowlessElement {
-  static get styles() {
+  static override get styles() {
     return css`
       lang-list {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-popover-background);
+        background: var(--affine-background-primary-color);
         border-radius: 10px;
         top: 24px;
         z-index: 1;
@@ -52,12 +51,19 @@ export class LangList extends ShadowlessElement {
         margin-bottom: 5px;
       }
 
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        margin-top: 8px;
+        margin-left: 4px;
+      }
+
       #filter-input {
         display: flex;
         align-items: center;
         height: 32px;
         width: 192px;
-        border: 1px solid #d0d7e3;
+        border: 1px solid var(--affine-border-color);
         border-radius: 10px;
         padding-left: 44px;
         padding-top: 4px;
@@ -74,20 +80,26 @@ export class LangList extends ShadowlessElement {
       }
 
       #filter-input::placeholder {
-        color: #888a9e;
+        color: var(--affine-placeholder-color);
         font-size: var(--affine-font-sm);
       }
 
       .search-icon {
-        left: 13.65px;
         position: absolute;
-        top: 16px;
+        left: 8px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        fill: var(--affine-icon-color);
       }
     `;
   }
 
   @state()
   private _filterText = '';
+
+  @state()
+  private _currentSelectedIndex = -1;
 
   @property()
   selectedLanguage = '';
@@ -130,7 +142,7 @@ export class LangList extends ShadowlessElement {
     );
   }
 
-  render() {
+  override render() {
     const filteredLanguages = LangList.languages.filter(language => {
       if (!this._filterText) {
         return true;
@@ -138,31 +150,53 @@ export class LangList extends ShadowlessElement {
       return language.toLowerCase().startsWith(this._filterText.toLowerCase());
     });
 
-    const styles = styleMap({
-      display: 'flex',
-      'padding-top': '8px',
-      'padding-left': '4px',
-    });
+    const onLanguageSelect = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (this._currentSelectedIndex >= filteredLanguages.length - 1) return;
+
+        this._currentSelectedIndex++;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (this._currentSelectedIndex <= -1) return;
+
+        this._currentSelectedIndex--;
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (
+          this._currentSelectedIndex === -1 ||
+          this._currentSelectedIndex >= filteredLanguages.length
+        )
+          return;
+
+        this._onLanguageClicked(filteredLanguages[this._currentSelectedIndex]);
+      }
+    };
 
     return html`
       <div class="lang-list-container">
-        <div style="${styles}">
+        <div class="input-wrapper">
           <div class="search-icon">${SearchIcon}</div>
           <input
             id="filter-input"
             type="text"
             placeholder="Search"
-            @input="${() => (this._filterText = this.filterInput?.value)}"
+            @input="${() => {
+              this._filterText = this.filterInput?.value;
+              this._currentSelectedIndex = -1;
+            }}"
+            @keydown="${onLanguageSelect}"
           />
         </div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
-            language => html`
+            (language, index) => html`
               <icon-button
                 width="100%"
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
+                ?hover=${index === this._currentSelectedIndex}
               >
                 ${language}
               </icon-button>

@@ -3,9 +3,12 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { IconButton } from '../button.js';
 
+/**
+ * @deprecated Use {@link IconButton} instead.
+ */
 @customElement('format-bar-button')
 export class FormatBarButton extends IconButton {
-  static styles = css`
+  static override styles = css`
     ${IconButton.styles}
 
     :host {
@@ -19,10 +22,10 @@ export class FormatBarButton extends IconButton {
   `;
 
   @property()
-  width: string | number = '32px';
+  override width: string | number = '32px';
 
   @property()
-  height: string | number = '32px';
+  override height: string | number = '32px';
 
   // TODO update color when active
   @property()

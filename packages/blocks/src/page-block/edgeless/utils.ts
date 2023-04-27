@@ -1,5 +1,4 @@
-import type { MouseMode, TopLevelBlockModel } from '@blocksuite/blocks/std';
-import type { Point as ConnectorPoint, Point } from '@blocksuite/connector';
+import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
 import type {
@@ -21,8 +20,18 @@ import {
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 
-import { isPinchEvent } from '../../__internal__/utils/gesture.js';
-import type { EdgelessContainer } from './edgeless-page-block.js';
+import {
+  handleNativeRangeAtPoint,
+  type MouseMode,
+  Point,
+  type TopLevelBlockModel,
+} from '../../__internal__/index.js';
+import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
+import { isPinchEvent } from '../../__internal__/utils/index.js';
+import type {
+  EdgelessContainer,
+  EdgelessPageBlockComponent,
+} from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export const FRAME_MIN_WIDTH = 200;
@@ -208,7 +217,7 @@ export function generateConnectorPath(
     }
   });
 
-  let path: Point[] = [];
+  let path: ConnectorPoint[] = [];
   if (fixed && customizedEnd > -1) {
     const part0EndPoint = originControllers[customizedStart];
     const part0 =
@@ -242,7 +251,7 @@ export function generateConnectorPath(
 function getAttachedPointByDirection(
   { x, y, w, h }: Rectangle,
   direction: Direction
-): Point {
+): ConnectorPoint {
   switch (direction) {
     case 'top': {
       return { x: x + w / 2, y };
@@ -266,7 +275,7 @@ export function getAttachedPoint(
   x: number,
   y: number,
   rect?: Rectangle | null
-): { point: Point; position: Point | null } {
+): { point: ConnectorPoint; position: ConnectorPoint | null } {
   if (!rect || !rect.contains(x, y)) {
     return { point: { x, y }, position: null };
   }
@@ -281,13 +290,19 @@ export function getAttachedPoint(
     Math.pow(x - attachedPoint.x, 2) + Math.pow(y - attachedPoint.y, 2)
   );
   if (distance < ATTACHED_DISTANCE) {
-    return { point: attachedPoint, position };
+    return {
+      point: attachedPoint,
+      position: {
+        x: (attachedPoint.x - rect.x) / rect.w,
+        y: (attachedPoint.y - rect.y) / rect.h,
+      },
+    };
   }
 
   return { point: { x, y }, position };
 }
 
-function getAttachedPointByPosition(rect: Rectangle, position: Point) {
+function getAttachedPointByPosition(rect: Rectangle, position: ConnectorPoint) {
   const x = rect.x + rect.w * position.x;
   const y = rect.y + rect.h * position.y;
 
@@ -429,4 +444,64 @@ export function handleElementChangedEffectForConnector(
       }
     });
   }
+}
+
+export function getBackgroundGrid(
+  viewportX: number,
+  viewportY: number,
+  zoom: number,
+  showGrid: boolean
+) {
+  const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
+  const gap = 20 * step * zoom;
+  const translateX = -viewportX * zoom + gap / 2;
+  const translateY = -viewportY * zoom + gap / 2;
+
+  const gridStyle = {
+    backgroundImage:
+      'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)',
+  };
+  const defaultStyle = {};
+  const style = showGrid ? gridStyle : defaultStyle;
+
+  return {
+    style,
+    gap,
+    translateX,
+    translateY,
+  };
+}
+
+export function addText(
+  edgeless: EdgelessPageBlockComponent,
+  page: Page,
+  event: SelectionEvent,
+  width = DEFAULT_FRAME_WIDTH
+) {
+  const frameId = edgeless.addFrameWithPoint(
+    new Point(event.x, event.y),
+    width
+  );
+  page.addBlock('affine:paragraph', {}, frameId);
+  edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+
+  // Wait for mouseMode updated
+  requestAnimationFrame(() => {
+    const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+    const element = blocks.find(b => b.id === frameId);
+    if (element) {
+      const selectionState = {
+        selected: [element],
+        active: true,
+      };
+      edgeless.slots.selectionUpdated.emit(selectionState);
+
+      // Waiting dom updated, `frame mask` is removed
+      edgeless.updateComplete.then(() => {
+        // Cannot reuse `handleNativeRangeClick` directly here,
+        // since `retargetClick` will re-target to pervious editor
+        handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
+      });
+    }
+  });
 }

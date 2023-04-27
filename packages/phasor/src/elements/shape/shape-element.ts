@@ -1,4 +1,4 @@
-import type { Color, StrokeStyle } from '../../consts.js';
+import { StrokeStyle } from '../../consts.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
@@ -10,14 +10,22 @@ export class ShapeElement extends BaseElement {
   shapeType: ShapeType;
   radius = 0;
   filled = false;
-  fillColor: Color = '#ffffff';
+  fillColor = '#ffffff';
   strokeWidth = 4;
-  strokeColor: Color = '#000000';
-  strokeStyle: StrokeStyle = 'solid';
+  strokeColor = '#000000';
+  strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
+  }
+
+  get realStrokeColor() {
+    return this.transformPropertyValue(this.strokeColor);
+  }
+
+  get realFillColor() {
+    return this.transformPropertyValue(this.fillColor);
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
@@ -65,7 +73,7 @@ export class ShapeElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  static getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
+  static override getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
     return simplePick(rawProps, [
       'shapeType',
       'index',

@@ -1,12 +1,11 @@
-import type { PageBlockModel } from '@blocksuite/blocks';
-import type { SerializedBlock } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
-import { getFileFromClipboard } from '../clipboard/utils.js';
-import { getServiceOrRegister } from '../service.js';
+import type { PageBlockModel } from '../../models.js';
+import { getFileFromClipboard } from '../clipboard/utils/pure.js';
+import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
@@ -79,13 +78,14 @@ export class ContentParser {
     this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
   }
-  async file2Blocks(clipboardData: DataTransfer) {
+
+  async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
     const file = getFileFromClipboard(clipboardData);
     if (file) {
       if (file.type.includes('image')) {
         // TODO: upload file to file server
         // XXX: should use blob storage here?
-        const storage = await this._page.blobs;
+        const storage = this._page.blobs;
         assertExists(storage);
         const id = await storage.set(file);
         return [
@@ -93,6 +93,7 @@ export class ContentParser {
             flavour: 'affine:embed',
             type: 'image',
             sourceId: id,
+            children: [],
           },
         ];
       }
@@ -157,10 +158,12 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
   }
+
   public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
     this._parsers[name] = func;
   }
@@ -206,7 +209,7 @@ export class ContentParser {
       );
       childText && children.push(childText);
     }
-
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2html(model, {
@@ -230,6 +233,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
+    const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2Text(model, {
@@ -244,13 +248,10 @@ export class ContentParser {
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
-        const clipBlockInfos =
+        return (
           (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
-          [];
-        if (clipBlockInfos.length) {
-          return clipBlockInfos;
-        }
-        return [];
+          []
+        );
       }
     );
 

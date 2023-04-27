@@ -1,6 +1,8 @@
 import './utils/declare-test-window.js';
 
 import {
+  activeFrameInEdgeless,
+  addBasicRectShapeElement,
   captureHistory,
   copyByKeyboard,
   cutByKeyboard,
@@ -12,7 +14,9 @@ import {
   initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
+  initThreeParagraphs,
   pasteByKeyboard,
   pasteContent,
   pressBackspace,
@@ -25,13 +29,16 @@ import {
   setSelection,
   setVirgoSelection,
   SHORT_KEY,
+  switchEditorMode,
   type,
   undoByClick,
+  waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
   assertClipItems,
+  assertEdgelessSelectedRect,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -240,12 +247,13 @@ test('import markdown', async ({ page }) => {
 `;
   await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, frameId, clipData);
+  await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test.skip('copy clipItems format', async ({ page }) => {
+test('copy clipItems format', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -259,6 +267,7 @@ test.skip('copy clipItems format', async ({ page }) => {
 `;
 
   await importMarkdown(page, frameId, clipData);
+  await page.waitForTimeout(100);
   await setSelection(page, 4, 1, 5, 1);
   await assertClipItems(page, 'text/plain', 'bc');
   await assertClipItems(
@@ -270,7 +279,7 @@ test.skip('copy clipItems format', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 // FIXME
-test.skip('copy partially selected text', async ({ page }) => {
+test('copy partially selected text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -289,52 +298,6 @@ test.skip('copy partially selected text', async ({ page }) => {
   await waitNextFrame(page);
 
   await assertRichTexts(page, ['123 456 789', '456']);
-});
-// FIXME
-test.skip('copy more than one delta op on a block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-
-  const clipData = 'You `talking` to me?';
-
-  await importMarkdown(page, clipData, '0');
-  await setSelection(page, 3, 0, 3, 1);
-  await setVirgoSelection(page, 0, 14);
-  await assertClipItems(page, 'text/plain', 'You talking to');
-  await assertClipItems(
-    page,
-    'blocksuite/x-c+w',
-    JSON.stringify({
-      data: [
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [
-            {
-              insert: 'You ',
-            },
-            {
-              insert: 'talking',
-              attributes: {
-                code: true,
-              },
-            },
-            {
-              insert: ' to',
-            },
-          ],
-          children: [],
-        },
-      ],
-    })
-  );
-  await assertClipItems(
-    page,
-    'text/html',
-    '<p>You <code>talking</code> to</p>'
-  );
 });
 
 test('copy & paste outside editor', async ({ page }) => {
@@ -378,7 +341,9 @@ test.skip('should keep first line format when pasted into a new line', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="1"
@@ -417,7 +382,9 @@ test.skip('should keep first line format when pasted into a new line', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="1"
@@ -526,7 +493,9 @@ test('cut will delete all content, and copy will reappear content', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:type="bulleted"
@@ -543,7 +512,9 @@ test('cut will delete all content, and copy will reappear content', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:list
       prop:checked={false}
       prop:text="1"
@@ -592,13 +563,11 @@ test('should copy and paste of database work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:database
-      prop:columns={
-        Array [
-          "4",
-        ]
-      }
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -608,11 +577,7 @@ test('should copy and paste of database work', async ({ page }) => {
       />
     </affine:database>
     <affine:database
-      prop:columns={
-        Array [
-          "10",
-        ]
-      }
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -633,13 +598,11 @@ test('should copy and paste of database work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
     <affine:database
-      prop:columns={
-        Array [
-          "4",
-        ]
-      }
+      prop:columns="Array [1]"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -654,4 +617,70 @@ test('should copy and paste of database work', async ({ page }) => {
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('copy phasor element and text frame in edgeless mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+
+  await switchEditorMode(page);
+
+  await addBasicRectShapeElement(
+    page,
+    {
+      x: 100,
+      y: 100,
+    },
+    {
+      x: 200,
+      y: 200,
+    }
+  );
+
+  await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
+  await assertEdgelessSelectedRect(page, [90, 100, 720, 272]);
+
+  await copyByKeyboard(page);
+
+  await page.mouse.move(400, 400);
+
+  await pasteByKeyboard(page, false);
+
+  await assertEdgelessSelectedRect(page, [40, 264, 720, 272]);
+});
+
+test('copy when text frame active in edgeless', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await switchEditorMode(page);
+
+  await activeFrameInEdgeless(page, ids.frameId);
+  await waitForVirgoStateUpdated(page);
+  await setVirgoSelection(page, 0, 4);
+  await copyByKeyboard(page);
+  await type(page, '555');
+  await pasteByKeyboard(page, false);
+  await assertText(page, '5551234');
+});
+
+test('copy and paste to selection block selection', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2265',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page, false);
+  await assertRichTexts(page, ['1234', '']);
 });

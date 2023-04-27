@@ -1,25 +1,26 @@
+import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { PhasorElement, XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
+
 import {
   type BlockComponentElement,
   type DefaultMouseMode,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
-  getSelectedStateRectByBlockElement,
+  getRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  isEmpty,
   noop,
   Point,
   Rect,
   resetNativeSelection,
   type SelectionEvent,
   type TopLevelBlockModel,
-} from '@blocksuite/blocks/std';
-import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PhasorElement, XYWH } from '@blocksuite/phasor';
-import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
-
+} from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import { showFormatQuickBarByDoubleClick } from '../../index.js';
+import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
@@ -27,6 +28,7 @@ import {
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
+  addText,
   getXYWH,
   handleElementChangedEffectForConnector,
   isConnectorAndBindingsAllSelected,
@@ -37,7 +39,7 @@ import {
 } from '../utils.js';
 import { MouseModeController } from './index.js';
 
-enum DragType {
+export enum DefaultModeDragType {
   /** Moving selected contents */
   ContentMoving = 'content-moving',
   /** Expanding the dragging area, select the content covered inside */
@@ -46,22 +48,26 @@ enum DragType {
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
+  /** Dragging preview */
+  PreviewDragging = 'preview-dragging',
 }
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
-  enableHover = true;
+  override enableHover = true;
+  dragType = DefaultModeDragType.None;
 
-  private _dragType = DragType.None;
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
+  // Do not select the text, when click again after activating the frame.
+  private _isDoubleClickedOnMask = false;
 
-  get draggingArea() {
-    if (this._dragType === DragType.Selecting) {
+  override get draggingArea() {
+    if (this.dragType === DefaultModeDragType.Selecting) {
       return {
         start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
         end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
@@ -94,6 +100,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
+    this._edgeless.clearSelectedBlocks();
+
     const currentSelected = this.blockSelectionState.selected;
     if (currentSelected.length !== 1) {
       this._setSelectionState([selected], false);
@@ -117,6 +125,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           this._blockSelectionState.active;
         this._setSelectionState([selected], active);
       }
+      this._edgeless.slots.selectedBlocksUpdated.emit([]);
       handleNativeRangeClick(this._page, e);
     }
   }
@@ -174,6 +183,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     ]);
     this._page.updateBlock(block, { xywh });
     this._handleDragMoveEffect(block);
+
+    // TODO: refactor
+    if (this._edgeless.getSelection().selectedBlocks.length) {
+      this._edgeless.slots.selectedBlocksUpdated.emit(
+        this._edgeless.getSelection().selectedBlocks
+      );
+    }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
@@ -210,7 +226,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => !b.children.length);
+    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
     // always keep at least one frame block
     if (emptyBlocks.length === this._blocks.length) {
       emptyBlocks.shift();
@@ -246,7 +262,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
-        rect: getSelectedStateRectByBlockElement(element),
+        rect: getRectByBlockElement(element),
       };
       this._edgeless.components.dragHandle?.onContainerMouseMove(
         e,
@@ -265,6 +281,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     } else {
       this._setNoneSelectionState();
     }
+
+    this._isDoubleClickedOnMask = false;
   }
 
   onContainerContextMenu(e: SelectionEvent) {
@@ -272,22 +290,43 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: SelectionEvent) {
-    showFormatQuickBarByDoubleClick(e, this._page, this._edgeless);
+    const selected = this._pick(e.x, e.y);
+    if (!selected) {
+      addText(this._edgeless, this._page, e);
+      return;
+    }
+
+    if (
+      e.raw.target &&
+      e.raw.target instanceof HTMLElement &&
+      e.raw.target.classList.contains('affine-edgeless-mask')
+    ) {
+      this.onContainerClick(e);
+      this._isDoubleClickedOnMask = true;
+      return;
+    }
+
+    showFormatQuickBarByClicks('double', e, this._page, this._edgeless);
+  }
+
+  onContainerTripleClick(e: SelectionEvent) {
+    if (this._isDoubleClickedOnMask) return;
+    showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
   }
 
   onContainerDragStart(e: SelectionEvent) {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      this._dragType = this._blockSelectionState.active
-        ? DragType.NativeEditing
-        : DragType.ContentMoving;
+      this.dragType = this._blockSelectionState.active
+        ? DefaultModeDragType.NativeEditing
+        : DefaultModeDragType.ContentMoving;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        this._dragType = DragType.ContentMoving;
+        this.dragType = DefaultModeDragType.ContentMoving;
       } else {
-        this._dragType = DragType.Selecting;
+        this.dragType = DefaultModeDragType.Selecting;
       }
     }
 
@@ -298,8 +337,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    switch (this._dragType) {
-      case DragType.Selecting: {
+    switch (this.dragType) {
+      case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
         const viewX = Math.min(startX, e.x);
@@ -316,7 +355,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._setSelectionState([...blocks, ...elements], false);
         break;
       }
-      case DragType.ContentMoving: {
+      case DefaultModeDragType.ContentMoving: {
         this._blockSelectionState.selected.forEach(element => {
           if (isPhasorElement(element)) {
             this._handleSurfaceDragMove(element, e);
@@ -327,7 +366,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         this._forceUpdateSelection();
         break;
       }
-      case DragType.NativeEditing: {
+      case DefaultModeDragType.NativeEditing: {
         // TODO reset if drag out of frame
         handleNativeRangeDragMove(this._startRange, e);
         break;
@@ -362,13 +401,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         },
       });
     }
-    this._dragType = DragType.None;
+    this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._forceUpdateSelection();
   }
 
   onContainerMouseMove(e: SelectionEvent) {
+    if (this.dragType === DefaultModeDragType.PreviewDragging) return;
     this._updateDragHandle(e);
   }
 

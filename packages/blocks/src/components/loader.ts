@@ -8,7 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 @customElement('loader-element')
 export class Loader extends LitElement {
-  static styles = css`
+  static override styles = css`
     .load-container {
       margin: 10px auto;
       width: 150px;
@@ -18,7 +18,7 @@ export class Loader extends LitElement {
     .load-container .load {
       width: 8px;
       height: 8px;
-      background-color: var(--affine-code-color);
+      background-color: var(--affine-text-primary-color);
 
       border-radius: 100%;
       display: inline-block;

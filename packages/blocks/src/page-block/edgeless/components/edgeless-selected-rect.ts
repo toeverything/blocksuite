@@ -1,15 +1,15 @@
 import './component-toolbar/component-toolbar.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
 import type { Bound, ConnectorElement } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
 import { createPopper } from '@popperjs/core';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { WithDisposable } from '../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type {
   EdgelessSelectionState,
@@ -35,7 +35,7 @@ import {
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       user-select: none;
@@ -63,7 +63,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _selectedRect!: HTMLDivElement;
 
   @query('edgeless-component-toolbar')
-  private _componentToolbar!: EdgelessComponentToolbar;
+  private _componentToolbar?: EdgelessComponentToolbar;
 
   private _componentToolbarPopper: PopperInstance | null = null;
 
@@ -143,49 +143,49 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._lock = false;
   };
 
-  firstUpdated() {
+  override firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
 
-    this._componentToolbarPopper = createPopper(
-      this._selectedRect,
-      this._componentToolbar,
-      {
-        placement: 'top',
-        modifiers: [
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 12],
+    this._componentToolbarPopper = this._componentToolbar
+      ? createPopper(this._selectedRect, this._componentToolbar, {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 12],
+              },
             },
-          },
-          {
-            name: 'flip',
-            options: {
-              fallbackPlacements: ['bottom'],
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['bottom'],
+              },
             },
-          },
-        ],
-      }
-    );
+          ],
+        })
+      : null;
     _disposables.add(() => this._componentToolbarPopper?.destroy());
 
-    // This hook is not waiting all children updated.
-    // But children effect popper position. So we use ResizeObserver watching sizing change.
-    const resizeObserver = new ResizeObserver(() =>
-      this._componentToolbarPopper?.update()
-    );
-    resizeObserver.observe(this._componentToolbar);
-    _disposables.add(() => resizeObserver.disconnect());
+    if (this._componentToolbar) {
+      // This hook is not waiting all children updated.
+      // But children effect popper position. So we use ResizeObserver watching sizing change.
+      const resizeObserver = new ResizeObserver(() =>
+        this._componentToolbarPopper?.update()
+      );
+      resizeObserver.observe(this._componentToolbar);
+      _disposables.add(() => resizeObserver.disconnect());
+    }
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     // when viewport updates, popper should update too.
     this._componentToolbarPopper?.update();
     super.updated(changedProperties);
   }
 
-  render() {
+  override render() {
     if (this.state.selected.length === 0) return null;
 
     const { page, state, surface, resizeMode, _resizeManager } = this;
@@ -203,9 +203,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const resizeHandles = ResizeHandles(
       selectedRect,
       resizeMode,
-      (e: MouseEvent, direction: HandleDirection) => {
+      (e: PointerEvent, direction: HandleDirection) => {
         const bounds = getSelectableBounds(this.state.selected);
-        _resizeManager.onMouseDown(e, direction, bounds);
+        _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
       }
     );
 
@@ -221,19 +221,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           )
         : null;
 
+    const componentToolbar = this.state.active
+      ? nothing
+      : html`<edgeless-component-toolbar
+          .selected=${selected}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.state}
+        >
+        </edgeless-component-toolbar>`;
+
     return html`
       ${hasResizeHandles ? resizeHandles : null}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
         ${connectorHandles}
       </div>
-      <edgeless-component-toolbar
-        .selected=${selected}
-        .page=${this.page}
-        .surface=${this.surface}
-        .slots=${this.slots}
-        .selectionState=${this.state}
-      >
-      </edgeless-component-toolbar>
+      ${componentToolbar}
     `;
   }
 }

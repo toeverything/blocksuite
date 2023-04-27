@@ -1,15 +1,15 @@
-import './color-panel.js';
+import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
-import type { Color } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { BrushSize } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
+import type { ColorEvent } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { ColorEvent } from './color-panel.js';
 
 function BrushSizeButtonGroup(
   mouseMode: MouseMode,
@@ -52,7 +52,7 @@ function BrushSizeButtonGroup(
 
 @customElement('edgeless-brush-menu')
 export class EdgelessBrushMenu extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       width: 260px;
       z-index: 1;
@@ -62,7 +62,7 @@ export class EdgelessBrushMenu extends LitElement {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -85,12 +85,12 @@ export class EdgelessBrushMenu extends LitElement {
 
     .brush-size-button[active],
     .brush-size-button:hover {
-      background-color: var(--affine-hover-background);
+      background-color: var(--affine-hover-color);
     }
 
     .brush-size-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     .brush-size-button .thin {
@@ -99,8 +99,8 @@ export class EdgelessBrushMenu extends LitElement {
     }
 
     .brush-size-button .thick {
-      width: 16px;
-      height: 15px;
+      width: 10px;
+      height: 10px;
     }
 
     menu-divider {
@@ -116,7 +116,7 @@ export class EdgelessBrushMenu extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor = (color: Color) => {
+  private _setBrushColor = (color: CssVariableName) => {
     if (this.mouseMode.type !== 'brush') return;
 
     const { lineWidth } = this.mouseMode;
@@ -138,7 +138,7 @@ export class EdgelessBrushMenu extends LitElement {
     });
   };
 
-  render() {
+  override render() {
     if (this.mouseMode.type !== 'brush') return nothing;
 
     const { color } = this.mouseMode;

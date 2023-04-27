@@ -1,7 +1,8 @@
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { PageMeta, Workspace } from '../workspace.js';
+import type { PageMeta } from '../meta.js';
+import type { Workspace } from '../workspace.js';
 
 @customElement('test-app')
 export class TestApp extends LitElement {
@@ -20,12 +21,12 @@ export class TestApp extends LitElement {
 
   private _createPage() {
     const id = `${this.pages.length}`;
-    this.workspace.createPage(id);
+    this.workspace.createPage({ id: id });
     this.workspace.setPageMeta(id, { title: this.input.value });
     this.input.value = '';
   }
 
-  firstUpdated(changedProps: PropertyValues) {
+  override firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
 
     this.workspace.slots.pagesUpdated.on(() => {
@@ -39,7 +40,7 @@ export class TestApp extends LitElement {
     this.workspace.slots;
   }
 
-  render() {
+  override render() {
     return html`
       <div>
         <input type="text" name="page" placeholder="add a page" />

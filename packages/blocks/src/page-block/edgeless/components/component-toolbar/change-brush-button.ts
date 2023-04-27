@@ -1,38 +1,37 @@
 import '../tool-icon-button.js';
-import '../../toolbar/brush-tool/color-panel.js';
+import '../color-panel.js';
 
-import { WithDisposable } from '@blocksuite/blocks/std';
-import type { BrushElement, Color, SurfaceManager } from '@blocksuite/phasor';
+import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { WithDisposable } from '../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type {
-  ColorEvent,
-  EdgelessColorPanel,
-} from '../../toolbar/brush-tool/color-panel.js';
+import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
+import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: BrushElement[]): Color | undefined {
+function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as Color) : undefined;
+  return max ? (max[0] as CssVariableName) : null;
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize | undefined {
+function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : undefined;
+  return max ? (Number(max[0]) as BrushSize) : null;
 }
 
 @customElement('edgeless-change-brush-button')
 export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       flex-direction: row;
@@ -40,7 +39,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       justify-content: center;
       fill: none;
       stroke: currentColor;
-      color: var(--affine-text-color);
+      color: var(--affine-text-primary-color);
     }
 
     menu-divider {
@@ -52,7 +51,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       padding: 4px;
       justify-content: center;
       align-items: center;
-      background: var(--affine-page-background);
+      background: var(--affine-white);
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
     }
@@ -74,7 +73,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
     .brush-size-button div {
       border-radius: 50%;
-      background-color: #888a9e;
+      background-color: var(--affine-icon-color);
     }
 
     .brush-size-button[active] div {
@@ -87,8 +86,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .brush-size-button .thick {
-      width: 16px;
-      height: 16px;
+      width: 10px;
+      height: 10px;
     }
   `;
 
@@ -127,7 +126,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setBrushColor(color: Color) {
+  private _setBrushColor(color: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
@@ -136,7 +135,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     });
   }
 
-  firstUpdated(changedProperties: Map<string, unknown>) {
+  override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     this._colorPanelPopper = createButtonPopper(
@@ -150,10 +149,11 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  render() {
-    const selectedColor = getMostCommonColor(this.elements);
+  override render() {
+    const selectedColor =
+      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
     const style = {
-      backgroundColor: selectedColor ?? '#fff',
+      backgroundColor: `var(${selectedColor})`,
     };
 
     const selectedSize = getMostCommonSize(this.elements);
@@ -161,7 +161,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Thin'}
-        @tool.click=${() => this._setBrushSize(BrushSize.Thin)}
+        @click=${() => this._setBrushSize(BrushSize.Thin)}
       >
         <div
           class="brush-size-button"
@@ -172,7 +172,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Thick'}
-        @tool.click=${() => this._setBrushSize(BrushSize.Thick)}
+        @click=${() => this._setBrushSize(BrushSize.Thick)}
       >
         <div
           class="brush-size-button"
@@ -185,7 +185,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
-        @tool.click=${() => this._colorPanelPopper?.toggle()}
+        @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="brush-size-button">
           <div class="thick" style=${styleMap(style)}></div>

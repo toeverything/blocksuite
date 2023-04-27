@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
@@ -15,7 +16,6 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
-  createEvent,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
@@ -23,13 +23,8 @@ import {
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
-import {
-  CSSColorProperties,
-  CSSSizeProperties,
-  plate,
-} from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { nanoid, Utils, type Workspace } from '@blocksuite/store';
+import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
@@ -45,7 +40,7 @@ setBasePath(basePath);
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
       --sl-input-font-size-small: var(--affine-font-xs);
@@ -77,9 +72,6 @@ export class DebugMenu extends ShadowlessElement {
   @property()
   mode: 'page' | 'edgeless' = 'page';
 
-  @state()
-  private _showGrid = false;
-
   @property()
   readonly = false;
 
@@ -95,12 +87,26 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _showTabMenu = false;
 
+  @state()
+  private _dark = localStorage.getItem('blocksuite:dark') === 'true';
+
   get page() {
     return this.editor.page;
   }
 
-  createRenderRoot() {
+  override createRenderRoot() {
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    this._setThemeMode(this._dark && matchMedia.matches);
+    matchMedia.addEventListener('change', this._darkModeChange);
+
     return this;
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.removeEventListener('change', this._darkModeChange);
   }
 
   private _toggleConnection() {
@@ -178,7 +184,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchShowGrid() {
-    this._showGrid = !this._showGrid;
+    this.editor.showGrid = !this.editor.showGrid;
   }
 
   private _exportHtml() {
@@ -209,43 +215,45 @@ export class DebugMenu extends ShadowlessElement {
     this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
-  firstUpdated() {
+  private _setThemeMode(dark: boolean) {
+    const html = document.querySelector('html');
+
+    this._dark = dark;
+    localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
+    html?.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (dark) {
+      html?.classList.add('dark');
+      html?.classList.add('sl-theme-dark');
+    } else {
+      html?.classList.remove('dark');
+      html?.classList.remove('sl-theme-dark');
+    }
+  }
+
+  private _toggleDarkMode() {
+    this._setThemeMode(!this._dark);
+  }
+
+  private _darkModeChange = (e: MediaQueryListEvent) => {
+    this._setThemeMode(!!e.matches);
+  };
+
+  override firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 350;
-    const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');
     sizeFolder.open();
-    CSSSizeProperties.forEach(item => {
-      const { name, defaultValue, cssProperty } = item;
-      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
-        style.setProperty(cssProperty, Math.round(e) + 'px');
-      });
-    });
-
-    const colorFolder = this._styleMenu.addFolder('Color');
-    colorFolder.open();
-    CSSColorProperties.forEach(item => {
-      const { name, cssProperty } = item;
-      colorFolder.addColor(plate, name).onChange((color: string | null) => {
-        style.setProperty(cssProperty, color);
-      });
-    });
     this._styleMenu.hide();
   }
 
-  update(changedProperties: Map<string, unknown>) {
+  override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
-    }
-    if (changedProperties.has('_showGrid')) {
-      window.dispatchEvent(
-        createEvent('affine:switch-edgeless-display-mode', this._showGrid)
-      );
     }
     if (changedProperties.has('_hasOffset')) {
       const appRoot = document.getElementById('app');
@@ -269,7 +277,7 @@ export class DebugMenu extends ShadowlessElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         .debug-menu {
@@ -481,6 +489,15 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
+
+          <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
+            <sl-button size="small" @click=${this._toggleDarkMode}>
+              <sl-icon
+                name=${this._dark ? 'moon' : 'brightness-high'}
+              ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,
@@ -500,7 +517,7 @@ export class DebugMenu extends ShadowlessElement {
               content="Show Grid"
               @click=${this._switchShowGrid}
             >
-              <sl-icon name=${!this._showGrid ? 'square' : 'grid-3x3'}>
+              <sl-icon name=${!this.editor.showGrid ? 'square' : 'grid-3x3'}>
               </sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -511,16 +528,8 @@ export class DebugMenu extends ShadowlessElement {
 }
 
 function createPage(workspace: Workspace) {
-  const pageName = 'Untitled';
-  // TODO use id generator
-  // const id = workspace.idGenerator();
-  const id = nanoid();
-  const newPage = workspace.createPage(id);
-  const pageBlockId = newPage.addBlock('affine:page', {
-    title: new newPage.Text(pageName),
-  });
-  newPage.addBlock('affine:surface', {}, null);
-  newPage.addBlock('affine:frame', {}, pageBlockId);
+  const id = workspace.idGenerator();
+  workspace.createPage({ id, init: true });
 }
 
 function getTabGroupTemplate({
@@ -572,7 +581,7 @@ function getTabGroupTemplate({
                 const tabGroup =
                   document.querySelector<SlTabGroup>('.tabs-closable');
                 if (!tabGroup) throw new Error('tab group not found');
-                const otherPage = workspace.meta.pageMetas.find(
+                const otherPage = pageList.find(
                   metaPage => page.id !== metaPage.id
                 );
                 if (!otherPage) throw new Error('no other page found');
@@ -581,7 +590,21 @@ function getTabGroupTemplate({
               workspace.removePage(page.id);
             }}
           >
-            ${page.title}
+            <div>
+              <div>${page.title || 'Untitled'}</div>
+              <div>
+                ${page.subpageIds
+                  .map(
+                    pageId =>
+                      (
+                        pageList.find(meta => meta.id === pageId) ?? {
+                          title: 'Page Not Found',
+                        }
+                      ).title || 'Untitled'
+                  )
+                  .join(',')}
+              </div>
+            </div>
           </sl-tab>`
       )}
     </sl-tab-group>`;

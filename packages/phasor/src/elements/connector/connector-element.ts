@@ -1,4 +1,5 @@
-import type { IBound } from '../../consts.js';
+import { type IBound, StrokeStyle } from '../../consts.js';
+import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { simplePick } from '../../utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
@@ -15,14 +16,15 @@ import { ConnectorMode } from './types.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
-  color = '#000000' as const;
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
+  color = '#000000';
+  override x = 0;
+  override y = 0;
+  override w = 0;
+  override h = 0;
 
   mode: ConnectorMode = ConnectorMode.Orthogonal;
-  lineWidth = 2;
+  lineWidth = 4;
+  strokeStyle: StrokeStyle = StrokeStyle.Solid;
   controllers: Controller[] = [];
   startElement?: AttachedElement;
   endElement?: AttachedElement;
@@ -43,13 +45,18 @@ export class ConnectorElement extends BaseElement {
 
     const last = this.controllers[this.controllers.length - 1];
     const secondToLast = this.controllers[this.controllers.length - 2];
-    drawArrow(path, [secondToLast.x, secondToLast.y], [last.x, last.y]);
+    const arrowPath = new Path2D();
+    drawArrow(arrowPath, [secondToLast.x, secondToLast.y], [last.x, last.y]);
 
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.transformPropertyValue(this.color);
+    setLineDash(ctx, this.strokeStyle);
     ctx.lineWidth = this.lineWidth;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.stroke(path);
+
+    setLineDash(ctx, StrokeStyle.Solid);
+    ctx.stroke(arrowPath);
   }
 
   serialize(): SerializedConnectorProps {
@@ -62,6 +69,7 @@ export class ConnectorElement extends BaseElement {
       mode: this.mode,
       color: this.color,
       lineWidth: this.lineWidth,
+      strokeStyle: this.strokeStyle,
 
       startElement: this.startElement,
       endElement: this.endElement,
@@ -96,12 +104,16 @@ export class ConnectorElement extends BaseElement {
     Object.assign(element, props);
   }
 
-  static getProps(element: BaseElement, rawProps: Record<string, unknown>) {
+  static override getProps(
+    element: BaseElement,
+    rawProps: Record<string, unknown>
+  ) {
     const props = simplePick(rawProps, [
       'index',
       'mode',
       'color',
       'lineWidth',
+      'strokeStyle',
       'xywh',
       'controllers',
       'startElement',
@@ -111,7 +123,7 @@ export class ConnectorElement extends BaseElement {
     return props;
   }
 
-  static getBoundProps(
+  static override getBoundProps(
     element: BaseElement,
     bound: IBound
   ): Record<string, string> {

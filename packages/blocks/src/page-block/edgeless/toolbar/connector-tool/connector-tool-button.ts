@@ -8,6 +8,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
+import { DEFAULT_SELECTED_COLOR } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
 
@@ -44,7 +45,7 @@ function createConnectorMenuPopper(
 
 @customElement('edgeless-connector-tool-button')
 export class EdgelessConnectorToolButton extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -75,11 +76,11 @@ export class EdgelessConnectorToolButton extends LitElement {
     this.edgeless.slots.mouseModeUpdated.emit({
       type: 'connector',
       mode: ConnectorMode.Orthogonal,
-      color: '#010101',
+      color: DEFAULT_SELECTED_COLOR,
     });
   }
 
-  updated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'connector') {
         this._menu?.dispose();
@@ -92,20 +93,20 @@ export class EdgelessConnectorToolButton extends LitElement {
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._menu?.dispose();
     this._menu = null;
     super.disconnectedCallback();
   }
 
-  render() {
+  override render() {
     const type = this.mouseMode?.type;
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
-        @tool.click=${() => {
+        @click=${() => {
           this._trySetConnectorMode();
           this._toggleMenu();
         }}

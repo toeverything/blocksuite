@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import type {
+  CssVariableName,
+  DatabaseBlockModel,
+  ListType,
+  ThemeObserver,
+} from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -9,12 +14,17 @@ import type { RichText } from '../../../packages/playground/examples/virgo/test-
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
   pressEnter,
-  pressEscape,
   pressSpace,
   pressTab,
   SHORT_KEY,
   type,
 } from './keyboard.js';
+
+declare global {
+  interface WindowEventMap {
+    'blocksuite:page-ready': CustomEvent<string>;
+  }
+}
 
 export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
@@ -29,10 +39,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   const ignoredMessages = [
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
-    // embed.spec.ts
-    'Failed to load resource: the server responded with a status of 404 (Not Found)',
-    // embed.spec.ts
-    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
@@ -41,6 +47,13 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
     "addRange(): The given range isn't in document.",
+    //#region embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    'Error: Failed to fetch blob',
+    'Error: Cannot find blob',
+    'Cannot find blob',
+    //#endregion
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -57,59 +70,82 @@ function generateRandomRoomId() {
  */
 async function initEmptyEditor(
   page: Page,
-  flags: Partial<BlockSuiteFlags> = {}
+  flags: Partial<BlockSuiteFlags> = {},
+  noInit = false
 ) {
-  await page.evaluate(flags => {
-    const { workspace } = window;
-    const page = workspace.createPage('page0');
+  await page.evaluate(
+    ([flags, noInit]) => {
+      const { workspace } = window;
+      async function initPage(page: ReturnType<typeof workspace.createPage>) {
+        for (const [key, value] of Object.entries(flags)) {
+          page.awarenessStore.setFlag(key as keyof typeof flags, value);
+        }
 
-    for (const [key, value] of Object.entries(flags)) {
-      page.awarenessStore.setFlag(key as keyof typeof flags, value);
-    }
+        const editor = document.createElement('editor-container');
+        editor.page = page;
+        editor.autofocus = true;
+        editor.slots.pageLinkClicked.on(({ pageId }) => {
+          const newPage = workspace.getPage(pageId);
+          if (!newPage) {
+            throw new Error(`Failed to jump to page ${pageId}`);
+          }
+          editor.page = newPage;
+        });
 
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-    editor.autofocus = true;
-    editor.slots.pageLinkClicked.on(({ pageId }) => {
-      const newPage = workspace.getPage(pageId);
-      if (!newPage) {
-        throw new Error(`Failed to jump to page ${pageId}`);
+        const debugMenu = document.createElement('debug-menu');
+        debugMenu.workspace = workspace;
+        debugMenu.editor = editor;
+
+        // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
+        const appRoot = document.querySelector('#app');
+        if (!appRoot) {
+          throw new Error('Cannot find app root element(#app).');
+        }
+        appRoot.appendChild(editor);
+        document.body.appendChild(debugMenu);
+        editor.createBlockHub().then(blockHub => {
+          document.body.appendChild(blockHub);
+        });
+        window.debugMenu = debugMenu;
+        window.editor = editor;
+        window.page = page;
+        window.dispatchEvent(
+          new CustomEvent('blocksuite:page-ready', { detail: page.id })
+        );
       }
-      editor.page = newPage;
-    });
-
-    const debugMenu = document.createElement('debug-menu');
-    debugMenu.workspace = workspace;
-    debugMenu.editor = editor;
-
-    // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
-    const appRoot = document.querySelector('#app');
-    if (!appRoot) {
-      throw new Error('Cannot find app root element(#app).');
-    }
-    appRoot.appendChild(editor);
-    document.body.appendChild(debugMenu);
-    editor.createBlockHub().then(blockHub => {
-      document.body.appendChild(blockHub);
-    });
-    window.debugMenu = debugMenu;
-    window.editor = editor;
-    window.page = page;
-  }, flags);
+      if (noInit) {
+        workspace.slots.pageAdded.on(pageId => {
+          const page = workspace.getPage(pageId);
+          if (!page) {
+            throw new Error(`Failed to get page ${pageId}`);
+          }
+          initPage(page);
+        });
+      } else {
+        const page = workspace.createPage({ id: 'page0' });
+        initPage(page);
+      }
+    },
+    [flags, noInit] as const
+  );
   await waitNextFrame(page);
 }
 
 export async function enterPlaygroundRoom(
   page: Page,
   flags?: Partial<BlockSuiteFlags>,
-  room?: string
+  room?: string,
+  blobStorage?: ('memory' | 'indexeddb' | 'mock')[],
+  noInit?: boolean
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
+  const readyPromise = waitForPageReady(page);
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
       throw new Error('window.$blocksuite is not object');
@@ -136,7 +172,8 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"`);
   });
 
-  await initEmptyEditor(page, flags);
+  await initEmptyEditor(page, flags, noInit);
+  await readyPromise;
   return room;
 }
 
@@ -153,6 +190,17 @@ export async function waitNextFrame(
   frameTimeout = NEXT_FRAME_TIMEOUT
 ) {
   await page.waitForTimeout(frameTimeout);
+}
+
+export async function waitForPageReady(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>(resolve => {
+        window.addEventListener('blocksuite:page-ready', () => resolve(), {
+          once: true,
+        });
+      })
+  );
 }
 
 export async function waitForRemoteUpdateSlot(page: Page) {
@@ -309,23 +357,6 @@ export async function initEmptyDatabaseWithParagraphState(
   return ids;
 }
 
-export async function initDatabaseColumn(page: Page, title = '') {
-  const header = page.locator('.affine-database-column-header');
-  const box = await header.boundingBox();
-  if (!box) throw new Error('Missing column type rect');
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-
-  const columnAddBtn = page.locator('.header-add-column-button');
-  await columnAddBtn.click();
-
-  if (title) {
-    await type(page, title);
-    await pressEnter(page);
-  } else {
-    await pressEscape(page);
-  }
-}
-
 export async function initDatabaseRow(page: Page) {
   const footer = page.locator('.affine-database-block-footer');
   const box = await footer.boundingBox();
@@ -371,7 +402,7 @@ export async function focusDatabaseTitle(page: Page) {
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
   const columns = await page.evaluate(async () => {
     const database = window.page?.getBlockById('2') as DatabaseBlockModel;
-    return database.columns;
+    return database.columns.map(col => col.id);
   });
   expect(columns).toEqual(order);
 }
@@ -393,7 +424,7 @@ export async function initEmptyCodeBlockState(page: Page) {
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
-  // need to set `force` to true when clicking on `affine-page-selected-rects`
+  // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
 }
 
@@ -483,6 +514,30 @@ export async function getSelectedTextByVirgo(page: Page) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { index, length } = component!.vEditor!.getVRange()!;
     return component?.vEditor?.yText.toString().slice(index, length) || '';
+  });
+}
+
+export async function getSelectedText(page: Page) {
+  return await page.evaluate(() => {
+    let content = '';
+    const selection = window.getSelection() as Selection;
+
+    if (selection.rangeCount === 0) return content;
+
+    const range = selection.getRangeAt(0);
+    const components =
+      range.commonAncestorContainer.parentElement?.querySelectorAll(
+        'rich-text'
+      ) || [];
+
+    components.forEach(component => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { index, length } = component!.vEditor!.getVRange()!;
+      content +=
+        component?.vEditor?.yText.toString().slice(index, length) || '';
+    });
+
+    return content;
   });
 }
 
@@ -775,4 +830,30 @@ export async function getCurrentEditorPageId(page: Page) {
     const pageId = editor.page.id;
     return pageId;
   });
+}
+
+export async function getCurrentHTMLTheme(page: Page) {
+  const root = page.locator('html');
+  return await root.getAttribute('data-theme');
+}
+
+export async function getCurrentEditorTheme(page: Page) {
+  const mode = await page.locator('editor-container').evaluate(ele => {
+    return (ele as unknown as Element & { themeObserver: ThemeObserver })
+      .themeObserver.cssVariables?.['--affine-theme-mode'];
+  });
+  return mode;
+}
+
+export async function getCurrentThemeCSSPropertyValue(
+  page: Page,
+  property: CssVariableName
+) {
+  const value = await page
+    .locator('editor-container')
+    .evaluate((ele, property: CssVariableName) => {
+      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+        .themeObserver.cssVariables?.[property];
+    }, property);
+  return value;
 }

@@ -4,6 +4,11 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '@blocksuite/blocks';
+import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import type { Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
@@ -17,7 +22,7 @@ export interface InitFn {
 }
 
 export const empty: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage({ id: 'page0' });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -38,7 +43,7 @@ empty.displayName = 'Empty Editor';
 empty.description = 'Start from empty editor';
 
 export const heavy: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage({ id: 'page0' });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -84,7 +89,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export const preset: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage({ id: 'page0' });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -106,9 +111,9 @@ export const preset: InitFn = (workspace: Workspace) => {
 
     radius: 0,
     filled: false,
-    fillColor: '#ffffff',
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeWidth: 4,
-    strokeColor: '#010101',
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
     strokeStyle: 'solid',
   });
   contentParser.importMarkdown(presetMarkdown, frameId);
@@ -119,7 +124,7 @@ preset.displayName = 'BlockSuite Starter';
 preset.description = 'Start from friendly introduction';
 
 export const database: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage('page0');
+  const page = workspace.createPage({ id: 'page0' });
   page.awarenessStore.setFlag('enable_database', true);
 
   // Add page block and surface block at root level
@@ -132,40 +137,45 @@ export const database: InitFn = (workspace: Workspace) => {
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
   const selection = [
-    { value: 'Done', color: '#F5F5F5' },
-    { value: 'TODO', color: '#FFE1E1' },
-    { value: 'WIP', color: '#E1EFFF' },
+    { value: 'Done', color: 'var(--affine-tag-white)' },
+    { value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
-  const col1 = page.db.updateColumn({
+  // Add database block inside frame block
+  const databaseId = page.addBlock(
+    'affine:database',
+    {
+      columns: [],
+      cells: {},
+      titleColumnName: 'Title',
+      titleColumnWidth: 200,
+    },
+    frameId
+  );
+  const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+  const col1 = database.updateColumn({
     name: 'Number',
     type: 'number',
     width: 200,
     hide: false,
     decimal: 0,
   });
-  const col2 = page.db.updateColumn({
+  const col2 = database.updateColumn({
     name: 'Single Select',
     type: 'select',
     width: 200,
     hide: false,
     selection,
   });
-  const col3 = page.db.updateColumn({
+  const col3 = database.updateColumn({
     name: 'Rich Text',
     type: 'rich-text',
     width: 200,
     hide: false,
   });
-  // Add database block inside frame block
-  const databaseId = page.addBlock(
-    'affine:database',
-    {
-      columns: [col1, col2, col3],
-      titleColumnName: 'Title',
-      titleColumnWidth: 200,
-    },
-    frameId
-  );
+
+  database.applyColumnUpdate();
+
   const p1 = page.addBlock(
     'affine:paragraph',
     {
@@ -181,12 +191,14 @@ export const database: InitFn = (workspace: Workspace) => {
     databaseId
   );
 
-  page.db.updateCell(p1, {
+  const num = new page.YText();
+  num.insert(0, '0.1');
+  database.updateCell(p1, {
     columnId: col1,
-    value: 0.1,
+    value: num,
   });
 
-  page.db.updateCell(p2, {
+  database.updateCell(p2, {
     columnId: col2,
     value: [selection[1]],
   });
@@ -194,7 +206,7 @@ export const database: InitFn = (workspace: Workspace) => {
   const text = new page.YText();
   text.insert(0, '123');
   text.insert(0, 'code');
-  page.db.updateCell(p2, {
+  database.updateCell(p2, {
     columnId: col3,
     value: text,
   });

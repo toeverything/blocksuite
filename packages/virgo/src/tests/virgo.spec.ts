@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { ZERO_WIDTH_SPACE } from '../constant.js';
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { VEditor } from '../virgo.js';
 import {
   enterVirgoPlayground,
@@ -158,6 +158,25 @@ test('basic input', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
   expect(await editorB.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
+});
+
+test('type many times in one moment', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+  await page.waitForTimeout(100);
+  await Promise.all(
+    'aaaaaaaaaaaaaaaaaaaa'.split('').map(s => page.keyboard.type(s))
+  );
+  const preOffset = await page.evaluate(() => {
+    return getSelection()?.getRangeAt(0).endOffset;
+  });
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  const offset = await page.evaluate(() => {
+    return getSelection()?.getRangeAt(0).endOffset;
+  });
+  expect(preOffset).toBe(offset);
 });
 
 test('readonly mode', async ({ page }) => {
@@ -781,6 +800,6 @@ test('yText should not contain \r', async ({ page }) => {
   });
 
   expect(message).toBe(
-    'yText must not contain \r because it will break the range synclization'
+    'yText must not contain \r because it will break the range synchronization'
   );
 });

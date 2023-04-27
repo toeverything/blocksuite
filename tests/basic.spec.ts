@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 import {
   addFrameByClick,
   captureHistory,
@@ -8,13 +10,19 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getCurrentEditorTheme,
+  getCurrentHTMLTheme,
   initEmptyParagraphState,
+  pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
+  pressForwardDelete,
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
   switchReadonly,
+  toggleDarkMode,
   type,
   undoByClick,
   undoByKeyboard,
@@ -84,8 +92,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
@@ -102,8 +109,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -123,8 +129,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
-  await waitNextFrame(pageB);
+  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
@@ -354,4 +359,88 @@ test('undo multi frames', async ({ page }) => {
 
   await redoByClick(page);
   await assertRichTexts(page, ['', '']);
+});
+
+test('change theme', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const currentTheme = await getCurrentHTMLTheme(page);
+  await toggleDarkMode(page);
+  const expectNextTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const nextHTMLTheme = await getCurrentHTMLTheme(page);
+  expect(nextHTMLTheme).toBe(expectNextTheme);
+
+  const nextEditorTheme = await getCurrentEditorTheme(page);
+  expect(nextEditorTheme).toBe(expectNextTheme);
+});
+
+test('should be able to delete an emoji completely by pressing backspace once', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '🌷🙅‍♂️🏳️‍🌈');
+  await pressBackspace(page);
+  await pressBackspace(page);
+  await pressBackspace(page);
+  await assertText(page, '');
+});
+
+test('delete emoji in the middle of the text', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2138',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1🌷1🙅‍♂️1🏳️‍🌈1👨‍👩‍👧‍👦1');
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await pressArrowLeft(page, 1);
+  await pressBackspace(page);
+  await assertText(page, '11111');
+});
+
+test('delete emoji forward', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1🌷1🙅‍♂️1🏳️‍🌈1👨‍👩‍👧‍👦1');
+  await pressArrowLeft(page, 8);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await pressArrowRight(page, 1);
+  await pressForwardDelete(page);
+  await assertText(page, '11111');
+});
+
+test('ZERO_WIDTH_SPACE should be counted by one cursor position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await waitNextFrame(page);
+  await page.keyboard.press(`Shift+Enter`, { delay: 50 });
+  await type(page, 'asdfg');
+  await waitNextFrame(page);
+  await pressEnter(page);
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  await pressBackspace(page);
+  const line = page.locator('v-line').last();
+  expect(await line.innerText()).toBe('asdf');
 });

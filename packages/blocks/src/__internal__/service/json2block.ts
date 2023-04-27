@@ -168,7 +168,7 @@ export async function addSerializedBlocks(
     assertExists(model);
 
     const initialProps =
-      model?.flavour && page.getInitialPropsMapByFlavour(model?.flavour);
+      model?.flavour && page.getInitialPropsByFlavour(model?.flavour);
     if (initialProps && initialProps.text instanceof Text) {
       json.text && model?.text?.applyDelta(json.text);
     }
@@ -184,7 +184,8 @@ export async function addSerializedBlocks(
     const service = await getServiceOrRegister(flavour);
     service.onBlockPasted(model, {
       rowIds: json.databaseProps?.rowIds,
-      columnIds: json.databaseProps?.columnIds,
+      cells: json.databaseProps?.cells,
+      columns: json.databaseProps?.columns,
     });
   }
 

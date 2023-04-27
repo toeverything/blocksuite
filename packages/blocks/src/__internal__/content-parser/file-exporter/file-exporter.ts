@@ -1,7 +1,7 @@
 /* eslint-disable no-control-regex */
 import TurndownService from 'turndown';
 
-import { globalCSS, highlightCSS } from './exporter-style.js';
+import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -245,7 +245,6 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
   ${globalCSS}
-  ${highlightCSS}
 </style>`;
   // Question: Do we really need the extra div container?
   return `<!DOCTYPE html>

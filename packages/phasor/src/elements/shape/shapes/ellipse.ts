@@ -1,4 +1,5 @@
-import type { IBound } from '../../../consts.js';
+import { type IBound, StrokeStyle } from '../../../consts.js';
+import { setLineDash } from '../../../utils/canvas.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../base-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -12,7 +13,15 @@ function createEllipsePath(width: number, height: number) {
 
 export const EllipseMethods: ShapeMethods = {
   render(ctx: CanvasRenderingContext2D, element: ShapeElement) {
-    const { w, h, strokeWidth, filled, fillColor, strokeColor } = element;
+    const {
+      w,
+      h,
+      strokeWidth,
+      filled,
+      realFillColor,
+      realStrokeColor,
+      strokeStyle,
+    } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = Math.max(1, w - renderOffset * 2);
@@ -23,12 +32,13 @@ export const EllipseMethods: ShapeMethods = {
     const path = createEllipsePath(renderWidth, renderHeight);
 
     if (filled) {
-      ctx.fillStyle = fillColor;
+      ctx.fillStyle = realFillColor;
       ctx.fill(path);
     }
 
-    if (strokeWidth > 0) {
-      ctx.strokeStyle = strokeColor;
+    if (strokeWidth > 0 && strokeStyle !== StrokeStyle.None) {
+      ctx.strokeStyle = realStrokeColor;
+      setLineDash(ctx, strokeStyle);
       ctx.lineWidth = strokeWidth;
       ctx.stroke(path);
     }

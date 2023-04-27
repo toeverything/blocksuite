@@ -27,7 +27,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
   private _draggingElementId: string | null = null;
 
-  protected _draggingArea: SelectionArea | null = null;
+  protected override _draggingArea: SelectionArea | null = null;
   private _draggingStartElement: Selectable | null = null;
   private _draggingStartRect: Rectangle | null = null;
   // must assign value when dragging start
@@ -51,6 +51,10 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   }
 
   onContainerDblClick(e: SelectionEvent): void {
+    noop();
+  }
+
+  onContainerTripleClick(e: SelectionEvent) {
     noop();
   }
 

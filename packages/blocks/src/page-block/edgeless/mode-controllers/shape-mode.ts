@@ -6,19 +6,25 @@ import type {
   ShapeMouseMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
+import { isTransparent } from '../components/color-panel.js';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../components/component-toolbar/change-shape-button.js';
 import type { SelectionArea } from '../selection-manager.js';
 import { MouseModeController } from './index.js';
 
 export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
     type: 'shape',
-    color: '#000000',
     shape: 'rect',
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
   };
 
   private _draggingElementId: string | null = null;
 
-  protected _draggingArea: SelectionArea | null = null;
+  protected override _draggingArea: SelectionArea | null = null;
 
   onContainerClick(e: SelectionEvent): void {
     noop();
@@ -32,6 +38,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     noop();
   }
 
+  onContainerTripleClick(e: SelectionEvent) {
+    noop();
+  }
+
   onContainerDragStart(e: SelectionEvent) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
@@ -41,11 +51,13 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const bound = new Bound(modelX, modelY, 0, 0);
-    const { shape, color } = this.mouseMode;
+    const { shape, fillColor, strokeColor } = this.mouseMode;
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
     const shapeProps = {
-      strokeColor: color,
+      strokeColor,
+      fillColor,
+      filled: !isTransparent(fillColor),
       radius: shape === 'roundedRect' ? 0.1 : 0,
     };
     const id = this._surface.addShapeElement(bound, shapeType, shapeProps);
@@ -66,7 +78,17 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     const { viewport } = this._edgeless.surface;
 
-    this._draggingArea.end = new DOMPoint(e.x, e.y);
+    let endX = e.x;
+    let endY = e.y;
+    if (e.keys.shift) {
+      const { x: startX, y: startY } = this._draggingArea.start;
+      const w = Math.abs(endX - startX) / viewport.zoom;
+      const h = Math.abs(endY - startY) / viewport.zoom;
+      const maxLength = Math.max(w, h);
+      endX = endX > startX ? startX + maxLength : startX - maxLength;
+      endY = endY > startY ? startY + maxLength : startY - maxLength;
+    }
+    this._draggingArea.end = new DOMPoint(endX, endY);
 
     const [x, y] = viewport.toModelCoord(
       Math.min(this._draggingArea.start.x, this._draggingArea.end.x),

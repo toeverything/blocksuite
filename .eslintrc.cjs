@@ -7,7 +7,6 @@ const allPackages = [
   'global',
   'phasor',
   'playground',
-  'react',
   'store',
   'virgo',
   'connector',
@@ -55,8 +54,6 @@ module.exports = {
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
     'packages/global/dist/*',
-    'packages/react/dist/*',
-    'packages/react/examples/next/.next/*',
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
@@ -73,7 +70,7 @@ module.exports = {
       },
     },
     ...allPackages.map(pkg => ({
-      files: [`packages/${pkg}/src/*.ts`],
+      files: [`packages/${pkg}/src/**/*.ts`],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
           'error',

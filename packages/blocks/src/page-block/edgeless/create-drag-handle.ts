@@ -1,73 +1,99 @@
+import { assertExists } from '@blocksuite/store';
+
 import type {
   BlockComponentElement,
   EditingState,
   Point,
-} from '@blocksuite/blocks/std';
+} from '../../__internal__/index.js';
 import {
-  doesInSamePath,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
+  getClosestFrameBlockElementById,
   getHoveringFrame,
   getModelByBlockElement,
-  isInEmptyDatabaseByPoint,
+  getRectByBlockElement,
+  isInSamePath,
   Rect,
-} from '@blocksuite/blocks/std';
-import { assertExists } from '@blocksuite/store';
-
+} from '../../__internal__/index.js';
 import { DragHandle } from '../../components/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import {
+  type DefaultModeController,
+  DefaultModeDragType,
+} from './mode-controllers/default-mode.js';
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
     // Drag handle should be at the same level with EditorContainer
     container: pageBlock.mouseRoot as HTMLElement,
-    onDropCallback(point, blockElements, editingState) {
-      const page = pageBlock.page;
-      const models = getBlockElementsExcludeSubtrees(blockElements).map(
-        getModelByBlockElement
-      );
-      if (editingState) {
-        const { rect, model, element } = editingState;
-        if (models.length === 1 && doesInSamePath(page, model, models[0])) {
-          return;
-        }
+    onDropCallback(point, blockElements, editingState, type) {
+      const blockElementsExcludeSubtrees =
+        getBlockElementsExcludeSubtrees(blockElements);
+      if (!blockElementsExcludeSubtrees.length) return;
 
-        let parentId;
+      const models = blockElementsExcludeSubtrees.map(getModelByBlockElement);
+      if (!models.length) return;
+
+      const page = pageBlock.page;
+
+      if (editingState && type !== 'none') {
+        const { model } = editingState;
+        if (models.length === 1 && isInSamePath(page, model, models[0])) return;
+
+        const focusId = models[0].id;
+        const targetFrameBlock = getClosestFrameBlockElementById(
+          model.id,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(targetFrameBlock);
+        const frameBlock = getClosestFrameBlockElementById(
+          focusId,
+          pageBlock
+        ) as BlockComponentElement;
+        assertExists(frameBlock);
 
         page.captureSync();
 
-        if (isInEmptyDatabaseByPoint(point, model, element, models)) {
+        if (type === 'database') {
           page.moveBlocks(models, model);
-          parentId = model.id;
         } else {
-          const distanceToTop = Math.abs(rect.top - point.y);
-          const distanceToBottom = Math.abs(rect.bottom - point.y);
           const parent = page.getParent(model);
           assertExists(parent);
-          page.moveBlocks(
-            models,
-            parent,
-            model,
-            distanceToTop < distanceToBottom
-          );
-          parentId = parent.id;
+          page.moveBlocks(models, parent, model, type === 'before');
         }
 
-        pageBlock.setSelectionByBlockId(parentId, true);
+        pageBlock.setSelection(targetFrameBlock.model.id, true, focusId, point);
         return;
       }
 
       // blank area
       page.captureSync();
-      pageBlock.moveBlocksToNewFrame(models, point);
+      pageBlock.moveBlocksToNewFrame(
+        models,
+        point,
+        getRectByBlockElement(blockElementsExcludeSubtrees[0])
+      );
     },
-    setSelectedBlocks(
-      selectedBlocks: EditingState | BlockComponentElement[] | null
-    ) {
-      return;
+    setDragType(dragging: boolean) {
+      const selection = pageBlock.getSelection();
+      if (selection.mouseMode.type === 'default') {
+        const currentController =
+          selection.currentController as DefaultModeController;
+        currentController.dragType = dragging
+          ? DefaultModeDragType.PreviewDragging
+          : DefaultModeDragType.None;
+      }
+    },
+    setSelectedBlock(modelState: EditingState | null) {
+      const selectedBlocks = [];
+      if (modelState) {
+        selectedBlocks.push(modelState.element);
+      }
+      pageBlock.slots.selectedBlocksUpdated.emit(selectedBlocks);
     },
     getSelectedBlocks() {
-      return [];
+      const selection = pageBlock.getSelection();
+      return selection.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
       if (pageBlock.mouseMode.type !== 'default') return null;

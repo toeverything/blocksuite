@@ -1,10 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
-import { nanoid } from 'nanoid';
 import * as Y from 'yjs';
 
-import type { Color, IBound } from './consts.js';
-import type { HitTestOptions } from './elements/base-element.js';
+import type { IBound } from './consts.js';
+import type {
+  HitTestOptions,
+  TransformPropertyValue,
+} from './elements/base-element.js';
+import { defaultTransformPropertyValue } from './elements/base-element.js';
 import type { BrushProps } from './elements/brush/types.js';
 import type { ConnectorProps, Controller } from './elements/connector/types.js';
 import type { ShapeProps } from './elements/index.js';
@@ -23,6 +26,7 @@ import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
+import { generateElementId } from './utils/std.js';
 import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -32,9 +36,15 @@ export class SurfaceManager {
   private _bindings = new Map<string, Set<string>>();
   private _lastIndex = 'a0';
 
-  constructor(yContainer: Y.Map<unknown>) {
+  private _transformPropertyValue: TransformPropertyValue;
+
+  constructor(
+    yContainer: Y.Map<unknown>,
+    transformPropertyValue: TransformPropertyValue = defaultTransformPropertyValue
+  ) {
     this._renderer = new Renderer();
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
+    this._transformPropertyValue = transformPropertyValue;
 
     this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
@@ -48,13 +58,18 @@ export class SurfaceManager {
     this._renderer.attach(container);
   }
 
+  onResize() {
+    this._renderer.onResize();
+  }
+
   getElementsBound(): IBound | null {
     return getCommonBound([...this._elements.values()]);
   }
 
   addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new ShapeElement(id, shapeType);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     if (props) {
@@ -65,8 +80,9 @@ export class SurfaceManager {
   }
 
   addDebugElement(bound: IBound, color: string): string {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new DebugElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.color = color;
@@ -78,12 +94,13 @@ export class SurfaceManager {
     bound: IBound,
     points: number[][] = [],
     props?: {
-      color?: Color;
+      color?: string;
       lineWidth?: number;
     }
   ): string {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new BrushElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.points = points;
@@ -100,8 +117,9 @@ export class SurfaceManager {
     controllers: Controller[],
     properties: ConnectorProps = {}
   ) {
-    const id = nanoid(10);
+    const id = generateElementId();
     const element = new ConnectorElement(id);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     setXYWH(element, bound);
     element.controllers = controllers;
@@ -306,6 +324,7 @@ export class SurfaceManager {
     assertExists(ElementCtor);
     const element = ElementCtor.deserialize(yElement.toJSON());
     assertExists(element);
+    element.transformPropertyValue = this._transformPropertyValue;
 
     this._renderer.addElement(element);
     this._elements.set(element.id, element);
@@ -445,7 +464,6 @@ export class SurfaceManager {
 
   dispose() {
     this._yElements.unobserveDeep(this._handleYEvents);
-    this._renderer.dispose();
   }
 
   /** @internal Only for testing */

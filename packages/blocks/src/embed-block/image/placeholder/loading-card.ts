@@ -9,14 +9,14 @@ const ELEMENT_TAG = 'affine-image-block-loading-card' as const;
 
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockLoadingCard extends ShadowlessElement {
-  static styles = css`
+  static override styles = css`
     .affine-image-block-loading-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 453px;
-      height: 104px;
+      width: 100%;
+      height: 100%;
       margin: 0 auto;
       border: 1px solid #ebeeff;
       border-radius: 10px;
@@ -36,7 +36,7 @@ export class AffineImageBlockLoadingCard extends ShadowlessElement {
   @property()
   content = 'Loading content...';
 
-  render() {
+  override render() {
     return html`
       <div class="affine-image-block-loading-card">
         <affine-image-block-circle-loading></affine-image-block-circle-loading>

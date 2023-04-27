@@ -28,15 +28,17 @@ import {
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
+  getVirgoByModel,
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { handleSelectAll } from '../utils/index.js';
-import { formatConfig } from './const.js';
+import { actionConfig } from './const.js';
 import {
   deleteModelsByRange,
   updateBlockType,
 } from './container-operations.js';
+import { formatConfig } from './format-config.js';
 
 export function bindCommonHotkey(page: Page) {
   if (page.readonly) return;
@@ -49,6 +51,21 @@ export function bindCommonHotkey(page: Page) {
         return;
       }
 
+      action({ page });
+    });
+  });
+
+  actionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
+    // if (!isPrintableKeyEvent(e) || page.readonly) return;
+    if (!hotkeyStr) return;
+
+    hotkey.addListener(hotkeyStr, e => {
+      // Prevent default behavior
+      e.preventDefault();
+      if (!enabledWhen(page)) return;
+      if (page.awarenessStore.isReadonly(page)) {
+        return;
+      }
       action({ page });
     });
   });
@@ -67,11 +84,13 @@ export function bindCommonHotkey(page: Page) {
   });
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
+    e.preventDefault();
     if (page.canUndo) clearSelection(page);
     page.undo();
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
+    e.preventDefault();
     if (page.canRedo) clearSelection(page);
     page.redo();
   });
@@ -360,7 +379,12 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     blockRange.models.slice(1, -1).forEach(model => {
       page.deleteBlock(model);
     });
-    focusBlockByModel(endModel, 'start');
+
+    // Virgo will addRange after update finished so we need to wait for it.
+    const vEditor = getVirgoByModel(endModel);
+    vEditor?.slots.updated.once(() => {
+      focusBlockByModel(endModel, 'start');
+    });
     return;
   });
 

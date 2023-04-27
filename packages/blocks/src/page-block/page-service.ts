@@ -25,7 +25,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     return `${text}${childText}`;
   }
 
-  async json2Block(
+  override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[]
   ) {

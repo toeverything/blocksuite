@@ -4,13 +4,13 @@ import { customElement, property } from 'lit/decorators.js';
 // FIXME: horizontal
 @customElement('menu-divider')
 export class MenuDivider extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: inline-block;
     }
 
     .divider {
-      background-color: #e3e2e4;
+      background-color: var(--affine-divider-color);
     }
 
     .divider.vertical {
@@ -29,7 +29,7 @@ export class MenuDivider extends LitElement {
   @property()
   vertical = false;
 
-  render() {
+  override render() {
     return html`<div
       class="divider ${this.vertical ? 'vertical' : 'horizontal'}"
     ></div>`;
