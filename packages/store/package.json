@@ -22,7 +22,7 @@
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
     "buffer": "^6.0.3",
-    "flexsearch": "0.7.21",
+    "flexsearch": "0.7.31",
     "idb-keyval": "^6.2.0",
     "ky": "^0.33.3",
     "lib0": "^0.2.68",
