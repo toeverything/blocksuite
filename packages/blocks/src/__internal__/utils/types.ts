@@ -1,7 +1,7 @@
-import type { Cell, Column } from '@blocksuite/global/database';
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { Cell, Column } from '../../database-block/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   BlockServiceInstanceByKey,
@@ -151,8 +151,13 @@ export type SerializedBlock = {
   xywh?: string;
 };
 
+export type EmbedBlockDoubleClickData = {
+  blockId: string;
+};
+
 declare global {
   interface WindowEventMap {
+    'affine.embed-block-db-click': CustomEvent<EmbedBlockDoubleClickData>;
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
     'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }

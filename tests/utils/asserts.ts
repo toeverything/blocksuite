@@ -73,7 +73,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,72]',
+      'prop:xywh': '[0,0,720,80]',
       'prop:background': '--affine-background-secondary-color',
     },
     '2': {

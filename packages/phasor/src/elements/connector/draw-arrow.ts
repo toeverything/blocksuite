@@ -10,12 +10,12 @@ export function drawArrow(
   const headLength = Math.sqrt(arrowSize);
 
   path.moveTo(
-    endX - headLength * Math.cos(angle - Math.PI / 6),
-    endY - headLength * Math.sin(angle - Math.PI / 6)
+    endX - headLength * Math.cos(angle - Math.PI / 4),
+    endY - headLength * Math.sin(angle - Math.PI / 4)
   );
   path.lineTo(endX, endY);
   path.lineTo(
-    endX - headLength * Math.cos(angle + Math.PI / 6),
-    endY - headLength * Math.sin(angle + Math.PI / 6)
+    endX - headLength * Math.cos(angle + Math.PI / 4),
+    endY - headLength * Math.sin(angle + Math.PI / 4)
   );
 }

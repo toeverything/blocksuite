@@ -77,12 +77,15 @@ There are more block flavours available in the prebuilt editor, including:
 
 ## Block Roles
 
-In BlockSuite, the blocks can be also be categorized into two distinct roles: `ContentBlock`, which contains atomic content, and `HubBlock`, which serves as an empty block container.
+In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
-- Examples of `HubBlock` include `affine:page`, `affine:frame`, and `affine:database`.
-- Examples of `ContentBlock` include `affine:paragraph`, `affine:list`, `affine:code`, and `affine:embed`.
+1. `HubBlock`: serves as an empty block container
+   - include `affine:page`, `affine:frame` and `affine:database`
+2. `ContentBlock`: contains atomic content
+   - include `affine:paragraph`, `affine:list`, `affine:code` and `affine:embed`
 
-`HubBlock`s act as containers that affect the presentation of the blocks they contain. For example, a frame block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock`s can only nest other `ContentBlock`s to express structures like nested markdown lists.
+`HubBlock`s act as containers that affect the presentation of the blocks they contain. For example, a frame block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards.  
+In contrast, `ContentBlock`s can only nest other `ContentBlock`s to express structures like nested markdown lists.
 
 ## Defining Block Schema
 

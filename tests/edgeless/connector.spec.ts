@@ -1,8 +1,17 @@
+import { expect } from '@playwright/test';
+
 import {
   addBasicConnectorElement,
+  changeConnectorStrokeColor,
+  changeConnectorStrokeStyle,
+  changeConnectorStrokeWidth,
+  locatorConnectorStrokeStyleButton,
+  locatorConnectorStrokeWidthButton,
+  pickColorAtPoints,
   resizeConnectorByStartCapitalHandler,
   switchEditorEmbedMode,
   switchEditorMode,
+  triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicRectShapeElement,
@@ -10,6 +19,7 @@ import {
   enterPlaygroundRoom,
   initEmptyEdgelessState,
   resizeElementByTopLeftHandle,
+  waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
@@ -165,4 +175,60 @@ test('resize connector by capital resize handler in embed mode', async ({
 
   await resizeConnectorByStartCapitalHandler(page, { x: -20, y: -20 }, 10);
   await assertEdgelessSelectedRect(page, [80, 80, 120, 120]);
+});
+
+test('change connector line width', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
+  await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
+
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
+  await changeConnectorStrokeWidth(page, 'l');
+
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
+  const activeButton = locatorConnectorStrokeWidthButton(page, 'l');
+  const className = await activeButton.evaluate(ele => ele.className);
+  expect(className.includes(' active')).toBeTruthy();
+
+  const pickedColor = await pickColorAtPoints(page, [
+    [start.x + 20, start.y],
+    [start.x + 20, start.y + 9],
+  ]);
+  expect(pickedColor[0]).toBe(pickedColor[1]);
+});
+
+test('change connector stroke style', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicConnectorElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
+  await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
+
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
+  await changeConnectorStrokeStyle(page, 'dash');
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
+  const activeButton = locatorConnectorStrokeStyleButton(page, 'dash');
+  const className = await activeButton.evaluate(ele => ele.className);
+  expect(className.includes(' active')).toBeTruthy();
+
+  const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
+  expect(pickedColor[0]).toBe('#000000');
 });

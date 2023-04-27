@@ -111,7 +111,11 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   }
 
-  /** Adjust the index of a page inside the pageMetss list */
+  /**
+   * Adjust the index of a page inside the pageMetss list
+   *
+   * @deprecated
+   */
   shiftPageMeta(pageId: string, newIndex: number) {
     const pageMetas = (this.pages ?? new Y.Array()).toJSON() as PageMeta[];
     const index = pageMetas.findIndex((page: PageMeta) => pageId === page.id);
@@ -152,7 +156,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     let versions = this._proxy.versions;
     if (!versions) {
       versions = new Y.Map<unknown>();
-      workspace.flavourSchemaMap.forEach((schema, flavour) => {
+      workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
         (versions as Y.Map<unknown>).set(flavour, schema.version);
       });
       this._ySpace.set('versions', versions);
@@ -183,7 +187,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = versions[dataFlavour] as number;
       const editorVersion =
-        workspace.flavourSchemaMap.get(dataFlavour)?.version;
+        workspace.schema.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`

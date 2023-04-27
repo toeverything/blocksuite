@@ -3,13 +3,16 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  cutByKeyboard,
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   focusRichTextEnd,
   initEmptyParagraphState,
+  pasteByKeyboard,
   pressEnter,
   pressShiftEnter,
+  selectAllByKeyboard,
   SHORT_KEY,
   switchReadonly,
   type,
@@ -319,4 +322,50 @@ test('link bar should not be appear when the range is collapsed', async ({
   await dragBetweenIndices(page, [1, 1], [1, 66]);
   await pressCreateLinkShortCut(page);
   await expect(linkPopoverLocator).toBeVisible();
+});
+
+test('create link with paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  const confirmBtn = linkPopoverLocator.locator('icon-button');
+
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
+  await pressCreateLinkShortCut(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(confirmBtn).toHaveAttribute('disabled', '');
+
+  await type(page, 'affine.pro');
+  await expect(confirmBtn).not.toHaveAttribute('disabled', '');
+  await selectAllByKeyboard(page);
+  await cutByKeyboard(page);
+
+  // press enter should not trigger confirm
+  await pressEnter(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(confirmBtn).toHaveAttribute('disabled', '');
+
+  await pasteByKeyboard(page, false);
+  await expect(confirmBtn).not.toHaveAttribute('disabled', '');
+  await pressEnter(page);
+  await expect(linkPopoverLocator).not.toBeVisible();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="aaa"
+        link="http://affine.pro"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });

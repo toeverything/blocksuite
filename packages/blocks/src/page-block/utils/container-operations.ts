@@ -17,7 +17,7 @@ import {
   type ExtendedModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
-  getDefaultPageBlock,
+  getDefaultPage,
   getVirgoByModel,
   handleNativeRangeDblClick,
   handleNativeRangeTripleClick,
@@ -63,15 +63,17 @@ export function handleBlockSelectionBatchDelete(
     parentModel,
     index
   );
+  const newBlock = page.getBlockById(id);
 
   // Try clean block selection
-  const defaultPageBlock = getDefaultPageBlock(models[0]);
-  if (!defaultPageBlock.selection) {
+  const defaultPageBlock = getDefaultPage(models[0].page);
+  if (!defaultPageBlock) {
     // In the edgeless mode
-    return;
+    return null;
   }
   defaultPageBlock.selection.clear();
-  return id && asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id);
+  return newBlock;
 }
 
 export function deleteModelsByRange(
@@ -79,11 +81,11 @@ export function deleteModelsByRange(
   blockRange = getCurrentBlockRange(page)
 ) {
   if (!blockRange) {
-    return;
+    return null;
   }
   if (blockRange.type === 'Block') {
-    handleBlockSelectionBatchDelete(page, blockRange.models);
-    return;
+    const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
+    return newBlock;
   }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
@@ -107,7 +109,7 @@ export function deleteModelsByRange(
       //   index: blockRange.startOffset - 1,
       //   length: 0,
       // });
-      return;
+      return startModel;
     }
     startModel.text.delete(
       blockRange.startOffset,
@@ -117,7 +119,7 @@ export function deleteModelsByRange(
       index: blockRange.startOffset,
       length: 0,
     });
-    return;
+    return startModel;
   }
   page.captureSync();
   startModel.text.delete(
@@ -134,6 +136,7 @@ export function deleteModelsByRange(
     index: blockRange.startOffset,
     length: 0,
   });
+  return startModel;
 }
 
 /**

@@ -529,12 +529,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPage(workspace: Workspace) {
   const id = workspace.idGenerator();
-  const newPage = workspace.createPage(id);
-  const pageBlockId = newPage.addBlock('affine:page', {
-    title: new newPage.Text(),
-  });
-  newPage.addBlock('affine:surface', {}, null);
-  newPage.addBlock('affine:frame', {}, pageBlockId);
+  workspace.createPage({ id, init: true });
 }
 
 function getTabGroupTemplate({
