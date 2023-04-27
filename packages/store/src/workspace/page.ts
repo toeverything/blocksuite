@@ -455,9 +455,6 @@ export class Page extends Space<FlatBlockMap> {
 
     currentParent.childrenUpdated.emit();
     newParent.childrenUpdated.emit();
-    setTimeout(() => {
-      blocks.forEach(block => block.childrenUpdated.emit());
-    });
   }
 
   @debug('CRUD')
