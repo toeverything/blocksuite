@@ -193,10 +193,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       .catch(this._fetchError);
   };
 
-  private _onDoubleClick = () => {
-    console.log(1);
-  };
-
   override connectedCallback() {
     super.connectedCallback();
     this._imageState = 'loading';
