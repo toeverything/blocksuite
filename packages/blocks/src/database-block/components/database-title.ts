@@ -78,8 +78,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     // prevent block selection
     const onStopPropagation = (event: Event) => event.stopPropagation();
-    disposables.addFromEvent(this, 'mousedown', onStopPropagation);
-    disposables.addFromEvent(this, 'mousemove', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
   private _initTitleVEditor() {
