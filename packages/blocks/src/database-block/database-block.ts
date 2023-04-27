@@ -163,19 +163,6 @@ export class DatabaseBlockComponent
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
-
-    // prevent block selection
-    const onStopPropagation = (event: Event) => event.stopPropagation();
-    disposables.addFromEvent(
-      this._tableContainer,
-      'pointerdown',
-      onStopPropagation
-    );
-    disposables.addFromEvent(
-      this._tableContainer,
-      'pointermove',
-      onStopPropagation
-    );
   }
 
   override firstUpdated() {
@@ -194,6 +181,16 @@ export class DatabaseBlockComponent
         cell.requestUpdate();
       });
       this.querySelector('affine-database-column-header')?.requestUpdate();
+    });
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    const databaseRows = this.querySelectorAll<HTMLElement>(
+      '.affine-database-block-rows'
+    );
+    databaseRows.forEach(row => {
+      this._disposables.addFromEvent(row, 'pointerdown', onStopPropagation);
+      this._disposables.addFromEvent(row, 'pointermove', onStopPropagation);
     });
 
     if (this.readonly) return;
