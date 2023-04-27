@@ -350,7 +350,7 @@ export class DefaultPageBlockComponent
     }
 
     if (point) {
-      // Create a synthetic `pointermove` MouseEvent
+      // Create a synthetic `pointermove` PointerEvent
       const evt = new PointerEvent('pointermove', {
         clientX: point.x,
         clientY: point.y,

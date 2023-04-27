@@ -8,10 +8,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import {
-  type EmbedBlockDoubleClickData,
-  noop,
-} from '../../../__internal__/index.js';
+import { type EmbedBlockDoubleClickData } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -233,48 +230,15 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerClick = (_: SelectionEvent) => {
-    noop();
-  };
-
-  private _onContainerPointerDown = (e: SelectionEvent) => {
+  private _onContainerClick = (e: SelectionEvent) => {
     const {
-      x,
-      y,
-      raw: { target, clientX, clientY, pageX },
+      raw: { target, clientX, clientY },
       keys: { shift },
     } = e;
+
+    if (shift) return;
+
     const { state } = this;
-    const { viewport } = state;
-    let { type } = state;
-
-    // do nothing when clicking on scrollbar
-    if (pageX >= viewport.clientWidth + viewport.left) return;
-
-    // do nothing when clicking on drag-handle
-    if (isElement(target) && isDragHandle(target as Element)) {
-      return;
-    }
-
-    // shift + click
-    // * native: select texts
-    // * block: select blocks
-    if (shift) {
-      if (type === 'none') {
-        type = state.type = 'native';
-      }
-      if (type === 'native') {
-        state.lastPoint = new Point(clientX, clientY);
-        handleNativeRangeDragMove(state.startRange, e);
-        return;
-      }
-      if (type === 'block') {
-        this.selectedBlocksWithShiftClick(x, y);
-        return;
-      }
-
-      return;
-    }
 
     // clear selection first
     this.clear();
@@ -337,6 +301,47 @@ export class DefaultSelectionManager {
     }
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
     handleNativeRangeClick(this.page, e);
+  };
+
+  private _onContainerPointerDown = (e: SelectionEvent) => {
+    const {
+      x,
+      y,
+      raw: { target, clientX, clientY, pageX },
+      keys: { shift },
+    } = e;
+
+    const { state } = this;
+    const { viewport } = state;
+
+    // do nothing when clicking on scrollbar
+    if (pageX >= viewport.clientWidth + viewport.left) return;
+
+    // do nothing when clicking on drag-handle
+    if (isElement(target) && isDragHandle(target as Element)) {
+      return;
+    }
+
+    let { type } = state;
+
+    // shift + click
+    // * native: select texts
+    // * block: select blocks
+    if (shift) {
+      if (type === 'none') {
+        type = state.type = 'native';
+      }
+      if (type === 'native') {
+        state.lastPoint = new Point(clientX, clientY);
+        handleNativeRangeDragMove(state.startRange, e);
+        return;
+      }
+      if (type === 'block') {
+        this.selectedBlocksWithShiftClick(x, y);
+        return;
+      }
+      return;
+    }
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
