@@ -452,8 +452,9 @@ export class Page extends Space<FlatBlockMap> {
         yChildrenB.insert(nextIdx + 1, ids);
       }
     });
-    currentParent.propsUpdated.emit();
-    newParent.propsUpdated.emit();
+
+    currentParent.childrenUpdated.emit();
+    newParent.childrenUpdated.emit();
   }
 
   @debug('CRUD')
