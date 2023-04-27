@@ -132,7 +132,6 @@ export class EdgelessSelectionManager {
       this._onContainerDragStart,
       this._onContainerDragMove,
       this._onContainerDragEnd,
-      this._onContainerPointerDown,
       this._onContainerClick,
       this._onContainerDblClick,
       this._onContainerTripleClick,
@@ -162,10 +161,6 @@ export class EdgelessSelectionManager {
     if (this.page.readonly) return;
 
     return this.currentController.onContainerDragEnd(e);
-  };
-
-  private _onContainerPointerDown = (_: SelectionEvent) => {
-    noop();
   };
 
   private _onContainerClick = (e: SelectionEvent) => {

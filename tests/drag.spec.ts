@@ -698,11 +698,11 @@ test('should drag and drop blocks under block-level selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: editorRect0.x + editorRect0.width / 2,
+      x: editorRect0.x + 10,
       y: editorRect0.y + editorRect0.height / 2,
     },
     {
-      x: editorRect2.x + editorRect2.width / 2,
+      x: editorRect2.x + 10,
       y: editorRect2.y + editorRect2.height / 2 + 1,
     },
     {
