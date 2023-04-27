@@ -151,8 +151,13 @@ export type SerializedBlock = {
   xywh?: string;
 };
 
+export type EmbedBlockDoubleClickData = {
+  blockId: string;
+};
+
 declare global {
   interface WindowEventMap {
+    'affine.embed-block-db-click': CustomEvent<EmbedBlockDoubleClickData>;
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
     'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }
