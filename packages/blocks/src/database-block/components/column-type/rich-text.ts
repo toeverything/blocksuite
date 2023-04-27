@@ -199,8 +199,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener('click', this._handleClick);
-    this.vEditor?.unmount();
-    this.vEditor = null;
   }
 
   override render() {
