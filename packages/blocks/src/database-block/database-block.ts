@@ -183,6 +183,16 @@ export class DatabaseBlockComponent
       this.querySelector('affine-database-column-header')?.requestUpdate();
     });
 
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    const databaseRows = this.querySelectorAll<HTMLElement>(
+      '.affine-database-block-rows'
+    );
+    databaseRows.forEach(row => {
+      this._disposables.addFromEvent(row, 'pointerdown', onStopPropagation);
+      this._disposables.addFromEvent(row, 'pointermove', onStopPropagation);
+    });
+
     if (this.readonly) return;
     const tableContent = this._tableContainer.parentElement;
     assertExists(tableContent);
