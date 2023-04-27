@@ -1,4 +1,4 @@
-import type { ColumnType } from '@blocksuite/global/database';
+import type { ColumnType } from '@blocksuite/blocks';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
