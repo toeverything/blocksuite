@@ -176,5 +176,5 @@ export function createButtonPopper(
 
 export function getTooltipWithShortcut(tip: string, shortcut: string) {
   return html`<span>${tip}</span
-    ><span style="margin-left: 10px;">${shortcut}</span>`;
+    ><span style="margin-left: 10px;">(${shortcut})</span>`;
 }

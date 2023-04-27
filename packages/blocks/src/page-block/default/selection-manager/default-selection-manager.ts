@@ -1,6 +1,5 @@
 import '../../../components/drag-handle.js';
 
-import { BLOCK_CHILDREN_CONTAINER_WIDTH } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -425,12 +424,14 @@ export class DefaultSelectionManager {
       if (model.type === 'image') {
         const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
-        const isLarge = rect.width > BLOCK_CHILDREN_CONTAINER_WIDTH;
-        tempRect.right += isLarge ? 0 : 60;
+        const isOutside =
+          rect.right + 60 <
+          this.state.viewport.left + this.state.viewport.clientWidth;
+        tempRect.right += isOutside ? 60 : 0;
 
         if (tempRect.isPointIn(point)) {
           // when image size is too large, the option popup should show inside
-          rect.x = rect.right + (isLarge ? -50 : 10);
+          rect.x = rect.right + (isOutside ? 10 : -50);
           hoverEditingState.rect = rect;
           shouldClear = false;
         }
@@ -609,7 +610,7 @@ export class DefaultSelectionManager {
   }
 
   refreshEmbedRects(hoverEditingState: EditingState | null = null) {
-    const { activeComponent, selectedEmbeds } = this.state;
+    const { activeComponent, selectedEmbeds, viewport } = this.state;
     if (activeComponent && selectedEmbeds.length) {
       const rect = getSelectedStateRectByBlockElement(activeComponent);
       const embedRects = [
@@ -618,8 +619,11 @@ export class DefaultSelectionManager {
 
       // updates editing
       if (hoverEditingState && isImage(activeComponent)) {
+        const isOutside =
+          rect.right + 60 < viewport.left + viewport.clientWidth;
+
         // when image size is too large, the option popup should show inside
-        rect.x = rect.right + (rect.width > 680 ? -50 : 10);
+        rect.x = rect.right + (isOutside ? 10 : -50);
         hoverEditingState.rect = rect;
       }
 
