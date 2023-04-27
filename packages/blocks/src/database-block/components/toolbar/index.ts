@@ -75,7 +75,7 @@ export function initAddNewRecordHandlers(
   if (!database) return;
 
   const rowContainer = database.querySelector<HTMLElement>(
-    '.affine-database-block-rows'
+    'affine-database-row-container'
   );
   assertExists(rowContainer);
 

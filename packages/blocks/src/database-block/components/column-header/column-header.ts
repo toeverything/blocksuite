@@ -166,7 +166,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     // the database may not be rendered to the page in time
     if (!databaseElement) return;
     const databaseBody = databaseElement.querySelector(
-      '.affine-database-block-rows'
+      'affine-database-row-container'
     );
     assertExists(databaseBody);
     const dragHandleHeight =

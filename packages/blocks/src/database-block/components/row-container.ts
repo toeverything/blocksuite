@@ -1,78 +1,101 @@
 import './cell-container.js';
 
-import { html } from 'lit';
+import { css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BlockElementWithService } from '../../__internal__/service/components.js';
+import { ShadowlessElement, WithDisposable } from '../../std.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DatabaseBlockComponent } from '../database-block.js';
 import { SearchState } from '../types.js';
 
-export function DataBaseRowContainer(
-  databaseBlock: DatabaseBlockComponent,
-  filteredRowIds: string[],
-  searchState: SearchState
-) {
-  const databaseModel = databaseBlock.model;
-  const columns = databaseModel.columns;
+@customElement('affine-database-row-container')
+export class DataBaseRowContainer extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-database-block-rows {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
 
-  const filteredChildren =
-    searchState === SearchState.Searching
-      ? databaseModel.children.filter(
-          child => filteredRowIds.indexOf(child.id) > -1
+    .affine-database-block-row {
+      width: 100%;
+      min-height: 44px;
+      display: flex;
+      flex-direction: row;
+      border-bottom: 1px solid var(--affine-border-color);
+    }
+    .affine-database-block-row > .affine-database-block-row-cell:first-child {
+      background: var(--affine-hover-color);
+    }
+    .affine-database-block-row > .database-cell {
+      background: var(--affine-white);
+    }
+
+    .affine-database-block-row-cell-content {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      min-height: 44px;
+      padding: 0 8px;
+      border-right: 1px solid var(--affine-border-color);
+      transform: translateX(0);
+    }
+    .affine-database-block-row-cell-content > affine-paragraph > .text {
+      margin-top: unset;
+    }
+    .database-cell {
+      min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
+    }
+    .database-cell:last-child affine-database-cell-container {
+      border-right: none;
+    }
+  `;
+
+  @property()
+  databaseBlock!: DatabaseBlockComponent;
+
+  @property()
+  filteredRowIds!: string[];
+
+  @property()
+  searchState!: SearchState;
+
+  private get databaseModel() {
+    return this.databaseBlock.model;
+  }
+  private get columns() {
+    return this.databaseModel.columns;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    // prevent block selection
+    const onStopPropagation = (event: Event) => event.stopPropagation();
+    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
+  }
+
+  private get filteredChildren() {
+    return this.searchState === SearchState.Searching
+      ? this.databaseModel.children.filter(
+          child => this.filteredRowIds.indexOf(child.id) > -1
         )
-      : databaseModel.children;
+      : this.databaseModel.children;
+  }
 
-  return html`
-    <style>
-      .affine-database-block-rows {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-      }
-
-      .affine-database-block-row {
-        width: 100%;
-        min-height: 44px;
-        display: flex;
-        flex-direction: row;
-        border-bottom: 1px solid var(--affine-border-color);
-      }
-      .affine-database-block-row > .affine-database-block-row-cell:first-child {
-        background: var(--affine-hover-color);
-      }
-      .affine-database-block-row > .database-cell {
-        background: var(--affine-white);
-      }
-
-      .affine-database-block-row-cell-content {
-        display: flex;
-        align-items: center;
-        height: 100%;
-        min-height: 44px;
-        padding: 0 8px;
-        border-right: 1px solid var(--affine-border-color);
-        transform: translateX(0);
-      }
-      .affine-database-block-row-cell-content > affine-paragraph > .text {
-        margin-top: unset;
-      }
-      .database-cell {
-        min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
-      }
-      .database-cell:last-child affine-database-cell-container {
-        border-right: none;
-      }
-    </style>
-    <div class="affine-database-block-rows">
+  protected override render() {
+    return html`<div class="affine-database-block-rows">
       ${repeat(
-        filteredChildren,
+        this.filteredChildren,
         child => child.id,
         (child, idx) => {
           const style = styleMap({
-            width: `${databaseModel.titleColumnWidth}px`,
+            width: `${this.databaseModel.titleColumnWidth}px`,
           });
           return html`
             <div
@@ -84,12 +107,12 @@ export function DataBaseRowContainer(
                 style=${style}
               >
                 <div class="affine-database-block-row-cell-content">
-                  ${BlockElementWithService(child, databaseBlock, () => {
-                    databaseBlock.requestUpdate();
+                  ${BlockElementWithService(child, this.databaseBlock, () => {
+                    this.databaseBlock.requestUpdate();
                   })}
                 </div>
               </div>
-              ${repeat(columns, column => {
+              ${repeat(this.columns, column => {
                 return html`
                   <div
                     class="database-cell"
@@ -98,10 +121,10 @@ export function DataBaseRowContainer(
                     })}
                   >
                     <affine-database-cell-container
-                      .databaseModel=${databaseModel}
+                      .databaseModel=${this.databaseModel}
                       .rowModel=${child}
                       .column=${column}
-                      .columnRenderer=${databaseBlock.columnRenderer}
+                      .columnRenderer=${this.databaseBlock.columnRenderer}
                     >
                     </affine-database-cell-container>
                   </div>
@@ -112,6 +135,12 @@ export function DataBaseRowContainer(
           `;
         }
       )}
-    </div>
-  `;
+    </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-row-container': DataBaseRowContainer;
+  }
 }

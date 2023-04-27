@@ -3,6 +3,7 @@ import './components/column-header/column-header.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
 import './components/database-title.js';
+import './components/row-container.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -20,7 +21,6 @@ import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { stopPropagation } from '../page-block/edgeless/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Column } from './types.js';
@@ -279,12 +279,6 @@ export class DatabaseBlockComponent
   };
 
   override render() {
-    const rows = DataBaseRowContainer(
-      this,
-      this._filteredRowIds,
-      this._searchState
-    );
-
     return html`
       <div
         class="affine-database-block-container"
@@ -312,7 +306,11 @@ export class DatabaseBlockComponent
               .addColumn=${this._addColumn}
               .columnRenderer=${this.columnRenderer}
             ></affine-database-column-header>
-            ${rows}
+            <affine-database-row-container
+              .databaseBlock=${this}
+              .filteredRowIds=${this._filteredRowIds}
+              .searchState=${this._searchState}
+            ></affine-database-row-container>
           </div>
         </div>
         ${this.readonly
