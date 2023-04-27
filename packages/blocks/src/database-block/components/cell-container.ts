@@ -79,8 +79,8 @@ export class DatabaseCellContainer
 
     // prevent block selection
     const onStopPropagation = (event: Event) => event.stopPropagation();
-    this._disposables.addFromEvent(this, 'mousedown', onStopPropagation);
-    this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
   private _onClick = (event: Event) => {
@@ -95,7 +95,7 @@ export class DatabaseCellContainer
           this.addEventListener('click', this._onClick);
           this._isEditing = false;
         },
-        'click'
+        'mousedown'
       );
     });
   };
