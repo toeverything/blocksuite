@@ -203,15 +203,15 @@ export class LinkPopover extends LitElement {
   }
 
   private _onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      this._onConfirm();
-    }
     if (!this.linkInput) {
       throw new Error('Failed to update link! Link input not found!');
     }
     const isValid = isValidLink(this.linkInput.value);
     this._disableConfirm = isValid ? false : true;
+    if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
+      this._onConfirm();
+    }
     return;
   }
 
