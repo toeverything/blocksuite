@@ -8,6 +8,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 
+import type { EmbedBlockDoubleClickData } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -38,7 +39,10 @@ import {
   type SelectionEvent,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import type { EmbedBlockComponent } from '../../../embed-block/index.js';
+import type {
+  EmbedBlockComponent,
+  EmbedBlockModel,
+} from '../../../embed-block/index.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
@@ -333,6 +337,40 @@ export class DefaultSelectionManager {
 
     // switch native selection
     NativeDragHandlers.onStart(this, e);
+
+    // The following code is for the fullscreen image modal
+    // fixme:
+    //  remove dispatch a custom event
+    //  once we have a better way to handle this
+    //  like plugin system.
+    {
+      const {
+        raw: { clientX, clientY },
+      } = e;
+
+      const element = getClosestBlockElementByPoint(
+        new Point(clientX, clientY),
+        {
+          rect: this.container.innerRect,
+        }
+      );
+
+      if (element) {
+        const targetModel = getModelByBlockElement(element) as EmbedBlockModel;
+        if (targetModel.flavour === 'affine:embed') {
+          window.dispatchEvent(
+            new CustomEvent<EmbedBlockDoubleClickData>(
+              'affine.embed-block-db-click',
+              {
+                detail: {
+                  blockId: targetModel.id,
+                },
+              }
+            )
+          );
+        }
+      }
+    }
 
     showFormatQuickBarByClicks(
       'double',
