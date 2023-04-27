@@ -70,7 +70,7 @@ export function clickColumnType(page: Page, columnType: ColumnType) {
 }
 
 export function getDatabaseBodyRows(page: Page) {
-  const rowContainer = page.locator('affine-database-row-container');
+  const rowContainer = page.locator('.affine-database-block-rows');
   return rowContainer.locator('.database-row');
 }
 
@@ -85,9 +85,7 @@ export async function assertDatabaseTitleColumnText(
   index = 0
 ) {
   const text = await page.evaluate(index => {
-    const rowContainer = document.querySelector(
-      'affine-database-row-container'
-    );
+    const rowContainer = document.querySelector('.affine-database-block-rows');
     const row = rowContainer?.querySelector(
       `.database-row:nth-child(${index + 1})`
     );
@@ -182,7 +180,7 @@ export async function assertDatabaseCellRichTexts(
 ) {
   const actualTexts = await page.evaluate(
     ({ rowIndex, columnIndex }) => {
-      const rows = document.querySelector('affine-database-row-container');
+      const rows = document.querySelector('.affine-database-block-rows');
       const row = rows?.querySelector(
         `.database-row:nth-child(${rowIndex + 1})`
       );
@@ -214,7 +212,7 @@ export async function assertDatabaseCellNumberText(
 ) {
   const actualTexts = await page.evaluate(
     ({ rowIndex, columnIndex }) => {
-      const rows = document.querySelector('affine-database-row-container');
+      const rows = document.querySelector('.affine-database-block-rows');
       const row = rows?.querySelector(
         `.database-row:nth-child(${rowIndex + 1})`
       );
