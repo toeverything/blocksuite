@@ -151,10 +151,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       const rootRect = root.getBoundingClientRect();
       const rangeRect = range.getBoundingClientRect();
 
-      const moveX = Math.max(
-        this._lastScrollLeft,
-        rangeRect.left - rootRect.right
-      );
+      let moveX = 0;
+      if (rangeRect.left > rootRect.left) {
+        moveX = Math.max(this._lastScrollLeft, rangeRect.left - rootRect.right);
+      }
 
       root.scrollLeft = moveX;
       this._lastScrollLeft = moveX;

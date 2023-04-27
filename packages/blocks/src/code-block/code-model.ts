@@ -11,6 +11,8 @@ export const CodeBlockSchema = defineBlockSchema({
     version: 1,
     role: 'content',
     tag: literal`affine-code`,
+    parent: ['affine:frame', 'affine:paragraph', 'affine:list'],
+    children: [],
   },
 });
 

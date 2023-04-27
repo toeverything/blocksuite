@@ -79,11 +79,11 @@ export class DatabaseCellContainer
 
     // prevent block selection
     const onStopPropagation = (event: Event) => event.stopPropagation();
-    this._disposables.addFromEvent(this, 'mousedown', onStopPropagation);
-    this._disposables.addFromEvent(this, 'mousemove', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
+    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
-  _onClick = (event: Event) => {
+  private _onClick = (event: Event) => {
     if (this.readonly) return;
 
     this._isEditing = true;

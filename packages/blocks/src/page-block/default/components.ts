@@ -10,6 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import { stopPropagation } from '../edgeless/utils.js';
 import type { DefaultSelectionSlots } from './default-page-block.js';
 import type { PageViewport } from './selection-manager/selection-state.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
@@ -99,7 +100,10 @@ export function EmbedEditingContainer(
       ${tooltipStyle}
     </style>
 
-    <div class="affine-embed-editing-state-container">
+    <div
+      class="affine-embed-editing-state-container"
+      @pointerdown=${stopPropagation}
+    >
       <div style=${styleMap(style)} class="embed-editing-state">
         <format-bar-button
           class="has-tool-tip"
