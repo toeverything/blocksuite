@@ -202,12 +202,15 @@ export class LinkPopover extends LitElement {
     this._disableConfirm = false;
   }
 
-  private _onKeydown(e: KeyboardEvent) {
+  private _onInput(e: InputEvent) {
     if (!this.linkInput) {
       throw new Error('Failed to update link! Link input not found!');
     }
     const isValid = isValidLink(this.linkInput.value);
     this._disableConfirm = isValid ? false : true;
+  }
+
+  private _onKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
       this._onConfirm();
@@ -234,6 +237,7 @@ export class LinkPopover extends LitElement {
         placeholder="Paste or type a link"
         value=${this.previewLink}
         @keydown=${this._onKeydown}
+        @input=${this._onInput}
       />
       <span class="affine-link-popover-dividing-line"></span>
       ${this.confirmBtnTemplate()}
