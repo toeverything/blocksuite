@@ -488,7 +488,7 @@ export function isToggleIcon(element: unknown): element is SVGPathElement {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute('data-block-is-database-input') === 'true'
+    element.getAttribute('data-virgo-root') === 'true'
   );
 }
 
