@@ -84,6 +84,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
   protected override firstUpdated() {
     this._onInitVEditor();
+    this._disposables.addFromEvent(this, 'click', this._handleClick);
   }
 
   private _handleClick() {
@@ -190,16 +191,6 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       });
     }
   };
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('click', this._handleClick);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeEventListener('click', this._handleClick);
-  }
 
   override render() {
     return html`

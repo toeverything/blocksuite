@@ -28,19 +28,9 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
 
   private vEditor: AffineVEditor | null = null;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('click', this._onClick);
-  }
-
   override firstUpdated() {
     this._disposables.addFromEvent(this, 'click', this._onClick);
     this._onInitVEditor();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeEventListener('click', this._onClick);
   }
 
   private _onClick = () => {
