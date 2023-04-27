@@ -81,7 +81,7 @@
     "prettier": "^2.8.4",
     "pretty-format": "^29.5.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "vite": "^4.2.0",
     "vite-plugin-istanbul": "^4.0.1",
     "vite-plugin-web-components-hmr": "^0.1.3",
