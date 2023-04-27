@@ -8,7 +8,10 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import type { EmbedBlockDoubleClickData } from '../../../__internal__/index.js';
+import {
+  type EmbedBlockDoubleClickData,
+  noop,
+} from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -97,6 +100,7 @@ export class DefaultSelectionManager {
         this._onContainerDragStart,
         this._onContainerDragMove,
         this._onContainerDragEnd,
+        this._onContainerPointerDown,
         this._onContainerClick,
         this._onContainerDblClick,
         this._onContainerTripleClick,
@@ -229,7 +233,11 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerClick = (e: SelectionEvent) => {
+  private _onContainerClick = (_: SelectionEvent) => {
+    noop();
+  };
+
+  private _onContainerPointerDown = (e: SelectionEvent) => {
     const {
       x,
       y,

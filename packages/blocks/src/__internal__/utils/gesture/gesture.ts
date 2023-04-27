@@ -30,6 +30,7 @@ export function initMouseEventHandlers(
   onContainerDragStart: (e: SelectionEvent) => void,
   onContainerDragMove: (e: SelectionEvent) => void,
   onContainerDragEnd: (e: SelectionEvent) => void,
+  onContainerPointerDown: (e: SelectionEvent) => void,
   onContainerClick: (e: SelectionEvent) => void,
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerTripleClick: (e: SelectionEvent) => void,
@@ -75,7 +76,13 @@ export function initMouseEventHandlers(
     },
 
     onPointerDown: event => {
-      //
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      onContainerPointerDown(event);
     },
     onPointerMove: event => {
       if (shouldFilterMouseEvent(event.raw)) return;
