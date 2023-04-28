@@ -5,7 +5,7 @@ import { BaseElement, type HitTestOptions } from '../base-element.js';
 export type SerializedDebugProps = {
   id: string;
   index: string;
-  type: 'debug';
+  type: string;
   xywh: string;
   color: string;
 };

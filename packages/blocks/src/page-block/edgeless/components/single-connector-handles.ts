@@ -94,7 +94,7 @@ function capPointerdown(
     }
 
     if (position === 'start') {
-      surface.updateConnectorElement(element.id, {
+      surface.updateElement(element.id, {
         controllers: routes,
         startElement:
           picked && attachedPointPosition
@@ -102,7 +102,7 @@ function capPointerdown(
             : undefined,
       });
     } else {
-      surface.updateConnectorElement(element.id, {
+      surface.updateElement(element.id, {
         controllers: routes,
         endElement:
           picked && attachedPointPosition
@@ -207,7 +207,7 @@ function centerControllerPointerdown(
       absoluteControllers[position + 1] = newPoint1;
     }
 
-    surface.updateConnectorElement(element.id, {
+    surface.updateElement(element.id, {
       controllers: simplifyPath(absoluteControllers),
     });
 

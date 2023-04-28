@@ -119,7 +119,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElementProps(element.id, { lineWidth: size });
+        this.surface.updateElement(element.id, { lineWidth: size });
       }
     });
     // FIXME: force update selection, because brush size changed
@@ -130,7 +130,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElementProps(element.id, { color });
+        this.surface.updateElement(element.id, { color });
       }
     });
   }

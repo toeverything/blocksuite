@@ -4,41 +4,26 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import type {
+  BaseElement,
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/base-element.js';
 import { defaultTransformPropertyValue } from './elements/base-element.js';
-import type {
-  BrushProps,
-  CreateBrushProps,
-  SerializedBrushProps,
-} from './elements/brush/types.js';
-import type {
-  ConnectorProps,
-  Controller,
-  CreateConnectorProps,
-  SerializedConnectorProps,
-} from './elements/connector/types.js';
-import type { CreateDebugProps } from './elements/debug/debug-element.js';
-import type { ShapeProps } from './elements/index.js';
 import {
-  BrushElement,
-  ConnectorElement,
-  DebugElement,
   ElementCtors,
   type PhasorElement,
+  type PhasorElementCreateProps,
+  type PhasorElementSerializeProps,
   type PhasorElementType,
-  ShapeElement,
 } from './elements/index.js';
-import type { CreateShapeProps } from './elements/shape/types.js';
 import { compare } from './grid.js';
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
 import { updateYElementProps } from './utils/operation.js';
-import { generateElementId } from './utils/std.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from './utils/xywh.js';
+import { generateElementId, typecast } from './utils/std.js';
+import { serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -77,138 +62,43 @@ export class SurfaceManager {
     return getCommonBound([...this._elements.values()]);
   }
 
-  addShapeElement(properties: CreateShapeProps) {
+  addElement(type: PhasorElementType, properties: PhasorElementCreateProps) {
+    const ElementCtor = ElementCtors[type];
+
     const id = generateElementId();
-    const element = new ShapeElement(id);
+    const element = new ElementCtor(id);
     element.transformPropertyValue = this._transformPropertyValue;
-    const updated = ShapeElement.getUpdatedSerializedProps(element, properties);
-    ShapeElement.applySerializedProps(element, updated);
+
+    const ctor = typecast<typeof BaseElement>(ElementCtor);
+    const updated = ctor.getUpdatedSerializedProps(element, properties);
+    ctor.applySerializedProps(element, updated);
 
     return this._addElement(element);
   }
 
-  addDebugElement(properties: CreateDebugProps) {
-    const id = generateElementId();
-    const element = new DebugElement(id);
-    DebugElement.applySerializedProps(element, properties);
-    return this._addElement(element);
-  }
-
-  addBrushElement(properties: CreateBrushProps) {
-    const id = generateElementId();
-    const element = new BrushElement(id);
-    element.transformPropertyValue = this._transformPropertyValue;
-    const updated = BrushElement.getUpdatedSerializedProps(element, properties);
-    BrushElement.applySerializedProps(element, updated);
-
-    return this._addElement(element);
-  }
-
-  updateBrushElement(id: string, properties: Partial<SerializedBrushProps>) {
+  updateElement<
+    T extends Partial<PhasorElementSerializeProps> = Partial<PhasorElementSerializeProps>
+  >(id: string, properties: T) {
     const element = this._elements.get(id);
     assertExists(element);
-    const updated = BrushElement.getUpdatedSerializedProps(
-      element as BrushElement,
-      properties
-    );
+
+    const ElementCtor = ElementCtors[element.type];
+    assertExists(ElementCtor);
+
+    const ctor = typecast<typeof BaseElement>(ElementCtor);
+    const updated = ctor.getUpdatedSerializedProps(element, properties);
+
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
+
       updateYElementProps(yElement, updated);
-    });
-  }
-
-  addConnectorElement(properties: CreateConnectorProps) {
-    const id = generateElementId();
-    const element = new ConnectorElement(id);
-    element.transformPropertyValue = this._transformPropertyValue;
-    const updated = ConnectorElement.getUpdatedSerializedProps(
-      element,
-      properties
-    );
-    ConnectorElement.applySerializedProps(element, updated);
-
-    return this._addElement(element);
-  }
-
-  updateConnectorElement(
-    id: string,
-    properties: Partial<SerializedConnectorProps>
-  ) {
-    const element = this._elements.get(id);
-    assertExists(element);
-    const updated = ConnectorElement.getUpdatedSerializedProps(
-      element as ConnectorElement,
-      properties
-    );
-    this._transact(() => {
-      const yElement = this._yElements.get(id) as Y.Map<unknown>;
-      assertExists(yElement);
-      updateYElementProps(yElement, updated);
-    });
-    if (updated.startElement) {
-      this._addBinding(updated.startElement.id, id);
-      this._addBinding(id, updated.startElement.id);
-    }
-    if (updated.endElement) {
-      this._addBinding(updated.endElement.id, id);
-      this._addBinding(id, updated.endElement.id);
-    }
-  }
-
-  updateElementProps(
-    id: string,
-    rawProps: ShapeProps | BrushProps | ConnectorProps
-  ) {
-    this._transact(() => {
-      const element = this._elements.get(id);
-      assertExists(element);
-      const ElementCtor = ElementCtors[element.type];
-      assertExists(ElementCtor);
-
-      const props = ElementCtor.getProps(element, rawProps);
-
-      const yElement = this._yElements.get(id) as Y.Map<unknown>;
-      assertExists(yElement);
-      for (const [key, value] of Object.entries(props)) {
-        yElement.set(key, value);
-      }
     });
   }
 
   setElementBound(id: string, bound: IBound) {
-    this._transact(() => {
-      const element = this._elements.get(id);
-      assertExists(element);
-      const ElementCtor = ElementCtors[element.type];
-      assertExists(ElementCtor);
-
-      if (element.type === 'connector') {
-        const updated = ElementCtors[element.type].getUpdatedSerializedProps(
-          element,
-          { xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h) }
-        );
-        const yElement = this._yElements.get(id) as Y.Map<unknown>;
-        assertExists(yElement);
-        updateYElementProps(yElement, updated);
-        return;
-      }
-      if (element.type === 'brush') {
-        const updated = ElementCtors[element.type].getUpdatedSerializedProps(
-          element,
-          { xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h) }
-        );
-        const yElement = this._yElements.get(id) as Y.Map<unknown>;
-        assertExists(yElement);
-        updateYElementProps(yElement, updated);
-        return;
-      }
-      const props = ElementCtor.getBoundProps(element, bound);
-      const yElement = this._yElements.get(id) as Y.Map<unknown>;
-      assertExists(yElement);
-      for (const [key, value] of Object.entries(props)) {
-        yElement.set(key, value);
-      }
+    this.updateElement(id, {
+      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     });
   }
 
@@ -331,6 +221,19 @@ export class SurfaceManager {
     this._bindings.get(id0)?.add(id1);
   }
 
+  private _updateBindings(element: PhasorElement) {
+    if (element.type === 'connector') {
+      if (element.startElement) {
+        this._addBinding(element.startElement.id, element.id);
+        this._addBinding(element.id, element.startElement.id);
+      }
+      if (element.endElement) {
+        this._addBinding(element.endElement.id, element.id);
+        this._addBinding(element.id, element.endElement.id);
+      }
+    }
+  }
+
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as PhasorElementType;
 
@@ -347,16 +250,7 @@ export class SurfaceManager {
       this._lastIndex = element.index;
     }
 
-    if (element.type === 'connector') {
-      if (element.startElement) {
-        this._addBinding(element.startElement.id, element.id);
-        this._addBinding(element.id, element.startElement.id);
-      }
-      if (element.endElement) {
-        this._addBinding(element.endElement.id, element.id);
-        this._addBinding(element.id, element.endElement.id);
-      }
-    }
+    this._updateBindings(element);
   }
 
   private _syncFromExistingContainer() {
@@ -427,30 +321,16 @@ export class SurfaceManager {
         assertExists(element);
 
         this._renderer.removeElement(element);
-        switch (key) {
-          case 'xywh': {
-            const xywh = yElement.get(key) as string;
-            const [x, y, w, h] = deserializeXYWH(xywh);
-            setXYWH(element, { x, y, w, h });
-            break;
-          }
-          case 'points': {
-            const points = yElement.get(key) as number[][];
-            (element as BrushElement).points = points;
-            break;
-          }
-          case 'controllers': {
-            const controllers = yElement.get(key) as Controller[];
-            (element as ConnectorElement).controllers = controllers;
-            break;
-          }
-          default: {
-            const v = yElement.get(key);
-            // FIXME: update element prop
-            // @ts-expect-error should be fixed
-            element[key] = v;
-          }
-        }
+        const ElementCtor = ElementCtors[element.type];
+        assertExists(ElementCtor);
+
+        const ctor = typecast<typeof BaseElement>(ElementCtor);
+        ctor.applySerializedProps(element, {
+          [key]: yElement.get(key),
+        });
+
+        this._updateBindings(element);
+
         this._renderer.addElement(element);
       }
     });

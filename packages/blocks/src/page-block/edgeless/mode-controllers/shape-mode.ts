@@ -55,7 +55,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
 
-    const id = this._surface.addShapeElement({
+    const id = this._surface.addElement('shape', {
       shapeType,
       xywh: bound.serialize(),
       strokeColor,

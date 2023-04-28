@@ -30,7 +30,7 @@ export type SerializedConnectorProps = {
   index: string;
   xywh: string;
 
-  type: 'connector';
+  type: string;
   mode: ConnectorMode;
   lineWidth: number;
   color: string;

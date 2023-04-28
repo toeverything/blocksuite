@@ -81,7 +81,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     this._draggingStartPoint = startPoint;
 
-    const id = this._surface.addConnectorElement({
+    const id = this._surface.addElement('connector', {
       color,
       mode,
       controllers: [
@@ -149,7 +149,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       mode
     );
 
-    this._surface.updateConnectorElement(id, {
+    this._surface.updateElement(id, {
       controllers: routes,
       endElement:
         end && endPosition ? { id: end.id, position: endPosition } : undefined,

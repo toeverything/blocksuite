@@ -17,6 +17,7 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import type { SerializedConnectorProps } from '@blocksuite/phasor/elements/connector/types.js';
 import type { Page } from '@blocksuite/store';
 
 import {
@@ -428,7 +429,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateConnectorElement(id, {
+        surface.updateElement(id, {
           controllers: routes,
         });
       }

@@ -25,7 +25,7 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
 }
 
 function addBrushElements(surface: SurfaceManager) {
-  surface.addBrushElement({
+  surface.addElement('brush', {
     points: [
       [0, 14.35],
       [0.23, 14.35],
@@ -45,12 +45,12 @@ function addBrushElements(surface: SurfaceManager) {
     lineWidth: 4,
   });
 
-  const brushId = surface.addBrushElement({
+  const brushId = surface.addElement('brush', {
     points: [[0, 100]],
     color: '#00ff00',
     lineWidth: 4,
   });
-  surface.updateBrushElement(brushId, {
+  surface.updateElement(brushId, {
     points: [
       [0, 0],
       [10, 10],
@@ -69,7 +69,7 @@ function addBrushElements(surface: SurfaceManager) {
 
 function addShapeElements(surface: SurfaceManager) {
   function addShape(shapeType: ShapeType, bound: Bound, radius = 0) {
-    surface.addShapeElement({
+    surface.addElement('shape', {
       shapeType,
       xywh: bound.serialize(),
       filled: true,
@@ -90,7 +90,7 @@ function addShapeElements(surface: SurfaceManager) {
 
 function addConnectorElements(surface: SurfaceManager) {
   function addConnector(controllers: Controller[]) {
-    surface.addConnectorElement({
+    surface.addElement('connector', {
       controllers,
       strokeStyle: StrokeStyle.Solid,
       lineWidth: 4,
@@ -158,15 +158,15 @@ function addConnectorElements(surface: SurfaceManager) {
 }
 
 function addDebugElements(surface: SurfaceManager) {
-  surface.addDebugElement({
+  surface.addElement('debug', {
     xywh: new Bound(0, 0, 100, 100).serialize(),
     color: 'red',
   });
-  surface.addDebugElement({
+  surface.addElement('debug', {
     xywh: new Bound(50, 50, 100, 100).serialize(),
     color: 'black',
   });
-  surface.addDebugElement({
+  surface.addElement('debug', {
     xywh: new Bound(298, 0, 2, 300).serialize(),
     color: 'gray',
   });

@@ -45,7 +45,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     const { color, lineWidth } = this.mouseMode;
     const points = [[modelX, modelY]];
 
-    const id = this._surface.addBrushElement({
+    const id = this._surface.addElement('brush', {
       points,
       color,
       lineWidth,
@@ -72,7 +72,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     this._draggingPathPoints = points;
 
-    this._surface.updateBrushElement(this._draggingElementId, {
+    this._surface.updateElement(this._draggingElementId, {
       points,
       lineWidth,
     });
