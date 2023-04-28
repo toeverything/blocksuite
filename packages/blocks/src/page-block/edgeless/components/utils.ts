@@ -1,6 +1,5 @@
-import { Bound } from '@blocksuite/phasor';
-import { deserializeXYWH, type SurfaceViewport } from '@blocksuite/phasor';
-import { getCommonBound } from '@blocksuite/phasor';
+import type { SurfaceViewport } from '@blocksuite/phasor';
+import { Bound, getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { html } from 'lit';
