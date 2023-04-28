@@ -28,8 +28,11 @@ import { SelectActionPopup } from './select-option-popup.js';
 const styles = css`
   affine-database-select-cell-editing {
     z-index: 2;
+    border: 1px solid var(--affine-border-color);
+    border-radius: 4px;
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
+    box-shadow: 0px 4px 4px var(--affine-black-10),
+      0px 0px 18px rgba(0, 0, 0, 0.05);
   }
   .affine-database-select-cell-select {
     font-size: var(--affine-font-sm);
@@ -40,7 +43,6 @@ const styles = css`
     flex-wrap: wrap;
     gap: 6px;
     min-height: 44px;
-    width: 345px;
     padding: 10px 8px;
     background: var(--affine-hover-color);
   }
@@ -226,7 +228,8 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       {
         getBoundingClientRect: () => {
           const rect = this.rowHost.getBoundingClientRect();
-          rect.y = rect.y - rect.height;
+          rect.y = rect.y - rect.height - 2;
+          rect.x = rect.x - 2;
           return rect;
         },
       },
