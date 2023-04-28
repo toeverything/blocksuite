@@ -1,5 +1,5 @@
 import { StrokeStyle } from '../../consts.js';
-import { Bound, getBoundFromPoints } from '../../utils/bound.js';
+import { Bound, inflateBound } from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { serializeXYWH } from '../../utils/xywh.js';
@@ -13,7 +13,7 @@ import type {
   SerializedConnectorProps,
 } from './types.js';
 import { ConnectorMode } from './types.js';
-import { validateConnectorProps } from './utils.js';
+import { getConnectorPointsBound, validateConnectorProps } from './utils.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
@@ -35,8 +35,6 @@ export class ConnectorElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
-
     const path = new Path2D();
     if (this.mode === ConnectorMode.Orthogonal) {
       drawOrthogonal(path, this.controllers);
@@ -96,33 +94,57 @@ export class ConnectorElement extends BaseElement {
 
     const { controllers, xywh } = props;
     if (controllers?.length) {
-      const bound = getBoundFromPoints(controllers.map(({ x, y }) => [x, y]));
+      const lineWidth = props.lineWidth ?? element.lineWidth;
+      const bound = getConnectorPointsBound(controllers);
+      const boundWidthLineWidth = inflateBound(bound, lineWidth);
       const relativeControllers = controllers.map(c => {
         return {
           ...c,
-          x: c.x - bound.x,
-          y: c.y - bound.y,
+          x: c.x - boundWidthLineWidth.x,
+          y: c.y - boundWidthLineWidth.y,
         };
       });
       updated.controllers = relativeControllers;
-      updated.xywh = bound.serialize();
+      updated.xywh = boundWidthLineWidth.serialize();
     }
 
     if (xywh) {
+      const { lineWidth } = element;
       const bound = Bound.deserialize(xywh);
-      const elementH = Math.max(element.h, 1);
-      const elementW = Math.max(element.w, 1);
-      const boundH = Math.max(bound.h, 1);
-      const boundW = Math.max(bound.w, 1);
+      const elementW = Math.max(element.w - lineWidth, 1);
+      const elementH = Math.max(element.h - lineWidth, 1);
+      const boundW = Math.max(bound.w - lineWidth, 1);
+      const boundH = Math.max(bound.h - lineWidth, 1);
       const controllers = element.controllers.map(v => {
         return {
           ...v,
-          x: boundW * (v.x / elementW),
-          y: boundH * (v.y / elementH),
+          x: boundW * ((v.x - lineWidth / 2) / elementW),
+          y: boundH * ((v.y - lineWidth / 2) / elementH),
         };
       });
-      updated.xywh = serializeXYWH(bound.x, bound.y, boundW, boundH);
       updated.controllers = controllers;
+
+      updated.xywh = serializeXYWH(
+        bound.x,
+        bound.y,
+        boundW + lineWidth,
+        boundH + lineWidth
+      );
+    }
+
+    if (props.lineWidth && props.lineWidth !== element.lineWidth) {
+      const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
+      const d = props.lineWidth - element.lineWidth;
+
+      const controllers = element.controllers.map(c => {
+        return {
+          ...c,
+          x: c.x + d / 2,
+          y: c.y + d / 2,
+        };
+      });
+      updated.controllers = controllers;
+      updated.xywh = inflateBound(bound, d).serialize();
     }
 
     return updated;

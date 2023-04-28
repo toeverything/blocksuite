@@ -72,3 +72,14 @@ export function getBoundFromPoints(points: number[][]) {
   const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
   return new Bound(minX, minY, width, height);
 }
+
+export function inflateBound(bound: IBound, delta: number) {
+  const half = delta / 2;
+
+  return new Bound(
+    bound.x - half,
+    bound.y - half,
+    bound.w + delta,
+    bound.h + delta
+  );
+}

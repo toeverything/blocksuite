@@ -1,11 +1,11 @@
 import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
-import { Bound, getBoundFromPoints } from '../../utils/bound.js';
+import { Bound, getBoundFromPoints, inflateBound } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
 import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import type { SerializedBrushProps } from './types.js';
-import { inflateBound, validateBrushProps } from './utils.js';
+import { validateBrushProps } from './utils.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStrokePoints(points, {
