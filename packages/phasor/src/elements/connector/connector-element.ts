@@ -118,8 +118,8 @@ export class ConnectorElement extends BaseElement {
       const controllers = element.controllers.map(v => {
         return {
           ...v,
-          x: boundW * ((v.x - lineWidth / 2) / elementW),
-          y: boundH * ((v.y - lineWidth / 2) / elementH),
+          x: boundW * ((v.x - lineWidth / 2) / elementW) + lineWidth / 2,
+          y: boundH * ((v.y - lineWidth / 2) / elementH) + lineWidth / 2,
         };
       });
       updated.controllers = controllers;

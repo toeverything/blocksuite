@@ -35,8 +35,6 @@ export class BrushElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
-
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
     const commands = Utils.getSvgPathFromStrokePoints(stroke);
     const path = new Path2D(commands);
@@ -88,13 +86,13 @@ export class BrushElement extends BaseElement {
     if (points?.length) {
       const lineWidth = props.lineWidth ?? element.lineWidth;
       const bound = getBoundFromPoints(points);
-
+      const boundWidthLineWidth = inflateBound(bound, lineWidth);
       const relativePoints = points.map(([x, y]) => {
-        return [x - bound.x, y - bound.y];
+        return [x - boundWidthLineWidth.x, y - boundWidthLineWidth.y];
       });
       updated.points = relativePoints;
 
-      updated.xywh = inflateBound(bound, lineWidth).serialize();
+      updated.xywh = boundWidthLineWidth.serialize();
     }
 
     if (xywh) {
@@ -105,7 +103,10 @@ export class BrushElement extends BaseElement {
       const boundH = Math.max(bound.h - lineWidth, 1);
       const boundW = Math.max(bound.w - lineWidth, 1);
       const points = element.points.map(([x, y]) => {
-        return [boundW * (x / elementW), boundH * (y / elementH)];
+        return [
+          boundW * ((x - lineWidth / 2) / elementW) + lineWidth / 2,
+          boundH * ((y - lineWidth / 2) / elementH) + lineWidth / 2,
+        ];
       });
 
       updated.points = points;
@@ -121,7 +122,10 @@ export class BrushElement extends BaseElement {
     if (props.lineWidth && props.lineWidth !== element.lineWidth) {
       const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
       const d = props.lineWidth - element.lineWidth;
-
+      const points = element.points.map(([x, y]) => {
+        return [x + d / 2, y + d / 2];
+      });
+      updated.points = points;
       updated.xywh = inflateBound(bound, d).serialize();
     }
     return updated;

@@ -21,9 +21,9 @@ import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { updateYElementProps } from './utils/operation.js';
 import { generateElementId, typecast } from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
+import { updateYElementProps } from './utils/y-operation.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
