@@ -48,7 +48,7 @@ const styles = css`
     align-items: center;
     justify-content: center;
   }
-  .search-container {
+  .search-container.hidden {
     overflow: hidden;
   }
   .affine-database-toolbar-item.more-action {
@@ -292,6 +292,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       this._searchContainer,
       () => {
         if (this.searchState !== SearchState.Searching) {
+          this._searchContainer.classList.add('hidden');
           this.setSearchState(SearchState.SearchIcon);
           removeListener();
         }
@@ -304,6 +305,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onFocusSearchInput = () => {
     if (this.searchState === SearchState.SearchInput) {
       this._searchInput.focus();
+      this._searchContainer.classList.remove('hidden');
     } else {
       this._searchInput.blur();
     }
@@ -390,7 +392,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     return html`<div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
-      <div class="affine-database-toolbar-item search-container">
+      <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
       ${this.readonly
