@@ -12,12 +12,21 @@ import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   static override styles = css`
     affine-database-number-cell-editing {
-      width: 100%;
       display: block;
+      width: 100%;
+      height: 100%;
     }
 
+    .affine-database-number {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
     .affine-database-number:focus {
       outline: none;
+    }
+    .affine-database-number v-line {
+      width: 100%;
     }
   `;
 
