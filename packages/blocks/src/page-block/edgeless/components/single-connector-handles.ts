@@ -6,7 +6,6 @@ import type {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';

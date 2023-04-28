@@ -1,11 +1,6 @@
 import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  Bound,
-  deserializeXYWH,
-  getBrushBoundFromPoints,
-  StrokeStyle,
-} from '@blocksuite/phasor';
+import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 
 import type {
   ConnectorMouseMode,

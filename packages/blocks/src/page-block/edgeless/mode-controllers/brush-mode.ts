@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 
 import type {
   BrushMouseMode,
@@ -75,6 +74,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     this._surface.updateBrushElement(this._draggingElementId, {
       points,
+      lineWidth,
     });
 
     this._edgeless.slots.surfaceUpdated.emit();

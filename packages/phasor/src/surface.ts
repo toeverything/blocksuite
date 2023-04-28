@@ -30,6 +30,7 @@ import {
   ShapeElement,
   type ShapeType,
 } from './elements/index.js';
+import type { CreateShapeProps } from './elements/shape/types.js';
 import { compare } from './grid.js';
 import { intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
@@ -76,15 +77,12 @@ export class SurfaceManager {
     return getCommonBound([...this._elements.values()]);
   }
 
-  addShapeElement(bound: IBound, shapeType: ShapeType, props?: ShapeProps) {
+  addShapeElement(properties: CreateShapeProps) {
     const id = generateElementId();
-    const element = new ShapeElement(id, shapeType);
+    const element = new ShapeElement(id);
     element.transformPropertyValue = this._transformPropertyValue;
-
-    setXYWH(element, bound);
-    if (props) {
-      ShapeElement.updateProps(element, props);
-    }
+    const updated = ShapeElement.getUpdatedSerializedProps(element, properties);
+    ShapeElement.applySerializedProps(element, updated);
 
     return this._addElement(element);
   }

@@ -3,7 +3,7 @@ import '../color-panel.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints, StrokeStyle } from '@blocksuite/phasor';
+import { StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';

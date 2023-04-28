@@ -9,7 +9,6 @@ import type {
   SurfaceManager,
   SurfaceViewport,
 } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,

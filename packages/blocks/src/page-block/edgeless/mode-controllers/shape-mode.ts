@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/phasor';
+import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
 import type {
   SelectionEvent,
@@ -54,13 +54,18 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const { shape, fillColor, strokeColor } = this.mouseMode;
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
-    const shapeProps = {
+
+    const id = this._surface.addShapeElement({
+      shapeType,
+      xywh: bound.serialize(),
       strokeColor,
       fillColor,
       filled: !isTransparent(fillColor),
       radius: shape === 'roundedRect' ? 0.1 : 0,
-    };
-    const id = this._surface.addShapeElement(bound, shapeType, shapeProps);
+      strokeWidth: 4,
+      strokeStyle: StrokeStyle.Solid,
+    });
+
     this._draggingElementId = id;
 
     this._draggingArea = {

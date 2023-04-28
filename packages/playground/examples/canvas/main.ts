@@ -2,6 +2,7 @@ import {
   ConnectorMode,
   type Controller,
   type DebugElement,
+  type ShapeType,
   StrokeStyle,
 } from '@blocksuite/phasor';
 import {
@@ -67,20 +68,24 @@ function addBrushElements(surface: SurfaceManager) {
 }
 
 function addShapeElements(surface: SurfaceManager) {
-  surface.addShapeElement(new Bound(200, 0, 100, 100), 'rect', {
-    filled: true,
-    strokeWidth: 0,
-    fillColor: '#009900',
-  });
-  surface.addShapeElement(new Bound(200, 110, 100, 100), 'triangle');
-  surface.addShapeElement(new Bound(200, 220, 210, 100), 'ellipse');
-  surface.addShapeElement(new Bound(310, 0, 100, 100), 'diamond');
-  surface.addShapeElement(new Bound(310, 110, 100, 100), 'rect', {
-    radius: 0.1,
-    filled: true,
-    fillColor: '#009900',
-    strokeColor: '#dddd00',
-  });
+  function addShape(shapeType: ShapeType, bound: Bound, radius = 0) {
+    surface.addShapeElement({
+      shapeType,
+      xywh: bound.serialize(),
+      filled: true,
+      strokeWidth: 4,
+      fillColor: '#009900',
+      radius,
+      strokeColor: '#dddd00',
+      strokeStyle: StrokeStyle.Solid,
+    });
+  }
+
+  addShape('rect', new Bound(200, 0, 100, 100));
+  addShape('triangle', new Bound(200, 110, 100, 100));
+  addShape('ellipse', new Bound(200, 220, 210, 100));
+  addShape('diamond', new Bound(310, 0, 100, 100));
+  addShape('rect', new Bound(310, 110, 100, 100), 0.1);
 }
 
 function addConnectorElements(surface: SurfaceManager) {
