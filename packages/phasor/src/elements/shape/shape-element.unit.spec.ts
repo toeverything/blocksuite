@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { Bound } from '../../utils/bound.js';
 import { ShapeElement } from './shape-element.js';
 
 const dataWithoutXywh = {
@@ -88,11 +89,8 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = ShapeElement.deserialize(data);
-    const props = ShapeElement.getBoundProps(element, {
-      x: 1,
-      y: 1,
-      w: 10,
-      h: 10,
+    const props = ShapeElement.getUpdatedSerializedProps(element, {
+      xywh: new Bound(1, 1, 10, 10).serialize(),
     });
     expect(props.xywh).toBe('[1,1,10,10]');
   });
