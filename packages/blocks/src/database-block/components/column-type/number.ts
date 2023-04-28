@@ -25,6 +25,9 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
     .affine-database-number:focus {
       outline: none;
     }
+    .affine-database-number v-line {
+      width: 100%;
+    }
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
