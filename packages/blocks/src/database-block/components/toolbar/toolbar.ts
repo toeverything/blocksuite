@@ -15,6 +15,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '../../../__internal__/index.js';
+import { stopPropagation } from '../../../page-block/edgeless/utils.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { SearchState } from '../../types.js';
 import { onClickOutside } from '../../utils.js';
@@ -376,6 +377,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
             @input=${this._onSearch}
             @click=${(event: MouseEvent) => event.stopPropagation()}
             @keydown=${this._onSearchKeydown}
+            @pointerdown=${stopPropagation}
           />
           <div class="has-tool-tip close-icon" @click=${this._clearSearch}>
             ${DatabaseSearchClose}

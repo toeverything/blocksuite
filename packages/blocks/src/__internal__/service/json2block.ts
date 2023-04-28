@@ -68,7 +68,7 @@ export async function json2block(
 
       assertExists(model);
       if (model.text) {
-        await setRange(focusedBlockModel, {
+        await setRange(model, {
           index: textLength,
           length: 0,
         });

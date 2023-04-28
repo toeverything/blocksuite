@@ -534,7 +534,7 @@ export async function getSelectedText(page: Page) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { index, length } = component!.vEditor!.getVRange()!;
       content +=
-        component?.vEditor?.yText.toString().slice(index, length) || '';
+        component?.vEditor?.yText.toString().slice(index, index + length) || '';
     });
 
     return content;
