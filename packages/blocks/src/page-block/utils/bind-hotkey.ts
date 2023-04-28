@@ -410,7 +410,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       // Do nothing
       return;
     }
-    // Assume native selection is collapsed
+    // See https://github.com/toeverything/blocksuite/issues/2260
     if (blockRange.models.length > 1) {
       e.preventDefault();
       const selection = getSelection();
@@ -434,7 +434,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       // Do nothing
       return;
     }
-    // Assume native selection is collapsed
+    // See https://github.com/toeverything/blocksuite/issues/2260
     if (blockRange.models.length > 1) {
       e.preventDefault();
       const selection = getSelection();
