@@ -249,8 +249,8 @@ export function handleDown(
     );
     const model = blockRange.models[0];
     if (
-      matchFlavours(model, ['affine:code'] as const) ||
-      matchFlavours(model, ['affine:page'] as const)
+      matchFlavours(model, ['affine:code']) ||
+      matchFlavours(model, ['affine:page'])
     ) {
       return;
     }

@@ -46,14 +46,14 @@ export function hardEnter(
   const parent = page.getParent(model);
   const isLastChild = parent?.lastChild() === model;
   const isEmptyList =
-    matchFlavours(model, ['affine:list'] as const) && model.text.length === 0;
+    matchFlavours(model, ['affine:list']) && model.text.length === 0;
 
   assertExists(model.text, 'Failed to hardEnter! model.text not exists!');
 
   if (
     isEmptyList &&
     parent &&
-    matchFlavours(parent, ['affine:frame'] as const) &&
+    matchFlavours(parent, ['affine:frame']) &&
     model.children.length === 0
   ) {
     // TODO use `handleLineStartBackspace` directly is not concise enough,
@@ -124,8 +124,8 @@ export function hardEnter(
 // 2. In the middle and start of block, press Enter will insert a \n to break the line
 // TODO this should be configurable per-block
 function isSoftEnterable(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:code'] as const)) return true;
-  if (matchFlavours(model, ['affine:paragraph'] as const)) {
+  if (matchFlavours(model, ['affine:code'])) return true;
+  if (matchFlavours(model, ['affine:paragraph'])) {
     return model.type === 'quote';
   }
   return false;

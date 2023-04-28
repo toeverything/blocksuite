@@ -18,7 +18,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
     return false;
   }
   if (
-    matchFlavours(model, ['affine:paragraph'] as const) &&
+    matchFlavours(model, ['affine:paragraph']) &&
     ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
   ) {
     return false;
