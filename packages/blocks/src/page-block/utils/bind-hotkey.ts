@@ -412,9 +412,15 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     }
     // Assume native selection is collapsed
     if (blockRange.models.length > 1) {
-      throw new Error(
-        "Failed to handle arrow left! Native selection can't be multi-block!"
-      );
+      e.preventDefault();
+      const selection = getSelection();
+      if (selection) {
+        const range = blockRange.nativeRange.cloneRange();
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      return;
     }
     focusPreviousBlock(blockRange.models[0], 'end');
     return;
@@ -430,9 +436,15 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     }
     // Assume native selection is collapsed
     if (blockRange.models.length > 1) {
-      throw new Error(
-        "Failed to handle arrow right! Native selection can't be multi-block!"
-      );
+      e.preventDefault();
+      const selection = getSelection();
+      if (selection) {
+        const range = blockRange.nativeRange.cloneRange();
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      return;
     }
     focusNextBlock(blockRange.models[0], 'start');
     return;

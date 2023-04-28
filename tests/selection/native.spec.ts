@@ -1128,3 +1128,32 @@ test('should select with shift-click', async ({ page }) => {
   });
   expect(await getSelectedText(page)).toBe('123456789');
 });
+
+test('should collapse to end when press arrow-right on multi-line selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await dragBetweenIndices(page, [0, 0], [1, 2]);
+  expect(await getSelectedText(page)).toBe('12345');
+  await pressArrowRight(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['123', '46', '789']);
+});
+
+test('should collapse to start when press arrow-left on multi-line selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 1], [1, 2]);
+  expect(await getSelectedText(page)).toBe('2345');
+  await pressArrowLeft(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['23', '456', '789']);
+});
