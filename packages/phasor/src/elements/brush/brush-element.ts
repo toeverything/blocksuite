@@ -5,7 +5,7 @@ import { Utils } from '../../utils/tl-utils.js';
 import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import type { SerializedBrushProps } from './types.js';
-import { validateBrushProps } from './utils.js';
+import { inflateBound, validateBrushProps } from './utils.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStrokePoints(points, {
@@ -94,9 +94,7 @@ export class BrushElement extends BaseElement {
       });
       updated.points = relativePoints;
 
-      bound.w = bound.w + lineWidth;
-      bound.h = bound.h + lineWidth;
-      updated.xywh = bound.serialize();
+      updated.xywh = inflateBound(bound, lineWidth).serialize();
     }
 
     if (xywh) {
@@ -110,21 +108,21 @@ export class BrushElement extends BaseElement {
         return [boundW * (x / elementW), boundH * (y / elementH)];
       });
 
+      updated.points = points;
+
       updated.xywh = serializeXYWH(
         bound.x,
         bound.y,
         boundW + lineWidth,
         boundH + lineWidth
       );
-      updated.points = points;
     }
 
     if (props.lineWidth && props.lineWidth !== element.lineWidth) {
-      const { x, y, w, h } = updated.xywh
-        ? Bound.deserialize(updated.xywh)
-        : element;
+      const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
       const d = props.lineWidth - element.lineWidth;
-      updated.xywh = serializeXYWH(x, y, w + d, h + d);
+
+      updated.xywh = inflateBound(bound, d).serialize();
     }
     return updated;
   }
