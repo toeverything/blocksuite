@@ -90,7 +90,7 @@ export async function initPageContentByParam(
   }
 
   // Try to load base64 content or markdown content from url
-  await tryInitExternalContent(workspace, param);
+  await tryInitExternalContent(workspace, param, pageId);
 }
 
 async function main() {

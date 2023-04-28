@@ -139,11 +139,15 @@ export function initDebugConfig() {
   // enableDebugLog(['CRUD']);
 }
 
-async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+async function initWithMarkdownContent(
+  workspace: Workspace,
+  url: URL,
+  pageId: string
+) {
   const { empty: emptyInit } = await import('./data/index.js');
 
-  emptyInit(workspace);
-  const page = workspace.getPage('page0');
+  emptyInit(workspace, pageId);
+  const page = workspace.getPage(pageId);
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());
@@ -153,11 +157,12 @@ async function initWithMarkdownContent(workspace: Workspace, url: URL) {
 
 export async function tryInitExternalContent(
   workspace: Workspace,
-  initParam: string
+  initParam: string,
+  pageId: string
 ) {
   if (isValidUrl(initParam)) {
     const url = new URL(initParam);
-    await initWithMarkdownContent(workspace, url);
+    await initWithMarkdownContent(workspace, url, pageId);
   } else if (isBase64.test(initParam)) {
     Utils.applyYjsUpdateV2(workspace, initParam);
   }
