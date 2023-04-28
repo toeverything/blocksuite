@@ -30,7 +30,10 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
+import { initPageContentByParam } from '../main';
+import { initParam } from '../utils';
 import { createViewer } from './doc-inspector';
 
 const basePath = import.meta.env.DEV
@@ -94,6 +97,7 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.page;
   }
 
+  private _pageList = new Set<string>(['page0']);
   override createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     this._setThemeMode(this._dark && matchMedia.matches);
@@ -198,6 +202,29 @@ export class DebugMenu extends ShadowlessElement {
   private _exportYDoc() {
     this.workspace.exportYDoc();
   }
+  private async _importYDoc() {
+    await this.workspace.importYDoc();
+    this.requestUpdate();
+  }
+
+  private _setPage(id: string) {
+    const page = this.workspace.getPage(id);
+    if (page) {
+      this.editor.page = page;
+    }
+  }
+  private async _addPage() {
+    const id = prompt('please input page id');
+    if (initParam && id) {
+      await initPageContentByParam(this.workspace, initParam, id);
+      const page = this.workspace.getPage(id);
+      if (page) {
+        this.editor.page = page;
+        this.requestUpdate();
+        this.editor.requestUpdate();
+      }
+    }
+  }
 
   private async _inspect() {
     await createViewer(this.workspace.doc.toJSON());
@@ -239,6 +266,12 @@ export class DebugMenu extends ShadowlessElement {
   };
 
   override firstUpdated() {
+    this.workspace.slots.pageAdded.on(page => {
+      this._pageList.add(page);
+    });
+    this.workspace.slots.pageRemoved.on(page => {
+      this._pageList.delete(page);
+    });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
@@ -349,7 +382,26 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-
+          <!-- page select -->
+          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
+            <sl-button size="small" slot="trigger" caret>
+              ${this.page.id}
+            </sl-button>
+            <sl-menu>
+              ${repeat(
+                [...this._pageList],
+                id => html`
+                  <sl-menu-item @click=${() => this._setPage(id)}>
+                    ${id}
+                  </sl-menu-item>
+                `
+              )}
+              <sl-divider></sl-divider>
+              <sl-menu-item @click=${() => this._addPage()}>
+                Add New Page
+              </sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
           <!-- block type -->
           <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
@@ -456,6 +508,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importYDoc}>
+                Import YDoc
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>

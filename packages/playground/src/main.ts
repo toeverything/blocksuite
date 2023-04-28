@@ -66,8 +66,15 @@ function subscribePage(workspace: Workspace) {
   });
 }
 
-async function initPageContentByParam(workspace: Workspace, param: string) {
-  const functionMap = new Map<string, (workspace: Workspace) => void>();
+export async function initPageContentByParam(
+  workspace: Workspace,
+  param: string,
+  pageId: string
+) {
+  const functionMap = new Map<
+    string,
+    (workspace: Workspace, id: string) => void
+  >();
   Object.values(
     (await import('./data/index.js')) as Record<string, InitFn>
   ).forEach(fn => functionMap.set(fn.id, fn));
@@ -78,7 +85,7 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
 
   // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(param)) {
-    functionMap.get(param)?.(workspace);
+    functionMap.get(param)?.(workspace, pageId);
     return;
   }
 
@@ -87,10 +94,12 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
 }
 
 async function main() {
+  if (window.workspace) {
+    return;
+  }
   const workspace = new Workspace(options)
     .register(AffineSchemas)
     .register(__unstableSchemas);
-
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
@@ -107,7 +116,7 @@ async function main() {
 
   subscribePage(workspace);
   if (initParam !== null) {
-    await initPageContentByParam(workspace, initParam);
+    await initPageContentByParam(workspace, initParam, 'page0');
     return;
   }
 
