@@ -1,4 +1,3 @@
-import type { IBound } from '../../consts.js';
 import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
 import { Bound, getBoundFromPoints } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/hit-utils.js';
