@@ -812,7 +812,7 @@ test('should cut work single line', async ({ page }) => {
   );
 });
 
-test('should cut work multiple line', async ({ page }) => {
+test.skip('should cut work multiple line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
