@@ -196,8 +196,14 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     return html`
       <style>
         .rich-text-container {
+          display: flex;
+          align-items: center;
           width: 100%;
+          height: 100%;
           outline: none;
+        }
+        .rich-text-container v-line {
+          width: 100%;
         }
       </style>
       <div class="rich-text-container"></div>
