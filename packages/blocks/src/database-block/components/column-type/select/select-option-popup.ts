@@ -34,8 +34,7 @@ export class SelectActionPopup extends LitElement {
       border: 1px solid var(--affine-border-color);
       border-radius: 4px;
       background: var(--affine-white);
-      box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
-        inset 0px 0px 0px 0.5px var(--affine-white);
+      box-shadow: var(--affine-menu-shadow);
     }
     ${actionStyles}
     .action {

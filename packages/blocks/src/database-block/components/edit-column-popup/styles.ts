@@ -34,8 +34,7 @@ export const actionStyles = css`
 export const styles = css`
   :host {
     background: var(--affine-background-primary-color);
-    box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14),
-      inset 0px 0px 0px 0.5px var(--affine-border-color);
+    box-shadow: var(--affine-menu-shadow);
     padding: 8px;
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;

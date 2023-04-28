@@ -31,8 +31,7 @@ const styles = css`
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;
     background: var(--affine-background-primary-color);
-    box-shadow: 0px 4px 4px var(--affine-black-10),
-      0px 0px 18px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--affine-shadow-2);
   }
   .affine-database-select-cell-select {
     font-size: var(--affine-font-sm);

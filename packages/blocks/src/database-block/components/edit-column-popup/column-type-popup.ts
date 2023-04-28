@@ -48,7 +48,7 @@ const styles = css`
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
+    box-shadow: var(--affine-menu-shadow);
   }
   ${actionStyles}
   .action > svg {
