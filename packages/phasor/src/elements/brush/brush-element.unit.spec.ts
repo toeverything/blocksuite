@@ -8,11 +8,9 @@ const data = {
   color: '#000000',
   lineWidth: 4,
   xywh: '[0,0,104,104]',
-  points: JSON.stringify(
-    Array(100)
-      .fill(0)
-      .map((_, index) => [index, index])
-  ),
+  points: Array(100)
+    .fill(0)
+    .map((_, index) => [index, index]),
 };
 
 describe('brush element', () => {
@@ -51,7 +49,7 @@ describe('brush element', () => {
       Math.round(y * 100) / 100,
     ]);
     expect(points).toMatchObject(
-      JSON.parse(data.points).map(([x, y]: [number, number]) => [x * 2, y * 2])
+      data.points.map(([x, y]: number[]) => [x * 2, y * 2])
     );
   });
 });
