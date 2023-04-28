@@ -15,14 +15,14 @@ import { Text } from '@blocksuite/store';
 import { addShapeElement } from './utils';
 
 export interface InitFn {
-  (workspace: Workspace): void;
+  (workspace: Workspace, pageId: string): void;
   id: string;
   displayName: string;
   description: string;
 }
 
-export const empty: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage({ id: 'page0' });
+export const empty: InitFn = (workspace: Workspace, pageId: string) => {
+  const page = workspace.createPage({ id: pageId });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -42,8 +42,8 @@ empty.id = 'empty';
 empty.displayName = 'Empty Editor';
 empty.description = 'Start from empty editor';
 
-export const heavy: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage({ id: 'page0' });
+export const heavy: InitFn = (workspace: Workspace, pageId: string) => {
+  const page = workspace.createPage({ id: pageId });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -88,8 +88,8 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export const preset: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage({ id: 'page0' });
+export const preset: InitFn = (workspace: Workspace, pageId: string) => {
+  const page = workspace.createPage({ id: pageId });
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -123,8 +123,8 @@ preset.id = 'preset';
 preset.displayName = 'BlockSuite Starter';
 preset.description = 'Start from friendly introduction';
 
-export const database: InitFn = (workspace: Workspace) => {
-  const page = workspace.createPage({ id: 'page0' });
+export const database: InitFn = (workspace: Workspace, pageId: string) => {
+  const page = workspace.createPage({ id: pageId });
   page.awarenessStore.setFlag('enable_database', true);
 
   // Add page block and surface block at root level

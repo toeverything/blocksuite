@@ -164,6 +164,10 @@ export class Workspace {
     return this._store.spaces as Map<`space:${string}`, Page>;
   }
 
+  public getPageNameList() {
+    return [...this._pages.keys()];
+  }
+
   get doc() {
     return this._store.doc;
   }
@@ -328,6 +332,29 @@ export class Workspace {
     link.click();
 
     URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  importYDoc(): Promise<void> {
+    return new Promise((res, rej) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.ydoc';
+      input.multiple = false;
+      input.onchange = async () => {
+        const file = input.files?.item(0);
+        if (!file) {
+          return rej();
+        }
+        const buffer = await file.arrayBuffer();
+        Y.applyUpdate(this.doc, new Uint8Array(buffer));
+        res();
+      };
+      input.onerror = rej;
+      input.click();
+    });
   }
 
   /**
