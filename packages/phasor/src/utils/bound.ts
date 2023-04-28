@@ -83,3 +83,36 @@ export function inflateBound(bound: IBound, delta: number) {
     bound.h + delta
   );
 }
+
+export function transformPointsToNewBound(
+  points: { x: number; y: number }[],
+  oldBound: IBound,
+  oldMargin: number,
+  newBound: IBound,
+  newMargin: number
+) {
+  const wholeOldMargin = oldMargin * 2;
+  const wholeNewMargin = newMargin * 2;
+  const oldW = Math.max(oldBound.w - wholeOldMargin, 1);
+  const oldH = Math.max(oldBound.h - wholeOldMargin, 1);
+  const newW = Math.max(newBound.w - wholeNewMargin, 1);
+  const newH = Math.max(newBound.h - wholeNewMargin, 1);
+
+  const transformedPoints = points.map(p => {
+    return {
+      ...p,
+      x: newW * ((p.x - oldMargin) / oldW) + newMargin,
+      y: newH * ((p.y - oldMargin) / oldH) + newMargin,
+    };
+  });
+
+  return {
+    points: transformedPoints,
+    bound: new Bound(
+      newBound.x,
+      newBound.y,
+      newW + wholeNewMargin,
+      newH + wholeNewMargin
+    ),
+  };
+}

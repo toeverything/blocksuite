@@ -1,8 +1,11 @@
 import { StrokeStyle } from '../../consts.js';
-import { Bound, inflateBound } from '../../utils/bound.js';
+import {
+  Bound,
+  inflateBound,
+  transformPointsToNewBound,
+} from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
-import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { drawArrow } from './draw-arrow.js';
 import { drawOrthogonal } from './draw-orthogonal.js';
@@ -111,40 +114,31 @@ export class ConnectorElement extends BaseElement {
     if (xywh) {
       const { lineWidth } = element;
       const bound = Bound.deserialize(xywh);
-      const elementW = Math.max(element.w - lineWidth, 1);
-      const elementH = Math.max(element.h - lineWidth, 1);
-      const boundW = Math.max(bound.w - lineWidth, 1);
-      const boundH = Math.max(bound.h - lineWidth, 1);
-      const controllers = element.controllers.map(v => {
-        return {
-          ...v,
-          x: boundW * ((v.x - lineWidth / 2) / elementW) + lineWidth / 2,
-          y: boundH * ((v.y - lineWidth / 2) / elementH) + lineWidth / 2,
-        };
-      });
-      updated.controllers = controllers;
-
-      updated.xywh = serializeXYWH(
-        bound.x,
-        bound.y,
-        boundW + lineWidth,
-        boundH + lineWidth
+      const transformed = transformPointsToNewBound(
+        element.controllers,
+        element,
+        lineWidth / 2,
+        bound,
+        lineWidth / 2
       );
+
+      updated.controllers = transformed.points;
+      updated.xywh = transformed.bound.serialize();
     }
 
     if (props.lineWidth && props.lineWidth !== element.lineWidth) {
       const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
-      const d = props.lineWidth - element.lineWidth;
+      const controllers = updated.controllers ?? element.controllers;
+      const transformed = transformPointsToNewBound(
+        controllers,
+        bound,
+        element.lineWidth / 2,
+        inflateBound(bound, props.lineWidth - element.lineWidth),
+        props.lineWidth / 2
+      );
 
-      const controllers = element.controllers.map(c => {
-        return {
-          ...c,
-          x: c.x + d / 2,
-          y: c.y + d / 2,
-        };
-      });
-      updated.controllers = controllers;
-      updated.xywh = inflateBound(bound, d).serialize();
+      updated.controllers = transformed.points;
+      updated.xywh = transformed.bound.serialize();
     }
 
     return updated;

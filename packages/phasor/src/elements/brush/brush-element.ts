@@ -1,8 +1,12 @@
 import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
-import { Bound, getBoundFromPoints, inflateBound } from '../../utils/bound.js';
+import {
+  Bound,
+  getBoundFromPoints,
+  inflateBound,
+  transformPointsToNewBound,
+} from '../../utils/bound.js';
 import { isPointIn } from '../../utils/hit-utils.js';
 import { Utils } from '../../utils/tl-utils.js';
-import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import type { SerializedBrushProps } from './types.js';
 import { validateBrushProps } from './utils.js';
@@ -84,7 +88,7 @@ export class BrushElement extends BaseElement {
     const { points, xywh } = props;
 
     if (points?.length) {
-      const lineWidth = props.lineWidth ?? element.lineWidth;
+      const lineWidth = element.lineWidth;
       const bound = getBoundFromPoints(points);
       const boundWidthLineWidth = inflateBound(bound, lineWidth);
       const relativePoints = points.map(([x, y]) => {
@@ -98,36 +102,33 @@ export class BrushElement extends BaseElement {
     if (xywh) {
       const bound = Bound.deserialize(xywh);
       const { lineWidth } = element;
-      const elementH = Math.max(element.h - lineWidth, 1);
-      const elementW = Math.max(element.w - lineWidth, 1);
-      const boundH = Math.max(bound.h - lineWidth, 1);
-      const boundW = Math.max(bound.w - lineWidth, 1);
-      const points = element.points.map(([x, y]) => {
-        return [
-          boundW * ((x - lineWidth / 2) / elementW) + lineWidth / 2,
-          boundH * ((y - lineWidth / 2) / elementH) + lineWidth / 2,
-        ];
-      });
-
-      updated.points = points;
-
-      updated.xywh = serializeXYWH(
-        bound.x,
-        bound.y,
-        boundW + lineWidth,
-        boundH + lineWidth
+      const transformed = transformPointsToNewBound(
+        element.points.map(([x, y]) => ({ x, y })),
+        element,
+        lineWidth / 2,
+        bound,
+        lineWidth / 2
       );
+
+      updated.points = transformed.points.map(p => [p.x, p.y]);
+      updated.xywh = transformed.bound.serialize();
     }
 
     if (props.lineWidth && props.lineWidth !== element.lineWidth) {
       const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
-      const d = props.lineWidth - element.lineWidth;
-      const points = element.points.map(([x, y]) => {
-        return [x + d / 2, y + d / 2];
-      });
-      updated.points = points;
-      updated.xywh = inflateBound(bound, d).serialize();
+      const points = updated.points ?? element.points;
+      const transformed = transformPointsToNewBound(
+        points.map(([x, y]) => ({ x, y })),
+        bound,
+        element.lineWidth / 2,
+        inflateBound(bound, props.lineWidth - element.lineWidth),
+        props.lineWidth / 2
+      );
+
+      updated.points = transformed.points.map(p => [p.x, p.y]);
+      updated.xywh = transformed.bound.serialize();
     }
+
     return updated;
   }
 }
