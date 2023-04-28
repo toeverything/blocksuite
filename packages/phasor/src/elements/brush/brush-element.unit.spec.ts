@@ -10,7 +10,7 @@ const data = {
   xywh: '[0,0,104,104]',
   points: Array(100)
     .fill(0)
-    .map((_, index) => [index, index]),
+    .map((_, index) => [index + 2, index + 2]),
 };
 
 describe('brush element', () => {
@@ -49,7 +49,7 @@ describe('brush element', () => {
       Math.round(y * 100) / 100,
     ]);
     expect(points).toMatchObject(
-      data.points.map(([x, y]: number[]) => [x * 2, y * 2])
+      data.points.map(([x, y]: number[]) => [(x - 2) * 2 + 2, (y - 2) * 2 + 2])
     );
   });
 });

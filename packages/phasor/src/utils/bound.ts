@@ -76,16 +76,22 @@ export function getBoundFromPoints(points: number[][]) {
 export function inflateBound(bound: IBound, delta: number) {
   const half = delta / 2;
 
-  return new Bound(
+  const newBound = new Bound(
     bound.x - half,
     bound.y - half,
     bound.w + delta,
     bound.h + delta
   );
+
+  if (newBound.w <= 0 || newBound.h <= 0) {
+    throw new Error('Invalid delta range or bound size.');
+  }
+
+  return newBound;
 }
 
-export function transformPointsToNewBound(
-  points: { x: number; y: number }[],
+export function transformPointsToNewBound<T extends { x: number; y: number }>(
+  points: T[],
   oldBound: IBound,
   oldMargin: number,
   newBound: IBound,
@@ -103,7 +109,7 @@ export function transformPointsToNewBound(
       ...p,
       x: newW * ((p.x - oldMargin) / oldW) + newMargin,
       y: newH * ((p.y - oldMargin) / oldH) + newMargin,
-    };
+    } as T;
   });
 
   return {
