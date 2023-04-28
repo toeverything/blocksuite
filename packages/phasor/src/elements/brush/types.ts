@@ -15,10 +15,3 @@ export type CreateBrushProps = Omit<
   SerializedBrushProps,
   'id' | 'index' | 'xywh' | 'type'
 >;
-
-type BrushPropsKeys = keyof Omit<
-  SerializedBrushProps,
-  'id' | 'type' | 'xywh' | 'points'
->;
-
-export type BrushProps = Partial<Pick<SerializedBrushProps, BrushPropsKeys>>;

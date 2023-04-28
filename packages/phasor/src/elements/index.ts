@@ -14,10 +14,7 @@ import { ShapeElement } from './shape/shape-element.js';
 import type { CreateShapeProps, SerializedShapeProps } from './shape/types.js';
 
 export type { SurfaceElement } from './base-element.js';
-export {
-  BrushElement,
-  getBrushBoundFromPoints,
-} from './brush/brush-element.js';
+export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';

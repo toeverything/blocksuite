@@ -19,19 +19,6 @@ function getSolidStrokePoints(points: number[][], lineWidth: number) {
   });
 }
 
-export function getBrushBoundFromPoints(
-  points: number[][],
-  lineWidth: number
-): IBound {
-  const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
-  return {
-    x: minX - lineWidth / 2,
-    y: minY - lineWidth / 2,
-    w: width < lineWidth ? lineWidth : width + lineWidth,
-    h: height < lineWidth ? lineWidth : height + lineWidth,
-  };
-}
-
 export class BrushElement extends BaseElement {
   type = 'brush' as const;
   color = '#000000';
@@ -49,6 +36,8 @@ export class BrushElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
+    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
+
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
     const commands = Utils.getSvgPathFromStrokePoints(stroke);
     const path = new Path2D(commands);
@@ -96,30 +85,32 @@ export class BrushElement extends BaseElement {
     const updated = { ...props };
 
     const { points, xywh } = props;
-    const lineWidth = props.lineWidth ?? element.lineWidth;
+
     if (points?.length) {
+      const lineWidth = props.lineWidth ?? element.lineWidth;
       const bound = getBoundFromPoints(points);
-      bound.x = bound.x - lineWidth / 2;
-      bound.y = bound.y - lineWidth / 2;
-      bound.w = bound.w + lineWidth;
-      bound.h = bound.h + lineWidth;
+
       const relativePoints = points.map(([x, y]) => {
         return [x - bound.x, y - bound.y];
       });
       updated.points = relativePoints;
+
+      bound.w = bound.w + lineWidth;
+      bound.h = bound.h + lineWidth;
       updated.xywh = bound.serialize();
     }
 
     if (xywh) {
       const bound = Bound.deserialize(xywh);
-      const { lineWidth } = element as BrushElement;
+      const { lineWidth } = element;
       const elementH = Math.max(element.h - lineWidth, 1);
       const elementW = Math.max(element.w - lineWidth, 1);
-      const boundH = Math.max(bound.h - lineWidth, 1);
-      const boundW = Math.max(bound.w - lineWidth, 1);
-      const points = (element as BrushElement).points.map(([x, y]) => {
+      const boundH = Math.max(bound.h, 1);
+      const boundW = Math.max(bound.w, 1);
+      const points = element.points.map(([x, y]) => {
         return [boundW * (x / elementW), boundH * (y / elementH)];
       });
+
       updated.xywh = serializeXYWH(
         bound.x,
         bound.y,
@@ -129,6 +120,13 @@ export class BrushElement extends BaseElement {
       updated.points = points;
     }
 
+    if (props.lineWidth && props.lineWidth !== element.lineWidth) {
+      const { x, y, w, h } = updated.xywh
+        ? Bound.deserialize(updated.xywh)
+        : element;
+      const d = props.lineWidth - element.lineWidth;
+      updated.xywh = serializeXYWH(x, y, w + d, h + d);
+    }
     return updated;
   }
 }
