@@ -126,16 +126,22 @@ export class RichText extends ShadowlessElement {
 
         const { data } = ctx;
         const deltas = vEditor.getDeltasByVRange(vRange);
-        if (deltas.length > 0 && vRange.index >= 0 && data && data !== '\n') {
-          const attributes = deltas[0][0].attributes;
-          if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-            IGNORED_ATTRIBUTES.forEach(attr => {
-              delete attributes?.[attr];
-            });
-          }
+        if (data && data.length > 0 && data !== '\n') {
+          if (
+            deltas.length > 1 ||
+            (deltas.length === 1 && vRange.index !== 0)
+          ) {
+            const attributes = deltas[0][0].attributes;
+            if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+              IGNORED_ATTRIBUTES.forEach(attr => {
+                delete attributes?.[attr];
+              });
+            }
 
-          ctx.attributes = attributes ?? null;
+            ctx.attributes = attributes ?? null;
+          }
         }
+
         return ctx;
       },
     });

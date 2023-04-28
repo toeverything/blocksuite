@@ -248,9 +248,6 @@ export class DatabaseBlockComponent
     page.captureSync();
     const id = page.addBlock('affine:paragraph', {}, this.model.id, index);
     asyncFocusRichText(page, id);
-    requestAnimationFrame(() => {
-      this._columnHeaderComponent.setDragHandleHeight();
-    });
     // save the search state
     this._setSearchState(currentSearchState);
   };

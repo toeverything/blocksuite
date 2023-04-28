@@ -35,6 +35,7 @@ test('add new bulleted list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Bulleted List');
+  await focusRichText(page, 0);
   await type(page, 'aa');
   await pressEnter(page);
   await type(page, 'aa');
@@ -50,6 +51,7 @@ test('add new toggle list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Toggle List');
+  await focusRichText(page, 0);
   await type(page, 'top');
   await pressTab(page);
   await pressEnter(page);

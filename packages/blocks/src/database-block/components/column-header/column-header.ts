@@ -103,9 +103,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     if (this.readonly) return;
 
     this._initChangeColumnWidthHandlers();
+    this._initSetDragHandleHeightEffect();
     this._initHeaderMousemoveHandlers();
     this._initMoveColumnHandlers();
-    this.setDragHandleHeight();
 
     const databaseElement = this.closest('affine-database');
     if (databaseElement) {
@@ -127,7 +127,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       // bind event when new column is added
       this._initMoveColumnHandlers();
       this._initChangeColumnWidthHandlers();
-      this.setDragHandleHeight();
     }
   }
 
@@ -160,7 +159,20 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  setDragHandleHeight() {
+  private _initSetDragHandleHeightEffect() {
+    const mutationObserver = new MutationObserver(() => {
+      this._setDragHandleHeight();
+    });
+    const tableContainer = this.closest('.affine-database-table-container');
+    assertExists(tableContainer);
+    mutationObserver.observe(tableContainer, {
+      childList: true,
+      subtree: true,
+    });
+    this._disposables.add(() => mutationObserver.disconnect());
+  }
+
+  private _setDragHandleHeight() {
     const databaseElement = this.closest('affine-database');
     // When dragging to generate a database preview,
     // the database may not be rendered to the page in time
