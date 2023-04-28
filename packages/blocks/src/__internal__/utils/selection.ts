@@ -150,7 +150,7 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
-  if (matchFlavours(model, ['affine:frame', 'affine:page'] as const)) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
@@ -161,7 +161,7 @@ export function focusBlockByModel(
       'affine:divider',
       'affine:code',
       'affine:database',
-    ] as const)
+    ])
   ) {
     if (!defaultPageBlock.selection) {
       // TODO fix this
@@ -174,7 +174,7 @@ export function focusBlockByModel(
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
-    if (matchFlavours(model, ['affine:database'] as const)) {
+    if (matchFlavours(model, ['affine:database'])) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
         .filter(
@@ -490,7 +490,7 @@ function retargetClick(page: Page, e: SelectionEvent) {
   const shouldRetarget = matchFlavours(parentModel, [
     'affine:frame',
     'affine:page',
-  ] as const);
+  ]);
   if (!shouldRetarget) return;
 
   const { clientX, clientY } = e.raw;

@@ -27,7 +27,7 @@ function tipsPlaceholderPreventDefault(event: Event) {
 }
 
 function TipsPlaceholder(model: BaseBlockModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) {
+  if (!matchFlavours(model, ['affine:paragraph'])) {
     throw new Error("TipsPlaceholder can't be used for this model");
   }
   if (model.type === 'text') {

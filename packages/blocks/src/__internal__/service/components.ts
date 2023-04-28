@@ -96,10 +96,7 @@ export function BlockChildrenContainer(
       "Failed to render block's children container! model not found"
     );
   }
-  const paddingLeft = matchFlavours(model, [
-    'affine:page',
-    'affine:frame',
-  ] as const)
+  const paddingLeft = matchFlavours(model, ['affine:page', 'affine:frame'])
     ? 0
     : BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 

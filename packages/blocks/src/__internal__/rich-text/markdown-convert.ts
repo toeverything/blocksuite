@@ -568,7 +568,7 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  if (matchFlavours(model, ['affine:code'] as const)) {
+  if (matchFlavours(model, ['affine:code'])) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;

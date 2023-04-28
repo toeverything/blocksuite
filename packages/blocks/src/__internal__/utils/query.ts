@@ -84,7 +84,7 @@ export function getNextBlock(
     const nextSibling = page.getNextSibling(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
-      if (matchFlavours(nextSibling, ['affine:frame'] as const)) {
+      if (matchFlavours(nextSibling, ['affine:frame'])) {
         return getNextBlock(nextSibling);
       }
       return nextSibling;
@@ -128,7 +128,7 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'] as const)) {
+    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
       return getPreviousBlock(parentBlock);
     }
     return parentBlock;
@@ -325,7 +325,7 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
     return null;
   }
   const startModel = startComponent.model as BaseBlockModel;
-  if (matchFlavours(startModel, ['affine:frame', 'affine:page'] as const)) {
+  if (matchFlavours(startModel, ['affine:frame', 'affine:page'])) {
     return null;
   }
   return startModel;
@@ -404,13 +404,13 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       const block = element as ContainerBlock;
       if (!block.model) return;
 
-      const mainElement = matchFlavours(block.model, ['affine:page'] as const)
+      const mainElement = matchFlavours(block.model, ['affine:page'])
         ? element?.querySelector('.affine-default-page-block-title-container')
         : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        !matchFlavours(block.model, ['affine:frame', 'affine:page'] as const)
+        !matchFlavours(block.model, ['affine:frame', 'affine:page'])
       ) {
         intersectedModels.push(block.model);
       }

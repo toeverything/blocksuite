@@ -174,7 +174,7 @@ function binarySearchBlockEditingState(
         options
       );
       return result;
-    } else if (matchFlavours(block, ['affine:database'] as const)) {
+    } else if (matchFlavours(block, ['affine:database'])) {
       // double check when current block is database block
       const result = binarySearchBlockEditingState(
         blocks,
