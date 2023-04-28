@@ -1,4 +1,4 @@
-import type { Bound } from '@blocksuite/phasor';
+import { Bound } from '@blocksuite/phasor';
 import { deserializeXYWH, type SurfaceViewport } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
@@ -64,10 +64,9 @@ export function getSelectableBounds(
   for (const s of selected) {
     let bound: Bound;
     if (isTopLevelBlock(s)) {
-      const [x, y, w, h] = deserializeXYWH(getXYWH(s));
-      bound = { x, y, w, h };
+      bound = Bound.deserialize(getXYWH(s));
     } else {
-      bound = { x: s.x, y: s.y, w: s.w, h: s.h };
+      bound = new Bound(s.x, s.y, s.w, s.h);
     }
     bounds.set(s.id, bound);
   }

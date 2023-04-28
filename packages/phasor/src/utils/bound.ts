@@ -41,8 +41,14 @@ function getExpandedBound(a: IBound, b: IBound): IBound {
   };
 }
 
-export function getCommonBound(bounds: IBound[]): IBound | null {
-  if (bounds.length < 2) return bounds[0] ?? null;
+export function getCommonBound(bounds: IBound[]): Bound | null {
+  if (!bounds.length) {
+    return null;
+  }
+  if (bounds.length === 1) {
+    const { x, y, w, h } = bounds[0];
+    return new Bound(x, y, w, h);
+  }
 
   let result = bounds[0];
 
@@ -50,7 +56,7 @@ export function getCommonBound(bounds: IBound[]): IBound | null {
     result = getExpandedBound(result, bounds[i]);
   }
 
-  return result;
+  return new Bound(result.x, result.y, result.w, result.h);
 }
 
 /**

@@ -17,7 +17,6 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import type { SerializedConnectorProps } from '@blocksuite/phasor/elements/connector/types.js';
 import type { Page } from '@blocksuite/store';
 
 import {
@@ -79,7 +78,10 @@ export function pickTopBlock(
   return null;
 }
 
-export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
+export function pickBlocksByBound(
+  blocks: TopLevelBlockModel[],
+  bound: Omit<Bound, 'serialize'>
+) {
   return blocks.filter(block => {
     const [x, y, w, h] = deserializeXYWH(block.xywh);
     const blockBound = { x, y, w, h };
