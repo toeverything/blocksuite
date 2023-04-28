@@ -21,7 +21,7 @@ export class DatabaseCellContainer
       align-items: center;
       width: 100%;
       height: 100%;
-      padding: 10px ${CELL_PADDING}px;
+      padding: 0 ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
   `;
