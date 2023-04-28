@@ -104,7 +104,8 @@ export class DefaultSelectionManager {
         this._onContainerContextMenu,
         // TODO merge these two functions
         this._onSelectionChangeWithDebounce,
-        this._onSelectionChangeWithoutDebounce
+        this._onSelectionChangeWithoutDebounce,
+        this._onContainerPointerDown
       )
     );
   }
@@ -228,6 +229,13 @@ export class DefaultSelectionManager {
     }
   };
 
+  private _onContainerPointerDown = (e: SelectionEvent) => {
+    if (e.keys.shift) {
+      // dont trigger native selection behavior
+      e.raw.preventDefault();
+    }
+  };
+
   private _onContainerClick = (e: SelectionEvent) => {
     const {
       x,
@@ -258,8 +266,7 @@ export class DefaultSelectionManager {
         state.lastPoint = new Point(clientX, clientY);
         handleNativeRangeDragMove(state.startRange, e);
         return;
-      }
-      if (type === 'block') {
+      } else if (type === 'block') {
         this.selectedBlocksWithShiftClick(x, y);
         return;
       }

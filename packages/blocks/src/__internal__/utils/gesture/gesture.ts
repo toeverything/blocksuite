@@ -1,5 +1,5 @@
 import { isDatabaseInput, isInsidePageTitle } from '../query.js';
-import { debounce } from '../std.js';
+import { debounce, noop } from '../std.js';
 import { Recognizer } from './recognizer.js';
 import type { SelectionEvent } from './selection-event.js';
 import { toSelectionEvent } from './selection-event.js';
@@ -37,7 +37,9 @@ export function initMouseEventHandlers(
   onContainerMouseOut: (e: SelectionEvent) => void,
   onContainerContextMenu: (e: SelectionEvent) => void,
   onSelectionChangeWithDebounce: (e: Event) => void,
-  onSelectionChangeWithoutDebounce: (e: Event) => void
+  onSelectionChangeWithoutDebounce: (e: Event) => void,
+  onContainerPointerDown: (e: SelectionEvent) => void = noop,
+  onContainerPointerUp: (e: SelectionEvent) => void = noop
 ) {
   let isDragging = false;
 
@@ -75,7 +77,7 @@ export function initMouseEventHandlers(
     },
 
     onPointerDown: event => {
-      //
+      onContainerPointerDown(event);
     },
     onPointerMove: event => {
       if (shouldFilterMouseEvent(event.raw)) return;
@@ -88,7 +90,7 @@ export function initMouseEventHandlers(
       onContainerMouseMove(event);
     },
     onPointerUp: event => {
-      //
+      onContainerPointerUp(event);
     },
     onPointerOut: event => {
       onContainerMouseOut(event);
