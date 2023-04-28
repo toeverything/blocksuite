@@ -157,6 +157,21 @@ function addConnectorElements(surface: SurfaceManager) {
   ]);
 }
 
+function addDebugElements(surface: SurfaceManager) {
+  surface.addDebugElement({
+    xywh: new Bound(0, 0, 100, 100).serialize(),
+    color: 'red',
+  });
+  surface.addDebugElement({
+    xywh: new Bound(50, 50, 100, 100).serialize(),
+    color: 'black',
+  });
+  surface.addDebugElement({
+    xywh: new Bound(298, 0, 2, 300).serialize(),
+    color: 'gray',
+  });
+}
+
 function main() {
   const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
@@ -164,10 +179,7 @@ function main() {
   const surface = new SurfaceManager(yContainer);
   surface.attach(container);
 
-  surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
-  surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
-  surface.addDebugElement(new Bound(298, 0, 2, 300), 'gray');
-
+  addDebugElements(surface);
   addBrushElements(surface);
   addShapeElements(surface);
   addConnectorElements(surface);

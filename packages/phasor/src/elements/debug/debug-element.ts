@@ -1,6 +1,19 @@
 import { isPointIn } from '../../utils/hit-utils.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
+import { serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
+
+export type SerializedDebugProps = {
+  id: string;
+  index: string;
+  type: 'debug';
+  xywh: string;
+  color: string;
+};
+
+export type CreateDebugProps = Omit<
+  SerializedDebugProps,
+  'id' | 'index' | 'type'
+>;
 
 export class DebugElement extends BaseElement {
   type = 'debug' as const;
@@ -10,7 +23,7 @@ export class DebugElement extends BaseElement {
     return isPointIn(this, x, y);
   }
 
-  serialize(): Record<string, unknown> {
+  serialize(): SerializedDebugProps {
     return {
       id: this.id,
       index: this.index,
@@ -22,12 +35,15 @@ export class DebugElement extends BaseElement {
 
   static deserialize(data: Record<string, unknown>): DebugElement {
     const element = new DebugElement(data.id as string);
-    element.index = data.index as string;
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-    element.color = data.color as string;
+    DebugElement.applySerializedProps(element, data);
     return element;
+  }
+
+  static override applySerializedProps(
+    element: DebugElement,
+    props: Partial<SerializedDebugProps>
+  ) {
+    super.applySerializedProps(element, props);
   }
 
   render(ctx: CanvasRenderingContext2D): void {

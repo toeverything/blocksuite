@@ -19,6 +19,7 @@ import type {
   CreateConnectorProps,
   SerializedConnectorProps,
 } from './elements/connector/types.js';
+import type { CreateDebugProps } from './elements/debug/debug-element.js';
 import type { ShapeProps } from './elements/index.js';
 import {
   BrushElement,
@@ -28,7 +29,6 @@ import {
   type PhasorElement,
   type PhasorElementType,
   ShapeElement,
-  type ShapeType,
 } from './elements/index.js';
 import type { CreateShapeProps } from './elements/shape/types.js';
 import { compare } from './grid.js';
@@ -87,14 +87,10 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
-  addDebugElement(bound: IBound, color: string): string {
+  addDebugElement(properties: CreateDebugProps) {
     const id = generateElementId();
     const element = new DebugElement(id);
-    element.transformPropertyValue = this._transformPropertyValue;
-
-    setXYWH(element, bound);
-    element.color = color;
-
+    DebugElement.applySerializedProps(element, properties);
     return this._addElement(element);
   }
 
