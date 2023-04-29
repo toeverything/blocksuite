@@ -51,6 +51,7 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.htm
   - [AFFiNE Alpha Editor](https://app.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/apps/web))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+  - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📄 [Documentation](https://blocksuite.affine.pro/introduction.html)
 - 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
