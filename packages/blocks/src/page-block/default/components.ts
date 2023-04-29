@@ -7,12 +7,11 @@ import {
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditingState } from '../../__internal__/index.js';
+import type { EditingState, IPoint } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import { stopPropagation } from '../edgeless/utils.js';
 import type { DefaultSelectionSlots } from './default-page-block.js';
-import type { PageViewport } from './selection-manager/selection-state.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function DraggingArea(rect: DOMRect | null) {
@@ -39,9 +38,8 @@ export function DraggingArea(rect: DOMRect | null) {
 
 export function EmbedSelectedRectsContainer(
   rects: DOMRect[],
-  viewport: PageViewport
+  viewportOffset: IPoint
 ) {
-  const { left, top, scrollLeft, scrollTop } = viewport;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -54,8 +52,8 @@ export function EmbedSelectedRectsContainer(
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
-          left: rect.left - left + scrollLeft + 'px',
-          top: rect.top - top + scrollTop + 'px',
+          left: rect.left + viewportOffset.x + 'px',
+          top: rect.top + viewportOffset.y + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
@@ -75,18 +73,17 @@ export function EmbedSelectedRectsContainer(
 export function EmbedEditingContainer(
   embedEditingState: EditingState | null,
   slots: DefaultSelectionSlots,
-  viewport: PageViewport
+  viewportOffset: IPoint
 ) {
   if (!embedEditingState) return null;
 
-  const { left, top, scrollLeft, scrollTop } = viewport;
   const {
     rect: { x, y },
     model,
   } = embedEditingState;
   const style = {
-    left: x - left + scrollLeft + 'px',
-    top: y - top + scrollTop + 'px',
+    left: x + viewportOffset.x + 'px',
+    top: y + viewportOffset.y + 'px',
   };
 
   return html`
@@ -96,7 +93,6 @@ export function EmbedEditingContainer(
         display: block;
         z-index: 1;
       }
-
       ${tooltipStyle}
     </style>
 

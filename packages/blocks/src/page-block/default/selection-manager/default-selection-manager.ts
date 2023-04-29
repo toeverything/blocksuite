@@ -7,7 +7,10 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import type { EmbedBlockDoubleClickData } from '../../../__internal__/index.js';
+import type {
+  EmbedBlockDoubleClickData,
+  IPoint,
+} from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -56,7 +59,7 @@ import { BlockDragHandlers } from './block-drag-handlers.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
-import { PageSelectionState, type PageViewport } from './selection-state.js';
+import { PageSelectionState } from './selection-state.js';
 import {
   filterBlocksExcludeSubtrees,
   setSelectedBlocks,
@@ -574,13 +577,13 @@ export class DefaultSelectionManager {
     }
   }
 
-  refreshDraggingArea(viewport: PageViewport) {
+  refreshDraggingArea(viewportOffset: IPoint) {
     const { blockCache, draggingArea } = this.state;
     if (draggingArea) {
       this.selectBlocksByDraggingArea(
         blockCache,
         Rect.fromPoints(draggingArea.start, draggingArea.end).toDOMRect(),
-        viewport,
+        viewportOffset,
         true
       );
     } else {
@@ -695,22 +698,18 @@ export class DefaultSelectionManager {
   selectBlocksByDraggingArea(
     blockCache: Map<BlockComponentElement, DOMRect>,
     draggingArea: DOMRect,
-    viewport: PageViewport,
+    viewportOffset: IPoint,
     isScrolling = false
   ) {
     if (isScrolling) {
       this.state.refreshBlockRectCache();
     }
 
-    const { scrollLeft, scrollTop, left, top } = viewport;
     const blocks = filterBlocksExcludeSubtrees(
       blockCache,
       draggingArea,
       // subtracting the left/top of the container is required.
-      {
-        y: scrollTop - top,
-        x: scrollLeft - left,
-      }
+      viewportOffset
     );
     const [selectedBlocks, rects] = blocks.reduce<[Element[], DOMRect[]]>(
       (data, { block }) => {
@@ -731,12 +730,15 @@ export class DefaultSelectionManager {
 
   selectedBlocksWithShiftClick(x: number, y: number) {
     const { state } = this;
-    const { viewport, selectedBlocks } = state;
+    const {
+      viewport: { scrollLeft, scrollTop },
+      viewportOffset,
+      selectedBlocks,
+    } = state;
     const lastIndex = selectedBlocks.length - 1;
 
     if (lastIndex === -1) return;
 
-    const { left, top, scrollLeft, scrollTop } = viewport;
     const hasOneBlock = lastIndex === 0;
     const first = selectedBlocks[0];
     const last = hasOneBlock ? first : selectedBlocks[lastIndex];
@@ -744,12 +746,12 @@ export class DefaultSelectionManager {
     const lastRect = hasOneBlock ? firstRect : getRectByBlockElement(last);
     const rect = Rect.fromPoints(
       new Point(
-        firstRect.left - left + scrollLeft,
-        firstRect.top - top + scrollTop
+        firstRect.left + viewportOffset.x,
+        firstRect.top + viewportOffset.y
       ),
       new Point(
-        lastRect.right - left + scrollLeft,
-        lastRect.bottom - top + scrollTop
+        lastRect.right + viewportOffset.x,
+        lastRect.bottom + viewportOffset.y
       )
     );
     const point = new Point(x + scrollLeft, y + scrollTop);
@@ -795,7 +797,7 @@ export class DefaultSelectionManager {
       this.selectBlocksByDraggingArea(
         state.blockCache,
         Rect.fromPoints(start, end).toDOMRect(),
-        viewport,
+        viewportOffset,
         true
       );
     }
