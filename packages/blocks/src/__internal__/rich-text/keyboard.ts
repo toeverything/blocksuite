@@ -68,8 +68,10 @@ export function createKeyboardBindings(
 
     linkedPage: {
       key: ['[', '【', '@'],
+      altKey: null,
       shiftKey: null,
       handler(range, { event, prefix }) {
+        console.log('event.key: ', event.key);
         if (
           (event.key === '[' || event.key === '【') &&
           !prefix.endsWith(event.key)
