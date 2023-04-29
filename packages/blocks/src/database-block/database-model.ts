@@ -236,6 +236,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
     version: 1,
     tag: literal`affine-database`,
     parent: ['affine:frame'],
+    children: ['affine:paragraph', 'affine:list'],
   },
   toModel: () => {
     return new DatabaseBlockModel();
