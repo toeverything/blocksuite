@@ -68,9 +68,6 @@ export const styles = css`
     cursor: pointer;
     padding: 4px 20px;
   }
-  .slash-category-name:hover {
-    color: var(--affine-popover-color);
-  }
 
   .slash-active-category {
     position: relative;
