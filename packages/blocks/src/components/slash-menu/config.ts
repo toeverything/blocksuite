@@ -40,9 +40,9 @@ import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
+  groupName: string;
   alias?: string[];
   icon: TemplateResult<1>;
-  divider?: boolean;
   disabled?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
@@ -74,238 +74,240 @@ function formatDate(date: Date) {
   return strTime;
 }
 
-export const menuGroups: { name: string; items: SlashItem[] }[] = [
-  {
-    name: 'Text',
-    items: [
-      ...paragraphConfig
-        .filter(i => i.flavour !== 'affine:list')
-        .map<SlashItem>(({ name, icon, flavour, type }) => ({
+export const menuGroups: { name: string; items: SlashItem[] }[] = (
+  [
+    {
+      name: 'Text',
+      items: [
+        ...paragraphConfig
+          .filter(i => i.flavour !== 'affine:list')
+          .map<Omit<SlashItem, 'groupName'>>(
+            ({ name, icon, flavour, type }) => ({
+              name,
+              icon,
+              action: ({ model }) => {
+                const newModels = updateBlockType([model], flavour, type);
+                // Reset selection if the target is code block
+                if (flavour === 'affine:code') {
+                  if (newModels.length !== 1) {
+                    throw new Error(
+                      "Failed to reset selection! New model length isn't 1"
+                    );
+                  }
+                  const codeModel = newModels[0];
+                  onModelTextUpdated(codeModel, () => {
+                    restoreSelection({
+                      type: 'Native',
+                      startOffset: 0,
+                      endOffset: 0,
+                      models: [codeModel],
+                    });
+                  });
+                }
+              },
+            })
+          ),
+      ],
+    },
+    {
+      name: 'Style',
+      items: formatConfig
+        .filter(i => !['Link', 'Code'].includes(i.name))
+        .map(({ name, icon, id }, idx) => ({
           name,
           icon,
           action: ({ model }) => {
-            const newModels = updateBlockType([model], flavour, type);
-            // Reset selection if the target is code block
-            if (flavour === 'affine:code') {
-              if (newModels.length !== 1) {
-                throw new Error(
-                  "Failed to reset selection! New model length isn't 1"
-                );
-              }
-              const codeModel = newModels[0];
-              onModelTextUpdated(codeModel, () => {
-                restoreSelection({
-                  type: 'Native',
-                  startOffset: 0,
-                  endOffset: 0,
-                  models: [codeModel],
-                });
-              });
+            if (!model.text) {
+              return;
             }
-          },
-        })),
-    ],
-  },
-  {
-    name: 'Style',
-    items: formatConfig
-      .filter(i => !['Link', 'Code'].includes(i.name))
-      .map(({ name, icon, id }, idx) => ({
-        name,
-        icon,
-        divider: idx === 0,
-        action: ({ model }) => {
-          if (!model.text) {
-            return;
-          }
-          const len = model.text.length;
-          if (!len) {
-            const vEditor = getVirgoByModel(model);
-            assertExists(vEditor, "Can't set style mark! vEditor not found");
-            vEditor.setMarks({
+            const len = model.text.length;
+            if (!len) {
+              const vEditor = getVirgoByModel(model);
+              assertExists(vEditor, "Can't set style mark! vEditor not found");
+              vEditor.setMarks({
+                [id]: true,
+              });
+              clearMarksOnDiscontinuousInput(vEditor);
+              return;
+            }
+            model.text.format(0, len, {
               [id]: true,
             });
-            clearMarksOnDiscontinuousInput(vEditor);
-            return;
-          }
-          model.text.format(0, len, {
-            [id]: true,
-          });
+          },
+        })),
+    },
+    {
+      name: 'List',
+      items: paragraphConfig
+        .filter(i => i.flavour === 'affine:list')
+        .map(({ name, icon, flavour, type }, idx) => ({
+          name,
+          icon,
+          divider: idx === 0,
+          action: ({ model }) => updateBlockType([model], flavour, type),
+        })),
+    },
+    {
+      name: 'Image & File',
+      items: [
+        {
+          name: 'Image',
+          icon: ImageIcon20,
+          async action({ page, model }) {
+            const parent = page.getParent(model);
+            if (!parent) {
+              return;
+            }
+            parent.children.indexOf(model);
+            const props = await uploadImageFromLocal(page);
+            page.addSiblingBlocks(model, props);
+          },
         },
-      })),
-  },
-  {
-    name: 'List',
-    items: paragraphConfig
-      .filter(i => i.flavour === 'affine:list')
-      .map(({ name, icon, flavour, type }, idx) => ({
-        name,
-        icon,
-        divider: idx === 0,
-        action: ({ model }) => updateBlockType([model], flavour, type),
-      })),
-  },
-  {
-    name: 'Image & File',
-    items: [
-      {
-        name: 'Image',
-        icon: ImageIcon20,
-        divider: true,
-        async action({ page, model }) {
-          const parent = page.getParent(model);
-          if (!parent) {
-            return;
-          }
-          parent.children.indexOf(model);
-          const props = await uploadImageFromLocal(page);
-          page.addSiblingBlocks(model, props);
+      ],
+    },
+    {
+      name: 'Date & Time',
+      items: [
+        {
+          name: 'Today',
+          icon: TodayIcon,
+          action: ({ model }) => {
+            const date = new Date();
+            insertContent(model, formatDate(date));
+          },
         },
-      },
-    ],
-  },
-  {
-    name: 'Date & Time',
-    items: [
-      {
-        name: 'Today',
-        icon: TodayIcon,
-        divider: true,
-        action: ({ model }) => {
-          const date = new Date();
-          insertContent(model, formatDate(date));
+        {
+          name: 'Tomorrow',
+          icon: TomorrowIcon,
+          action: ({ model }) => {
+            // yyyy-mm-dd
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+            insertContent(model, formatDate(date));
+          },
         },
-      },
-      {
-        name: 'Tomorrow',
-        icon: TomorrowIcon,
-        action: ({ model }) => {
-          // yyyy-mm-dd
-          const date = new Date();
-          date.setDate(date.getDate() + 1);
-          insertContent(model, formatDate(date));
+        {
+          name: 'Yesterday',
+          icon: YesterdayIcon,
+          action: ({ model }) => {
+            const date = new Date();
+            date.setDate(date.getDate() - 1);
+            insertContent(model, formatDate(date));
+          },
         },
-      },
-      {
-        name: 'Yesterday',
-        icon: YesterdayIcon,
-        action: ({ model }) => {
-          const date = new Date();
-          date.setDate(date.getDate() - 1);
-          insertContent(model, formatDate(date));
+        {
+          name: 'Now',
+          icon: NowIcon,
+          action: ({ model }) => {
+            // For example 7:13 pm
+            // https://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+            const date = new Date();
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const amOrPm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const min = minutes < 10 ? '0' + minutes : minutes;
+            const strTime = hours + ':' + min + ' ' + amOrPm;
+            insertContent(model, strTime);
+          },
         },
-      },
-      {
-        name: 'Now',
-        icon: NowIcon,
-        action: ({ model }) => {
-          // For example 7:13 pm
-          // https://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
-          const date = new Date();
-          let hours = date.getHours();
-          const minutes = date.getMinutes();
-          const amOrPm = hours >= 12 ? 'pm' : 'am';
-          hours = hours % 12;
-          hours = hours ? hours : 12; // the hour '0' should be '12'
-          const min = minutes < 10 ? '0' + minutes : minutes;
-          const strTime = hours + ':' + min + ' ' + amOrPm;
-          insertContent(model, strTime);
-        },
-      },
-    ],
-  },
-  {
-    name: 'Database',
-    items: [
-      {
-        name: 'Table View',
-        alias: ['database'],
-        icon: DatabaseTableViewIcon,
-        divider: true,
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
+      ],
+    },
+    {
+      name: 'Database',
+      items: [
+        {
+          name: 'Table View',
+          alias: ['database'],
+          icon: DatabaseTableViewIcon,
+          action: async ({ page, model }) => {
+            const parent = page.getParent(model);
+            assertExists(parent);
+            const index = parent.children.indexOf(model);
 
-          const id = page.addBlock(
-            'affine:database',
-            {},
-            page.getParent(model),
-            index
-          );
-          const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(page, model, id, false);
+            const id = page.addBlock(
+              'affine:database',
+              {},
+              page.getParent(model),
+              index
+            );
+            const service = await getServiceOrRegister('affine:database');
+            service.initDatabaseBlock(page, model, id, false);
+          },
         },
-      },
-      {
-        name: 'Kanban View',
-        alias: ['database'],
-        icon: DatabaseKanbanViewIcon,
-        disabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        action: ({ model }) => {},
-      },
-    ],
-  },
-  {
-    name: 'Actions',
-    items: [
-      {
-        name: 'Copy',
-        icon: CopyIcon,
-        divider: true,
-        action: async ({ model }) => {
-          const curRange = getCurrentNativeRange();
-          await copyBlock(model);
-          resetNativeSelection(curRange);
-          toast('Copied to clipboard');
+        {
+          name: 'Kanban View',
+          alias: ['database'],
+          icon: DatabaseKanbanViewIcon,
+          disabled: true,
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          action: ({ model }) => {},
         },
-      },
-      // {
-      //   name: 'Paste',
-      //   icon: PasteIcon,
-      //   action: async ({ model }) => {
-      //     const copiedText = await navigator.clipboard.readText();
-      //     console.log('copiedText', copiedText);
-      //     insertContent(model, copiedText);
-      //   },
-      // },
-      {
-        name: 'Duplicate',
-        icon: DuplicateIcon,
-        action: ({ page, model }) => {
-          if (!model.text || !(model.text instanceof Text)) {
-            throw new Error("Can't duplicate a block without text");
-          }
-          const parent = page.getParent(model);
-          if (!parent) {
-            throw new Error('Failed to duplicate block! Parent not found');
-          }
-          const index = parent.children.indexOf(model);
+      ],
+    },
+    {
+      name: 'Actions',
+      items: [
+        {
+          name: 'Copy',
+          icon: CopyIcon,
+          action: async ({ model }) => {
+            const curRange = getCurrentNativeRange();
+            await copyBlock(model);
+            resetNativeSelection(curRange);
+            toast('Copied to clipboard');
+          },
+        },
+        // {
+        //   name: 'Paste',
+        //   icon: PasteIcon,
+        //   action: async ({ model }) => {
+        //     const copiedText = await navigator.clipboard.readText();
+        //     console.log('copiedText', copiedText);
+        //     insertContent(model, copiedText);
+        //   },
+        // },
+        {
+          name: 'Duplicate',
+          icon: DuplicateIcon,
+          action: ({ page, model }) => {
+            if (!model.text || !(model.text instanceof Text)) {
+              throw new Error("Can't duplicate a block without text");
+            }
+            const parent = page.getParent(model);
+            if (!parent) {
+              throw new Error('Failed to duplicate block! Parent not found');
+            }
+            const index = parent.children.indexOf(model);
 
-          // TODO add clone model util
-          page.addBlock(
-            model.flavour,
-            {
-              type: model.type,
-              text: page.Text.fromDelta(
-                normalizeDelta(page, model.text.toDelta())
-              ),
-              // @ts-expect-error
-              checked: model.checked,
-            },
-            page.getParent(model),
-            index
-          );
+            // TODO add clone model util
+            page.addBlock(
+              model.flavour,
+              {
+                type: model.type,
+                text: page.Text.fromDelta(
+                  normalizeDelta(page, model.text.toDelta())
+                ),
+                // @ts-expect-error
+                checked: model.checked,
+              },
+              page.getParent(model),
+              index
+            );
+          },
         },
-      },
-      {
-        name: 'Delete',
-        icon: DeleteIcon,
-        action: ({ page, model }) => {
-          page.deleteBlock(model);
+        {
+          name: 'Delete',
+          icon: DeleteIcon,
+          action: ({ page, model }) => {
+            page.deleteBlock(model);
+          },
         },
-      },
-    ],
-  },
-];
+      ],
+    },
+  ] satisfies { name: string; items: Omit<SlashItem, 'groupName'>[] }[]
+).map(group => ({
+  name: group.name,
+  items: group.items.map(item => ({ ...item, groupName: group.name })),
+}));
