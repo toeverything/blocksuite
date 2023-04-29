@@ -19,7 +19,6 @@ import {
   getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  hasDatabase,
   isContainedIn,
   Point,
   Rect,
@@ -504,21 +503,36 @@ export class DragHandle extends WithDisposable(LitElement) {
     element: Element,
     draggingElements: BlockComponentElement[],
     scale: number,
-    force = false
+    flavour: string | null = null // for block-hub
   ): {
     type: DroppingType;
     rect: Rect;
     modelState: EditingState;
   } | null {
-    const includingDatabase = hasDatabase(draggingElements) || force;
+    const schema = model.page.getSchemaByFlavour('affine:database');
+    assertExists(schema);
+    const children = schema.model.children ?? [];
 
-    if (includingDatabase) {
-      if (!matchFlavours(model, ['affine:database'] as const)) {
-        const databaseBlockElement = element.closest('affine-database');
-        if (databaseBlockElement) {
-          element = databaseBlockElement;
-          model = getModelByBlockElement(element);
-        }
+    let shouldNotAppendToDatabase = false;
+
+    if (children.length) {
+      if (draggingElements.length) {
+        shouldNotAppendToDatabase = draggingElements
+          .map(getModelByBlockElement)
+          .some(m => !children.includes(m.flavour));
+      } else if (flavour) {
+        shouldNotAppendToDatabase = !children.includes(flavour);
+      }
+    }
+
+    if (
+      shouldNotAppendToDatabase &&
+      !matchFlavours(model, ['affine:database'] as const)
+    ) {
+      const databaseBlockElement = element.closest('affine-database');
+      if (databaseBlockElement) {
+        element = databaseBlockElement;
+        model = getModelByBlockElement(element);
       }
     }
 
