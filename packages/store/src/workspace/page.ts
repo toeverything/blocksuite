@@ -419,10 +419,6 @@ export class Page extends Space<FlatBlockMap> {
     const firstBlock = blocks[0];
     const currentParent = this.getParent(firstBlock);
 
-    blocks.forEach(block => {
-      this.schema.validate(block.flavour, currentParent?.flavour);
-    });
-
     // the blocks must have the same parent (siblings)
     if (blocks.some(block => this.getParent(block) !== currentParent)) {
       console.error('the blocks must have the same parent');
@@ -431,6 +427,10 @@ export class Page extends Space<FlatBlockMap> {
     if (currentParent === null || newParent === null) {
       throw new Error("Can't find parent model");
     }
+
+    blocks.forEach(block => {
+      this.schema.validate(block.flavour, newParent.flavour);
+    });
 
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
