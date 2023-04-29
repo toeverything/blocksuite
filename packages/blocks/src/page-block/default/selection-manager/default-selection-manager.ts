@@ -402,19 +402,20 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    if (this.state.type === 'block:drag') return;
+    const { dragging, raw } = e;
 
-    if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
+    // dont show option menu of image on block/native selection
+    if (dragging || (raw.target as HTMLElement).closest('.embed-editing-state'))
+      return;
 
-    const point = new Point(e.raw.clientX, e.raw.clientY);
+    const point = new Point(raw.clientX, raw.clientY);
     let hoverEditingState = null;
 
     const element = getClosestBlockElementByPoint(point.clone(), {
       rect: this.container.innerRect,
     });
 
-    // dont show option menu of image on selecting
-    if (!e.dragging && element) {
+    if (element) {
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
@@ -432,11 +433,14 @@ export class DefaultSelectionManager {
       let shouldClear = true;
 
       if (model.type === 'image') {
+        const {
+          state: {
+            viewport: { left, clientWidth },
+          },
+        } = this;
         const rect = getSelectedStateRectByBlockElement(element);
         const tempRect = Rect.fromDOMRect(rect);
-        const isOutside =
-          rect.right + 60 <
-          this.state.viewport.left + this.state.viewport.clientWidth;
+        const isOutside = rect.right + 60 < left + clientWidth;
         tempRect.right += isOutside ? 60 : 0;
 
         if (tempRect.isPointIn(point)) {

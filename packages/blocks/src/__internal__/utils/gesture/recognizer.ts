@@ -130,9 +130,9 @@ export class Recognizer {
     const selectionEvent = toSelectionEvent({
       event,
       getBoundingClientRect: this._getTargetBoundingRect,
-      startX: -Infinity,
-      startY: -Infinity,
-      last: null,
+      startX: this._startX,
+      startY: this._startY,
+      last: this._lastDragMoveEvent,
     });
     this._dispatchEvent('onPointerMove', selectionEvent);
   };

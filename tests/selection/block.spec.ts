@@ -1073,7 +1073,7 @@ test('should not show option menu of image on block selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: imageRect.x + imageRect.width + 10,
+      x: imageRect.x + imageRect.width + 60,
       y: imageRect.y + imageRect.height / 2 + 10,
     },
     {
