@@ -43,12 +43,12 @@ export const BlockDragHandlers = {
         selection.updateDraggingArea(draggingArea);
       },
       onMove() {
-        const { blockCache, draggingArea, viewport } = selection.state;
+        const { blockCache, draggingArea, viewportOffset } = selection.state;
 
         assertExists(draggingArea);
 
         const rect = selection.updateDraggingArea(draggingArea);
-        selection.selectBlocksByDraggingArea(blockCache, rect, viewport);
+        selection.selectBlocksByDraggingArea(blockCache, rect, viewportOffset);
       },
     });
   },

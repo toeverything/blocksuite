@@ -262,6 +262,8 @@ export class DefaultPageBlockComponent
         asyncFocusRichText(page, newFirstParagraphId);
       }
       return;
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
     }
   };
 
@@ -332,7 +334,7 @@ export class DefaultPageBlockComponent
     viewport.scrollTop = scrollTop;
 
     if (type === 'block') {
-      selection.refreshDraggingArea(viewport);
+      selection.refreshDraggingArea(selection.state.viewportOffset);
       return;
     }
 
@@ -527,7 +529,7 @@ export class DefaultPageBlockComponent
     });
 
     const { page, selection } = this;
-    const { viewport } = selection.state;
+    const { viewportOffset } = selection.state;
 
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
@@ -535,12 +537,12 @@ export class DefaultPageBlockComponent
     const draggingArea = DraggingArea(this._draggingArea);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
-      viewport
+      viewportOffset
     );
     const embedEditingContainer = EmbedEditingContainer(
       page.readonly ? null : this._embedEditingState,
       this.slots,
-      viewport
+      viewportOffset
     );
     const isEmpty =
       (!this.model.title || !this.model.title.length) && !this._isComposing;
@@ -565,10 +567,7 @@ export class DefaultPageBlockComponent
             rects: this._selectedRects,
             grab: !draggingArea,
           }}
-          .offset=${{
-            x: -viewport.left + viewport.scrollLeft,
-            y: -viewport.top + viewport.scrollTop,
-          }}
+          .offset=${viewportOffset}
         ></affine-selected-blocks>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>

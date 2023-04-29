@@ -2,6 +2,7 @@ import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 import type {
   BlockComponentElement,
+  IPoint,
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import {
@@ -83,6 +84,16 @@ export class PageSelectionState {
 
   get embedCache() {
     return this._embedCache;
+  }
+
+  get viewportOffset(): IPoint {
+    const {
+      viewport: { left, top, scrollLeft, scrollTop },
+    } = this;
+    return {
+      x: scrollLeft - left,
+      y: scrollTop - top,
+    };
   }
 
   resetStartRange(e: SelectionEvent) {
