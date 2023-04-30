@@ -20,7 +20,7 @@ export abstract class DatabaseCellElement<Value> extends WithDisposable(
   @property()
   column!: Column;
   @property()
-  cell: Cell | null = null;
+  cell: Cell<Value> | null = null;
 }
 
 export interface ColumnRenderer<

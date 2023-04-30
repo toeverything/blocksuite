@@ -23,9 +23,9 @@ export interface Column extends Record<string, unknown> {
   hide: boolean;
 }
 
-export type Cell = {
+export type Cell<ValueType = unknown> = {
   columnId: Column['id'];
-  value: unknown;
+  value: ValueType;
 };
 
 export const enum ColumnInsertPosition {

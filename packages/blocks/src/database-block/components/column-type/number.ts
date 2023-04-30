@@ -56,7 +56,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       });
       value = yText;
     } else {
-      value = this.cell.value as Y.Text;
+      value = this.cell.value;
     }
 
     const isNumeric = (str: string) => {
