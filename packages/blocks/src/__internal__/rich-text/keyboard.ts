@@ -68,6 +68,7 @@ export function createKeyboardBindings(
 
     linkedPage: {
       key: ['[', '【', '@'],
+      altKey: null,
       shiftKey: null,
       handler(range, { event, prefix }) {
         if (
