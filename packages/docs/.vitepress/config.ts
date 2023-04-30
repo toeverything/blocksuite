@@ -107,6 +107,10 @@ export default defineConfig({
     footer: {
       copyright: 'Copyright © 2022-present Toeverything',
     },
+
+    search: {
+      provider: 'local',
+    },
   },
   head: [
     [

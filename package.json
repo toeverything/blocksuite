@@ -90,6 +90,11 @@
   "pnpm": {
     "patchedDependencies": {
       "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch"
+    },
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@algolia/client-search"
+      ]
     }
   },
   "stackblitz": {
