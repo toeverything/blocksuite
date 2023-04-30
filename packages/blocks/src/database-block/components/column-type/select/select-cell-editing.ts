@@ -445,7 +445,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       );
     });
 
-    const selectedTag = (this.cell?.value ?? []) as SelectTag[];
+    const selectedTag = this.cell?.value ?? [];
     const showCreateTip =
       this._inputValue &&
       filteredSelection.findIndex(item => item.value === this._inputValue) ===

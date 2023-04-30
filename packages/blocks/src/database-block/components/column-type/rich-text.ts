@@ -101,7 +101,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       });
       value = yText;
     } else {
-      value = this.cell.value as Y.Text;
+      value = this.cell.value;
     }
 
     this.vEditor = new VEditor(value);

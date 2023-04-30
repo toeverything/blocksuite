@@ -43,7 +43,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
   static override tag = literal`affine-database-select-cell`;
 
   override render() {
-    const values = (this.cell?.value ?? []) as SelectTag[];
+    const values = this.cell?.value ?? [];
     return html`
       <div
         class="affine-database-select-cell-container"
@@ -74,7 +74,7 @@ export const SelectColumnRenderer = defineColumnRenderer(
   () => ({
     selection: [] as SelectTag[],
   }),
-  () => null as SelectTag[] | null,
+  () => [] as SelectTag[],
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,
