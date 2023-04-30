@@ -8,7 +8,7 @@
   "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
   "devDependencies": {
-    "vitepress": "1.0.0-alpha.60"
+    "vitepress": "1.0.0-alpha.74"
   },
   "scripts": {
     "dev": "vitepress dev --port 5200",
@@ -16,7 +16,6 @@
     "preview": "vitepress preview"
   },
   "dependencies": {
-    "@algolia/client-search": "^4.15.0",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*"
