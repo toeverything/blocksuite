@@ -5,9 +5,10 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '../../__internal__/utils/lit.js';
+import { setupVirgoScroll } from '../../__internal__/utils/virgo.js';
+import { VirgoInput } from '../../components/virgo-input/virgo-input.js';
 import { DATABASE_TITLE_LENGTH } from '../consts.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { initLimitedLengthVEditor } from '../utils.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -69,6 +70,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
 
+  private _titleVInput: VirgoInput | null = null;
+
   override firstUpdated() {
     this._initTitleVEditor();
     const disposables = this._disposables;
@@ -83,15 +86,14 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   }
 
   private _initTitleVEditor() {
-    initLimitedLengthVEditor({
+    this._titleVInput = new VirgoInput({
       yText: this.targetModel.title.yText,
-      container: this._titleContainer,
-      targetModel: this.targetModel,
+      rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
-      handlers: {
-        keydown: this._handleKeyDown,
-      },
     });
+    setupVirgoScroll(this.targetModel.page, this._titleVInput.vEditor);
+    this._titleVInput.vEditor.setReadonly(this.targetModel.page.readonly);
+    this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 
     // for title placeholder
     this.targetModel.title.yText.observe(() => {
