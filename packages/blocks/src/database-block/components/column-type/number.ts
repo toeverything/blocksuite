@@ -35,7 +35,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   private _container!: HTMLDivElement;
 
   private _vInput: VirgoInput | null = null;
-  private get _vEditor() {
+  get vEditor() {
     assertExists(this._vInput);
     return this._vInput.vEditor;
   }
@@ -67,7 +67,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       rootElement: this._container,
       type: 'number',
     });
-    setupVirgoScroll(this.databaseModel.page, this._vEditor);
+    setupVirgoScroll(this.databaseModel.page, this.vEditor);
     this._container.addEventListener('keydown', event => {
       if (!this._vInput) return;
       if (event.key === 'Enter') {
