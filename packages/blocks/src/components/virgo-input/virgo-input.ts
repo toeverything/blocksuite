@@ -33,7 +33,7 @@ export class VirgoInput {
     if (maxLength) {
       this.maxLength = maxLength;
       if (text.length > maxLength) {
-        throw 'The text exceeds the limit length.';
+        throw new Error('The text exceeds the limit length.');
       }
     }
 
@@ -174,9 +174,9 @@ export class VirgoInput {
         ) {
           e.preventDefault();
           if (e.shiftKey) {
-            this.undoManager.redo();
+            this.redo();
           } else {
-            this.undoManager.undo();
+            this.undo();
           }
         }
       },
