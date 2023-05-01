@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
@@ -22,15 +22,12 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
     }
   `;
 
-  @query('.affine-database-checkbox')
-  private _checkBox!: HTMLInputElement;
-
   protected override firstUpdated() {
     this._disposables.addFromEvent(this, 'click', this._onChange);
   }
 
   private _onChange() {
-    const checked = !this._checkBox.checked;
+    const checked = !this.cell?.value;
 
     this.rowHost.setValue(checked);
   }
