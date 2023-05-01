@@ -35,9 +35,9 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
   protected override render() {
     const checked = this.cell?.value ?? false;
 
-    return html`<div class="affine-database-checkbox-container checkbox">
+    return html`<div class="affine-database-checkbox-container">
       <input
-        class="affine-database-checkbox"
+        class="affine-database-checkbox checkbox"
         type="checkbox"
         .checked=${checked}
       />

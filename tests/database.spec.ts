@@ -528,6 +528,24 @@ test.describe('switch column type', () => {
       text: '',
     });
   });
+
+  test('switch to checkbox', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await switchColumnType(page, 'checkbox');
+
+    const checkbox = getFirstColumnCell(page, 'checkbox');
+    expect(await checkbox.isChecked()).toBe(false);
+
+    await checkbox.click();
+    expect(await checkbox.isChecked()).toBe(true);
+
+    await undoByClick(page);
+    expect(await checkbox.isChecked()).toBe(false);
+  });
 });
 
 test.describe('select column tag action', () => {
