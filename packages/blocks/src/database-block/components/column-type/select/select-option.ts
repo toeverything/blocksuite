@@ -1,13 +1,13 @@
-import type { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
+import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
 import { ShadowlessElement, WithDisposable } from '../../../../std.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import type { SelectTag } from '../../../types.js';
-import { initLimitedLengthVEditor } from '../../../utils.js';
 
 @customElement('affine-database-select-option')
 export class SelectOption extends WithDisposable(ShadowlessElement) {
@@ -59,7 +59,10 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   @query('.select-option-text')
   private _container!: HTMLDivElement;
 
-  private _vEditor!: VEditor;
+  private _vInput!: VirgoInput;
+  private get _vEditor() {
+    return this._vInput.vEditor;
+  }
 
   override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
@@ -77,29 +80,24 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   }
 
   private _onInitVEditor() {
-    this._vEditor = initLimitedLengthVEditor({
+    this._vInput = new VirgoInput({
       yText: this.select.value,
-      container: this._container,
-      targetModel: this.databaseModel,
+      rootElement: this._container,
       maxLength: SELECT_TAG_NAME_MAX_LENGTH,
-      // When editing the current select, other sibling selects should not be edited
-      readonly: !this.editing,
-      handlers: {
-        keydown: event => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            this.saveSelectionName(this.index);
-          }
-          if (event.key === 'Escape') {
-            event.preventDefault();
-            this.setEditingIndex(-1);
-            this._container.blur();
-          }
-        },
-      },
-      options: {
-        defaultMode: 'pure',
-      },
+    });
+    setupVirgoScroll(this.databaseModel.page, this._vEditor);
+    // When editing the current select, other sibling selects should not be edited
+    this._vEditor.setReadonly(!this.editing);
+    this._container.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        this.saveSelectionName(this.index);
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.setEditingIndex(-1);
+        this._container.blur();
+      }
     });
   }
 
