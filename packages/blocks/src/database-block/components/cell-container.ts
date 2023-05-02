@@ -24,6 +24,10 @@ export class DatabaseCellContainer
       padding: 0 ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
+
+    affine-database-cell-container * {
+      box-sizing: border-box;
+    }
   `;
 
   @state()

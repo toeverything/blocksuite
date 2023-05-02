@@ -1,7 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html } from 'lit';
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
 import {
@@ -23,11 +22,6 @@ import {
   textPointToDomPoint,
 } from './utils/index.js';
 import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
-
-export interface VEditorOptions {
-  // it is a option to determine default `_attributeRenderer`
-  defaultMode: 'rich' | 'pure';
-}
 
 type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
   HTMLElement & {
@@ -120,21 +114,7 @@ export class VEditor<
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
 
-  constructor(
-    text: VEditor['yText'] | string,
-    options: VEditorOptions = {
-      defaultMode: 'rich',
-    }
-  ) {
-    let yText: Y.Text;
-    if (typeof text === 'string') {
-      const temporaryYDoc = new Y.Doc();
-      yText = temporaryYDoc.getText('text');
-      yText.insert(0, text);
-    } else {
-      yText = text;
-    }
-
+  constructor(yText: VEditor['yText']) {
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
@@ -143,14 +123,6 @@ export class VEditor<
       throw new Error(
         'yText must not contain \r because it will break the range synchronization'
       );
-    }
-
-    // we can change default render to pure for making `VEditor` to be a pure string render,
-    // you can change schema and renderer again after construction
-    if (options.defaultMode === 'pure') {
-      this._attributeService.setAttributeRenderer(delta => {
-        return html`<span><v-text .str="${delta.insert}"></v-text></span>`;
-      });
     }
 
     this._yText = yText;

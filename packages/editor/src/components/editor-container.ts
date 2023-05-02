@@ -239,6 +239,9 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
     return html`
       <style>
+        editor-container * {
+          box-sizing: border-box;
+        }
         editor-container,
         .affine-editor-container {
           display: block;
