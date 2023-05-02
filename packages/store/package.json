@@ -53,7 +53,8 @@
       ".": {
         "module": "./dist/index.js",
         "import": "./dist/index.js"
-      }
+      },
+      "./shim.d.ts": "./shim.d.ts"
     }
   }
 }
