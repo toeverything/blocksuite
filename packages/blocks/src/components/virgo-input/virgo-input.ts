@@ -40,7 +40,7 @@ export class VirgoInput {
     if (type) {
       this.type = type;
       if (type === 'number' && !isDecimal(text) && text.length > 0) {
-        throw 'Illegal digital type text.';
+        throw new Error('Illegal digital type text.');
       }
     }
 
@@ -49,7 +49,7 @@ export class VirgoInput {
         this.yText = yText;
         this.yDoc = yText.doc;
       } else {
-        throw 'Y.Text should be binded to Y.Doc.';
+        throw new Error('Y.Text should be binded to Y.Doc.');
       }
     } else {
       this.yText = this.yDoc.getText(VirgoInput.YTEXT_NAME);
@@ -189,11 +189,11 @@ export class VirgoInput {
 
   setValue(str: string) {
     if (str.length > this.maxLength) {
-      throw 'The text exceeds the limit length.';
+      throw new Error('The text exceeds the limit length.');
     }
 
     if (this.type === 'number' && !isDecimal(str)) {
-      throw 'Illegal digital type text.';
+      throw new Error('Illegal digital type text.');
     }
 
     this.yText.delete(0, this.yText.length);
