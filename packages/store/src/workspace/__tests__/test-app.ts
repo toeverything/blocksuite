@@ -4,6 +4,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { PageMeta } from '../meta.js';
 import type { Workspace } from '../workspace.js';
 
+declare module '../../workspace/meta.js' {
+  interface PageMeta {
+    favorite?: boolean;
+  }
+}
+
 @customElement('test-app')
 export class TestApp extends LitElement {
   workspace!: Workspace;
