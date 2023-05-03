@@ -78,12 +78,12 @@ const styles = css`
   .selected.rich-text svg {
     fill: var(--affine-text-emphasis-color);
   }
-  .action.disabled {
+  /* .action.disabled {
     cursor: not-allowed;
   }
   .action.disabled:hover {
     background: unset;
-  }
+  } */
 `;
 
 @customElement('affine-database-column-type-popup')
@@ -107,10 +107,8 @@ export class ColumnTypePopup extends LitElement {
         </div>
         <div class="action-divider"></div>
         ${columnTypes.map(column => {
-          const isProgress = column.type === 'progress';
-          const selected = column.type === this.columnType && !isProgress;
+          const selected = column.type === this.columnType;
           const onChangeColumnType = () => {
-            if (isProgress) return;
             if (!selected) {
               this.changeColumnType(this.columnId, column.type);
             }
@@ -118,9 +116,7 @@ export class ColumnTypePopup extends LitElement {
 
           return html`
             <div
-              class="action ${column.type} ${selected
-                ? 'selected'
-                : ''} ${isProgress ? 'disabled' : ''}"
+              class="action ${column.type} ${selected ? 'selected' : ''}"
               @click=${onChangeColumnType}
             >
               <div class="action-content">
