@@ -20,8 +20,7 @@ export interface PageMeta {
    * @deprecated
    */
   subpageIds: string[];
-
-  [key: string]: string | number | boolean | undefined | (string | number)[];
+  // please use `declare module '@blocksuite/store'` to extend this interface
 }
 
 type WorkspaceMetaState = {
@@ -255,10 +254,10 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     });
   };
 
-  private _transformObjectToYMap(obj: Record<string, unknown>) {
-    const yMap = new Y.Map();
+  private _transformObjectToYMap<T extends object>(obj: T): Y.Map<T[keyof T]> {
+    const yMap: Y.Map<T[keyof T]> = new Y.Map();
     Object.entries(obj).forEach(([key, value]) => {
-      yMap.set(key, value);
+      yMap.set(key, value as T[keyof T]);
     });
     return yMap;
   }
