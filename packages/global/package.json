@@ -40,7 +40,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "lit": "^2.7.2"
+    "lit": "^2.7.3"
   },
   "peerDependencies": {
     "lit": "^2.7"
