@@ -500,7 +500,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _indicator!: DragIndicator;
   private _lastDroppingTarget: EditingState | null = null;
   private _lastDroppingType: DroppingType = 'none';
-  private _lastDraggingType: DroppingType = 'none';
+  private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
   private _mouseRoot: HTMLElement;
@@ -677,8 +677,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._lastDraggingType =
-      data.flavour === 'affine:database' ? 'database' : 'none';
+    this._lastDraggingFlavour = data.flavour;
     this.onDragStarted();
   };
 
@@ -729,13 +728,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      const result = DragHandle.calcTarget(
+      const result = DragHandle.calcDropTarget(
         point,
         model,
         element,
         [],
         scale,
-        this._lastDraggingType === 'database'
+        this._lastDraggingFlavour
       );
 
       if (result) {
@@ -765,7 +764,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    this._lastDraggingType = 'none';
+    this._lastDraggingFlavour = null;
     this._lastDroppingType = 'none';
     this._lastDroppingTarget = null;
 

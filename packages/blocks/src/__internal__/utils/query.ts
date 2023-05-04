@@ -931,35 +931,61 @@ export function getDatabaseBlockRowsElement(element: Element) {
 }
 
 /**
+ * Returns a flag for the drop target.
+ */
+export enum DropFlags {
+  Normal,
+  Database,
+  EmptyDatabase,
+}
+
+/**
  * Gets the drop rect by block and point.
  */
 export function getDropRectByPoint(
   point: Point,
   model: BaseBlockModel,
   element: Element
-) {
+): {
+  rect: DOMRect;
+  flag: DropFlags;
+} {
   const result = {
     rect: getRectByBlockElement(element),
-    // 0: others, 1: empty database
-    flag: 0,
+    flag: DropFlags.Normal,
   };
 
-  // If the database is empty and the point is inside the database
-  if (isEmptyDatabase(model)) {
-    result.flag = 1;
-    const table = getDatabaseBlockTableElement(element);
-    assertExists(table);
-    const bounds = table.getBoundingClientRect();
-    if (point.y < bounds.top) return result;
-    const header = getDatabaseBlockColumnHeaderElement(element);
-    assertExists(header);
-    const headerBounds = header.getBoundingClientRect();
-    result.rect = new DOMRect(
-      headerBounds.left,
-      headerBounds.bottom,
-      result.rect.width,
-      1
-    );
+  const isDatabase = matchFlavours(model, ['affine:database'] as const);
+  const tempElement = isDatabase
+    ? element
+    : element.parentElement?.classList.contains(
+        'affine-database-block-row-cell-content'
+      )
+    ? element.parentElement
+    : null;
+
+  // Inside the database
+  if (tempElement) {
+    // If the database is empty
+    if (isDatabase && model.isEmpty()) {
+      result.flag = DropFlags.EmptyDatabase;
+      const table = getDatabaseBlockTableElement(element);
+      assertExists(table);
+      const bounds = table.getBoundingClientRect();
+      if (point.y < bounds.top) return result;
+      const header = getDatabaseBlockColumnHeaderElement(element);
+      assertExists(header);
+      const headerBounds = header.getBoundingClientRect();
+      result.rect = new DOMRect(
+        headerBounds.left,
+        headerBounds.bottom,
+        result.rect.width,
+        1
+      );
+    } else {
+      result.flag = DropFlags.Database;
+      result.rect = tempElement.getBoundingClientRect();
+    }
   }
 
   return result;
