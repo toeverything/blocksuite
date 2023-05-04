@@ -2,7 +2,6 @@
 import './table/table-block.js';
 import './kanban/kanban-block.js';
 
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
@@ -35,7 +34,6 @@ export class DatabaseBlockComponent extends ShadowlessElement {
         .model=${this.model}
         .host=${this.host}
         class="affine-block-element"
-        ${unsafeStatic(BLOCK_ID_ATTR)}=${this.model.id}
       ></${databaseTag}>
     `;
   }
