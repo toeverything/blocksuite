@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BlockElementWithService } from '../../../__internal__/service/components.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-import type { DatabaseTable } from '../table-block.js';
+import type { DatabaseTable } from '../table-view.js';
 import { SearchState } from '../types.js';
 
 export function DataBaseRowContainer(

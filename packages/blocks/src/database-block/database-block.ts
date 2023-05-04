@@ -1,5 +1,5 @@
 // related component
-import './table/table-block.js';
+import './table/table-view.js';
 import './kanban/kanban-block.js';
 
 import { customElement, property } from 'lit/decorators.js';
