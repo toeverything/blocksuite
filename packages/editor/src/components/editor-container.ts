@@ -4,6 +4,7 @@ import {
   type EdgelessPageBlockComponent,
   type MouseMode,
   type PageBlockModel,
+  setIfNoActive,
   type SurfaceBlockModel,
   WithDisposable,
 } from '@blocksuite/blocks';
@@ -166,7 +167,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
-
+    setIfNoActive(this);
     if (this.mode === 'page') {
       setTimeout(() => {
         const defaultPage = this.querySelector('affine-default-page');

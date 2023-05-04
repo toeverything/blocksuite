@@ -1,6 +1,7 @@
 import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
 
-import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
+import { activeSlot, isActive } from '../../__internal__/utils/activeEditor.js';
+import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
 import {
@@ -64,68 +65,77 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
 }
 
 export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
-  hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
+  const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_EDGELESS);
+  if (isActive(edgeless)) {
+    hotkey.setScope(scope);
+  }
+  const activeDispose = activeSlot.on(() => {
+    if (isActive(edgeless)) {
+      hotkey.setScope(scope);
+    }
+  });
+  hotkey.withScope(scope, () => {
+    hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
+      // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
+      deleteModelsByRange(edgeless.page);
 
-  hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
-    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
-    deleteModelsByRange(edgeless.page);
-
-    const { selected } = edgeless.getSelection().blockSelectionState;
-    selected.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = edgeless.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 frame
-        if (children.length > 1) {
-          edgeless.page.deleteBlock(element);
+      const { selected } = edgeless.getSelection().blockSelectionState;
+      selected.forEach(element => {
+        if (isTopLevelBlock(element)) {
+          const children = edgeless.page.root?.children ?? [];
+          // FIXME: should always keep at least 1 frame
+          if (children.length > 1) {
+            edgeless.page.deleteBlock(element);
+          }
+        } else {
+          edgeless.surface.removeElement(element.id);
         }
-      } else {
-        edgeless.surface.removeElement(element.id);
-      }
+      });
+      edgeless.getSelection().currentController.clearSelection();
+      edgeless.slots.selectionUpdated.emit(
+        edgeless.getSelection().blockSelectionState
+      );
     });
-    edgeless.getSelection().currentController.clearSelection();
-    edgeless.slots.selectionUpdated.emit(
-      edgeless.getSelection().blockSelectionState
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, edgeless.page));
+
+    hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
+    hotkey.addListener('h', () =>
+      setMouseMode(edgeless, { type: 'pan', panning: false })
     );
+    hotkey.addListener('t', () =>
+      setMouseMode(edgeless, {
+        type: 'text',
+        background: FRAME_BACKGROUND_COLORS[0],
+      })
+    );
+    hotkey.addListener('p', () =>
+      setMouseMode(edgeless, {
+        type: 'brush',
+        color: DEFAULT_SELECTED_COLOR,
+        lineWidth: BrushSize.Thin,
+      })
+    );
+    hotkey.addListener('s', () =>
+      setMouseMode(edgeless, {
+        type: 'shape',
+        shape: 'rect',
+        fillColor: DEFAULT_SHAPE_FILL_COLOR,
+        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      })
+    );
+
+    // issue #1814
+    hotkey.addListener('esc', () => {
+      edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
+      setMouseMode(edgeless, { type: 'default' }, true);
+    });
+
+    bindSpace(edgeless);
+    bindCommonHotkey(edgeless.page);
   });
-  hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page));
-  hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, edgeless.page));
-
-  hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-  hotkey.addListener('h', () =>
-    setMouseMode(edgeless, { type: 'pan', panning: false })
-  );
-  hotkey.addListener('t', () =>
-    setMouseMode(edgeless, {
-      type: 'text',
-      background: FRAME_BACKGROUND_COLORS[0],
-    })
-  );
-  hotkey.addListener('p', () =>
-    setMouseMode(edgeless, {
-      type: 'brush',
-      color: DEFAULT_SELECTED_COLOR,
-      lineWidth: BrushSize.Thin,
-    })
-  );
-  hotkey.addListener('s', () =>
-    setMouseMode(edgeless, {
-      type: 'shape',
-      shape: 'rect',
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    })
-  );
-
-  // issue #1814
-  hotkey.addListener('esc', () => {
-    edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
-    setMouseMode(edgeless, { type: 'default' }, true);
-  });
-
-  bindSpace(edgeless);
-  bindCommonHotkey(edgeless.page);
-
   return () => {
-    hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
+    hotkey.deleteScope(scope);
+    activeDispose.dispose();
   };
 }

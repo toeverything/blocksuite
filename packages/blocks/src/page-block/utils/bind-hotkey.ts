@@ -86,6 +86,7 @@ export function bindCommonHotkey(page: Page) {
   hotkey.addListener(HOTKEYS.UNDO, e => {
     e.preventDefault();
     if (page.canUndo) clearSelection(page);
+    console.log('undo');
     page.undo();
   });
 

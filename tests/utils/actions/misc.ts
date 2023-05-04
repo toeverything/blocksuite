@@ -71,41 +71,46 @@ function generateRandomRoomId() {
 async function initEmptyEditor(
   page: Page,
   flags: Partial<BlockSuiteFlags> = {},
-  noInit = false
+  noInit = false,
+  multiEditor = false
 ) {
   await page.evaluate(
-    ([flags, noInit]) => {
+    ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
-
-        const editor = document.createElement('editor-container');
-        editor.page = page;
-        editor.autofocus = true;
-        editor.slots.pageLinkClicked.on(({ pageId }) => {
-          const newPage = workspace.getPage(pageId);
-          if (!newPage) {
-            throw new Error(`Failed to jump to page ${pageId}`);
-          }
-          editor.page = newPage;
-        });
-
-        const debugMenu = document.createElement('debug-menu');
-        debugMenu.workspace = workspace;
-        debugMenu.editor = editor;
-
         // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
         const appRoot = document.querySelector('#app');
         if (!appRoot) {
           throw new Error('Cannot find app root element(#app).');
         }
-        appRoot.appendChild(editor);
+        const createEditor = () => {
+          const editor = document.createElement('editor-container');
+          editor.page = page;
+          editor.autofocus = true;
+          editor.slots.pageLinkClicked.on(({ pageId }) => {
+            const newPage = workspace.getPage(pageId);
+            if (!newPage) {
+              throw new Error(`Failed to jump to page ${pageId}`);
+            }
+            editor.page = newPage;
+          });
+          appRoot.appendChild(editor);
+          editor.createBlockHub().then(blockHub => {
+            document.body.appendChild(blockHub);
+          });
+          return editor;
+        };
+        const editor = createEditor();
+        if (multiEditor) {
+          createEditor();
+        }
+        const debugMenu = document.createElement('debug-menu');
+        debugMenu.workspace = workspace;
+        debugMenu.editor = editor;
         document.body.appendChild(debugMenu);
-        editor.createBlockHub().then(blockHub => {
-          document.body.appendChild(blockHub);
-        });
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
@@ -126,19 +131,24 @@ async function initEmptyEditor(
         initPage(page);
       }
     },
-    [flags, noInit] as const
+    [flags, noInit, multiEditor] as const
   );
   await waitNextFrame(page);
 }
 
 export async function enterPlaygroundRoom(
   page: Page,
-  flags?: Partial<BlockSuiteFlags>,
-  room?: string,
-  blobStorage?: ('memory' | 'indexeddb' | 'mock')[],
-  noInit?: boolean
+  ops?: {
+    flags?: Partial<BlockSuiteFlags>;
+    room?: string;
+    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    noInit?: boolean;
+    multiEditor?: boolean;
+  }
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
+  let room = ops?.room;
+  const blobStorage = ops?.blobStorage;
   if (!room) {
     room = generateRandomRoomId();
   }
@@ -169,10 +179,10 @@ export async function enterPlaygroundRoom(
 
   // Log all uncaught errors
   page.on('pageerror', exception => {
-    throw new Error(`Uncaught exception: "${exception}"`);
+    throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, flags, noInit);
+  await initEmptyEditor(page, ops?.flags, ops?.noInit, ops?.multiEditor);
   await readyPromise;
   return room;
 }
@@ -838,10 +848,13 @@ export async function getCurrentHTMLTheme(page: Page) {
 }
 
 export async function getCurrentEditorTheme(page: Page) {
-  const mode = await page.locator('editor-container').evaluate(ele => {
-    return (ele as unknown as Element & { themeObserver: ThemeObserver })
-      .themeObserver.cssVariables?.['--affine-theme-mode'];
-  });
+  const mode = await page
+    .locator('editor-container')
+    .first()
+    .evaluate(ele => {
+      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+        .themeObserver.cssVariables?.['--affine-theme-mode'];
+    });
   return mode;
 }
 

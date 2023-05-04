@@ -91,7 +91,7 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const vEditor = page.locator('[data-block-is-title="true"]');
+  const vEditor = page.locator('[data-block-is-title="true"]').first();
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
 }
@@ -108,8 +108,9 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actualTexts = await page.evaluate(() => {
+    const editor = document.querySelector('editor-container');
     const richTexts = Array.from(
-      document.querySelectorAll<RichText>('rich-text')
+      editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
       const editor = richText.vEditor;

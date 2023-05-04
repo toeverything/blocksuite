@@ -21,6 +21,7 @@ export { getServiceOrRegister } from './__internal__/service.js';
 export type { BaseService } from './__internal__/service/index.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';
+export * from './__internal__/utils/activeEditor.js';
 export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';
@@ -41,7 +42,6 @@ export * from './list-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export * from './surface-block/index.js';
-
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

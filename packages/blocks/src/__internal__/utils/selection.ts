@@ -478,7 +478,7 @@ export function isBlankArea(e: SelectionEvent) {
 // Retarget selection back to the nearest block
 // when user clicks on the edge of page (page mode) or frame (edgeless mode).
 // See https://github.com/toeverything/blocksuite/pull/878
-function retargetClick(page: Page, e: SelectionEvent) {
+function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
   const targetElement = getElementFromEventTarget(e.raw.target);
   const block = targetElement?.closest(`[${BLOCK_ID_ATTR}]`) as {
     model?: BaseBlockModel;
@@ -495,7 +495,7 @@ function retargetClick(page: Page, e: SelectionEvent) {
 
   const { clientX, clientY } = e.raw;
 
-  const horizontalElement = getClosestEditor(clientY);
+  const horizontalElement = getClosestEditor(clientY, container);
   if (!horizontalElement) return;
 
   const model = getModelByElement(horizontalElement);
@@ -517,13 +517,17 @@ function retargetClick(page: Page, e: SelectionEvent) {
   }
 }
 
-export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
+export function handleNativeRangeClick(
+  page: Page,
+  e: SelectionEvent,
+  container?: HTMLElement
+) {
   // if not left click
   if (e.button) return;
 
   handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
 
-  retargetClick(page, e);
+  retargetClick(page, e, container);
 }
 
 export function handleNativeRangeAtPoint(x: number, y: number) {
@@ -871,7 +875,6 @@ export function getHorizontalClosestElement(
       // getBoundingClientRect here actually run so fast because of the browser cache
       a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
   );
-
   // short circuit
   const len = elements.length;
   if (len === 0) return null;

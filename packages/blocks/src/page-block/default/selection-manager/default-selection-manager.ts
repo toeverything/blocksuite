@@ -21,6 +21,7 @@ import {
   getClosestBlockElementByPoint,
   getCurrentNativeRange,
   getDefaultPageBlock,
+  getEditorContainerByElement,
   getModelByBlockElement,
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
@@ -40,6 +41,7 @@ import {
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
+import { setActive } from '../../../__internal__/utils/activeEditor.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
   EmbedBlockComponent,
@@ -240,6 +242,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
+    const container = getEditorContainerByElement(this.container);
+    setActive(container);
     const {
       x,
       y,
@@ -334,7 +338,7 @@ export class DefaultSelectionManager {
       return;
     }
     if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
-    handleNativeRangeClick(this.page, e);
+    handleNativeRangeClick(this.page, e, this.container);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {

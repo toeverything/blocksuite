@@ -112,17 +112,20 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
+    if (!this._editor.isActive) {
+      return;
+    }
+    const selectionRoot = findDocumentOrShadowRoot(this._editor);
+    const selection = selectionRoot.getSelection();
+    if (!selection) {
+      return;
+    }
     const newRange = this.toDomRange(vRange);
 
     if (!newRange) {
       return;
     }
 
-    const selectionRoot = findDocumentOrShadowRoot(this._editor);
-    const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return;
-    }
     selection.removeAllRanges();
     selection.addRange(newRange);
 

@@ -201,6 +201,13 @@ export function getEditorContainer(page: Page) {
   return editorContainer;
 }
 
+export function getEditorContainerByElement(ele: Element) {
+  // EditorContainer
+  const editorContainer = ele.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer;
+}
+
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
