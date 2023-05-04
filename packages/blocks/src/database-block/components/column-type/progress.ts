@@ -195,7 +195,7 @@ class ProgressColumnPropertyEditing extends DatabaseCellElement<number> {
 export const ProgressColumnRenderer = defineColumnRenderer(
   'progress',
   () => ({}),
-  () => null,
+  () => 0,
   {
     Cell: ProgressCellEditing,
     CellEditing: false,
