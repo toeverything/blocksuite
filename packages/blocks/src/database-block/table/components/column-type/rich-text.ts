@@ -91,17 +91,26 @@ class TextCell extends DatabaseCellElement<Y.Text> {
     this.databaseModel.page.captureSync();
   }
 
+  private _initYText = (text?: string) => {
+    const yText = new this.databaseModel.page.YText(text);
+    this.databaseModel.updateCell(this.rowModel.id, {
+      columnId: this.column.id,
+      value: yText,
+    });
+    return yText;
+  };
+
   private _onInitVEditor() {
     let value: Y.Text;
     if (!this.cell?.value) {
-      const yText = new this.databaseModel.page.YText();
-      this.databaseModel.updateCell(this.rowModel.id, {
-        columnId: this.column.id,
-        value: yText,
-      });
-      value = yText;
+      value = this._initYText();
     } else {
-      value = this.cell.value;
+      // When copying the database, the type of the value is `string`.s
+      if (typeof this.cell.value === 'string') {
+        value = this._initYText(this.cell.value);
+      } else {
+        value = this.cell.value;
+      }
     }
 
     this.vEditor = new VEditor(value);
