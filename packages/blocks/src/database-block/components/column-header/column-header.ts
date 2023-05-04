@@ -128,6 +128,11 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this._initMoveColumnHandlers();
       this._initChangeColumnWidthHandlers();
     }
+
+    // When dragging a block or adding a new row to the database, the changedProperties.size is 0
+    if (changedProperties.size === 0 || changedProperties.has('columns')) {
+      this._setDragHandleHeight();
+    }
   }
 
   override disconnectedCallback() {
