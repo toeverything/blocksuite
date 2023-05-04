@@ -15,17 +15,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getDefaultPage } from '../../../__internal__/index.js';
+import { getDefaultPage } from '../../../../__internal__/index.js';
 import {
   ShadowlessElement,
   WithDisposable,
-} from '../../../__internal__/utils/lit.js';
+} from '../../../../__internal__/utils/lit.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
+import { onClickOutside } from '../../../utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnRendererHelper } from '../../register.js';
 import type { Column, ColumnTypeIcon } from '../../types.js';
 import { ColumnInsertPosition } from '../../types.js';
-import { onClickOutside } from '../../utils.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
 import { changeColumnType } from '../edit-column-popup/utils.js';

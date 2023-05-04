@@ -14,11 +14,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import {
   ShadowlessElement,
   WithDisposable,
-} from '../../../__internal__/index.js';
-import { stopPropagation } from '../../../page-block/edgeless/utils.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
+} from '../../../../__internal__/index.js';
+import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
+import { onClickOutside } from '../../../utils.js';
 import { SearchState } from '../../types.js';
-import { onClickOutside } from '../../utils.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 

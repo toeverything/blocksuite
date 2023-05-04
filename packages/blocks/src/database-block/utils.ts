@@ -1,4 +1,4 @@
-import type { DatabaseAction, Divider } from './types.js';
+import type { DatabaseAction, Divider } from './table/types.js';
 
 // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
 function isVisible(elem: HTMLElement) {

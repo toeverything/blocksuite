@@ -3,8 +3,8 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
-import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
+import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
+import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 @customElement('affine-database-number-cell-editing')

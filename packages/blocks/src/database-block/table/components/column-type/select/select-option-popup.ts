@@ -2,8 +2,8 @@ import { DeleteIcon, PenIcon } from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { isDivider } from '../../../../utils.js';
 import type { SelectTagAction, SelectTagActionType } from '../../../types.js';
-import { isDivider } from '../../../utils.js';
 import { actionStyles } from '../../edit-column-popup/styles.js';
 
 const tagActions: SelectTagAction[] = [

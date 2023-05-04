@@ -2,9 +2,11 @@ import { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-import type { Cell, Column, SelectTag } from './types.js';
+import type { Cell, Column, SelectTag } from './table/types.js';
+import type { DatabaseMode } from './types.js';
 
 export type Props = {
+  mode: DatabaseMode;
   title: Text;
   cells: SerializedCells;
   columns: Array<Column>;
@@ -225,6 +227,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
+    mode: 'table',
     title: internal.Text(),
     cells: {},
     columns: [],
