@@ -64,11 +64,6 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
   }
 }
 
-@customElement('affine-database-select-column-property-editing')
-class SelectColumnPropertyEditing extends DatabaseCellElement<SelectTag[]> {
-  static override tag = literal`affine-database-select-column-property-editing`;
-}
-
 export const SelectColumnRenderer = defineColumnRenderer(
   'select',
   () => ({
@@ -78,7 +73,6 @@ export const SelectColumnRenderer = defineColumnRenderer(
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,
-    ColumnPropertyEditing: SelectColumnPropertyEditing,
   },
   {
     displayName: 'Select',

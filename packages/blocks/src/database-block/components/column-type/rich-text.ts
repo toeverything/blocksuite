@@ -211,19 +211,13 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   }
 }
 
-@customElement('affine-database-rich-text-column-property-editing')
-class TextColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
-  static override tag = literal`affine-database-rich-text-column-property-editing`;
-}
-
 export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
   () => ({}),
   page => new page.YText(''),
   {
     Cell: TextCell,
-    CellEditing: false,
-    ColumnPropertyEditing: TextColumnPropertyEditing,
+    CellEditing: null,
   },
   {
     displayName: 'Rich Text',

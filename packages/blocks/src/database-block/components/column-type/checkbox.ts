@@ -45,19 +45,13 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
   }
 }
 
-@customElement('affine-database-checkbox-column-property-editing')
-class CheckboxColumnPropertyEditing extends DatabaseCellElement<boolean> {
-  static override tag = literal`affine-database-checkbox-column-property-editing`;
-}
-
 export const CheckboxColumnRenderer = defineColumnRenderer(
   'checkbox',
   () => ({}),
   () => false,
   {
     Cell: CheckboxCell,
-    CellEditing: false,
-    ColumnPropertyEditing: CheckboxColumnPropertyEditing,
+    CellEditing: null,
   },
   {
     displayName: 'Checkbox',
