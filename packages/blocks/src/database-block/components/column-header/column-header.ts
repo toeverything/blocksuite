@@ -10,7 +10,6 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
-import { type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -24,7 +23,7 @@ import {
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnRendererHelper } from '../../register.js';
-import type { Column } from '../../types.js';
+import type { Column, ColumnTypeIcon } from '../../types.js';
 import { ColumnInsertPosition } from '../../types.js';
 import { onClickOutside } from '../../utils.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
@@ -35,9 +34,10 @@ import { initMoveColumnHandlers } from './column-move/index.js';
 import { initChangeColumnWidthHandlers } from './column-width/index.js';
 import { styles } from './styles.js';
 
-const columnTypeIconMap: Record<string, TemplateResult> = {
+const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
+  checkbox: DatabaseNumber,
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,

@@ -41,7 +41,7 @@ export interface ColumnComponents<
 > {
   Cell: typeof DatabaseCellElement<Value>;
   CellEditing: typeof DatabaseCellElement<Value> | false;
-  ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
+  ColumnPropertyEditing: typeof DatabaseCellElement<Value> | false;
 }
 
 export function defineColumnRenderer<
@@ -52,11 +52,7 @@ export function defineColumnRenderer<
   type: Type,
   propertyCreator: () => Property,
   defaultValue: (page: Page) => Value | null,
-  components: {
-    Cell: typeof DatabaseCellElement<Value>;
-    CellEditing: typeof DatabaseCellElement<Value> | false;
-    ColumnPropertyEditing: typeof DatabaseCellElement<Value>;
-  },
+  components: ColumnComponents,
   config: {
     displayName: string;
   }

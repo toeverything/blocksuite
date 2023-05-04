@@ -34,6 +34,11 @@ const columnTypes: ColumnHeader[] = [
     icon: DatabaseNumber,
   },
   {
+    type: 'checkbox',
+    text: 'Checkbox',
+    icon: DatabaseNumber,
+  },
+  {
     type: 'progress',
     text: 'Progress',
     icon: DatabaseProgress,

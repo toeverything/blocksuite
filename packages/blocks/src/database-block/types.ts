@@ -14,7 +14,10 @@ export type ColumnType =
   | 'select'
   | 'multi-select'
   | 'number'
+  | 'checkbox'
   | 'progress';
+
+export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 
 export interface Column extends Record<string, unknown> {
   id: string;
