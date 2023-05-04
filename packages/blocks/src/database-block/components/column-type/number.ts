@@ -89,11 +89,6 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   }
 }
 
-@customElement('affine-database-number-column-property-editing')
-class NumberColumnPropertyEditing extends DatabaseCellElement<Y.Text> {
-  static override tag = literal`affine-database-number-column-property-editing`;
-}
-
 export const NumberColumnRenderer = defineColumnRenderer(
   'number',
   () => ({
@@ -102,8 +97,7 @@ export const NumberColumnRenderer = defineColumnRenderer(
   page => new page.YText(''),
   {
     Cell: NumberCellEditing,
-    CellEditing: false,
-    ColumnPropertyEditing: NumberColumnPropertyEditing,
+    CellEditing: null,
   },
   {
     displayName: 'Number',

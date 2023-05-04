@@ -187,19 +187,13 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
   }
 }
 
-@customElement('affine-database-progress-column-property-editing')
-class ProgressColumnPropertyEditing extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-progress-column-property-editing`;
-}
-
 export const ProgressColumnRenderer = defineColumnRenderer(
   'progress',
   () => ({}),
   () => 0,
   {
     Cell: ProgressCellEditing,
-    CellEditing: false,
-    ColumnPropertyEditing: ProgressColumnPropertyEditing,
+    CellEditing: null,
   },
   {
     displayName: 'Progress',

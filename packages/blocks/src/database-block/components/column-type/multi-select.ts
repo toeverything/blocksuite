@@ -47,13 +47,6 @@ class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   }
 }
 
-@customElement('affine-database-multi-select-column-property-editing')
-class MultiSelectColumnPropertyEditing extends DatabaseCellElement<
-  SelectTag[]
-> {
-  static override tag = literal`affine-database-multi-select-column-property-editing`;
-}
-
 export const MultiSelectColumnRenderer = defineColumnRenderer(
   'multi-select',
   () => ({
@@ -63,7 +56,6 @@ export const MultiSelectColumnRenderer = defineColumnRenderer(
   {
     Cell: MultiSelectCell,
     CellEditing: MultiSelectCellEditing,
-    ColumnPropertyEditing: MultiSelectColumnPropertyEditing,
   },
   {
     displayName: 'Multi Select',
