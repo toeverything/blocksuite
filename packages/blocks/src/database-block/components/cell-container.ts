@@ -118,10 +118,11 @@ export class DatabaseCellContainer
   override render() {
     const renderer = this.columnRenderer.get(this.column.type);
     const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
+
     if (
       !this.readonly &&
       this._isEditing &&
-      renderer.components.CellEditing !== false
+      renderer.components.CellEditing !== null
     ) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`

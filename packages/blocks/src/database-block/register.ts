@@ -26,22 +26,18 @@ export abstract class DatabaseCellElement<Value> extends WithDisposable(
 export interface ColumnRenderer<
   Type extends ColumnType = ColumnType,
   Property extends Record<string, unknown> = Record<string, unknown>,
-  BaseValue = unknown
+  Value = unknown
 > {
   displayName: string;
   type: Type;
   propertyCreator: () => Property;
   components: ColumnComponents;
+  defaultValue: (page: Page) => Value;
 }
 
-export interface ColumnComponents<
-  Type extends string = string,
-  Property extends Record<string, unknown> = Record<string, unknown>,
-  Value = unknown
-> {
+export interface ColumnComponents<Value = unknown> {
   Cell: typeof DatabaseCellElement<Value>;
-  CellEditing: typeof DatabaseCellElement<Value> | false;
-  ColumnPropertyEditing: typeof DatabaseCellElement<Value> | false;
+  CellEditing: typeof DatabaseCellElement<Value> | null;
 }
 
 export function defineColumnRenderer<
@@ -51,7 +47,7 @@ export function defineColumnRenderer<
 >(
   type: Type,
   propertyCreator: () => Property,
-  defaultValue: (page: Page) => Value | null,
+  defaultValue: (page: Page) => Value,
   components: ColumnComponents,
   config: {
     displayName: string;
@@ -62,6 +58,7 @@ export function defineColumnRenderer<
     type,
     propertyCreator,
     components,
+    defaultValue,
   };
 }
 

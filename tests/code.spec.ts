@@ -650,6 +650,21 @@ test('should code block works in read only mode', async ({ page }) => {
   ).toHaveCount(2);
 });
 
+test('should code block lang input supports fuzzy search', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await expect(codeBlockController.langList).toBeVisible();
+  await type(page, 'jas');
+  await pressEnter(page);
+  await expect(codeBlockController.languageButton).toHaveText('Javascript');
+});
+
 test('multi-line indent', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
