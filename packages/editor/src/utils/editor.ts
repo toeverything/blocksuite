@@ -1,3 +1,4 @@
+import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
   BlockHub,
@@ -10,7 +11,9 @@ import {
 import {
   type BlockComponentElement,
   getClosestFrameBlockElementById,
+  getDefaultPage,
   getHoveringFrame,
+  isDefaultPage,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -81,7 +84,7 @@ export const createBlockHub: (
       }
 
       // In edgeless mode.
-      const pageBlock = getEdgelessPage(page);
+      const pageBlock = getEdgelessPage(page) || getDefaultPage(page);
       assertExists(pageBlock);
 
       let frameId;
@@ -92,13 +95,24 @@ export const createBlockHub: (
         ) as BlockComponentElement;
         assertExists(targetFrameBlock);
         frameId = targetFrameBlock.model.id;
+      } else if (isDefaultPage(pageBlock)) {
+        models.forEach(model => page.addBlock(model.flavour, model, model));
+        return;
       } else {
         // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(models, point);
+        const result = (pageBlock as EdgelessPageBlockComponent).addNewFrame(
+          models,
+          point
+        );
         frameId = result.frameId;
         focusId = result.ids[0];
       }
-      pageBlock.setSelection(frameId, true, focusId, point);
+      (pageBlock as EdgelessPageBlockComponent).setSelection(
+        frameId,
+        true,
+        focusId,
+        point
+      );
     },
     onDragStarted: () => {
       if (editor.mode === 'page') {
