@@ -139,8 +139,8 @@ importers:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
       marked:
         specifier: ^4.2.12
         version: 4.2.12
@@ -194,8 +194,8 @@ importers:
         specifier: workspace:*
         version: link:../global
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
       marked:
         specifier: ^4.2.12
         version: 4.2.12
@@ -226,8 +226,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
 
   packages/phasor:
     dependencies:
@@ -287,8 +287,8 @@ importers:
         specifier: ^0.32.1
         version: 0.32.1
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -336,8 +336,8 @@ importers:
         specifier: ^0.33.3
         version: 0.33.3
       lib0:
-        specifier: ^0.2.68
-        version: 0.2.68
+        specifier: ^0.2.74
+        version: 0.2.74
       merge:
         specifier: ^2.1.1
         version: 2.1.1
@@ -358,8 +358,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
       yjs:
         specifier: ^13.6.0
         version: 13.6.0
@@ -374,8 +374,8 @@ importers:
         version: 3.21.4
     devDependencies:
       lit:
-        specifier: ^2.7.2
-        version: 2.7.2
+        specifier: ^2.7.3
+        version: 2.7.3
       yjs:
         specifier: ^13.6.0
         version: 13.6.0
@@ -1436,7 +1436,7 @@ packages:
       '@lit-labs/react': 1.1.1
       '@shoelace-style/animations': 1.1.0
       '@shoelace-style/localize': 3.0.4
-      lit: 2.7.2
+      lit: 2.7.3
       qr-creator: 1.0.0
     dev: false
 
@@ -4118,14 +4118,6 @@ packages:
       type-check: 0.4.0
     dev: true
 
-  /lib0@0.2.68:
-    resolution: {integrity: sha512-VZPU3TFmS9mdNku3YmmPoiUQnhHK178p4nUh+BrtCDPT3r5GxE9XSx1yObTL7sH2xgAlAxFO/c/grh2zZMTJkw==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dependencies:
-      isomorphic.js: 0.2.5
-    dev: false
-
   /lib0@0.2.74:
     resolution: {integrity: sha512-roj9i46/JwG5ik5KNTkxP2IytlnrssAkD/OhlAVtE+GqectrdkfR+pttszVLrOzMDeXNs1MPt6yo66MUolWSiA==}
     engines: {node: '>=14'}
@@ -4196,8 +4188,8 @@ packages:
     dependencies:
       '@types/trusted-types': 2.0.2
 
-  /lit@2.7.2:
-    resolution: {integrity: sha512-9QnZmG5mIKPRja96cpndMclLSi0Qrz2BXD6EbqNqCKMMjOWVm/BwAeXufFk2jqFsNmY07HOzU8X+8aTSVt3yrA==}
+  /lit@2.7.3:
+    resolution: {integrity: sha512-0a+u+vVbmgSfPu+fyvqjMPBX0Kwbyj9QOv9MbQFZhWGlV2cyk3lEwgfUQgYN+i/lx++1Z3wZknSIp3QCKxHLyg==}
     dependencies:
       '@lit/reactive-element': 1.6.0
       lit-element: 3.3.1
