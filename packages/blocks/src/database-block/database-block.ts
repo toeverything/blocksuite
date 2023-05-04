@@ -1,6 +1,6 @@
 // related component
 import './table/table-view.js';
-import './kanban/kanban-block.js';
+import './kanban/kanban-view.js';
 
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
