@@ -96,7 +96,11 @@ export const createBlockHub: (
         assertExists(targetFrameBlock);
         frameId = targetFrameBlock.model.id;
       } else if (isDefaultPage(pageBlock)) {
-        models.forEach(model => page.addBlock(model.flavour, model, model));
+        const children = page.root?.children ?? [];
+        models.forEach(model => {
+          // add to last child
+          page.addBlock(model.flavour, model, children[children.length - 1].id);
+        });
         return;
       } else {
         // Creates new frame block on blank area.
