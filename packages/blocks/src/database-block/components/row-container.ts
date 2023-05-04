@@ -56,7 +56,7 @@ export function DataBaseRowContainer(
         border-right: 1px solid var(--affine-border-color);
         transform: translateX(0);
       }
-      .affine-database-block-row-cell-content > affine-paragraph {
+      .affine-database-block-row-cell-content > .affine-block-element {
         width: 100%;
       }
       .affine-database-block-row-cell-content > affine-paragraph > .text {

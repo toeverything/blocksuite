@@ -12,13 +12,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type BlockComponentElement,
+  DropFlags,
   type EditingState,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByElement,
   getDropRectByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  hasDatabase,
   isContainedIn,
   Point,
   Rect,
@@ -494,27 +494,45 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
   }
 
-  static calcTarget(
+  /**
+   * Calculates the drop target.
+   */
+  static calcDropTarget(
     point: Point,
     model: BaseBlockModel,
     element: Element,
     draggingElements: BlockComponentElement[],
     scale: number,
-    force = false
+    flavour: string | null = null // for block-hub
   ): {
     type: DroppingType;
     rect: Rect;
     modelState: EditingState;
   } | null {
-    const includingDatabase = hasDatabase(draggingElements) || force;
+    const schema = model.page.getSchemaByFlavour('affine:database');
+    assertExists(schema);
+    const children = schema.model.children ?? [];
 
-    if (includingDatabase) {
-      if (!matchFlavours(model, ['affine:database'] as const)) {
-        const databaseBlockElement = element.closest('affine-database');
-        if (databaseBlockElement) {
-          element = databaseBlockElement;
-          model = getModelByBlockElement(element);
-        }
+    let shouldAppendToDatabase = true;
+
+    if (children.length) {
+      if (draggingElements.length) {
+        shouldAppendToDatabase = draggingElements
+          .map(getModelByBlockElement)
+          .every(m => children.includes(m.flavour));
+      } else if (flavour) {
+        shouldAppendToDatabase = children.includes(flavour);
+      }
+    }
+
+    if (
+      !shouldAppendToDatabase &&
+      !matchFlavours(model, ['affine:database'] as const)
+    ) {
+      const databaseBlockElement = element.closest('affine-database');
+      if (databaseBlockElement) {
+        element = databaseBlockElement;
+        model = getModelByBlockElement(element);
       }
     }
 
@@ -522,8 +540,8 @@ export class DragHandle extends WithDisposable(LitElement) {
     const height = 3 * scale;
     const { rect: domRect, flag } = getDropRectByPoint(point, model, element);
 
-    // empty database
-    if (flag === 1) {
+    if (flag === DropFlags.EmptyDatabase) {
+      // empty database
       const rect = Rect.fromDOMRect(domRect);
       rect.top -= height / 2;
       rect.height = height;
@@ -532,6 +550,27 @@ export class DragHandle extends WithDisposable(LitElement) {
       return {
         type,
         rect,
+        modelState: {
+          model,
+          rect: domRect,
+          element: element as BlockComponentElement,
+        },
+      };
+    } else if (flag === DropFlags.Database) {
+      // not empty database
+      const distanceToTop = Math.abs(domRect.top - point.y);
+      const distanceToBottom = Math.abs(domRect.bottom - point.y);
+      const before = distanceToTop < distanceToBottom;
+      type = before ? 'before' : 'after';
+
+      return {
+        type,
+        rect: Rect.fromLWTH(
+          domRect.left,
+          domRect.width,
+          (before ? domRect.top - 1 : domRect.bottom) - height / 2,
+          height
+        ),
         modelState: {
           model,
           rect: domRect,
@@ -764,7 +803,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         !isContainedIn(this._draggingElements, element)
       ) {
         const model = getModelByBlockElement(element);
-        const result = DragHandle.calcTarget(
+        const result = DragHandle.calcDropTarget(
           point,
           model,
           element,
