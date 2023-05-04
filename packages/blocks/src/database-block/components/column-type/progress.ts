@@ -182,7 +182,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
           ></div>
         </div>
       </div>
-      <div class="progress-number">${progress}</div>
+      <div class="progress-number progress">${progress}</div>
     </div>`;
   }
 }
