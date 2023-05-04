@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { ShadowlessElement } from '../../../../__internal__/index.js';
+import { ShadowlessElement } from '../../../../../__internal__/index.js';
 
 @customElement('affine-database-column-drag-preview')
 export class ColumnDragPreview extends ShadowlessElement {

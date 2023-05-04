@@ -14,6 +14,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
+import { getTagColor, onClickOutside } from '../../../../utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
@@ -21,7 +22,6 @@ import {
 import { DatabaseCellElement } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
-import { getTagColor, onClickOutside } from '../../../utils.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 

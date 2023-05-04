@@ -9,8 +9,8 @@ import { html, literal } from 'lit/static-html.js';
 import type {
   AffineTextAttributes,
   AffineVEditor,
-} from '../../../__internal__/rich-text/virgo/types.js';
-import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
+} from '../../../../__internal__/rich-text/virgo/types.js';
+import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(

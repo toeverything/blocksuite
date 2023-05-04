@@ -1,10 +1,10 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
+import type { DatabaseBlockModel } from '../../../../database-model.js';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../consts.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
 
 type ColumnWidthConfig = {
   index: number;
