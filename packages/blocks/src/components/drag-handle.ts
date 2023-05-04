@@ -513,20 +513,20 @@ export class DragHandle extends WithDisposable(LitElement) {
     assertExists(schema);
     const children = schema.model.children ?? [];
 
-    let shouldNotAppendToDatabase = false;
+    let shouldAppendToDatabase = true;
 
     if (children.length) {
       if (draggingElements.length) {
-        shouldNotAppendToDatabase = draggingElements
+        shouldAppendToDatabase = draggingElements
           .map(getModelByBlockElement)
-          .some(m => !children.includes(m.flavour));
+          .every(m => children.includes(m.flavour));
       } else if (flavour) {
-        shouldNotAppendToDatabase = !children.includes(flavour);
+        shouldAppendToDatabase = children.includes(flavour);
       }
     }
 
     if (
-      shouldNotAppendToDatabase &&
+      !shouldAppendToDatabase &&
       !matchFlavours(model, ['affine:database'] as const)
     ) {
       const databaseBlockElement = element.closest('affine-database');
