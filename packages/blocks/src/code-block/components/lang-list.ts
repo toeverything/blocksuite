@@ -2,7 +2,11 @@ import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
+import {
+  createEvent,
+  isFuzzyMatch,
+  ShadowlessElement,
+} from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
@@ -99,7 +103,7 @@ export class LangList extends ShadowlessElement {
   private _filterText = '';
 
   @state()
-  private _currentSelectedIndex = -1;
+  private _currentSelectedIndex = 0;
 
   @property()
   selectedLanguage = '';
@@ -147,20 +151,24 @@ export class LangList extends ShadowlessElement {
       if (!this._filterText) {
         return true;
       }
-      return language.toLowerCase().startsWith(this._filterText.toLowerCase());
+      return isFuzzyMatch(
+        language.toLowerCase(),
+        this._filterText.toLowerCase()
+      );
     });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (this._currentSelectedIndex >= filteredLanguages.length - 1) return;
-
-        this._currentSelectedIndex++;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + 1) % filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (this._currentSelectedIndex <= -1) return;
-
-        this._currentSelectedIndex--;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + filteredLanguages.length - 1) %
+          filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (
@@ -183,7 +191,7 @@ export class LangList extends ShadowlessElement {
             placeholder="Search"
             @input="${() => {
               this._filterText = this.filterInput?.value;
-              this._currentSelectedIndex = -1;
+              this._currentSelectedIndex = 0;
             }}"
             @keydown="${onLanguageSelect}"
           />
