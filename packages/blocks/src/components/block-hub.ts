@@ -24,17 +24,15 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EditingState, Rect } from '../__internal__/index.js';
 import {
+  calcDropTarget,
+  type DroppingType,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
   ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
-import {
-  DragHandle,
-  type DragIndicator,
-  type DroppingType,
-} from './drag-handle.js';
+import { type DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
@@ -728,7 +726,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     let lastModelState = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      const result = DragHandle.calcDropTarget(
+      const result = calcDropTarget(
         point,
         model,
         element,
