@@ -13,6 +13,28 @@ import type {
 import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
+const INDENT_SYMBOL = '  ';
+const LINE_BREAK_SYMBOL = '\n';
+const allIndexOf = (
+  text: string,
+  symbol: string,
+  start = 0,
+  end = text.length
+) => {
+  const indexArr: number[] = [];
+  let i = start;
+
+  while (i < end) {
+    const index = text.indexOf(symbol, i);
+    if (index === -1 || index > end) {
+      break;
+    }
+    indexArr.push(index);
+    i = index + 1;
+  }
+  return indexArr;
+};
+
 export class CodeBlockService extends BaseService<CodeBlockModel> {
   setLang(model: CodeBlockModel, lang: string) {
     model.page.updateBlock(model, { language: lang });
@@ -68,10 +90,10 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
         handler(range, context) {
           context.event.stopPropagation();
           const text = this.vEditor.yText.toString();
-          const index = text.lastIndexOf(lineBreakSymbol, range.index - 1);
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
           const indexArr = allIndexOf(
             text,
-            lineBreakSymbol,
+            LINE_BREAK_SYMBOL,
             range.index,
             range.index + range.length
           )
@@ -88,12 +110,12 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
                 index: i,
                 length: 0,
               },
-              indentSymbol
+              INDENT_SYMBOL
             );
           });
           this.vEditor.setVRange({
             index: range.index + 2,
-            length: range.length + (indexArr.length - 1) * indentSymbol.length,
+            length: range.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
           });
 
           return PREVENT_DEFAULT;
@@ -105,10 +127,10 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
         handler: function (range, context) {
           context.event.stopPropagation();
           const text = this.vEditor.yText.toString();
-          const index = text.lastIndexOf(lineBreakSymbol, range.index - 1);
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
           let indexArr = allIndexOf(
             text,
-            lineBreakSymbol,
+            LINE_BREAK_SYMBOL,
             range.index,
             range.index + range.length
           )
@@ -120,7 +142,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
             indexArr.push(0);
           }
           indexArr = indexArr.filter(
-            i => text.slice(i, i + 2) === indentSymbol
+            i => text.slice(i, i + 2) === INDENT_SYMBOL
           );
           indexArr.forEach(i => {
             this.vEditor.deleteText({
@@ -134,7 +156,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
                 range.index -
                 (indexArr[indexArr.length - 1] < range.index ? 2 : 0),
               length:
-                range.length - (indexArr.length - 1) * indentSymbol.length,
+                range.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
           }
 
@@ -144,24 +166,3 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     };
   }
 }
-const indentSymbol = '  ';
-const lineBreakSymbol = '\n';
-const allIndexOf = (
-  text: string,
-  symbol: string,
-  start = 0,
-  end = text.length
-) => {
-  const indexArr: number[] = [];
-  let i = start;
-
-  while (i < end) {
-    const index = text.indexOf(symbol, i);
-    if (index === -1 || index > end) {
-      break;
-    }
-    indexArr.push(index);
-    i = index + 1;
-  }
-  return indexArr;
-};
