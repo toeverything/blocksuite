@@ -1,7 +1,11 @@
+import { sleep } from '@blocksuite/global/utils';
+
 import { isControlledKeyboardEvent } from '../__internal__/utils/std.js';
+import { getCurrentNativeRange } from '../std.js';
 
 export const createKeydownObserver = ({
   target,
+  delimiter,
   onUpdateQuery,
   onMove,
   onConfirm,
@@ -10,6 +14,7 @@ export const createKeydownObserver = ({
   abortController,
 }: {
   target: HTMLElement;
+  delimiter: string;
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
@@ -18,6 +23,38 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
+
+  const updateQuery = async () => {
+    // Wait for text update
+    await sleep(0);
+    const range = getCurrentNativeRange();
+    if (range.startContainer !== range.endContainer) {
+      console.warn(
+        'Failed to parse query! Current range is not collapsed.',
+        range
+      );
+      abortController.abort();
+      return;
+    }
+    const textNode = range.startContainer;
+    if (textNode.nodeType !== Node.TEXT_NODE) {
+      console.warn(
+        'Failed to parse query! Current range is not a text node.',
+        range
+      );
+      abortController.abort();
+      return;
+    }
+    const text = (textNode.textContent ?? '').slice(0, range.startOffset);
+    const delimiterIdx = text.lastIndexOf(delimiter);
+    if (delimiterIdx === -1) {
+      abortController.abort();
+      return;
+    }
+    query = text.slice(delimiterIdx + 1);
+    onUpdateQuery(query);
+  };
+
   const keyDownListener = (e: KeyboardEvent) => {
     e.stopPropagation();
 
@@ -68,8 +105,7 @@ export const createKeydownObserver = ({
           if (!query.length) {
             abortController.abort();
           }
-          query = query.slice(0, -1);
-          onUpdateQuery(query);
+          updateQuery();
           return;
         }
         case 'Enter': {
@@ -121,22 +157,18 @@ export const createKeydownObserver = ({
           return;
       }
     }
-    query += e.key;
-    onUpdateQuery(query);
+    updateQuery();
   };
 
-  const listenerWithMiddleware = (e: KeyboardEvent) =>
-    interceptor(e, () => keyDownListener(e));
-
-  target.addEventListener('keydown', listenerWithMiddleware, {
-    // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-    capture: true,
-  });
-  abortController.signal.addEventListener('abort', () => {
-    target.removeEventListener('keydown', listenerWithMiddleware, {
+  target.addEventListener(
+    'keydown',
+    (e: KeyboardEvent) => interceptor(e, () => keyDownListener(e)),
+    {
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
-    });
-  });
+      signal: abortController.signal,
+    }
+  );
 
   if (onEsc) {
     const escListener = (e: KeyboardEvent) => {
