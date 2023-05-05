@@ -43,7 +43,7 @@ const page = workspace.createPage();
 page.addBlock('affine:page', { title: new Text('hello') });
 ```
 
-The document data will be automatically synchronized to IndexedDB. After the next refresh, the content of `affine:page` should appear directly on the page. If you want to use a WebSocket connection, you can achieve the same persistence effect with very similar code logic by switching or using providers simultaneously. As BlockSuite leverages Yjs as its underlying data structure, you can reuse the [Connection Providers](https://docs.yjs.dev/ecosystem/connection-provider) or the [Database Providers providers](https://docs.yjs.dev/ecosystem/database-provider) from the Yjs ecosystem.
+The document data will be automatically synchronized to IndexedDB. After the next refresh, the content of `affine:page` should appear directly on the page. If you want to use a WebSocket connection, you can achieve the same persistence effect with very similar code logic by switching or using providers simultaneously. As BlockSuite leverages Yjs as its underlying data structure, you can reuse the [connection providers](https://docs.yjs.dev/ecosystem/connection-provider) or the [database providers](https://docs.yjs.dev/ecosystem/database-provider) from the Yjs ecosystem.
 
 ::: tip
 
@@ -52,8 +52,6 @@ The document data will be automatically synchronized to IndexedDB. After the nex
   :::
 
 You can view more provider usage instructions in the [BlockSuite Playground](https://blocksuite-toeverything.vercel.app/?init).
-
-The persistence we are introducing now only involves the internal CRDT data format used by BlockSuite. Importing and exporting to different document formats will be covered when introducing the editor.
 
 ## Reusing Binary Data
 
