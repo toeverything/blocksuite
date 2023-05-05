@@ -5,12 +5,12 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { Loader } from '../../components/loader.js';
 import type {
   DefaultPageBlockComponent,
   EdgelessPageBlockComponent,
 } from '../../index.js';
-import { activeEditorManager } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
