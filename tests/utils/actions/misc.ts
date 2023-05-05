@@ -135,7 +135,20 @@ async function initEmptyEditor(
   );
   await waitNextFrame(page);
 }
-
+let multiEditor = false;
+export const setMultiEditor = (me: boolean) => {
+  multiEditor = me;
+};
+let currentEditorIndex = 0;
+export const setCurrentEditor = (n: number) => {
+  currentEditorIndex = n;
+};
+export const getCurrentEditorIndex = () => {
+  return currentEditorIndex;
+};
+export const getEditorLocator = (page: Page) => {
+  return page.locator('editor-container').nth(currentEditorIndex);
+};
 export async function enterPlaygroundRoom(
   page: Page,
   ops?: {
@@ -143,7 +156,6 @@ export async function enterPlaygroundRoom(
     room?: string;
     blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
     noInit?: boolean;
-    multiEditor?: boolean;
   }
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
@@ -182,7 +194,7 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, ops?.flags, ops?.noInit, ops?.multiEditor);
+  await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
   await readyPromise;
   return room;
 }
@@ -433,17 +445,22 @@ export async function initEmptyCodeBlockState(page: Page) {
 
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
-  const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
+  const editor = getEditorLocator(page);
+  const locator = editor.locator(RICH_TEXT_SELECTOR).nth(i);
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {
-  await page.evaluate(i => {
-    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+  await page.evaluate(
+    ([i, editorIndex]) => {
+      const editor = document.querySelectorAll('editor-container')[i];
+      const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
-    richTexts[i].vEditor?.focusEnd();
-  }, i);
+      richTexts[i].vEditor?.focusEnd();
+    },
+    [i, currentEditorIndex]
+  );
   await waitNextFrame(page);
 }
 

@@ -10,8 +10,8 @@ import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../../../__internal__/rich-text/virgo/types.js';
+import { isActive } from '../../../../__internal__/utils/activeEditor.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
-import { isActive } from '../../../__internal__/utils/activeEditor.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(

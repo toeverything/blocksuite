@@ -208,13 +208,7 @@ export class VEditor<
       index += 1;
     }
 
-    throw new Error(
-      `failed to find leaf${rangeIndex}${Array.from(
-        document.querySelectorAll('v-line')
-      )
-        .map(v => v.textContent)
-        .join()}`
-    );
+    throw new Error('failed to find leaf');
   }
 
   // the number is related to the VirgoLine's textLength
