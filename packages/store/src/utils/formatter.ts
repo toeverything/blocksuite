@@ -16,6 +16,7 @@ function initCustomFormatter() {
   ) {
     return;
   }
+  console.log('initCustomFormatter!');
 
   const bannerStyle = {
     style:
@@ -59,7 +60,5 @@ function initCustomFormatter() {
     (window as any).devtoolsFormatters = [formatter];
   }
 }
-
-console.log('initCustomFormatter!');
 
 initCustomFormatter();
