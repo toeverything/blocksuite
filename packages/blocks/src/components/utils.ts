@@ -176,9 +176,8 @@ export const createKeydownObserver = ({
         onEsc();
       }
     };
-    window.addEventListener('keydown', escListener);
-    abortController.signal.addEventListener('abort', () =>
-      window.removeEventListener('keydown', escListener)
-    );
+    window.addEventListener('keydown', escListener, {
+      signal: abortController.signal,
+    });
   }
 };

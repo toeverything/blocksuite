@@ -96,6 +96,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
      */
     createKeydownObserver({
       target: richText,
+      delimiter: '/',
       abortController: this.abortController,
       interceptor: (e, next) => {
         if (e.key === '/') {
@@ -267,7 +268,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   private _categoryTemplate() {
     const showCategory = !this._searchString.length;
     const activatedGroupName =
-      this._filterItems[this._activatedItemIndex].groupName;
+      this._filterItems[this._activatedItemIndex]?.groupName;
     const groups = collectGroupNames(this._filterItems);
 
     return html`<div

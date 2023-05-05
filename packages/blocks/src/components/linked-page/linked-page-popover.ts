@@ -119,7 +119,11 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
     createKeydownObserver({
       target: richText,
-      onUpdateQuery: str => this._updateQuery(str),
+      delimiter: '@',
+      onUpdateQuery: str => {
+        this._query = str;
+        this._activatedItemIndex = 0;
+      },
       abortController: this.abortController,
       onMove: step => {
         this._activatedItemIndex =
@@ -172,11 +176,6 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   updatePosition(position: { height: number; x: string; y: string }) {
     this._position = position;
-  }
-
-  private _updateQuery(str: string) {
-    this._query = str;
-    this._activatedItemIndex = 0;
   }
 
   private _insertLinkedNode(type: 'Subpage' | 'LinkedPage', pageId: string) {
