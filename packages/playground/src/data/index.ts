@@ -274,7 +274,7 @@ export const multiEditorVertical: InitFn = (
 
   const app = document.getElementById('app');
   if (app) {
-    createEditor(page, app!);
+    createEditor(page, app);
   }
 };
 

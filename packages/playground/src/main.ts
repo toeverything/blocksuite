@@ -35,8 +35,12 @@ function subscribePage(workspace: Workspace) {
         return;
       }
     }
+    const app = document.getElementById('app');
+    if (!app) {
+      return;
+    }
     const page = workspace.getPage(pageId) as Page;
-    const editor = createEditor(page, document.getElementById('app')!);
+    const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;

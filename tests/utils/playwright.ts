@@ -19,7 +19,7 @@ export const setScope = (name: string) => {
   scope = name;
 };
 export const scoped = (stringsArray: TemplateStringsArray) => {
-  return `${scope} | ${stringsArray.join()}`;
+  return scope ? `${scope} | ${stringsArray.join()}` : stringsArray.join();
 };
 export const test = baseTest.extend({
   context: async ({ context }, use) => {
