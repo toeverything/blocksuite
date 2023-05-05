@@ -100,7 +100,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
-        `Reference node must be initialized with ${REFERENCE_NODE}, but got '${this.delta.insert}'`
+        `Reference node must be initialized with '${REFERENCE_NODE}', but got '${this.delta.insert}'`
       );
     }
     const model = getModelByElement(this);

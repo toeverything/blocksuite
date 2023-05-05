@@ -136,7 +136,7 @@ html[class='dark'] {
   --affine-font-xs: 12px;
   --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
-  --affine-z-index-popover: 100;
+  --affine-z-index-popover: 1000;
   --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
