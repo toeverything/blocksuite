@@ -96,6 +96,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
      */
     createKeydownObserver({
       target: richText,
+      delimiter: '/',
       abortController: this.abortController,
       interceptor: (e, next) => {
         if (e.key === '/') {
@@ -107,6 +108,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
           // if the following key is not the backspace key,
           // the slash menu will be closed
           this.abortController.abort();
+          return;
+        }
+        if (e.key === ' ') {
+          this._hide = true;
+          next();
           return;
         }
         if (this._hide) {
@@ -267,7 +273,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   private _categoryTemplate() {
     const showCategory = !this._searchString.length;
     const activatedGroupName =
-      this._filterItems[this._activatedItemIndex].groupName;
+      this._filterItems[this._activatedItemIndex]?.groupName;
     const groups = collectGroupNames(this._filterItems);
 
     return html`<div
