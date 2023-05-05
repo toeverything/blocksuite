@@ -12,7 +12,7 @@ import {
   initMouseEventHandlers,
   noop,
 } from '../../__internal__/index.js';
-import { setActive } from '../../__internal__/utils/activeEditor.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
@@ -170,7 +170,7 @@ export class EdgelessSelectionManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     const container = getEditorContainerByElement(this._container);
-    setActive(container);
+    activeEditorManager.setActive(container);
     return this.currentController.onContainerClick(e);
   };
 

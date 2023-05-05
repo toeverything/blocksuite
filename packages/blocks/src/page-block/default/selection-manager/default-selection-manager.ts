@@ -41,7 +41,7 @@ import {
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
-import { setActive } from '../../../__internal__/utils/activeEditor.js';
+import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
   EmbedBlockComponent,
@@ -243,7 +243,7 @@ export class DefaultSelectionManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     const container = getEditorContainerByElement(this.container);
-    setActive(container);
+    activeEditorManager.setActive(container);
     const {
       x,
       y,

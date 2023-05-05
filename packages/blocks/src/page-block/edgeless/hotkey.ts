@@ -1,6 +1,6 @@
 import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
 
-import { activeSlot, isActive } from '../../__internal__/utils/activeEditor.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
@@ -66,11 +66,11 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
 
 export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_EDGELESS);
-  if (isActive(edgeless)) {
+  if (activeEditorManager.isActive(edgeless)) {
     hotkey.setScope(scope);
   }
-  const activeDispose = activeSlot.on(() => {
-    if (isActive(edgeless)) {
+  const activeDispose = activeEditorManager.activeSlot.on(() => {
+    if (activeEditorManager.isActive(edgeless)) {
       hotkey.setScope(scope);
     }
   });

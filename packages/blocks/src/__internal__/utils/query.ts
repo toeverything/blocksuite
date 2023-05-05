@@ -10,6 +10,7 @@ import type {
   DefaultPageBlockComponent,
   EdgelessPageBlockComponent,
 } from '../../index.js';
+import { activeEditorManager } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
@@ -266,7 +267,8 @@ export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return Promise.resolve(null);

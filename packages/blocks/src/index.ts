@@ -21,7 +21,7 @@ export { getServiceOrRegister } from './__internal__/service.js';
 export type { BaseService } from './__internal__/service/index.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';
-export * from './__internal__/utils/activeEditor.js';
+export * from './__internal__/utils/active-editor-manager.js';
 export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';

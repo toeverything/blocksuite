@@ -20,7 +20,7 @@ import {
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
-import { activeSlot, isActive } from '../../__internal__/utils/activeEditor.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import {
   ShadowlessElement,
   WithDisposable,
@@ -197,7 +197,7 @@ export class DefaultPageBlockComponent
     const title = model.title;
 
     this._titleVEditor = new VEditor(title.yText, {
-      active: () => isActive(this),
+      active: () => activeEditorManager.isActive(this),
     });
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
@@ -487,12 +487,12 @@ export class DefaultPageBlockComponent
   override firstUpdated() {
     const { page, selection } = this;
     const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_PAGE);
-    if (isActive(this)) {
+    if (activeEditorManager.isActive(this)) {
       hotkey.setScope(scope);
     }
     this._disposables.add(
-      activeSlot.on(() => {
-        if (isActive(this)) {
+      activeEditorManager.activeSlot.on(() => {
+        if (activeEditorManager.isActive(this)) {
           hotkey.setScope(scope);
         }
       })

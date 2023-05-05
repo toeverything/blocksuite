@@ -1,7 +1,7 @@
 import { VEditor } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
-import { isActive } from '../../__internal__/utils/activeEditor.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { isDecimal } from './utils.js';
 
 export class VirgoInput {
@@ -60,7 +60,7 @@ export class VirgoInput {
     this.undoManager = new Y.UndoManager(this.yText);
 
     this.vEditor = new VEditor(this.yText, {
-      active: () => isActive(options.rootElement),
+      active: () => activeEditorManager.isActive(options.rootElement),
     });
     this.vEditor.mount(rootElement);
     this.vEditor.bindHandlers({
