@@ -110,6 +110,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this.abortController.abort();
           return;
         }
+        if (e.key === ' ') {
+          this._hide = true;
+          next();
+          return;
+        }
         if (this._hide) {
           this._hide = false;
         }
