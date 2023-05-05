@@ -75,6 +75,8 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, ' ');
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/ ']);
+    await page.keyboard.press('Backspace');
+    await expect(slashMenu).toBeVisible();
   });
 
   test('delete the slash symbol should close the slash menu', async () => {
