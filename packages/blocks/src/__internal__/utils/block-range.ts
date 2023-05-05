@@ -92,7 +92,6 @@ export function blockRangeToNativeRange(
 ) {
   // special case for title
   if (blockRange.type === 'Title') {
-    console.log('title');
     const page = blockRange.models[0].page;
     const pageElement = getDefaultPage(page);
     if (!pageElement) {
