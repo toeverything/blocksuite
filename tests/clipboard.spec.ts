@@ -568,6 +568,7 @@ test('should copy and paste of database work', async ({ page }) => {
   >
     <affine:database
       prop:columns="Array [1]"
+      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -578,6 +579,7 @@ test('should copy and paste of database work', async ({ page }) => {
     </affine:database>
     <affine:database
       prop:columns="Array [1]"
+      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -603,6 +605,7 @@ test('should copy and paste of database work', async ({ page }) => {
   >
     <affine:database
       prop:columns="Array [1]"
+      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
@@ -683,4 +686,74 @@ test('copy and paste to selection block selection', async ({ page }) => {
   await copyByKeyboard(page);
   await pasteByKeyboard(page, false);
   await assertRichTexts(page, ['1234', '']);
+});
+
+test("should keep paragraph block's type when pasting at the start of empty paragraph block except type text", async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2336',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await focusRichText(page);
+  await type(page, '>');
+  await page.keyboard.press('Space', { delay: 50 });
+
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.setAttribute('id', 'input-test');
+    input.value = '123';
+    document.body.appendChild(input);
+  });
+  await page.focus('#input-test');
+  await page.dblclick('#input-test');
+  await copyByKeyboard(page);
+  await focusRichText(page);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="quote"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+
+  // when pasting a quote into a text paragraph block, the paragraph type should be text
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+
+  await pressEnter(page);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="quote"
+    />
+    <affine:paragraph
+      prop:text="123"
+      prop:type="quote"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });

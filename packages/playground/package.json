@@ -22,9 +22,9 @@
     "@rich-data/json-plugin": "^3.0.0-20230329005843-d296129",
     "@rich-data/viewer": "^3.0.0-20230329005843-d296129",
     "@shoelace-style/shoelace": "2.0.0",
-    "@toeverything/y-indexeddb": "0.5.4-canary.7",
+    "@toeverything/y-indexeddb": "0.5.4-canary.21",
     "browser-fs-access": "^0.32.1",
-    "lit": "^2.7.2",
+    "lit": "^2.7.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "yjs": "^13.6.0"

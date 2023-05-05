@@ -15,7 +15,10 @@ import {
   initEmptyParagraphState,
   pasteByKeyboard,
   pressArrowLeft,
+  pressArrowUp,
   pressEnter,
+  pressShiftTab,
+  pressTab,
   redoByKeyboard,
   selectAllByKeyboard,
   SHORT_KEY,
@@ -645,4 +648,49 @@ test('should code block works in read only mode', async ({ page }) => {
   await expect(
     codeBlockController.codeOption.locator('format-bar-button')
   ).toHaveCount(2);
+});
+
+test('should code block lang input supports fuzzy search', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await expect(codeBlockController.langList).toBeVisible();
+  await type(page, 'jas');
+  await pressEnter(page);
+  await expect(codeBlockController.languageButton).toHaveText('Javascript');
+});
+
+test('multi-line indent', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'aaa');
+  await pressEnter(page);
+
+  await type(page, 'bbb');
+  await pressEnter(page);
+
+  await type(page, 'ccc');
+
+  await page.keyboard.down('Shift');
+  await pressArrowUp(page, 2);
+  await page.keyboard.up('Shift');
+
+  await pressTab(page);
+
+  await assertRichTexts(page, ['  aaa\n  bbb\n  ccc']);
+
+  await pressShiftTab(page);
+
+  await assertRichTexts(page, ['aaa\nbbb\nccc']);
+
+  await pressShiftTab(page);
+
+  await assertRichTexts(page, ['aaa\nbbb\nccc']);
 });

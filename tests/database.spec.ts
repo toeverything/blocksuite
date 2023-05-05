@@ -528,6 +528,63 @@ test.describe('switch column type', () => {
       text: '',
     });
   });
+
+  test('switch to checkbox', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await switchColumnType(page, 'checkbox');
+
+    const checkbox = getFirstColumnCell(page, 'checkbox');
+    expect(await checkbox.isChecked()).toBe(false);
+
+    await checkbox.click();
+    expect(await checkbox.isChecked()).toBe(true);
+
+    await undoByClick(page);
+    expect(await checkbox.isChecked()).toBe(false);
+  });
+
+  test('switch to progress', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await switchColumnType(page, 'progress');
+
+    const progress = getFirstColumnCell(page, 'progress');
+    expect(await progress.textContent()).toBe('0');
+
+    const progressBg = page.locator('.affine-database-progress-bg');
+    const {
+      x: progressBgX,
+      y: progressBgY,
+      width: progressBgWidth,
+    } = await getBoundingBox(progressBg);
+    await page.mouse.move(progressBgX, progressBgY);
+
+    const dragHandle = page.locator('.affine-database-progress-drag-handle');
+    const {
+      x: dragX,
+      y: dragY,
+      width,
+      height,
+    } = await getBoundingBox(dragHandle);
+    const dragCenterX = dragX + width / 2;
+    const dragCenterY = dragY + height / 2;
+    await page.mouse.move(dragCenterX, dragCenterY);
+
+    const endX = dragCenterX + progressBgWidth;
+    await dragBetweenCoords(
+      page,
+      { x: dragCenterX, y: dragCenterY },
+      { x: endX, y: dragCenterY }
+    );
+    expect(await progress.textContent()).toBe('100');
+  });
 });
 
 test.describe('select column tag action', () => {

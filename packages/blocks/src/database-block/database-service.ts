@@ -9,7 +9,7 @@ import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import type { Cell, Column } from './types.js';
+import type { Cell, Column } from './table/types.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   initDatabaseBlock(
@@ -100,11 +100,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       const newRowId = newRowIds[rowIndex];
       columnIds.forEach((columnId, columnIndex) => {
         const cellData = cells[rowId]?.[columnId];
-        let value = cellData?.value;
+        const value = cellData?.value;
         if (!value) return;
-        if (value instanceof model.page.YText) {
-          value = value.clone();
-        }
         model.updateCell(newRowId, {
           columnId: newColumnIds[columnIndex],
           value,

@@ -1,4 +1,4 @@
-import type { DatabaseAction, Divider } from './types.js';
+import type { DatabaseAction, Divider } from './table/types.js';
 
 // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
 function isVisible(elem: HTMLElement) {
@@ -15,16 +15,20 @@ export function onClickOutside(
   reusable = false
 ): () => void {
   const outsideClickListener = (event: Event) => {
-    if (!element.contains(event.target as Node) && isVisible(element)) {
-      // or use: event.target.closest(selector) === null
-      callback(element, event.target as HTMLElement);
-      // if reuseable, need to manually remove the listener
-      if (!reusable) removeClickListener();
-    }
+    // support shadow dom
+    const path = event.composedPath && event.composedPath();
+    const isOutside = path
+      ? path.indexOf(element) < 0
+      : !element.contains(event.target as Node) && isVisible(element);
+
+    if (!isOutside) return;
+
+    callback(element, event.target as HTMLElement);
+    // if reuseable, need to manually remove the listener
+    if (!reusable) removeClickListener();
   };
 
   document.addEventListener(event, outsideClickListener);
-
   const removeClickListener = () => {
     document.removeEventListener(event, outsideClickListener);
   };
