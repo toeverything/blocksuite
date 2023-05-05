@@ -4,11 +4,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import {
   ShadowlessElement,
   WithDisposable,
-} from '../../__internal__/utils/lit.js';
-import { setupVirgoScroll } from '../../__internal__/utils/virgo.js';
-import { VirgoInput } from '../../components/virgo-input/virgo-input.js';
+} from '../../../__internal__/utils/lit.js';
+import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
+import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
 import { DATABASE_TITLE_LENGTH } from '../consts.js';
-import type { DatabaseBlockModel } from '../database-model.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {

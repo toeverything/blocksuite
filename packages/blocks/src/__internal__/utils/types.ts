@@ -1,7 +1,7 @@
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import type { Cell, Column } from '../../database-block/types.js';
+import type { Cell, Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type {
   BlockServiceInstanceByKey,

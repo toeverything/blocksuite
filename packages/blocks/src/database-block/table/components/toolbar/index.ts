@@ -4,8 +4,8 @@ import { assertExists } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DragIndicator } from '../../../components/drag-handle.js';
-import { Point, Rect, ShadowlessElement } from '../../../std.js';
+import type { DragIndicator } from '../../../../components/drag-handle.js';
+import { Point, Rect, ShadowlessElement } from '../../../../std.js';
 
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {

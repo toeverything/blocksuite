@@ -9,16 +9,16 @@ import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { copyBlocks } from '../../../__internal__/clipboard/utils/commons.js';
-import { toast } from '../../../components/toast.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
+import { copyBlocks } from '../../../../__internal__/clipboard/utils/commons.js';
+import { toast } from '../../../../components/toast.js';
+import type { DatabaseBlockModel } from '../../../database-model.js';
+import { isDivider } from '../../../utils.js';
 import type {
   SwitchViewAction,
   SwitchViewActionType,
   ToolbarAction,
   ToolbarActionType,
 } from '../../types.js';
-import { isDivider } from '../../utils.js';
 import { actionStyles } from '../edit-column-popup/styles.js';
 
 const toolbarActions: ToolbarAction[] = [
@@ -44,12 +44,12 @@ const toolbarActions: ToolbarAction[] = [
 
 const databaseTypes: SwitchViewAction[] = [
   {
-    type: 'table-view',
+    type: 'table',
     text: 'Table view',
     icon: DatabaseTableViewIcon,
   },
   {
-    type: 'kanban-view',
+    type: 'kanban',
     text: 'Kanban view',
     icon: DatabaseKanbanViewIcon,
   },
@@ -115,7 +115,7 @@ class DatabaseTypePopup extends LitElement {
         </div>
         <div class="action-divider"></div>
         ${databaseTypes.map(column => {
-          const isKanban = column.type === 'kanban-view';
+          const isKanban = column.type === 'kanban';
           const selected = column.type === this.dbType && !isKanban;
 
           return html`
@@ -203,7 +203,7 @@ export class ToolbarActionPopup extends LitElement {
   private _onShowDatabaseType = () => {
     if (this._databaseTypePopup) return;
     this._databaseTypePopup = new DatabaseTypePopup();
-    this._databaseTypePopup.dbType = 'table-view';
+    this._databaseTypePopup.dbType = 'table';
     this._container.appendChild(this._databaseTypePopup);
     createPopper(this._container, this._databaseTypePopup, {
       placement: 'right-start',
