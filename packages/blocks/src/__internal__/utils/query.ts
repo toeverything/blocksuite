@@ -251,7 +251,8 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return null;
@@ -481,7 +482,10 @@ export function isInsideRichText(element: unknown): element is RichText {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const titleElement = document.querySelector('[data-block-is-title="true"]');
+  const editor = activeEditorManager.getActiveEditor();
+  const titleElement = (editor ?? document).querySelector(
+    '[data-block-is-title="true"]'
+  );
   if (!titleElement) return false;
 
   return titleElement.contains(element as Node);
@@ -781,7 +785,10 @@ export function getBlockElementsByElement(
  */
 export function getBlockElementById(
   id: string,
-  parent: BlockComponentElement | Document | Element = document
+  parent:
+    | BlockComponentElement
+    | Document
+    | Element = activeEditorManager.getActiveEditor() ?? document
 ) {
   return parent.querySelector(`[${ATTR}="${id}"]`);
 }

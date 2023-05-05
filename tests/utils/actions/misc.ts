@@ -774,14 +774,23 @@ export function virgoEditorInnerTextToString(innerText: string): string {
 }
 
 export async function focusTitle(page: Page) {
-  await page.evaluate(() => {
-    const defaultPageComponent = document.querySelector('affine-default-page');
+  // click to ensure editor is active
+  await page.mouse.move(0, 0);
+  const editor = getEditorLocator(page);
+  const locator = editor.locator('affine-default-page').first();
+  // need to set `force` to true when clicking on `affine-selected-blocks`
+  await locator.click({ force: true });
+  // avoid trigger double click
+  await page.waitForTimeout(500);
+  await page.evaluate(i => {
+    const defaultPageComponent = document.querySelectorAll(
+      'affine-default-page'
+    )[i];
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
-
     defaultPageComponent.titleVEditor.focusEnd();
-  });
+  }, currentEditorIndex);
   await waitNextFrame(page);
 }
 

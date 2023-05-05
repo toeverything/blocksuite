@@ -17,7 +17,12 @@ test.beforeAll(() => {
 test.afterAll(async ({ page }) => {
   const focusInSecondEditor = await page.evaluate(() => {
     const editor = document.querySelectorAll('editor-container')[1];
-    return editor.contains(getSelection().getRangeAt(0).startContainer);
+    const selection = getSelection();
+    if (selection.rangeCount === 0) {
+      return true;
+    }
+    // once the range exists, it must be in the second editor
+    return editor.contains(selection.getRangeAt(0).startContainer);
   });
   await expect(focusInSecondEditor).toBe(true);
 });

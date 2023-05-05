@@ -37,6 +37,7 @@ import {
   captureHistory,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
+  getEditorLocator,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -91,7 +92,8 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const vEditor = page.locator('[data-block-is-title="true"]').first();
+  const editor = getEditorLocator(page);
+  const vEditor = editor.locator('[data-block-is-title="true"]').first();
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
 }

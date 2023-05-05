@@ -136,7 +136,6 @@ export class RemoteSelection extends LitElement {
         if (!userRange) {
           return;
         }
-
         assertExists(this.page);
         const models = userRange.blockIds
           .map(id => {

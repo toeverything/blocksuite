@@ -304,7 +304,6 @@ test(scoped`should undo/redo works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
-
   await focusTitle(page);
   await type(page, 'title');
   await focusRichText(page);
@@ -467,7 +466,6 @@ test(
     await waitNextFrame(page);
     await undoByKeyboard(page);
     await pressBackspace(page);
-    const line = page.locator('v-line').last();
-    expect(await line.innerText()).toBe('asdf');
+    await assertRichTexts(page, ['\nasdf']);
   }
 );
