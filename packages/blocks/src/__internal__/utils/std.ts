@@ -318,12 +318,13 @@ export function isFuzzyMatch(name: string, query: string) {
     .trim()
     .toLowerCase()
     .split('')
-    .filter(char => /[A-Za-z0-9]/.test(char))
+    .filter(char => char !== ' ')
     .join('');
 
   const regex = new RegExp(
     query
       .split('')
+      .filter(char => char !== ' ')
       .map(item => `${escapeRegExp(item)}.*`)
       .join(''),
     'i'
