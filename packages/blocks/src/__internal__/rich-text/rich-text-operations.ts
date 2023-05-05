@@ -561,6 +561,7 @@ export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
 }
 
 export function handleKeyDown(
+  block: BaseBlockModel,
   event: KeyboardEvent,
   editableContainer: HTMLElement
 ) {
@@ -572,10 +573,14 @@ export function handleKeyDown(
   }
   const isLastLine = checkLastLine(range, editableContainer);
   if (isLastLine) {
-    // If the caret is at the last line of the block,
-    // default behavior will move the caret to the end of the line,
-    // which is not expected. so we need to prevent default behavior.
-    return PREVENT_DEFAULT;
+    // When the cursor is at the last line of the block,
+    // default ArrowDown behavior will move the cursor to the end of the line
+    // If the block is the last block of the page,
+    // we want the cursor to move to next block instead of the end of the line,
+    // thus we should prevent the default behavior.
+    // If the block is the last block of the page,
+    // let the cursor move to the end of line as default.
+    return getNextBlock(block) ? PREVENT_DEFAULT : ALLOW_DEFAULT;
   }
   // Avoid triggering hotkey bindings
   event.stopPropagation();
