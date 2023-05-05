@@ -1,13 +1,14 @@
 import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/editor';
 import {
   configDebugLog,
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
-import type { BlobStorage } from '@blocksuite/store';
+import type { BlobStorage, Page } from '@blocksuite/store';
 import type { DocProvider, Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
@@ -235,3 +236,22 @@ export function isValidUrl(urlLike: string) {
   }
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
+
+export const createEditor = (page: Page, element: HTMLElement) => {
+  const editor = new EditorContainer();
+  editor.page = page;
+  editor.slots.pageLinkClicked.on(({ pageId }) => {
+    const target = page.workspace.getPage(pageId);
+    if (!target) {
+      throw new Error(`Failed to jump to page ${pageId}`);
+    }
+    editor.page = target;
+  });
+
+  element.append(editor);
+
+  editor.createBlockHub().then(blockHub => {
+    document.body.appendChild(blockHub);
+  });
+  return editor;
+};

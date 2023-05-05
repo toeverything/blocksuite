@@ -10,6 +10,7 @@ import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../../../__internal__/rich-text/virgo/types.js';
+import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
@@ -113,7 +114,9 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value);
+    this.vEditor = new VEditor(value, {
+      active: () => activeEditorManager.isActive(this),
+    });
     setupVirgoScroll(this.databaseModel.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({

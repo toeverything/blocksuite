@@ -5,6 +5,7 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { Loader } from '../../components/loader.js';
 import type {
   DefaultPageBlockComponent,
@@ -201,6 +202,13 @@ export function getEditorContainer(page: Page) {
   return editorContainer;
 }
 
+export function getEditorContainerByElement(ele: Element) {
+  // EditorContainer
+  const editorContainer = ele.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer;
+}
+
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
@@ -243,7 +251,8 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return null;
@@ -259,7 +268,8 @@ export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return Promise.resolve(null);
@@ -472,7 +482,10 @@ export function isInsideRichText(element: unknown): element is RichText {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const titleElement = document.querySelector('[data-block-is-title="true"]');
+  const editor = activeEditorManager.getActiveEditor();
+  const titleElement = (editor ?? document).querySelector(
+    '[data-block-is-title="true"]'
+  );
   if (!titleElement) return false;
 
   return titleElement.contains(element as Node);
@@ -772,7 +785,10 @@ export function getBlockElementsByElement(
  */
 export function getBlockElementById(
   id: string,
-  parent: BlockComponentElement | Document | Element = document
+  parent:
+    | BlockComponentElement
+    | Document
+    | Element = activeEditorManager.getActiveEditor() ?? document
 ) {
   return parent.querySelector(`[${ATTR}="${id}"]`);
 }

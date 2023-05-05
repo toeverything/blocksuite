@@ -15,11 +15,12 @@ import type {
 import {
   asyncFocusRichText,
   hotkey,
-  HOTKEY_SCOPE,
+  HOTKEY_SCOPE_TYPE,
   Rect,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import { BlockChildrenContainer } from '../../__internal__/service/components.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import {
   ShadowlessElement,
   WithDisposable,
@@ -195,7 +196,9 @@ export class DefaultPageBlockComponent
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new VEditor(title.yText);
+    this._titleVEditor = new VEditor(title.yText, {
+      active: () => activeEditorManager.isActive(this),
+    });
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,
@@ -483,11 +486,21 @@ export class DefaultPageBlockComponent
 
   override firstUpdated() {
     const { page, selection } = this;
-
-    hotkey.setScope(HOTKEY_SCOPE.AFFINE_PAGE);
-    this._disposables.add(() => hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_PAGE));
-
-    bindHotkeys(page, selection);
+    const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_PAGE);
+    if (activeEditorManager.isActive(this)) {
+      hotkey.setScope(scope);
+    }
+    this._disposables.add(
+      activeEditorManager.activeSlot.on(() => {
+        if (activeEditorManager.isActive(this)) {
+          hotkey.setScope(scope);
+        }
+      })
+    );
+    this._disposables.add(() => hotkey.deleteScope(scope));
+    hotkey.withScope(scope, () => {
+      bindHotkeys(page, selection);
+    });
     hotkey.enableHotkey();
 
     this._initDragHandle();
@@ -557,17 +570,20 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
-            <backlink-button .host=${this} .page=${this.page}></backlink-button>
+            <backlink-button
+              .host="${this}"
+              .page="${this.page}"
+            ></backlink-button>
           </div>
           ${childrenContainer}
         </div>
         <affine-selected-blocks
-          .mouseRoot=${this.mouseRoot}
-          .state=${{
+          .mouseRoot="${this.mouseRoot}"
+          .state="${{
             rects: this._selectedRects,
             grab: !draggingArea,
-          }}
-          .offset=${viewportOffset}
+          }}"
+          .offset="${viewportOffset}"
         ></affine-selected-blocks>
         ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
       </div>

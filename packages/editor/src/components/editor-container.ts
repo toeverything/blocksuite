@@ -1,4 +1,5 @@
 import {
+  activeEditorManager,
   type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -166,7 +167,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
-
+    activeEditorManager.setIfNoActive(this);
     if (this.mode === 'page') {
       setTimeout(() => {
         const defaultPage = this.querySelector('affine-default-page');
