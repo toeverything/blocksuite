@@ -96,13 +96,16 @@ class DatabaseTypePopup extends LitElement {
     .selected.table-view svg {
       fill: var(--affine-text-emphasis-color);
     }
+    .action.disabled {
+      cursor: not-allowed;
+    }
+    .action.disabled:hover {
+      background: unset;
+    }
   `;
 
   @property()
   dbType!: SwitchViewActionType;
-
-  @property()
-  changeType!: (type: SwitchViewActionType) => void;
 
   override render() {
     return html`
@@ -112,12 +115,14 @@ class DatabaseTypePopup extends LitElement {
         </div>
         <div class="action-divider"></div>
         ${databaseTypes.map(column => {
-          const selected = column.type === this.dbType;
+          const isKanban = column.type === 'kanban';
+          const selected = column.type === this.dbType && !isKanban;
 
           return html`
             <div
-              class="action ${column.type} ${selected ? 'selected' : ''}"
-              @click=${() => this.changeType(column.type)}
+              class="action ${column.type} ${selected
+                ? 'selected'
+                : ''} ${isKanban ? 'disabled' : ''}"
             >
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>
@@ -198,12 +203,7 @@ export class ToolbarActionPopup extends LitElement {
   private _onShowDatabaseType = () => {
     if (this._databaseTypePopup) return;
     this._databaseTypePopup = new DatabaseTypePopup();
-    this._databaseTypePopup.dbType = this.targetModel.mode;
-    this._databaseTypePopup.changeType = mode => {
-      this.targetModel.page.updateBlock(this.targetModel, {
-        mode,
-      });
-    };
+    this._databaseTypePopup.dbType = 'table';
     this._container.appendChild(this._databaseTypePopup);
     createPopper(this._container, this._databaseTypePopup, {
       placement: 'right-start',
