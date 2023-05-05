@@ -594,7 +594,7 @@ function isEmbed({ tagName }: Element) {
  * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
-  return tagName === 'AFFINE-DATABASE';
+  return tagName === 'AFFINE-DATABASE-TABLE';
 }
 
 /**
