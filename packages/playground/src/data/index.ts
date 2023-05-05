@@ -239,7 +239,7 @@ export const multiEditor: InitFn = (workspace: Workspace, pageId: string) => {
 
   const app = document.getElementById('app');
   if (app) {
-    createEditor(page, app!);
+    createEditor(page, app);
     app.style.display = 'flex';
     app.childNodes.forEach(node => {
       if (node instanceof EditorContainer) {
