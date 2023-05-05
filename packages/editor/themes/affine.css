@@ -41,7 +41,7 @@
   --affine-font-xs: 12px;
   --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
-  --affine-z-index-popover: 100;
+  --affine-z-index-popover: 1000;
   --affine-paragraph-space: 8px;
   --affine-popover-radius: 10px;
   --affine-zoom: 1;
