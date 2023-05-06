@@ -443,12 +443,20 @@ export async function initEmptyCodeBlockState(page: Page) {
   return ids;
 }
 
-export async function focusRichText(page: Page, i = 0) {
+type FocusRichTextOptions = {
+  clickPosition?: { x: number; y: number };
+};
+
+export async function focusRichText(
+  page: Page,
+  i = 0,
+  options?: FocusRichTextOptions
+) {
   await page.mouse.move(0, 0);
   const editor = getEditorLocator(page);
   const locator = editor.locator(RICH_TEXT_SELECTOR).nth(i);
   // need to set `force` to true when clicking on `affine-selected-blocks`
-  await locator.click({ force: true });
+  await locator.click({ force: true, position: options?.clickPosition });
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {
