@@ -125,7 +125,6 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    console.log(this.select);
     const style = styleMap({
       backgroundColor: this.select.color,
     });
