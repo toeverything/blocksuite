@@ -196,12 +196,13 @@ export async function assertSelection(
   rangeLength = 0
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+    ([richTextIndex, index]) => {
+      const editor = document.querySelectorAll('editor-container')[index];
+      const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
       const vEditor = richText.vEditor;
       return vEditor?.getVRange();
     },
-    { richTextIndex }
+    [richTextIndex, getCurrentEditorIndex()]
   );
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
@@ -657,8 +658,8 @@ export function assertRectEqual(a: Rect, b: Rect) {
 
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
-
-  const selectedRect = page
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
     .locator('edgeless-selected-rect')
     .locator('.affine-edgeless-selected-rect');
   const box = await selectedRect.boundingBox();
