@@ -7,6 +7,7 @@ import {
   PlusIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { nanoid } from '@blocksuite/store/index.js';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -314,7 +315,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
     const tagColor = this._selectColor ?? getTagColor();
     this._selectColor = undefined;
-    const newSelect = { value, color: tagColor };
+    const newSelect = { id: nanoid(), value, color: tagColor };
 
     this.rowHost.updateColumnProperty(property => {
       const selection = property.selection as SelectTag[];
@@ -493,7 +494,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
           ${selectCreateTip}
           ${repeat(
             filteredSelection,
-            item => item,
+            select => select.id,
             (select, index) => {
               const isEditing = index === this._editingIndex;
               const onOptionIconClick = isEditing

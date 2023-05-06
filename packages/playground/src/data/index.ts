@@ -7,10 +7,11 @@
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  type SelectTag,
 } from '@blocksuite/blocks';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import type { Workspace } from '@blocksuite/store';
+import { nanoid, type Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import { createEditor } from '../utils';
@@ -137,10 +138,10 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
-  const selection = [
-    { value: 'Done', color: 'var(--affine-tag-white)' },
-    { value: 'TODO', color: 'var(--affine-tag-pink)' },
-    { value: 'WIP', color: 'var(--affine-tag-blue)' },
+  const selection: SelectTag[] = [
+    { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
+    { id: nanoid(), value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { id: nanoid(), value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
   // Add database block inside frame block
   const databaseId = page.addBlock(
