@@ -18,6 +18,7 @@ import {
   pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressShiftEnter,
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
@@ -458,13 +459,11 @@ test(
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusRichText(page);
-    await waitNextFrame(page);
-    await page.keyboard.press(`Shift+Enter`, { delay: 50 });
+    await pressShiftEnter(page);
     await type(page, 'asdfg');
-    await waitNextFrame(page);
     await pressEnter(page);
-    await waitNextFrame(page);
     await undoByKeyboard(page);
+    await page.waitForTimeout(300);
     await pressBackspace(page);
     await assertRichTexts(page, ['\nasdf']);
   }
