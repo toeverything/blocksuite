@@ -7,7 +7,7 @@ import {
   PlusIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { nanoid } from '@blocksuite/store/index.js';
+import { nanoid } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
