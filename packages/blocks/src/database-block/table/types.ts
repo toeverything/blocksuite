@@ -40,6 +40,7 @@ export const enum ColumnInsertPosition {
 
 /** select tag property */
 export type SelectTag = {
+  id: string;
   color: string;
   value: string;
 };
