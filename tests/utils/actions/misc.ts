@@ -179,7 +179,10 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      throw new Error('Unexpected console message: ' + message.text());
+      expect('no console message').toBe(
+        'Unexpected console message: ' + message.text()
+      );
+      // throw new Error('Unexpected console message: ' + message.text());
     }
     if (message.type() === 'warning') {
       console.warn(message.text());
