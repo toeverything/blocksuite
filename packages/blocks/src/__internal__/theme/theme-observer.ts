@@ -34,6 +34,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
 
   observer(element: Element) {
     this._observer?.disconnect();
+    this._cssVariables = extractCssVariables(element);
     this._observer = new MutationObserver(() => {
       const mode = element.getAttribute('data-theme');
       if (this._mode !== mode) {
