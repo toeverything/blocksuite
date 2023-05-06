@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import { SHORT_KEY } from './keyboard.js';
+import { getEditorLocator } from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -251,7 +252,8 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
 }
 
 export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
-  const frame = page.locator(`affine-frame[data-block-id="${frameId}"]`);
+  const editor = getEditorLocator(page);
+  const frame = editor.locator(`affine-frame[data-block-id="${frameId}"]`);
   const bound = await frame.boundingBox();
   if (!bound) {
     throw new Error(`Missing frame: ${frameId}`);

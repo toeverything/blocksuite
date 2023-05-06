@@ -307,7 +307,7 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
     const input = document.createElement('input');
     input.setAttribute('id', 'input-test');
     input.value = '123';
-    document.body.appendChild(input);
+    document.body.querySelector('#app')?.appendChild(input);
   });
   await page.focus('#input-test');
   await page.dblclick('#input-test');
@@ -708,7 +708,7 @@ test(
       const input = document.createElement('input');
       input.setAttribute('id', 'input-test');
       input.value = '123';
-      document.body.appendChild(input);
+      document.body.querySelector('#app')?.appendChild(input);
     });
     await page.focus('#input-test');
     await page.dblclick('#input-test');

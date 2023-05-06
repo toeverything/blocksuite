@@ -35,6 +35,7 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getCurrentEditorIndex,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
@@ -109,8 +110,8 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('editor-container');
+  const actualTexts = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
     const richTexts = Array.from(
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
@@ -118,7 +119,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
       const editor = richText.vEditor;
       return editor.yText.toString();
     });
-  });
+  }, getCurrentEditorIndex());
   expect(actualTexts).toEqual(texts);
 }
 
@@ -265,8 +266,9 @@ export async function assertTypeFormat(page: Page, type: string) {
 }
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
-  const actual = await page.evaluate(() => {
-    const elements = document.querySelectorAll('rich-text');
+  const actual = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
+    const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
       const vEditor = el.vEditor;
       if (!vEditor) {
@@ -279,7 +281,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
       });
       return result;
     });
-  });
+  }, getCurrentEditorIndex());
   expect(actual).toEqual(resultObj);
 }
 
@@ -383,15 +385,16 @@ export async function assertBlockProps(
 }
 
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
-  const actual = await page.evaluate(() => {
-    const elements = document.querySelectorAll('[data-block-id]');
+  const actual = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
+    const elements = editor?.querySelectorAll('[data-block-id]');
     return (
       Array.from(elements)
         .slice(2)
         // @ts-ignore
         .map(el => el.model.type)
     );
-  });
+  }, getCurrentEditorIndex());
   expect(actual).toEqual(blockTypes);
 }
 
@@ -686,7 +689,8 @@ export async function assertEdgelessFrameBackground(
   frameId: string,
   color: CssVariableName
 ) {
-  const backgroundColor = await page
+  const editor = getEditorLocator(page);
+  const backgroundColor = await editor
     .locator(`affine-frame[data-block-id="${frameId}"]`)
     .evaluate(ele => {
       const frameWrapper = ele.closest<HTMLDivElement>(
