@@ -73,6 +73,10 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       this._vEditor.setReadonly(!this.editing);
       this._vEditor.setText(this.select.value);
     }
+
+    if (changedProperties.has('select')) {
+      this._vEditor.setText(this.select.value);
+    }
   }
 
   getSelectionValue() {
@@ -121,6 +125,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
+    console.log(this.select);
     const style = styleMap({
       backgroundColor: this.select.color,
     });
