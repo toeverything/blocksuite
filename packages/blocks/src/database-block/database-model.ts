@@ -22,6 +22,16 @@ type SerializedCells = {
   };
 };
 
+type KanbanColumnChildren = { id: string; text: string };
+export type KanbanColumn = {
+  index: number;
+  title: {
+    text: string;
+    color?: string;
+  };
+  children: KanbanColumnChildren[];
+};
+
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
   override onCreated() {
     super.onCreated();
@@ -221,6 +231,71 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         };
       });
     });
+  }
+
+  private readonly _kanbanEmptyColumnTitle = 'No Status';
+  private readonly _kanbanEmptyColumn: KanbanColumn = {
+    index: 0,
+    title: {
+      text: this._kanbanEmptyColumnTitle,
+    },
+    children: [],
+  };
+
+  getKanbanCategories(): KanbanColumn[] {
+    const firstSelectColumn = this.columns.find(
+      column => column.type === 'select'
+    );
+    const firstSelectColumnId = firstSelectColumn?.id;
+    if (!firstSelectColumnId) {
+      return [
+        {
+          ...this._kanbanEmptyColumn,
+          children: this.children.map((child, index) => ({
+            index,
+            id: child.id,
+            text: child.text?.toString() ?? '',
+          })),
+        },
+      ];
+    }
+
+    const selectMap: Record<string, KanbanColumn['children']> = {};
+    this.children.forEach(child => {
+      const cell = this.getCell(child.id, firstSelectColumnId);
+      let key = this._kanbanEmptyColumnTitle;
+      if (cell) {
+        const values = cell.value as SelectTag[];
+        key = values[0].value;
+      }
+
+      const current = selectMap[key] ?? [];
+      selectMap[key] = [
+        ...current,
+        {
+          id: child.id,
+          text: child.text?.toString() ?? '',
+        },
+      ];
+    });
+
+    const selections = firstSelectColumn.selection as SelectTag[];
+    const currentKanbanList = selections.map((selection, index) => ({
+      index: index + 1,
+      title: {
+        text: selection.value,
+        color: selection.color,
+      },
+      children: selectMap[selection.value] ?? [],
+    }));
+
+    return [
+      {
+        ...this._kanbanEmptyColumn,
+        children: selectMap[this._kanbanEmptyColumnTitle] ?? [],
+      },
+      ...currentKanbanList,
+    ];
   }
 }
 
