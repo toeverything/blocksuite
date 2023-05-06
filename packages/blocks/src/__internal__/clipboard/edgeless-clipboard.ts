@@ -20,6 +20,7 @@ import { deleteModelsByRange } from '../../page-block/utils/container-operations
 import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/std.js';
 import type { Clipboard } from './type.js';
@@ -57,6 +58,9 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _onCut = (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
     this._onCopy(e);
 
@@ -79,6 +83,9 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onCopy = (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
     const selection = this._edgeless.getSelection().blockSelectionState;
     // when frame active, handle copy like page mode
@@ -103,6 +110,9 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onPaste = async (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
     const selection = this._edgeless.getSelection().blockSelectionState;
     if (selection.active) {

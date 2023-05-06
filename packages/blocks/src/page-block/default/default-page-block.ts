@@ -119,7 +119,7 @@ export class DefaultPageBlockComponent
 
   flavour = 'affine:page' as const;
 
-  clipboard = new PageClipboard();
+  clipboard = new PageClipboard(this);
 
   selection!: DefaultSelectionManager;
 
