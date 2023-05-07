@@ -35,9 +35,6 @@ export class ColumnContainer extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property()
-  index!: number;
-
-  @property()
   column!: KanbanColumn;
 
   protected override render() {

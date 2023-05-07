@@ -62,10 +62,9 @@ export class DatabaseKanban
       <div class="affine-database-kanban-content">
         ${repeat(
           columns,
-          column => column.index,
-          (column, index) => {
+          column => column.id,
+          column => {
             return html`<affine-database-kanban-column-container
-              .index=${index}
               .column=${column}
             ></affine-database-kanban-column-container>`;
           }

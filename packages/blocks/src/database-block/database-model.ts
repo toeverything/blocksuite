@@ -1,4 +1,4 @@
-import { Text } from '@blocksuite/store';
+import { nanoid, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
@@ -24,7 +24,7 @@ type SerializedCells = {
 
 type KanbanColumnChildren = { id: string; text: string };
 export type KanbanColumn = {
-  index: number;
+  id: string;
   title: {
     text: string;
     color?: string;
@@ -235,7 +235,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   private readonly _kanbanEmptyColumnTitle = 'No Status';
   private readonly _kanbanEmptyColumn: KanbanColumn = {
-    index: 0,
+    id: nanoid(),
     title: {
       text: this._kanbanEmptyColumnTitle,
     },
@@ -251,8 +251,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       return [
         {
           ...this._kanbanEmptyColumn,
-          children: this.children.map((child, index) => ({
-            index,
+          children: this.children.map(child => ({
             id: child.id,
             text: child.text?.toString() ?? '',
           })),
@@ -280,8 +279,8 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
 
     const selections = firstSelectColumn.selection as SelectTag[];
-    const currentKanbanList = selections.map((selection, index) => ({
-      index: index + 1,
+    const currentKanbanList = selections.map(selection => ({
+      id: selection.id,
       title: {
         text: selection.value,
         color: selection.color,
