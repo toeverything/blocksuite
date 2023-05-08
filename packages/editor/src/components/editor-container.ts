@@ -89,6 +89,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    activeEditorManager.setIfNoActive(this);
 
     const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
@@ -161,13 +162,13 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    activeEditorManager.clearActive();
     this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
-    activeEditorManager.setIfNoActive(this);
     if (this.mode === 'page') {
       setTimeout(() => {
         const defaultPage = this.querySelector('affine-default-page');
