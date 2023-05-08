@@ -183,3 +183,11 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
     : T extends keyof HTMLElementEventMap
     ? HTMLElementEventDetail<T>
     : never;
+
+export type AbstractEditor = {
+  page: Page;
+  mode: 'page' | 'edgeless';
+  mouseMode: MouseMode;
+  showGrid: boolean;
+  slots: CommonSlots;
+} & HTMLElement;

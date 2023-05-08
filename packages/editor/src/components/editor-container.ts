@@ -1,4 +1,5 @@
 import {
+  type AbstractEditor,
   activeEditorManager,
   type CommonSlots,
   type DefaultPageBlockComponent,
@@ -32,12 +33,15 @@ function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
 }
 
 @customElement('editor-container')
-export class EditorContainer extends WithDisposable(ShadowlessElement) {
+export class EditorContainer
+  extends WithDisposable(ShadowlessElement)
+  implements AbstractEditor
+{
   @property()
   page!: Page;
 
   @property()
-  mode?: 'page' | 'edgeless' = 'page';
+  mode: 'page' | 'edgeless' = 'page';
 
   @property()
   override autofocus = false;

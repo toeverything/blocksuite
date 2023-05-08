@@ -7,9 +7,10 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { Loader } from '../../components/loader.js';
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
+import {
+  type AbstractEditor,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
 } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
@@ -190,7 +191,12 @@ export function getEdgelessPage(page: Page) {
   return pageComponent;
 }
 
-export function getEditorContainer(page: Page) {
+/**
+ * This function exposes higher levels of abstraction.
+ *
+ * PLEASE USE IT WITH CAUTION!
+ */
+export function getEditorContainer(page: Page): AbstractEditor {
   assertExists(
     page.root,
     'Failed to check page mode! Page root is not exists!'
@@ -199,7 +205,7 @@ export function getEditorContainer(page: Page) {
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
   assertExists(editorContainer);
-  return editorContainer;
+  return editorContainer as AbstractEditor;
 }
 
 export function getEditorContainerByElement(ele: Element) {
@@ -214,7 +220,7 @@ export function isPageMode(page: Page) {
   if (!('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
-  const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
+  const mode = editor.mode;
   return mode === 'page';
 }
 
