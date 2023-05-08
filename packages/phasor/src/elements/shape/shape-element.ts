@@ -1,24 +1,18 @@
 import { StrokeStyle } from '../../consts.js';
-import { simplePick } from '../../utils/std.js';
-import { deserializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
-import type { SerializedShapeProps, ShapeProps, ShapeType } from './types.js';
+import type { SerializedShapeProps, ShapeType } from './types.js';
+import { validateShapeProps } from './utils.js';
 
 export class ShapeElement extends BaseElement {
   type = 'shape' as const;
-  shapeType: ShapeType;
+  shapeType: ShapeType = 'rect';
   radius = 0;
   filled = false;
   fillColor = '#ffffff';
   strokeWidth = 4;
   strokeColor = '#000000';
   strokeStyle: StrokeStyle = StrokeStyle.Solid;
-
-  constructor(id: string, shapeType: ShapeType) {
-    super(id);
-    this.shapeType = shapeType;
-  }
 
   get realStrokeColor() {
     return this.transformPropertyValue(this.strokeColor);
@@ -57,32 +51,25 @@ export class ShapeElement extends BaseElement {
   }
 
   static deserialize(data: Record<string, unknown>): ShapeElement {
-    const shapeType = data.shapeType as ShapeType;
-    const element = new ShapeElement(data.id as string, shapeType);
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-
-    const props = ShapeElement.getProps(element, data);
-    ShapeElement.updateProps(element, props);
-
+    if (!validateShapeProps(data)) {
+      throw new Error('Invalid shape props');
+    }
+    const element = new ShapeElement(data.id);
+    ShapeElement.applySerializedProps(element, data);
     return element;
   }
 
-  static updateProps(element: ShapeElement, props: ShapeProps) {
-    Object.assign(element, props);
+  static override applySerializedProps(
+    element: ShapeElement,
+    props: Partial<SerializedShapeProps>
+  ) {
+    super.applySerializedProps(element, props);
   }
 
-  static override getProps(_: BaseElement, rawProps: ShapeProps): ShapeProps {
-    return simplePick(rawProps, [
-      'shapeType',
-      'index',
-      'radius',
-      'filled',
-      'fillColor',
-      'strokeColor',
-      'strokeWidth',
-      'strokeStyle',
-    ]);
+  static override getUpdatedSerializedProps(
+    element: ShapeElement,
+    props: Partial<SerializedShapeProps>
+  ) {
+    return props;
   }
 }

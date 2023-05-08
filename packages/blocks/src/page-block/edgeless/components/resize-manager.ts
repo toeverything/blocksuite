@@ -1,4 +1,4 @@
-import type { Bound } from '@blocksuite/phasor';
+import { Bound } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 
 import { HandleDirection } from './resize-handles.js';
@@ -132,7 +132,7 @@ export class HandleResizeManager {
         const shapeW = newCommonBound.w * (oldSelectableW / oldCommonW);
         const shapeH = newCommonBound.h * (oldSelectableH / oldCommonH);
 
-        newBounds.set(id, { x: shapeX, y: shapeY, w: shapeW, h: shapeH });
+        newBounds.set(id, new Bound(shapeX, shapeY, shapeW, shapeH));
       });
       this._onResizeMove(newBounds);
     };

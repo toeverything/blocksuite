@@ -6,7 +6,6 @@ import type {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
@@ -94,27 +93,17 @@ function capPointerdown(
       );
     }
 
-    const bound = getBrushBoundFromPoints(
-      routes.map(r => [r.x, r.y]),
-      0
-    );
-    const controllers = routes.map(v => {
-      return {
-        ...v,
-        x: v.x - bound.x,
-        y: v.y - bound.y,
-      };
-    });
-
     if (position === 'start') {
-      surface.updateConnectorElement(element.id, bound, controllers, {
+      surface.updateElement(element.id, {
+        controllers: routes,
         startElement:
           picked && attachedPointPosition
             ? { id: picked.id, position: attachedPointPosition }
             : undefined,
       });
     } else {
-      surface.updateConnectorElement(element.id, bound, controllers, {
+      surface.updateElement(element.id, {
+        controllers: routes,
         endElement:
           picked && attachedPointPosition
             ? { id: picked.id, position: attachedPointPosition }
@@ -218,19 +207,9 @@ function centerControllerPointerdown(
       absoluteControllers[position + 1] = newPoint1;
     }
 
-    const bound = getBrushBoundFromPoints(
-      absoluteControllers.map(r => [r.x, r.y]),
-      0
-    );
-
-    const newControllers = simplifyPath(
-      absoluteControllers.map(c => ({
-        ...c,
-        x: c.x - bound.x,
-        y: c.y - bound.y,
-      }))
-    );
-    surface.updateConnectorElement(element.id, bound, newControllers);
+    surface.updateElement(element.id, {
+      controllers: simplifyPath(absoluteControllers),
+    });
 
     requestUpdate();
   };

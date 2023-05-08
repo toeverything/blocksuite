@@ -5,15 +5,13 @@ export type SerializedBrushProps = {
   xywh: string;
 
   // [[x0,y0],[x1,y1]...]
-  points: string;
+  points: number[][];
 
   color: string;
   lineWidth: number;
 };
 
-type BrushPropsKeys = keyof Omit<
+export type CreateBrushProps = Omit<
   SerializedBrushProps,
-  'id' | 'type' | 'xywh' | 'points'
+  'id' | 'index' | 'xywh' | 'type'
 >;
-
-export type BrushProps = Partial<Pick<SerializedBrushProps, BrushPropsKeys>>;
