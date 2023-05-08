@@ -1,5 +1,4 @@
-import type { IBound } from '../consts.js';
-import { serializeXYWH } from '../utils/xywh.js';
+import { deserializeXYWH, serializeXYWH } from '../utils/xywh.js';
 
 export interface SurfaceElement {
   id: string;
@@ -52,22 +51,22 @@ export abstract class BaseElement implements SurfaceElement {
 
   abstract serialize(): Record<string, unknown>;
 
-  /**
-   * Different elements could hold different bound-related props.
-   * On updating element bound, instead of directly mutating element instance,
-   * we need to get these props and set them into Yjs.
-   * Then the change will be computed as YEvent, from which we can mutate the element.
-   */
-  static getBoundProps(_: BaseElement, bound: IBound): Record<string, string> {
-    return {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-    };
+  static applySerializedProps(element: object, props: Record<string, unknown>) {
+    Object.assign(element, { ...props });
+
+    const { xywh } = props;
+    if (xywh) {
+      const [x, y, w, h] = deserializeXYWH(xywh as string);
+      Object.assign(element, { x, y, w, h });
+    }
   }
 
-  static getProps(
-    _: BaseElement,
-    rawProps: Record<string, unknown>
-  ): Record<string, unknown> {
-    return rawProps;
+  static getUpdatedSerializedProps(
+    element: object,
+    props: Record<string, unknown>
+  ) {
+    const updated = { ...props };
+
+    return updated;
   }
 }
