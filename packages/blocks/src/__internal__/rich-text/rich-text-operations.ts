@@ -35,7 +35,21 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
     page.captureSync();
     const index = parent.children.findIndex(child => child.id === model.id);
-    const id = page.addBlock('affine:paragraph', {}, parent, index + 1);
+    let newParent: BaseBlockModel = parent;
+    let newBlockIndex = index + 1;
+    if (
+      index === parent.children.length - 1 &&
+      model.text?.yText.length === 0
+    ) {
+      const prevParent = page.getParent(parent);
+      if (!prevParent) return;
+      const prevIndex = prevParent.children.findIndex(
+        child => child.id === parent.id
+      );
+      newParent = prevParent;
+      newBlockIndex = prevIndex + 1;
+    }
+    const id = page.addBlock('affine:paragraph', {}, newParent, newBlockIndex);
     asyncFocusRichText(page, id);
     return;
   }
