@@ -33,7 +33,10 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     return;
   }
   if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
-    // todo: jump into next row
+    page.captureSync();
+    const index = parent.children.findIndex(child => child.id === model.id);
+    const id = page.addBlock('affine:paragraph', {}, parent, index + 1);
+    asyncFocusRichText(page, id);
     return;
   }
   const index = parent.children.indexOf(model);
