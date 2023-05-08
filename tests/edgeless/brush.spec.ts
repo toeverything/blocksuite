@@ -134,7 +134,7 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   await updateExistedBrushElementSize(page, 'thick');
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 110, 110]);
+  await assertEdgelessHoverRect(page, [95, 95, 110, 110]);
 
   // change to thin
   await page.mouse.click(110, 110);

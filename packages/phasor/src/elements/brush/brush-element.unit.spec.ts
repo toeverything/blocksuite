@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { Bound } from '../../utils/bound.js';
 import { BrushElement } from './brush-element.js';
 
 const data = {
@@ -7,11 +8,9 @@ const data = {
   color: '#000000',
   lineWidth: 4,
   xywh: '[0,0,104,104]',
-  points: JSON.stringify(
-    Array(100)
-      .fill(0)
-      .map((_, index) => [index, index])
-  ),
+  points: Array(100)
+    .fill(0)
+    .map((_, index) => [index + 2, index + 2]),
 };
 
 describe('brush element', () => {
@@ -41,19 +40,16 @@ describe('brush element', () => {
 
   it('transform', () => {
     const element = BrushElement.deserialize(data);
-    const props = BrushElement.getBoundProps(element, {
-      x: 0,
-      y: 0,
-      w: 204,
-      h: 204,
+    const props = BrushElement.getUpdatedSerializedProps(element, {
+      xywh: new Bound(0, 0, 204, 204).serialize(),
     });
     expect(props.xywh).toBe('[0,0,204,204]');
-    const points = JSON.parse(props.points).map(([x, y]: [number, number]) => [
+    const points = (props?.points || []).map(([x, y]: number[]) => [
       Math.round(x * 100) / 100,
       Math.round(y * 100) / 100,
     ]);
     expect(points).toMatchObject(
-      JSON.parse(data.points).map(([x, y]: [number, number]) => [x * 2, y * 2])
+      data.points.map(([x, y]: number[]) => [(x - 2) * 2 + 2, (y - 2) * 2 + 2])
     );
   });
 });

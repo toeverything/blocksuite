@@ -19,6 +19,11 @@ export type SerializedShapeProps = {
   strokeStyle: StrokeStyle;
 };
 
+export type CreateShapeProps = Omit<
+  SerializedShapeProps,
+  'id' | 'index' | 'type'
+>;
+
 type ShapeKeys = keyof Omit<SerializedShapeProps, 'id' | 'type' | 'xywh'>;
 
 export type ShapeProps = Partial<Pick<SerializedShapeProps, ShapeKeys>>;
