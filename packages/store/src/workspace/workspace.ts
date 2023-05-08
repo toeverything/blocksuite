@@ -119,9 +119,6 @@ export class Workspace {
       search: new SearchIndexer(this.doc),
       backlink: backlinkIndexer,
     };
-    backlinkIndexer.slots.indexUpdated.on(e => {
-      normalizeSubpage(e, this, backlinkIndexer);
-    });
 
     // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
