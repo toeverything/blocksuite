@@ -31,10 +31,7 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
-import { initPageContentByParam } from '../main';
-import { initParam } from '../utils';
 import { createViewer } from './doc-inspector';
 
 const basePath = import.meta.env.DEV
@@ -98,7 +95,6 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.page;
   }
 
-  private _pageList = new Set<string>(['page0']);
   override createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     this._setThemeMode(this._dark && matchMedia.matches);
@@ -214,25 +210,6 @@ export class DebugMenu extends ShadowlessElement {
     this.requestUpdate();
   }
 
-  private _setPage(id: string) {
-    const page = this.workspace.getPage(id);
-    if (page) {
-      this.editor.page = page;
-    }
-  }
-  private async _addPage() {
-    const id = prompt('please input page id');
-    if (initParam && id) {
-      await initPageContentByParam(this.workspace, initParam, id);
-      const page = this.workspace.getPage(id);
-      if (page) {
-        this.editor.page = page;
-        this.requestUpdate();
-        this.editor.requestUpdate();
-      }
-    }
-  }
-
   private async _inspect() {
     await createViewer(this.workspace.doc.toJSON());
   }
@@ -273,11 +250,11 @@ export class DebugMenu extends ShadowlessElement {
   };
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(page => {
-      this._pageList.add(page);
+    this.workspace.slots.pageAdded.on(() => {
+      this._showTabMenu = true;
     });
-    this.workspace.slots.pageRemoved.on(page => {
-      this._pageList.delete(page);
+    this.workspace.slots.pageRemoved.on(() => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
@@ -389,26 +366,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-          <!-- page select -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
-            <sl-button size="small" slot="trigger" caret>
-              ${this.page.id}
-            </sl-button>
-            <sl-menu>
-              ${repeat(
-                [...this._pageList],
-                id => html`
-                  <sl-menu-item @click=${() => this._setPage(id)}>
-                    ${id}
-                  </sl-menu-item>
-                `
-              )}
-              <sl-divider></sl-divider>
-              <sl-menu-item @click=${() => this._addPage()}>
-                Add New Page
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
           <!-- block type -->
           <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
@@ -524,11 +481,6 @@ export class DebugMenu extends ShadowlessElement {
                 Toggle CSS Debug Menu
               </sl-menu-item>
               <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
-              <sl-menu-item
-                @click=${() => (this._showTabMenu = !this._showTabMenu)}
-              >
-                Toggle Tab Menu
-              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -557,6 +509,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon
                 name=${this._dark ? 'moon' : 'brightness-high'}
               ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Add new page" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Add New Page"
+              @click=${() => createPage(this.workspace)}
+            >
+              <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -611,65 +573,57 @@ function getTabGroupTemplate({
     tabGroup.show(pageId);
   });
 
-  return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
-      <sl-button
-        size="small"
-        content="Add New Page"
-        @click=${() => createPage(workspace)}
-      >
-        <sl-icon name="file-earmark-plus"></sl-icon>
-      </sl-button>
-    </sl-tooltip>
-    <sl-tab-group
-      class="tabs-closable"
-      style="display: flex; overflow: hidden;"
-      @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
-        const otherPage = workspace.getPage(e.detail.name);
-        if (!otherPage) throw new Error('page not found');
-        editor.page = otherPage;
-      }}
-    >
-      ${pageList.map(
-        page =>
-          html`<sl-tab
-            slot="nav"
-            panel="${page.id}"
-            ?active=${page.id === editor.page.id}
-            ?closable=${pageList.length > 1}
-            @sl-close=${(e: CustomEvent) => {
-              const tab = e.target;
-              // Show other tab if the tab is currently active
-              if (tab && (tab as SlTab).active) {
-                const tabGroup =
-                  document.querySelector<SlTabGroup>('.tabs-closable');
-                if (!tabGroup) throw new Error('tab group not found');
-                const otherPage = pageList.find(
-                  metaPage => page.id !== metaPage.id
-                );
-                if (!otherPage) throw new Error('no other page found');
-                tabGroup.show(otherPage.id);
-              }
-              workspace.removePage(page.id);
-            }}
-          >
+  return html`<sl-tab-group
+    class="tabs-closable"
+    style="display: flex; overflow: hidden;"
+    @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+      const otherPage = workspace.getPage(e.detail.name);
+      if (!otherPage) throw new Error('page not found');
+      editor.page = otherPage;
+    }}
+  >
+    ${pageList.map(
+      page =>
+        html`<sl-tab
+          slot="nav"
+          panel="${page.id}"
+          ?active=${page.id === editor.page.id}
+          ?closable=${pageList.length > 1}
+          @sl-close=${(e: CustomEvent) => {
+            const tab = e.target;
+            // Show other tab if the tab is currently active
+            if (tab && (tab as SlTab).active) {
+              const tabGroup =
+                document.querySelector<SlTabGroup>('.tabs-closable');
+              if (!tabGroup) throw new Error('tab group not found');
+              const otherPage = pageList.find(
+                metaPage => page.id !== metaPage.id
+              );
+              if (!otherPage) throw new Error('no other page found');
+              tabGroup.show(otherPage.id);
+            }
+            workspace.removePage(page.id);
+          }}
+        >
+          <div>
+            <div>${page.title || 'Untitled'}</div>
+            <!-- TODO deprecated subpage -->
             <div>
-              <div>${page.title || 'Untitled'}</div>
-              <div>
-                ${page.subpageIds
-                  .map(
-                    pageId =>
-                      (
-                        pageList.find(meta => meta.id === pageId) ?? {
-                          title: 'Page Not Found',
-                        }
-                      ).title || 'Untitled'
-                  )
-                  .join(',')}
-              </div>
+              ${page.subpageIds
+                .map(
+                  pageId =>
+                    (
+                      pageList.find(meta => meta.id === pageId) ?? {
+                        title: 'Page Not Found',
+                      }
+                    ).title || 'Untitled'
+                )
+                .join(',')}
             </div>
-          </sl-tab>`
-      )}
-    </sl-tab-group>`;
+          </div>
+        </sl-tab>`
+    )}
+  </sl-tab-group>`;
 }
 
 declare global {
