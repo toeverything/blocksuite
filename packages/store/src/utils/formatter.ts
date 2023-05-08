@@ -16,7 +16,6 @@ function initCustomFormatter() {
   ) {
     return;
   }
-  console.log('initCustomFormatter!');
 
   const bannerStyle = {
     style:
