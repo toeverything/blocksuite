@@ -5,10 +5,12 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { Loader } from '../../components/loader.js';
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
+import {
+  type AbstractEditor,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
 } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
@@ -189,7 +191,12 @@ export function getEdgelessPage(page: Page) {
   return pageComponent;
 }
 
-export function getEditorContainer(page: Page) {
+/**
+ * This function exposes higher levels of abstraction.
+ *
+ * PLEASE USE IT WITH CAUTION!
+ */
+export function getEditorContainer(page: Page): AbstractEditor {
   assertExists(
     page.root,
     'Failed to check page mode! Page root is not exists!'
@@ -197,6 +204,13 @@ export function getEditorContainer(page: Page) {
   const pageBlock = getBlockElementById(page.root.id);
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer as AbstractEditor;
+}
+
+export function getEditorContainerByElement(ele: Element) {
+  // EditorContainer
+  const editorContainer = ele.closest('editor-container');
   assertExists(editorContainer);
   return editorContainer;
 }
@@ -206,7 +220,7 @@ export function isPageMode(page: Page) {
   if (!('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
-  const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
+  const mode = editor.mode;
   return mode === 'page';
 }
 
@@ -243,7 +257,8 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return null;
@@ -259,7 +274,8 @@ export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const page = document.querySelector<
+  const editor = activeEditorManager.getActiveEditor();
+  const page = (editor ?? document).querySelector<
     DefaultPageBlockComponent | EdgelessPageBlockComponent
   >(`[${ATTR}="${model.page.root.id}"]`);
   if (!page) return Promise.resolve(null);
@@ -472,7 +488,10 @@ export function isInsideRichText(element: unknown): element is RichText {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const titleElement = document.querySelector('[data-block-is-title="true"]');
+  const editor = activeEditorManager.getActiveEditor();
+  const titleElement = (editor ?? document).querySelector(
+    '[data-block-is-title="true"]'
+  );
   if (!titleElement) return false;
 
   return titleElement.contains(element as Node);
@@ -594,7 +613,7 @@ function isEmbed({ tagName }: Element) {
  * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
-  return tagName === 'AFFINE-DATABASE';
+  return tagName === 'AFFINE-DATABASE-TABLE';
 }
 
 /**
@@ -772,7 +791,10 @@ export function getBlockElementsByElement(
  */
 export function getBlockElementById(
   id: string,
-  parent: BlockComponentElement | Document | Element = document
+  parent:
+    | BlockComponentElement
+    | Document
+    | Element = activeEditorManager.getActiveEditor() ?? document
 ) {
   return parent.querySelector(`[${ATTR}="${id}"]`);
 }

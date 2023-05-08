@@ -223,7 +223,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         key: 'ArrowDown',
         shiftKey: false,
         handler(range, context) {
-          return handleKeyDown(context.event, this.vEditor.rootElement);
+          return handleKeyDown(block, context.event, this.vEditor.rootElement);
         },
       },
       left: {

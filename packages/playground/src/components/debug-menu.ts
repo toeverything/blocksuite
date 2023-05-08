@@ -16,13 +16,14 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
+  activeEditorManager,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
@@ -165,8 +166,14 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    this.mode = mode;
+    const editor = activeEditorManager.getActiveEditor();
+    if (editor instanceof EditorContainer) {
+      const mode = editor.mode === 'page' ? 'edgeless' : 'page';
+      editor.mode = mode;
+    } else {
+      const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+      this.mode = mode;
+    }
   }
 
   private _switchOffsetMode() {

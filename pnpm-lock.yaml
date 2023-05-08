@@ -193,6 +193,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@toeverything/theme':
+        specifier: 0.5.7
+        version: 0.5.7
       lit:
         specifier: ^2.7.3
         version: 2.7.3
@@ -1456,6 +1459,10 @@ packages:
 
   /@tabler/icons@2.12.0:
     resolution: {integrity: sha512-PiYD2zUOewNAtfJKU9tBZfyv3NeFlTlUe5LSGTTplvBcM0iuHrNVnd30+HIcUGJQhi3Uf0Ng9FRi/kPqm/q6ZA==}
+    dev: false
+
+  /@toeverything/theme@0.5.7:
+    resolution: {integrity: sha512-uukhC5w7x7GcmBb0xZHp3g+aPYILceEdvOwMPzHvsLHpCeG/EyiHKLnccc3b02mLGiYRvIyO2XOg5Hawz4DRtA==}
     dev: false
 
   /@toeverything/y-indexeddb@0.5.4-canary.21(yjs@13.6.0):

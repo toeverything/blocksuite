@@ -1,8 +1,11 @@
-import { type IBound, StrokeStyle } from '../../consts.js';
+import { StrokeStyle } from '../../consts.js';
+import {
+  Bound,
+  inflateBound,
+  transformPointsToNewBound,
+} from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
 import { isPointIn } from '../../utils/hit-utils.js';
-import { simplePick } from '../../utils/std.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
 import { BaseElement, type HitTestOptions } from '../base-element.js';
 import { drawArrow } from './draw-arrow.js';
 import { drawOrthogonal } from './draw-orthogonal.js';
@@ -13,6 +16,7 @@ import type {
   SerializedConnectorProps,
 } from './types.js';
 import { ConnectorMode } from './types.js';
+import { getConnectorPointsBound, validateConnectorProps } from './utils.js';
 
 export class ConnectorElement extends BaseElement {
   type = 'connector' as const;
@@ -34,8 +38,6 @@ export class ConnectorElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
-
     const path = new Path2D();
     if (this.mode === ConnectorMode.Orthogonal) {
       drawOrthogonal(path, this.controllers);
@@ -74,74 +76,78 @@ export class ConnectorElement extends BaseElement {
       startElement: this.startElement,
       endElement: this.endElement,
 
-      controllers: JSON.stringify(this.controllers),
+      controllers: this.controllers,
     };
   }
 
   static deserialize(data: Record<string, unknown>): ConnectorElement {
+    if (!validateConnectorProps(data)) {
+      throw new Error('Invalid connector props');
+    }
     const element = new ConnectorElement(data.id as string);
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-
-    const { controllers, startElement, endElement, mode, color } =
-      ConnectorElement.getProps(element, data) as SerializedConnectorProps;
-    ConnectorElement.updateProps(element, {
-      controllers: controllers?.length ? JSON.parse(controllers) : [],
-      startElement,
-      endElement,
-      mode,
-      color,
-    });
-
+    ConnectorElement.applySerializedProps(element, data);
     return element;
   }
 
-  static updateProps(
+  static override getUpdatedSerializedProps(
     element: ConnectorElement,
-    props: Record<string, unknown>
+    props: Partial<SerializedConnectorProps>
   ) {
-    Object.assign(element, props);
+    const updated = { ...props };
+
+    const { controllers, xywh } = props;
+    if (controllers?.length) {
+      const lineWidth = props.lineWidth ?? element.lineWidth;
+      const bound = getConnectorPointsBound(controllers);
+      const boundWidthLineWidth = inflateBound(bound, lineWidth);
+      const relativeControllers = controllers.map(c => {
+        return {
+          ...c,
+          x: c.x - boundWidthLineWidth.x,
+          y: c.y - boundWidthLineWidth.y,
+        };
+      });
+      updated.controllers = relativeControllers;
+      updated.xywh = boundWidthLineWidth.serialize();
+    }
+
+    if (xywh) {
+      const { lineWidth } = element;
+      const bound = Bound.deserialize(xywh);
+      const transformed = transformPointsToNewBound(
+        element.controllers,
+        element,
+        lineWidth / 2,
+        bound,
+        lineWidth / 2
+      );
+
+      updated.controllers = transformed.points;
+      updated.xywh = transformed.bound.serialize();
+    }
+
+    if (props.lineWidth && props.lineWidth !== element.lineWidth) {
+      const bound = updated.xywh ? Bound.deserialize(updated.xywh) : element;
+      const controllers = updated.controllers ?? element.controllers;
+      const transformed = transformPointsToNewBound(
+        controllers,
+        bound,
+        element.lineWidth / 2,
+        inflateBound(bound, props.lineWidth - element.lineWidth),
+        props.lineWidth / 2
+      );
+
+      updated.controllers = transformed.points;
+      updated.xywh = transformed.bound.serialize();
+    }
+
+    return updated;
   }
 
-  static override getProps(
-    element: BaseElement,
-    rawProps: Record<string, unknown>
+  static override applySerializedProps(
+    element: ConnectorElement,
+    props: Partial<SerializedConnectorProps>
   ) {
-    const props = simplePick(rawProps, [
-      'index',
-      'mode',
-      'color',
-      'lineWidth',
-      'strokeStyle',
-      'xywh',
-      'controllers',
-      'startElement',
-      'endElement',
-    ]);
-
-    return props;
-  }
-
-  static override getBoundProps(
-    element: BaseElement,
-    bound: IBound
-  ): Record<string, string> {
-    const elementH = Math.max(element.h, 1);
-    const elementW = Math.max(element.w, 1);
-    const boundH = Math.max(bound.h, 1);
-    const boundW = Math.max(bound.w, 1);
-    const controllers = (element as ConnectorElement).controllers.map(v => {
-      return {
-        ...v,
-        x: boundW * (v.x / elementW),
-        y: boundH * (v.y / elementH),
-      };
-    });
-
-    return {
-      xywh: serializeXYWH(bound.x, bound.y, boundW, boundH),
-      controllers: JSON.stringify(controllers),
-    };
+    super.applySerializedProps(element, props);
   }
 }

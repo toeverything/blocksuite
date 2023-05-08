@@ -1,4 +1,6 @@
 import {
+  type AbstractEditor,
+  activeEditorManager,
   type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -31,12 +33,15 @@ function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
 }
 
 @customElement('editor-container')
-export class EditorContainer extends WithDisposable(ShadowlessElement) {
+export class EditorContainer
+  extends WithDisposable(ShadowlessElement)
+  implements AbstractEditor
+{
   @property()
   page!: Page;
 
   @property()
-  mode?: 'page' | 'edgeless' = 'page';
+  mode: 'page' | 'edgeless' = 'page';
 
   @property()
   override autofocus = false;
@@ -88,6 +93,7 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    activeEditorManager.setIfNoActive(this);
 
     const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
@@ -160,13 +166,13 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    activeEditorManager.clearActive();
     this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
-
     if (this.mode === 'page') {
       setTimeout(() => {
         const defaultPage = this.querySelector('affine-default-page');

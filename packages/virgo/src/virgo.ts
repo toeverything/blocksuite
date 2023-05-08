@@ -36,6 +36,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
+  private readonly _isActive: () => boolean;
   private _rootElement: VirgoElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
@@ -62,7 +63,6 @@ export class VEditor<
     rangeUpdated: Slot<Range>;
     scrollUpdated: Slot<number>;
   };
-
   get yText() {
     return this._yText;
   }
@@ -113,8 +113,12 @@ export class VEditor<
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
-
-  constructor(yText: VEditor['yText']) {
+  constructor(
+    yText: VEditor['yText'],
+    ops?: {
+      active?: () => boolean;
+    }
+  ) {
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
@@ -126,7 +130,7 @@ export class VEditor<
     }
 
     this._yText = yText;
-
+    this._isActive = ops?.active ?? (() => true);
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
@@ -185,7 +189,6 @@ export class VEditor<
 
   getTextPoint(rangeIndex: VRange['index']): TextPoint {
     assertExists(this._rootElement);
-
     const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
 
     let index = 0;
@@ -239,6 +242,10 @@ export class VEditor<
 
   get isReadonly() {
     return this._isReadonly;
+  }
+
+  get isActive() {
+    return this._isActive();
   }
 
   /**

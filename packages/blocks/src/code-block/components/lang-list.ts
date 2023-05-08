@@ -2,7 +2,11 @@ import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
+import {
+  createEvent,
+  isFuzzyMatch,
+  ShadowlessElement,
+} from '../../__internal__/index.js';
 import { codeLanguages } from '../utils/code-languages.js';
 
 // TODO extract to a common list component
@@ -14,17 +18,16 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-background-primary-color);
-        border-radius: 10px;
+        background: var(--affine-white);
+        border-radius: 12px;
         top: 24px;
         z-index: 1;
       }
 
       .lang-list-container {
-        box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-          -4px -4px 13px rgba(58, 76, 92, 0.02),
-          6px 6px 36px rgba(58, 76, 92, 0.06);
-        border-radius: 0 10px 10px 10px;
+        box-shadow: var(--affine-menu-shadow);
+        border-radius: 8px;
+        padding: 12px 8px;
       }
 
       .lang-list-button-container {
@@ -64,7 +67,7 @@ export class LangList extends ShadowlessElement {
         height: 32px;
         width: 192px;
         border: 1px solid var(--affine-border-color);
-        border-radius: 10px;
+        border-radius: 8px;
         padding-left: 44px;
         padding-top: 4px;
 
@@ -72,7 +75,7 @@ export class LangList extends ShadowlessElement {
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
-        background: transparent;
+        background: var(--affine-white);
       }
 
       #filter-input:focus {
@@ -99,7 +102,7 @@ export class LangList extends ShadowlessElement {
   private _filterText = '';
 
   @state()
-  private _currentSelectedIndex = -1;
+  private _currentSelectedIndex = 0;
 
   @property()
   selectedLanguage = '';
@@ -147,20 +150,24 @@ export class LangList extends ShadowlessElement {
       if (!this._filterText) {
         return true;
       }
-      return language.toLowerCase().startsWith(this._filterText.toLowerCase());
+      return isFuzzyMatch(
+        language.toLowerCase(),
+        this._filterText.toLowerCase()
+      );
     });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (this._currentSelectedIndex >= filteredLanguages.length - 1) return;
-
-        this._currentSelectedIndex++;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + 1) % filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (this._currentSelectedIndex <= -1) return;
-
-        this._currentSelectedIndex--;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + filteredLanguages.length - 1) %
+          filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (
@@ -183,7 +190,7 @@ export class LangList extends ShadowlessElement {
             placeholder="Search"
             @input="${() => {
               this._filterText = this.filterInput?.value;
-              this._currentSelectedIndex = -1;
+              this._currentSelectedIndex = 0;
             }}"
             @keydown="${onLanguageSelect}"
           />

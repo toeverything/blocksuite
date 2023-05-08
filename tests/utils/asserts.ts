@@ -35,8 +35,10 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getCurrentEditorIndex,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
+  getEditorLocator,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './virgo.js';
@@ -91,7 +93,8 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const vEditor = page.locator('[data-block-is-title="true"]');
+  const editor = getEditorLocator(page);
+  const vEditor = editor.locator('[data-block-is-title="true"]').first();
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
 }
@@ -107,15 +110,16 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(() => {
+  const actualTexts = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
     const richTexts = Array.from(
-      document.querySelectorAll<RichText>('rich-text')
+      editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
       const editor = richText.vEditor;
       return editor.yText.toString();
     });
-  });
+  }, getCurrentEditorIndex());
   expect(actualTexts).toEqual(texts);
 }
 
@@ -192,12 +196,13 @@ export async function assertSelection(
   rangeLength = 0
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+    ([richTextIndex, index]) => {
+      const editor = document.querySelectorAll('editor-container')[index];
+      const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
       const vEditor = richText.vEditor;
       return vEditor?.getVRange();
     },
-    { richTextIndex }
+    [richTextIndex, getCurrentEditorIndex()]
   );
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
@@ -262,8 +267,9 @@ export async function assertTypeFormat(page: Page, type: string) {
 }
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
-  const actual = await page.evaluate(() => {
-    const elements = document.querySelectorAll('rich-text');
+  const actual = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
+    const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
       const vEditor = el.vEditor;
       if (!vEditor) {
@@ -276,7 +282,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
       });
       return result;
     });
-  });
+  }, getCurrentEditorIndex());
   expect(actual).toEqual(resultObj);
 }
 
@@ -380,15 +386,16 @@ export async function assertBlockProps(
 }
 
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
-  const actual = await page.evaluate(() => {
-    const elements = document.querySelectorAll('[data-block-id]');
+  const actual = await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
+    const elements = editor?.querySelectorAll('[data-block-id]');
     return (
       Array.from(elements)
         .slice(2)
         // @ts-ignore
         .map(el => el.model.type)
     );
-  });
+  }, getCurrentEditorIndex());
   expect(actual).toEqual(blockTypes);
 }
 
@@ -651,8 +658,8 @@ export function assertRectEqual(a: Rect, b: Rect) {
 
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
-
-  const selectedRect = page
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
     .locator('edgeless-selected-rect')
     .locator('.affine-edgeless-selected-rect');
   const box = await selectedRect.boundingBox();
@@ -683,7 +690,8 @@ export async function assertEdgelessFrameBackground(
   frameId: string,
   color: CssVariableName
 ) {
-  const backgroundColor = await page
+  const editor = getEditorLocator(page);
+  const backgroundColor = await editor
     .locator(`affine-frame[data-block-id="${frameId}"]`)
     .evaluate(ele => {
       const frameWrapper = ele.closest<HTMLDivElement>(

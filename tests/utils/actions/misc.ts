@@ -71,41 +71,46 @@ function generateRandomRoomId() {
 async function initEmptyEditor(
   page: Page,
   flags: Partial<BlockSuiteFlags> = {},
-  noInit = false
+  noInit = false,
+  multiEditor = false
 ) {
   await page.evaluate(
-    ([flags, noInit]) => {
+    ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
-
-        const editor = document.createElement('editor-container');
-        editor.page = page;
-        editor.autofocus = true;
-        editor.slots.pageLinkClicked.on(({ pageId }) => {
-          const newPage = workspace.getPage(pageId);
-          if (!newPage) {
-            throw new Error(`Failed to jump to page ${pageId}`);
-          }
-          editor.page = newPage;
-        });
-
-        const debugMenu = document.createElement('debug-menu');
-        debugMenu.workspace = workspace;
-        debugMenu.editor = editor;
-
         // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
         const appRoot = document.querySelector('#app');
         if (!appRoot) {
           throw new Error('Cannot find app root element(#app).');
         }
-        appRoot.appendChild(editor);
+        const createEditor = () => {
+          const editor = document.createElement('editor-container');
+          editor.page = page;
+          editor.autofocus = true;
+          editor.slots.pageLinkClicked.on(({ pageId }) => {
+            const newPage = workspace.getPage(pageId);
+            if (!newPage) {
+              throw new Error(`Failed to jump to page ${pageId}`);
+            }
+            editor.page = newPage;
+          });
+          appRoot.appendChild(editor);
+          editor.createBlockHub().then(blockHub => {
+            document.body.appendChild(blockHub);
+          });
+          return editor;
+        };
+        const editor = createEditor();
+        if (multiEditor) {
+          createEditor();
+        }
+        const debugMenu = document.createElement('debug-menu');
+        debugMenu.workspace = workspace;
+        debugMenu.editor = editor;
         document.body.appendChild(debugMenu);
-        editor.createBlockHub().then(blockHub => {
-          document.body.appendChild(blockHub);
-        });
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
@@ -126,19 +131,36 @@ async function initEmptyEditor(
         initPage(page);
       }
     },
-    [flags, noInit] as const
+    [flags, noInit, multiEditor] as const
   );
   await waitNextFrame(page);
 }
-
+let multiEditor = false;
+export const setMultiEditor = (me: boolean) => {
+  multiEditor = me;
+};
+let currentEditorIndex = 0;
+export const setCurrentEditor = (n: number) => {
+  currentEditorIndex = n;
+};
+export const getCurrentEditorIndex = () => {
+  return currentEditorIndex;
+};
+export const getEditorLocator = (page: Page) => {
+  return page.locator('editor-container').nth(currentEditorIndex);
+};
 export async function enterPlaygroundRoom(
   page: Page,
-  flags?: Partial<BlockSuiteFlags>,
-  room?: string,
-  blobStorage?: ('memory' | 'indexeddb' | 'mock')[],
-  noInit?: boolean
+  ops?: {
+    flags?: Partial<BlockSuiteFlags>;
+    room?: string;
+    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    noInit?: boolean;
+  }
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
+  let room = ops?.room;
+  const blobStorage = ops?.blobStorage;
   if (!room) {
     room = generateRandomRoomId();
   }
@@ -157,7 +179,10 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      throw new Error('Unexpected console message: ' + message.text());
+      expect('no console message').toBe(
+        'Unexpected console message: ' + message.text()
+      );
+      // throw new Error('Unexpected console message: ' + message.text());
     }
     if (message.type() === 'warning') {
       console.warn(message.text());
@@ -169,10 +194,10 @@ export async function enterPlaygroundRoom(
 
   // Log all uncaught errors
   page.on('pageerror', exception => {
-    throw new Error(`Uncaught exception: "${exception}"`);
+    throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, flags, noInit);
+  await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
   await readyPromise;
   return room;
 }
@@ -358,11 +383,12 @@ export async function initEmptyDatabaseWithParagraphState(
 }
 
 export async function initDatabaseRow(page: Page) {
-  const footer = page.locator('.affine-database-block-footer');
+  const editor = getEditorLocator(page);
+  const footer = editor.locator('.affine-database-block-footer');
   const box = await footer.boundingBox();
   if (!box) throw new Error('Missing database footer rect');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  const columnAddBtn = page.locator(
+  const columnAddBtn = editor.locator(
     '[data-test-id="affine-database-add-row-button"]'
   );
   await columnAddBtn.click();
@@ -421,19 +447,32 @@ export async function initEmptyCodeBlockState(page: Page) {
   return ids;
 }
 
-export async function focusRichText(page: Page, i = 0) {
+type FocusRichTextOptions = {
+  clickPosition?: { x: number; y: number };
+};
+
+export async function focusRichText(
+  page: Page,
+  i = 0,
+  options?: FocusRichTextOptions
+) {
   await page.mouse.move(0, 0);
-  const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
+  const editor = getEditorLocator(page);
+  const locator = editor.locator(RICH_TEXT_SELECTOR).nth(i);
   // need to set `force` to true when clicking on `affine-selected-blocks`
-  await locator.click({ force: true });
+  await locator.click({ force: true, position: options?.clickPosition });
 }
 
 export async function focusRichTextEnd(page: Page, i = 0) {
-  await page.evaluate(i => {
-    const richTexts = Array.from(document.querySelectorAll('rich-text'));
+  await page.evaluate(
+    ([i, editorIndex]) => {
+      const editor = document.querySelectorAll('editor-container')[i];
+      const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
-    richTexts[i].vEditor?.focusEnd();
-  }, i);
+      richTexts[i].vEditor?.focusEnd();
+    },
+    [i, currentEditorIndex]
+  );
   await waitNextFrame(page);
 }
 
@@ -747,14 +786,23 @@ export function virgoEditorInnerTextToString(innerText: string): string {
 }
 
 export async function focusTitle(page: Page) {
-  await page.evaluate(() => {
-    const defaultPageComponent = document.querySelector('affine-default-page');
+  // click to ensure editor is active
+  await page.mouse.move(0, 0);
+  const editor = getEditorLocator(page);
+  const locator = editor.locator('affine-default-page').first();
+  // need to set `force` to true when clicking on `affine-selected-blocks`
+  await locator.click({ force: true });
+  // avoid trigger double click
+  await page.waitForTimeout(500);
+  await page.evaluate(i => {
+    const defaultPageComponent = document.querySelectorAll(
+      'affine-default-page'
+    )[i];
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
-
     defaultPageComponent.titleVEditor.focusEnd();
-  });
+  }, currentEditorIndex);
   await waitNextFrame(page);
 }
 
@@ -824,12 +872,12 @@ export async function initImageState(page: Page) {
 }
 
 export async function getCurrentEditorPageId(page: Page) {
-  return await page.evaluate(() => {
-    const editor = document.querySelector('editor-container');
+  return await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
     if (!editor) throw new Error("Can't find editor-container");
     const pageId = editor.page.id;
     return pageId;
-  });
+  }, getCurrentEditorIndex());
 }
 
 export async function getCurrentHTMLTheme(page: Page) {
@@ -838,10 +886,13 @@ export async function getCurrentHTMLTheme(page: Page) {
 }
 
 export async function getCurrentEditorTheme(page: Page) {
-  const mode = await page.locator('editor-container').evaluate(ele => {
-    return (ele as unknown as Element & { themeObserver: ThemeObserver })
-      .themeObserver.cssVariables?.['--affine-theme-mode'];
-  });
+  const mode = await page
+    .locator('editor-container')
+    .first()
+    .evaluate(ele => {
+      return (ele as unknown as Element & { themeObserver: ThemeObserver })
+        .themeObserver.cssVariables?.['--affine-theme-mode'];
+    });
   return mode;
 }
 

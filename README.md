@@ -53,7 +53,7 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.htm
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📄 [Documentation](https://blocksuite.affine.pro/introduction.html)
-- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/22)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
@@ -66,7 +66,7 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
 
 ## Current Status (`@blocksuite/editor`)
 
-> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10).
+> For more detailed planning and recent progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/22).
 
 - Basic text editing
   - ✅ Paragraph with inline style

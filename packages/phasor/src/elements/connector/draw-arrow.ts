@@ -1,21 +1,14 @@
+import { getArrowPoints } from './utils.js';
+
 export function drawArrow(
   path: Path2D,
-  [startX, startY]: number[],
-  [endX, endY]: number[],
-  arrowSize = 100
+  start: number[],
+  end: number[],
+  arrowSize = 10
 ) {
-  const dx = endX - startX;
-  const dy = endY - startY;
-  const angle = Math.atan2(dy, dx);
-  const headLength = Math.sqrt(arrowSize);
+  const { sides } = getArrowPoints(start, end, arrowSize);
 
-  path.moveTo(
-    endX - headLength * Math.cos(angle - Math.PI / 4),
-    endY - headLength * Math.sin(angle - Math.PI / 4)
-  );
-  path.lineTo(endX, endY);
-  path.lineTo(
-    endX - headLength * Math.cos(angle + Math.PI / 4),
-    endY - headLength * Math.sin(angle + Math.PI / 4)
-  );
+  path.moveTo(sides[0][0], sides[0][1]);
+  path.lineTo(end[0], end[1]);
+  path.lineTo(sides[1][0], sides[1][1]);
 }

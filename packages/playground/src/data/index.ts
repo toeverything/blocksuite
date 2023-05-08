@@ -7,13 +7,15 @@
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  type SelectTag,
 } from '@blocksuite/blocks';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import type { Workspace } from '@blocksuite/store';
+import { EditorContainer } from '@blocksuite/editor';
+import { nanoid, type Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
+import { createEditor } from '../utils';
 import { addShapeElement } from './utils';
-
 export interface InitFn {
   (workspace: Workspace, pageId: string): void;
   id: string;
@@ -136,10 +138,10 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
 
-  const selection = [
-    { value: 'Done', color: 'var(--affine-tag-white)' },
-    { value: 'TODO', color: 'var(--affine-tag-pink)' },
-    { value: 'WIP', color: 'var(--affine-tag-blue)' },
+  const selection: SelectTag[] = [
+    { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
+    { id: nanoid(), value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { id: nanoid(), value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
   // Add database block inside frame block
   const databaseId = page.addBlock(
@@ -219,3 +221,64 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
 database.id = 'database';
 database.displayName = 'Database Example';
 database.description = 'Database block basic example';
+
+export const multiEditor: InitFn = (workspace: Workspace, pageId: string) => {
+  const page = workspace.createPage({ id: pageId });
+
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text(),
+  });
+
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Add paragraph block inside frame block
+  page.addBlock('affine:paragraph', {}, frameId);
+  page.resetHistory();
+
+  const app = document.getElementById('app');
+  if (app) {
+    createEditor(page, app);
+    app.style.display = 'flex';
+    app.childNodes.forEach(node => {
+      if (node instanceof EditorContainer) {
+        node.style.flex = '1';
+      }
+    });
+  }
+};
+
+multiEditor.id = 'multiple-editor';
+multiEditor.displayName = 'Multiple Editor Example';
+multiEditor.description = 'Multiple Editor basic example';
+
+export const multiEditorVertical: InitFn = (
+  workspace: Workspace,
+  pageId: string
+) => {
+  const page = workspace.createPage({ id: pageId });
+
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text(),
+  });
+
+  page.addBlock('affine:surface', {}, null);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Add paragraph block inside frame block
+  page.addBlock('affine:paragraph', {}, frameId);
+  page.resetHistory();
+
+  const app = document.getElementById('app');
+  if (app) {
+    createEditor(page, app);
+  }
+};
+
+multiEditorVertical.id = 'multiple-editor-vertical';
+multiEditorVertical.displayName = 'Vertical Multiple Editor Example';
+multiEditorVertical.description = 'Multiple Editor vertical layout example';

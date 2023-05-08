@@ -6,6 +6,7 @@
  */
 export * from './block-range.js';
 export * from './common-operations.js';
+export * from './drag-and-drop.js';
 export * from './filesys.js';
 export * from './gesture/index.js';
 export * from './hotkey.js';

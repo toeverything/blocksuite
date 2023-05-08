@@ -11,8 +11,6 @@ export const globalCSS = css`
 
     --affine-popover-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
       0px 3px 16px -6px rgba(24, 39, 75, 0.04);
-    --affine-modal-shadow: 0px 4px 24px #161616;
-    --affine-tooltip-shadow: 0px 0px 4px rgba(0, 0, 0, 0.14);
     --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
       Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
       Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
@@ -36,7 +34,7 @@ export const globalCSS = css`
     --affine-font-xs: 12px;
     --affine-line-height: calc(1em + 8px);
     --affine-z-index-modal: 1000;
-    --affine-z-index-popover: 100;
+    --affine-z-index-popover: 1000;
     --affine-paragraph-space: 8px;
     --affine-popover-radius: 10px;
     --affine-zoom: 1;

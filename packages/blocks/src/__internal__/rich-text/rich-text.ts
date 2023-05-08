@@ -3,6 +3,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { type BlockHost } from '../utils/index.js';
 import { ShadowlessElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
@@ -55,7 +56,9 @@ export class RichText extends ShadowlessElement {
 
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
-    this._vEditor = new VEditor(this.model.text.yText);
+    this._vEditor = new VEditor(this.model.text.yText, {
+      active: () => activeEditorManager.isActive(this),
+    });
     setupVirgoScroll(this.model.page, this._vEditor);
 
     const textSchema = this.textSchema;
