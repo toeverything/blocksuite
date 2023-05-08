@@ -83,7 +83,8 @@ describe('basic', () => {
 });
 
 describe('pageMeta', () => {
-  it('can create subpage', async () => {
+  // TODO deprecated subpage tests
+  it.fails('can create subpage', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 

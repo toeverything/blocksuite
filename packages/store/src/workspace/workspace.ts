@@ -271,7 +271,7 @@ export class Workspace {
   setPageMeta(
     pageId: string,
     // You should not update subpageIds directly.
-    props: Partial<PageMeta & { subpageIds: never }>
+    props: Partial<PageMeta>
   ) {
     this.meta.setPageMeta(pageId, props);
   }
