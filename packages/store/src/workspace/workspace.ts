@@ -14,7 +14,6 @@ import {
 } from '../store.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
-import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
