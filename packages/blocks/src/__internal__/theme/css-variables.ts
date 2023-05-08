@@ -8,8 +8,12 @@ export const VARIABLES = [
   '--affine-palette-transparent',
 
   '--affine-popover-shadow',
-  '--affine-modal-shadow',
-  '--affine-tooltip-shadow',
+  '--affine-menu-shadow',
+  '--affine-float-button-shadow',
+  '--affine-shadow-1',
+  '--affine-shadow-2',
+  '--affine-shadow-3',
+
   '--affine-font-family',
   '--affine-font-number-family',
   '--affine-font-code-family',

@@ -18,17 +18,16 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-background-primary-color);
-        border-radius: 10px;
+        background: var(--affine-white);
+        border-radius: 12px;
         top: 24px;
         z-index: 1;
       }
 
       .lang-list-container {
-        box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-          -4px -4px 13px rgba(58, 76, 92, 0.02),
-          6px 6px 36px rgba(58, 76, 92, 0.06);
-        border-radius: 0 10px 10px 10px;
+        box-shadow: var(--affine-menu-shadow);
+        border-radius: 8px;
+        padding: 12px 8px;
       }
 
       .lang-list-button-container {
@@ -68,7 +67,7 @@ export class LangList extends ShadowlessElement {
         height: 32px;
         width: 192px;
         border: 1px solid var(--affine-border-color);
-        border-radius: 10px;
+        border-radius: 8px;
         padding-left: 44px;
         padding-top: 4px;
 
@@ -76,7 +75,7 @@ export class LangList extends ShadowlessElement {
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
-        background: transparent;
+        background: var(--affine-white);
       }
 
       #filter-input:focus {

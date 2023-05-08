@@ -55,13 +55,12 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .embed-editing-state {
-      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.8),
-        0 3px 16px -6px rgba(24, 39, 75, 0.4);
+      box-shadow: var(--affine-menu-shadow);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-white-90);
+      background-color: var(--affine-white);
       margin: 0;
     }
 

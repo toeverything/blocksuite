@@ -56,8 +56,8 @@ const styles = css`
     display: flex;
     flex-direction: column;
     padding: 8px 4px;
-    background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
+    background: var(--affine-white);
+    box-shadow: var(--affine-menu-shadow);
     border-radius: 12px;
     transform: translateY(100%);
     z-index: 1;

@@ -56,8 +56,8 @@ const styles = css`
     fill: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
-    border-radius: 10px;
+    box-shadow: var(--affine-menu-shadow);
+    border-radius: 8px;
   }
 
   .affine-block-hub-container[type='text'] {
@@ -88,9 +88,9 @@ const styles = css`
     align-items: center;
     width: 250px;
     height: 54px;
-    background: var(--affine-white-90);
-    box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
-    border-radius: 10px;
+    background: var(--affine-white-80);
+    box-shadow: var(--affine-shadow-1);
+    border-radius: 8px;
     margin-bottom: 12px;
     cursor: grab;
     top: 0;
@@ -120,8 +120,7 @@ const styles = css`
   .card-container-inner:hover .card-container.grabbing {
     top: unset;
     left: unset;
-    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-      0 0 12px rgba(66, 65, 73, 0.08);
+    box-shadow: var(--affine-shadow-2);
   }
 
   .card-description-container {
@@ -169,11 +168,11 @@ const styles = css`
     position: fixed;
     width: 44px;
     background: var(--affine-background-primary-color);
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .block-hub-menu-container[expanded] {
-    box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-background-overlay-panel-color);
   }
 
@@ -183,8 +182,8 @@ const styles = css`
     align-items: center;
     margin-bottom: 8px;
     position: relative;
-    border-radius: 5px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 4px;
+    fill: var(--affine-icon-color);
     height: 36px;
   }
 
@@ -194,7 +193,7 @@ const styles = css`
 
   .block-hub-icon-container:hover {
     background: var(--affine-hover-color);
-    border-radius: 5px;
+    border-radius: 4px;
   }
 
   .new-icon {
@@ -204,17 +203,20 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 8px;
+    fill: var(--affine-icon-color);
   }
 
+  .new-icon-in-edgeless {
+    box-shadow: var(--affine-menu-shadow);
+  }
   .block-hub-menu-container[expanded] .new-icon {
-    border-radius: 5px;
+    border-radius: 4px;
+    box-shadow: unset;
   }
 
   .new-icon:hover {
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-white);
     fill: var(--affine-primary-color);
   }
@@ -226,8 +228,6 @@ const styles = css`
 
   .icon-expanded:hover {
     background: var(--affine-hover-color);
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   }
 
   .divider {

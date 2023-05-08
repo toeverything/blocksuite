@@ -141,9 +141,8 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .code-block-option {
-      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0 3px 16px -6px rgba(24, 39, 75, 0.04);
-      border-radius: 10px;
+      box-shadow: var(--affine-menu-shadow);
+      border-radius: 8px;
       list-style: none;
       padding: 4px;
       width: 40px;
