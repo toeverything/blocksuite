@@ -161,7 +161,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
       this._ySpace.set('versions', versions);
       return;
     } else {
-      console.error('Workspace versions already set.');
+      console.error(`Workspace versions already set.`);
     }
   }
 

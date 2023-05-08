@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
+import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
@@ -15,7 +16,10 @@ import {
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
-
+  _ele: Element;
+  constructor(pageEle: Element) {
+    this._ele = pageEle;
+  }
   init(page: Page) {
     this._page = page;
     document.body.addEventListener('cut', this._onCut);
@@ -30,6 +34,9 @@ export class PageClipboard implements Clipboard {
   }
 
   private _onPaste = async (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._ele)) {
+      return;
+    }
     const range = getCurrentBlockRange(this._page);
     if (!e.clipboardData || !range) {
       return;
@@ -59,6 +66,9 @@ export class PageClipboard implements Clipboard {
     e: ClipboardEvent,
     range = getCurrentBlockRange(this._page)
   ) => {
+    if (!activeEditorManager.isActive(this._ele)) {
+      return;
+    }
     if (!range) {
       return;
     }
@@ -71,6 +81,9 @@ export class PageClipboard implements Clipboard {
   };
 
   private _onCut = (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._ele)) {
+      return;
+    }
     const range = getCurrentBlockRange(this._page);
     if (!range) {
       return;

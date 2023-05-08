@@ -179,7 +179,10 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      throw new Error('Unexpected console message: ' + message.text());
+      expect('no console message').toBe(
+        'Unexpected console message: ' + message.text()
+      );
+      // throw new Error('Unexpected console message: ' + message.text());
     }
     if (message.type() === 'warning') {
       console.warn(message.text());
@@ -380,11 +383,12 @@ export async function initEmptyDatabaseWithParagraphState(
 }
 
 export async function initDatabaseRow(page: Page) {
-  const footer = page.locator('.affine-database-block-footer');
+  const editor = getEditorLocator(page);
+  const footer = editor.locator('.affine-database-block-footer');
   const box = await footer.boundingBox();
   if (!box) throw new Error('Missing database footer rect');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  const columnAddBtn = page.locator(
+  const columnAddBtn = editor.locator(
     '[data-test-id="affine-database-add-row-button"]'
   );
   await columnAddBtn.click();
@@ -868,12 +872,12 @@ export async function initImageState(page: Page) {
 }
 
 export async function getCurrentEditorPageId(page: Page) {
-  return await page.evaluate(() => {
-    const editor = document.querySelector('editor-container');
+  return await page.evaluate(index => {
+    const editor = document.querySelectorAll('editor-container')[index];
     if (!editor) throw new Error("Can't find editor-container");
     const pageId = editor.page.id;
     return pageId;
-  });
+  }, getCurrentEditorIndex());
 }
 
 export async function getCurrentHTMLTheme(page: Page) {

@@ -7,12 +7,14 @@ import { pressEnter, pressEscape, type } from './keyboard.js';
 import {
   getBoundingBox,
   getBoundingClientRect,
+  getEditorLocator,
   waitNextFrame,
 } from './misc.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
-  const columnAddBtn = page.locator('.header-add-column-button');
+  const editor = getEditorLocator(page);
+  const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
   await waitNextFrame(page);
 
