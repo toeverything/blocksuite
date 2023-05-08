@@ -22,7 +22,11 @@ import {
 } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditingState, Rect } from '../__internal__/index.js';
+import type {
+  AbstractEditor,
+  EditingState,
+  Rect,
+} from '../__internal__/index.js';
 import {
   calcDropTarget,
   type DroppingType,
@@ -501,12 +505,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
-  private _mouseRoot: HTMLElement;
+  private _mouseRoot: AbstractEditor;
 
   static override styles = styles;
 
   constructor(options: {
-    mouseRoot: HTMLElement;
+    mouseRoot: AbstractEditor;
     enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringFrameState: (point: Point) => {
