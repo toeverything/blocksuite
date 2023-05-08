@@ -18,9 +18,9 @@ const paragraphPanelStyle = css`
     padding: 8px 4px;
     overflow-y: auto;
 
-    background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
-    border-radius: 0 10px 10px 10px;
+    background: var(--affine-white);
+    box-shadow: var(--affine-menu-shadow);
+    border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
 `;
@@ -35,16 +35,16 @@ export const formatQuickBarStyle = css`
     gap: 4px;
     height: 40px;
 
-    border-radius: 10px 10px 10px 0;
-    background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
+    border-radius: 8px;
+    background: var(--affine-white);
+    box-shadow: var(--affine-menu-shadow);
     z-index: var(--affine-z-index-popover);
     user-select: none;
   }
 
   .divider {
     width: 1px;
-    height: 100%;
+    height: 24px;
     background-color: var(--affine-border-color);
   }
 
