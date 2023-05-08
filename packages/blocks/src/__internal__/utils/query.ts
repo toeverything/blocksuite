@@ -9,7 +9,6 @@ import { activeEditorManager } from '../../__internal__/utils/active-editor-mana
 import type { Loader } from '../../components/loader.js';
 import {
   type AbstractEditor,
-  clamp,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
 } from '../../index.js';
@@ -664,15 +663,10 @@ export function getClosestBlockElementByPoint(
     container = state.container;
     const rect = state.rect || container?.getBoundingClientRect();
     if (rect) {
-      // point.x = Math.min(
-      //   Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-      //   rect.right - PADDING_LEFT * scale - 1
-      // );
-      point.y = clamp(point.y, rect.top, rect.top + rect.height - 150 - 1);
-      // Math.min(
-      //   Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-      //   rect.right - PADDING_LEFT * scale - 1
-      // );
+      point.x = Math.min(
+        Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+        rect.right - PADDING_LEFT * scale - 1
+      );
     }
   }
 
