@@ -96,10 +96,10 @@ export const createBlockHub: (
         assertExists(targetFrameBlock);
         frameId = targetFrameBlock.model.id;
       } else if (isDefaultPage(pageBlock)) {
-        const children = page.root?.children ?? [];
+        const last = page.root?.lastChild;
         models.forEach(model => {
           // add to last child
-          page.addBlock(model.flavour, model, children[children.length - 1].id);
+          page.addBlock(model.flavour, model, last?.id);
         });
         return;
       } else {

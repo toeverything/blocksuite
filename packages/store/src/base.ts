@@ -158,19 +158,19 @@ export class BaseBlockModel<
   text?: Text;
   sourceId?: string;
 
-  isEmpty() {
+  get isEmpty() {
     return this.children.length === 0;
   }
 
-  firstChild(): BaseBlockModel | null {
+  get firstChild(): BaseBlockModel | null {
     return this.children[0] || null;
   }
 
-  lastChild(): BaseBlockModel | null {
+  get lastChild(): BaseBlockModel | null {
     if (!this.children.length) {
       return this;
     }
-    return this.children[this.children.length - 1].lastChild();
+    return this.children[this.children.length - 1].lastChild;
   }
 
   dispose() {

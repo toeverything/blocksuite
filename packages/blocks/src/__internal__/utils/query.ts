@@ -906,7 +906,7 @@ export function getHoveringFrame(point: Point) {
  * Returns `true` if the database is empty.
  */
 export function isEmptyDatabase(model: BaseBlockModel) {
-  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty;
 }
 
 /**
@@ -967,7 +967,7 @@ export function getDropRectByPoint(
   // Inside the database
   if (tempElement) {
     // If the database is empty
-    if (isDatabase && model.isEmpty()) {
+    if (isDatabase && model.isEmpty) {
       result.flag = DropFlags.EmptyDatabase;
       const table = getDatabaseBlockTableElement(element);
       assertExists(table);
