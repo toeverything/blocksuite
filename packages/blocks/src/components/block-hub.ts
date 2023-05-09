@@ -467,6 +467,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _showTooltip = true;
+  @state()
+  private _inEdgelessMode = false;
 
   @state()
   private _maxHeight = 2000;
@@ -545,7 +547,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
     disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
-
+    disposables.add(
+      this._mouseRoot.slots.pageModeSwitched.on(mode => {
+        this._inEdgelessMode = mode === 'edgeless';
+      })
+    );
     if (isFirefox) {
       disposables.addFromEvent(
         this._mouseRoot,
@@ -855,7 +861,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       >
         ${blockHubMenu}
         <div
-          class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
+          class="has-tool-tip new-icon ${this._inEdgelessMode
+            ? this._expanded
+              ? 'icon-expanded'
+              : 'new-icon-in-edgeless'
+            : ''}"
           role="menuitem"
           style="cursor:pointer;"
         >
