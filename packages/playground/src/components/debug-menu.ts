@@ -250,8 +250,8 @@ export class DebugMenu extends ShadowlessElement {
   };
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(() => {
-      this._showTabMenu = true;
+    this.workspace.slots.pageAdded.on(e => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.workspace.slots.pageRemoved.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
