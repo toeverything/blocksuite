@@ -723,39 +723,51 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect: frameRect,
       scale,
     } = this.getHoveringFrameState(point.clone());
-    let element = null;
-    if (frameRect) {
-      element = getClosestBlockElementByPoint(
-        point,
-        { container, rect: frameRect },
-        scale
-      );
+    if (!frameRect) {
+      this._resetDropState();
+      return;
+    }
+    const element = getClosestBlockElementByPoint(
+      point,
+      { container, rect: frameRect, snapToEdge: { x: false, y: true } },
+      scale
+    );
+    if (!element) {
+      // if (this._mouseRoot.mode === 'page') {
+      //   return;
+      // }
+      this._resetDropState();
+      return;
     }
 
     let type: DroppingType = 'none';
     let rect = null;
     let lastModelState = null;
-    if (element) {
-      const model = getModelByBlockElement(element);
-      const result = calcDropTarget(
-        point,
-        model,
-        element,
-        [],
-        scale,
-        this._lastDraggingFlavour
-      );
+    const model = getModelByBlockElement(element);
+    const result = calcDropTarget(
+      point,
+      model,
+      element,
+      [],
+      scale,
+      this._lastDraggingFlavour
+    );
 
-      if (result) {
-        type = result.type;
-        rect = result.rect;
-        lastModelState = result.modelState;
-      }
+    if (result) {
+      type = result.type;
+      rect = result.rect;
+      lastModelState = result.modelState;
     }
 
-    this._indicator.rect = rect;
     this._lastDroppingType = type;
+    this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
+  };
+
+  private _resetDropState = () => {
+    this._lastDroppingType = 'none';
+    this._indicator.rect = null;
+    this._lastDroppingTarget = null;
   };
 
   private _onDragOver = (e: DragEvent) => {
