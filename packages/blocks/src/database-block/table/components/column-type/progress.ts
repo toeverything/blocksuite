@@ -127,6 +127,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       boundLeft: left,
       containerWidth: visibleWidth,
     };
+    this.databaseModel.page.captureSync();
   };
 
   private _onPointerMove = (event: PointerEvent) => {
@@ -148,12 +149,13 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
     }
 
     if (this.cell?.value !== steps) {
-      this.rowHost.setValue(steps);
+      this.rowHost.setValue(steps, { captureSync: false });
     }
   };
 
   private _onPointerUp = () => {
     this._dragConfig = null;
+    this.databaseModel.page.captureSync();
   };
 
   protected override render() {
