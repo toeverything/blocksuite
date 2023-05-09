@@ -419,8 +419,11 @@ export class EdgelessPageBlockComponent
   }
 
   /** Moves selected blocks into a new frame at the given point. */
-  moveBlocksToNewFrame(blocks: BaseBlockModel[], point: Point, rect?: DOMRect) {
-    this.page.captureSync();
+  moveBlocksToNewFrame(
+    blocks: BaseBlockModel[],
+    point: Point,
+    { rect, focus }: { rect?: DOMRect; focus?: boolean } = {}
+  ) {
     const { left, top, zoom } = this.surface.viewport;
     const width = rect?.width
       ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
@@ -428,11 +431,10 @@ export class EdgelessPageBlockComponent
     point.x -= left;
     point.y -= top;
     const frameId = this.addFrameWithPoint(point, width);
-    this.page.moveBlocks(
-      blocks,
-      this.page.getBlockById(frameId) as FrameBlockModel
-    );
-    this.setSelection(frameId, true, blocks[0].id, point);
+    const frameModel = this.page.getBlockById(frameId) as FrameBlockModel;
+    this.page.moveBlocks(blocks, frameModel);
+
+    focus && this.setSelection(frameId, true, blocks[0].id, point);
   }
 
   /*
