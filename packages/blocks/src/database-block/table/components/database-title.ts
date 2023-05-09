@@ -114,14 +114,14 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   private _onTitleFocus = () => {
     this._titleContainer.classList.remove('ellipsis');
     // console.log(this._titleVInput?.yText.toString());
-    if (this._titleVInput?.yText.toString() === 'Database') {
+    if (this._titleVInput?.value === 'Database') {
       this._titleVInput?.setValue('');
     }
   };
 
   private _onTitleBlur = () => {
     this._titleContainer.classList.add('ellipsis');
-    if (this._titleVInput?.yText.toString() === '') {
+    if (this._titleVInput?.value === '') {
       this._titleVInput?.setValue('Database');
     }
   };
