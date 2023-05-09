@@ -764,12 +764,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._lastDroppingTarget = lastModelState;
   };
 
-  private _resetDropState = () => {
-    this._lastDroppingType = 'none';
-    this._indicator.rect = null;
-    this._lastDroppingTarget = null;
-  };
-
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();
   };
@@ -786,12 +780,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._showTooltip = true;
     this._isGrabbing = false;
     this._lastDraggingFlavour = null;
-    this._lastDroppingType = 'none';
-    this._lastDroppingTarget = null;
+    this._resetDropState();
+  };
 
-    if (this._indicator) {
-      this._indicator.rect = null;
-    }
+  private _resetDropState = () => {
+    this._lastDroppingType = 'none';
+    this._indicator.rect = null;
+    this._lastDroppingTarget = null;
   };
 
   private _onDrop = (e: DragEvent) => {
