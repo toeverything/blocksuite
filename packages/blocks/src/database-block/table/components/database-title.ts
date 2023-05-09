@@ -127,7 +127,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    console.log(1111);
     const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
     return html`<div class="affine-database-title">
       <div
