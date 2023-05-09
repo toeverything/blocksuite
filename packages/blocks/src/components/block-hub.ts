@@ -20,6 +20,7 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
@@ -852,7 +853,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._isGrabbing,
       this._showTooltip
     );
-
+    const classes = classMap({
+      'icon-expanded': this._expanded,
+      'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
+      'has-tool-tip': true,
+      'new-icon': true,
+    });
     return html`
       <div
         class="block-hub-menu-container"
@@ -860,15 +866,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"
       >
         ${blockHubMenu}
-        <div
-          class="has-tool-tip new-icon ${this._inEdgelessMode
-            ? this._expanded
-              ? 'icon-expanded'
-              : 'new-icon-in-edgeless'
-            : ''}"
-          role="menuitem"
-          style="cursor:pointer;"
-        >
+        <div class=${classes} role="menuitem" style="cursor:pointer;">
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
             class=${this._expanded ? 'invisible' : ''}
