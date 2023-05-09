@@ -8,9 +8,9 @@ export const editLinkStyle = css`
     width: 404px;
     height: 112px;
     padding: 12px;
-    box-shadow: var(--affine-popover-shadow);
-    background: var(--affine-background-primary-color);
-    border-radius: 10px;
+    box-shadow: var(--affine-menu-shadow);
+    background: var(--affine-white);
+    border-radius: 8px;
     display: grid;
     grid-template-columns: auto auto auto;
     grid-template-rows: repeat(2, 1fr);
@@ -71,7 +71,7 @@ export const editLinkStyle = css`
   .affine-confirm-button {
     grid-area: btn;
     user-select: none;
-    fill: var(--affine-primary-color);
+    fill: var(--affine-icon-color);
   }
   .affine-confirm-button[disabled],
   .affine-confirm-button:disabled {
@@ -161,12 +161,12 @@ export const linkPopoverStyle = css`
   .affine-link-popover {
     display: flex;
     align-items: center;
-    height: 34px;
+    height: 40px;
     padding: 0 12px;
 
-    background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
-    border-radius: 0 10px 10px 10px;
+    background: var(--affine-white);
+    box-shadow: var(--affine-menu-shadow);
+    border-radius: 8px;
   }
 
   .affine-link-popover-input {

@@ -21,7 +21,6 @@ export const tooltipStyle = css`
     padding: 4px 12px;
     color: var(--affine-white);
     background: var(--affine-tooltip);
-    box-shadow: var(--affine-tooltip-shadow);
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     pointer-events: none;
