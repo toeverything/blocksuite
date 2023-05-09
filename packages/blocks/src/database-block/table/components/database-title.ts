@@ -113,13 +113,21 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   private _onTitleFocus = () => {
     this._titleContainer.classList.remove('ellipsis');
+    // console.log(this._titleVInput?.yText.toString());
+    if (this._titleVInput?.yText.toString() === 'Database') {
+      this._titleVInput?.setValue('');
+    }
   };
 
   private _onTitleBlur = () => {
     this._titleContainer.classList.add('ellipsis');
+    if (this._titleVInput?.yText.toString() === '') {
+      this._titleVInput?.setValue('Database');
+    }
   };
 
   override render() {
+    console.log(1111);
     const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
     return html`<div class="affine-database-title">
       <div
