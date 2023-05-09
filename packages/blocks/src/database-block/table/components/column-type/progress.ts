@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { literal } from 'lit/static-html.js';
 
@@ -86,11 +86,8 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
   @query('.affine-database-progress-bg')
   private _progressBg!: HTMLElement;
 
-  @state()
-  private _positionX = -1;
-
-  private _translateX = 0;
   private _dragConfig: DragConfig | null = null;
+  private _progressBgWidth = 0;
 
   override firstUpdated() {
     const disposables = this._disposables;
@@ -104,12 +101,25 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
     disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
     disposables.addFromEvent(document, 'pointermove', this._onDocumentMove);
 
-    if (this.cell?.value) {
-      const { width } = this._progressBg.getBoundingClientRect();
-      const visibleWidth = width - 6;
-      const x = visibleWidth * (this.cell.value / 100);
-      this._translateX = x;
-      this._dragHandle.style.transform = `translate(${x}, -1px)`;
+    const { width } = this._progressBg.getBoundingClientRect();
+    const visibleWidth = width - 6;
+    this._progressBgWidth = visibleWidth;
+    const value = this.cell?.value;
+    if (value) {
+      this._setDragHandlePosition(value);
+    }
+  }
+
+  private _setDragHandlePosition(value: number) {
+    const x = this._progressBgWidth * (value / 100);
+    this._dragHandle.style.transform = `translate(${x}px, -1px)`;
+  }
+
+  protected override updated(_changedProperties: Map<string, unknown>) {
+    super.updated(_changedProperties);
+
+    if (_changedProperties.has('cell')) {
+      this._setDragHandlePosition(this.cell?.value ?? 0);
     }
   }
 
@@ -139,13 +149,10 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
     let steps: number;
     if (x <= boundLeft) {
       steps = 0;
-      this._positionX = 0;
     } else if (x - boundLeft >= containerWidth) {
       steps = 100;
-      this._positionX = containerWidth;
     } else {
       steps = Math.floor((x - boundLeft) / stepWidth);
-      this._positionX = Math.abs(x - boundLeft);
     }
 
     if (this.cell?.value !== steps) {
@@ -165,12 +172,6 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       width: `${progress}%`,
     });
 
-    const dragStyles = styleMap({
-      transform: `translate(${
-        this._positionX !== -1 ? this._positionX : this._translateX
-      }px, -1px)`,
-    });
-
     return html`<div
       class="affine-database-progress"
       @mousedown=${(e: Event) => e.preventDefault()}
@@ -178,10 +179,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       <div class="affine-database-progress-bar">
         <div class="affine-database-progress-bg">
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
-          <div
-            class="affine-database-progress-drag-handle"
-            style=${dragStyles}
-          ></div>
+          <div class="affine-database-progress-drag-handle"></div>
         </div>
       </div>
       <div class="progress-number progress">${progress}</div>
