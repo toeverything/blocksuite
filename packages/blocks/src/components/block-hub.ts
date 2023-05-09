@@ -20,6 +20,7 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
@@ -467,6 +468,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _showTooltip = true;
+  @state()
+  private _inEdgelessMode = false;
 
   @state()
   private _maxHeight = 2000;
@@ -545,7 +548,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
     disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
-
+    disposables.add(
+      this._mouseRoot.slots.pageModeSwitched.on(mode => {
+        this._inEdgelessMode = mode === 'edgeless';
+      })
+    );
     if (isFirefox) {
       disposables.addFromEvent(
         this._mouseRoot,
@@ -846,7 +853,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._isGrabbing,
       this._showTooltip
     );
-
+    const classes = classMap({
+      'icon-expanded': this._expanded,
+      'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
+      'has-tool-tip': true,
+      'new-icon': true,
+    });
     return html`
       <div
         class="block-hub-menu-container"
@@ -854,11 +866,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"
       >
         ${blockHubMenu}
-        <div
-          class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
-          role="menuitem"
-          style="cursor:pointer;"
-        >
+        <div class=${classes} role="menuitem" style="cursor:pointer;">
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
             class=${this._expanded ? 'invisible' : ''}
