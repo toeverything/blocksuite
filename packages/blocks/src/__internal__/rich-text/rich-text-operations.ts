@@ -38,19 +38,19 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     let newParent: BaseBlockModel = parent;
     let newBlockIndex = index + 1;
 
-    const nextModel = page.getNextSibling(newParent);
-    if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
-      asyncFocusRichText(page, nextModel.id, {
-        index: nextModel.text.yText.length,
-        length: 0,
-      });
-      return;
-    }
-
     if (
       index === parent.children.length - 1 &&
       model.text?.yText.length === 0
     ) {
+      const nextModel = page.getNextSibling(newParent);
+      if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
+        asyncFocusRichText(page, nextModel.id, {
+          index: nextModel.text.yText.length,
+          length: 0,
+        });
+        return;
+      }
+
       const prevParent = page.getParent(parent);
       if (!prevParent) return;
       const prevIndex = prevParent.children.findIndex(
@@ -59,6 +59,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
       newParent = prevParent;
       newBlockIndex = prevIndex + 1;
     }
+
     const id = page.addBlock('affine:paragraph', {}, newParent, newBlockIndex);
     asyncFocusRichText(page, id);
     return;
