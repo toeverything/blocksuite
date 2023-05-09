@@ -8,7 +8,7 @@ import {
 import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { DATABASE_TITLE_LENGTH } from '../consts.js';
+import { DATABASE_TITLE_LENGTH, DEFAULT_TITLE } from '../consts.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -112,19 +112,20 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   private _onTitleFocus = () => {
-    this._titleVInput?.setActive(true);
     this._titleContainer.classList.remove('ellipsis');
-    // console.log(this._titleVInput?.yText.toString());
+
+    this._titleVInput?.setActive(true);
     if (this._titleVInput?.value === 'Database') {
       this._titleVInput?.setValue('');
     }
   };
 
   private _onTitleBlur = () => {
-    this._titleVInput?.setActive(false);
     this._titleContainer.classList.add('ellipsis');
+
+    this._titleVInput?.setActive(false);
     if (this._titleVInput?.value === '') {
-      this._titleVInput?.setValue('Database');
+      this._titleVInput?.setValue(DEFAULT_TITLE);
     }
   };
 
