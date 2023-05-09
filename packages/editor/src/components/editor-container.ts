@@ -1,7 +1,6 @@
 import {
   type AbstractEditor,
   activeEditorManager,
-  type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   type MouseMode,
@@ -24,10 +23,14 @@ import { keyed } from 'lit/directives/keyed.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
+function forwardSlot<T extends Record<string, Slot<any>>>(
+  from: T,
+  to: Partial<T>
+) {
   Object.entries(from).forEach(([key, slot]) => {
-    if (key in to) {
-      slot.pipe(to[key]);
+    const target = to[key];
+    if (target) {
+      slot.pipe(target);
     }
   });
 }
@@ -79,16 +82,9 @@ export class EditorContainer
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
-  slots: CommonSlots = {
+  slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
-    /**
-     * @deprecated
-     */
-    subpageLinked: new Slot(),
-    /**
-     * @deprecated
-     */
-    subpageUnlinked: new Slot(),
+    pageModeSwitched: new Slot(),
   };
 
   override connectedCallback() {
@@ -184,6 +180,10 @@ export class EditorContainer
   }
 
   override updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mode')) {
+      this.slots.pageModeSwitched.emit(this.mode);
+    }
+
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
