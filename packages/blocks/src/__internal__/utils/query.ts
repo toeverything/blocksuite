@@ -6,15 +6,14 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
-import {
-  type AbstractEditor,
-  type DefaultPageBlockComponent,
-  type EdgelessPageBlockComponent,
-} from '../../index.js';
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
+import { clamp } from './std.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -647,6 +646,7 @@ export function getClosestBlockElementByPoint(
   state: {
     rect?: Rect;
     container?: Element;
+    snapToEdge?: { x: boolean; y: boolean };
   } | null = null,
   scale = 1
 ): Element | null {
@@ -660,13 +660,20 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   if (state) {
+    const { snapToEdge = { x: true, y: false } } = state;
     container = state.container;
     const rect = state.rect || container?.getBoundingClientRect();
     if (rect) {
-      point.x = Math.min(
-        Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-        rect.right - PADDING_LEFT * scale - 1
-      );
+      if (snapToEdge.x) {
+        point.x = Math.min(
+          Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+          rect.right - PADDING_LEFT * scale - 1
+        );
+      }
+      if (snapToEdge.y) {
+        // TODO handle scale
+        point.y = clamp(point.y, rect.top + 1, rect.bottom - 1);
+      }
     }
   }
 
