@@ -12,6 +12,8 @@ export class VirgoInput {
 
   vEditor: VEditor;
 
+  private _active = true;
+
   readonly type: 'default' | 'number' = 'default';
   readonly maxLength = Infinity;
 
@@ -60,7 +62,8 @@ export class VirgoInput {
     this.undoManager = new Y.UndoManager(this.yText);
 
     this.vEditor = new VEditor(this.yText, {
-      active: () => activeEditorManager.isActive(options.rootElement),
+      active: () =>
+        activeEditorManager.isActive(options.rootElement) && this.active,
     });
     this.vEditor.mount(rootElement);
     this.vEditor.bindHandlers({
@@ -188,6 +191,14 @@ export class VirgoInput {
 
   get value() {
     return this.yText.toString();
+  }
+
+  get active() {
+    return this._active;
+  }
+
+  setActive(value: boolean) {
+    this._active = value;
   }
 
   setValue(str: string) {
