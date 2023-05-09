@@ -90,6 +90,14 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     deltaLeaf: DeltaOperation
   ) {
     let text = deltaLeaf.insert ?? '';
+    // replace unsafe characters
+    text = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
       return text;
