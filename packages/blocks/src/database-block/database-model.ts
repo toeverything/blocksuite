@@ -228,7 +228,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     mode: 'table',
-    title: internal.Text(),
+    title: internal.Text('Database'),
     cells: {},
     columns: [],
     titleColumnName: 'Title',
