@@ -83,7 +83,7 @@ export function syncBlockProps(
   Object.entries(propSchema).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined) {
       if (value instanceof Text) {
-        yBlock.set(`prop:${key}`, new Y.Text());
+        yBlock.set(`prop:${key}`, value.yText);
       } else if (Array.isArray(value) || isPureObject(value)) {
         yBlock.set(`prop:${key}`, native2Y(value, true));
       } else {

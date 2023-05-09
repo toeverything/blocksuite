@@ -12,6 +12,8 @@ export class VirgoInput {
 
   vEditor: VEditor;
 
+  private _active = true;
+
   readonly type: 'default' | 'number' = 'default';
   readonly maxLength = Infinity;
 
@@ -60,7 +62,8 @@ export class VirgoInput {
     this.undoManager = new Y.UndoManager(this.yText);
 
     this.vEditor = new VEditor(this.yText, {
-      active: () => activeEditorManager.isActive(options.rootElement),
+      active: () =>
+        activeEditorManager.isActive(options.rootElement) && this.active,
     });
     this.vEditor.mount(rootElement);
     this.vEditor.bindHandlers({
@@ -190,6 +193,14 @@ export class VirgoInput {
     return this.yText.toString();
   }
 
+  get active() {
+    return this._active;
+  }
+
+  setActive(value: boolean) {
+    this._active = value;
+  }
+
   setValue(str: string) {
     if (str.length > this.maxLength) {
       throw new Error('The text exceeds the limit length.');
@@ -201,6 +212,10 @@ export class VirgoInput {
 
     this.yText.delete(0, this.yText.length);
     this.yText.insert(0, str);
+    this.vEditor.setVRange({
+      index: str.length,
+      length: 0,
+    });
     this.undoManager.stopCapturing();
   }
 

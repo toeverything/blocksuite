@@ -2,6 +2,7 @@ import { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
+import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column, SelectTag } from './table/types.js';
 import type { DatabaseMode } from './types.js';
 
@@ -228,7 +229,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     mode: 'table',
-    title: internal.Text('Database'),
+    title: internal.Text(DEFAULT_TITLE),
     cells: {},
     columns: [],
     titleColumnName: 'Title',
