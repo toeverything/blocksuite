@@ -91,7 +91,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-code-block-container > .lang-list-wrapper > .lang-button {
-      min-width: 101px;
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 8px;
     }
 
     .affine-code-block-container rich-text {
