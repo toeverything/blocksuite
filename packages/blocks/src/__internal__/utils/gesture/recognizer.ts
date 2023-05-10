@@ -146,8 +146,6 @@ export class Recognizer {
       last: this._lastDragMoveEvent,
     });
 
-    this._dispatchEvent('onPointerUp', selectionEvent);
-
     if (this._dragging) {
       this._dispatchEvent('onDragEnd', selectionEvent);
     } else {
@@ -158,6 +156,8 @@ export class Recognizer {
         this._dispatchEvent('onTripleClick', selectionEvent);
       }
     }
+
+    this._dispatchEvent('onPointerUp', selectionEvent);
 
     this._startX = -Infinity;
     this._startY = -Infinity;
