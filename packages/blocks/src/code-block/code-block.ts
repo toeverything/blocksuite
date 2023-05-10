@@ -363,6 +363,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   private _langListTemplate() {
+    // TODO this is a workaround
     const normalizedLang =
       this.model.language[0].toUpperCase() + this.model.language.slice(1);
     return html`<div

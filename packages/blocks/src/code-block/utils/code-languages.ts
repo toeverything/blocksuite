@@ -28,23 +28,48 @@ const PopularLanguages: Lang[] = [
   // 'fortran',
   // 'classic-visual-basic',
 
-  // other
-
-  // 24
+  // 21-50
+  'sas',
+  // '(Visual) FoxPro',
+  'ada',
   'perl',
   'objective-c',
-  // 28
+  'cobol',
+  'lisp',
   'dart',
   'lua',
-  // 33
+  'julia',
+  // 'transact-SQL',
+  'd',
   'kotlin',
   'logo',
   'scala',
   'haskell',
   'fsharp',
   'scheme',
-  // 40
+  // 'cfml',
   'typescript',
+  'groovy',
+  'abap',
+  'prolog',
+  'plsql',
+  // 'ml',
+  // 'bourne shell',
+  // 'forth',
+  // 'crystal',
+  'bash',
+  'apex',
+  // ⬆️ 50
+
+  // Other
+  'markdown',
+  'json',
+  'html',
+  'css',
+  'diff',
+  'jsx',
+  'tsx',
+  'vue',
 ];
 
 export const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =

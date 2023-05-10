@@ -321,6 +321,10 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
   test('drag blank line to the bottom of editor should insert block', async ({
     page,
   }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/AFFiNE/issues/2125',
+    });
     await enterPlaygroundRoom(page);
     const { frameId } = await initEmptyParagraphState(page);
 
