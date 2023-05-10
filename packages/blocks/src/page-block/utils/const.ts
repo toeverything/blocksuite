@@ -40,7 +40,7 @@ export const actionConfig = [
   },
   {
     id: 'convert-to-database',
-    name: 'To Database',
+    name: 'Group as Database',
     disabledToolTip:
       'Contains Block types that cannot be converted to Database. Learn more',
     icon: DatabaseTableViewIcon,
