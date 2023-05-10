@@ -662,7 +662,7 @@ test('should code block lang input supports alias', async ({ page }) => {
   await expect(codeBlockController.langList).toBeVisible();
   await type(page, '文言');
   await pressEnter(page);
-  await expect(codeBlockController.languageButton).toHaveText('wenyan');
+  await expect(codeBlockController.languageButton).toHaveText('Wenyan');
 });
 
 test('multi-line indent', async ({ page }) => {
