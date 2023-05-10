@@ -44,8 +44,8 @@ export class EdgelessToolbar extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: var(--affine-white);
-      box-shadow: var(--affine-menu-shadow);
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       fill: var(--affine-icon-color);
     }

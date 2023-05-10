@@ -101,7 +101,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
         padding: 4px;
         justify-content: center;
         align-items: center;
-        background: var(--affine-white);
+        background: var(--affine-background-overlay-panel-color);
         box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
         border-radius: 8px;
       }

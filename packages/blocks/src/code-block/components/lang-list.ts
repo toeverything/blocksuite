@@ -18,7 +18,7 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-white);
+        background: var(--affine-background-overlay-panel-color);
         border-radius: 12px;
         top: 24px;
         z-index: 1;
@@ -75,7 +75,7 @@ export class LangList extends ShadowlessElement {
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
-        background: var(--affine-white);
+        background: var(--affine-background-overlay-panel-color);
       }
 
       #filter-input:focus {
