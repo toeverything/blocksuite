@@ -140,9 +140,7 @@ export class DefaultPageBlockComponent
     dragHandle: <DragHandle | null>null,
   };
 
-  mouseRoot: HTMLElement = this.parentElement!;
-  // @property()
-  // mouseRoot!: HTMLElement;
+  mouseRoot!: HTMLElement;
 
   @state()
   private _draggingArea: DOMRect | null = null;

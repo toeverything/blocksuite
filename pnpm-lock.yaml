@@ -15,6 +15,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:packages/global
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:packages/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:packages/store
@@ -126,6 +129,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:../lit
       '@blocksuite/phasor':
         specifier: workspace:*
         version: link:../phasor

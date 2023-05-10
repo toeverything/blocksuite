@@ -3,7 +3,7 @@ import {
   activeEditorManager,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
-  type MouseMode,
+  edgelessPreset,
   type PageBlockModel,
   pagePreset,
   type SurfaceBlockModel,
@@ -18,7 +18,6 @@ import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
@@ -51,14 +50,6 @@ export class EditorContainer
 
   @property()
   override autofocus = false;
-
-  @property()
-  mouseMode: MouseMode = {
-    type: 'default',
-  };
-
-  @property()
-  showGrid = true;
 
   readonly themeObserver = new ThemeObserver();
 
@@ -130,13 +121,13 @@ export class EditorContainer
     }
 
     // connect mouse mode event changes
-    this._disposables.addFromEvent(
-      window,
-      'affine.switch-mouse-mode',
-      ({ detail }) => {
-        this.mouseMode = detail;
-      }
-    );
+    // this._disposables.addFromEvent(
+    //   window,
+    //   'affine.switch-mouse-mode',
+    //   ({ detail }) => {
+    //     this.mouseMode = detail;
+    //   }
+    // );
 
     // subscribe store
     this._disposables.add(
@@ -213,45 +204,12 @@ export class EditorContainer
       this.pageBlockModel.id,
       html`<block-suite-root
         .page=${this.page}
-        .componentMap=${pagePreset}
+        .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
       ></block-suite-root>`
-    );
-
-    const pageContainer = keyed(
-      'page-' + this.pageBlockModel.id,
-      html`
-        <affine-default-page
-          .mouseRoot=${this as HTMLElement}
-          .page=${this.page}
-          .model=${this.pageBlockModel}
-        ></affine-default-page>
-      `
-    );
-
-    const edgelessContainer = keyed(
-      'edgeless-' + this.pageBlockModel.id,
-      html`
-        <affine-edgeless-page
-          .mouseRoot=${this as HTMLElement}
-          .page=${this.page}
-          .model=${this.pageBlockModel}
-          .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
-          .mouseMode=${this.mouseMode}
-          .showGrid=${this.showGrid}
-        ></affine-edgeless-page>
-      `
     );
 
     const remoteSelectionContainer = html`
       <remote-selection .page=${this.page}></remote-selection>
-    `;
-
-    const blockRoot = html`
-      ${choose(this.mode, [
-        ['page', () => pageContainer],
-        ['edgeless', () => edgelessContainer],
-      ])}
-      ${remoteSelectionContainer}
     `;
 
     return html`
@@ -269,7 +227,7 @@ export class EditorContainer
           background: var(--affine-background-primary-color);
         }
       </style>
-      ${rootContainer}
+      ${rootContainer} ${remoteSelectionContainer}
     `;
   }
 }

@@ -52,6 +52,7 @@
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@commitlint/cli": "^17.4.4",

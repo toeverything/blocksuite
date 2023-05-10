@@ -29,12 +29,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this._renderModel(root);
+    return this.renderModel(root);
   }
 
-  private _renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel): TemplateResult => {
     const { flavour, id, children } = model;
-    // console.log('---render model----', flavour, id);
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
@@ -65,7 +64,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this._renderModel(child)
+        child => this.renderModel(child)
       )}`}
     ></${tag}>`;
   };
