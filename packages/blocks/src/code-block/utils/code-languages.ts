@@ -1,214 +1,79 @@
-import type { Lang } from 'shiki';
+import type { ILanguageRegistration, Lang } from 'shiki';
+import { BUNDLED_LANGUAGES } from 'shiki';
 
-export const codeLanguages: Lang[] = [
-  'abap',
-  'actionscript-3',
-  'ada',
-  'apache',
-  'apex',
-  'apl',
-  'applescript',
-  'ara',
-  'asm',
-  'astro',
-  'awk',
-  'ballerina',
-  'bat',
-  'batch',
-  'berry',
-  'be',
-  'bibtex',
-  'bicep',
-  'blade',
-  'c',
-  'cadence',
-  'cdc',
-  'clarity',
-  'clojure',
-  'cmake',
-  'cobol',
-  'codeql',
-  'ql',
-  'coffee',
-  'cpp',
-  'crystal',
-  'csharp',
-  'css',
-  'cue',
-  'd',
-  'dart',
-  'dax',
-  'diff',
-  'docker',
-  'dream-maker',
-  'elixir',
-  'elm',
-  'erb',
-  'erlang',
-  'fish',
-  'fsharp',
-  'gherkin',
-  'git-commit',
-  'git-rebase',
-  'glsl',
-  'gnuplot',
-  'go',
-  'graphql',
-  'groovy',
-  'hack',
-  'haml',
-  'handlebars',
-  'haskell',
-  'hcl',
-  'hlsl',
-  'html',
-  'http',
-  'imba',
-  'ini',
-  'properties',
-  'java',
-  'javascript',
-  'jinja-html',
-  'jison',
-  'json',
-  'json5',
-  'jsonc',
-  'jsonnet',
-  'jssm',
-  'fsl',
-  'jsx',
-  'julia',
-  'kotlin',
-  'latex',
-  'less',
-  'liquid',
-  'lisp',
-  'logo',
-  'lua',
-  'makefile',
-  'markdown',
-  'marko',
-  'matlab',
-  'mdx',
-  'mermaid',
-  'nginx',
-  'nim',
-  'nix',
-  'objective-c',
-  'objective-cpp',
-  'ocaml',
-  'pascal',
-  'perl',
-  'php',
-  'plsql',
-  'postcss',
-  'powerquery',
-  'powershell',
-  'prisma',
-  'prolog',
-  'proto',
-  'pug',
-  'jade',
-  'puppet',
-  'purescript',
+import { PLAIN_TEXT_REGISTRATION } from './consts.js';
+
+// TIOBE Index for May 2023
+// ref https://www.tiobe.com/tiobe-index/
+const PopularLanguages: Lang[] = [
+  // 1-20
   'python',
-  'r',
-  'raku',
-  'perl6',
-  'razor',
-  'rel',
-  'riscv',
-  'rst',
-  'ruby',
-  'rust',
-  'sas',
-  'sass',
-  'scala',
-  'scheme',
-  'scss',
-  'shaderlab',
-  'shader',
-  'shellscript',
-  'bash',
-  'console',
-  'shell',
-  'zsh',
-  'smalltalk',
-  'solidity',
-  'sparql',
-  'sql',
-  'ssh-config',
-  'stata',
-  'stylus',
-  'svelte',
-  'swift',
-  'system-verilog',
-  'tasl',
-  'tcl',
-  'tex',
-  'toml',
-  'tsx',
-  'turtle',
-  'twig',
-  'typescript',
-  'v',
+  'c',
+  'java',
+  'cpp',
+  'csharp',
   'vb',
-  'cmd',
-  'verilog',
-  'vhdl',
-  'viml',
-  'vim',
-  'vimscript',
-  'vue-html',
-  'vue',
-  'wasm',
-  'wenyan',
-  '文言',
-  'wgsl',
-  'xml',
-  'xsl',
-  'yaml',
-  'zenscript',
+  'javascript',
+  'php',
+  'sql',
+  'asm',
+  'pascal',
+  'go',
+  // 'scratch',
+  'swift',
+  'matlab',
+  'r',
+  'rust',
+  'ruby',
+  // 'fortran',
+  // 'classic-visual-basic',
+
+  // other
+
+  // 24
+  'perl',
+  'objective-c',
+  // 28
+  'dart',
+  'lua',
+  // 33
+  'kotlin',
+  'logo',
+  'scala',
+  'haskell',
+  'fsharp',
+  'scheme',
+  // 40
+  'typescript',
 ];
 
-const languagesWithShortName: Record<string, string> = {
-  clj: 'clojure',
+export const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =
+  PopularLanguages.reduce((acc, lang, i) => {
+    return {
+      [lang]: i,
+      ...acc,
+    };
+  }, {});
 
-  'c#': 'csharp',
-  cs: 'csharp',
+function isPlaintext(lang: string) {
+  return [
+    PLAIN_TEXT_REGISTRATION.id,
+    ...PLAIN_TEXT_REGISTRATION.aliases,
+  ].includes(lang.toLowerCase());
+}
 
-  erl: 'erlang',
-
-  'f#': 'fsharp',
-  fs: 'fsharp',
-
-  hbs: 'handlebars',
-  hs: 'haskell',
-  js: 'JavaScript',
-  make: 'makefile',
-  md: 'markdown',
-  objc: 'objectivec',
-
-  ps: 'powershell',
-  ps1: 'powershell',
-
-  py: 'Python',
-  rb: 'ruby',
-  rs: 'Rust',
-  sh: 'shell',
-  styl: 'stylus',
-  ts: 'TypeScript',
-  yml: 'yaml',
-};
-
-export const getCodeLanguage = (languageName: string) => {
-  const language = codeLanguages.find(codeLanguage => {
-    return codeLanguage.toLowerCase() === languageName.toLowerCase();
-  });
-
-  if (language) {
-    return language;
+export const getStandardLanguage = (
+  languageName: string | null
+): ILanguageRegistration | null => {
+  if (!languageName) return null;
+  if (isPlaintext(languageName)) {
+    return null;
   }
 
-  return languagesWithShortName[languageName];
+  const language = BUNDLED_LANGUAGES.find(
+    codeLanguage =>
+      codeLanguage.id.toLowerCase() === languageName.toLowerCase() ||
+      codeLanguage.aliases?.includes(languageName.toLowerCase())
+  );
+  return language ?? null;
 };
