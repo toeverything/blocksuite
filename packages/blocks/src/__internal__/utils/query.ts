@@ -129,7 +129,13 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+    if (
+      matchFlavours(parentBlock, [
+        'affine:frame',
+        'affine:page',
+        'affine:database',
+      ])
+    ) {
       return getPreviousBlock(parentBlock);
     }
     return parentBlock;

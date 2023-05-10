@@ -584,6 +584,9 @@ test.describe('switch column type', () => {
       { x: endX, y: dragCenterY }
     );
     expect(await progress.textContent()).toBe('100');
+
+    await undoByClick(page);
+    expect(await progress.textContent()).toBe('0');
   });
 });
 
