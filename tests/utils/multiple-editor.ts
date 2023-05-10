@@ -1,12 +1,9 @@
 import process from 'node:process';
 
-const editorIndex = (
-  {
-    0: 0,
-    1: 1,
-    '': undefined,
-  } satisfies Record<string, number | undefined>
-)[process.env.MULTIPLE_EDITOR ?? ''];
+const editorIndex = {
+  0: 0,
+  1: 1,
+}[process.env.MULTIPLE_EDITOR ?? ''];
 export const scope =
   editorIndex == null
     ? undefined

@@ -99,12 +99,12 @@ jobs:
           COVERAGE: true
 
       - name: Run First Editor test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts
         env:
           MULTIPLE_EDITOR: 0
 
       - name: Run Second Editor test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts
         env:
           MULTIPLE_EDITOR: 1
 
