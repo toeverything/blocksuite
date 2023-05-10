@@ -71,14 +71,14 @@ if (scope) {
   });
 
   test.afterAll(async ({ page }, testInfo) => {
-    if (scope && !testInfo.title.startsWith(scope)) {
+    if (!scope || !testInfo.title.startsWith(scope)) {
       return;
     }
     const focusInSecondEditor = await page.evaluate(
       ([currentEditorIndex]) => {
         const editor = document.querySelectorAll('editor-container')[1];
         const selection = getSelection();
-        if (!selection || selection.rangeCount === 0 || !currentEditorIndex) {
+        if (!selection || selection.rangeCount === 0) {
           return true;
         }
         // once the range exists, it must be in the corresponding editor
