@@ -708,8 +708,7 @@ export const getCenterPosition: (
   page: Page,
   selector: string
 ) => {
-  const editor = getEditorLocator(page);
-  const locator = editor.locator(selector);
+  const locator = page.locator(selector);
   const box = await locator.boundingBox();
   if (!box) {
     throw new Error("Failed to getCenterPosition! Can't get bounding box");
