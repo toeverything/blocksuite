@@ -278,6 +278,16 @@ export class HtmlParser {
       isChildNode = true;
     }
 
+    if (textValues.length === 0 && children.length === 1) {
+      return {
+        flavour: flavour as keyof BlockSchemas,
+        type: type,
+        checked: checked,
+        text: children[0].text,
+        children: children[0].children,
+      };
+    }
+
     return {
       flavour: flavour as keyof BlockSchemas,
       type: type,
