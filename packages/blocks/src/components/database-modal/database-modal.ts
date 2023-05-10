@@ -115,29 +115,35 @@ export class DatabaseModal extends LitElement {
           </div>
         </div>
         <div class="modal-body">
-          ${databaseViews.map(view => {
-            const isSelected = view.type === this._selectedView;
-            return html`
-              <div
-                class="modal-view-item ${view.type} ${view.isComingSoon
-                  ? 'coming-soon'
-                  : ''}"
-                @click=${() => this._convertToDatabase(view.type)}
-              >
+          <div class="modal-desc">
+            Group as Database can quickly convert selected blocks into Database
+            for easy structuring of data.
+          </div>
+          <div class="modal-view-container">
+            ${databaseViews.map(view => {
+              const isSelected = view.type === this._selectedView;
+              return html`
                 <div
-                  class="modal-view-item-content ${isSelected
-                    ? 'selected'
+                  class="modal-view-item ${view.type} ${view.isComingSoon
+                    ? 'coming-soon'
                     : ''}"
+                  @click=${() => this._convertToDatabase(view.type)}
                 >
-                  <div class="modal-view-item-icon">${view.icon}</div>
-                  <div class="modal-view-item-text">${view.text}</div>
+                  <div
+                    class="modal-view-item-content ${isSelected
+                      ? 'selected'
+                      : ''}"
+                  >
+                    <div class="modal-view-item-icon">${view.icon}</div>
+                    <div class="modal-view-item-text">${view.text}</div>
+                  </div>
+                  <div class="modal-view-item-description">
+                    ${view.description}
+                  </div>
                 </div>
-                <div class="modal-view-item-description">
-                  ${view.description}
-                </div>
-              </div>
-            `;
-          })}
+              `;
+            })}
+          </div>
         </div>
         <div class="modal-footer">More views are on the way.</div>
       </div>
