@@ -6,6 +6,7 @@ import './components/lang-list.js';
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -26,7 +27,6 @@ import {
   WithDisposable,
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -165,6 +165,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   @property()
   host!: BlockHost;
+
+  @property()
+  content!: TemplateResult;
 
   @state()
   private _showLangList = false;
@@ -454,12 +457,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
-
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
@@ -471,7 +468,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
           >
           </rich-text>
         </div>
-        ${childrenContainer}
+        ${this.content}
       </div>
       ${this._codeOptionTemplate()}`;
   }

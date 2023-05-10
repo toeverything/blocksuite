@@ -6,6 +6,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
+import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -120,6 +121,9 @@ export class DefaultPageBlockComponent
   @property()
   model!: PageBlockModel;
 
+  @property()
+  content!: TemplateResult;
+
   flavour = 'affine:page' as const;
 
   clipboard = new PageClipboard(this);
@@ -137,8 +141,9 @@ export class DefaultPageBlockComponent
     dragHandle: <DragHandle | null>null,
   };
 
-  @property()
-  mouseRoot!: HTMLElement;
+  mouseRoot: HTMLElement = this.parentElement!;
+  // @property()
+  // mouseRoot!: HTMLElement;
 
   @state()
   private _draggingArea: DOMRect | null = null;
@@ -375,19 +380,6 @@ export class DefaultPageBlockComponent
     }
   }
 
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
-      this.selection = new DefaultSelectionManager({
-        page: this.page,
-        mouseRoot: this.mouseRoot,
-        slots: this.slots,
-        container: this,
-      });
-    }
-
-    super.update(changedProperties);
-  }
-
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
@@ -520,6 +512,14 @@ export class DefaultPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
     this.clipboard.init(this.page);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.mouseRoot = this.parentElement!;
+    this.selection = new DefaultSelectionManager({
+      page: this.page,
+      mouseRoot: this.mouseRoot,
+      slots: this.slots,
+      container: this,
+    });
   }
 
   override disconnectedCallback() {
@@ -578,7 +578,7 @@ export class DefaultPageBlockComponent
               .page="${this.page}"
             ></backlink-button>
           </div>
-          ${childrenContainer}
+          ${this.content}
         </div>
         <affine-selected-blocks
           .mouseRoot="${this.mouseRoot}"

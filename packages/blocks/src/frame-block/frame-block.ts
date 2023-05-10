@@ -1,11 +1,12 @@
 /// <reference types="vite/client" />
+import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
-import { tryUpdateFrameSize } from '../page-block/index.js';
+import { registerService } from '../__internal__/service.js';
 import type { FrameBlockModel } from './frame-model.js';
+import { FrameBlockService } from './frame-service.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends ShadowlessElement {
@@ -24,23 +25,22 @@ export class FrameBlockComponent extends ShadowlessElement {
   @property()
   host!: BlockHost;
 
+  @property()
+  content!: TemplateResult;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:frame', FrameBlockService);
+  }
+
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => {
-        this.requestUpdate();
-        tryUpdateFrameSize(this.host.page, 1);
-      }
-    );
-
     return html`
-      <div class="affine-frame-block-container">${childrenContainer}</div>
+      <div class="affine-frame-block-container">${this.content}</div>
     `;
   }
 }

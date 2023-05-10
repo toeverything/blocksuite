@@ -5,15 +5,16 @@ import {
   type EdgelessPageBlockComponent,
   type MouseMode,
   type PageBlockModel,
+  pagePreset,
   type SurfaceBlockModel,
   WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  ShadowlessElement,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -34,6 +35,8 @@ function forwardSlot<T extends Record<string, Slot<any>>>(
     }
   });
 }
+
+BlockSuiteRoot;
 
 @customElement('editor-container')
 export class EditorContainer
@@ -206,6 +209,14 @@ export class EditorContainer
   override render() {
     if (!this.model || !this.pageBlockModel) return null;
 
+    const rootContainer = keyed(
+      this.pageBlockModel.id,
+      html`<block-suite-root
+        .page=${this.page}
+        .componentMap=${pagePreset}
+      ></block-suite-root>`
+    );
+
     const pageContainer = keyed(
       'page-' + this.pageBlockModel.id,
       html`
@@ -258,7 +269,7 @@ export class EditorContainer
           background: var(--affine-background-primary-color);
         }
       </style>
-      <div class="affine-editor-container">${blockRoot}</div>
+      ${rootContainer}
     `;
   }
 }

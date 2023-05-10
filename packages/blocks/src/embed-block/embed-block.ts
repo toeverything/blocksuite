@@ -1,4 +1,4 @@
-import { css, html, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../__internal__/index.js';
@@ -80,10 +80,14 @@ export class EmbedBlockComponent extends ShadowlessElement {
   }
 
   override render() {
+    const slot =
+      this.model.type === 'image'
+        ? html`<affine-image .model=${this.model}></affine-image>`
+        : nothing;
     return html`
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">
-          <slot></slot>
+          ${slot}
           <input
             .disabled=${this.model.page.readonly}
             placeholder="Write a caption"

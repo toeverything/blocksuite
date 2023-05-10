@@ -209,6 +209,9 @@ importers:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:../lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -231,6 +234,19 @@ importers:
       lit:
         specifier: ^2.7.3
         version: 2.7.3
+
+  packages/lit:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      lit:
+        specifier: ^2.7.3
+        version: 2.7.3
+    devDependencies:
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
 
   packages/phasor:
     dependencies:

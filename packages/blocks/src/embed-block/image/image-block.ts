@@ -123,9 +123,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   @property()
   model!: EmbedBlockModel;
 
-  @property()
-  host!: BlockHost;
-
   @query('.resizable-img')
   public readonly resizeImg!: HTMLElement;
 
@@ -211,12 +208,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
-
     const resizeImgStyle = {
       width: 'unset',
       height: 'unset',
@@ -241,14 +232,11 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <affine-embed .model=${this.model}>
-        <div class="affine-image-wrapper">
-          <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-            ${img}
-          </div>
-          ${childrenContainer}
+      <div class="affine-image-wrapper">
+        <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
+          ${img}
         </div>
-      </affine-embed>
+      </div>
     `;
   }
 }
