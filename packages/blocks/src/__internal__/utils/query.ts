@@ -6,14 +6,14 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
-} from '../../index.js';
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
+import { clamp } from './std.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -129,7 +129,13 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+    if (
+      matchFlavours(parentBlock, [
+        'affine:frame',
+        'affine:page',
+        'affine:database',
+      ])
+    ) {
       return getPreviousBlock(parentBlock);
     }
     return parentBlock;
@@ -190,7 +196,12 @@ export function getEdgelessPage(page: Page) {
   return pageComponent;
 }
 
-export function getEditorContainer(page: Page) {
+/**
+ * This function exposes higher levels of abstraction.
+ *
+ * PLEASE USE IT WITH CAUTION!
+ */
+export function getEditorContainer(page: Page): AbstractEditor {
   assertExists(
     page.root,
     'Failed to check page mode! Page root is not exists!'
@@ -199,7 +210,7 @@ export function getEditorContainer(page: Page) {
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
   assertExists(editorContainer);
-  return editorContainer;
+  return editorContainer as AbstractEditor;
 }
 
 export function getEditorContainerByElement(ele: Element) {
@@ -214,7 +225,7 @@ export function isPageMode(page: Page) {
   if (!('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
-  const mode = editor.mode as 'page' | 'edgeless'; // | undefined;
+  const mode = editor.mode;
   return mode === 'page';
 }
 
@@ -641,6 +652,7 @@ export function getClosestBlockElementByPoint(
   state: {
     rect?: Rect;
     container?: Element;
+    snapToEdge?: { x: boolean; y: boolean };
   } | null = null,
   scale = 1
 ): Element | null {
@@ -654,13 +666,20 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   if (state) {
+    const { snapToEdge = { x: true, y: false } } = state;
     container = state.container;
     const rect = state.rect || container?.getBoundingClientRect();
     if (rect) {
-      point.x = Math.min(
-        Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
-        rect.right - PADDING_LEFT * scale - 1
-      );
+      if (snapToEdge.x) {
+        point.x = Math.min(
+          Math.max(point.x, rect.left) + PADDING_LEFT * scale - 1,
+          rect.right - PADDING_LEFT * scale - 1
+        );
+      }
+      if (snapToEdge.y) {
+        // TODO handle scale
+        point.y = clamp(point.y, rect.top + 1, rect.bottom - 1);
+      }
     }
   }
 

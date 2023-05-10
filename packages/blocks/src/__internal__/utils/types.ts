@@ -1,5 +1,5 @@
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page, Slot } from '@blocksuite/store';
 
 import type { Cell, Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
@@ -48,13 +48,16 @@ export interface BlockHost extends BlockHostContext {
   readonly slots: CommonSlots;
 }
 
-/**
- * @deprecated Not used yet
- */
-export interface CommonBlockElement extends HTMLElement {
-  host: BlockHost;
-  model: BaseBlockModel;
-}
+type EditorMode = 'page' | 'edgeless';
+type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
+
+export type AbstractEditor = {
+  page: Page;
+  mode: EditorMode;
+  mouseMode: MouseMode;
+  showGrid: boolean;
+  readonly slots: CommonSlots & EditorSlots;
+} & HTMLElement;
 
 /**
  * type of `window.getSelection().type`

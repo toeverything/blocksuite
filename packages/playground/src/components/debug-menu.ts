@@ -17,10 +17,15 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
   activeEditorManager,
+  COLOR_VARIABLES,
+  extractCssVariables,
+  FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
+  SIZE_VARIABLES,
   updateBlockType,
+  VARIABLES,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
@@ -31,16 +36,85 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
-import { initPageContentByParam } from '../main';
-import { initParam } from '../utils';
 import { createViewer } from './doc-inspector';
+
+const cssVariablesMap = extractCssVariables(document.documentElement);
+const plate: Record<string, string> = {};
+COLOR_VARIABLES.forEach((key: string) => {
+  plate[key] = cssVariablesMap[key];
+});
+const OTHER_CSS_VARIABLES = VARIABLES.filter(
+  variable =>
+    !SIZE_VARIABLES.includes(variable) &&
+    !COLOR_VARIABLES.includes(variable) &&
+    !FONT_FAMILY_VARIABLES.includes(variable)
+);
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
+
+function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
+  const sizeFolder = styleMenu.addFolder('Size');
+  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
+  const colorFolder = styleMenu.addFolder('Color');
+  const othersFolder = styleMenu.addFolder('Others');
+  sizeFolder.open();
+  fontFamilyFolder.open();
+  colorFolder.open();
+  othersFolder.open();
+  SIZE_VARIABLES.forEach(name => {
+    sizeFolder
+      .add(
+        {
+          [name]: isNaN(parseFloat(cssVariablesMap[name]))
+            ? 0
+            : parseFloat(cssVariablesMap[name]),
+        },
+        name,
+        0,
+        100
+      )
+      .onChange(e => {
+        style.setProperty(name, `${Math.round(e)}px`);
+      });
+  });
+  FONT_FAMILY_VARIABLES.forEach(name => {
+    fontFamilyFolder
+      .add(
+        {
+          [name]: cssVariablesMap[name],
+        },
+        name
+      )
+      .onChange(e => {
+        style.setProperty(name, e);
+      });
+  });
+  OTHER_CSS_VARIABLES.forEach(name => {
+    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
+      style.setProperty(name, e);
+    });
+  });
+  fontFamilyFolder
+    .add(
+      {
+        '--affine-font-family':
+          'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
+      },
+      '--affine-font-family'
+    )
+    .onChange(e => {
+      style.setProperty('--affine-font-family', e);
+    });
+  for (const plateKey in plate) {
+    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
+      style.setProperty(plateKey, color);
+    });
+  }
+}
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
@@ -98,7 +172,6 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.page;
   }
 
-  private _pageList = new Set<string>(['page0']);
   override createRenderRoot() {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     this._setThemeMode(this._dark && matchMedia.matches);
@@ -199,38 +272,20 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportHtml() {
-    this.contentParser.onExportHtml();
+    this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    this.contentParser.onExportMarkdown();
+    this.contentParser.exportMarkdown();
   }
 
   private _exportYDoc() {
     this.workspace.exportYDoc();
   }
+
   private async _importYDoc() {
     await this.workspace.importYDoc();
     this.requestUpdate();
-  }
-
-  private _setPage(id: string) {
-    const page = this.workspace.getPage(id);
-    if (page) {
-      this.editor.page = page;
-    }
-  }
-  private async _addPage() {
-    const id = prompt('please input page id');
-    if (initParam && id) {
-      await initPageContentByParam(this.workspace, initParam, id);
-      const page = this.workspace.getPage(id);
-      if (page) {
-        this.editor.page = page;
-        this.requestUpdate();
-        this.editor.requestUpdate();
-      }
-    }
   }
 
   private async _inspect() {
@@ -273,20 +328,20 @@ export class DebugMenu extends ShadowlessElement {
   };
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(page => {
-      this._pageList.add(page);
+    this.workspace.slots.pageAdded.on(e => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
-    this.workspace.slots.pageRemoved.on(page => {
-      this._pageList.delete(page);
+    this.workspace.slots.pageRemoved.on(() => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 350;
-    const sizeFolder = this._styleMenu.addFolder('Size');
-    sizeFolder.open();
+    this._styleMenu.width = 650;
+    const style = document.documentElement.style;
+    init_css_debug_menu(this._styleMenu, style);
     this._styleMenu.hide();
   }
 
@@ -389,26 +444,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-          <!-- page select -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
-            <sl-button size="small" slot="trigger" caret>
-              ${this.page.id}
-            </sl-button>
-            <sl-menu>
-              ${repeat(
-                [...this._pageList],
-                id => html`
-                  <sl-menu-item @click=${() => this._setPage(id)}>
-                    ${id}
-                  </sl-menu-item>
-                `
-              )}
-              <sl-divider></sl-divider>
-              <sl-menu-item @click=${() => this._addPage()}>
-                Add New Page
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
           <!-- block type -->
           <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
@@ -523,12 +558,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
-              <sl-menu-item
-                @click=${() => (this._showTabMenu = !this._showTabMenu)}
-              >
-                Toggle Tab Menu
-              </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -557,6 +587,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon
                 name=${this._dark ? 'moon' : 'brightness-high'}
               ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Add new page" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Add New Page"
+              @click=${() => createPage(this.workspace)}
+            >
+              <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -611,65 +651,57 @@ function getTabGroupTemplate({
     tabGroup.show(pageId);
   });
 
-  return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
-      <sl-button
-        size="small"
-        content="Add New Page"
-        @click=${() => createPage(workspace)}
-      >
-        <sl-icon name="file-earmark-plus"></sl-icon>
-      </sl-button>
-    </sl-tooltip>
-    <sl-tab-group
-      class="tabs-closable"
-      style="display: flex; overflow: hidden;"
-      @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
-        const otherPage = workspace.getPage(e.detail.name);
-        if (!otherPage) throw new Error('page not found');
-        editor.page = otherPage;
-      }}
-    >
-      ${pageList.map(
-        page =>
-          html`<sl-tab
-            slot="nav"
-            panel="${page.id}"
-            ?active=${page.id === editor.page.id}
-            ?closable=${pageList.length > 1}
-            @sl-close=${(e: CustomEvent) => {
-              const tab = e.target;
-              // Show other tab if the tab is currently active
-              if (tab && (tab as SlTab).active) {
-                const tabGroup =
-                  document.querySelector<SlTabGroup>('.tabs-closable');
-                if (!tabGroup) throw new Error('tab group not found');
-                const otherPage = pageList.find(
-                  metaPage => page.id !== metaPage.id
-                );
-                if (!otherPage) throw new Error('no other page found');
-                tabGroup.show(otherPage.id);
-              }
-              workspace.removePage(page.id);
-            }}
-          >
+  return html`<sl-tab-group
+    class="tabs-closable"
+    style="display: flex; overflow: hidden;"
+    @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+      const otherPage = workspace.getPage(e.detail.name);
+      if (!otherPage) throw new Error('page not found');
+      editor.page = otherPage;
+    }}
+  >
+    ${pageList.map(
+      page =>
+        html`<sl-tab
+          slot="nav"
+          panel="${page.id}"
+          ?active=${page.id === editor.page.id}
+          ?closable=${pageList.length > 1}
+          @sl-close=${(e: CustomEvent) => {
+            const tab = e.target;
+            // Show other tab if the tab is currently active
+            if (tab && (tab as SlTab).active) {
+              const tabGroup =
+                document.querySelector<SlTabGroup>('.tabs-closable');
+              if (!tabGroup) throw new Error('tab group not found');
+              const otherPage = pageList.find(
+                metaPage => page.id !== metaPage.id
+              );
+              if (!otherPage) throw new Error('no other page found');
+              tabGroup.show(otherPage.id);
+            }
+            workspace.removePage(page.id);
+          }}
+        >
+          <div>
+            <div>${page.title || 'Untitled'}</div>
+            <!-- TODO deprecated subpage -->
             <div>
-              <div>${page.title || 'Untitled'}</div>
-              <div>
-                ${page.subpageIds
-                  .map(
-                    pageId =>
-                      (
-                        pageList.find(meta => meta.id === pageId) ?? {
-                          title: 'Page Not Found',
-                        }
-                      ).title || 'Untitled'
-                  )
-                  .join(',')}
-              </div>
+              ${page.subpageIds
+                .map(
+                  pageId =>
+                    (
+                      pageList.find(meta => meta.id === pageId) ?? {
+                        title: 'Page Not Found',
+                      }
+                    ).title || 'Untitled'
+                )
+                .join(',')}
             </div>
-          </sl-tab>`
-      )}
-    </sl-tab-group>`;
+          </div>
+        </sl-tab>`
+    )}
+  </sl-tab-group>`;
 }
 
 declare global {

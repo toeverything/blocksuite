@@ -20,9 +20,14 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditingState, Rect } from '../__internal__/index.js';
+import type {
+  AbstractEditor,
+  EditingState,
+  Rect,
+} from '../__internal__/index.js';
 import {
   calcDropTarget,
   type DroppingType,
@@ -52,8 +57,8 @@ const styles = css`
     fill: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
-    border-radius: 10px;
+    box-shadow: var(--affine-menu-shadow);
+    border-radius: 8px;
   }
 
   .affine-block-hub-container[type='text'] {
@@ -84,9 +89,9 @@ const styles = css`
     align-items: center;
     width: 250px;
     height: 54px;
-    background: var(--affine-white-90);
-    box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
-    border-radius: 10px;
+    background: var(--affine-white-80);
+    box-shadow: var(--affine-shadow-1);
+    border-radius: 8px;
     margin-bottom: 12px;
     cursor: grab;
     top: 0;
@@ -116,8 +121,7 @@ const styles = css`
   .card-container-inner:hover .card-container.grabbing {
     top: unset;
     left: unset;
-    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-      0 0 12px rgba(66, 65, 73, 0.08);
+    box-shadow: var(--affine-shadow-2);
   }
 
   .card-description-container {
@@ -165,11 +169,11 @@ const styles = css`
     position: fixed;
     width: 44px;
     background: var(--affine-background-primary-color);
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .block-hub-menu-container[expanded] {
-    box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-background-overlay-panel-color);
   }
 
@@ -179,8 +183,8 @@ const styles = css`
     align-items: center;
     margin-bottom: 8px;
     position: relative;
-    border-radius: 5px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 4px;
+    fill: var(--affine-icon-color);
     height: 36px;
   }
 
@@ -190,7 +194,7 @@ const styles = css`
 
   .block-hub-icon-container:hover {
     background: var(--affine-hover-color);
-    border-radius: 5px;
+    border-radius: 4px;
   }
 
   .new-icon {
@@ -200,17 +204,20 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 8px;
+    fill: var(--affine-icon-color);
   }
 
+  .new-icon-in-edgeless {
+    box-shadow: var(--affine-menu-shadow);
+  }
   .block-hub-menu-container[expanded] .new-icon {
-    border-radius: 5px;
+    border-radius: 4px;
+    box-shadow: unset;
   }
 
   .new-icon:hover {
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-white);
     fill: var(--affine-primary-color);
   }
@@ -222,8 +229,6 @@ const styles = css`
 
   .icon-expanded:hover {
     background: var(--affine-hover-color);
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   }
 
   .divider {
@@ -463,6 +468,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _showTooltip = true;
+  @state()
+  private _inEdgelessMode = false;
 
   @state()
   private _maxHeight = 2000;
@@ -501,12 +508,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
-  private _mouseRoot: HTMLElement;
+  private _mouseRoot: AbstractEditor;
 
   static override styles = styles;
 
   constructor(options: {
-    mouseRoot: HTMLElement;
+    mouseRoot: AbstractEditor;
     enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringFrameState: (point: Point) => {
@@ -541,7 +548,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
     disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
-
+    disposables.add(
+      this._mouseRoot.slots.pageModeSwitched.on(mode => {
+        this._inEdgelessMode = mode === 'edgeless';
+      })
+    );
     if (isFirefox) {
       disposables.addFromEvent(
         this._mouseRoot,
@@ -712,38 +723,44 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect: frameRect,
       scale,
     } = this.getHoveringFrameState(point.clone());
-    let element = null;
-    if (frameRect) {
-      element = getClosestBlockElementByPoint(
-        point,
-        { container, rect: frameRect },
-        scale
-      );
+    if (!frameRect) {
+      this._resetDropState();
+      return;
+    }
+    const element = getClosestBlockElementByPoint(
+      point,
+      { container, rect: frameRect, snapToEdge: { x: false, y: true } },
+      scale
+    );
+    if (!element) {
+      // if (this._mouseRoot.mode === 'page') {
+      //   return;
+      // }
+      this._resetDropState();
+      return;
     }
 
     let type: DroppingType = 'none';
     let rect = null;
     let lastModelState = null;
-    if (element) {
-      const model = getModelByBlockElement(element);
-      const result = calcDropTarget(
-        point,
-        model,
-        element,
-        [],
-        scale,
-        this._lastDraggingFlavour
-      );
+    const model = getModelByBlockElement(element);
+    const result = calcDropTarget(
+      point,
+      model,
+      element,
+      [],
+      scale,
+      this._lastDraggingFlavour
+    );
 
-      if (result) {
-        type = result.type;
-        rect = result.rect;
-        lastModelState = result.modelState;
-      }
+    if (result) {
+      type = result.type;
+      rect = result.rect;
+      lastModelState = result.modelState;
     }
 
-    this._indicator.rect = rect;
     this._lastDroppingType = type;
+    this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
   };
 
@@ -763,12 +780,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._showTooltip = true;
     this._isGrabbing = false;
     this._lastDraggingFlavour = null;
-    this._lastDroppingType = 'none';
-    this._lastDroppingTarget = null;
+    this._resetDropState();
+  };
 
-    if (this._indicator) {
-      this._indicator.rect = null;
-    }
+  private _resetDropState = () => {
+    this._lastDroppingType = 'none';
+    this._indicator.rect = null;
+    this._lastDroppingTarget = null;
   };
 
   private _onDrop = (e: DragEvent) => {
@@ -842,7 +860,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._isGrabbing,
       this._showTooltip
     );
-
+    const classes = classMap({
+      'icon-expanded': this._expanded,
+      'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
+      'has-tool-tip': true,
+      'new-icon': true,
+    });
     return html`
       <div
         class="block-hub-menu-container"
@@ -850,11 +873,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"
       >
         ${blockHubMenu}
-        <div
-          class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
-          role="menuitem"
-          style="cursor:pointer;"
-        >
+        <div class=${classes} role="menuitem" style="cursor:pointer;">
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
             class=${this._expanded ? 'invisible' : ''}

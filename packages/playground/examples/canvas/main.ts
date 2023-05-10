@@ -1,4 +1,10 @@
-import type { DebugElement } from '@blocksuite/phasor';
+import {
+  ConnectorMode,
+  type Controller,
+  type DebugElement,
+  type ShapeType,
+  StrokeStyle,
+} from '@blocksuite/phasor';
 import {
   Bound,
   SurfaceManager,
@@ -19,9 +25,8 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
 }
 
 function addBrushElements(surface: SurfaceManager) {
-  surface.addBrushElement(
-    { x: 0, y: 0, w: 37.24, h: 18.35 },
-    [
+  surface.addElement('brush', {
+    points: [
       [0, 14.35],
       [0.23, 14.35],
       [0.99, 14.35],
@@ -36,109 +41,135 @@ function addBrushElements(surface: SurfaceManager) {
       [28.9, 6.12],
       [33.24, 0],
     ],
-    {
-      color: '#000000',
-      lineWidth: 4,
-    }
-  );
+    color: '#000000',
+    lineWidth: 4,
+  });
 
-  const brushId = surface.addBrushElement(
-    { x: 0, y: 100, w: 4, h: 4 },
-    [[0, 0]],
-    {
-      color: '#00ff00',
-      lineWidth: 4,
-    }
-  );
-  surface.updateBrushElementPoints(brushId, { x: 0, y: 0, w: 104, h: 104 }, [
-    [0, 0],
-    [10, 10],
-    [20, 20],
-    [30, 30],
-    [40, 40],
-    [50, 50],
-    [60, 60],
-    [70, 70],
-    [80, 80],
-    [90, 90],
-    [100, 100],
-  ]);
+  const brushId = surface.addElement('brush', {
+    points: [[0, 100]],
+    color: '#00ff00',
+    lineWidth: 4,
+  });
+  surface.updateElement(brushId, {
+    points: [
+      [0, 0],
+      [10, 10],
+      [20, 20],
+      [30, 30],
+      [40, 40],
+      [50, 50],
+      [60, 60],
+      [70, 70],
+      [80, 80],
+      [90, 90],
+      [100, 100],
+    ],
+  });
 }
 
 function addShapeElements(surface: SurfaceManager) {
-  surface.addShapeElement(new Bound(200, 0, 100, 100), 'rect', {
-    filled: true,
-    strokeWidth: 0,
-    fillColor: '#009900',
-  });
-  surface.addShapeElement(new Bound(200, 110, 100, 100), 'triangle');
-  surface.addShapeElement(new Bound(200, 220, 210, 100), 'ellipse');
-  surface.addShapeElement(new Bound(310, 0, 100, 100), 'diamond');
-  surface.addShapeElement(new Bound(310, 110, 100, 100), 'rect', {
-    radius: 0.1,
-    filled: true,
-    fillColor: '#009900',
-    strokeColor: '#dddd00',
-  });
+  function addShape(shapeType: ShapeType, bound: Bound, radius = 0) {
+    surface.addElement('shape', {
+      shapeType,
+      xywh: bound.serialize(),
+      filled: true,
+      strokeWidth: 4,
+      fillColor: '#009900',
+      radius,
+      strokeColor: '#dddd00',
+      strokeStyle: StrokeStyle.Solid,
+    });
+  }
+
+  addShape('rect', new Bound(200, 0, 100, 100));
+  addShape('triangle', new Bound(200, 110, 100, 100));
+  addShape('ellipse', new Bound(200, 220, 210, 100));
+  addShape('diamond', new Bound(310, 0, 100, 100));
+  addShape('rect', new Bound(310, 110, 100, 100), 0.1);
 }
 
 function addConnectorElements(surface: SurfaceManager) {
-  surface.addConnectorElement(new Bound(500, 0, 100, 100), [
-    { x: 0, y: 0 },
-    { x: 30, y: 0 },
-    { x: 30, y: 50 },
-    { x: 60, y: 50 },
-    { x: 60, y: 100 },
-    { x: 100, y: 100 },
+  function addConnector(controllers: Controller[]) {
+    surface.addElement('connector', {
+      controllers,
+      strokeStyle: StrokeStyle.Solid,
+      lineWidth: 4,
+      color: '#000',
+      mode: ConnectorMode.Orthogonal,
+    });
+  }
+
+  addConnector([
+    { x: 500, y: 0 },
+    { x: 530, y: 0 },
+    { x: 530, y: 50 },
+    { x: 560, y: 50 },
+    { x: 560, y: 100 },
+    { x: 600, y: 100 },
   ]);
 
   // right
-  surface.addConnectorElement(new Bound(500, 120, 100, 10), [
-    { x: 0, y: 0 },
-    { x: 100, y: 0 },
+  addConnector([
+    { x: 500, y: 120 },
+    { x: 600, y: 120 },
   ]);
 
   // left
-  surface.addConnectorElement(new Bound(500, 260, 100, 10), [
-    { x: 100, y: 0 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 600, y: 260 },
+    { x: 500, y: 260 },
   ]);
 
   // top
-  surface.addConnectorElement(new Bound(480, 140, 10, 100), [
-    { x: 0, y: 100 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 480, y: 240 },
+    { x: 480, y: 140 },
   ]);
 
   // bottom
-  surface.addConnectorElement(new Bound(620, 140, 10, 100), [
-    { x: 0, y: 0 },
-    { x: 0, y: 100 },
+  addConnector([
+    { x: 620, y: 140 },
+    { x: 620, y: 240 },
   ]);
 
   // right-bottom
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
-    { x: 0, y: 0 },
-    { x: 100, y: 100 },
+  addConnector([
+    { x: 500, y: 150 },
+    { x: 600, y: 250 },
   ]);
 
   // left-top
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
-    { x: 100, y: 100 },
-    { x: 0, y: 0 },
+  addConnector([
+    { x: 600, y: 230 },
+    { x: 500, y: 130 },
   ]);
 
   // left-bottom
-  surface.addConnectorElement(new Bound(500, 130, 100, 100), [
-    { x: 100, y: 0 },
-    { x: 0, y: 100 },
+  addConnector([
+    { x: 600, y: 130 },
+    { x: 500, y: 230 },
   ]);
 
   // right-top
-  surface.addConnectorElement(new Bound(500, 150, 100, 100), [
-    { x: 0, y: 100 },
-    { x: 100, y: 0 },
+  addConnector([
+    { x: 500, y: 250 },
+    { x: 600, y: 150 },
   ]);
+}
+
+function addDebugElements(surface: SurfaceManager) {
+  surface.addElement('debug', {
+    xywh: new Bound(0, 0, 100, 100).serialize(),
+    color: 'red',
+  });
+  surface.addElement('debug', {
+    xywh: new Bound(50, 50, 100, 100).serialize(),
+    color: 'black',
+  });
+  surface.addElement('debug', {
+    xywh: new Bound(298, 0, 2, 300).serialize(),
+    color: 'gray',
+  });
 }
 
 function main() {
@@ -148,10 +179,7 @@ function main() {
   const surface = new SurfaceManager(yContainer);
   surface.attach(container);
 
-  surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
-  surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
-  surface.addDebugElement(new Bound(298, 0, 2, 300), 'gray');
-
+  addDebugElements(surface);
   addBrushElements(surface);
   addShapeElements(surface);
   addConnectorElements(surface);

@@ -5,7 +5,7 @@ import { html } from 'lit/static-html.js';
 import { onClickOutside } from '../../utils.js';
 import type { ColumnRendererHelper } from '../register.js';
 import { DatabaseCellElement } from '../register.js';
-import type { RowHost } from '../types.js';
+import type { RowHost, SetValueOption } from '../types.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
@@ -40,9 +40,11 @@ export class DatabaseCellContainer
     return this.databaseModel.page.readonly;
   }
 
-  setValue(value: unknown) {
+  setValue(value: unknown, option: SetValueOption = { captureSync: true }) {
     queueMicrotask(() => {
-      this.databaseModel.page.captureSync();
+      if (option.captureSync) {
+        this.databaseModel.page.captureSync();
+      }
       this.databaseModel.updateCell(this.rowModel.id, {
         columnId: this.column.id,
         value,

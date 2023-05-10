@@ -1,6 +1,6 @@
 import {
+  type AbstractEditor,
   activeEditorManager,
-  type CommonSlots,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   type MouseMode,
@@ -23,21 +23,28 @@ import { keyed } from 'lit/directives/keyed.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function forwardSlot<T extends Record<string, Slot<any>>>(from: T, to: T) {
+function forwardSlot<T extends Record<string, Slot<any>>>(
+  from: T,
+  to: Partial<T>
+) {
   Object.entries(from).forEach(([key, slot]) => {
-    if (key in to) {
-      slot.pipe(to[key]);
+    const target = to[key];
+    if (target) {
+      slot.pipe(target);
     }
   });
 }
 
 @customElement('editor-container')
-export class EditorContainer extends WithDisposable(ShadowlessElement) {
+export class EditorContainer
+  extends WithDisposable(ShadowlessElement)
+  implements AbstractEditor
+{
   @property()
   page!: Page;
 
   @property()
-  mode?: 'page' | 'edgeless' = 'page';
+  mode: 'page' | 'edgeless' = 'page';
 
   @property()
   override autofocus = false;
@@ -75,20 +82,14 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
-  slots: CommonSlots = {
+  slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
-    /**
-     * @deprecated
-     */
-    subpageLinked: new Slot(),
-    /**
-     * @deprecated
-     */
-    subpageUnlinked: new Slot(),
+    pageModeSwitched: new Slot(),
   };
 
   override connectedCallback() {
     super.connectedCallback();
+    activeEditorManager.setIfNoActive(this);
 
     const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
@@ -161,13 +162,13 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    activeEditorManager.clearActive();
     this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   override firstUpdated() {
     // todo: refactor to a better solution
     getServiceOrRegister('affine:code');
-    activeEditorManager.setIfNoActive(this);
     if (this.mode === 'page') {
       setTimeout(() => {
         const defaultPage = this.querySelector('affine-default-page');
@@ -179,6 +180,10 @@ export class EditorContainer extends WithDisposable(ShadowlessElement) {
   }
 
   override updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mode')) {
+      this.slots.pageModeSwitched.emit(this.mode);
+    }
+
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }

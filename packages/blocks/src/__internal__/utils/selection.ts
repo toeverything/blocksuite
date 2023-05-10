@@ -381,9 +381,10 @@ export function handleNativeRangeDragMove(
   e: SelectionEvent
 ) {
   const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
+  const { clientX: x, clientY: y } = e.raw;
 
   // Range from current mouse position
-  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(x, y);
   if (!currentRange) return;
 
   assertExists(startRange);
@@ -395,8 +396,6 @@ export function handleNativeRangeDragMove(
   ) as HTMLElement;
   const startFrame = _startContainer.closest('affine-frame');
   if (!startFrame) return;
-
-  const { clientX: x, clientY: y } = e.raw;
 
   let currentFrame: FrameBlockComponent | null | undefined = null;
   let shouldUpdateCurrentRange = false;

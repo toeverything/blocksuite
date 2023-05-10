@@ -23,22 +23,6 @@ export const REFERENCE_NODE = ' ';
 const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
-  /**
-   * Emit when the subpage is linked to the current page.
-   *
-   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
-   *
-   * @deprecated
-   */
-  subpageLinked: Slot<{ pageId: string }>;
-  /**
-   * Emit when the subpage is unlinked from the current page.
-   *
-   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
-   *
-   * @deprecated
-   */
-  subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
 };
 

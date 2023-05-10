@@ -40,6 +40,13 @@ export function CodeOptionTemplate({
       .affine-codeblock-option-container > div {
           position: fixed;
           z-index: 1;
+          box-shadow:var(--affine-menu-shadow)
+      }
+      .affine-codeblock-option {
+        box-shadow:var(--affine-menu-shadow);
+        padding:4px;
+        border-radius:8px;
+        background:var(--affine-white)
       }
 
       ${tooltipStyle}

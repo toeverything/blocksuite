@@ -36,14 +36,28 @@ const styles = css`
     align-items: center;
     justify-content: space-between;
     height: 44px;
-    margin: 12px 0px;
+    margin: 18px 0 6px;
   }
 
   .affine-database-block-table {
     position: relative;
     width: 100%;
+    padding-bottom: 4px;
     overflow-x: scroll;
     border-top: 1.5px solid var(--affine-border-color);
+  }
+  .affine-database-block-table::-webkit-scrollbar {
+    margin-top: 4px;
+    -webkit-appearance: none;
+  }
+  .affine-database-block-table::-webkit-scrollbar:horizontal {
+    height: 4px;
+  }
+  .affine-database-block-table::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar-thumb {
+    background-color: var(--affine-black-10);
   }
 
   .affine-database-table-container {
@@ -70,6 +84,7 @@ const styles = css`
     display: flex;
     width: 100%;
     height: 28px;
+    margin-top: -8px;
   }
   .affine-database-block-footer:hover {
     background-color: var(--affine-hover-color);

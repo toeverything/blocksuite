@@ -3,7 +3,7 @@ import '../color-panel.js';
 
 import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints, StrokeStyle } from '@blocksuite/phasor';
+import { StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
@@ -185,12 +185,16 @@ export class EdgelessChangeConnectorButton extends LitElement {
           const controllers = [
             element.controllers[0],
             element.controllers[element.controllers.length - 1],
-          ];
-          const bound = getBrushBoundFromPoints(
-            controllers.map(c => [c.x + element.x, c.y + element.y]),
-            0
-          );
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+          ].map(c => {
+            return {
+              ...c,
+              x: c.x + element.x,
+              y: c.y + element.y,
+            };
+          });
+
+          this.surface.updateElement(element.id, {
+            controllers,
             mode,
           });
         } else {
@@ -206,18 +210,9 @@ export class EdgelessChangeConnectorButton extends LitElement {
             end.point,
             []
           );
-          const bound = getBrushBoundFromPoints(
-            route.map(r => [r.x, r.y]),
-            0
-          );
-          const controllers = route.map(r => {
-            return {
-              ...r,
-              x: r.x - bound.x,
-              y: r.y - bound.y,
-            };
-          });
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+
+          this.surface.updateElement(element.id, {
+            controllers: route,
             mode,
           });
         }
@@ -230,7 +225,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElementProps(element.id, { color });
+        this.surface.updateElement(element.id, { color });
       }
     });
   }
@@ -238,7 +233,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeWidth(lineWidth: number) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElementProps(ele.id, {
+        this.surface.updateElement(ele.id, {
           lineWidth,
         });
       });
@@ -249,7 +244,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElementProps(ele.id, {
+        this.surface.updateElement(ele.id, {
           strokeStyle,
         });
       });

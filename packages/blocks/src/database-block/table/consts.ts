@@ -13,3 +13,5 @@ export const DATABASE_TITLE_LENGTH = 50;
 export const SELECT_TAG_NAME_MAX_LENGTH = 50;
 /** edit select popup width */
 export const SELECT_EDIT_POPUP_WIDTH = 345;
+
+export const DEFAULT_TITLE = 'Database';

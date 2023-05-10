@@ -46,15 +46,8 @@ export async function addFrameByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Add Frame');
 }
 
-export async function toggleTabMenu(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
-}
-
 export async function addNewPage(page: Page) {
   const { addNewPageBtn } = getDebugMenu(page);
-  if (!(await addNewPageBtn.isVisible())) {
-    await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
-  }
   await addNewPageBtn.click();
   const pageMetas = await page.evaluate(() => {
     const { workspace } = window;

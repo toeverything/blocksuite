@@ -18,11 +18,11 @@ import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../__internal__/index.js';
+import { clamp, type MouseMode } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation } from '../utils.js';
+import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -45,9 +45,9 @@ export class EdgelessToolbar extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-white);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+      box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
-      fill: currentColor;
+      fill: var(--affine-icon-color);
     }
 
     .edgeless-toolbar-container[level='second'] {
@@ -79,6 +79,7 @@ export class EdgelessToolbar extends LitElement {
       font-weight: 500;
       text-align: center;
       cursor: pointer;
+      color: var(--affine-icon-color);
     }
 
     .zoom-percent:hover {
@@ -104,6 +105,10 @@ export class EdgelessToolbar extends LitElement {
     const { viewport } = this.edgeless.surface;
     viewport.setZoom(zoom);
     this.edgeless.slots.viewportUpdated.emit();
+  }
+
+  private _setZoomByStep(step: number) {
+    this._setZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
   }
 
   private _zoomToFit() {
@@ -134,7 +139,6 @@ export class EdgelessToolbar extends LitElement {
 
   override render() {
     const type = this.mouseMode?.type;
-    const { viewport } = this.edgeless.surface;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
 
     return html`
@@ -199,7 +203,7 @@ export class EdgelessToolbar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @click=${() => this._setZoom(Math.max(viewport.zoom - 0.1, 0.1))}
+          @click=${() => this._setZoomByStep(-0.1)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -208,7 +212,7 @@ export class EdgelessToolbar extends LitElement {
         </span>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
-          @click=${() => this._setZoom(viewport.zoom + 0.1)}
+          @click=${() => this._setZoomByStep(+0.1)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

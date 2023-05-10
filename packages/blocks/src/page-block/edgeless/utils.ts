@@ -9,7 +9,6 @@ import type {
   SurfaceManager,
   SurfaceViewport,
 } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
@@ -41,6 +40,9 @@ export const DEFAULT_FRAME_WIDTH = 448;
 export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
+
+export const ZOOM_MAX = 3.0;
+export const ZOOM_MIN = 0.1;
 
 const ATTACHED_DISTANCE = 20;
 
@@ -79,7 +81,10 @@ export function pickTopBlock(
   return null;
 }
 
-export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
+export function pickBlocksByBound(
+  blocks: TopLevelBlockModel[],
+  bound: Omit<Bound, 'serialize'>
+) {
   return blocks.filter(block => {
     const [x, y, w, h] = deserializeXYWH(block.xywh);
     const blockBound = { x, y, w, h };
@@ -429,18 +434,9 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        const bound = getBrushBoundFromPoints(
-          routes.map(r => [r.x, r.y]),
-          0
-        );
-        const newControllers = routes.map(v => {
-          return {
-            ...v,
-            x: v.x - bound.x,
-            y: v.y - bound.y,
-          };
+        surface.updateElement(id, {
+          controllers: routes,
         });
-        surface.updateConnectorElement(id, bound, newControllers);
       }
     });
   }

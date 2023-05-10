@@ -33,7 +33,35 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     return;
   }
   if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
-    // todo: jump into next row
+    page.captureSync();
+    const index = parent.children.findIndex(child => child.id === model.id);
+    let newParent: BaseBlockModel = parent;
+    let newBlockIndex = index + 1;
+
+    if (
+      index === parent.children.length - 1 &&
+      model.text?.yText.length === 0
+    ) {
+      const nextModel = page.getNextSibling(newParent);
+      if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
+        asyncFocusRichText(page, nextModel.id, {
+          index: nextModel.text.yText.length,
+          length: 0,
+        });
+        return;
+      }
+
+      const prevParent = page.getParent(parent);
+      if (!prevParent) return;
+      const prevIndex = prevParent.children.findIndex(
+        child => child.id === parent.id
+      );
+      newParent = prevParent;
+      newBlockIndex = prevIndex + 1;
+    }
+
+    const id = page.addBlock('affine:paragraph', {}, newParent, newBlockIndex);
+    asyncFocusRichText(page, id);
     return;
   }
   const index = parent.children.indexOf(model);
@@ -476,12 +504,19 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   if (!parent) return false;
   const previousSibling = getPreviousBlock(model);
   const nextSibling = getNextBlock(model);
-  const previousSiblingParent = previousSibling
-    ? page.getParent(previousSibling)
-    : null;
-  if (matchFlavours(parent, ['affine:frame'])) {
+
+  if (matchFlavours(parent, ['affine:database'])) {
+    if (previousSibling) {
+      page.deleteBlock(model);
+      focusBlockByModel(previousSibling);
+      return true;
+    } else {
+      return previousSibling
+        ? handleDatabaseSibling(page, model, previousSibling)
+        : handleNoPreviousSibling(page, model, previousSibling);
+    }
+  } else if (matchFlavours(parent, ['affine:frame'])) {
     return (
-      handleDatabaseSibling(page, model, previousSiblingParent) ||
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
       handleNoPreviousSibling(page, model, previousSibling)
@@ -531,10 +566,10 @@ function handleUnknownBlockBackspace(model: ExtendedModel) {
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   if (
     handleCodeBlockBackspace(page, model) ||
-    handleDatabaseBlockBackspace(page, model) ||
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
+    handleDatabaseBlockBackspace(page, model);
     return;
   }
 
