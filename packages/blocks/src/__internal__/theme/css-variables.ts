@@ -97,6 +97,12 @@ export const SIZE_VARIABLES = [
   '--affine-z-index-popover',
 ];
 
+export const FONT_FAMILY_VARIABLES = [
+  '--affine-font-family',
+  '--affine-font-number-family',
+  '--affine-font-code-family',
+];
+
 export const VARIABLES = [
   '--affine-editor-width',
 
@@ -112,15 +118,13 @@ export const VARIABLES = [
   '--affine-shadow-2',
   '--affine-shadow-3',
 
-  '--affine-font-family',
-  '--affine-font-number-family',
-  '--affine-font-code-family',
   '--affine-paragraph-space',
   '--affine-popover-radius',
   '--affine-zoom',
   '--affine-scale',
   ...SIZE_VARIABLES,
   ...COLOR_VARIABLES,
+  ...FONT_FAMILY_VARIABLES,
 ] as const;
 
 type VariablesType = typeof VARIABLES;

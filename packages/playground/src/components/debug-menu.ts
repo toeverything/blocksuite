@@ -19,6 +19,7 @@ import {
   activeEditorManager,
   COLOR_VARIABLES,
   extractCssVariables,
+  FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
@@ -43,22 +44,62 @@ COLOR_VARIABLES.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
 
-const CSSSizeProperties: Array<{
-  name: string;
-  defaultValue: number;
-}> = SIZE_VARIABLES.map((key: string) => {
-  return {
-    name: key,
-    defaultValue: isNaN(parseFloat(cssVariablesMap[key]))
-      ? 0
-      : parseFloat(cssVariablesMap[key]),
-  };
-});
-
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
+
+function init_css_debug_menu(
+  sizeFolder: GUI,
+  style: CSSStyleDeclaration,
+  fontFamilyFolder: GUI,
+  colorFolder: GUI
+) {
+  SIZE_VARIABLES.forEach(name => {
+    sizeFolder
+      .add(
+        {
+          [name]: isNaN(parseFloat(cssVariablesMap[name]))
+            ? 0
+            : parseFloat(cssVariablesMap[name]),
+        },
+        name,
+        0,
+        100
+      )
+      .onChange(e => {
+        style.setProperty(name, `${Math.round(e)}px`);
+      });
+  });
+  FONT_FAMILY_VARIABLES.forEach(name => {
+    fontFamilyFolder
+      .add(
+        {
+          [name]: cssVariablesMap[name],
+        },
+        name
+      )
+      .onChange(e => {
+        style.setProperty(name, e);
+      });
+  });
+  fontFamilyFolder
+    .add(
+      {
+        '--affine-font-family':
+          'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
+      },
+      '--affine-font-family'
+    )
+    .onChange(e => {
+      style.setProperty('--affine-font-family', e);
+    });
+  for (const plateKey in plate) {
+    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
+      style.setProperty(plateKey, color);
+    });
+  }
+}
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
@@ -286,19 +327,12 @@ export class DebugMenu extends ShadowlessElement {
     this._styleMenu.width = 650;
     const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');
+    const fontFamilyFolder = this._styleMenu.addFolder('FontFamily');
     const colorFolder = this._styleMenu.addFolder('Color');
     sizeFolder.open();
-    CSSSizeProperties.forEach(({ name, defaultValue }) => {
-      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
-        style.setProperty(name, `${Math.round(e)}px`);
-      });
-    });
+    fontFamilyFolder.open();
     colorFolder.open();
-    for (const plateKey in plate) {
-      colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
-        style.setProperty(plateKey, color);
-      });
-    }
+    init_css_debug_menu(sizeFolder, style, fontFamilyFolder, colorFolder);
     this._styleMenu.hide();
   }
 
@@ -515,7 +549,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
