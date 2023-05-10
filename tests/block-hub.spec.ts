@@ -4,6 +4,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getBoundingClientRect,
   getCenterPosition,
   initEmptyParagraphState,
   initThreeParagraphs,
@@ -314,4 +315,77 @@ test('drag database', async ({ page }) => {
   expect(await tagColumn.innerText()).toBe('Tag');
   const defaultRows = page.locator('.affine-database-block-row');
   expect(await defaultRows.count()).toBe(3);
+});
+
+test.describe('Drag block hub can snap to the edge and function properly', () => {
+  test('drag blank line to the bottom of editor should insert block', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const { frameId } = await initEmptyParagraphState(page);
+
+    await page.click('.block-hub-menu-container [role="menuitem"]');
+    await page.waitForTimeout(200);
+    const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+    const blankMenuRect = await getCenterPosition(page, blankMenu);
+    const targetPos = await getCenterPosition(page, '[data-block-id="1"]');
+    await dragBetweenCoords(
+      page,
+      { x: blankMenuRect.x, y: blankMenuRect.y },
+      { x: targetPos.x, y: targetPos.y + 200 },
+      { steps: 50 }
+    );
+
+    await waitNextFrame(page);
+    await assertStoreMatchJSX(
+      page,
+      /*xml*/ `
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
+  <affine:paragraph
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:frame>`,
+      frameId
+    );
+  });
+
+  test('drag blank line to the right of editor should not insert block', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const { frameId } = await initEmptyParagraphState(page);
+
+    await page.click('.block-hub-menu-container [role="menuitem"]');
+    await page.waitForTimeout(200);
+    const blankMenu = '.block-hub-icon-container:nth-child(1)';
+
+    const blankMenuRect = await getCenterPosition(page, blankMenu);
+    const targetPos = await getBoundingClientRect(page, '[data-block-id="1"]');
+    await dragBetweenCoords(
+      page,
+      { x: blankMenuRect.x, y: blankMenuRect.y },
+      { x: targetPos.x + targetPos.width + 10, y: targetPos.y },
+      { steps: 50 }
+    );
+
+    await waitNextFrame(page);
+    await assertStoreMatchJSX(
+      page,
+      /*xml*/ `
+<affine:frame
+  prop:background="--affine-background-secondary-color"
+>
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:frame>`,
+      frameId
+    );
+  });
 });

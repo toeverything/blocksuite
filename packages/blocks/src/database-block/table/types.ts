@@ -2,10 +2,14 @@ import type { TemplateResult } from 'lit';
 
 import type { DatabaseMode } from '../types.js';
 
+export type SetValueOption = {
+  captureSync: boolean;
+};
+
 export interface RowHost<Value = unknown> extends HTMLElement {
   setEditing(isEditing: boolean): void;
   setHeight(height: number): void;
-  setValue(value: Value): void;
+  setValue(value: Value, option?: SetValueOption): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ): void;

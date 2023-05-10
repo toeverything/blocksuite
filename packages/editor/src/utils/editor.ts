@@ -14,6 +14,7 @@ import {
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
+import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -65,19 +66,21 @@ export const createBlockHub: (
           parentId = parent.id;
         }
 
-        if (focusId) {
-          // database init basic structure
-          if (isDatabase) {
-            const service = await getServiceOrRegister(props.flavour);
-            service.initDatabaseBlock(page, model, focusId);
-          }
+        // database init basic structure
+        if (isDatabase) {
+          const service = await getServiceOrRegister<'affine:database'>(
+            props.flavour
+          );
+          service.initDatabaseBlock(page, model, focusId);
         }
+      }
 
-        if (editor.mode === 'page') {
+      if (editor.mode === 'page') {
+        if (focusId) {
           asyncFocusRichText(page, focusId);
           tryUpdateFrameSize(page, 1);
-          return;
         }
+        return;
       }
 
       // In edgeless mode.
@@ -126,7 +129,11 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        state.rect = defaultPageBlock.innerRect;
+        const rect = Rect.fromDOMRect(
+          defaultPageBlock.pageBlockContainer.getBoundingClientRect()
+        );
+        rect.height -= PAGE_BLOCK_PADDING_BOTTOM;
+        state.rect = rect;
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);

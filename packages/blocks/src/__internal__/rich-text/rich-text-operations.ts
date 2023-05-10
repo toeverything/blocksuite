@@ -504,12 +504,19 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   if (!parent) return false;
   const previousSibling = getPreviousBlock(model);
   const nextSibling = getNextBlock(model);
-  const previousSiblingParent = previousSibling
-    ? page.getParent(previousSibling)
-    : null;
-  if (matchFlavours(parent, ['affine:frame'])) {
+
+  if (matchFlavours(parent, ['affine:database'])) {
+    if (previousSibling) {
+      page.deleteBlock(model);
+      focusBlockByModel(previousSibling);
+      return true;
+    } else {
+      return previousSibling
+        ? handleDatabaseSibling(page, model, previousSibling)
+        : handleNoPreviousSibling(page, model, previousSibling);
+    }
+  } else if (matchFlavours(parent, ['affine:frame'])) {
     return (
-      handleDatabaseSibling(page, model, previousSiblingParent) ||
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
       handleNoPreviousSibling(page, model, previousSibling)
@@ -559,10 +566,10 @@ function handleUnknownBlockBackspace(model: ExtendedModel) {
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   if (
     handleCodeBlockBackspace(page, model) ||
-    handleDatabaseBlockBackspace(page, model) ||
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
+    handleDatabaseBlockBackspace(page, model);
     return;
   }
 

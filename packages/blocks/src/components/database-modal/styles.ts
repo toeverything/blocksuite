@@ -1,6 +1,9 @@
 import { css } from 'lit';
 
 export const styles = css`
+  :host {
+    font-family: var(--affine-font-family);
+  }
   :host * {
     box-sizing: border-box;
   }
@@ -22,10 +25,9 @@ export const styles = css`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 673px;
-    padding: 10px 18px 14px;
-    height: 288px;
-    border-radius: 5px;
+    width: 720px;
+    padding: 24px 40px;
+    border-radius: 24px;
     background: var(--affine-background-overlay-panel-color);
   }
   .modal-header {
@@ -44,12 +46,24 @@ export const styles = css`
     color: var(--affine-icon-color);
     cursor: pointer;
   }
+  .modal-header-close-icon svg {
+    width: 24px;
+    height: 24px;
+  }
   .modal-footer {
     color: var(--affine-text-secondary-color);
     font-size: 14px;
     text-align: center;
   }
   .modal-body {
+    padding: 24px 0;
+  }
+  .modal-desc {
+    margin-bottom: 38px;
+    color: var(--affine-text-primary-color);
+    font-size: 14px;
+  }
+  .modal-view-container {
     display: flex;
     justify-content: center;
     gap: 18px;
@@ -71,6 +85,7 @@ export const styles = css`
   }
   .modal-view-item-content:hover .modal-view-item-text,
   .modal-view-item-content:hover svg {
+    fill: var(--affine-primary-color);
     color: var(--affine-primary-color);
   }
   .modal-view-item-content {
@@ -91,7 +106,7 @@ export const styles = css`
   .modal-view-item-icon svg {
     width: 42px;
     height: 42px;
-    color: var(--affine-black-50);
+    fill: var(--affine-black-50);
   }
   .modal-view-item-text {
     font-size: 14px;

@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import {
+  BLOCK_ID_ATTR,
+  PAGE_BLOCK_PADDING_BOTTOM,
+} from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
@@ -70,7 +73,7 @@ export class DefaultPageBlockComponent
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-      padding-bottom: 150px;
+      padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
       padding-left: 24px;
