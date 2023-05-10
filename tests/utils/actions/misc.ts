@@ -12,6 +12,7 @@ import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
   pressSpace,
@@ -26,7 +27,7 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(`http://localhost:5177/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
@@ -77,6 +78,7 @@ async function initEmptyEditor(
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
+
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
@@ -118,6 +120,7 @@ async function initEmptyEditor(
           new CustomEvent('blocksuite:page-ready', { detail: page.id })
         );
       }
+
       if (noInit) {
         workspace.slots.pageAdded.on(pageId => {
           const page = workspace.getPage(pageId);
@@ -135,20 +138,14 @@ async function initEmptyEditor(
   );
   await waitNextFrame(page);
 }
-let multiEditor = false;
-export const setMultiEditor = (me: boolean) => {
-  multiEditor = me;
-};
-let currentEditorIndex = 0;
-export const setCurrentEditor = (n: number) => {
-  currentEditorIndex = n;
-};
-export const getCurrentEditorIndex = () => {
-  return currentEditorIndex;
-};
+
 export const getEditorLocator = (page: Page) => {
   return page.locator('editor-container').nth(currentEditorIndex);
 };
+export const getBlockHub = (page: Page) => {
+  return page.locator('affine-block-hub').nth(currentEditorIndex);
+};
+
 export async function enterPlaygroundRoom(
   page: Page,
   ops?: {
@@ -711,7 +708,8 @@ export const getCenterPosition: (
   page: Page,
   selector: string
 ) => {
-  const locator = page.locator(selector);
+  const editor = getEditorLocator(page);
+  const locator = editor.locator(selector);
   const box = await locator.boundingBox();
   if (!box) {
     throw new Error("Failed to getCenterPosition! Can't get bounding box");
@@ -852,7 +850,7 @@ export async function initImageState(page: Page) {
   await focusRichText(page);
   await page.evaluate(() => {
     const clipData = {
-      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
+      'text/html': `<img src='${location.origin}/test-card-1.png' />`,
     };
     const e = new ClipboardEvent('paste', {
       clipboardData: new DataTransfer(),
@@ -877,7 +875,7 @@ export async function getCurrentEditorPageId(page: Page) {
     if (!editor) throw new Error("Can't find editor-container");
     const pageId = editor.page.id;
     return pageId;
-  }, getCurrentEditorIndex());
+  }, currentEditorIndex);
 }
 
 export async function getCurrentHTMLTheme(page: Page) {

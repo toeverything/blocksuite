@@ -98,6 +98,16 @@ jobs:
         env:
           COVERAGE: true
 
+      - name: Run playwright test
+        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          MULTIPLE_EDITOR: 0
+
+      - name: Run playwright test
+        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          MULTIPLE_EDITOR: 1
+
       - name: Collect code coverage report
         run: pnpm exec nyc report -t .nyc_output --reporter=lcov
 
