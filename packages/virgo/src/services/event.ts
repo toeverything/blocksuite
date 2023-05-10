@@ -159,8 +159,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         ).length === 1
       ) {
         this._editor.rangeService.setVRange({
-          index: this._editor.yText.length,
-          length: range.endOffset,
+          index: range.endOffset,
+          length: range.endContainer.textContent?.length || 0,
         });
       } else {
         return;
