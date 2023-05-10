@@ -3,7 +3,7 @@ import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
+import { ShadowlessElement } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { FrameBlockModel } from './frame-model.js';
 import { FrameBlockService } from './frame-service.js';
@@ -21,9 +21,6 @@ export class FrameBlockComponent extends ShadowlessElement {
 
   @property()
   model!: FrameBlockModel;
-
-  @property()
-  host!: BlockHost;
 
   @property()
   content!: TemplateResult;

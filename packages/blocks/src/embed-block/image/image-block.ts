@@ -6,12 +6,7 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/index.js';
-import { BlockChildrenContainer } from '../../__internal__/service/components.js';
+import { ShadowlessElement, WithDisposable } from '../../__internal__/index.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')

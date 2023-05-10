@@ -23,7 +23,6 @@ import {
   Rect,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
-import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import {
   ShadowlessElement,
@@ -547,9 +546,6 @@ export class DefaultPageBlockComponent
     const { page, selection } = this;
     const { viewportOffset } = selection.state;
 
-    const childrenContainer = BlockChildrenContainer(this.model, this, () =>
-      this.requestUpdate()
-    );
     const draggingArea = DraggingArea(this._draggingArea);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,

@@ -5,7 +5,6 @@ import './kanban/kanban-view.js';
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { type BlockHost } from '../__internal__/index.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
@@ -13,9 +12,6 @@ import type { DatabaseBlockModel } from './database-model.js';
 export class DatabaseBlockComponent extends ShadowlessElement {
   @property()
   model!: DatabaseBlockModel;
-
-  @property()
-  host!: BlockHost;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -32,7 +28,6 @@ export class DatabaseBlockComponent extends ShadowlessElement {
     return html`
       <${databaseTag}
         .model=${this.model}
-        .host=${this.host}
         class="affine-block-element"
       ></${databaseTag}>
     `;
