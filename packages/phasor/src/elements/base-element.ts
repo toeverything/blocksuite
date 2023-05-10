@@ -96,7 +96,6 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     this._renderer = renderer;
     this._renderer.addElement(this);
     this.yMap.observeDeep(() => {
-      console.log(this, this.yMap.toJSON());
       this._renderer?.removeElement(this);
       this._renderer?.addElement(this);
     });
