@@ -3,7 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
-import { test as baseTest } from '@playwright/test';
+import { expect, test as baseTest } from '@playwright/test';
+
+import {
+  enterPlaygroundRoom,
+  initEmptyParagraphState,
+} from './actions/misc.js';
+import { currentEditorIndex, scope } from './multiple-editor.js';
 
 const istanbulTempDir = process.env.ISTANBUL_TEMP_DIR
   ? path.resolve(process.env.ISTANBUL_TEMP_DIR)
@@ -14,12 +20,8 @@ function generateUUID() {
 }
 
 const enableCoverage = !!process.env.CI || !!process.env.COVERAGE;
-let scope = '';
-export const setScope = (name: string) => {
-  scope = name;
-};
 export const scoped = (stringsArray: TemplateStringsArray) => {
-  return scope ? `${scope} | ${stringsArray.join()}` : stringsArray.join();
+  return `${scope ?? ''}${stringsArray.join()}`;
 };
 export const test = baseTest.extend({
   context: async ({ context }, use) => {
@@ -57,3 +59,42 @@ export const test = baseTest.extend({
     }
   },
 });
+if (scope) {
+  test.beforeEach(async ({ page, browser }, testInfo) => {
+    if (scope && !testInfo.title.startsWith(scope)) {
+      testInfo.fn = () => {
+        testInfo.skip();
+      };
+      testInfo.skip();
+      await browser.close();
+    }
+  });
+
+  test.afterAll(async ({ page }, testInfo) => {
+    if (scope && !testInfo.title.startsWith(scope)) {
+      return;
+    }
+    const focusInSecondEditor = await page.evaluate(() => {
+      const editor = document.querySelectorAll('editor-container')[1];
+      const selection = getSelection();
+      if (!selection || selection.rangeCount === 0 || !currentEditorIndex) {
+        return true;
+      }
+      // once the range exists, it must be in the corresponding editor
+      return editor.contains(
+        selection.getRangeAt(currentEditorIndex).startContainer
+      );
+    });
+    await expect(focusInSecondEditor).toBe(true);
+  });
+
+  test('ensure enable two editor', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    const count = await page.evaluate(() => {
+      return document.querySelectorAll('editor-container').length;
+    });
+
+    await expect(count).toBe(2);
+  });
+}
