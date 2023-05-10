@@ -29,10 +29,13 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this.renderModel(root);
+    return this.renderModel(root, root);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (
+    model: BaseBlockModel,
+    host: BaseBlockModel
+  ): TemplateResult => {
     const { flavour, id, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -56,15 +59,18 @@ export class BlockSuiteRoot extends ShadowlessElement {
       this.modelSubscribed.add(id);
     }
 
+    const childrenHost = model.role === 'content' ? host : model;
+
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
       .root=${this}
       .page=${this.page}
       .model=${model}
+      .host=${host}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child)
+        child => this.renderModel(child, childrenHost)
       )}`}
     ></${tag}>`;
   };
