@@ -17,9 +17,12 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
   activeEditorManager,
+  COLOR_VARIABLES,
+  extractCssVariables,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
+  SIZE_VARIABLES,
   updateBlockType,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -33,6 +36,24 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createViewer } from './doc-inspector';
+
+const cssVariablesMap = extractCssVariables(document.documentElement);
+const plate: Record<string, string> = {};
+COLOR_VARIABLES.forEach((key: string) => {
+  plate[key] = cssVariablesMap[key];
+});
+
+const CSSSizeProperties: Array<{
+  name: string;
+  defaultValue: number;
+}> = SIZE_VARIABLES.map((key: string) => {
+  return {
+    name: key,
+    defaultValue: isNaN(parseFloat(cssVariablesMap[key]))
+      ? 0
+      : parseFloat(cssVariablesMap[key]),
+  };
+});
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -205,6 +226,7 @@ export class DebugMenu extends ShadowlessElement {
   private _exportYDoc() {
     this.workspace.exportYDoc();
   }
+
   private async _importYDoc() {
     await this.workspace.importYDoc();
     this.requestUpdate();
@@ -261,9 +283,22 @@ export class DebugMenu extends ShadowlessElement {
       this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 350;
+    this._styleMenu.width = 650;
+    const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');
+    const colorFolder = this._styleMenu.addFolder('Color');
     sizeFolder.open();
+    CSSSizeProperties.forEach(({ name, defaultValue }) => {
+      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
+        style.setProperty(name, `${Math.round(e)}px`);
+      });
+    });
+    colorFolder.open();
+    for (const plateKey in plate) {
+      colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
+        style.setProperty(plateKey, color);
+      });
+    }
     this._styleMenu.hide();
   }
 

@@ -10,3 +10,7 @@
 :root {
   --affine-editor-width: 720px;
 }
+
+.dg > ul {
+  overflow: scroll;
+}
