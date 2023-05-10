@@ -76,7 +76,8 @@ if (scope) {
     }
     const focusInSecondEditor = await page.evaluate(
       ([currentEditorIndex]) => {
-        const editor = document.querySelectorAll('editor-container')[1];
+        const editor =
+          document.querySelectorAll('editor-container')[currentEditorIndex];
         const selection = getSelection();
         if (!selection || selection.rangeCount === 0) {
           return true;
