@@ -549,7 +549,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
