@@ -156,12 +156,17 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         range.endContainer.contains(rootElement) &&
         Array.from(range.endContainer.childNodes).filter(
           node => node instanceof HTMLElement
+        ).length === 1 &&
+        range.startContainer.contains(rootElement) &&
+        Array.from(range.startContainer.childNodes).filter(
+          node => node instanceof HTMLElement
         ).length === 1
       ) {
-        this._editor.rangeService.setVRange({
-          index: range.endOffset,
-          length: range.endContainer.textContent?.length || 0,
-        });
+        this._editor.focusEnd();
+        // this._editor.rangeService.setVRange({
+        //   index: range.endOffset,
+        //   length: range.endContainer.textContent?.length || 0,
+        // });
       } else {
         return;
       }
