@@ -25,6 +25,7 @@ import {
   ShadowlessElement,
   SIZE_VARIABLES,
   updateBlockType,
+  VARIABLES,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
@@ -43,18 +44,27 @@ const plate: Record<string, string> = {};
 COLOR_VARIABLES.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
+const OTHER_CSS_VARIABLES = VARIABLES.filter(
+  variable =>
+    !SIZE_VARIABLES.includes(variable) &&
+    !COLOR_VARIABLES.includes(variable) &&
+    !FONT_FAMILY_VARIABLES.includes(variable)
+);
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(
-  sizeFolder: GUI,
-  style: CSSStyleDeclaration,
-  fontFamilyFolder: GUI,
-  colorFolder: GUI
-) {
+function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
+  const sizeFolder = styleMenu.addFolder('Size');
+  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
+  const colorFolder = styleMenu.addFolder('Color');
+  const othersFolder = styleMenu.addFolder('Others');
+  sizeFolder.open();
+  fontFamilyFolder.open();
+  colorFolder.open();
+  othersFolder.open();
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
       .add(
@@ -82,6 +92,11 @@ function init_css_debug_menu(
       .onChange(e => {
         style.setProperty(name, e);
       });
+  });
+  OTHER_CSS_VARIABLES.forEach(name => {
+    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
+      style.setProperty(name, e);
+    });
   });
   fontFamilyFolder
     .add(
@@ -326,13 +341,7 @@ export class DebugMenu extends ShadowlessElement {
     this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 650;
     const style = document.documentElement.style;
-    const sizeFolder = this._styleMenu.addFolder('Size');
-    const fontFamilyFolder = this._styleMenu.addFolder('FontFamily');
-    const colorFolder = this._styleMenu.addFolder('Color');
-    sizeFolder.open();
-    fontFamilyFolder.open();
-    colorFolder.open();
-    init_css_debug_menu(sizeFolder, style, fontFamilyFolder, colorFolder);
+    init_css_debug_menu(this._styleMenu, style);
     this._styleMenu.hide();
   }
 
@@ -549,7 +558,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
