@@ -22,6 +22,9 @@ function isUndoRedo(event: KeyboardEvent) {
   return false;
 }
 
+/**
+ * Return `true` if the event should be ignore.
+ */
 function shouldFilterHotkey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
