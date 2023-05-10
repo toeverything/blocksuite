@@ -52,6 +52,8 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
         edgeless.mouseMode = { type: 'pan', panning: false };
         shouldRevertMode = true;
         lastMode = mouseMode;
+
+        return;
       }
       if (event.type === 'keyup') {
         if (mouseMode.type === 'pan' && shouldRevertMode && lastMode) {
