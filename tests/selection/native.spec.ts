@@ -34,7 +34,6 @@ import {
   pressEnter,
   pressShiftTab,
   redoByKeyboard,
-  shamefullyBlurActiveElement,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -1156,4 +1155,34 @@ test('should collapse to start when press arrow-left on multi-line selection', a
   await pressArrowLeft(page);
   await pressBackspace(page);
   await assertRichTexts(page, ['23', '456', '789']);
+});
+
+test('should select when clicking on blank area in edgeless mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+  await activeFrameInEdgeless(page, ids.frameId);
+
+  const r1 = await page.locator('[data-block-id="3"]').boundingBox();
+  const r2 = await page.locator('[data-block-id="4"]').boundingBox();
+  const r3 = await page.locator('[data-block-id="5"]').boundingBox();
+  if (!r1 || !r2 || !r3) {
+    throw new Error();
+  }
+
+  await focusRichText(page, 2);
+
+  await dragBetweenCoords(
+    page,
+    { x: r3.x + r3.width / 2, y: r3.y - (r3.y - (r2.y + r2.height)) / 2 },
+    { x: r3.x + r3.width / 2, y: r2.y - (r2.y - (r1.y + r1.height)) / 2 },
+    { steps: 50 }
+  );
+
+  expect(await getVirgoSelectionText(page)).toBe('456');
 });
