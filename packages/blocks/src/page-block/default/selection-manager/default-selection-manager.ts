@@ -272,12 +272,9 @@ export class DefaultSelectionManager {
       if (type === 'native') {
         state.lastPoint = new Point(clientX, clientY);
         handleNativeRangeDragMove(state.startRange, e);
-        return;
       } else if (type === 'block') {
         this.selectedBlocksWithShiftClick(x, y);
-        return;
       }
-
       return;
     }
 

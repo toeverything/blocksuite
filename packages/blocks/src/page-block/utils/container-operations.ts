@@ -46,8 +46,6 @@ import type {
 } from '../default/selection-manager/index.js';
 import { calcCurrentSelectionPosition } from './position.js';
 
-const DEFAULT_SPACING = 64;
-
 export function handleBlockSelectionBatchDelete(
   page: Page,
   models: ExtendedModel[]
@@ -535,7 +533,6 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
     const frames = page.root.children as TopLevelBlockModel[];
-    let offset = 0;
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
@@ -548,11 +545,9 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const newModelHeight =
         bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
       if (!almostEqual(newModelHeight, h)) {
-        const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
-          xywh: JSON.stringify([newX, y, w, Math.round(newModelHeight)]),
+          xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
         });
-        offset = newX + w;
       }
     });
   });

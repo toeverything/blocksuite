@@ -17,10 +17,15 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
   activeEditorManager,
+  COLOR_VARIABLES,
+  extractCssVariables,
+  FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
   ShadowlessElement,
+  SIZE_VARIABLES,
   updateBlockType,
+  VARIABLES,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
@@ -34,10 +39,82 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createViewer } from './doc-inspector';
 
+const cssVariablesMap = extractCssVariables(document.documentElement);
+const plate: Record<string, string> = {};
+COLOR_VARIABLES.forEach((key: string) => {
+  plate[key] = cssVariablesMap[key];
+});
+const OTHER_CSS_VARIABLES = VARIABLES.filter(
+  variable =>
+    !SIZE_VARIABLES.includes(variable) &&
+    !COLOR_VARIABLES.includes(variable) &&
+    !FONT_FAMILY_VARIABLES.includes(variable)
+);
+
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
+
+function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
+  const sizeFolder = styleMenu.addFolder('Size');
+  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
+  const colorFolder = styleMenu.addFolder('Color');
+  const othersFolder = styleMenu.addFolder('Others');
+  sizeFolder.open();
+  fontFamilyFolder.open();
+  colorFolder.open();
+  othersFolder.open();
+  SIZE_VARIABLES.forEach(name => {
+    sizeFolder
+      .add(
+        {
+          [name]: isNaN(parseFloat(cssVariablesMap[name]))
+            ? 0
+            : parseFloat(cssVariablesMap[name]),
+        },
+        name,
+        0,
+        100
+      )
+      .onChange(e => {
+        style.setProperty(name, `${Math.round(e)}px`);
+      });
+  });
+  FONT_FAMILY_VARIABLES.forEach(name => {
+    fontFamilyFolder
+      .add(
+        {
+          [name]: cssVariablesMap[name],
+        },
+        name
+      )
+      .onChange(e => {
+        style.setProperty(name, e);
+      });
+  });
+  OTHER_CSS_VARIABLES.forEach(name => {
+    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
+      style.setProperty(name, e);
+    });
+  });
+  fontFamilyFolder
+    .add(
+      {
+        '--affine-font-family':
+          'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
+      },
+      '--affine-font-family'
+    )
+    .onChange(e => {
+      style.setProperty('--affine-font-family', e);
+    });
+  for (const plateKey in plate) {
+    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
+      style.setProperty(plateKey, color);
+    });
+  }
+}
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
@@ -205,6 +282,7 @@ export class DebugMenu extends ShadowlessElement {
   private _exportYDoc() {
     this.workspace.exportYDoc();
   }
+
   private async _importYDoc() {
     await this.workspace.importYDoc();
     this.requestUpdate();
@@ -261,9 +339,9 @@ export class DebugMenu extends ShadowlessElement {
       this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 350;
-    const sizeFolder = this._styleMenu.addFolder('Size');
-    sizeFolder.open();
+    this._styleMenu.width = 650;
+    const style = document.documentElement.style;
+    init_css_debug_menu(this._styleMenu, style);
     this._styleMenu.hide();
   }
 
@@ -480,7 +558,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
