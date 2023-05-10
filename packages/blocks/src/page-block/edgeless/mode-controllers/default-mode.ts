@@ -1,5 +1,9 @@
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PhasorElement, XYWH } from '@blocksuite/phasor';
+import {
+  ConnectorElement,
+  type PhasorElement,
+  type XYWH,
+} from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
 
 import {
@@ -155,7 +159,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     if (
       selected.type !== 'connector' ||
-      (selected.type === 'connector' &&
+      (selected instanceof ConnectorElement &&
         isConnectorAndBindingsAllSelected(
           selected,
           this._blockSelectionState.selected

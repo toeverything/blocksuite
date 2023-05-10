@@ -4,31 +4,29 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import type {
-  BaseElement,
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/base-element.js';
-import { defaultTransformPropertyValue } from './elements/base-element.js';
 import {
   ElementCtors,
+  ElementDefaultProps,
+  type IPhasorElementType,
   type PhasorElement,
-  type PhasorElementCreateProps,
-  type PhasorElementSerializeProps,
   type PhasorElementType,
+  type SurfaceElement,
 } from './elements/index.js';
 import { compare } from './grid.js';
-import { intersects } from './index.js';
+import { ConnectorElement, intersects, type IPhasorElement } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { generateElementId, typecast } from './utils/std.js';
+import { generateElementId } from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
-import { updateYElementProps } from './utils/y-operation.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
-  private _yElements: Y.Map<Y.Map<unknown>>;
-  private _elements = new Map<string, PhasorElement>();
+  private _yContainer: Y.Map<Y.Map<unknown>>;
+  private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
   private _lastIndex = 'a0';
 
@@ -36,14 +34,14 @@ export class SurfaceManager {
 
   constructor(
     yContainer: Y.Map<unknown>,
-    transformPropertyValue: TransformPropertyValue = defaultTransformPropertyValue
+    transformPropertyValue: TransformPropertyValue = v => v
   ) {
     this._renderer = new Renderer();
-    this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
+    this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._transformPropertyValue = transformPropertyValue;
 
     this._syncFromExistingContainer();
-    this._yElements.observeDeep(this._handleYEvents);
+    this._yContainer.observe(this._onYContainer);
   }
 
   get viewport(): SurfaceViewport {
@@ -62,38 +60,34 @@ export class SurfaceManager {
     return getCommonBound([...this._elements.values()]);
   }
 
-  addElement(type: PhasorElementType, properties: PhasorElementCreateProps) {
-    const ElementCtor = ElementCtors[type];
-
+  addElement<T extends keyof PhasorElementType>(
+    type: T,
+    properties: Partial<Omit<IPhasorElementType[T], 'id' | 'index'>>
+  ): PhasorElement['id'] {
     const id = generateElementId();
-    const element = new ElementCtor(id);
-    element.transformPropertyValue = this._transformPropertyValue;
 
-    const ctor = typecast<typeof BaseElement>(ElementCtor);
-    const updated = ctor.getUpdatedSerializedProps(element, properties);
-    ctor.applySerializedProps(element, updated);
+    const yMap = new Y.Map();
 
-    return this._addElement(element);
+    const defaultProps = ElementDefaultProps[type];
+    const props: IPhasorElement = {
+      ...defaultProps,
+      ...properties,
+      id,
+      index: generateKeyBetween(this._lastIndex, null),
+    };
+    for (const key in props) {
+      yMap.set(key, props[key as keyof IPhasorElement]);
+    }
+
+    this._yContainer.set(id, yMap);
+
+    return id;
   }
 
-  updateElement<
-    T extends Partial<PhasorElementSerializeProps> = Partial<PhasorElementSerializeProps>
-  >(id: string, properties: T) {
+  updateElement<T extends IPhasorElement>(id: string, properties: Partial<T>) {
     const element = this._elements.get(id);
     assertExists(element);
-
-    const ElementCtor = ElementCtors[element.type];
-    assertExists(ElementCtor);
-
-    const ctor = typecast<typeof BaseElement>(ElementCtor);
-    const updated = ctor.getUpdatedSerializedProps(element, properties);
-
-    this._transact(() => {
-      const yElement = this._yElements.get(id) as Y.Map<unknown>;
-      assertExists(yElement);
-
-      updateYElementProps(yElement, updated);
-    });
+    element.applyUpdate(properties);
   }
 
   setElementBound(id: string, bound: IBound) {
@@ -104,12 +98,12 @@ export class SurfaceManager {
 
   removeElement(id: string) {
     this._transact(() => {
-      this._yElements.delete(id);
+      this._yContainer.delete(id);
     });
   }
 
   hasElement(id: string) {
-    return this._yElements.has(id);
+    return this._yContainer.has(id);
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
@@ -124,32 +118,32 @@ export class SurfaceManager {
     return this._elements.get(id);
   }
 
-  pickByPoint(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
+  pickByPoint(
+    x: number,
+    y: number,
+    options?: HitTestOptions
+  ): SurfaceElement[] {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
-    const picked = candidates.filter((element: PhasorElement) => {
+    const picked = candidates.filter(element => {
       return element.hitTest(x, y, options);
     });
 
     return picked;
   }
 
-  pickTop(x: number, y: number): PhasorElement | null {
+  pickTop(x: number, y: number): SurfaceElement | null {
     const results = this.pickByPoint(x, y);
     return results[results.length - 1] ?? null;
   }
 
-  pickByBound(bound: IBound): PhasorElement[] {
+  pickByBound(bound: IBound): SurfaceElement[] {
     const candidates = this._renderer.gridManager.search(bound);
-    const picked = candidates.filter((element: PhasorElement) => {
+    const picked = candidates.filter((element: SurfaceElement) => {
       return contains(bound, element) || intersects(bound, element);
     });
 
     return picked;
-  }
-
-  addElements(elements: PhasorElement[]) {
-    elements.forEach(element => this._addElement(element));
   }
 
   moveToBack(elementIds: string[]) {
@@ -172,12 +166,12 @@ export class SurfaceManager {
     const sortedElements = (
       elementIds
         .map(id => this._elements.get(id))
-        .filter(e => !!e) as PhasorElement[]
+        .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
     this._transact(() => {
       sortedElements.forEach((ele, index) => {
-        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
         yElement.set('index', keys[index]);
       });
     });
@@ -193,12 +187,12 @@ export class SurfaceManager {
     const sortedElements = (
       elementIds
         .map(id => this._elements.get(id))
-        .filter(e => !!e) as PhasorElement[]
+        .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
     this._transact(() => {
       sortedElements.forEach((ele, index) => {
-        const yElement = this._yElements.get(ele.id) as Y.Map<unknown>;
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
         yElement.set('index', keys[index]);
       });
     });
@@ -211,7 +205,7 @@ export class SurfaceManager {
     }
     return [...bindingIds.values()]
       .map(bindingId => this.pickById(bindingId))
-      .filter(e => !!e) as PhasorElement[];
+      .filter(e => !!e) as SurfaceElement[];
   }
 
   private _addBinding(id0: string, id1: string) {
@@ -221,8 +215,8 @@ export class SurfaceManager {
     this._bindings.get(id0)?.add(id1);
   }
 
-  private _updateBindings(element: PhasorElement) {
-    if (element.type === 'connector') {
+  private _updateBindings(element: SurfaceElement) {
+    if (element instanceof ConnectorElement) {
       if (element.startElement) {
         this._addBinding(element.startElement.id, element.id);
         this._addBinding(element.id, element.startElement.id);
@@ -234,56 +228,29 @@ export class SurfaceManager {
     }
   }
 
-  private _handleYElementAdded(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as PhasorElementType;
-
-    const ElementCtor = ElementCtors[type];
-    assertExists(ElementCtor);
-    const element = ElementCtor.deserialize(yElement.toJSON());
-    assertExists(element);
-    element.transformPropertyValue = this._transformPropertyValue;
-
-    this._renderer.addElement(element);
-    this._elements.set(element.id, element);
-
-    if (element.index > this._lastIndex) {
-      this._lastIndex = element.index;
-    }
-
-    this._updateBindings(element);
-  }
-
   private _syncFromExistingContainer() {
-    this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
-  }
+    this._yContainer.forEach(yElement => {
+      const type = yElement.get('type') as keyof PhasorElementType;
 
-  private _addElement(element: PhasorElement) {
-    element.index = generateKeyBetween(this._lastIndex, null);
+      const ElementCtor = ElementCtors[type];
+      assertExists(ElementCtor);
+      const element = new ElementCtor(yElement);
+      element.transformPropertyValue = this._transformPropertyValue;
+      element.mount(this._renderer);
 
-    this._transact(() => {
-      const yElement = this._createYElement(element);
-      this._yElements.set(element.id, yElement);
+      this._elements.set(element.id, element);
+
+      if (element.index > this._lastIndex) {
+        this._lastIndex = element.index;
+      }
+
+      this._updateBindings(element);
     });
-
-    return element.id;
   }
 
-  private _createYElement(element: Omit<PhasorElement, 'id'>) {
-    const serialized = element.serialize();
-    const yElement = new Y.Map<unknown>();
-    updateYElementProps(yElement, serialized);
-    return yElement;
-  }
-
-  private _transact(callback: () => void) {
-    const doc = this._yElements.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
-  }
-
-  private _handleYElementsEvent(event: Y.YMapEvent<unknown>) {
+  private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
     // skip empty event
     if (event.changes.keys.size === 0) return;
-
     event.keysChanged.forEach(id => {
       const type = event.changes.keys.get(id);
       if (!type) {
@@ -292,68 +259,41 @@ export class SurfaceManager {
       }
 
       if (type.action === 'add') {
-        const yElement = this._yElements.get(id) as Y.Map<unknown>;
-        this._handleYElementAdded(yElement);
+        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
+        const type = yElement.get('type') as keyof PhasorElementType;
+
+        const ElementCtor = ElementCtors[type];
+        assertExists(ElementCtor);
+        const element = new ElementCtor(yElement);
+        element.transformPropertyValue = this._transformPropertyValue;
+        element.mount(this._renderer);
+
+        this._elements.set(element.id, element);
+
+        if (element.index > this._lastIndex) {
+          this._lastIndex = element.index;
+        }
+
+        this._updateBindings(element);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);
         assertExists(element);
+        element.unmount();
         this._renderer.removeElement(element);
         this._elements.delete(id);
       }
     });
-  }
-
-  private _handleYElementEvent(event: Y.YMapEvent<unknown>) {
-    const yElement = event.target as Y.Map<unknown>;
-    const id = yElement.get('id') as string;
-
-    event.keysChanged.forEach(key => {
-      const type = event.changes.keys.get(key);
-      if (!type) {
-        console.error('invalid event', event);
-        return;
-      }
-
-      if (type.action === 'update') {
-        const element = this._elements.get(id);
-        assertExists(element);
-
-        this._renderer.removeElement(element);
-        const ElementCtor = ElementCtors[element.type];
-        assertExists(ElementCtor);
-
-        const ctor = typecast<typeof BaseElement>(ElementCtor);
-        ctor.applySerializedProps(element, {
-          [key]: yElement.get(key),
-        });
-
-        this._updateBindings(element);
-
-        this._renderer.addElement(element);
-      }
-    });
-  }
-
-  private _handleYEvent(event: Y.YEvent<Y.Map<unknown>>) {
-    if (!(event instanceof Y.YMapEvent)) return;
-
-    if (event.target === this._yElements) {
-      this._handleYElementsEvent(event);
-    } else if (event.target.parent === this._yElements) {
-      this._handleYElementEvent(event);
-    }
-  }
-
-  private _handleYEvents = (events: Y.YEvent<Y.Map<unknown>>[]) => {
-    for (const event of events) {
-      this._handleYEvent(event);
-    }
   };
 
+  private _transact(callback: () => void) {
+    const doc = this._yContainer.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
+  }
+
   dispose() {
-    this._yElements.unobserveDeep(this._handleYEvents);
+    this._yContainer.unobserve(this._onYContainer);
   }
 
   /** @internal Only for testing */

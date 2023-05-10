@@ -1,5 +1,5 @@
 import { GRID_SIZE, type IBound } from './consts.js';
-import type { PhasorElement } from './elements/index.js';
+import type { SurfaceElement } from './elements/base-element.js';
 import { intersects, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {
@@ -14,18 +14,18 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export function compare(a: PhasorElement, b: PhasorElement): number {
+export function compare(a: SurfaceElement, b: SurfaceElement): number {
   if (a.index > b.index) return 1;
   else if (a.index < b.index) return -1;
   return a.id > b.id ? 1 : -1;
 }
 
 export class GridManager {
-  private _grids: Map<string, Set<PhasorElement>> = new Map();
+  private _grids: Map<string, Set<SurfaceElement>> = new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<PhasorElement> = new Set();
+    const elements: Set<SurfaceElement> = new Set();
     this._grids.set(id, elements);
     return elements;
   }
@@ -39,7 +39,7 @@ export class GridManager {
     return this._grids.size === 0;
   }
 
-  add(element: PhasorElement) {
+  add(element: SurfaceElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -52,7 +52,7 @@ export class GridManager {
     }
   }
 
-  remove(element: PhasorElement) {
+  remove(element: SurfaceElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -74,9 +74,9 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound): PhasorElement[] {
+  search(bound: IBound): SurfaceElement[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<PhasorElement> = new Set();
+    const results: Set<SurfaceElement> = new Set();
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
@@ -96,13 +96,13 @@ export class GridManager {
     return sorted;
   }
 
-  pick(x: number, y: number): PhasorElement[] {
+  pick(x: number, y: number): SurfaceElement[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
     const gridElements = this._getGrid(row, col);
     if (!gridElements) return [];
 
-    const results: PhasorElement[] = [];
+    const results: SurfaceElement[] = [];
     for (const element of gridElements) {
       if (isPointIn(element, x, y)) {
         results.push(element);
