@@ -83,9 +83,7 @@ if (scope) {
           return true;
         }
         // once the range exists, it must be in the corresponding editor
-        return editor.contains(
-          selection.getRangeAt(currentEditorIndex).startContainer
-        );
+        return editor.contains(selection.getRangeAt(0).startContainer);
       },
       [currentEditorIndex]
     );
