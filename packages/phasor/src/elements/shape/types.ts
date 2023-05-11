@@ -1,6 +1,6 @@
 import type { IBound, StrokeStyle } from '../../consts.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
-import type { HitTestOptions } from '../base-element.js';
+import type { HitTestOptions } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';

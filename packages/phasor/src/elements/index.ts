@@ -14,12 +14,12 @@ import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape } from './shape/types.js';
 
-export type { SurfaceElement } from './base-element.js';
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
+export type { SurfaceElement } from './surface-element.js';
 
 export type PhasorElement =
   | ShapeElement
