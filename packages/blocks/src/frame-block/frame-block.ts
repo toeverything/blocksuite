@@ -37,7 +37,9 @@ export class FrameBlockComponent extends ShadowlessElement {
 
   override render() {
     return html`
-      <div class="affine-frame-block-container">${this.content}</div>
+      <div class="affine-frame-block-container">
+        <div class="affine-block-children-container">${this.content}</div>
+      </div>
     `;
   }
 }
