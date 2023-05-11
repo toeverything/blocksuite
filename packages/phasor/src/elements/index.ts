@@ -13,6 +13,9 @@ import {
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape } from './shape/types.js';
+import { TextElementDefaultProps } from './text/constants.js';
+import { TextElement } from './text/text-element.js';
+import type { IText } from './text/types.js';
 
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
@@ -33,15 +36,17 @@ export type PhasorElementType = {
   debug: DebugElement;
   brush: BrushElement;
   connector: ConnectorElement;
+  text: TextElement;
 };
 
-export type IPhasorElement = IShape | IConnector | IDebug | IBrush;
+export type IPhasorElement = IShape | IConnector | IDebug | IBrush | IText;
 
 export type IPhasorElementType = {
   shape: IShape;
   debug: IDebug;
   brush: IBrush;
   connector: IConnector;
+  text: IText;
 };
 
 export const ElementCtors = {
@@ -49,6 +54,7 @@ export const ElementCtors = {
   brush: BrushElement,
   shape: ShapeElement,
   connector: ConnectorElement,
+  text: TextElement,
 } as const;
 
 export const ElementDefaultProps = {
@@ -56,4 +62,5 @@ export const ElementDefaultProps = {
   brush: BrushElementDefaultProps,
   shape: ShapeElementDefaultProps,
   connector: ConnectorElementDefaultProps,
+  text: TextElementDefaultProps,
 } as const;

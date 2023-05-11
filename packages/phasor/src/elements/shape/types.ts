@@ -8,7 +8,7 @@ export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 export interface IShape {
   id: string;
   index: string;
-  type: string;
+  type: 'shape';
   xywh: SerializedXYWH;
 
   shapeType: ShapeType;
@@ -18,6 +18,8 @@ export interface IShape {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
+
+  textId?: string;
 }
 
 export interface ShapeMethods {

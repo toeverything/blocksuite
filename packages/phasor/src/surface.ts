@@ -234,7 +234,7 @@ export class SurfaceManager {
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
-      const element = new ElementCtor(yElement);
+      const element = new ElementCtor(yElement, this);
       element.transformPropertyValue = this._transformPropertyValue;
       element.mount(this._renderer);
 
@@ -264,7 +264,7 @@ export class SurfaceManager {
 
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
-        const element = new ElementCtor(yElement);
+        const element = new ElementCtor(yElement, this);
         element.transformPropertyValue = this._transformPropertyValue;
         element.mount(this._renderer);
 
