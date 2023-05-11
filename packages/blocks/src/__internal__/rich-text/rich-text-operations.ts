@@ -391,19 +391,6 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
-  function handleListItem(
-    page: Page,
-    model: ExtendedModel,
-    previousSibling: ExtendedModel | null
-  ) {
-    if (previousSibling) {
-      page.deleteBlock(model);
-      focusBlockByModel(previousSibling);
-      return true;
-    }
-    return false;
-  }
-
   function handleParagraphOrListSibling(
     page: Page,
     model: ExtendedModel,
@@ -484,7 +471,6 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
   if (!parent) return false;
   const previousSibling = getPreviousBlock(model);
-  const nextSibling = getNextBlock(model);
 
   if (matchFlavours(parent, ['affine:database'])) {
     const databaseRowsCount = parent.children.length;
@@ -503,8 +489,6 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
       handleNoPreviousSibling(page, model, previousSibling)
     );
-  } else if (nextSibling && matchFlavours(nextSibling, ['affine:list'])) {
-    return handleListItem(page, model, previousSibling);
   }
 
   return false;
