@@ -1,8 +1,6 @@
 import {
   type AbstractEditor,
   activeEditorManager,
-  type DefaultPageBlockComponent,
-  type EdgelessPageBlockComponent,
   edgelessPreset,
   type PageBlockModel,
   pagePreset,
@@ -17,23 +15,10 @@ import {
 import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function forwardSlot<T extends Record<string, Slot<any>>>(
-  from: T,
-  to: Partial<T>
-) {
-  Object.entries(from).forEach(([key, slot]) => {
-    const target = to[key];
-    if (target) {
-      slot.pipe(target);
-    }
-  });
-}
 
 BlockSuiteRoot;
 
@@ -63,18 +48,6 @@ export class EditorContainer
   get pageBlockModel(): PageBlockModel | null {
     return Array.isArray(this.model) ? this.model[0] : this.model;
   }
-
-  get surfaceBlockModel(): SurfaceBlockModel | null {
-    return Array.isArray(this.model)
-      ? (this.model[1] as SurfaceBlockModel)
-      : null;
-  }
-
-  @query('affine-default-page')
-  private _defaultPageBlock?: DefaultPageBlockComponent;
-
-  @query('affine-edgeless-page')
-  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
@@ -180,12 +153,6 @@ export class EditorContainer
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
-    }
-    if (this._defaultPageBlock) {
-      forwardSlot(this._defaultPageBlock.slots, this.slots);
-    }
-    if (this._edgelessPageBlock) {
-      forwardSlot(this._edgelessPageBlock.slots, this.slots);
     }
   }
 
