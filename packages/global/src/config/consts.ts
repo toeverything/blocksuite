@@ -17,6 +17,7 @@ export const HOTKEYS = {
   UNDO: `${SHORT_KEY}+z`,
   REDO: `${SHORT_KEY}+shift+z,ctrl+y`,
   BACKSPACE: 'backspace',
+  DELETE: 'delete',
   SELECT_ALL: `${SHORT_KEY}+a`,
   SHIFT_UP: 'shift+up',
   SHIFT_DOWN: 'shift+down',
