@@ -9,6 +9,9 @@ import { EmbedBlockService } from './embed-service.js';
 @customElement('affine-embed')
 export class EmbedBlockComponent extends ShadowlessElement {
   static override styles = css`
+    affine-embed {
+      display: block;
+    }
     .affine-embed-wrapper {
       text-align: center;
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -92,9 +95,9 @@ export class EmbedBlockComponent extends ShadowlessElement {
         ? html`<affine-image .model=${this.model}></affine-image>`
         : nothing;
     return html`
+      ${slot}
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">
-          ${slot}
           <input
             .disabled=${this.model.page.readonly}
             placeholder="Write a caption"

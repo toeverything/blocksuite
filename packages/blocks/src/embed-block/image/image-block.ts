@@ -12,9 +12,6 @@ import type { EmbedBlockModel } from '../index.js';
 @customElement('affine-image')
 export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    affine-image > affine-embed {
-      display: block;
-    }
     .affine-image-wrapper {
       padding: 8px;
       width: 100%;
