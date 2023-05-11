@@ -6,13 +6,13 @@ import './components/database-title.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import {
   asyncFocusRichText,
-  type BlockHost,
   WithDisposable,
 } from '../../__internal__/index.js';
 import { ShadowlessElement } from '../../__internal__/utils/lit.js';
@@ -114,33 +114,16 @@ const styles = css`
 `;
 
 @customElement('affine-database-table')
-export class DatabaseTable
-  extends WithDisposable(ShadowlessElement)
-  implements BlockHost
-{
+export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   flavour = 'affine:database' as const;
 
   static override styles = styles;
-
-  get slots() {
-    return this.host.slots;
-  }
-
-  get page() {
-    return this.host.page;
-  }
-  get clipboard() {
-    return this.host.clipboard;
-  }
-  get getService() {
-    return this.host.getService;
-  }
 
   @property()
   model!: DatabaseBlockModel;
 
   @property()
-  host!: BlockHost;
+  root!: BlockSuiteRoot;
 
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
@@ -293,7 +276,8 @@ export class DatabaseTable
     const rows = DataBaseRowContainer(
       this,
       this._filteredRowIds,
-      this._searchState
+      this._searchState,
+      this.root
     );
 
     return html`

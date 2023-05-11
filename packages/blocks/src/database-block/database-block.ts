@@ -2,12 +2,14 @@
 import './table/table-view.js';
 import './kanban/kanban-view.js';
 
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { type BlockHost } from '../__internal__/index.js';
+import { registerService } from '../__internal__/service.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockService } from './database-service.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends ShadowlessElement {
@@ -15,11 +17,12 @@ export class DatabaseBlockComponent extends ShadowlessElement {
   model!: DatabaseBlockModel;
 
   @property()
-  host!: BlockHost;
+  root!: BlockSuiteRoot;
 
   override connectedCallback() {
     super.connectedCallback();
 
+    registerService('affine:database', DatabaseBlockService);
     this.model.propsUpdated.on(() => this.requestUpdate());
   }
 
@@ -31,8 +34,8 @@ export class DatabaseBlockComponent extends ShadowlessElement {
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
       <${databaseTag}
+        .root=${this.root}
         .model=${this.model}
-        .host=${this.host}
         class="affine-block-element"
       ></${databaseTag}>
     `;

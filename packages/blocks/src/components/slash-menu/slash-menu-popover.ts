@@ -96,7 +96,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
      */
     createKeydownObserver({
       target: richText,
-      delimiter: '/',
       abortController: this.abortController,
       interceptor: (e, next) => {
         if (e.key === '/') {

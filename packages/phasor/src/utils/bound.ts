@@ -1,6 +1,6 @@
 import type { IBound } from '../consts.js';
 import { Utils } from './tl-utils.js';
-import { deserializeXYWH, serializeXYWH } from './xywh.js';
+import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
 export class Bound implements IBound {
   x: number;
@@ -15,7 +15,7 @@ export class Bound implements IBound {
     this.h = h;
   }
 
-  serialize() {
+  serialize(): SerializedXYWH {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
