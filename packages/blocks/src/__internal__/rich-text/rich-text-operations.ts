@@ -492,14 +492,15 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const previousSibling = getPreviousBlock(model);
 
   if (matchFlavours(parent, ['affine:database'])) {
-    if (previousSibling) {
+    const databaseRowsCount = parent.children.length;
+    if (databaseRowsCount === 1) {
+      return true;
+    } else if (previousSibling) {
       page.deleteBlock(model);
       focusBlockByModel(previousSibling);
       return true;
     } else {
-      return previousSibling
-        ? handleDatabaseSibling(page, model, previousSibling)
-        : handleNoPreviousSibling(page, model, previousSibling);
+      return handleNoPreviousSibling(page, model, previousSibling);
     }
   } else if (matchFlavours(parent, ['affine:frame'])) {
     return (

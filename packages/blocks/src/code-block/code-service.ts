@@ -12,6 +12,8 @@ import type {
 } from '../__internal__/utils/index.js';
 import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
+import { getStandardLanguage } from './utils/code-languages.js';
+import { FALLBACK_LANG } from './utils/consts.js';
 
 const INDENT_SYMBOL = '  ';
 const LINE_BREAK_SYMBOL = '\n';
@@ -36,8 +38,12 @@ const allIndexOf = (
 };
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
-  setLang(model: CodeBlockModel, lang: string) {
-    model.page.updateBlock(model, { language: lang });
+  setLang(model: CodeBlockModel, lang: string | null) {
+    const standardLang = getStandardLanguage(lang);
+    const langName = standardLang?.id ?? FALLBACK_LANG;
+    model.page.updateBlock(model, {
+      language: langName,
+    });
   }
 
   override block2html(
