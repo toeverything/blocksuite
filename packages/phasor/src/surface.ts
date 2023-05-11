@@ -152,22 +152,48 @@ export class SurfaceManager {
     return picked;
   }
 
-  moveToBack(elementIds: string[]) {
+  /**
+   * Generates a bound by elements.
+   */
+  genBound(elements: SurfaceElement[]): IBound {
+    const bound = {
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+    };
+
+    let i = 0;
+    const l = elements.length;
+    const first = elements[i];
+
+    if (l) {
+      bound.x = first.x;
+      bound.y = first.y;
+      bound.w = first.w;
+      bound.h = first.h;
+
+      let e;
+      let maxX;
+      let maxY;
+      for (i++; i < l; i++) {
+        e = elements[i];
+        bound.x = Math.min(bound.x, e.x);
+        bound.y = Math.min(bound.y, e.y);
+        maxX = Math.max(bound.x + bound.w, e.x + e.w);
+        maxY = Math.max(bound.y + bound.h, e.y + e.h);
+        bound.w = maxX - bound.x;
+        bound.h = maxY - bound.y;
+      }
+    }
+
+    return bound;
+  }
+
+  bringToFront(elementIds: string[]) {
     if (!elementIds.length) {
       return;
     }
-
-    let startIndex = this._lastIndex;
-    this._elements.forEach(element => {
-      if (elementIds.includes(element.id)) {
-        return;
-      }
-      if (element.index < startIndex) {
-        startIndex = element.index;
-      }
-    });
-
-    const keys = generateNKeysBetween(null, startIndex, elementIds.length);
 
     const sortedElements = (
       elementIds
@@ -175,20 +201,47 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
+    const bound = this.genBound(sortedElements);
+    const elements = this.pickByBound(bound).sort(compare);
+    const startIndex = elements[0].index;
+    const indexes = sortedElements.map(e =>
+      elements.findIndex(element => element === e)
+    );
+
+    let curr;
+    let start = indexes[0];
+    let end = indexes[0];
+    const ranges = [[start, end]];
+    const len = indexes.length;
+    for (let i = 1; i < len; i++) {
+      curr = indexes[i];
+      if (curr - end === 1) {
+        ranges[i - 1][1] = end = curr;
+      } else {
+        ranges.push([start, end]);
+        start = curr;
+      }
+    }
+
+    ranges.forEach(([start, end]) => {
+      const temp = elements.splice(start, end + 1 - start);
+      elements.push(...temp);
+    });
+
+    const keys = generateNKeysBetween(startIndex, null, elements.length);
+
     this._transact(() => {
-      sortedElements.forEach((ele, index) => {
+      elements.forEach((ele, index) => {
         const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
         yElement.set('index', keys[index]);
       });
     });
   }
 
-  moveToFront(elementIds: string[]) {
+  bringForward(elementIds: string[]) {
     if (!elementIds.length) {
       return;
     }
-
-    const keys = generateNKeysBetween(this._lastIndex, null, elementIds.length);
 
     const sortedElements = (
       elementIds
@@ -196,8 +249,133 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
+    const bound = this.genBound(sortedElements);
+    const elements = this.pickByBound(bound).sort(compare);
+    const startIndex = elements[0].index;
+    const indexes = sortedElements.map(e =>
+      elements.findIndex(element => element === e)
+    );
+
+    let curr;
+    let start = indexes[0];
+    let end = indexes[0];
+    const ranges = [[start, end]];
+    const len = indexes.length;
+    for (let i = 1; i < len; i++) {
+      curr = indexes[i];
+      if (curr - end === 1) {
+        ranges[i - 1][1] = end = curr;
+      } else {
+        ranges.push([start, end]);
+        start = curr;
+      }
+    }
+
+    ranges.forEach(([start, end]) => {
+      const temp = elements.splice(start, end + 1 - start);
+      elements.splice(end + 1, 0, ...temp);
+    });
+
+    const keys = generateNKeysBetween(startIndex, null, elements.length);
+
     this._transact(() => {
-      sortedElements.forEach((ele, index) => {
+      elements.forEach((ele, index) => {
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  sendBackward(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+
+    const bound = this.genBound(sortedElements);
+    const elements = this.pickByBound(bound).sort(compare);
+    const lastIndex = elements[elements.length - 1].index;
+    const indexes = sortedElements.map(e =>
+      elements.findIndex(element => element === e)
+    );
+
+    let curr;
+    let start = indexes[0];
+    let end = indexes[0];
+    const ranges = [[start, end]];
+    const len = indexes.length;
+    for (let i = 1; i < len; i++) {
+      curr = indexes[i];
+      if (curr - end === 1) {
+        ranges[i - 1][1] = end = curr;
+      } else {
+        ranges.push([start, end]);
+        start = curr;
+      }
+    }
+
+    ranges.forEach(([start, end]) => {
+      const temp = elements.splice(start, end + 1 - start);
+      elements.splice(start - 1, 0, ...temp);
+    });
+
+    const keys = generateNKeysBetween(null, lastIndex, elements.length);
+
+    this._transact(() => {
+      elements.forEach((ele, index) => {
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  sendToBack(elementIds: string[]) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+
+    const bound = this.genBound(sortedElements);
+    const elements = this.pickByBound(bound).sort(compare);
+    const lastIndex = elements[elements.length - 1].index;
+    const indexes = sortedElements.map(e =>
+      elements.findIndex(element => element === e)
+    );
+
+    let curr;
+    let start = indexes[0];
+    let end = indexes[0];
+    const ranges = [[start, end]];
+    const len = indexes.length;
+    for (let i = 1; i < len; i++) {
+      curr = indexes[i];
+      if (curr - end === 1) {
+        ranges[i - 1][1] = end = curr;
+      } else {
+        ranges.push([start, end]);
+        start = curr;
+      }
+    }
+
+    ranges.reverse().forEach(([start, end]) => {
+      const temp = elements.splice(start, end + 1 - start);
+      elements.unshift(...temp);
+    });
+
+    const keys = generateNKeysBetween(null, lastIndex, elements.length);
+
+    this._transact(() => {
+      elements.forEach((ele, index) => {
         const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
         yElement.set('index', keys[index]);
       });

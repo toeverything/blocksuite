@@ -43,6 +43,7 @@ export const DEFAULT_FRAME_OFFSET_Y = 40;
 
 export const ZOOM_MAX = 3.0;
 export const ZOOM_MIN = 0.1;
+export const ZOOM_STEP = 0.1;
 
 const ATTACHED_DISTANCE = 20;
 

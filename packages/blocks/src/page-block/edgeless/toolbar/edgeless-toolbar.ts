@@ -27,7 +27,7 @@ import {
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
+import { stopPropagation, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -259,7 +259,7 @@ export class EdgelessToolbar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @click=${() => this._setZoomByStep(-0.1)}
+          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -268,7 +268,7 @@ export class EdgelessToolbar extends LitElement {
         </span>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
-          @click=${() => this._setZoomByStep(+0.1)}
+          @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

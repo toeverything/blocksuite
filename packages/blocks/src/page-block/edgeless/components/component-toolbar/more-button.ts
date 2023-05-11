@@ -16,7 +16,12 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  value: 'delete' | 'moveToBack' | 'moveToFront';
+  value:
+    | 'delete'
+    | 'bringToFront'
+    | 'bringForward'
+    | 'sendBackward'
+    | 'sendToBack';
   disabled?: boolean;
 };
 const ACTIONS: Action[] = [
@@ -24,8 +29,10 @@ const ACTIONS: Action[] = [
   // { name: 'Copy', value: 'copy', disabled: true },
   // { name: 'Paste', value: 'paste', disabled: true },
   // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  { name: 'Bring to front', value: 'moveToFront' },
-  { name: 'Send to back', value: 'moveToBack' },
+  { name: 'Bring to front', value: 'bringToFront' },
+  { name: 'Bring forward', value: 'bringForward' },
+  { name: 'Send backward', value: 'sendBackward' },
+  { name: 'Send to back', value: 'sendToBack' },
   // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
   { name: 'Delete', value: 'delete' },
 ];
@@ -134,12 +141,20 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         this._delete();
         break;
       }
-      case 'moveToBack': {
-        this.surface.moveToBack(this.elements.map(ele => ele.id));
+      case 'bringToFront': {
+        this.surface.bringToFront(this.elements.map(ele => ele.id));
         break;
       }
-      case 'moveToFront': {
-        this.surface.moveToFront(this.elements.map(ele => ele.id));
+      case 'bringForward': {
+        this.surface.bringForward(this.elements.map(ele => ele.id));
+        break;
+      }
+      case 'sendBackward': {
+        this.surface.sendBackward(this.elements.map(ele => ele.id));
+        break;
+      }
+      case 'sendToBack': {
+        this.surface.sendToBack(this.elements.map(ele => ele.id));
         break;
       }
     }
