@@ -92,6 +92,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               name,
               icon,
               showWhen: model => {
+                if (!model.page.schema.flavourSchemaMap.has(flavour)) {
+                  return false;
+                }
+
                 if (['Quote', 'Code Block', 'Divider'].includes(name)) {
                   return !insideDatabase(model);
                 }
@@ -155,6 +159,12 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
         .map(({ name, icon, flavour, type }) => ({
           name,
           icon,
+          showWhen: model => {
+            if (!model.page.schema.flavourSchemaMap.has(flavour)) {
+              return false;
+            }
+            return true;
+          },
           action: ({ model }) => updateBlockType([model], flavour, type),
         })),
     },
@@ -164,7 +174,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
         {
           name: 'Image',
           icon: ImageIcon20,
-          showWhen: model => !insideDatabase(model),
+          showWhen: model => {
+            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+              return false;
+            }
+            if (!insideDatabase(model)) {
+              return false;
+            }
+            return true;
+          },
           async action({ page, model }) {
             const parent = page.getParent(model);
             if (!parent) {
@@ -237,6 +255,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!model.page.awarenessStore.getFlag('enable_database')) {
               return false;
             }
+            if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
+              return false;
+            }
             if (insideDatabase(model)) {
               // You can't add a database block inside another database block
               return false;
@@ -265,6 +286,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           icon: DatabaseKanbanViewIcon,
           showWhen: model => {
             if (!model.page.awarenessStore.getFlag('enable_database')) {
+              return false;
+            }
+            if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
               return false;
             }
             if (insideDatabase(model)) {
