@@ -1,3 +1,7 @@
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+} from '@blocksuite/blocks';
 import {
   type AbstractEditor,
   activeEditorManager,
@@ -15,12 +19,25 @@ import {
 import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 BlockSuiteRoot;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function forwardSlot<T extends Record<string, Slot<any>>>(
+  from: T,
+  to: Partial<T>
+) {
+  Object.entries(from).forEach(([key, slot]) => {
+    const target = to[key];
+    if (target) {
+      slot.pipe(target);
+    }
+  });
+}
 
 @customElement('editor-container')
 export class EditorContainer
@@ -35,6 +52,12 @@ export class EditorContainer
 
   @property()
   override autofocus = false;
+
+  @query('affine-default-page')
+  private _defaultPageBlock?: DefaultPageBlockComponent;
+
+  @query('affine-edgeless-page')
+  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   readonly themeObserver = new ThemeObserver();
 
@@ -154,6 +177,15 @@ export class EditorContainer
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
+
+    requestAnimationFrame(() => {
+      if (this._defaultPageBlock) {
+        forwardSlot(this._defaultPageBlock.slots, this.slots);
+      }
+      if (this._edgelessPageBlock) {
+        forwardSlot(this._edgelessPageBlock.slots, this.slots);
+      }
+    });
   }
 
   async createBlockHub() {
