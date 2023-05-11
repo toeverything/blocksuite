@@ -68,7 +68,7 @@ test(scoped`clipboard paste html`, async ({ page }) => {
 
   // set up clipboard data using html
   const clipData = {
-    'text/html': `<span>aaa</span><span>bbb</span><span>ccc</span>`,
+    'text/html': `<span>aaa</span><span>bbb</span><span>ccc</span><bdi>ddd</bdi>`,
   };
   await waitNextFrame(page);
   await page.evaluate(
@@ -84,7 +84,7 @@ test(scoped`clipboard paste html`, async ({ page }) => {
     },
     { clipData }
   );
-  await assertText(page, 'aaabbbccc');
+  await assertText(page, 'aaabbbcccddd');
 });
 
 test(scoped`markdown format parse`, async ({ page }) => {
