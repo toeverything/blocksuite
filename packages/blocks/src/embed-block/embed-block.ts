@@ -20,6 +20,7 @@ export class EmbedBlockComponent extends ShadowlessElement {
       text-align: center;
       color: var(--affine-icon-color);
       display: none;
+      background: var(--affine-background-primary-color);
     }
     .affine-embed-wrapper-caption::placeholder {
       color: var(--affine-placeholder-color);
