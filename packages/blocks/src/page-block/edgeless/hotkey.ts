@@ -103,8 +103,12 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     }
   });
   hotkey.withScope(scope, () => {
-    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page));
-    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, edgeless.page));
+    hotkey.addListener(HOTKEYS.UP, e =>
+      handleUp(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
+    );
+    hotkey.addListener(HOTKEYS.DOWN, e =>
+      handleDown(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
+    );
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
     hotkey.addListener('h', () =>
