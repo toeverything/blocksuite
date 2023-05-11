@@ -141,7 +141,7 @@ export class SurfaceManager {
    */
   private _reorderTo(
     elementIds: string[],
-    pickIndexes: () => {
+    getIndexes: () => {
       startIndex: string | null;
       endIndex: string | null;
     },
@@ -157,7 +157,7 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const { startIndex, endIndex } = pickIndexes();
+    const { startIndex, endIndex } = getIndexes();
 
     const keys = generateNKeysBetween(
       startIndex,
@@ -180,7 +180,7 @@ export class SurfaceManager {
    */
   private _reorder(
     elementIds: string[],
-    pickIndexes: (elements: SurfaceElement[]) => {
+    getIndexes: (elements: SurfaceElement[]) => {
       startIndex: string | null;
       endIndex: string | null;
     },
@@ -201,7 +201,7 @@ export class SurfaceManager {
 
     const bound = generateBound(sortedElements);
     const elements = this.pickByBound(bound).sort(compare);
-    const { startIndex, endIndex } = pickIndexes(elements);
+    const { startIndex, endIndex } = getIndexes(elements);
     const indexes = sortedElements.map(e =>
       elements.findIndex(element => element === e)
     );
