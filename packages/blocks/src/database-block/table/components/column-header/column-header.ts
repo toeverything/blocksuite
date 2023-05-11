@@ -7,6 +7,7 @@ import {
   DatabaseSelect,
   PenIcon,
   TextIcon,
+  TodoIcon,
 } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
@@ -37,7 +38,7 @@ import { styles } from './styles.js';
 const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
-  checkbox: DatabaseNumber,
+  checkbox: TodoIcon,
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
