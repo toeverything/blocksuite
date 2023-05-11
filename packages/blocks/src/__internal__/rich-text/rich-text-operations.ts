@@ -404,25 +404,6 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     return false;
   }
 
-  function handleDatabaseSibling(
-    page: Page,
-    model: ExtendedModel,
-    previousSiblingParent: ExtendedModel | null
-  ) {
-    if (
-      !previousSiblingParent ||
-      !matchFlavours(previousSiblingParent, ['affine:database'] as const)
-    )
-      return false;
-
-    focusBlockByModel(previousSiblingParent, 'end');
-    if (!model.text?.length) {
-      page.captureSync();
-      page.deleteBlock(model);
-    }
-    return true;
-  }
-
   function handleParagraphOrListSibling(
     page: Page,
     model: ExtendedModel,
@@ -506,14 +487,15 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const nextSibling = getNextBlock(model);
 
   if (matchFlavours(parent, ['affine:database'])) {
-    if (previousSibling) {
+    const databaseRowsCount = parent.children.length;
+    if (databaseRowsCount === 1) {
+      return true;
+    } else if (previousSibling) {
       page.deleteBlock(model);
       focusBlockByModel(previousSibling);
       return true;
     } else {
-      return previousSibling
-        ? handleDatabaseSibling(page, model, previousSibling)
-        : handleNoPreviousSibling(page, model, previousSibling);
+      return handleNoPreviousSibling(page, model, previousSibling);
     }
   } else if (matchFlavours(parent, ['affine:frame'])) {
     return (
