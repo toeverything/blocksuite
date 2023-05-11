@@ -3,7 +3,8 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
+import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
+import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import {
   asyncSetVRange,
   convertToDivider,
@@ -413,7 +414,9 @@ const matches: Match[] = [
 
       const codeId = page.addBlock(
         'affine:code',
-        { language: getCodeLanguage(match?.[1] || '') || 'Plain Text' },
+        {
+          language: getStandardLanguage(match?.[1] || '')?.id ?? FALLBACK_LANG,
+        },
         parent,
         index
       );

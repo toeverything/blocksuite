@@ -52,7 +52,7 @@ export function toSelectionEvent({
       cmd: event.metaKey || event.ctrlKey,
       alt: event.altKey,
     },
-    button: event.button,
+    button: last?.button || event.button,
     dragging: !!last,
   };
   if (last) {

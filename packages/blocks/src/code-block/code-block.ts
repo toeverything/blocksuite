@@ -9,7 +9,13 @@ import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getHighlighter, type Highlighter, type Lang } from 'shiki';
+import {
+  BUNDLED_LANGUAGES,
+  getHighlighter,
+  type Highlighter,
+  type ILanguageRegistration,
+  type Lang,
+} from 'shiki';
 import { z } from 'zod';
 
 import {
@@ -25,9 +31,8 @@ import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
-import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
-import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
+import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
@@ -143,12 +148,12 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .code-block-option {
-      box-shadow: var(--affine-menu-shadow);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-white-90);
+      background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
 
@@ -186,7 +191,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
-  private async _startHighlight(lang: Lang) {
+  private async _startHighlight(lang: ILanguageRegistration) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
@@ -298,32 +303,32 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       });
     });
 
-    if (this.model.language === 'Plain Text') {
+    if (!this.model.language || this.model.language === FALLBACK_LANG) {
       this._highlighter = null;
       return;
     }
 
-    const lang = codeLanguages.find(
-      lang => lang === this.model.language.toLowerCase()
+    const lang = BUNDLED_LANGUAGES.find(
+      lang => lang.id === this.model.language.toLowerCase()
     );
-    if (lang) {
-      this._startHighlight(lang);
-    } else {
-      this._highlighter = null;
+    if (!lang) {
+      console.warn('Unexpected language: ', this.model.language);
+      return;
     }
+    this._startHighlight(lang);
   }
 
   override updated() {
     if (this.model.language !== this._preLang) {
       this._preLang = this.model.language;
 
-      const lang = codeLanguages.find(
-        lang => lang === this.model.language.toLowerCase()
+      const lang = BUNDLED_LANGUAGES.find(
+        lang => lang.id === this.model.language.toLowerCase()
       );
       if (lang) {
         if (this._highlighter) {
           const currentLangs = this._highlighter.getLoadedLanguages();
-          if (!currentLangs.includes(lang)) {
+          if (!currentLangs.includes(lang.id as Lang)) {
             this._highlighter.loadLanguage(lang).then(() => {
               const richText = this.querySelector('rich-text');
               const vEditor = richText?.vEditor;
@@ -358,6 +363,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   private _langListTemplate() {
+    // TODO this is a workaround
+    const normalizedLang =
+      this.model.language[0].toUpperCase() + this.model.language.slice(1);
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -371,7 +379,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
         ?disabled=${this.readonly}
         @click=${this._onClickLangBtn}
       >
-        ${this.model.language} ${!this.readonly ? ArrowDownIcon : html``}
+        ${normalizedLang} ${!this.readonly ? ArrowDownIcon : html``}
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
