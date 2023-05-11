@@ -57,14 +57,15 @@ function setEndRange(editableContainer: Element) {
   return newRange;
 }
 
-async function setNewTop(y: number, editableContainer: Element) {
+async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
   const scrollContainer = editableContainer.closest('.affine-default-viewport');
   const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
-    Number(
+    (Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
-    ) || 16;
+    ) || 16) * zoom;
+
   const compare = bottom < y;
   switch (compare) {
     case true: {
@@ -114,7 +115,8 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
 
 export async function focusRichText(
   editableContainer: Element,
-  position: SelectionPosition = 'end'
+  position: SelectionPosition = 'end',
+  zoom = 1
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
@@ -132,7 +134,7 @@ export async function focusRichText(
     default: {
       const { x, y } = position;
       let newLeft = x;
-      const newTop = await setNewTop(y, editableContainer);
+      const newTop = await setNewTop(y, editableContainer, zoom);
       if (x <= left) {
         newLeft = left + 1;
       }
@@ -148,7 +150,8 @@ export async function focusRichText(
 
 export function focusBlockByModel(
   model: BaseBlockModel,
-  position: SelectionPosition = 'end'
+  position: SelectionPosition = 'end',
+  zoom = 1
 ) {
   if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
     throw new Error("Can't focus frame or page!");
@@ -187,20 +190,20 @@ export function focusBlockByModel(
     (document.activeElement as HTMLTextAreaElement).blur();
     return;
   }
-
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
   defaultPageBlock.selection &&
     defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
     defaultPageBlock.selection?.setFocusedBlock(element as Element);
-    focusRichText(editableContainer, position);
+    focusRichText(editableContainer, position, zoom);
   }
 }
 
 export function focusPreviousBlock(
   model: BaseBlockModel,
-  position?: SelectionPosition
+  position: SelectionPosition = 'start',
+  zoom = 1
 ) {
   const page = getDefaultPageBlock(model);
 
@@ -213,13 +216,14 @@ export function focusPreviousBlock(
 
   const preNodeModel = getPreviousBlock(model);
   if (preNodeModel && nextPosition) {
-    focusBlockByModel(preNodeModel, nextPosition);
+    focusBlockByModel(preNodeModel, nextPosition, zoom);
   }
 }
 
 export function focusNextBlock(
   model: BaseBlockModel,
-  position: SelectionPosition = 'start'
+  position: SelectionPosition = 'start',
+  zoom = 1
 ) {
   const page = getDefaultPageBlock(model);
   let nextPosition = position;
@@ -231,7 +235,7 @@ export function focusNextBlock(
   const nextNodeModel = getNextBlock(model);
 
   if (nextNodeModel) {
-    focusBlockByModel(nextNodeModel, nextPosition);
+    focusBlockByModel(nextNodeModel, nextPosition, zoom);
   }
 }
 
