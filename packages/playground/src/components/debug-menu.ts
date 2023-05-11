@@ -272,11 +272,11 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportHtml() {
-    this.contentParser.onExportHtml();
+    this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    this.contentParser.onExportMarkdown();
+    this.contentParser.exportMarkdown();
   }
 
   private _exportYDoc() {
