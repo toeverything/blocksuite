@@ -15,6 +15,7 @@ export type ColumnDragConfig = {
     left: number;
     right: number;
   };
+  offset: { x: number; y: number };
 };
 
 export function initMoveColumnHandlers(
@@ -51,6 +52,7 @@ export function initMoveColumnHandlers(
     const database = tableContainer.closest('affine-database');
     assertExists(database);
     const { left, right } = database.getBoundingClientRect();
+    const { x, y } = dragHeaderColumn.getBoundingClientRect();
 
     dragColumnConfig = {
       dragIndex,
@@ -60,6 +62,10 @@ export function initMoveColumnHandlers(
       previewBoundaries: {
         left,
         right,
+      },
+      offset: {
+        x: event.clientX - x,
+        y: event.clientY - y,
       },
     };
 
@@ -76,11 +82,18 @@ export function initMoveColumnHandlers(
     }
     const x = event.clientX;
     const y = event.clientY;
+    const {
+      dragIndex,
+      previewBoundaries,
+      indicatorHeight,
+      headerColumns,
+      offset: { x: offsetX, y: offsetY },
+    } = dragColumnConfig;
 
-    dragPreview.style.transform = `translate(${x}px, ${y}px)`;
+    dragPreview.style.transform = `translate(${x - offsetX}px, ${
+      y - offsetY
+    }px)`;
 
-    const { dragIndex, previewBoundaries, indicatorHeight, headerColumns } =
-      dragColumnConfig;
     const point = new Point(x, y);
     const { element, index: targetIndex } = getClosestElement(
       point,

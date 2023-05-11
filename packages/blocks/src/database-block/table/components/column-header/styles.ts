@@ -163,7 +163,7 @@ export const styles = css`
     width: 10px;
     height: 14px;
     color: var(--affine-black-10);
-    cursor: move;
+    cursor: grab;
     opacity: 0;
   }
   .affine-database-column-content:hover svg {

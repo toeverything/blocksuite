@@ -32,6 +32,7 @@ export class ColumnDragPreview extends ShadowlessElement {
           background: var(--affine-tertiary-color);
         }
         .preview-column-header .affine-database-column-move svg {
+          cursor: grabbing;
           opacity: 1;
         }
         .preview-column-header .affine-database-column-move circle {
