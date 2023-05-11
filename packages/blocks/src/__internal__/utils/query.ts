@@ -678,6 +678,9 @@ export function getClosestBlockElementByPoint(
       }
       if (snapToEdge.y) {
         // TODO handle scale
+        if (scale !== 1) {
+          console.warn('scale is not supported yet');
+        }
         point.y = clamp(point.y, rect.top + 1, rect.bottom - 1);
       }
     }

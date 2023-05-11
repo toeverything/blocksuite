@@ -29,7 +29,7 @@ export class ContentParser {
     this._htmlParser.registerParsers();
   }
 
-  public async onExportHtml() {
+  public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
@@ -41,7 +41,7 @@ export class ContentParser {
     );
   }
 
-  public async onExportMarkdown() {
+  public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(

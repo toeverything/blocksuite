@@ -68,6 +68,12 @@ export class EdgelessSelectionManager {
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
+  private _rightClickTimer: {
+    mouseMode: MouseMode;
+    timer: number;
+    timeStamp: number;
+  } | null = null;
+
   get lastMousePos() {
     return this._lastMousePos;
   }
@@ -144,7 +150,9 @@ export class EdgelessSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu,
       noop,
-      this._onSelectionChangeWithoutDebounce
+      this._onSelectionChangeWithoutDebounce,
+      noop, // pointer down
+      this._onPointerUp
     );
 
     this._wheelDisposeCallback = initWheelEventHandlers(this._container);
@@ -152,18 +160,24 @@ export class EdgelessSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     if (this.page.readonly) return;
+    // do nothing when holding right-key and not in pan mode
+    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
 
     return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
     if (this.page.readonly) return;
+    // do nothing when holding right-key and not in pan mode
+    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
 
     return this.currentController.onContainerDragMove(e);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.page.readonly) return;
+    // do nothing when holding right-key and not in pan mode
+    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
 
     return this.currentController.onContainerDragEnd(e);
   };
@@ -193,7 +207,29 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    return this._controllers[this.mouseMode.type].onContainerContextMenu(e);
+    e.raw.preventDefault();
+    const mouseMode = this.mouseMode;
+    if (mouseMode.type !== 'pan' && !this._rightClickTimer) {
+      this._rightClickTimer = {
+        mouseMode,
+        timeStamp: e.raw.timeStamp,
+        timer: window.setTimeout(() => {
+          this._controllers['pan'].onContainerDragStart(e);
+        }, 233),
+      };
+    }
+  };
+
+  private _onPointerUp = (e: SelectionEvent) => {
+    if (e.button === 2 && this._rightClickTimer) {
+      const { timer, timeStamp, mouseMode } = this._rightClickTimer;
+      if (e.raw.timeStamp - timeStamp > 233) {
+        this._container.slots.mouseModeUpdated.emit(mouseMode);
+      } else {
+        clearTimeout(timer);
+      }
+      this._rightClickTimer = null;
+    }
   };
 
   private _onSelectionChangeWithoutDebounce = (_: Event) => {

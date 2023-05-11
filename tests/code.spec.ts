@@ -128,7 +128,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   const languageButton = codeBlockController.languageButton;
   await expect(languageButton).toBeVisible();
   const languageText = await languageButton.innerText();
-  expect(languageText).toEqual('TypeScript');
+  expect(languageText).toEqual('Typescript');
 });
 
 test('use more than three backticks can not create code block', async ({
@@ -180,7 +180,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
-  prop:language="Rust"
+  prop:language="rust"
 />`,
     codeBlockId
   );
@@ -650,7 +650,7 @@ test('should code block works in read only mode', async ({ page }) => {
   ).toHaveCount(2);
 });
 
-test('should code block lang input supports fuzzy search', async ({ page }) => {
+test('should code block lang input supports alias', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -660,9 +660,9 @@ test('should code block lang input supports fuzzy search', async ({ page }) => {
   await codeBlock.hover();
   await codeBlockController.clickLanguageButton();
   await expect(codeBlockController.langList).toBeVisible();
-  await type(page, 'jas');
+  await type(page, '文言');
   await pressEnter(page);
-  await expect(codeBlockController.languageButton).toHaveText('Javascript');
+  await expect(codeBlockController.languageButton).toHaveText('Wenyan');
 });
 
 test('multi-line indent', async ({ page }) => {

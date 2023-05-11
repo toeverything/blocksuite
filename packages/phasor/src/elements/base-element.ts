@@ -1,11 +1,14 @@
-import { deserializeXYWH, serializeXYWH } from '../utils/xywh.js';
+import type * as Y from 'yjs';
 
-export interface SurfaceElement {
+import type { Renderer } from '../renderer.js';
+import { isPointIn } from '../utils/hit-utils.js';
+import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+
+export interface ISurfaceElement {
   id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+  index: string;
+  type: string;
+  xywh: SerializedXYWH;
 }
 
 export interface HitTestOptions {
@@ -14,59 +17,96 @@ export interface HitTestOptions {
 }
 
 export type TransformPropertyValue = (value: string) => string;
-export function defaultTransformPropertyValue(v: string) {
-  return v;
-}
 
-export abstract class BaseElement implements SurfaceElement {
-  abstract type: string;
-  id: string;
-  index!: string;
+export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
+  yMap: Y.Map<unknown>;
+
+  private _renderer: Renderer | null = null;
+
   transformPropertyValue: TransformPropertyValue = v => v;
 
-  x = 0;
-  y = 0;
-  w = 0;
-  h = 0;
+  constructor(yMap: Y.Map<unknown>, data?: T) {
+    if (!yMap.doc) {
+      throw new Error('yMap must be bound to a Y.Doc');
+    }
 
-  constructor(id: string) {
-    this.id = id;
-  }
-
-  get centerX() {
-    return this.x + this.w / 2;
-  }
-
-  get centerY() {
-    return this.y + this.h / 2;
-  }
-
-  protected get _xywh() {
-    return serializeXYWH(this.x, this.y, this.w, this.h);
-  }
-
-  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
-
-  abstract render(_: CanvasRenderingContext2D): void;
-
-  abstract serialize(): Record<string, unknown>;
-
-  static applySerializedProps(element: object, props: Record<string, unknown>) {
-    Object.assign(element, { ...props });
-
-    const { xywh } = props;
-    if (xywh) {
-      const [x, y, w, h] = deserializeXYWH(xywh as string);
-      Object.assign(element, { x, y, w, h });
+    this.yMap = yMap;
+    if (data) {
+      for (const key in data) {
+        this.yMap.set(key, data[key] as T[keyof T]);
+      }
     }
   }
 
-  static getUpdatedSerializedProps(
-    element: object,
-    props: Record<string, unknown>
-  ) {
-    const updated = { ...props };
+  get id() {
+    const id = this.yMap.get('id') as T['id'];
+    return id;
+  }
 
-    return updated;
+  get index() {
+    const index = this.yMap.get('index') as T['index'];
+    return index;
+  }
+
+  get type() {
+    const type = this.yMap.get('type') as T['type'];
+    return type;
+  }
+
+  get xywh() {
+    const xywh = this.yMap.get('xywh') as T['xywh'];
+    return xywh;
+  }
+
+  get x() {
+    const [x] = deserializeXYWH(this.xywh);
+    return x;
+  }
+
+  get y() {
+    const [, y] = deserializeXYWH(this.xywh);
+    return y;
+  }
+
+  get w() {
+    const [, , w] = deserializeXYWH(this.xywh);
+    return w;
+  }
+
+  get h() {
+    const [, , , h] = deserializeXYWH(this.xywh);
+    return h;
+  }
+
+  applyUpdate(updates: Partial<T>) {
+    for (const key in updates) {
+      this.yMap.set(key, updates[key] as T[keyof T]);
+    }
+  }
+
+  serialize(): T {
+    return this.yMap.toJSON() as T;
+  }
+
+  hitTest(x: number, y: number, options?: HitTestOptions) {
+    return isPointIn(this, x, y);
+  }
+
+  mount(renderer: Renderer) {
+    this._renderer = renderer;
+    this._renderer.addElement(this);
+    this.yMap.observeDeep(() => {
+      this._renderer?.removeElement(this);
+      this._renderer?.addElement(this);
+    });
+  }
+
+  unmount() {
+    this._renderer?.removeElement(this);
+    this._renderer = null;
+  }
+
+  render(ctx: CanvasRenderingContext2D) {
+    return;
   }
 }

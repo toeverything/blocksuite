@@ -52,6 +52,8 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
         edgeless.mouseMode = { type: 'pan', panning: false };
         shouldRevertMode = true;
         lastMode = mouseMode;
+
+        return;
       }
       if (event.type === 'keyup') {
         if (mouseMode.type === 'pan' && shouldRevertMode && lastMode) {
@@ -62,6 +64,32 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
     },
     { keyup: true }
   );
+}
+
+function bindDelete(edgeless: EdgelessPageBlockComponent) {
+  function backspace(e: KeyboardEvent) {
+    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
+    deleteModelsByRange(edgeless.page);
+
+    const { selected } = edgeless.getSelection().blockSelectionState;
+    selected.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        const children = edgeless.page.root?.children ?? [];
+        // FIXME: should always keep at least 1 frame
+        if (children.length > 1) {
+          edgeless.page.deleteBlock(element);
+        }
+      } else {
+        edgeless.surface.removeElement(element.id);
+      }
+    });
+    edgeless.getSelection().currentController.clearSelection();
+    edgeless.slots.selectionUpdated.emit(
+      edgeless.getSelection().blockSelectionState
+    );
+  }
+  hotkey.addListener(HOTKEYS.BACKSPACE, backspace);
+  hotkey.addListener(HOTKEYS.DELETE, backspace);
 }
 
 export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
@@ -75,33 +103,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     }
   });
   hotkey.withScope(scope, () => {
-    hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
-      // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
-      deleteModelsByRange(edgeless.page);
-
-      const { selected } = edgeless.getSelection().blockSelectionState;
-      selected.forEach(element => {
-        if (isTopLevelBlock(element)) {
-          const children = edgeless.page.root?.children ?? [];
-          // FIXME: should always keep at least 1 frame
-          if (children.length > 1) {
-            edgeless.page.deleteBlock(element);
-          }
-        } else {
-          edgeless.surface.removeElement(element.id);
-        }
-      });
-      edgeless.getSelection().currentController.clearSelection();
-      edgeless.slots.selectionUpdated.emit(
-        edgeless.getSelection().blockSelectionState
-      );
-    });
-    hotkey.addListener(HOTKEYS.UP, e =>
-      handleUp(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
-    );
-    hotkey.addListener(HOTKEYS.DOWN, e =>
-      handleDown(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
-    );
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom }));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom }));
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
     hotkey.addListener('h', () =>
@@ -130,12 +133,13 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     );
 
     // issue #1814
-    hotkey.addListener('esc', () => {
+    hotkey.addListener(HOTKEYS.ESC, () => {
       edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
       setMouseMode(edgeless, { type: 'default' }, true);
     });
 
     bindSpace(edgeless);
+    bindDelete(edgeless);
     bindCommonHotkey(edgeless.page);
   });
   return () => {

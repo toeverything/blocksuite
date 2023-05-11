@@ -465,7 +465,8 @@ test.describe('indent correctly when deleting list item', () => {
     await pressBackspace(page);
     await pressBackspace(page);
 
-    await assertBlockChildrenIds(page, '3', ['4', '6']);
+    await assertBlockChildrenIds(page, '3', ['4']);
+    await assertBlockChildrenIds(page, '7', ['6']);
   });
 
   test('merge two lists', async ({ page }) => {
