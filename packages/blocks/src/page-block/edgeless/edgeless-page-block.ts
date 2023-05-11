@@ -36,7 +36,7 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
@@ -51,6 +51,7 @@ import type {
   MouseMode,
   PageBlockModel,
 } from '../../index.js';
+import { PageBlockService } from '../../index.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
@@ -527,6 +528,7 @@ export class EdgelessPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
   }

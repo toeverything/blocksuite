@@ -5,7 +5,9 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../__internal__/index.js';
+import { registerService } from '../__internal__/service.js';
 import type { DividerBlockModel } from './divider-model.js';
+import { DividerBlockService } from './divider-service.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends ShadowlessElement {
@@ -29,6 +31,11 @@ export class DividerBlockComponent extends ShadowlessElement {
 
   @property()
   content!: TemplateResult;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:divider', DividerBlockService);
+  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

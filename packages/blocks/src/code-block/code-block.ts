@@ -26,10 +26,11 @@ import {
   WithDisposable,
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService } from '../__internal__/service.js';
+import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
+import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
@@ -224,6 +225,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:code', CodeBlockService);
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );

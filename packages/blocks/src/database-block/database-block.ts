@@ -6,8 +6,10 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
+import { registerService } from '../__internal__/service.js';
 import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockService } from './database-service.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends ShadowlessElement {
@@ -20,6 +22,7 @@ export class DatabaseBlockComponent extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
+    registerService('affine:database', DatabaseBlockService);
     this.model.propsUpdated.on(() => this.requestUpdate());
   }
 

@@ -2,7 +2,9 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../__internal__/index.js';
+import { registerService } from '../__internal__/service.js';
 import type { EmbedBlockModel } from './embed-model.js';
+import { EmbedBlockService } from './embed-service.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends ShadowlessElement {
@@ -38,6 +40,11 @@ export class EmbedBlockComponent extends ShadowlessElement {
 
   @state()
   private _caption!: string;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:embed', EmbedBlockService);
+  }
 
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);

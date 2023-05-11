@@ -267,10 +267,6 @@ export class DebugMenu extends ShadowlessElement {
     this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  private _switchShowGrid() {
-    this.editor.showGrid = !this.editor.showGrid;
-  }
-
   private _exportHtml() {
     this.contentParser.exportHtml();
   }
@@ -607,22 +603,6 @@ export class DebugMenu extends ShadowlessElement {
                 requestUpdate: () => this.requestUpdate(),
               })
             : null}
-        </div>
-
-        <div
-          class="edgeless-toolbar"
-          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
-        >
-          <sl-tooltip content="Show Grid" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Show Grid"
-              @click=${this._switchShowGrid}
-            >
-              <sl-icon name=${!this.editor.showGrid ? 'square' : 'grid-3x3'}>
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
         </div>
       </div>
     `;

@@ -22,13 +22,14 @@ import {
   HOTKEY_SCOPE_TYPE,
   Rect,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import {
   ShadowlessElement,
   WithDisposable,
 } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
+import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
@@ -508,6 +509,7 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:page', PageBlockService);
     this.clipboard.init(this.page);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
