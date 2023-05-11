@@ -1,7 +1,7 @@
 import { assertNotExists } from '@blocksuite/global/utils';
 
 import { MIN_ZOOM } from './consts.js';
-import type { PhasorElement } from './elements/index.js';
+import type { SurfaceElement } from './elements/base-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
@@ -117,17 +117,17 @@ export class Renderer implements SurfaceViewport {
     this.setCenter(this._centerX + deltaX, this._centerY + deltaY);
   };
 
-  addElement(element: PhasorElement) {
+  addElement(element: SurfaceElement) {
     this.gridManager.add(element);
     this._shouldUpdate = true;
   }
 
-  removeElement(element: PhasorElement) {
+  removeElement(element: SurfaceElement) {
     this.gridManager.remove(element);
     this._shouldUpdate = true;
   }
 
-  load(elements: PhasorElement[]) {
+  load(elements: SurfaceElement[]) {
     for (let i = 0; i < elements.length; i++) {
       this.gridManager.add(elements[i]);
     }
