@@ -5,6 +5,7 @@ import {
   DatabaseProgress,
   DatabaseSelect,
   TextIcon,
+  TodoIcon,
 } from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -36,7 +37,7 @@ const columnTypes: ColumnHeader[] = [
   {
     type: 'checkbox',
     text: 'Checkbox',
-    icon: DatabaseNumber,
+    icon: TodoIcon,
   },
   {
     type: 'progress',

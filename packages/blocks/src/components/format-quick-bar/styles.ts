@@ -48,6 +48,11 @@ export const formatQuickBarStyle = css`
     background-color: var(--affine-border-color);
   }
 
+  format-bar-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
   ${paragraphPanelStyle}
   ${tooltipStyle}
 `;
