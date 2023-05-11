@@ -101,12 +101,12 @@ jobs:
       - name: Run First Editor test
         run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
-          MULTIPLE_EDITOR: 0
+          MULTIPLE_EDITOR_INDEX: 0
 
       - name: Run Second Editor test
         run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
-          MULTIPLE_EDITOR: 1
+          MULTIPLE_EDITOR_INDEX: 1
 
       - name: Collect code coverage report
         run: pnpm exec nyc report -t .nyc_output --reporter=lcov
