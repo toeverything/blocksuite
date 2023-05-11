@@ -356,10 +356,15 @@ export class SurfaceManager {
         endIndex: null,
       }),
       (ranges, elements) => {
-        ranges.forEach(({ start, end }) => {
+        let i = 0;
+        const len = ranges.length;
+        const max = elements.length;
+        for (; i < len; i++) {
+          const { start, end } = ranges[i];
+          if (end + 1 === max) return;
           const temp = elements.splice(start, end + 1 - start);
           elements.splice(start + 1, 0, ...temp);
-        });
+        }
       }
     );
   }
@@ -372,10 +377,14 @@ export class SurfaceManager {
         endIndex: elements[elements.length - 1].index,
       }),
       (ranges, elements) => {
-        ranges.forEach(({ start, end }) => {
+        let i = 0;
+        const len = ranges.length;
+        for (; i < len; i++) {
+          const { start, end } = ranges[i];
+          if (start === 0) continue;
           const temp = elements.splice(start, end + 1 - start);
           elements.splice(start - 1, 0, ...temp);
-        });
+        }
       }
     );
   }
