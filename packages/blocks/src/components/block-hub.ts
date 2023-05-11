@@ -11,6 +11,7 @@ import {
   TextIconLarge,
 } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
@@ -34,7 +35,6 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
-  ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
 import { type DragIndicator } from './drag-handle.js';

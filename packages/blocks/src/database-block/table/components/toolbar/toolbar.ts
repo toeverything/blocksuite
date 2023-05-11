@@ -6,15 +6,13 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../../../__internal__/index.js';
+import { WithDisposable } from '../../../../__internal__/index.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';

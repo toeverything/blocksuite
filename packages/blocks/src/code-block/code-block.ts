@@ -4,6 +4,7 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -22,7 +23,6 @@ import { z } from 'zod';
 import {
   getViewportElement,
   queryCurrentMode,
-  ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';

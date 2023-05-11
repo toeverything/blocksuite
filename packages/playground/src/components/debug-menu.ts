@@ -22,7 +22,6 @@ import {
   FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
-  ShadowlessElement,
   SIZE_VARIABLES,
   updateBlockType,
   VARIABLES,
@@ -30,6 +29,7 @@ import {
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';

@@ -1,7 +1,7 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { ShadowlessElement } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { EmbedBlockModel } from './embed-model.js';
 import { EmbedBlockService } from './embed-service.js';

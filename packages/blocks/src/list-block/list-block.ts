@@ -2,14 +2,12 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  getDefaultPageBlock,
-  ShadowlessElement,
-} from '../__internal__/index.js';
+import { getDefaultPageBlock } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,

@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { ShadowlessElement } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { DividerBlockModel } from './divider-model.js';
 import { DividerBlockService } from './divider-service.js';

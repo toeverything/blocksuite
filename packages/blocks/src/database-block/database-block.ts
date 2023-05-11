@@ -3,11 +3,11 @@ import './table/table-view.js';
 import './kanban/kanban-view.js';
 
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import { registerService } from '../__internal__/service.js';
-import { ShadowlessElement } from '../__internal__/utils/lit.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
 
