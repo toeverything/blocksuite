@@ -391,25 +391,6 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
-  function handleDatabaseSibling(
-    page: Page,
-    model: ExtendedModel,
-    previousSiblingParent: ExtendedModel | null
-  ) {
-    if (
-      !previousSiblingParent ||
-      !matchFlavours(previousSiblingParent, ['affine:database'] as const)
-    )
-      return false;
-
-    focusBlockByModel(previousSiblingParent, 'end');
-    if (!model.text?.length) {
-      page.captureSync();
-      page.deleteBlock(model);
-    }
-    return true;
-  }
-
   function handleParagraphOrListSibling(
     page: Page,
     model: ExtendedModel,
