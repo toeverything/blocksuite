@@ -159,8 +159,17 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this._handleClickCategory(targetGroup);
           return;
         }
-        this._activatedItemIndex =
-          (this._activatedItemIndex + step + configLen) % configLen;
+        let ejectedCnt = configLen;
+        do {
+          this._activatedItemIndex =
+            (this._activatedItemIndex + step + configLen) % configLen;
+          // Skip disabled items
+        } while (
+          this._filterItems[this._activatedItemIndex].disabled &&
+          // If all items are disabled, the loop will never end
+          ejectedCnt--
+        );
+
         this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
       },
       onConfirm: () => {
