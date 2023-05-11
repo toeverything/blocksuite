@@ -1,5 +1,5 @@
 import { type SerializedXYWH } from '../../utils/xywh.js';
-import { SurfaceElement } from '../base-element.js';
+import { SurfaceElement } from '../surface-element.js';
 
 export interface IDebug {
   id: string;

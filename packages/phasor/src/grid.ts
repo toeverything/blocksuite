@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/store';
 
 import { GRID_SIZE, type IBound } from './consts.js';
-import type { SurfaceElement } from './elements/base-element.js';
+import type { SurfaceElement } from './elements/surface-element.js';
 import { intersects, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {
