@@ -24,7 +24,6 @@ import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
-  repairContextMenuRange,
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
 import {
@@ -286,7 +285,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerContextMenu(e: SelectionEvent) {
-    repairContextMenuRange(e);
+    // repairContextMenuRange(e);
+    noop();
   }
 
   onContainerDblClick(e: SelectionEvent) {
