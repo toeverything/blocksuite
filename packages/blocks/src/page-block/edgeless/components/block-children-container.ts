@@ -37,7 +37,7 @@ function EdgelessBlockChild(
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
-  const { xywh, background } = model;
+  const { xywh, background, zIndex } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
@@ -52,7 +52,7 @@ function EdgelessBlockChild(
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
     background: `var(${background || FRAME_BACKGROUND_COLORS[0]})`,
     pointerEvents: 'all',
-    zIndex: '0',
+    zIndex,
     boxSizing: 'border-box',
     borderRadius: '4px',
   };

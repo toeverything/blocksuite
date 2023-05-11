@@ -67,12 +67,18 @@ import {
   getCursorMode,
 } from './utils.js';
 
+export type ReorderType = 'front' | 'forward' | 'backward' | 'back';
+
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
+  reorderUpdated: Slot<{
+    elements: TopLevelBlockModel[];
+    type: ReorderType;
+  }>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -167,6 +173,10 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+    reorderUpdated: new Slot<{
+      type: ReorderType;
+      elements: TopLevelBlockModel[];
+    }>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -357,6 +367,12 @@ export class EdgelessPageBlockComponent
         slots.selectionUpdated.emit({
           ...this._selection.blockSelectionState,
         });
+      })
+    );
+
+    _disposables.add(
+      slots.reorderUpdated.on(({ elements, type }) => {
+        console.log(type, elements);
       })
     );
   }

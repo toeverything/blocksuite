@@ -12,19 +12,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessSelectionSlots,
+  ReorderType,
+} from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  value:
-    | 'delete'
-    | 'bringToFront'
-    | 'bringForward'
-    | 'sendBackward'
-    | 'sendToBack';
+  value: 'delete' | ReorderType;
   disabled?: boolean;
 };
 const ACTIONS: Action[] = [
@@ -32,10 +30,10 @@ const ACTIONS: Action[] = [
   // { name: 'Copy', value: 'copy', disabled: true },
   // { name: 'Paste', value: 'paste', disabled: true },
   // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  { name: 'Bring to front', value: 'bringToFront' },
-  { name: 'Bring forward', value: 'bringForward' },
-  { name: 'Send backward', value: 'sendBackward' },
-  { name: 'Send to back', value: 'sendToBack' },
+  { name: 'Bring to front', value: 'front' },
+  { name: 'Bring forward', value: 'forward' },
+  { name: 'Send backward', value: 'backward' },
+  { name: 'Send to back', value: 'back' },
   // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
   { name: 'Delete', value: 'delete' },
 ];
@@ -157,35 +155,59 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 
-  private _runAction = (action: Action) => {
-    switch (action.value) {
+  private _runAction = ({ value: type }: Action) => {
+    switch (type) {
       case 'delete': {
         this._delete();
         break;
       }
-      case 'bringToFront': {
+      case 'front': {
         const { frames, shapes } = this._splitElements();
+        if (frames.length) {
+          this.slots.reorderUpdated.emit({
+            elements: frames,
+            type,
+          });
+        }
         if (shapes.length) {
           this.surface.bringToFront(shapes.map(ele => ele.id));
         }
         break;
       }
-      case 'bringForward': {
+      case 'forward': {
         const { frames, shapes } = this._splitElements();
+        if (frames.length) {
+          this.slots.reorderUpdated.emit({
+            elements: frames,
+            type,
+          });
+        }
         if (shapes.length) {
           this.surface.bringForward(shapes.map(ele => ele.id));
         }
         break;
       }
-      case 'sendBackward': {
+      case 'backward': {
         const { frames, shapes } = this._splitElements();
+        if (frames.length) {
+          this.slots.reorderUpdated.emit({
+            elements: frames,
+            type,
+          });
+        }
         if (shapes.length) {
           this.surface.sendBackward(shapes.map(ele => ele.id));
         }
         break;
       }
-      case 'sendToBack': {
+      case 'back': {
         const { frames, shapes } = this._splitElements();
+        if (frames.length) {
+          this.slots.reorderUpdated.emit({
+            elements: frames,
+            type,
+          });
+        }
         if (shapes.length) {
           this.surface.sendToBack(shapes.map(ele => ele.id));
         }
