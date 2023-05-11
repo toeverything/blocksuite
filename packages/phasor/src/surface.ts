@@ -97,11 +97,6 @@ export class SurfaceManager {
   }
 
   removeElement(id: string) {
-    const element = this._elements.get(id);
-    assertExists(element);
-    element.unmount();
-    this._elements.delete(id);
-
     this._transact(() => {
       this._yContainer.delete(id);
     });
@@ -282,6 +277,11 @@ export class SurfaceManager {
         this._updateBindings(element);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
+      } else if (type.action === 'delete') {
+        const element = this._elements.get(id);
+        assertExists(element);
+        element.unmount();
+        this._elements.delete(id);
       }
     });
   };

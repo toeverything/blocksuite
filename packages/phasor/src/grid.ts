@@ -1,3 +1,5 @@
+import { assertExists } from '@blocksuite/store';
+
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/base-element.js';
 import { intersects, isPointIn } from './utils/hit-utils.js';
@@ -22,6 +24,8 @@ export function compare(a: SurfaceElement, b: SurfaceElement): number {
 
 export class GridManager {
   private _grids: Map<string, Set<SurfaceElement>> = new Map();
+  private _elementToGrids: Map<SurfaceElement, Set<Set<SurfaceElement>>> =
+    new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
@@ -41,6 +45,9 @@ export class GridManager {
 
   add(element: SurfaceElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
+    const grids = new Set<Set<SurfaceElement>>();
+    this._elementToGrids.set(element, grids);
+
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         let grid = this._getGrid(i, j);
@@ -48,18 +55,17 @@ export class GridManager {
           grid = this._createGrid(i, j);
         }
         grid.add(element);
+        grids.add(grid);
       }
     }
   }
 
   remove(element: SurfaceElement) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
-    for (let i = minRow; i <= maxRow; i++) {
-      for (let j = minCol; j <= maxCol; j++) {
-        const grid = this._getGrid(i, j);
-        if (!grid) continue;
-        grid.delete(element);
-      }
+    const grids = this._elementToGrids.get(element);
+    assertExists(grids);
+
+    for (const grid of grids) {
+      grid.delete(element);
     }
   }
 
