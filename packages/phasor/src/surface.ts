@@ -17,7 +17,7 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/surface-element.js';
-import { compare } from './grid.js';
+import { compare, generateBound } from './grid.js';
 import { ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
@@ -152,44 +152,6 @@ export class SurfaceManager {
     return picked;
   }
 
-  /**
-   * Generates a bound by elements.
-   */
-  genBound(elements: SurfaceElement[]): IBound {
-    const bound = {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-    };
-
-    let i = 0;
-    const l = elements.length;
-    const first = elements[i];
-
-    if (l) {
-      bound.x = first.x;
-      bound.y = first.y;
-      bound.w = first.w;
-      bound.h = first.h;
-
-      let e;
-      let maxX;
-      let maxY;
-      for (i++; i < l; i++) {
-        e = elements[i];
-        bound.x = Math.min(bound.x, e.x);
-        bound.y = Math.min(bound.y, e.y);
-        maxX = Math.max(bound.x + bound.w, e.x + e.w);
-        maxY = Math.max(bound.y + bound.h, e.y + e.h);
-        bound.w = maxX - bound.x;
-        bound.h = maxY - bound.y;
-      }
-    }
-
-    return bound;
-  }
-
   bringToFront(elementIds: string[]) {
     if (!elementIds.length) {
       return;
@@ -201,7 +163,7 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bound = this.genBound(sortedElements);
+    const bound = generateBound(sortedElements);
     const elements = this.pickByBound(bound).sort(compare);
     const startIndex = elements[0].index;
     const indexes = sortedElements.map(e =>
@@ -249,7 +211,7 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bound = this.genBound(sortedElements);
+    const bound = generateBound(sortedElements);
     const elements = this.pickByBound(bound).sort(compare);
     const startIndex = elements[0].index;
     const indexes = sortedElements.map(e =>
@@ -297,7 +259,7 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bound = this.genBound(sortedElements);
+    const bound = generateBound(sortedElements);
     const elements = this.pickByBound(bound).sort(compare);
     const lastIndex = elements[elements.length - 1].index;
     const indexes = sortedElements.map(e =>
@@ -345,7 +307,7 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bound = this.genBound(sortedElements);
+    const bound = generateBound(sortedElements);
     const elements = this.pickByBound(bound).sort(compare);
     const lastIndex = elements[elements.length - 1].index;
     const indexes = sortedElements.map(e =>
