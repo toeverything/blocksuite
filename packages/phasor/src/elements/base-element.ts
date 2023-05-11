@@ -2,7 +2,7 @@ import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
 import { isPointIn } from '../utils/hit-utils.js';
-import { type SerializedXYWH } from '../utils/xywh.js';
+import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -59,22 +59,22 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   }
 
   get x() {
-    const [x] = JSON.parse(this.xywh);
+    const [x] = deserializeXYWH(this.xywh);
     return x;
   }
 
   get y() {
-    const [, y] = JSON.parse(this.xywh);
+    const [, y] = deserializeXYWH(this.xywh);
     return y;
   }
 
   get w() {
-    const [, , w] = JSON.parse(this.xywh);
+    const [, , w] = deserializeXYWH(this.xywh);
     return w;
   }
 
   get h() {
-    const [, , , h] = JSON.parse(this.xywh);
+    const [, , , h] = deserializeXYWH(this.xywh);
     return h;
   }
 
