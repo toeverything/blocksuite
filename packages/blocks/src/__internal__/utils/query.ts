@@ -379,6 +379,16 @@ export function getVirgoByModel(model: BaseBlockModel) {
   return richText.vEditor;
 }
 
+export async function asyncGetVirgoByModel(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Not support database model since it's may be have multiple Virgo instances.
+    throw new Error('Cannot get virgo by database model!');
+  }
+  const richText = await asyncGetRichTextByModel(model);
+  if (!richText) return null;
+  return richText.vEditor;
+}
+
 // TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   // filter comment
