@@ -46,7 +46,7 @@ export function CodeOptionTemplate({
         box-shadow:var(--affine-menu-shadow);
         padding:4px;
         border-radius:8px;
-        background:var(--affine-white)
+        background:var(--affine-background-overlay-panel-color)
       }
 
       ${tooltipStyle}

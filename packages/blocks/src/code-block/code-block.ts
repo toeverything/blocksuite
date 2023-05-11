@@ -153,7 +153,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-white-90);
+      background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
 
