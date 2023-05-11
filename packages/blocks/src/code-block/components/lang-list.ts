@@ -1,13 +1,15 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
 import {
-  createEvent,
-  isFuzzyMatch,
-  ShadowlessElement,
-} from '../../__internal__/index.js';
-import { codeLanguages } from '../utils/code-languages.js';
+  BUNDLED_LANGUAGES,
+  type ILanguageRegistration,
+  type Lang,
+} from 'shiki';
+
+import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
+import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
+import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -104,24 +106,20 @@ export class LangList extends ShadowlessElement {
   @state()
   private _currentSelectedIndex = 0;
 
-  @property()
-  selectedLanguage = '';
-
   @query('#filter-input')
   filterInput!: HTMLInputElement;
 
   @property()
   delay = 150;
 
-  static languages = codeLanguages
-    .map(lang => lang.toUpperCase()[0] + lang.slice(1))
-    .concat(['Plain Text']);
-
   override async connectedCallback() {
-    await super.connectedCallback();
+    super.connectedCallback();
     // Avoid triggering click away listener on initial render
     document.addEventListener('click', this._clickAwayListener);
-    this.filterInput.focus();
+
+    setTimeout(() => {
+      this.filterInput?.focus();
+    }, 0);
   }
 
   override disconnectedCallback() {
@@ -136,25 +134,33 @@ export class LangList extends ShadowlessElement {
     this.dispatchEvent(createEvent('dispose', null));
   };
 
-  private _onLanguageClicked(language: string) {
-    this.selectedLanguage = language;
+  private _onLanguageClicked(language: ILanguageRegistration | null) {
+    // TODO use slot instead
     this.dispatchEvent(
       createEvent('selected-language-changed', {
-        language: this.selectedLanguage ?? 'Plain Text',
+        language: language?.id ?? null,
       })
     );
   }
 
   override render() {
-    const filteredLanguages = LangList.languages.filter(language => {
-      if (!this._filterText) {
-        return true;
-      }
-      return isFuzzyMatch(
-        language.toLowerCase(),
-        this._filterText.toLowerCase()
+    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+      .filter(language => {
+        if (!this._filterText) {
+          return true;
+        }
+        return (
+          language.id.startsWith(this._filterText.toLowerCase()) ||
+          language.aliases?.some(alias =>
+            alias.startsWith(this._filterText.toLowerCase())
+          )
+        );
+      })
+      .sort(
+        (a, b) =>
+          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
+          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
       );
-    });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -205,7 +211,7 @@ export class LangList extends ShadowlessElement {
                 class="lang-item"
                 ?hover=${index === this._currentSelectedIndex}
               >
-                ${language}
+                ${language.id[0].toUpperCase() + language.id.slice(1)}
               </icon-button>
             `
           )}
@@ -221,7 +227,10 @@ declare global {
   }
 
   interface HTMLElementEventMap {
-    'selected-language-changed': CustomEvent<{ language: string }>;
+    /**
+     * @deprecated Use slot instead
+     */
+    'selected-language-changed': CustomEvent<{ language: string | null }>;
     dispose: CustomEvent<null>;
   }
 }
