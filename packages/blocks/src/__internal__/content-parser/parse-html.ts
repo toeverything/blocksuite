@@ -27,6 +27,7 @@ const INLINE_TAGS = [
   'SMALL',
   'ABBR',
   'CITE',
+  'BDI',
 ];
 
 export class HtmlParser {
