@@ -1,11 +1,13 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
+import { FALLBACK_LANG } from './utils/consts.js';
+
 export const CodeBlockSchema = defineBlockSchema({
   flavour: 'affine:code',
   props: internal => ({
     text: internal.Text(),
-    language: 'Plain Text',
+    language: FALLBACK_LANG,
   }),
   metadata: {
     version: 1,
