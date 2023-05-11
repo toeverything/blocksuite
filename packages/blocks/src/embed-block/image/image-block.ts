@@ -55,7 +55,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .embed-editing-state {
-      box-shadow: var(--affine-menu-shadow);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 10px;
       list-style: none;
       padding: 4px;

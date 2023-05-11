@@ -19,7 +19,7 @@ const paragraphPanelStyle = css`
     overflow-y: auto;
 
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-menu-shadow);
+    box-shadow: var(--affine-shadow-2);
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
@@ -37,7 +37,7 @@ export const formatQuickBarStyle = css`
 
     border-radius: 8px;
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-menu-shadow);
+    box-shadow: var(--affine-shadow-2);
     z-index: var(--affine-z-index-popover);
     user-select: none;
   }

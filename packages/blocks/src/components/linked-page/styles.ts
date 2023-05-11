@@ -17,7 +17,7 @@ export const styles = css`
     flex-direction: column;
 
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-menu-shadow);
+    box-shadow: var(--affine-shadow-2);
     border-radius: 12px;
     z-index: var(--affine-z-index-popover);
   }

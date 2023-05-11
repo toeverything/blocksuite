@@ -8,7 +8,7 @@ export const editLinkStyle = css`
     width: 404px;
     height: 112px;
     padding: 12px;
-    box-shadow: var(--affine-menu-shadow);
+    box-shadow: var(--affine-shadow-2);
     background: var(--affine-background-overlay-panel-color);
     border-radius: 8px;
     display: grid;
@@ -165,7 +165,7 @@ export const linkPopoverStyle = css`
     padding: 0 12px;
 
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-menu-shadow);
+    box-shadow: var(--affine-shadow-2);
     border-radius: 8px;
   }
 

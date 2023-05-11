@@ -62,7 +62,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       justify-content: center;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       font-size: 16px;
       line-height: 22px;
