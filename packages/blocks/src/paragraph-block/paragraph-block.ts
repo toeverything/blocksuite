@@ -5,17 +5,14 @@ import {
   BlockHubIcon20,
 } from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  isPageMode,
-  ShadowlessElement,
-} from '../__internal__/index.js';
+import { type BlockHost, isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,

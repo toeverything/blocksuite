@@ -7,6 +7,7 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/global/config';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { ShadowlessElement } from '@blocksuite/lit';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -40,10 +41,7 @@ import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/utils/lit.js';
+import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type {
   BlockHost,
   DragHandle,

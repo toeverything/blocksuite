@@ -4,6 +4,7 @@ import {
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
@@ -24,10 +25,7 @@ import {
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/utils/lit.js';
+import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';

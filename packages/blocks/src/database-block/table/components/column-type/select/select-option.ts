@@ -1,10 +1,11 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { setupVirgoScroll } from '../../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../../components/virgo-input/virgo-input.js';
-import { ShadowlessElement, WithDisposable } from '../../../../../std.js';
+import { WithDisposable } from '../../../../../std.js';
 import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { SelectTag } from '../../../types.js';

@@ -2,11 +2,12 @@ import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ShadowlessElement, WithDisposable } from '../../__internal__/index.js';
+import { WithDisposable } from '../../__internal__/index.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
