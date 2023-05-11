@@ -17,7 +17,7 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/surface-element.js';
-import { compare, generateBound } from './grid.js';
+import { compare, generateBounds } from './grid.js';
 import { ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
@@ -199,8 +199,8 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bound = generateBound(sortedElements);
-    const elements = this.pickByBound(bound).sort(compare);
+    const bounds = generateBounds(sortedElements);
+    const elements = this.pickByBound(bounds).sort(compare);
     const { startIndex, endIndex } = getIndexes(elements);
     const indexes = sortedElements.map(e =>
       elements.findIndex(element => element === e)
@@ -358,7 +358,7 @@ export class SurfaceManager {
       (ranges, elements) => {
         ranges.forEach(({ start, end }) => {
           const temp = elements.splice(start, end + 1 - start);
-          elements.splice(end + 1, 0, ...temp);
+          elements.splice(start + 1, 0, ...temp);
         });
       }
     );

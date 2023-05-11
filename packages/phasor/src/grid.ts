@@ -23,9 +23,9 @@ export function compare(a: SurfaceElement, b: SurfaceElement): number {
 }
 
 /**
- * Generates a bound with selected elements.
+ * Generates bounds with selected elements.
  */
-export function generateBound(elements: SurfaceElement[]): IBound {
+export function generateBounds(elements: SurfaceElement[]): IBound {
   const bound = {
     x: 0,
     y: 0,

@@ -3,12 +3,15 @@ import '../../toolbar/shape-tool/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { SurfaceManager } from '@blocksuite/phasor';
+import type { SurfaceElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import {
+  type TopLevelBlockModel,
+} from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
@@ -120,6 +123,25 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   private _actionsMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  private _splitElements(): {
+    frames: TopLevelBlockModel[];
+    shapes: SurfaceElement[];
+  } {
+    const frames: TopLevelBlockModel[] = [];
+    const shapes: SurfaceElement[] = [];
+    this.elements.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        frames.push(element);
+      } else {
+        shapes.push(element);
+      }
+    });
+    return {
+      frames,
+      shapes,
+    };
+  }
+
   private _delete() {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -142,19 +164,31 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'bringToFront': {
-        this.surface.bringToFront(this.elements.map(ele => ele.id));
+        const { frames, shapes } = this._splitElements();
+        if (shapes.length) {
+          this.surface.bringToFront(shapes.map(ele => ele.id));
+        }
         break;
       }
       case 'bringForward': {
-        this.surface.bringForward(this.elements.map(ele => ele.id));
+        const { frames, shapes } = this._splitElements();
+        if (shapes.length) {
+          this.surface.bringForward(shapes.map(ele => ele.id));
+        }
         break;
       }
       case 'sendBackward': {
-        this.surface.sendBackward(this.elements.map(ele => ele.id));
+        const { frames, shapes } = this._splitElements();
+        if (shapes.length) {
+          this.surface.sendBackward(shapes.map(ele => ele.id));
+        }
         break;
       }
       case 'sendToBack': {
-        this.surface.sendToBack(this.elements.map(ele => ele.id));
+        const { frames, shapes } = this._splitElements();
+        if (shapes.length) {
+          this.surface.sendToBack(shapes.map(ele => ele.id));
+        }
         break;
       }
     }
