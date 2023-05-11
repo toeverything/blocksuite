@@ -54,8 +54,6 @@ type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
 export type AbstractEditor = {
   page: Page;
   mode: EditorMode;
-  mouseMode: MouseMode;
-  showGrid: boolean;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;
 

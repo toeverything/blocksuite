@@ -14,21 +14,10 @@ export function registerService(
   Constructor: { new (): BaseService }
 ): Promise<void> | void {
   if (services.has(flavour)) {
-    console.error(`'${flavour}' already be registered!`);
     return;
   }
   const service = new Constructor();
-  if ('onLoad' in service && typeof service.onLoad === 'function') {
-    const onLoad = service.onLoad.bind(service);
-    return new Promise(resolve => {
-      onLoad().then(() => {
-        services.set(flavour, service);
-        resolve();
-      });
-    });
-  } else {
-    services.set(flavour, service);
-  }
+  services.set(flavour, service);
   return;
 }
 

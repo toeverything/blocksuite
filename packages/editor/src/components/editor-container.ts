@@ -1,26 +1,30 @@
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+} from '@blocksuite/blocks';
 import {
   type AbstractEditor,
   activeEditorManager,
-  type DefaultPageBlockComponent,
-  type EdgelessPageBlockComponent,
-  type MouseMode,
+  edgelessPreset,
   type PageBlockModel,
+  pagePreset,
   type SurfaceBlockModel,
   WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
-  ShadowlessElement,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { choose } from 'lit/directives/choose.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
+
+BlockSuiteRoot;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function forwardSlot<T extends Record<string, Slot<any>>>(
@@ -49,13 +53,11 @@ export class EditorContainer
   @property()
   override autofocus = false;
 
-  @property()
-  mouseMode: MouseMode = {
-    type: 'default',
-  };
+  @query('affine-default-page')
+  private _defaultPageBlock?: DefaultPageBlockComponent;
 
-  @property()
-  showGrid = true;
+  @query('affine-edgeless-page')
+  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   readonly themeObserver = new ThemeObserver();
 
@@ -69,18 +71,6 @@ export class EditorContainer
   get pageBlockModel(): PageBlockModel | null {
     return Array.isArray(this.model) ? this.model[0] : this.model;
   }
-
-  get surfaceBlockModel(): SurfaceBlockModel | null {
-    return Array.isArray(this.model)
-      ? (this.model[1] as SurfaceBlockModel)
-      : null;
-  }
-
-  @query('affine-default-page')
-  private _defaultPageBlock?: DefaultPageBlockComponent;
-
-  @query('affine-edgeless-page')
-  private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
@@ -127,13 +117,13 @@ export class EditorContainer
     }
 
     // connect mouse mode event changes
-    this._disposables.addFromEvent(
-      window,
-      'affine.switch-mouse-mode',
-      ({ detail }) => {
-        this.mouseMode = detail;
-      }
-    );
+    // this._disposables.addFromEvent(
+    //   window,
+    //   'affine.switch-mouse-mode',
+    //   ({ detail }) => {
+    //     this.mouseMode = detail;
+    //   }
+    // );
 
     // subscribe store
     this._disposables.add(
@@ -187,12 +177,15 @@ export class EditorContainer
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
-    if (this._defaultPageBlock) {
-      forwardSlot(this._defaultPageBlock.slots, this.slots);
-    }
-    if (this._edgelessPageBlock) {
-      forwardSlot(this._edgelessPageBlock.slots, this.slots);
-    }
+
+    requestAnimationFrame(() => {
+      if (this._defaultPageBlock) {
+        forwardSlot(this._defaultPageBlock.slots, this.slots);
+      }
+      if (this._edgelessPageBlock) {
+        forwardSlot(this._edgelessPageBlock.slots, this.slots);
+      }
+    });
   }
 
   async createBlockHub() {
@@ -206,41 +199,16 @@ export class EditorContainer
   override render() {
     if (!this.model || !this.pageBlockModel) return null;
 
-    const pageContainer = keyed(
-      'page-' + this.pageBlockModel.id,
-      html`
-        <affine-default-page
-          .mouseRoot=${this as HTMLElement}
-          .page=${this.page}
-          .model=${this.pageBlockModel}
-        ></affine-default-page>
-      `
-    );
-
-    const edgelessContainer = keyed(
-      'edgeless-' + this.pageBlockModel.id,
-      html`
-        <affine-edgeless-page
-          .mouseRoot=${this as HTMLElement}
-          .page=${this.page}
-          .model=${this.pageBlockModel}
-          .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
-          .mouseMode=${this.mouseMode}
-          .showGrid=${this.showGrid}
-        ></affine-edgeless-page>
-      `
+    const rootContainer = keyed(
+      this.pageBlockModel.id,
+      html`<block-suite-root
+        .page=${this.page}
+        .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
+      ></block-suite-root>`
     );
 
     const remoteSelectionContainer = html`
       <remote-selection .page=${this.page}></remote-selection>
-    `;
-
-    const blockRoot = html`
-      ${choose(this.mode, [
-        ['page', () => pageContainer],
-        ['edgeless', () => edgelessContainer],
-      ])}
-      ${remoteSelectionContainer}
     `;
 
     return html`
@@ -258,7 +226,7 @@ export class EditorContainer
           background: var(--affine-background-primary-color);
         }
       </style>
-      <div class="affine-editor-container">${blockRoot}</div>
+      ${rootContainer} ${remoteSelectionContainer}
     `;
   }
 }

@@ -10,8 +10,9 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import {
-  type BlockHost,
+  getBlockElementById,
   getModelByElement,
   ShadowlessElement,
   WithDisposable,
@@ -68,9 +69,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     attributes: {},
   };
 
-  @property()
-  host!: BlockHost;
-
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   @state()
   private _refMeta?: PageMeta;
@@ -122,7 +120,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return;
     }
     const targetPageId = refMeta.id;
-    this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const root = model.page.root;
+    assertExists(root);
+    const element = getBlockElementById(root?.id) as DefaultPageBlockComponent;
+    assertExists(element);
+    element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
   override render() {

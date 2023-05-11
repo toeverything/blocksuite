@@ -1,10 +1,13 @@
 /// <reference types="vite/client" />
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type BlockHost, ShadowlessElement } from '../__internal__/index.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { ShadowlessElement } from '../__internal__/index.js';
+import { registerService } from '../__internal__/service.js';
 import type { DividerBlockModel } from './divider-model.js';
+import { DividerBlockService } from './divider-service.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends ShadowlessElement {
@@ -27,7 +30,12 @@ export class DividerBlockComponent extends ShadowlessElement {
   model!: DividerBlockModel;
 
   @property()
-  host!: BlockHost;
+  content!: TemplateResult;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:divider', DividerBlockService);
+  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -35,16 +43,17 @@ export class DividerBlockComponent extends ShadowlessElement {
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
+    const children = html`<div
+      class="affine-block-children-container"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+    >
+      ${this.content}
+    </div>`;
 
     return html`
       <div class=${`affine-divider-block-container`}>
         <hr />
-        ${childrenContainer}
+        ${children}
       </div>
     `;
   }

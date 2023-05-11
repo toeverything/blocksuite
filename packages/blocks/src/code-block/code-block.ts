@@ -6,6 +6,7 @@ import './components/lang-list.js';
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 import { css, html, render } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -19,17 +20,17 @@ import {
 import { z } from 'zod';
 
 import {
-  type BlockHost,
   getViewportElement,
   queryCurrentMode,
   ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
+import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
@@ -164,7 +165,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   model!: CodeBlockModel;
 
   @property()
-  host!: BlockHost;
+  content!: TemplateResult;
 
   @state()
   private _showLangList = false;
@@ -224,6 +225,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:code', CodeBlockService);
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
@@ -384,9 +386,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       ${this._showLangList
         ? html`<lang-list
             @selected-language-changed=${(e: CustomEvent) => {
-              this.host
-                .getService('affine:code')
-                .setLang(this.model, e.detail.language);
+              getService('affine:code').setLang(this.model, e.detail.language);
               this._showLangList = false;
             }}
             @dispose=${() => {
@@ -454,24 +454,14 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
-
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
           <div id="line-numbers"></div>
-          <rich-text
-            .host=${this.host}
-            .model=${this.model}
-            .textSchema=${this.textSchema}
-          >
+          <rich-text .model=${this.model} .textSchema=${this.textSchema}>
           </rich-text>
         </div>
-        ${childrenContainer}
+        ${this.content}
       </div>
       ${this._codeOptionTemplate()}`;
   }

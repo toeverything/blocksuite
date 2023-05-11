@@ -97,7 +97,7 @@ async function initEmptyEditor(
             }
             editor.page = newPage;
           });
-          appRoot.appendChild(editor);
+          appRoot.append(editor);
           editor.createBlockHub().then(blockHub => {
             document.body.appendChild(blockHub);
           });

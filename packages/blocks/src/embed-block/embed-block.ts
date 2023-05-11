@@ -1,12 +1,17 @@
-import { css, html, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { ShadowlessElement } from '../__internal__/index.js';
+import { registerService } from '../__internal__/service.js';
 import type { EmbedBlockModel } from './embed-model.js';
+import { EmbedBlockService } from './embed-service.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends ShadowlessElement {
   static override styles = css`
+    affine-embed {
+      display: block;
+    }
     .affine-embed-wrapper {
       text-align: center;
       margin-bottom: calc(var(--affine-paragraph-space) + 8px);
@@ -38,6 +43,11 @@ export class EmbedBlockComponent extends ShadowlessElement {
 
   @state()
   private _caption!: string;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:embed', EmbedBlockService);
+  }
 
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -80,10 +90,14 @@ export class EmbedBlockComponent extends ShadowlessElement {
   }
 
   override render() {
+    const slot =
+      this.model.type === 'image'
+        ? html`<affine-image .model=${this.model}></affine-image>`
+        : nothing;
     return html`
+      ${slot}
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">
-          <slot></slot>
           <input
             .disabled=${this.model.page.readonly}
             placeholder="Write a caption"
