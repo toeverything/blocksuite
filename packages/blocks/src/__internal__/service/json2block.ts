@@ -40,10 +40,22 @@ export async function json2block(
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
 
+    const shouldSplitBlock = focusedBlockModel.text?.length !== range.endOffset;
+
+    shouldSplitBlock &&
+      (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
         range?.startOffset || 0
+      );
+
+      await addSerializedBlocks(
+        page,
+        firstBlock.children || [],
+        focusedBlockModel,
+        0
       );
 
       await setRange(focusedBlockModel, {
@@ -51,12 +63,6 @@ export async function json2block(
         length: 0,
       });
     } else {
-      const shouldSplitBlock =
-        focusedBlockModel.text?.length !== range.endOffset;
-
-      shouldSplitBlock &&
-        (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
-
       const [id] = await addSerializedBlocks(
         page,
         pastedBlocks,
@@ -87,6 +93,12 @@ export async function json2block(
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
       range?.startOffset || 0
+    );
+    await addSerializedBlocks(
+      page,
+      firstBlock.children || [],
+      focusedBlockModel,
+      0
     );
   }
 
