@@ -12,6 +12,7 @@ import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
   pressSpace,
@@ -77,6 +78,7 @@ async function initEmptyEditor(
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
+
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
@@ -118,6 +120,7 @@ async function initEmptyEditor(
           new CustomEvent('blocksuite:page-ready', { detail: page.id })
         );
       }
+
       if (noInit) {
         workspace.slots.pageAdded.on(pageId => {
           const page = workspace.getPage(pageId);
@@ -135,20 +138,14 @@ async function initEmptyEditor(
   );
   await waitNextFrame(page);
 }
-let multiEditor = false;
-export const setMultiEditor = (me: boolean) => {
-  multiEditor = me;
-};
-let currentEditorIndex = 0;
-export const setCurrentEditor = (n: number) => {
-  currentEditorIndex = n;
-};
-export const getCurrentEditorIndex = () => {
-  return currentEditorIndex;
-};
+
 export const getEditorLocator = (page: Page) => {
   return page.locator('editor-container').nth(currentEditorIndex);
 };
+export const getBlockHub = (page: Page) => {
+  return page.locator('affine-block-hub').nth(currentEditorIndex);
+};
+
 export async function enterPlaygroundRoom(
   page: Page,
   ops?: {
@@ -852,7 +849,7 @@ export async function initImageState(page: Page) {
   await focusRichText(page);
   await page.evaluate(() => {
     const clipData = {
-      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
+      'text/html': `<img src='${location.origin}/test-card-1.png' />`,
     };
     const e = new ClipboardEvent('paste', {
       clipboardData: new DataTransfer(),
@@ -877,7 +874,7 @@ export async function getCurrentEditorPageId(page: Page) {
     if (!editor) throw new Error("Can't find editor-container");
     const pageId = editor.page.id;
     return pageId;
-  }, getCurrentEditorIndex());
+  }, currentEditorIndex);
 }
 
 export async function getCurrentHTMLTheme(page: Page) {
