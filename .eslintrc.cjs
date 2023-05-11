@@ -10,6 +10,7 @@ const allPackages = [
   'store',
   'virgo',
   'connector',
+  'lit',
 ];
 
 const createPattern = packageName => [
@@ -51,6 +52,7 @@ module.exports = {
   ],
   ignorePatterns: [
     'packages/store/dist/*',
+    'packages/lit/dist/*',
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
     'packages/global/dist/*',
