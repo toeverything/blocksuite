@@ -33,19 +33,19 @@ export function generateBound(elements: SurfaceElement[]): IBound {
     h: 0,
   };
 
-  let i = 0;
   const l = elements.length;
-  const first = elements[i];
 
   if (l) {
-    bound.x = first.x;
-    bound.y = first.y;
-    bound.w = first.w;
-    bound.h = first.h;
-
-    let e;
     let maxX;
     let maxY;
+    let i = 0;
+    let e = elements[i];
+
+    bound.x = e.x;
+    bound.y = e.y;
+    bound.w = e.w;
+    bound.h = e.h;
+
     for (i++; i < l; i++) {
       e = elements[i];
       bound.x = Math.min(bound.x, e.x);

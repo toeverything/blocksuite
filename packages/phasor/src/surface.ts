@@ -30,7 +30,8 @@ export class SurfaceManager {
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
-  private _lastIndex = 'a0';
+  private _minIndex = 'a0';
+  private _maxIndex = 'a0';
 
   private _transformPropertyValue: TransformPropertyValue;
 
@@ -48,6 +49,188 @@ export class SurfaceManager {
 
   get viewport(): SurfaceViewport {
     return this._renderer;
+  }
+
+  private _addBinding(id0: string, id1: string) {
+    if (!this._bindings.has(id0)) {
+      this._bindings.set(id0, new Set());
+    }
+    this._bindings.get(id0)?.add(id1);
+  }
+
+  private _updateBindings(element: SurfaceElement) {
+    if (element instanceof ConnectorElement) {
+      if (element.startElement) {
+        this._addBinding(element.startElement.id, element.id);
+        this._addBinding(element.id, element.startElement.id);
+      }
+      if (element.endElement) {
+        this._addBinding(element.endElement.id, element.id);
+        this._addBinding(element.id, element.endElement.id);
+      }
+    }
+  }
+
+  private _syncFromExistingContainer() {
+    this._yContainer.forEach(yElement => {
+      const type = yElement.get('type') as keyof PhasorElementType;
+
+      const ElementCtor = ElementCtors[type];
+      assertExists(ElementCtor);
+      const element = new ElementCtor(yElement);
+      element.transformPropertyValue = this._transformPropertyValue;
+      element.mount(this._renderer);
+
+      this._elements.set(element.id, element);
+
+      if (element.index > this._maxIndex) {
+        this._maxIndex = element.index;
+      } else if (element.index < this._minIndex) {
+        this._minIndex = element.index;
+      }
+
+      this._updateBindings(element);
+    });
+  }
+
+  private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
+    // skip empty event
+    if (event.changes.keys.size === 0) return;
+    event.keysChanged.forEach(id => {
+      const type = event.changes.keys.get(id);
+      if (!type) {
+        console.error('invalid event', event);
+        return;
+      }
+
+      if (type.action === 'add') {
+        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
+        const type = yElement.get('type') as keyof PhasorElementType;
+
+        const ElementCtor = ElementCtors[type];
+        assertExists(ElementCtor);
+        const element = new ElementCtor(yElement);
+        element.transformPropertyValue = this._transformPropertyValue;
+        element.mount(this._renderer);
+
+        this._elements.set(element.id, element);
+
+        if (element.index > this._maxIndex) {
+          this._maxIndex = element.index;
+        }
+
+        this._updateBindings(element);
+      } else if (type.action === 'update') {
+        console.error('update event on yElements is not supported', event);
+      } else if (type.action === 'delete') {
+        const element = this._elements.get(id);
+        assertExists(element);
+        element.unmount();
+        this._elements.delete(id);
+      }
+    });
+  };
+
+  private _transact(callback: () => void) {
+    const doc = this._yContainer.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
+  }
+
+  /**
+   * Brings to front or Sends to back.
+   */
+  private _reorderTo(
+    elementIds: string[],
+    pickIndexes: () => {
+      startIndex: string | null;
+      endIndex: string | null;
+    },
+    setIndexes: (keys: string[]) => void
+  ) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+
+    const { startIndex, endIndex } = pickIndexes();
+
+    const keys = generateNKeysBetween(
+      startIndex,
+      endIndex,
+      sortedElements.length
+    );
+
+    setIndexes(keys);
+
+    this._transact(() => {
+      sortedElements.forEach((ele, index) => {
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
+  }
+
+  /**
+   * Brings forward or Sends backward layer by layer.
+   */
+  private _reorder(
+    elementIds: string[],
+    pickIndexes: (elements: SurfaceElement[]) => {
+      startIndex: string | null;
+      endIndex: string | null;
+    },
+    order: (
+      ranges: { start: number; end: number }[],
+      elements: SurfaceElement[]
+    ) => void
+  ) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+
+    const bound = generateBound(sortedElements);
+    const elements = this.pickByBound(bound).sort(compare);
+    const { startIndex, endIndex } = pickIndexes(elements);
+    const indexes = sortedElements.map(e =>
+      elements.findIndex(element => element === e)
+    );
+
+    let curr;
+    let start = indexes[0];
+    let end = indexes[0];
+    const ranges = [{ start, end }];
+    const len = indexes.length;
+    for (let i = 1; i < len; i++) {
+      curr = indexes[i];
+      if (curr - end === 1) {
+        ranges[i - 1].end = end = curr;
+      } else {
+        ranges.push({ start, end });
+        start = curr;
+      }
+    }
+
+    order(ranges, elements);
+
+    const keys = generateNKeysBetween(startIndex, endIndex, elements.length);
+
+    this._transact(() => {
+      elements.forEach((ele, index) => {
+        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
+        yElement.set('index', keys[index]);
+      });
+    });
   }
 
   attach(container: HTMLElement) {
@@ -75,7 +258,7 @@ export class SurfaceManager {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(this._lastIndex, null),
+      index: generateKeyBetween(this._maxIndex, null),
       seed: randomSeed(),
     };
     for (const key in props) {
@@ -153,195 +336,61 @@ export class SurfaceManager {
   }
 
   bringToFront(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const bound = generateBound(sortedElements);
-    const elements = this.pickByBound(bound).sort(compare);
-    const startIndex = elements[0].index;
-    const indexes = sortedElements.map(e =>
-      elements.findIndex(element => element === e)
-    );
-
-    let curr;
-    let start = indexes[0];
-    let end = indexes[0];
-    const ranges = [[start, end]];
-    const len = indexes.length;
-    for (let i = 1; i < len; i++) {
-      curr = indexes[i];
-      if (curr - end === 1) {
-        ranges[i - 1][1] = end = curr;
-      } else {
-        ranges.push([start, end]);
-        start = curr;
+    this._reorderTo(
+      elementIds,
+      () => ({
+        startIndex: this._maxIndex,
+        endIndex: null,
+      }),
+      keys => {
+        this._maxIndex = keys[keys.length - 1];
       }
-    }
-
-    ranges.forEach(([start, end]) => {
-      const temp = elements.splice(start, end + 1 - start);
-      elements.push(...temp);
-    });
-
-    const keys = generateNKeysBetween(startIndex, null, elements.length);
-
-    this._transact(() => {
-      elements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
+    );
   }
 
   bringForward(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const bound = generateBound(sortedElements);
-    const elements = this.pickByBound(bound).sort(compare);
-    const startIndex = elements[0].index;
-    const indexes = sortedElements.map(e =>
-      elements.findIndex(element => element === e)
-    );
-
-    let curr;
-    let start = indexes[0];
-    let end = indexes[0];
-    const ranges = [[start, end]];
-    const len = indexes.length;
-    for (let i = 1; i < len; i++) {
-      curr = indexes[i];
-      if (curr - end === 1) {
-        ranges[i - 1][1] = end = curr;
-      } else {
-        ranges.push([start, end]);
-        start = curr;
+    this._reorder(
+      elementIds,
+      elements => ({
+        startIndex: elements[0].index,
+        endIndex: null,
+      }),
+      (ranges, elements) => {
+        ranges.forEach(({ start, end }) => {
+          const temp = elements.splice(start, end + 1 - start);
+          elements.splice(end + 1, 0, ...temp);
+        });
       }
-    }
-
-    ranges.forEach(([start, end]) => {
-      const temp = elements.splice(start, end + 1 - start);
-      elements.splice(end + 1, 0, ...temp);
-    });
-
-    const keys = generateNKeysBetween(startIndex, null, elements.length);
-
-    this._transact(() => {
-      elements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
+    );
   }
 
   sendBackward(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const bound = generateBound(sortedElements);
-    const elements = this.pickByBound(bound).sort(compare);
-    const lastIndex = elements[elements.length - 1].index;
-    const indexes = sortedElements.map(e =>
-      elements.findIndex(element => element === e)
-    );
-
-    let curr;
-    let start = indexes[0];
-    let end = indexes[0];
-    const ranges = [[start, end]];
-    const len = indexes.length;
-    for (let i = 1; i < len; i++) {
-      curr = indexes[i];
-      if (curr - end === 1) {
-        ranges[i - 1][1] = end = curr;
-      } else {
-        ranges.push([start, end]);
-        start = curr;
+    this._reorder(
+      elementIds,
+      elements => ({
+        startIndex: null,
+        endIndex: elements[elements.length - 1].index,
+      }),
+      (ranges, elements) => {
+        ranges.forEach(({ start, end }) => {
+          const temp = elements.splice(start, end + 1 - start);
+          elements.splice(start - 1, 0, ...temp);
+        });
       }
-    }
-
-    ranges.forEach(([start, end]) => {
-      const temp = elements.splice(start, end + 1 - start);
-      elements.splice(start - 1, 0, ...temp);
-    });
-
-    const keys = generateNKeysBetween(null, lastIndex, elements.length);
-
-    this._transact(() => {
-      elements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
+    );
   }
 
   sendToBack(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const bound = generateBound(sortedElements);
-    const elements = this.pickByBound(bound).sort(compare);
-    const lastIndex = elements[elements.length - 1].index;
-    const indexes = sortedElements.map(e =>
-      elements.findIndex(element => element === e)
-    );
-
-    let curr;
-    let start = indexes[0];
-    let end = indexes[0];
-    const ranges = [[start, end]];
-    const len = indexes.length;
-    for (let i = 1; i < len; i++) {
-      curr = indexes[i];
-      if (curr - end === 1) {
-        ranges[i - 1][1] = end = curr;
-      } else {
-        ranges.push([start, end]);
-        start = curr;
+    this._reorderTo(
+      elementIds,
+      () => ({
+        startIndex: null,
+        endIndex: this._minIndex,
+      }),
+      keys => {
+        this._minIndex = keys[0];
       }
-    }
-
-    ranges.reverse().forEach(([start, end]) => {
-      const temp = elements.splice(start, end + 1 - start);
-      elements.unshift(...temp);
-    });
-
-    const keys = generateNKeysBetween(null, lastIndex, elements.length);
-
-    this._transact(() => {
-      elements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
+    );
   }
 
   getBindingElements(id: string) {
@@ -352,89 +401,6 @@ export class SurfaceManager {
     return [...bindingIds.values()]
       .map(bindingId => this.pickById(bindingId))
       .filter(e => !!e) as SurfaceElement[];
-  }
-
-  private _addBinding(id0: string, id1: string) {
-    if (!this._bindings.has(id0)) {
-      this._bindings.set(id0, new Set());
-    }
-    this._bindings.get(id0)?.add(id1);
-  }
-
-  private _updateBindings(element: SurfaceElement) {
-    if (element instanceof ConnectorElement) {
-      if (element.startElement) {
-        this._addBinding(element.startElement.id, element.id);
-        this._addBinding(element.id, element.startElement.id);
-      }
-      if (element.endElement) {
-        this._addBinding(element.endElement.id, element.id);
-        this._addBinding(element.id, element.endElement.id);
-      }
-    }
-  }
-
-  private _syncFromExistingContainer() {
-    this._yContainer.forEach(yElement => {
-      const type = yElement.get('type') as keyof PhasorElementType;
-
-      const ElementCtor = ElementCtors[type];
-      assertExists(ElementCtor);
-      const element = new ElementCtor(yElement);
-      element.transformPropertyValue = this._transformPropertyValue;
-      element.mount(this._renderer);
-
-      this._elements.set(element.id, element);
-
-      if (element.index > this._lastIndex) {
-        this._lastIndex = element.index;
-      }
-
-      this._updateBindings(element);
-    });
-  }
-
-  private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
-    // skip empty event
-    if (event.changes.keys.size === 0) return;
-    event.keysChanged.forEach(id => {
-      const type = event.changes.keys.get(id);
-      if (!type) {
-        console.error('invalid event', event);
-        return;
-      }
-
-      if (type.action === 'add') {
-        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as keyof PhasorElementType;
-
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement);
-        element.transformPropertyValue = this._transformPropertyValue;
-        element.mount(this._renderer);
-
-        this._elements.set(element.id, element);
-
-        if (element.index > this._lastIndex) {
-          this._lastIndex = element.index;
-        }
-
-        this._updateBindings(element);
-      } else if (type.action === 'update') {
-        console.error('update event on yElements is not supported', event);
-      } else if (type.action === 'delete') {
-        const element = this._elements.get(id);
-        assertExists(element);
-        element.unmount();
-        this._elements.delete(id);
-      }
-    });
-  };
-
-  private _transact(callback: () => void) {
-    const doc = this._yContainer.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
   }
 
   dispose() {
