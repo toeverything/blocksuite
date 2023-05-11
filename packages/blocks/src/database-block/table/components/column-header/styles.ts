@@ -27,12 +27,11 @@ export const styles = css`
     min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
   }
   .database-cell.add-column-button {
-    width: auto;
+    flex: 1;
     min-width: ${DEFAULT_ADD_BUTTON_WIDTH}px;
     min-height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
   }
   .affine-database-column-content {
     display: flex;
@@ -184,7 +183,7 @@ export const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 40px;
     height: 100%;
     cursor: pointer;
   }
