@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.3.1",
+  "packageManager": "pnpm@8.5.0",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
@@ -52,6 +52,7 @@
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@commitlint/cli": "^17.4.4",

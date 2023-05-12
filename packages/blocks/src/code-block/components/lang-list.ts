@@ -1,4 +1,5 @@
 import { SearchIcon } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -7,7 +8,7 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
+import { createEvent } from '../../__internal__/index.js';
 import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 

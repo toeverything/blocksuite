@@ -5,7 +5,7 @@ import {
   transformPointsToNewBound,
 } from '../../utils/bound.js';
 import { setLineDash } from '../../utils/canvas.js';
-import { SurfaceElement } from '../base-element.js';
+import { SurfaceElement } from '../surface-element.js';
 import { drawArrow } from './draw-arrow.js';
 import { drawOrthogonal } from './draw-orthogonal.js';
 import { drawStraight } from './draw-straight.js';

@@ -4,6 +4,7 @@ import {
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -21,7 +22,6 @@ import {
   Point,
   type Rect,
   type SelectionEvent,
-  ShadowlessElement,
   WithDisposable,
 } from '../__internal__/index.js';
 

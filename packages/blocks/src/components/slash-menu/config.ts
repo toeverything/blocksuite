@@ -16,8 +16,9 @@ import {
   assertExists,
   type BaseBlockModel,
   type Page,
+  Text,
+  Utils,
 } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
@@ -43,6 +44,7 @@ export type SlashItem = {
   groupName: string;
   alias?: string[];
   icon: TemplateResult<1>;
+  showWhen?: (model: BaseBlockModel) => boolean;
   disabled?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
@@ -74,6 +76,10 @@ function formatDate(date: Date) {
   return strTime;
 }
 
+function insideDatabase(model: BaseBlockModel) {
+  return Utils.isInsideBlockByFlavour(model.page, model, 'affine:database');
+}
+
 export const menuGroups: { name: string; items: SlashItem[] }[] = (
   [
     {
@@ -85,6 +91,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             ({ name, icon, flavour, type }) => ({
               name,
               icon,
+              showWhen: model => {
+                if (!model.page.schema.flavourSchemaMap.has(flavour)) {
+                  return false;
+                }
+
+                if (['Quote', 'Code Block', 'Divider'].includes(name)) {
+                  return !insideDatabase(model);
+                }
+                return true;
+              },
               action: ({ model }) => {
                 const newModels = updateBlockType([model], flavour, type);
                 // Reset selection if the target is code block
@@ -113,7 +129,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
       name: 'Style',
       items: formatConfig
         .filter(i => !['Link', 'Code'].includes(i.name))
-        .map(({ name, icon, id }, idx) => ({
+        .map(({ name, icon, id }) => ({
           name,
           icon,
           action: ({ model }) => {
@@ -140,10 +156,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
       name: 'List',
       items: paragraphConfig
         .filter(i => i.flavour === 'affine:list')
-        .map(({ name, icon, flavour, type }, idx) => ({
+        .map(({ name, icon, flavour, type }) => ({
           name,
           icon,
-          divider: idx === 0,
+          showWhen: model => {
+            if (!model.page.schema.flavourSchemaMap.has(flavour)) {
+              return false;
+            }
+            return true;
+          },
           action: ({ model }) => updateBlockType([model], flavour, type),
         })),
     },
@@ -153,6 +174,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
         {
           name: 'Image',
           icon: ImageIcon20,
+          showWhen: model => {
+            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+              return false;
+            }
+            if (!insideDatabase(model)) {
+              return false;
+            }
+            return true;
+          },
           async action({ page, model }) {
             const parent = page.getParent(model);
             if (!parent) {
@@ -221,6 +251,19 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           name: 'Table View',
           alias: ['database'],
           icon: DatabaseTableViewIcon,
+          showWhen: model => {
+            if (!model.page.awarenessStore.getFlag('enable_database')) {
+              return false;
+            }
+            if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
+              return false;
+            }
+            if (insideDatabase(model)) {
+              // You can't add a database block inside another database block
+              return false;
+            }
+            return true;
+          },
           action: async ({ page, model }) => {
             const parent = page.getParent(model);
             assertExists(parent);
@@ -239,8 +282,21 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
         {
           name: 'Kanban View',
           alias: ['database'],
-          icon: DatabaseKanbanViewIcon,
           disabled: true,
+          icon: DatabaseKanbanViewIcon,
+          showWhen: model => {
+            if (!model.page.awarenessStore.getFlag('enable_database')) {
+              return false;
+            }
+            if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
+              return false;
+            }
+            if (insideDatabase(model)) {
+              // You can't add a database block inside another database block
+              return false;
+            }
+            return true;
+          },
           // eslint-disable-next-line @typescript-eslint/no-empty-function
           action: ({ model }) => {},
         },

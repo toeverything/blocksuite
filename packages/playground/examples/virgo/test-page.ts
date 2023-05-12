@@ -1,6 +1,6 @@
 import '@shoelace-style/shoelace';
 
-import { ShadowlessElement } from '@blocksuite/blocks';
+import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type BaseTextAttributes,
   type DeltaInsert,

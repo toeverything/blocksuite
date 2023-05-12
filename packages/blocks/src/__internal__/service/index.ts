@@ -30,8 +30,6 @@ import {
 } from './keymap.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
-  onLoad?: () => Promise<void>;
-
   block2html(
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}

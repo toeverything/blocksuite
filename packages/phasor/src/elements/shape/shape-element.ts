@@ -1,4 +1,4 @@
-import { type HitTestOptions, SurfaceElement } from '../base-element.js';
+import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
 

@@ -7,8 +7,6 @@ import type {
 import { baseTextAttributes } from '@blocksuite/virgo';
 import { z, type ZodTypeDef } from 'zod';
 
-import type { BlockHost } from '../../utils/types.js';
-
 export const affineTextAttributes = baseTextAttributes.extend({
   reference: z
     .object({
@@ -28,5 +26,5 @@ export type AffineTextSchema<
   TextAttributes extends BaseTextAttributes = AffineTextAttributes
 > = {
   attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
-  textRenderer: (host: BlockHost) => AttributeRenderer<TextAttributes>;
+  textRenderer: () => AttributeRenderer<TextAttributes>;
 };

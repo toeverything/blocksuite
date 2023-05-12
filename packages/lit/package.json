@@ -1,7 +1,7 @@
 {
-  "name": "@blocksuite/editor",
+  "name": "@blocksuite/lit",
   "version": "0.5.0",
-  "description": "Default BlockSuite-based editor built for AFFiNE.",
+  "description": "Lit renderer for blocksuite store",
   "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -13,27 +13,17 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@toeverything/theme": "0.5.7",
-    "lit": "^2.7.3",
-    "marked": "^4.2.12",
-    "turndown": "^7.1.1"
+    "lit": "^2.7.3"
   },
   "devDependencies": {
-    "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
-    "@blocksuite/store": "workspace:*",
-    "@types/marked": "^4.0.8",
-    "@types/turndown": "^5.0.1"
+    "@blocksuite/store": "workspace:*"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./themes/*": "./themes/*"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -43,12 +33,10 @@
       ".": {
         "module": "./dist/index.js",
         "import": "./dist/index.js"
-      },
-      "./themes/*": "./themes/*"
+      }
     },
     "files": [
-      "dist",
-      "themes"
+      "dist"
     ]
   }
 }
