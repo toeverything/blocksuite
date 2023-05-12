@@ -411,12 +411,14 @@ export class EdgelessPageBlockComponent
 
           zIndex = allElements[allElements.length - 1].zIndex;
         } else {
-          const i = sortedElements.length - 1;
-          if (sortedElements[i] === allElements[i]) {
+          if (
+            sortedElements[sortedElements.length - 1] ===
+            allElements[sortedElements.length - 1]
+          ) {
             return;
           }
 
-          zIndex = allElements[0].zIndex - i;
+          zIndex = allElements[0].zIndex - sortedElements.length - 1;
         }
 
         frames = sortedElements;
