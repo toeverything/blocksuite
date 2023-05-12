@@ -382,6 +382,8 @@ export class EdgelessPageBlockComponent
   }
 
   // Just update `zIndex`, we don't change the order of the frames in the children.
+  //
+  // TODO: do not re-render
   private _reorderingFrames = ({
     frames,
     type,
