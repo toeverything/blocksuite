@@ -164,8 +164,8 @@ export class SurfaceManager {
     setIndexes(keys);
 
     this._transact(() => {
-      sortedElements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
+      sortedElements.forEach((elem, index) => {
+        const yElement = this._yContainer.get(elem.id) as Y.Map<unknown>;
         yElement.set('index', keys[index]);
       });
     });
@@ -205,9 +205,10 @@ export class SurfaceManager {
     let curr;
     let from = indexes[0];
     let to = indexes[0];
+    let i = 1;
     const ranges = [{ from, to }];
     const len = indexes.length;
-    for (let i = 1; i < len; i++) {
+    for (; i < len; i++) {
       curr = indexes[i];
       if (curr - to === 1) {
         ranges[i - 1].to = to = curr;
@@ -222,10 +223,18 @@ export class SurfaceManager {
     const keys = generateNKeysBetween(start, end, elements.length);
 
     this._transact(() => {
-      elements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
+      let e;
+      let newIndex;
+      let i = 0;
+      const len = elements.length;
+      for (; i < len; i++) {
+        e = elements[i];
+        newIndex = keys[i];
+        const yElement = this._yContainer.get(e.id) as Y.Map<unknown>;
+        const oldIndex = yElement.get('index') as string;
+        if (oldIndex === newIndex) continue;
+        yElement.set('index', newIndex);
+      }
     });
   }
 
