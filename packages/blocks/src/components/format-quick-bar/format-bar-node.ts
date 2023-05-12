@@ -5,7 +5,11 @@ import {
   type BlockConfig,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -48,6 +52,8 @@ function ParagraphPanel(
   if (showParagraphPanel === 'hidden') {
     return html``;
   }
+  const page = models[0].page;
+  assertExists(page);
   const styles = styleMap({
     left: '0',
     top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
@@ -91,17 +97,19 @@ function ParagraphPanel(
     @mouseover="${onHover}"
     @mouseout="${onHoverEnd}"
   >
-    ${paragraphConfig.map(
-      ({ flavour, type, name, icon }) => html`<format-bar-button
-        width="100%"
-        style="padding-left: 12px; justify-content: flex-start;"
-        text="${name}"
-        data-testid="${flavour}/${type}"
-        @click="${() => updateParagraphType(flavour, type)}"
-      >
-        ${icon}
-      </format-bar-button>`
-    )}
+    ${paragraphConfig
+      .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
+      .map(
+        ({ flavour, type, name, icon }) => html`<format-bar-button
+          width="100%"
+          style="padding-left: 12px; justify-content: flex-start;"
+          text="${name}"
+          data-testid="${flavour}/${type}"
+          @click="${() => updateParagraphType(flavour, type)}"
+        >
+          ${icon}
+        </format-bar-button>`
+      )}
   </div>`;
 }
 
