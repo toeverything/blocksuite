@@ -253,7 +253,9 @@ export class EdgelessSelectionManager {
       return null;
     }
     const { surface } = this._container;
-    const frames = (this.page.root?.children ?? []) as TopLevelBlockModel[];
+    const frames = (this.page.root?.children ?? []).filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 

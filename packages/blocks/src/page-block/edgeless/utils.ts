@@ -188,14 +188,19 @@ export function pickBy(
   return selectedShapes.length
     ? selectedShapes[selectedShapes.length - 1]
     : pickTopBlock(
-        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        (page.root?.children as TopLevelBlockModel[]).filter(
+          child => child.flavour === 'affine:frame'
+        ) ?? [],
         modelX,
         modelY
       );
 }
 
 function pickById(surface: SurfaceManager, page: Page, id: string) {
-  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const blocks =
+    (page.root?.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
 }
@@ -483,7 +488,10 @@ export function addText(
 
   // Wait for mouseMode updated
   requestAnimationFrame(() => {
-    const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+    const blocks =
+      (page.root?.children.filter(
+        child => child.flavour === 'affine:frame'
+      ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
       const selectionState = {

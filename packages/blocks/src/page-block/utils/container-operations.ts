@@ -532,7 +532,9 @@ export async function onModelElementUpdated(
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children as TopLevelBlockModel[];
+    const frames = page.root.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[];
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.

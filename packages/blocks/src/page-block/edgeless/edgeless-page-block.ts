@@ -144,6 +144,11 @@ export class EdgelessPageBlockComponent
 
   showGrid = true;
 
+  @state()
+  mouseMode: MouseMode = {
+    type: 'default',
+  };
+
   @property()
   page!: Page;
 
@@ -152,11 +157,6 @@ export class EdgelessPageBlockComponent
 
   @property()
   root!: BlockSuiteRoot;
-
-  @property()
-  mouseMode: MouseMode = {
-    type: 'default',
-  };
 
   @property()
   content!: TemplateResult;
@@ -213,7 +213,13 @@ export class EdgelessPageBlockComponent
   // just init surface, attach to dom later
   private _initSurface() {
     const { page } = this;
-    const yContainer = page.ySurfaceContainer;
+    const yBlock = page.getYBlockById(this.model.id);
+    assertExists(yBlock);
+    let yContainer = yBlock.get('elements') as InstanceType<typeof page.YMap>;
+    if (!yContainer) {
+      yContainer = new page.YMap();
+      yBlock.set('elements', yContainer);
+    }
     this.surface = new SurfaceManager(yContainer, value => {
       if (isCssVariable(value)) {
         const cssValue = getThemePropertyValue(this, value as CssVariableName);
@@ -443,7 +449,7 @@ export class EdgelessPageBlockComponent
    * Not supports surface elements.
    */
   setSelection(frameId: string, active = true, blockId: string, point?: Point) {
-    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+    const frameBlock = this.model.children.find(b => b.id === frameId);
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {
@@ -506,9 +512,16 @@ export class EdgelessPageBlockComponent
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
 
-      const frame = this.model.children[0] as FrameBlockModel;
-      const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-      this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
+      const frame = this.model.children.find(
+        child => child.flavour === 'affine:frame'
+      ) as FrameBlockModel;
+      if (frame) {
+        const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+        this.surface.viewport.setCenter(
+          modelX + modelW / 2,
+          modelY + modelH / 2
+        );
+      }
 
       // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();
