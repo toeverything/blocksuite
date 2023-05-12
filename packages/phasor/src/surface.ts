@@ -348,7 +348,10 @@ export class SurfaceManager {
         end: null,
       }),
       keys => {
-        this._maxIndex = keys[keys.length - 1];
+        const index = keys[keys.length - 1];
+        if (this._maxIndex < index) {
+          this._maxIndex = index;
+        }
       }
     );
   }
@@ -402,7 +405,10 @@ export class SurfaceManager {
         end: this._minIndex,
       }),
       keys => {
-        this._minIndex = keys[0];
+        const index = keys[0];
+        if (this._minIndex > index) {
+          this._minIndex = index;
+        }
       }
     );
   }
