@@ -379,8 +379,8 @@ export class EdgelessPageBlockComponent
           (a, b) => a.zIndex - b.zIndex
         );
         const sortedFrames = allFrames.filter(frame => frames.includes(frame));
-        const minIndex = allFrames[0].zIndex;
-        const maxIndex = allFrames[allFrames.length - 1].zIndex;
+        let minIndex = allFrames[0].zIndex;
+        let maxIndex = allFrames[allFrames.length - 1].zIndex;
 
         if (type === 'front' || type === 'back') {
           if (type === 'front') {
@@ -390,9 +390,9 @@ export class EdgelessPageBlockComponent
               });
             });
           } else {
-            sortedFrames.reverse().forEach((elem, index) => {
+            sortedFrames.forEach((elem, index) => {
               this.page.updateBlock(elem, {
-                zIndex: minIndex - 1 - index,
+                zIndex: minIndex - 1 - (sortedFrames.length - 1 - index),
               });
             });
           }
@@ -404,7 +404,7 @@ export class EdgelessPageBlockComponent
             h: 0,
           };
 
-          const len = sortedFrames.length;
+          let len = sortedFrames.length;
 
           if (len) {
             let maxX;
@@ -431,12 +431,65 @@ export class EdgelessPageBlockComponent
           }
 
           // TODO: opt filter
-          const intersectingFrames = allFrames.filter(frame => {
+          const elements = allFrames.filter(frame => {
             const [x, y, w, h] = deserializeXYWH(frame.xywh);
             return intersects(bounds, { x, y, w, h });
           });
 
-          console.log(type, frames, intersectingFrames);
+          minIndex = elements[0].zIndex;
+          maxIndex = elements[elements.length - 1].zIndex;
+
+          const indexes = sortedFrames.map(e =>
+            elements.findIndex(element => element === e)
+          );
+
+          let curr;
+          let from = indexes[0];
+          let to = indexes[0];
+          const ranges = [{ from, to }];
+          len = indexes.length;
+          for (let i = 1; i < len; i++) {
+            curr = indexes[i];
+            if (curr - to === 1) {
+              ranges[i - 1].to = to = curr;
+            } else {
+              ranges.push({ from, to });
+              from = curr;
+            }
+          }
+
+          if (type === 'forward') {
+            let i = 0;
+            const len = ranges.length;
+            const max = elements.length;
+            for (; i < len; i++) {
+              const { from, to } = ranges[i];
+              if (to + 1 === max) return;
+              const temp = elements.splice(from, to + 1 - from);
+              elements.splice(from + 1, 0, ...temp);
+            }
+
+            elements.forEach((elem, index) => {
+              this.page.updateBlock(elem, {
+                zIndex: maxIndex + 1 + index,
+              });
+            });
+          } else {
+            let i = 0;
+            const len = ranges.length;
+            for (; i < len; i++) {
+              const { from, to } = ranges[i];
+              if (from === 0) continue;
+              const temp = elements.splice(from, to + 1 - from);
+              elements.splice(from - 1, 0, ...temp);
+            }
+
+            elements.forEach((elem, index) => {
+              this.page.updateBlock(elem, {
+                zIndex: minIndex - 1 - (elements.length - 1 - index),
+              });
+            });
+          }
         }
       })
     );
