@@ -192,6 +192,7 @@ describe('addBlock', () => {
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': '[0,0,720,480]',
+        'prop:zIndex': 0,
       },
       '2': {
         'sys:children': [],
@@ -373,6 +374,7 @@ describe('deleteBlock', () => {
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': '[0,0,720,480]',
+        'prop:zIndex': 0,
       },
       '2': {
         'sys:children': [],
@@ -399,6 +401,7 @@ describe('deleteBlock', () => {
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': '[0,0,720,480]',
+        'prop:zIndex': 0,
       },
     });
     assert.equal(root.children.length, 1);
@@ -497,6 +500,7 @@ describe('workspace.exportJSX works', () => {
       <affine:page>
         <affine:frame
           prop:background="--affine-background-secondary-color"
+          prop:zIndex={0}
         >
           <affine:paragraph
             prop:type="text"
