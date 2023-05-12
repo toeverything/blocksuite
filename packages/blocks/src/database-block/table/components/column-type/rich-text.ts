@@ -70,6 +70,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       align-items: center;
       width: 100%;
       height: 100%;
+      cursor: text;
     }
   `;
 
@@ -218,7 +219,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
           width: 100%;
         }
       </style>
-      <div class="rich-text-container"></div>
+      <div class="rich-text-container virgo-editor"></div>
     `;
   }
 }

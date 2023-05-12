@@ -82,11 +82,6 @@ export class DatabaseCellContainer
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
-
-    // prevent block selection
-    const onStopPropagation = (event: Event) => event.stopPropagation();
-    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
-    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
   private _onClick = (event: Event) => {

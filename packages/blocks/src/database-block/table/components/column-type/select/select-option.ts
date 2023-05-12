@@ -26,6 +26,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       background: var(--affine-tag-pink);
       overflow: hidden;
+      cursor: text;
     }
     .select-option-text:focus {
       outline: none;
@@ -129,7 +130,10 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     const style = styleMap({
       backgroundColor: this.select.color,
     });
-    return html`<div class="select-option-text" style=${style}></div>`;
+    return html`<div
+      class="select-option-text virgo-editor"
+      style=${style}
+    ></div>`;
   }
 }
 

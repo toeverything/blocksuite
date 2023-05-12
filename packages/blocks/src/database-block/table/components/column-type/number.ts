@@ -14,6 +14,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       display: block;
       width: 100%;
       height: 100%;
+      cursor: text;
     }
 
     .affine-database-number {
@@ -85,7 +86,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   };
 
   protected override render() {
-    return html`<div class="affine-database-number number"></div>`;
+    return html`<div class="affine-database-number number virgo-editor"></div>`;
   }
 }
 
