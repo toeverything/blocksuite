@@ -419,6 +419,7 @@ export class EdgelessPageBlockComponent
           zIndex = allElements[0].zIndex - i;
         }
 
+        frames = sortedElements;
         break;
       }
       case 'forward':
