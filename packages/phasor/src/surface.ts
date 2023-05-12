@@ -165,32 +165,34 @@ export class SurfaceManager {
   /**
    * Brings to front or sends to back.
    */
-  // private _reorderTo(
-  //   elementIds: string[],
-  //   getBoundsIndexes: () => {
-  //     start: string | null;
-  //     end: string | null;
-  //   },
-  //   setBoundsIndexes: (keys: string[]) => void
-  // ) {
-  //   if (!elementIds.length) {
-  //     return;
-  //   }
-  //
-  //   const sortedElements = (
-  //     elementIds
-  //       .map(id => this._elements.get(id))
-  //       .filter(e => !!e) as SurfaceElement[]
-  //   ).sort(compare);
-  //
-  //   const { start, end } = getBoundsIndexes();
-  //
-  //   const keys = generateNKeysBetween(start, end, sortedElements.length);
-  //
-  //   setBoundsIndexes(keys);
-  //
-  //   this._updateZIndexes(keys, sortedElements);
-  // }
+  /*
+  private _reorderTo(
+    elementIds: string[],
+    getBoundsIndexes: () => {
+      start: string | null;
+      end: string | null;
+    },
+    setBoundsIndexes: (keys: string[]) => void
+  ) {
+    if (!elementIds.length) {
+      return;
+    }
+  
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+  
+    const { start, end } = getBoundsIndexes();
+  
+    const keys = generateNKeysBetween(start, end, sortedElements.length);
+  
+    setBoundsIndexes(keys);
+  
+    this._updateZIndexes(keys, sortedElements);
+  }
+  */
 
   /**
    * Brings to front or sends to back.

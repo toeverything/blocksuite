@@ -24,11 +24,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
-import {
-  type BlockComponentElement,
-  type Point,
-  type ReorderingType,
-  type TopLevelBlockModel,
+import type {
+  BlockComponentElement,
+  Point,
+  ReorderingType,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
   almostEqual,
@@ -394,38 +394,39 @@ export class EdgelessPageBlockComponent
     if (!frames.length) return;
 
     // TODO: opt sort
-    const allFrames = (this.model.children as FrameBlockModel[]).sort(
+    const allElements = (this.model.children as FrameBlockModel[]).sort(
       (a, b) => a.zIndex - b.zIndex
     );
-    const sortedFrames = frames.sort((a, b) => a.zIndex - b.zIndex);
+    const sortedElements = frames.sort((a, b) => a.zIndex - b.zIndex);
 
-    const bounds = generateBoundsWithFrames(sortedFrames);
+    const bounds = generateBoundsWithFrames(sortedElements);
 
     // TODO: opt filter
-    const elements = allFrames.filter(frame => {
-      if (sortedFrames.includes(frame)) return true;
+    const elements = allElements.filter(frame => {
+      if (sortedElements.includes(frame)) return true;
       const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
       return intersects(bounds, { x, y, w, h });
     });
 
-    if (elements.length <= sortedFrames.length) return;
+    if (elements.length <= sortedElements.length) return;
 
     if (type === 'front' || type === 'forward') {
-      if (sortedFrames[0] === elements[elements.length - sortedFrames.length]) {
+      if (
+        sortedElements[0] === elements[elements.length - sortedElements.length]
+      ) {
         return;
       }
     } else {
       if (
-        sortedFrames[sortedFrames.length - 1] ===
-        elements[sortedFrames.length - 1]
+        sortedElements[sortedElements.length - 1] ===
+        elements[sortedElements.length - 1]
       ) {
         return;
       }
     }
 
     const minIndex = elements[0].zIndex;
-
-    const indexes = getIndexes(sortedFrames, elements);
+    const indexes = getIndexes(sortedElements, elements);
     const ranges = generateRanges(indexes);
 
     switch (type) {
@@ -450,14 +451,14 @@ export class EdgelessPageBlockComponent
     let zIndex = minIndex - 1;
 
     this.page.transact(() => {
-      let frame;
       let i = 0;
+      let element;
       const len = elements.length;
       for (; i < len; i++) {
         ++zIndex;
-        frame = elements[i];
-        if (frame.zIndex === zIndex) continue;
-        this.page.updateBlock(frame, {
+        element = elements[i];
+        if (element.zIndex === zIndex) continue;
+        this.page.updateBlock(element, {
           zIndex,
         });
       }
