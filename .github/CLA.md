@@ -69,3 +69,4 @@ Example:
 - 三咲智子 Kevin Deng, @sxzz, 2023/04/30
 - Doma, @SevenOutman, 2023/05/05
 - donglixiaoche, @donglixiaoche, 2023/05/06
+- Alkaidcc, @Alkaidcc, 2023/05/12
