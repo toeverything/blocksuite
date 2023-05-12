@@ -119,7 +119,6 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
     createKeydownObserver({
       target: richText,
-      delimiter: '@',
       onUpdateQuery: str => {
         this._query = str;
         this._activatedItemIndex = 0;

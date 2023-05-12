@@ -1,3 +1,4 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { type DeltaInsert, VText, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
@@ -6,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
-import { queryCurrentMode, ShadowlessElement } from '../std.js';
+import { queryCurrentMode } from '../std.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,

@@ -6,15 +6,13 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../../../__internal__/index.js';
+import { WithDisposable } from '../../../../__internal__/index.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
@@ -360,6 +358,12 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
     const onSearchIconClick = expandSearch ? undefined : this._onShowSearch;
 
+    const closeIcon = this._searchInput
+      ? this._searchInput.value === ''
+        ? null
+        : DatabaseSearchClose
+      : null;
+
     const searchTool = html`
       <div
         class="affine-database-search-container ${expandSearch
@@ -381,7 +385,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
             @pointerdown=${stopPropagation}
           />
           <div class="has-tool-tip close-icon" @click=${this._clearSearch}>
-            ${DatabaseSearchClose}
+            ${closeIcon}
             <tool-tip inert arrow tip-position="top" role="tooltip">
               <span class="code">Esc</span> to clear all
             </tool-tip>

@@ -1,11 +1,11 @@
-import { sleep } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/std.js';
 import { getCurrentNativeRange } from '../std.js';
 
 export const createKeydownObserver = ({
   target,
-  delimiter,
   onUpdateQuery,
   onMove,
   onConfirm,
@@ -13,8 +13,7 @@ export const createKeydownObserver = ({
   interceptor = (e, next) => next(),
   abortController,
 }: {
-  target: HTMLElement;
-  delimiter: string;
+  target: RichText;
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
@@ -23,6 +22,12 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
+  const vEditor = target.vEditor;
+  assertExists(
+    vEditor,
+    'Failed to observer keyboard! virgo editor is not exist.'
+  );
+  const startIndex = vEditor?.getVRange()?.index ?? 0;
 
   const updateQuery = async () => {
     // Wait for text update
@@ -45,14 +50,14 @@ export const createKeydownObserver = ({
       abortController.abort();
       return;
     }
-    const text = (textNode.textContent ?? '').slice(0, range.startOffset);
-    const delimiterIdx = text.lastIndexOf(delimiter);
-    if (delimiterIdx === -1) {
-      abortController.abort();
-      return;
+    const curIndex = vEditor.getVRange()?.index ?? 0;
+    const text = vEditor.yText.toString();
+    const previousQuery = query;
+    query = text.slice(startIndex, curIndex);
+
+    if (query !== previousQuery) {
+      onUpdateQuery(query);
     }
-    query = text.slice(delimiterIdx + 1);
-    onUpdateQuery(query);
   };
 
   const keyDownListener = (e: KeyboardEvent) => {
@@ -169,6 +174,11 @@ export const createKeydownObserver = ({
       signal: abortController.signal,
     }
   );
+
+  // Fix composition input
+  target.addEventListener('input', updateQuery, {
+    signal: abortController.signal,
+  });
 
   if (onEsc) {
     const escListener = (e: KeyboardEvent) => {

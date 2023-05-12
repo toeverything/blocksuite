@@ -1,7 +1,7 @@
 import { assertNotExists } from '@blocksuite/global/utils';
 
 import { MIN_ZOOM } from './consts.js';
-import type { SurfaceElement } from './elements/base-element.js';
+import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 

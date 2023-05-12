@@ -1,7 +1,7 @@
 import { type IBound, StrokeStyle } from '../../../consts.js';
 import { setLineDash } from '../../../utils/canvas.js';
 import { isPointIn } from '../../../utils/hit-utils.js';
-import type { HitTestOptions } from '../../base-element.js';
+import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 

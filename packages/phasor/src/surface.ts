@@ -3,10 +3,6 @@ import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
-import type {
-  HitTestOptions,
-  TransformPropertyValue,
-} from './elements/base-element.js';
 import {
   ElementCtors,
   ElementDefaultProps,
@@ -15,6 +11,10 @@ import {
   type PhasorElementType,
   type SurfaceElement,
 } from './elements/index.js';
+import type {
+  HitTestOptions,
+  TransformPropertyValue,
+} from './elements/surface-element.js';
 import { compare } from './grid.js';
 import { ConnectorElement, intersects, type IPhasorElement } from './index.js';
 import type { SurfaceViewport } from './renderer.js';

@@ -6,6 +6,8 @@ import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/global/config';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { ShadowlessElement } from '@blocksuite/lit';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -17,6 +19,7 @@ import {
   type Page,
   Slot,
 } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -34,14 +37,11 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/utils/lit.js';
+import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type {
   BlockHost,
   DragHandle,
@@ -49,7 +49,7 @@ import type {
   MouseMode,
   PageBlockModel,
 } from '../../index.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { PageBlockService } from '../../index.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
@@ -140,10 +140,8 @@ export class EdgelessPageBlockComponent
     dragHandle: <DragHandle | null>null,
   };
 
-  @property()
   mouseRoot!: HTMLElement;
 
-  @property()
   showGrid = true;
 
   @property()
@@ -153,12 +151,15 @@ export class EdgelessPageBlockComponent
   model!: PageBlockModel;
 
   @property()
-  surfaceModel!: SurfaceBlockModel;
+  root!: BlockSuiteRoot;
 
   @property()
   mouseMode: MouseMode = {
     type: 'default',
   };
+
+  @property()
+  content!: TemplateResult;
 
   @state()
   private _toolbarEnabled = false;
@@ -523,6 +524,13 @@ export class EdgelessPageBlockComponent
     super.updated(changedProperties);
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:page', PageBlockService);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.mouseRoot = this.parentElement!;
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboard.dispose();
@@ -548,7 +556,8 @@ export class EdgelessPageBlockComponent
       this.model,
       this,
       this.surface.viewport,
-      active
+      active,
+      this.root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;

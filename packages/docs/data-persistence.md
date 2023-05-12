@@ -57,8 +57,31 @@ You can view more provider usage instructions in the [BlockSuite Playground](htt
 
 The `workspace.doc` in BlockSuite is encoded in binary format before being stored in the provider backend. This binary data structure can also be deserialized to reconstruct the document state. This process can also be easily accomplished through standardized APIs.
 
-::: info
+If you want to explicitly obtain the binary content of a document in certain scenarios (e.g., storing the content on the server-side), you can do it like this:
 
-🚧 WIP
+```ts
+import * as Y from 'yjs';
 
-:::
+// Get the encoded binary
+const binary = Y.encodeStateAsUpdate(workspace.doc);
+```
+
+The obtained `Uint8Array` can then be stored and distributed independently. On the other hand, the stored binary update data only needs to be applied to an empty workspace to restore it to a usable block tree, like this:
+
+```ts
+const workspace = new Workspace({ id: 'foo' });
+
+const binary = await loadBinary();
+
+Y.applyUpdate(workspace.doc, binary);
+```
+
+## Common Patterns
+
+If you want to use BlockSuite in a common centralized application and support real-time collaboration, the recommended approach is as follows:
+
+1. When a user starts creating content from scratch, create an empty `workspace` and `page`. As long as `workspace.doc` is connected to the provider, the created initial content will be automatically recorded.
+2. As the user continues to write new content, the state can be continuously synchronized to the server-side through the provider, or the binary can be backed up to the database periodically.
+3. When the user reopens an existing document, just connect to the provider to automatically restore the block tree from the binary update data. If continuous synchronization is not required, you can also deserialize the binary data into a block tree by calling `Y.applyUpdate` once.
+
+It is worth noting that if you want to load existing content in a page, you should not explicitly create a new `page` through `workspace.createPage`. Instead, you should automatically load the existing block tree by connecting to the provider or calling `Y.applyUpdate`. Otherwise, this would be equivalent to performing a `git commit` followed by a `git pull` in a git repository, which may cause state merge issues.

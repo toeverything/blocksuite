@@ -6,7 +6,7 @@ import {
   transformPointsToNewBound,
 } from '../../utils/bound.js';
 import { Utils } from '../../utils/tl-utils.js';
-import { SurfaceElement } from '../base-element.js';
+import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
