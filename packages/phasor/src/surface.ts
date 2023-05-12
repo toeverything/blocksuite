@@ -1,3 +1,12 @@
+import {
+  bringForward,
+  bringToFront,
+  generateRanges,
+  getIndexes,
+  type ReorderingRange,
+  sendBackward,
+  sendToBack,
+} from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import { randomSeed } from 'roughjs/bin/math.js';
@@ -136,92 +145,7 @@ export class SurfaceManager {
     doc.transact(callback, doc.clientID);
   }
 
-  /**
-   * Brings to front or sends to back.
-   */
-  private _reorderTo(
-    elementIds: string[],
-    getIndexes: () => {
-      start: string | null;
-      end: string | null;
-    },
-    setIndexes: (keys: string[]) => void
-  ) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const { start, end } = getIndexes();
-
-    const keys = generateNKeysBetween(start, end, sortedElements.length);
-
-    setIndexes(keys);
-
-    this._transact(() => {
-      sortedElements.forEach((elem, index) => {
-        const yElement = this._yContainer.get(elem.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
-  }
-
-  /**
-   * Brings forward or sends backward layer by layer.
-   */
-  private _reorder(
-    elementIds: string[],
-    getIndexes: (elements: SurfaceElement[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    order: (
-      ranges: { from: number; to: number }[],
-      elements: SurfaceElement[]
-    ) => void
-  ) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const bounds = generateBounds(sortedElements);
-    const elements = this.pickByBound(bounds).sort(compare);
-    const { start, end } = getIndexes(elements);
-    const indexes = sortedElements.map(e =>
-      elements.findIndex(element => element === e)
-    );
-
-    let curr;
-    let from = indexes[0];
-    let to = indexes[0];
-    let i = 1;
-    const ranges = [{ from, to }];
-    const len = indexes.length;
-    for (; i < len; i++) {
-      curr = indexes[i];
-      if (curr - to === 1) {
-        ranges[i - 1].to = to = curr;
-      } else {
-        ranges.push({ from, to });
-        from = curr;
-      }
-    }
-
-    order(ranges, elements);
-
-    const keys = generateNKeysBetween(start, end, elements.length);
-
+  private _updateZIndexes(keys: string[], elements: SurfaceElement[]) {
     this._transact(() => {
       let e;
       let newIndex;
@@ -236,6 +160,75 @@ export class SurfaceManager {
         yElement.set('index', newIndex);
       }
     });
+  }
+
+  /**
+   * Brings to front or sends to back.
+   */
+  // private _reorderTo(
+  //   elementIds: string[],
+  //   getBoundsIndexes: () => {
+  //     start: string | null;
+  //     end: string | null;
+  //   },
+  //   setBoundsIndexes: (keys: string[]) => void
+  // ) {
+  //   if (!elementIds.length) {
+  //     return;
+  //   }
+  //
+  //   const sortedElements = (
+  //     elementIds
+  //       .map(id => this._elements.get(id))
+  //       .filter(e => !!e) as SurfaceElement[]
+  //   ).sort(compare);
+  //
+  //   const { start, end } = getBoundsIndexes();
+  //
+  //   const keys = generateNKeysBetween(start, end, sortedElements.length);
+  //
+  //   setBoundsIndexes(keys);
+  //
+  //   this._updateZIndexes(keys, sortedElements);
+  // }
+
+  /**
+   * Brings to front or sends to back.
+   * Brings forward or sends backward layer by layer.
+   */
+  private _reorder(
+    elementIds: string[],
+    getBoundsIndexes: (elements: SurfaceElement[]) => {
+      start: string | null;
+      end: string | null;
+    },
+    order: <T>(ranges: ReorderingRange[], elements: T[]) => void,
+    setBoundsIndexes: (keys: string[]) => void
+  ) {
+    if (!elementIds.length) {
+      return;
+    }
+
+    const sortedElements = (
+      elementIds
+        .map(id => this._elements.get(id))
+        .filter(e => !!e) as SurfaceElement[]
+    ).sort(compare);
+
+    const bounds = generateBounds(sortedElements);
+    const elements = this.pickByBound(bounds).sort(compare);
+    const { start, end } = getBoundsIndexes(elements);
+    const indexes = getIndexes(sortedElements, elements);
+
+    const ranges = generateRanges(indexes);
+
+    order(ranges, elements);
+
+    const keys = generateNKeysBetween(start, end, elements.length);
+
+    setBoundsIndexes(keys);
+
+    this._updateZIndexes(keys, elements);
   }
 
   attach(container: HTMLElement) {
@@ -341,12 +334,13 @@ export class SurfaceManager {
   }
 
   bringToFront(elementIds: string[]) {
-    this._reorderTo(
+    this._reorder(
       elementIds,
-      () => ({
-        start: this._maxIndex,
+      elements => ({
+        start: elements[0].index,
         end: null,
       }),
+      bringToFront,
       keys => {
         const index = keys[keys.length - 1];
         if (index > this._maxIndex) {
@@ -363,15 +357,11 @@ export class SurfaceManager {
         start: elements[0].index,
         end: null,
       }),
-      (ranges, elements) => {
-        let i = 0;
-        const len = ranges.length;
-        const max = elements.length;
-        for (; i < len; i++) {
-          const { from, to } = ranges[i];
-          if (to + 1 === max) return;
-          const temp = elements.splice(from, to + 1 - from);
-          elements.splice(from + 1, 0, ...temp);
+      bringForward,
+      keys => {
+        const index = keys[keys.length - 1];
+        if (index > this._maxIndex) {
+          this._maxIndex = index;
         }
       }
     );
@@ -384,26 +374,24 @@ export class SurfaceManager {
         start: null,
         end: elements[elements.length - 1].index,
       }),
-      (ranges, elements) => {
-        let i = 0;
-        const len = ranges.length;
-        for (; i < len; i++) {
-          const { from, to } = ranges[i];
-          if (from === 0) continue;
-          const temp = elements.splice(from, to + 1 - from);
-          elements.splice(from - 1, 0, ...temp);
+      sendBackward,
+      keys => {
+        const index = keys[0];
+        if (index < this._minIndex) {
+          this._minIndex = index;
         }
       }
     );
   }
 
   sendToBack(elementIds: string[]) {
-    this._reorderTo(
+    this._reorder(
       elementIds,
-      () => ({
+      elements => ({
         start: null,
-        end: this._minIndex,
+        end: elements[elements.length - 1].index,
       }),
+      sendToBack,
       keys => {
         const index = keys[0];
         if (index < this._minIndex) {

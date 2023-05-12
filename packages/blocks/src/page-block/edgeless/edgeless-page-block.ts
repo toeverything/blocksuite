@@ -24,18 +24,24 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockComponentElement,
-  Point,
-  ReorderingType,
-  TopLevelBlockModel,
+import {
+  type BlockComponentElement,
+  type Point,
+  type ReorderingType,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
   almostEqual,
   asyncFocusRichText,
+  bringForward,
+  bringToFront,
+  generateRanges,
+  getIndexes,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
   resetNativeSelection,
+  sendBackward,
+  sendToBack,
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
@@ -65,6 +71,8 @@ import {
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
   DEFAULT_FRAME_WIDTH,
+  extendsWithPadding,
+  generateBoundsWithFrames,
   getBackgroundGrid,
   getCursorMode,
 } from './utils.js';
@@ -370,129 +378,89 @@ export class EdgelessPageBlockComponent
       })
     );
 
-    // Just update `zIndex`, we don't change the order of the frames in the children.
-    _disposables.add(
-      slots.reorderingUpdated.on(({ frames, type }) => {
-        // TODO: opt sort
-        const allFrames = (this.model.children as FrameBlockModel[]).sort(
-          (a, b) => a.zIndex - b.zIndex
-        );
-        const sortedFrames = allFrames.filter(frame => frames.includes(frame));
-        let minIndex = allFrames[0].zIndex;
-        let maxIndex = allFrames[allFrames.length - 1].zIndex;
-
-        if (type === 'front' || type === 'back') {
-          if (type === 'front') {
-            sortedFrames.forEach((elem, index) => {
-              this.page.updateBlock(elem, {
-                zIndex: maxIndex + 1 + index,
-              });
-            });
-          } else {
-            sortedFrames.forEach((elem, index) => {
-              this.page.updateBlock(elem, {
-                zIndex: minIndex - 1 - (sortedFrames.length - 1 - index),
-              });
-            });
-          }
-        } else {
-          const bounds = {
-            x: 0,
-            y: 0,
-            w: 0,
-            h: 0,
-          };
-
-          let len = sortedFrames.length;
-
-          if (len) {
-            let maxX;
-            let maxY;
-            let i = 0;
-            let e = sortedFrames[i];
-            const [x, y, w, h] = deserializeXYWH(e.xywh);
-
-            bounds.x = x;
-            bounds.y = y;
-            bounds.w = w;
-            bounds.h = h;
-
-            for (i++; i < len; i++) {
-              e = sortedFrames[i];
-              const [x, y, w, h] = deserializeXYWH(e.xywh);
-              bounds.x = Math.min(bounds.x, x);
-              bounds.y = Math.min(bounds.y, y);
-              maxX = Math.max(bounds.x + bounds.w, x + w);
-              maxY = Math.max(bounds.y + bounds.h, y + h);
-              bounds.w = maxX - bounds.x;
-              bounds.h = maxY - bounds.y;
-            }
-          }
-
-          // TODO: opt filter
-          const elements = allFrames.filter(frame => {
-            const [x, y, w, h] = deserializeXYWH(frame.xywh);
-            return intersects(bounds, { x, y, w, h });
-          });
-
-          minIndex = elements[0].zIndex;
-          maxIndex = elements[elements.length - 1].zIndex;
-
-          const indexes = sortedFrames.map(e =>
-            elements.findIndex(element => element === e)
-          );
-
-          let curr;
-          let from = indexes[0];
-          let to = indexes[0];
-          const ranges = [{ from, to }];
-          len = indexes.length;
-          for (let i = 1; i < len; i++) {
-            curr = indexes[i];
-            if (curr - to === 1) {
-              ranges[i - 1].to = to = curr;
-            } else {
-              ranges.push({ from, to });
-              from = curr;
-            }
-          }
-
-          if (type === 'forward') {
-            let i = 0;
-            const len = ranges.length;
-            const max = elements.length;
-            for (; i < len; i++) {
-              const { from, to } = ranges[i];
-              if (to + 1 === max) return;
-              const temp = elements.splice(from, to + 1 - from);
-              elements.splice(from + 1, 0, ...temp);
-            }
-
-            elements.forEach((elem, index) => {
-              this.page.updateBlock(elem, {
-                zIndex: maxIndex + 1 + index,
-              });
-            });
-          } else {
-            let i = 0;
-            const len = ranges.length;
-            for (; i < len; i++) {
-              const { from, to } = ranges[i];
-              if (from === 0) continue;
-              const temp = elements.splice(from, to + 1 - from);
-              elements.splice(from - 1, 0, ...temp);
-            }
-
-            elements.forEach((elem, index) => {
-              this.page.updateBlock(elem, {
-                zIndex: minIndex - 1 - (elements.length - 1 - index),
-              });
-            });
-          }
-        }
-      })
-    );
+    _disposables.add(slots.reorderingUpdated.on(this._reorderingFrames));
   }
+
+  // Just update `zIndex`, we don't change the order of the frames in the children.
+  private _reorderingFrames = ({
+    frames,
+    type,
+  }: {
+    frames: TopLevelBlockModel[];
+    type: ReorderingType;
+  }) => {
+    if (!frames.length) return;
+
+    // TODO: opt sort
+    const allFrames = (this.model.children as FrameBlockModel[]).sort(
+      (a, b) => a.zIndex - b.zIndex
+    );
+    const sortedFrames = frames.sort((a, b) => a.zIndex - b.zIndex);
+
+    const bounds = generateBoundsWithFrames(sortedFrames);
+
+    // TODO: opt filter
+    const elements = allFrames.filter(frame => {
+      if (sortedFrames.includes(frame)) return true;
+      const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
+      return intersects(bounds, { x, y, w, h });
+    });
+
+    if (elements.length <= sortedFrames.length) return;
+
+    if (type === 'front' || type === 'forward') {
+      if (sortedFrames[0] === elements[elements.length - sortedFrames.length]) {
+        return;
+      }
+    } else {
+      if (
+        sortedFrames[sortedFrames.length - 1] ===
+        elements[sortedFrames.length - 1]
+      ) {
+        return;
+      }
+    }
+
+    const minIndex = elements[0].zIndex;
+
+    const indexes = getIndexes(sortedFrames, elements);
+    const ranges = generateRanges(indexes);
+
+    switch (type) {
+      case 'front': {
+        bringToFront(ranges, elements);
+        break;
+      }
+      case 'forward': {
+        bringForward(ranges, elements);
+        break;
+      }
+      case 'backward': {
+        sendBackward(ranges, elements);
+        break;
+      }
+      case 'back': {
+        sendToBack(ranges, elements);
+        break;
+      }
+    }
+
+    let zIndex = minIndex - 1;
+
+    this.page.transact(() => {
+      let frame;
+      let i = 0;
+      const len = elements.length;
+      for (; i < len; i++) {
+        ++zIndex;
+        frame = elements[i];
+        if (frame.zIndex === zIndex) continue;
+        this.page.updateBlock(frame, {
+          zIndex,
+        });
+      }
+    });
+  };
 
   /**
    * Adds a new frame with the given point on the editor-container.
