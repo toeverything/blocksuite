@@ -164,6 +164,9 @@ export class EdgelessPageBlockComponent
   @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
 
+  @state()
+  private _zIndexes: { max: number; min: number } = { max: 0, min: 0 };
+
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
@@ -357,6 +360,13 @@ export class EdgelessPageBlockComponent
         resizedFrames.forEach((domRect, id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const [x, y, w, h] = deserializeXYWH(model.xywh);
+          const { zIndex } = model;
+
+          if (zIndex < this._zIndexes.min) {
+            this._zIndexes.min = zIndex;
+          } else if (zIndex > this._zIndexes.max) {
+            this._zIndexes.max = zIndex;
+          }
 
           // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
@@ -392,9 +402,9 @@ export class EdgelessPageBlockComponent
     if (!frames.length) return;
 
     // TODO: opt sort
-    const allElements = (this.model.children as FrameBlockModel[]).sort(
-      (a, b) => a.zIndex - b.zIndex
-    );
+    // const allElements = (this.model.children as FrameBlockModel[]).sort(
+    //   (a, b) => a.zIndex - b.zIndex
+    // );
     const sortedElements = frames.sort((a, b) => a.zIndex - b.zIndex);
     let zIndex = 0;
 
@@ -402,23 +412,33 @@ export class EdgelessPageBlockComponent
       case 'front':
       case 'back': {
         if (type === 'front') {
-          if (
-            sortedElements[0] ===
-            allElements[allElements.length - sortedElements.length]
-          ) {
+          // if (
+          //   sortedElements[0] ===
+          //   allElements[allElements.length - sortedElements.length]
+          // ) {
+          //   return;
+          // }
+          // zIndex = allElements[allElements.length - 1].zIndex;
+          if (sortedElements[0].zIndex >= this._zIndexes.max) {
             return;
           }
 
-          zIndex = allElements[allElements.length - 1].zIndex;
+          zIndex = this._zIndexes.max;
         } else {
+          // if (
+          //   sortedElements[sortedElements.length - 1] ===
+          //   allElements[sortedElements.length - 1]
+          // ) {
+          //   return;
+          // }
+          // zIndex = allElements[0].zIndex - sortedElements.length - 1;
           if (
-            sortedElements[sortedElements.length - 1] ===
-            allElements[sortedElements.length - 1]
+            sortedElements[sortedElements.length - 1].zIndex <=
+            this._zIndexes.min
           ) {
             return;
           }
-
-          zIndex = allElements[0].zIndex - sortedElements.length - 1;
+          zIndex = this._zIndexes.min - sortedElements.length - 1;
         }
 
         frames = sortedElements;
@@ -429,11 +449,20 @@ export class EdgelessPageBlockComponent
         const bounds = generateBoundsWithFrames(sortedElements);
 
         // TODO: opt filter
-        const elements = allElements.filter(frame => {
-          if (sortedElements.includes(frame)) return true;
-          const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
-          return intersects(bounds, { x, y, w, h });
-        });
+        // const elements = allElements.filter(frame => {
+        //   if (sortedElements.includes(frame)) return true;
+        //   const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
+        //   return intersects(bounds, { x, y, w, h });
+        // });
+        const elements = (this.model.children as FrameBlockModel[])
+          .filter(frame => {
+            if (sortedElements.includes(frame)) return true;
+            const [x, y, w, h] = extendsWithPadding(
+              deserializeXYWH(frame.xywh)
+            );
+            return intersects(bounds, { x, y, w, h });
+          })
+          .sort((a, b) => a.zIndex - b.zIndex);
 
         if (elements.length <= sortedElements.length) return;
 
@@ -468,19 +497,29 @@ export class EdgelessPageBlockComponent
       }
     }
 
-    this.page.transact(() => {
-      let i = 0;
-      let frame;
-      const len = frames.length;
-      for (; i < len; i++) {
-        ++zIndex;
-        frame = frames[i];
-        if (frame.zIndex === zIndex) continue;
-        this.page.updateBlock(frame, {
-          zIndex,
-        });
+    if (type === 'backward' || type === 'back') {
+      if (this._zIndexes.min > zIndex + 1) {
+        this._zIndexes.min = zIndex + 1;
       }
-    });
+    }
+
+    let i = 0;
+    let frame;
+    const len = frames.length;
+    for (; i < len; i++) {
+      ++zIndex;
+      frame = frames[i];
+      if (frame.zIndex === zIndex) continue;
+      this.page.updateBlock(frame, {
+        zIndex,
+      });
+    }
+
+    if (type === 'forward' || type === 'front') {
+      if (this._zIndexes.max < zIndex) {
+        this._zIndexes.max = zIndex;
+      }
+    }
   };
 
   /**
@@ -513,6 +552,7 @@ export class EdgelessPageBlockComponent
       'affine:frame',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        zIndex: this._zIndexes.max,
       },
       parentId,
       frameIndex

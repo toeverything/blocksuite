@@ -40,15 +40,15 @@ export function getIndexes<T>(a: T[], b: T[]): number[] {
  * Reorders the elements, moving multiple ranges of child elements to then end.
  */
 export function bringToFront<T>(ranges: ReorderingRange[], elements: T[]) {
-  let c = 0;
+  let n = 0;
   let i = ranges.length;
   const t = elements.length;
   while (i) {
     i--;
     const { start, end } = ranges[i];
     const temp = elements.splice(start, end + 1 - start);
-    c += temp.length;
-    elements.splice(t - c, 0, ...temp);
+    n += temp.length;
+    elements.splice(t - n, 0, ...temp);
   }
 }
 
