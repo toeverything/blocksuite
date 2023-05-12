@@ -22,7 +22,6 @@ import {
   FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
-  ShadowlessElement,
   SIZE_VARIABLES,
   updateBlockType,
   VARIABLES,
@@ -30,6 +29,7 @@ import {
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -265,10 +265,6 @@ export class DebugMenu extends ShadowlessElement {
 
     const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, frameId);
-  }
-
-  private _switchShowGrid() {
-    this.editor.showGrid = !this.editor.showGrid;
   }
 
   private _exportHtml() {
@@ -607,22 +603,6 @@ export class DebugMenu extends ShadowlessElement {
                 requestUpdate: () => this.requestUpdate(),
               })
             : null}
-        </div>
-
-        <div
-          class="edgeless-toolbar"
-          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
-        >
-          <sl-tooltip content="Show Grid" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Show Grid"
-              @click=${this._switchShowGrid}
-            >
-              <sl-icon name=${!this.editor.showGrid ? 'square' : 'grid-3x3'}>
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
         </div>
       </div>
     `;

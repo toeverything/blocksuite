@@ -2,7 +2,14 @@ import type { IBound } from '../consts.js';
 
 export type XYWH = [number, number, number, number];
 
-export function serializeXYWH(x: number, y: number, w: number, h: number) {
+export type SerializedXYWH = `[${number},${number},${number},${number}]`;
+
+export function serializeXYWH(
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): SerializedXYWH {
   return `[${x},${y},${w},${h}]`;
 }
 

@@ -11,6 +11,7 @@ export type ColumnDragConfig = {
   targetIndex: number;
   indicatorHeight: number;
   headerColumns: HTMLElement[];
+  tableBody: HTMLElement;
   previewBoundaries: {
     left: number;
     right: number;
@@ -32,6 +33,7 @@ export function initMoveColumnHandlers(
     indicator = new ColumnDragIndicator();
     document.body.appendChild(indicator);
   }
+  let rafId = -1;
 
   const onColumnDragStart = (event: DragEvent) => {
     event.stopPropagation();
@@ -51,11 +53,16 @@ export function initMoveColumnHandlers(
 
     const database = tableContainer.closest('affine-database');
     assertExists(database);
-    const { left, right } = database.getBoundingClientRect();
     const { x, y } = dragHeaderColumn.getBoundingClientRect();
+    const tableBody = tableContainer.closest<HTMLElement>(
+      '.affine-database-block-table'
+    );
+    assertExists(tableBody);
+    const { left, right } = tableBody.getBoundingClientRect();
 
     dragColumnConfig = {
       dragIndex,
+      tableBody,
       headerColumns,
       targetIndex: -1,
       indicatorHeight: tableContainer.clientHeight,
@@ -84,6 +91,7 @@ export function initMoveColumnHandlers(
     const y = event.clientY;
     const {
       dragIndex,
+      tableBody,
       previewBoundaries,
       indicatorHeight,
       headerColumns,
@@ -116,6 +124,29 @@ export function initMoveColumnHandlers(
     assertExists(indicator);
     indicator.targetRect = rect;
     dragColumnConfig.targetIndex = targetIndex - 1;
+
+    // auto scroll
+    const autoLeft = x <= previewBoundaries.left + 50;
+    const autoRight = x >= previewBoundaries.right - 50;
+    const auto = autoLeft || autoRight;
+
+    const autoScroll = () => {
+      if (!auto) {
+        cancelAnimationFrame(rafId);
+        return;
+      } else {
+        rafId = requestAnimationFrame(autoScroll);
+      }
+
+      if (autoRight) {
+        tableBody.scrollLeft += 10;
+      }
+      if (autoLeft) {
+        tableBody.scrollLeft -= 10;
+      }
+    };
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(autoScroll);
   };
 
   const onColumnDragEnd = (event: DragEvent) => {

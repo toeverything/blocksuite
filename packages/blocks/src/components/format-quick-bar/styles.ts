@@ -18,8 +18,8 @@ const paragraphPanelStyle = css`
     padding: 8px 4px;
     overflow-y: auto;
 
-    background: var(--affine-white);
-    box-shadow: var(--affine-menu-shadow);
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-2);
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
@@ -36,8 +36,8 @@ export const formatQuickBarStyle = css`
     height: 40px;
 
     border-radius: 8px;
-    background: var(--affine-white);
-    box-shadow: var(--affine-menu-shadow);
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-2);
     z-index: var(--affine-z-index-popover);
     user-select: none;
   }
@@ -46,6 +46,11 @@ export const formatQuickBarStyle = css`
     width: 1px;
     height: 24px;
     background-color: var(--affine-border-color);
+  }
+
+  format-bar-button svg {
+    width: 20px;
+    height: 20px;
   }
 
   ${paragraphPanelStyle}

@@ -24,8 +24,8 @@ export const styles = css`
     padding: 12px 0;
     display: flex;
 
-    background: var(--affine-white);
-    box-shadow: var(--affine-menu-shadow);
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-2);
     border-radius: 12px;
     z-index: var(--affine-z-index-popover);
     /* transition: max-height 0.2s ease-in-out; */

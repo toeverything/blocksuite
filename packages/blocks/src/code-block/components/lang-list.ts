@@ -1,4 +1,5 @@
 import { SearchIcon } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -7,7 +8,7 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
+import { createEvent } from '../../__internal__/index.js';
 import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
@@ -20,7 +21,7 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-white);
+        background: var(--affine-background-overlay-panel-color);
         border-radius: 12px;
         top: 24px;
         z-index: 1;
@@ -77,7 +78,7 @@ export class LangList extends ShadowlessElement {
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
-        background: var(--affine-white);
+        background: var(--affine-background-overlay-panel-color);
       }
 
       #filter-input:focus {

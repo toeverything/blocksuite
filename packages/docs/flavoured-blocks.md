@@ -63,7 +63,7 @@ In the prebuilt editor, creating a simple page requires following block flavours
 ![block-nesting](./images/block-nesting.png)
 
 ::: tip
-The `affine:frame` block is designed to interop with the whiteboard mode. If you only need the document editor, simply placing all other blocks within a single frame will be sufficient.
+In AFFiNE, the `affine:frame` block is crucial for blending the document mode with the whiteboard mode. In document mode, the frame acts as a transparent container that doesn't affect the display of its internal blocks. However, in whiteboard mode, the frame has absolute positioning, allowing its content to be freely placed on the canvas.
 :::
 
 There are more block flavours available in the prebuilt editor, including:
@@ -79,13 +79,10 @@ There are more block flavours available in the prebuilt editor, including:
 
 In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
-1. `HubBlock`: serves as an empty block container
-   - include `affine:page`, `affine:frame` and `affine:database`
-2. `ContentBlock`: contains atomic content
-   - include `affine:paragraph`, `affine:list`, `affine:code` and `affine:embed`
+1. `HubBlock` serves as an empty block container, which include `affine:page`, `affine:frame` and `affine:database`.
+2. `ContentBlock` contains atomic content, this includes `affine:paragraph`, `affine:list`, `affine:code` and `affine:embed`.
 
-`HubBlock`s act as containers that affect the presentation of the blocks they contain. For example, a frame block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards.  
-In contrast, `ContentBlock`s can only nest other `ContentBlock`s to express structures like nested markdown lists.
+`HubBlock` acts as container that affects the presentation of the blocks it contains. For example, a frame block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock` can only nest other `ContentBlock` to express structures like nested markdown lists.
 
 ## Defining Block Schema
 

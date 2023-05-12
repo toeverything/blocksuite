@@ -1,8 +1,10 @@
-import type { Bound, PhasorElement } from '@blocksuite/phasor';
+import type {
+  Bound,
+  PhasorElement,
+  PhasorElementType,
+} from '@blocksuite/phasor';
 import {
   deserializeXYWH,
-  ElementCtors,
-  generateElementId,
   getCommonBound,
   serializeXYWH,
 } from '@blocksuite/phasor';
@@ -150,9 +152,11 @@ export class EdgelessClipboard implements Clipboard {
     const phasorElements =
       (elements
         ?.map(d => {
-          const type = (d as unknown as PhasorElement).type;
-          const element = ElementCtors[type]?.deserialize(d);
-          element.id = generateElementId();
+          const id = this._edgeless.surface.addElement(
+            d.type as keyof PhasorElementType,
+            d
+          );
+          const element = this._edgeless.surface.pickById(id);
           return element;
         })
         .filter(e => !!e) as PhasorElement[]) || [];
@@ -269,12 +273,17 @@ export class EdgelessClipboard implements Clipboard {
 
     // update phasor elements' position to mouse position
     elements.forEach(ele => {
-      ele.x = pasteX + ele.x - oldCommonBound.x;
-      ele.y = pasteY + ele.y - oldCommonBound.y;
-    });
+      const newXYWH = serializeXYWH(
+        pasteX + ele.x - oldCommonBound.x,
+        pasteY + ele.y - oldCommonBound.y,
+        ele.w,
+        ele.h
+      );
 
-    // add phasor element to surface
-    this._edgeless.surface.addElements(elements);
+      this._edgeless.surface.updateElement(ele.id, {
+        xywh: newXYWH,
+      });
+    });
     // create and add blocks to page
     const frameIds = await this._createFrameBlocks(
       groupedByType.frames || [],

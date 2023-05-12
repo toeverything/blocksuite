@@ -35,12 +35,12 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
-  getCurrentEditorIndex,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
+import { currentEditorIndex } from './multiple-editor.js';
 import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
@@ -119,7 +119,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
       const editor = richText.vEditor;
       return editor.yText.toString();
     });
-  }, getCurrentEditorIndex());
+  }, currentEditorIndex);
   expect(actualTexts).toEqual(texts);
 }
 
@@ -202,7 +202,7 @@ export async function assertSelection(
       const vEditor = richText.vEditor;
       return vEditor?.getVRange();
     },
-    [richTextIndex, getCurrentEditorIndex()]
+    [richTextIndex, currentEditorIndex]
   );
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
@@ -282,7 +282,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
       });
       return result;
     });
-  }, getCurrentEditorIndex());
+  }, currentEditorIndex);
   expect(actual).toEqual(resultObj);
 }
 
@@ -395,7 +395,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
         // @ts-ignore
         .map(el => el.model.type)
     );
-  }, getCurrentEditorIndex());
+  }, currentEditorIndex);
   expect(actual).toEqual(blockTypes);
 }
 

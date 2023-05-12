@@ -46,8 +46,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 68px;
       padding: 8px 12px;
       flex-wrap: wrap;
-      background: var(--affine-white);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
     }
 

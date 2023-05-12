@@ -1,21 +1,21 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
-import { css, html } from 'lit';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
+import type { TemplateResult } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  type BlockHost,
-  getDefaultPageBlock,
-  ShadowlessElement,
-} from '../__internal__/index.js';
+import { getDefaultPageBlock } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { registerService } from '../__internal__/service.js';
 import type { ListBlockModel } from './list-model.js';
+import { ListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
@@ -79,11 +79,11 @@ export class ListBlockComponent extends ShadowlessElement {
   @property()
   model!: ListBlockModel;
 
-  @property()
-  host!: BlockHost;
-
   @state()
   showChildren = true;
+
+  @property()
+  content!: TemplateResult;
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
@@ -102,9 +102,9 @@ export class ListBlockComponent extends ShadowlessElement {
       this.showChildren = !this.showChildren;
       return;
     } else if (this.model.type === 'todo') {
-      this.host.page.captureSync();
+      this.model.page.captureSync();
       const checkedPropObj = { checked: !this.model.checked };
-      this.host.page.updateBlock(this.model, checkedPropObj);
+      this.model.page.updateBlock(this.model, checkedPropObj);
       return;
     }
     this._select();
@@ -115,18 +115,25 @@ export class ListBlockComponent extends ShadowlessElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:list', ListBlockService);
+  }
+
   override render() {
-    const { deep, index } = getListInfo(this.host, this.model);
+    const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
 
-    const childrenContainer = this.showChildren
-      ? BlockChildrenContainer(this.model, this.host, () =>
-          this.requestUpdate()
-        )
-      : null;
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
+
+    const children = html`<div
+      class="affine-block-children-container"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+    >
+      ${this.content}
+    </div>`;
 
     return html`
       <div
@@ -141,12 +148,11 @@ export class ListBlockComponent extends ShadowlessElement {
         >
           ${listIcon}
           <rich-text
-            .host=${this.host}
             .model=${this.model}
             .textSchema=${this.textSchema}
           ></rich-text>
         </div>
-        ${childrenContainer}
+        ${this.showChildren ? children : nothing}
       </div>
     `;
   }

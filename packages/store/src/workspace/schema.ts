@@ -17,6 +17,21 @@ export class Schema {
     this.workspace = workspace;
   }
 
+  toJSON() {
+    return Object.fromEntries(
+      Array.from(this.flavourSchemaMap.values()).map(
+        (schema): [string, Record<string, unknown>] => [
+          schema.model.flavour,
+          {
+            role: schema.model.role,
+            parent: schema.model.parent,
+            children: schema.model.children,
+          },
+        ]
+      )
+    );
+  }
+
   validate = (
     flavour: string,
     parentFlavour?: string,

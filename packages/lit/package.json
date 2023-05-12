@@ -1,0 +1,42 @@
+{
+  "name": "@blocksuite/lit",
+  "version": "0.5.0",
+  "description": "Lit renderer for blocksuite store",
+  "main": "src/index.ts",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "peerDependencies": {
+    "@blocksuite/store": "workspace:*"
+  },
+  "dependencies": {
+    "@blocksuite/global": "workspace:*",
+    "lit": "^2.7.3"
+  },
+  "devDependencies": {
+    "@blocksuite/store": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      }
+    },
+    "files": [
+      "dist"
+    ]
+  }
+}

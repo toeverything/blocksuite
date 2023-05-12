@@ -6,8 +6,11 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import { getServiceOrRegister } from '../service.js';
-import { type BlockRange, type SerializedBlock } from '../utils/index.js';
-import { getVirgoByModel } from '../utils/query.js';
+import {
+  asyncGetVirgoByModel,
+  type BlockRange,
+  type SerializedBlock,
+} from '../utils/index.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
@@ -132,7 +135,7 @@ export async function json2block(
 }
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
-  const vEditor = getVirgoByModel(model);
+  const vEditor = await asyncGetVirgoByModel(model);
   assertExists(vEditor);
   vEditor.setVRange(vRange);
 }
@@ -173,7 +176,7 @@ export async function addSerializedBlocks(
       json.text && model?.text?.applyDelta(json.text);
     }
 
-    if (model && json.children) {
+    if (model && json.children.length) {
       await addSerializedBlocks(page, json.children, model, 0);
       pendingModels.push({ model, json });
     }

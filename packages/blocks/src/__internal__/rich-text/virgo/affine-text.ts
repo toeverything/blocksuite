@@ -1,9 +1,9 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { ShadowlessElement } from '../../index.js';
 import type { AffineTextAttributes } from './types.js';
 
 export function affineTextStyles(

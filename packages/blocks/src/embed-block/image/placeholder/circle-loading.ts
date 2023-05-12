@@ -1,7 +1,6 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-
-import { ShadowlessElement } from '../../../__internal__/index.js';
 
 const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;
 @customElement(ELEMENT_TAG)

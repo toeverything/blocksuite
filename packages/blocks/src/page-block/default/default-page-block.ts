@@ -4,8 +4,10 @@ import {
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
+import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -21,14 +23,11 @@ import {
   HOTKEY_SCOPE_TYPE,
   Rect,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
-import { BlockChildrenContainer } from '../../__internal__/service/components.js';
+import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/utils/lit.js';
+import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
+import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
@@ -120,6 +119,9 @@ export class DefaultPageBlockComponent
   @property()
   model!: PageBlockModel;
 
+  @property()
+  content!: TemplateResult;
+
   flavour = 'affine:page' as const;
 
   clipboard = new PageClipboard(this);
@@ -137,7 +139,6 @@ export class DefaultPageBlockComponent
     dragHandle: <DragHandle | null>null,
   };
 
-  @property()
   mouseRoot!: HTMLElement;
 
   @state()
@@ -375,19 +376,6 @@ export class DefaultPageBlockComponent
     }
   }
 
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
-      this.selection = new DefaultSelectionManager({
-        page: this.page,
-        mouseRoot: this.mouseRoot,
-        slots: this.slots,
-        container: this,
-      });
-    }
-
-    super.update(changedProperties);
-  }
-
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
@@ -519,7 +507,16 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:page', PageBlockService);
     this.clipboard.init(this.page);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.mouseRoot = this.parentElement!;
+    this.selection = new DefaultSelectionManager({
+      page: this.page,
+      mouseRoot: this.mouseRoot,
+      slots: this.slots,
+      container: this,
+    });
   }
 
   override disconnectedCallback() {
@@ -547,9 +544,6 @@ export class DefaultPageBlockComponent
     const { page, selection } = this;
     const { viewportOffset } = selection.state;
 
-    const childrenContainer = BlockChildrenContainer(this.model, this, () =>
-      this.requestUpdate()
-    );
     const draggingArea = DraggingArea(this._draggingArea);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
@@ -578,7 +572,7 @@ export class DefaultPageBlockComponent
               .page="${this.page}"
             ></backlink-button>
           </div>
-          ${childrenContainer}
+          ${this.content}
         </div>
         <affine-selected-blocks
           .mouseRoot="${this.mouseRoot}"

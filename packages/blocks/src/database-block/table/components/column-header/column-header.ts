@@ -7,8 +7,10 @@ import {
   DatabaseSelect,
   PenIcon,
   TextIcon,
+  TodoIcon,
 } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { createPopper } from '@popperjs/core';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -16,10 +18,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDefaultPage } from '../../../../__internal__/index.js';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '../../../../__internal__/utils/lit.js';
+import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
@@ -37,7 +36,7 @@ import { styles } from './styles.js';
 const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
-  checkbox: DatabaseNumber,
+  checkbox: TodoIcon,
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,

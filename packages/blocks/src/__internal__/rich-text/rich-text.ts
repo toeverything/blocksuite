@@ -1,11 +1,10 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { type BlockHost } from '../utils/index.js';
-import { ShadowlessElement } from '../utils/lit.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
@@ -38,9 +37,6 @@ export class RichText extends ShadowlessElement {
   }
 
   @property()
-  host!: BlockHost;
-
-  @property()
   model!: BaseBlockModel;
 
   @property()
@@ -67,7 +63,7 @@ export class RichText extends ShadowlessElement {
       'Failed to render rich-text! textSchema not found'
     );
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
-    this._vEditor.setAttributeRenderer(textSchema.textRenderer(this.host));
+    this._vEditor.setAttributeRenderer(textSchema.textRenderer());
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(

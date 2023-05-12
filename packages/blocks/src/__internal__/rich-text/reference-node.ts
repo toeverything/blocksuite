@@ -1,6 +1,7 @@
 import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { Page, PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
@@ -10,10 +11,10 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import {
-  type BlockHost,
+  getBlockElementById,
   getModelByElement,
-  ShadowlessElement,
   WithDisposable,
 } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
@@ -68,9 +69,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     attributes: {},
   };
 
-  @property()
-  host!: BlockHost;
-
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   @state()
   private _refMeta?: PageMeta;
@@ -122,7 +120,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return;
     }
     const targetPageId = refMeta.id;
-    this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const root = model.page.root;
+    assertExists(root);
+    const element = getBlockElementById(root?.id) as DefaultPageBlockComponent;
+    assertExists(element);
+    element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
   override render() {

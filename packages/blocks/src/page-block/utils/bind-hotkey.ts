@@ -128,7 +128,12 @@ export function removeCommonHotKey() {
 export function handleUp(
   e: KeyboardEvent,
   page: Page,
-  selection?: DefaultSelectionManager
+  {
+    selection,
+    zoom,
+  }: { selection?: DefaultSelectionManager; zoom?: number } = {
+    zoom: 1,
+  }
 ) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) {
@@ -197,10 +202,10 @@ export function handleUp(
         return;
       }
       const rect = range.startContainer.getBoundingClientRect();
-      focusPreviousBlock(model, new Point(rect.left, rect.top));
+      focusPreviousBlock(model, new Point(rect.left, rect.top), zoom);
       return;
     }
-    focusPreviousBlock(model, new Point(left, top));
+    focusPreviousBlock(model, new Point(left, top), zoom);
     return;
   }
 }
@@ -208,7 +213,12 @@ export function handleUp(
 export function handleDown(
   e: KeyboardEvent,
   page: Page,
-  selection?: DefaultSelectionManager
+  {
+    selection,
+    zoom,
+  }: { selection?: DefaultSelectionManager; zoom?: number } = {
+    zoom: 1,
+  }
 ) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) {
@@ -285,10 +295,14 @@ export function handleDown(
       const richText = getRichTextByModel(model);
       assertExists(richText);
       const richTextRect = richText.getBoundingClientRect();
-      focusNextBlock(model, new Point(richTextRect.left, richTextRect.top));
+      focusNextBlock(
+        model,
+        new Point(richTextRect.left, richTextRect.top),
+        zoom
+      );
       return;
     }
-    focusNextBlock(model, new Point(left, bottom));
+    focusNextBlock(model, new Point(left, bottom), zoom);
     return;
   }
   return;
@@ -396,10 +410,10 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(e, page, selection);
+    handleUp(e, page, { selection });
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(e, page, selection);
+    handleDown(e, page, { selection });
   });
   hotkey.addListener(LEFT, e => {
     const blockRange = getCurrentBlockRange(page);
