@@ -821,9 +821,11 @@ test('should indent native multi-selection block', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page>
+    `
+<affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:zIndex={0}
   >
     <affine:paragraph
       prop:text="123"

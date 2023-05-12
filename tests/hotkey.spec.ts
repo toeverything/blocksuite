@@ -742,6 +742,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="hello"

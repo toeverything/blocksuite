@@ -37,7 +37,7 @@ export function getIndexes<T>(a: T[], b: T[]): number[] {
 }
 
 /**
- * Reorders the elements, move elements of multiple ranges to the end.
+ * Reorders the elements, moving multiple ranges of child elements to then end.
  */
 export function bringToFront<T>(ranges: ReorderingRange[], elements: T[]) {
   let c = 0;
@@ -53,22 +53,20 @@ export function bringToFront<T>(ranges: ReorderingRange[], elements: T[]) {
 }
 
 /**
- * Reorders the elements, move elements of multiple ranges forward.
+ * Reorders the elements, moving multiple ranges of child elements forward.
  */
 export function bringForward<T>(ranges: ReorderingRange[], elements: T[]) {
-  let i = 0;
-  const len = ranges.length;
-  const max = elements.length;
-  for (; i < len; i++) {
+  let i = ranges.length;
+  while (i) {
+    i--;
     const { start, end } = ranges[i];
-    if (end + 1 === max) return;
     const temp = elements.splice(start, end + 1 - start);
-    elements.splice(end + 1, 0, ...temp);
+    elements.splice(start + 1, 0, ...temp);
   }
 }
 
 /**
- * Reorders the elements, move elements of multiple ranges backward.
+ * Reorders the elements, moving multiple ranges of child elements backward.
  */
 export function sendBackward<T>(ranges: ReorderingRange[], elements: T[]) {
   let i = 0;
@@ -82,7 +80,7 @@ export function sendBackward<T>(ranges: ReorderingRange[], elements: T[]) {
 }
 
 /**
- * Reorders the elements, move elements of multiple ranges to the start.
+ * Reorders the elements, moving multiple ranges of child elements to then start.
  */
 export function sendToBack<T>(ranges: ReorderingRange[], elements: T[]) {
   let i = 0;
