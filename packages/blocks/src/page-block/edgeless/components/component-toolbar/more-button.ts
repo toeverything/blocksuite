@@ -22,26 +22,26 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  value: 'delete' | ReorderType;
+  type: 'delete' | ReorderType;
   disabled?: boolean;
 };
 const ACTIONS: Action[] = [
   // FIXME: should implement these function
-  // { name: 'Copy', value: 'copy', disabled: true },
-  // { name: 'Paste', value: 'paste', disabled: true },
-  // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  { name: 'Bring to front', value: 'front' },
-  { name: 'Bring forward', value: 'forward' },
-  { name: 'Send backward', value: 'backward' },
-  { name: 'Send to back', value: 'back' },
-  // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
-  { name: 'Delete', value: 'delete' },
+  // { name: 'Copy', type: 'copy', disabled: true },
+  // { name: 'Paste', type: 'paste', disabled: true },
+  // { name: 'Duplicate', type: 'duplicate', disabled: true },
+  { name: 'Bring to front', type: 'front' },
+  { name: 'Bring forward', type: 'forward' },
+  { name: 'Send backward', type: 'backward' },
+  { name: 'Send to back', type: 'back' },
+  // { name: 'Copy as PNG', type: 'copy as PNG', disabled: true },
+  { name: 'Delete', type: 'delete' },
 ];
 
 function Actions(onClick: (action: Action) => void) {
   return repeat(
     ACTIONS,
-    action => action.value,
+    action => action.type,
     action =>
       html`<div
         class="action-item"
@@ -155,7 +155,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 
-  private _runAction = ({ value: type }: Action) => {
+  private _runAction = ({ type }: Action) => {
     switch (type) {
       case 'delete': {
         this._delete();

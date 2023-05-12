@@ -372,7 +372,7 @@ export class EdgelessPageBlockComponent
 
     _disposables.add(
       slots.reorderUpdated.on(({ elements, type }) => {
-        console.log(type, elements);
+        console.log(type, elements, this.model.children);
       })
     );
   }

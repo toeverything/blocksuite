@@ -142,8 +142,8 @@ export class SurfaceManager {
   private _reorderTo(
     elementIds: string[],
     getIndexes: () => {
-      startIndex: string | null;
-      endIndex: string | null;
+      start: string | null;
+      end: string | null;
     },
     setIndexes: (keys: string[]) => void
   ) {
@@ -157,13 +157,9 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const { startIndex, endIndex } = getIndexes();
+    const { start, end } = getIndexes();
 
-    const keys = generateNKeysBetween(
-      startIndex,
-      endIndex,
-      sortedElements.length
-    );
+    const keys = generateNKeysBetween(start, end, sortedElements.length);
 
     setIndexes(keys);
 
@@ -181,11 +177,11 @@ export class SurfaceManager {
   private _reorder(
     elementIds: string[],
     getIndexes: (elements: SurfaceElement[]) => {
-      startIndex: string | null;
-      endIndex: string | null;
+      start: string | null;
+      end: string | null;
     },
     order: (
-      ranges: { start: number; end: number }[],
+      ranges: { from: number; to: number }[],
       elements: SurfaceElement[]
     ) => void
   ) {
@@ -201,29 +197,29 @@ export class SurfaceManager {
 
     const bounds = generateBounds(sortedElements);
     const elements = this.pickByBound(bounds).sort(compare);
-    const { startIndex, endIndex } = getIndexes(elements);
+    const { start, end } = getIndexes(elements);
     const indexes = sortedElements.map(e =>
       elements.findIndex(element => element === e)
     );
 
     let curr;
-    let start = indexes[0];
-    let end = indexes[0];
-    const ranges = [{ start, end }];
+    let from = indexes[0];
+    let to = indexes[0];
+    const ranges = [{ from, to }];
     const len = indexes.length;
     for (let i = 1; i < len; i++) {
       curr = indexes[i];
-      if (curr - end === 1) {
-        ranges[i - 1].end = end = curr;
+      if (curr - to === 1) {
+        ranges[i - 1].to = to = curr;
       } else {
-        ranges.push({ start, end });
-        start = curr;
+        ranges.push({ from, to });
+        from = curr;
       }
     }
 
     order(ranges, elements);
 
-    const keys = generateNKeysBetween(startIndex, endIndex, elements.length);
+    const keys = generateNKeysBetween(start, end, elements.length);
 
     this._transact(() => {
       elements.forEach((ele, index) => {
@@ -339,8 +335,8 @@ export class SurfaceManager {
     this._reorderTo(
       elementIds,
       () => ({
-        startIndex: this._maxIndex,
-        endIndex: null,
+        start: this._maxIndex,
+        end: null,
       }),
       keys => {
         this._maxIndex = keys[keys.length - 1];
@@ -352,18 +348,18 @@ export class SurfaceManager {
     this._reorder(
       elementIds,
       elements => ({
-        startIndex: elements[0].index,
-        endIndex: null,
+        start: elements[0].index,
+        end: null,
       }),
       (ranges, elements) => {
         let i = 0;
         const len = ranges.length;
         const max = elements.length;
         for (; i < len; i++) {
-          const { start, end } = ranges[i];
-          if (end + 1 === max) return;
-          const temp = elements.splice(start, end + 1 - start);
-          elements.splice(start + 1, 0, ...temp);
+          const { from, to } = ranges[i];
+          if (to + 1 === max) return;
+          const temp = elements.splice(from, to + 1 - from);
+          elements.splice(from + 1, 0, ...temp);
         }
       }
     );
@@ -373,17 +369,17 @@ export class SurfaceManager {
     this._reorder(
       elementIds,
       elements => ({
-        startIndex: null,
-        endIndex: elements[elements.length - 1].index,
+        start: null,
+        end: elements[elements.length - 1].index,
       }),
       (ranges, elements) => {
         let i = 0;
         const len = ranges.length;
         for (; i < len; i++) {
-          const { start, end } = ranges[i];
-          if (start === 0) continue;
-          const temp = elements.splice(start, end + 1 - start);
-          elements.splice(start - 1, 0, ...temp);
+          const { from, to } = ranges[i];
+          if (from === 0) continue;
+          const temp = elements.splice(from, to + 1 - from);
+          elements.splice(from - 1, 0, ...temp);
         }
       }
     );
@@ -393,8 +389,8 @@ export class SurfaceManager {
     this._reorderTo(
       elementIds,
       () => ({
-        startIndex: null,
-        endIndex: this._minIndex,
+        start: null,
+        end: this._minIndex,
       }),
       keys => {
         this._minIndex = keys[0];
