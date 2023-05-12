@@ -1,4 +1,4 @@
-import { type BaseBlockModel, Utils } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -57,10 +57,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
    * Does not include the slash character
    */
   private _searchString = '';
-
-  get enabledDatabase() {
-    return !!this.model.page.awarenessStore.getFlag('enable_database');
-  }
 
   get menuGroups() {
     return menuGroups;
@@ -159,8 +155,17 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this._handleClickCategory(targetGroup);
           return;
         }
-        this._activatedItemIndex =
-          (this._activatedItemIndex + step + configLen) % configLen;
+        let ejectedCnt = configLen;
+        do {
+          this._activatedItemIndex =
+            (this._activatedItemIndex + step + configLen) % configLen;
+          // Skip disabled items
+        } while (
+          this._filterItems[this._activatedItemIndex].disabled &&
+          // If all items are disabled, the loop will never end
+          ejectedCnt--
+        );
+
         this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
       },
       onConfirm: () => {
@@ -194,25 +199,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
     const searchStr = this._searchString.toLowerCase();
     let allMenus = this.menuGroups.flatMap(group => group.items);
 
-    if (!this.enabledDatabase) {
-      allMenus.filter(group => group.groupName !== 'Database');
-    }
-    // This is a temporary solution for the database menu
-    // If there are more menus that need to be filtered by flavours,
-    // we should refactor this by adding a `showWhen` property to the menu
-    if (
-      Utils.isInsideBlockByFlavour(
-        this.model.page,
-        this.model,
-        'affine:database'
-      )
-    ) {
-      allMenus = allMenus.filter(
-        item =>
-          item.groupName !== 'Database' &&
-          !['Image', 'Quote', 'Code Block', 'Divider'].includes(item.name)
-      );
-    }
+    allMenus = allMenus.filter(({ showWhen = () => true }) =>
+      showWhen(this.model)
+    );
     if (!searchStr) {
       return allMenus;
     }

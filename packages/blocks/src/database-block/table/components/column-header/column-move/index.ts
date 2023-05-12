@@ -16,6 +16,7 @@ export type ColumnDragConfig = {
     left: number;
     right: number;
   };
+  offset: { x: number; y: number };
 };
 
 export function initMoveColumnHandlers(
@@ -50,6 +51,9 @@ export function initMoveColumnHandlers(
     assertExists(dragHeaderColumn);
     const dragIndex = headerColumns.indexOf(dragHeaderColumn) - 1;
 
+    const database = tableContainer.closest('affine-database');
+    assertExists(database);
+    const { x, y } = dragHeaderColumn.getBoundingClientRect();
     const tableBody = tableContainer.closest<HTMLElement>(
       '.affine-database-block-table'
     );
@@ -66,6 +70,10 @@ export function initMoveColumnHandlers(
         left,
         right,
       },
+      offset: {
+        x: event.clientX - x,
+        y: event.clientY - y,
+      },
     };
 
     dragPreview = createDragPreview(event);
@@ -81,16 +89,19 @@ export function initMoveColumnHandlers(
     }
     const x = event.clientX;
     const y = event.clientY;
-
-    dragPreview.style.transform = `translate(${x}px, ${y}px)`;
-
     const {
       dragIndex,
+      tableBody,
       previewBoundaries,
       indicatorHeight,
       headerColumns,
-      tableBody,
+      offset: { x: offsetX, y: offsetY },
     } = dragColumnConfig;
+
+    dragPreview.style.transform = `translate(${x - offsetX}px, ${
+      y - offsetY
+    }px)`;
+
     const point = new Point(x, y);
     const { element, index: targetIndex } = getClosestElement(
       point,
