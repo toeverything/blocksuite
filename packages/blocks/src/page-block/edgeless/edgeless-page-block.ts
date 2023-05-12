@@ -55,6 +55,7 @@ import { EdgelessHoverRect } from './components/hover-rect.js';
 import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
+import { type ReorderingType } from './reordering.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
@@ -68,17 +69,15 @@ import {
   getCursorMode,
 } from './utils.js';
 
-export type ReorderType = 'front' | 'forward' | 'backward' | 'back';
-
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
-  reorderUpdated: Slot<{
+  reorderingUpdated: Slot<{
     frames: TopLevelBlockModel[];
-    type: ReorderType;
+    type: ReorderingType;
   }>;
 }
 
@@ -174,9 +173,9 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
-    reorderUpdated: new Slot<{
+    reorderingUpdated: new Slot<{
       frames: TopLevelBlockModel[];
-      type: ReorderType;
+      type: ReorderingType;
     }>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
@@ -373,7 +372,7 @@ export class EdgelessPageBlockComponent
 
     // Just update `zIndex`, we don't change the order of the frames in the children.
     _disposables.add(
-      slots.reorderUpdated.on(({ frames, type }) => {
+      slots.reorderingUpdated.on(({ frames, type }) => {
         // TODO: opt sort
         const allFrames = (this.model.children as FrameBlockModel[]).sort(
           (a, b) => a.zIndex - b.zIndex

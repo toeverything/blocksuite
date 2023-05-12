@@ -12,17 +12,15 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
-import type {
-  EdgelessSelectionSlots,
-  ReorderType,
-} from '../../edgeless-page-block.js';
+import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type { ReorderingType } from '../../reordering.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  type: 'delete' | ReorderType;
+  type: 'delete' | ReorderingType;
   disabled?: boolean;
 };
 const ACTIONS: Action[] = [
@@ -164,7 +162,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'front': {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
-          this.slots.reorderUpdated.emit({
+          this.slots.reorderingUpdated.emit({
             frames,
             type,
           });
@@ -177,7 +175,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward': {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
-          this.slots.reorderUpdated.emit({
+          this.slots.reorderingUpdated.emit({
             frames,
             type,
           });
@@ -190,7 +188,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'backward': {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
-          this.slots.reorderUpdated.emit({
+          this.slots.reorderingUpdated.emit({
             frames,
             type,
           });
@@ -203,7 +201,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'back': {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
-          this.slots.reorderUpdated.emit({
+          this.slots.reorderingUpdated.emit({
             frames,
             type,
           });
