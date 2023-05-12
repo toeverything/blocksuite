@@ -10,10 +10,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { ReorderingType } from '../../reordering.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
 import { createButtonPopper } from '../utils.js';

@@ -12,6 +12,7 @@ export * from './gesture/index.js';
 export * from './hotkey.js';
 export * from './query.js';
 export * from './rect.js';
+export * from './reordering.js';
 export * from './selection.js';
 // Compat with SSR
 // export * from './shortcut.js';

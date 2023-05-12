@@ -27,6 +27,7 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockComponentElement,
   Point,
+  ReorderingType,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
@@ -55,7 +56,6 @@ import { EdgelessHoverRect } from './components/hover-rect.js';
 import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
-import { type ReorderingType } from './reordering.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
