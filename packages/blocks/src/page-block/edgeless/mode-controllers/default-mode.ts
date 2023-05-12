@@ -24,12 +24,16 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { EdgelessPageBlockComponent } from '../../index.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
-import type { Selectable } from '../selection-manager.js';
+import type {
+  EdgelessSelectionState,
+  Selectable,
+} from '../selection-manager.js';
 import {
   addText,
   getXYWH,
@@ -55,6 +59,15 @@ export enum DefaultModeDragType {
   PreviewDragging = 'preview-dragging',
 }
 
+export type HistoryStackItem = {
+  meta: Map<'edgeless-selections', EdgelessSelectionState>;
+};
+
+export type HistoryStackEvent = {
+  type: 'undo' | 'redo';
+  stackItem: HistoryStackItem;
+};
+
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
@@ -68,6 +81,64 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _lock = false;
   // Do not select the text, when click again after activating the frame.
   private _isDoubleClickedOnMask = false;
+
+  constructor(edgeless: EdgelessPageBlockComponent) {
+    super(edgeless);
+    this._page.history.on('stack-item-added', this.handleStackItemAdded);
+    this._page.history.on('stack-item-popped', this.handleStackItemPopped);
+  }
+
+  handleStackItemPopped = (e: HistoryStackEvent) => {
+    if (this.mouseMode.type !== 'default') return;
+    const selection = e.stackItem.meta.get('edgeless-selections');
+    if (!selection) return;
+
+    if (e.type === 'undo') {
+      this.setRedoTopItem(selection);
+    }
+
+    if (e.type === 'redo') {
+      this.setUndoTopItem(selection);
+    }
+
+    this.setCurSelection();
+  };
+
+  handleStackItemAdded = (e: HistoryStackEvent) => {
+    if (this.mouseMode.type !== 'default') return;
+    if (e.type === 'undo' && this._page.history.redoStack.length === 0) {
+      e.stackItem.meta.set('edgeless-selections', this._blockSelectionState);
+    }
+  };
+
+  setCurSelection() {
+    const undoStack = this._page.history.undoStack;
+    const selection = (undoStack[undoStack.length - 1]?.meta.get(
+      'edgeless-selections'
+    ) as EdgelessSelectionState) || {
+      selected: [],
+      active: false,
+    };
+
+    const newSelections = selection.selected.reduce((res, cur) => {
+      // update new selection rendering position
+      const el = this._surface.pickById(cur.id);
+      if (el) res.push(el);
+      return res;
+    }, [] as Selectable[]);
+
+    this._setSelectionState(newSelections, selection.active);
+  }
+
+  setUndoTopItem(selection: EdgelessSelectionState) {
+    const undoStack = this._page.history.undoStack;
+    undoStack[undoStack.length - 1]?.meta.set('edgeless-selections', selection);
+  }
+
+  setRedoTopItem(selection: EdgelessSelectionState) {
+    const redoStack = this._page.history.redoStack;
+    redoStack[redoStack.length - 1]?.meta.set('edgeless-selections', selection);
+  }
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -90,6 +161,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _setNoneSelectionState() {
     this._blockSelectionState = { selected: [], active: false };
+    this.setUndoTopItem(this._blockSelectionState);
     this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
     resetNativeSelection(null);
   }
@@ -99,6 +171,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       selected,
       active,
     };
+    this.setUndoTopItem(this._blockSelectionState);
     this._edgeless.slots.selectionUpdated.emit(this._blockSelectionState);
   }
 
