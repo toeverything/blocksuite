@@ -9,6 +9,7 @@ import {
 import { BlockElement } from '@blocksuite/lit';
 import {
   deserializeXYWH,
+  intersects,
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
@@ -76,7 +77,7 @@ export interface EdgelessSelectionSlots {
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
   reorderUpdated: Slot<{
-    elements: TopLevelBlockModel[];
+    frames: TopLevelBlockModel[];
     type: ReorderType;
   }>;
 }
@@ -174,8 +175,8 @@ export class EdgelessPageBlockComponent
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
     reorderUpdated: new Slot<{
+      frames: TopLevelBlockModel[];
       type: ReorderType;
-      elements: TopLevelBlockModel[];
     }>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
@@ -370,9 +371,73 @@ export class EdgelessPageBlockComponent
       })
     );
 
+    // Just update `zIndex`, we don't change the order of the frames in the children.
     _disposables.add(
-      slots.reorderUpdated.on(({ elements, type }) => {
-        console.log(type, elements, this.model.children);
+      slots.reorderUpdated.on(({ frames, type }) => {
+        // TODO: opt sort
+        const allFrames = (this.model.children as FrameBlockModel[]).sort(
+          (a, b) => a.zIndex - b.zIndex
+        );
+        const sortedFrames = allFrames.filter(frame => frames.includes(frame));
+        const minIndex = allFrames[0].zIndex;
+        const maxIndex = allFrames[allFrames.length - 1].zIndex;
+
+        if (type === 'front' || type === 'back') {
+          if (type === 'front') {
+            sortedFrames.forEach((elem, index) => {
+              this.page.updateBlock(elem, {
+                zIndex: maxIndex + 1 + index,
+              });
+            });
+          } else {
+            sortedFrames.reverse().forEach((elem, index) => {
+              this.page.updateBlock(elem, {
+                zIndex: minIndex - 1 - index,
+              });
+            });
+          }
+        } else {
+          const bounds = {
+            x: 0,
+            y: 0,
+            w: 0,
+            h: 0,
+          };
+
+          const len = sortedFrames.length;
+
+          if (len) {
+            let maxX;
+            let maxY;
+            let i = 0;
+            let e = sortedFrames[i];
+            const [x, y, w, h] = deserializeXYWH(e.xywh);
+
+            bounds.x = x;
+            bounds.y = y;
+            bounds.w = w;
+            bounds.h = h;
+
+            for (i++; i < len; i++) {
+              e = sortedFrames[i];
+              const [x, y, w, h] = deserializeXYWH(e.xywh);
+              bounds.x = Math.min(bounds.x, x);
+              bounds.y = Math.min(bounds.y, y);
+              maxX = Math.max(bounds.x + bounds.w, x + w);
+              maxY = Math.max(bounds.y + bounds.h, y + h);
+              bounds.w = maxX - bounds.x;
+              bounds.h = maxY - bounds.y;
+            }
+          }
+
+          // TODO: opt filter
+          const intersectingFrames = allFrames.filter(frame => {
+            const [x, y, w, h] = deserializeXYWH(frame.xywh);
+            return intersects(bounds, { x, y, w, h });
+          });
+
+          console.log(type, frames, intersectingFrames);
+        }
       })
     );
   }
@@ -643,6 +708,7 @@ export class EdgelessPageBlockComponent
             background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: var(--affine-background-primary-color);
+            z-index: 0;
           }
         </style>
         <div

@@ -137,7 +137,7 @@ export class SurfaceManager {
   }
 
   /**
-   * Brings to front or Sends to back.
+   * Brings to front or sends to back.
    */
   private _reorderTo(
     elementIds: string[],
@@ -172,7 +172,7 @@ export class SurfaceManager {
   }
 
   /**
-   * Brings forward or Sends backward layer by layer.
+   * Brings forward or sends backward layer by layer.
    */
   private _reorder(
     elementIds: string[],

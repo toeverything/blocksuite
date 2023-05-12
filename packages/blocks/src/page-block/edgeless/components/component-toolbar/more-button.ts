@@ -165,7 +165,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
           this.slots.reorderUpdated.emit({
-            elements: frames,
+            frames,
             type,
           });
         }
@@ -178,7 +178,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
           this.slots.reorderUpdated.emit({
-            elements: frames,
+            frames,
             type,
           });
         }
@@ -191,7 +191,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
           this.slots.reorderUpdated.emit({
-            elements: frames,
+            frames,
             type,
           });
         }
@@ -204,7 +204,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
           this.slots.reorderUpdated.emit({
-            elements: frames,
+            frames,
             type,
           });
         }

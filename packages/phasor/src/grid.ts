@@ -26,7 +26,7 @@ export function compare(a: SurfaceElement, b: SurfaceElement): number {
  * Generates bounds with selected elements.
  */
 export function generateBounds(elements: SurfaceElement[]): IBound {
-  const bound = {
+  const bounds = {
     x: 0,
     y: 0,
     w: 0,
@@ -39,25 +39,25 @@ export function generateBounds(elements: SurfaceElement[]): IBound {
     let maxX;
     let maxY;
     let i = 0;
-    let e = elements[i];
+    const { x, y, w, h } = elements[i];
 
-    bound.x = e.x;
-    bound.y = e.y;
-    bound.w = e.w;
-    bound.h = e.h;
+    bounds.x = x;
+    bounds.y = y;
+    bounds.w = w;
+    bounds.h = h;
 
     for (i++; i < len; i++) {
-      e = elements[i];
-      bound.x = Math.min(bound.x, e.x);
-      bound.y = Math.min(bound.y, e.y);
-      maxX = Math.max(bound.x + bound.w, e.x + e.w);
-      maxY = Math.max(bound.y + bound.h, e.y + e.h);
-      bound.w = maxX - bound.x;
-      bound.h = maxY - bound.y;
+      const { x, y, w, h } = elements[i];
+      bounds.x = Math.min(bounds.x, x);
+      bounds.y = Math.min(bounds.y, y);
+      maxX = Math.max(bounds.x + bounds.w, x + w);
+      maxY = Math.max(bounds.y + bounds.h, y + h);
+      bounds.w = maxX - bounds.x;
+      bounds.h = maxY - bounds.y;
     }
   }
 
-  return bound;
+  return bounds;
 }
 
 export class GridManager {
