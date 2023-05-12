@@ -122,8 +122,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     const newSelections = selection.selected.reduce((res, cur) => {
       // update new selection rendering position
-      const el = this._surface.pickById(cur.id);
-      if (el) res.push(el);
+      const el = this._surface.pickById(cur.id) || cur;
+      res.push(el);
       return res;
     }, [] as Selectable[]);
 
