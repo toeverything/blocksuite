@@ -34,14 +34,12 @@ import {
   almostEqual,
   asyncFocusRichText,
   bringForward,
-  bringToFront,
   generateRanges,
   getIndexes,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
   resetNativeSelection,
   sendBackward,
-  sendToBack,
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
@@ -398,67 +396,84 @@ export class EdgelessPageBlockComponent
       (a, b) => a.zIndex - b.zIndex
     );
     const sortedElements = frames.sort((a, b) => a.zIndex - b.zIndex);
-
-    const bounds = generateBoundsWithFrames(sortedElements);
-
-    // TODO: opt filter
-    const elements = allElements.filter(frame => {
-      if (sortedElements.includes(frame)) return true;
-      const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
-      return intersects(bounds, { x, y, w, h });
-    });
-
-    if (elements.length <= sortedElements.length) return;
-
-    if (type === 'front' || type === 'forward') {
-      if (
-        sortedElements[0] === elements[elements.length - sortedElements.length]
-      ) {
-        return;
-      }
-    } else {
-      if (
-        sortedElements[sortedElements.length - 1] ===
-        elements[sortedElements.length - 1]
-      ) {
-        return;
-      }
-    }
-
-    const minIndex = elements[0].zIndex;
-    const indexes = getIndexes(sortedElements, elements);
-    const ranges = generateRanges(indexes);
+    let zIndex = 0;
 
     switch (type) {
-      case 'front': {
-        bringToFront(ranges, elements);
-        break;
-      }
-      case 'forward': {
-        bringForward(ranges, elements);
-        break;
-      }
-      case 'backward': {
-        sendBackward(ranges, elements);
-        break;
-      }
+      case 'front':
       case 'back': {
-        sendToBack(ranges, elements);
+        if (type === 'front') {
+          if (
+            sortedElements[0] ===
+            allElements[allElements.length - sortedElements.length]
+          ) {
+            return;
+          }
+
+          zIndex = allElements[allElements.length - 1].zIndex;
+        } else {
+          const i = sortedElements.length - 1;
+          if (sortedElements[i] === allElements[i]) {
+            return;
+          }
+
+          zIndex = allElements[0].zIndex - i;
+        }
+
+        break;
+      }
+      case 'forward':
+      case 'backward': {
+        const bounds = generateBoundsWithFrames(sortedElements);
+
+        // TODO: opt filter
+        const elements = allElements.filter(frame => {
+          if (sortedElements.includes(frame)) return true;
+          const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
+          return intersects(bounds, { x, y, w, h });
+        });
+
+        if (elements.length <= sortedElements.length) return;
+
+        if (type === 'forward') {
+          if (
+            sortedElements[0] ===
+            elements[elements.length - sortedElements.length]
+          ) {
+            return;
+          }
+        } else {
+          if (
+            sortedElements[sortedElements.length - 1] ===
+            elements[sortedElements.length - 1]
+          ) {
+            return;
+          }
+        }
+
+        zIndex = elements[0].zIndex - 1;
+        const indexes = getIndexes(sortedElements, elements);
+        const ranges = generateRanges(indexes);
+
+        if (type === 'forward') {
+          bringForward(ranges, elements);
+        } else {
+          sendBackward(ranges, elements);
+        }
+
+        frames = elements;
         break;
       }
     }
-
-    let zIndex = minIndex - 1;
 
     this.page.transact(() => {
       let i = 0;
-      let element;
-      const len = elements.length;
+      let frame;
+      const len = frames.length;
       for (; i < len; i++) {
         ++zIndex;
-        element = elements[i];
-        if (element.zIndex === zIndex) continue;
-        this.page.updateBlock(element, {
+        frame = frames[i];
+        if (frame.zIndex === zIndex) continue;
+        this.page.updateBlock(frame, {
           zIndex,
         });
       }

@@ -1,11 +1,9 @@
 import {
   bringForward,
-  bringToFront,
   generateRanges,
   getIndexes,
   type ReorderingRange,
   sendBackward,
-  sendToBack,
 } from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
@@ -165,7 +163,6 @@ export class SurfaceManager {
   /**
    * Brings to front or sends to back.
    */
-  /*
   private _reorderTo(
     elementIds: string[],
     getBoundsIndexes: () => {
@@ -177,22 +174,21 @@ export class SurfaceManager {
     if (!elementIds.length) {
       return;
     }
-  
+
     const sortedElements = (
       elementIds
         .map(id => this._elements.get(id))
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
-  
+
     const { start, end } = getBoundsIndexes();
-  
+
     const keys = generateNKeysBetween(start, end, sortedElements.length);
-  
+
     setBoundsIndexes(keys);
-  
+
     this._updateZIndexes(keys, sortedElements);
   }
-  */
 
   /**
    * Brings to front or sends to back.
@@ -336,13 +332,12 @@ export class SurfaceManager {
   }
 
   bringToFront(elementIds: string[]) {
-    this._reorder(
+    this._reorderTo(
       elementIds,
-      elements => ({
-        start: elements[0].index,
+      () => ({
+        start: this._maxIndex,
         end: null,
       }),
-      bringToFront,
       keys => {
         const index = keys[keys.length - 1];
         if (index > this._maxIndex) {
@@ -387,13 +382,12 @@ export class SurfaceManager {
   }
 
   sendToBack(elementIds: string[]) {
-    this._reorder(
+    this._reorderTo(
       elementIds,
-      elements => ({
+      () => ({
         start: null,
-        end: elements[elements.length - 1].index,
+        end: this._minIndex,
       }),
-      sendToBack,
       keys => {
         const index = keys[0];
         if (index < this._minIndex) {
