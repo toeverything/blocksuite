@@ -79,9 +79,10 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         m => m.id === models[models.length - 1].id
       );
 
-      pageBlock.moveBlocksToNewFrame(models, point, {
+      pageBlock.moveBlocksWithNewFrame(models, point, {
         rect: getRectByBlockElement(blockElementsExcludeSubtrees[0]),
         focus: true,
+        frameIndex: firstModelIndex === 0 ? 0 : undefined,
       });
 
       if (
@@ -94,7 +95,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
         assertExists(nextFirstBlockElement);
         const nextFirstBlockRect = getRectByBlockElement(nextFirstBlockElement);
-        pageBlock.moveBlocksToNewFrame(
+        pageBlock.moveBlocksWithNewFrame(
           parent?.children.slice(lastModelIndex),
           new Point(nextFirstBlockRect.x, nextFirstBlockRect.y),
           { rect: nextFirstBlockRect }

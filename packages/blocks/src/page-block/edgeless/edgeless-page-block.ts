@@ -374,9 +374,19 @@ export class EdgelessPageBlockComponent
    */
   addFrameWithPoint(
     point: Point,
-    width = DEFAULT_FRAME_WIDTH,
-    height = DEFAULT_FRAME_HEIGHT
+    options: {
+      width?: number;
+      height?: number;
+      parentId?: string;
+      frameIndex?: number;
+    } = {}
   ) {
+    const {
+      width = DEFAULT_FRAME_WIDTH,
+      height = DEFAULT_FRAME_HEIGHT,
+      parentId = this.page.root?.id,
+      frameIndex,
+    } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.page.addBlock(
       'affine:frame',
@@ -388,7 +398,8 @@ export class EdgelessPageBlockComponent
           height
         ),
       },
-      this.page.root?.id
+      parentId,
+      frameIndex
     );
   }
 
@@ -420,10 +431,20 @@ export class EdgelessPageBlockComponent
   }
 
   /** Moves selected blocks into a new frame at the given point. */
-  moveBlocksToNewFrame(
+  moveBlocksWithNewFrame(
     blocks: BaseBlockModel[],
     point: Point,
-    { rect, focus }: { rect?: DOMRect; focus?: boolean } = {}
+    {
+      rect,
+      focus,
+      parentId,
+      frameIndex,
+    }: {
+      rect?: DOMRect;
+      focus?: boolean;
+      parentId?: string;
+      frameIndex?: number;
+    } = {}
   ) {
     const { left, top, zoom } = this.surface.viewport;
     const width = rect?.width
@@ -431,7 +452,11 @@ export class EdgelessPageBlockComponent
       : DEFAULT_FRAME_WIDTH;
     point.x -= left;
     point.y -= top;
-    const frameId = this.addFrameWithPoint(point, width);
+    const frameId = this.addFrameWithPoint(point, {
+      width,
+      parentId,
+      frameIndex,
+    });
     const frameModel = this.page.getBlockById(frameId) as FrameBlockModel;
     this.page.moveBlocks(blocks, frameModel);
 
