@@ -214,6 +214,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -259,6 +260,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -304,6 +306,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text={
@@ -349,6 +352,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -389,6 +393,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -424,6 +429,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -464,6 +470,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -490,6 +497,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -518,6 +526,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -760,6 +769,7 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -829,6 +839,7 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text={
@@ -903,6 +914,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:list
     prop:checked={false}
@@ -930,6 +942,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:paragraph
     prop:text="123"
@@ -974,6 +987,7 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:code
     prop:language="Plain Text"

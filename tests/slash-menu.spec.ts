@@ -275,6 +275,7 @@ test.describe('slash search', () => {
       `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:zIndex={0}
 >
   <affine:list
     prop:checked={false}
