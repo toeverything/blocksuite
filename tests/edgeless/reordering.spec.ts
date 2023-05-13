@@ -42,7 +42,9 @@ test.describe('reordering shapes', () => {
 
     // bring rect0 to front
     await triggerComponentToolbarAction(page, 'bringToFront');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect0
     await page.mouse.click(180, 180);
@@ -58,7 +60,9 @@ test.describe('reordering shapes', () => {
 
     // bring rect0 forward
     await triggerComponentToolbarAction(page, 'bringForward');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect0
     await page.mouse.click(150, 150);
@@ -74,7 +78,9 @@ test.describe('reordering shapes', () => {
 
     // bring rect2 backward
     await triggerComponentToolbarAction(page, 'sendBackward');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect1
     await page.mouse.click(180, 180);
@@ -90,7 +96,9 @@ test.describe('reordering shapes', () => {
 
     // bring rect2 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect1
     await page.mouse.click(180, 180);
@@ -98,7 +106,9 @@ test.describe('reordering shapes', () => {
 
     // send rect1 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect0
     await page.mouse.click(180, 180);
@@ -138,7 +148,9 @@ test.describe('reordering frames', () => {
 
     // bring frame0 to front
     await triggerComponentToolbarAction(page, 'bringToFront');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be frame0
     await page.mouse.click(180, 140);
@@ -157,7 +169,9 @@ test.describe('reordering frames', () => {
 
     // bring frame0 forward
     await triggerComponentToolbarAction(page, 'bringForward');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be rect0
     await page.mouse.click(150, 140);
@@ -176,7 +190,9 @@ test.describe('reordering frames', () => {
 
     // bring frame2 backward
     await triggerComponentToolbarAction(page, 'sendBackward');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be frame1
     await page.mouse.click(180, 140);
@@ -195,7 +211,9 @@ test.describe('reordering frames', () => {
 
     // bring frame2 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be frame1
     await page.mouse.click(180, 140);
@@ -203,7 +221,9 @@ test.describe('reordering frames', () => {
 
     // send frame1 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
-    await waitNextFrame(page);
+
+    // click outside to clear selection
+    await page.mouse.click(50, 50);
 
     // should be frame0
     await page.mouse.click(180, 140);
