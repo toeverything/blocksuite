@@ -155,59 +155,25 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _runAction = ({ type }: Action) => {
     switch (type) {
-      case 'delete': {
+      case 'delete':
         this._delete();
         break;
-      }
-      case 'front': {
-        const { frames, shapes } = this._splitElements();
-        if (frames.length) {
-          this.slots.reorderingUpdated.emit({
-            frames,
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.surface.bringToFront(shapes.map(ele => ele.id));
-        }
-        break;
-      }
-      case 'forward': {
-        const { frames, shapes } = this._splitElements();
-        if (frames.length) {
-          this.slots.reorderingUpdated.emit({
-            frames,
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.surface.bringForward(shapes.map(ele => ele.id));
-        }
-        break;
-      }
-      case 'backward': {
-        const { frames, shapes } = this._splitElements();
-        if (frames.length) {
-          this.slots.reorderingUpdated.emit({
-            frames,
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.surface.sendBackward(shapes.map(ele => ele.id));
-        }
-        break;
-      }
+      case 'front':
+      case 'forward':
+      case 'backward':
       case 'back': {
         const { frames, shapes } = this._splitElements();
         if (frames.length) {
           this.slots.reorderingUpdated.emit({
-            frames,
+            elements: frames,
             type,
           });
         }
         if (shapes.length) {
-          this.surface.sendToBack(shapes.map(ele => ele.id));
+          this.surface.reorder({
+            elements: shapes,
+            type,
+          });
         }
         break;
       }

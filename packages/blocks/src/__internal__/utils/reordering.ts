@@ -2,6 +2,11 @@
 
 export type ReorderingType = 'front' | 'forward' | 'backward' | 'back';
 
+export interface ReorderingAction<T> {
+  type: ReorderingType;
+  elements: T[];
+}
+
 export interface ReorderingRange {
   start: number;
   end: number;

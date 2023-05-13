@@ -27,7 +27,7 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockComponentElement,
   Point,
-  ReorderingType,
+  ReorderingAction,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
@@ -81,10 +81,7 @@ export interface EdgelessSelectionSlots {
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
-  reorderingUpdated: Slot<{
-    frames: TopLevelBlockModel[];
-    type: ReorderingType;
-  }>;
+  reorderingUpdated: Slot<ReorderingAction<FrameBlockModel>>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -182,10 +179,7 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
-    reorderingUpdated: new Slot<{
-      frames: TopLevelBlockModel[];
-      type: ReorderingType;
-    }>(),
+    reorderingUpdated: new Slot<ReorderingAction<FrameBlockModel>>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -393,106 +387,77 @@ export class EdgelessPageBlockComponent
   //
   // TODO: do not re-render
   private _reorderingFrames = ({
-    frames,
+    elements,
     type,
-  }: {
-    frames: TopLevelBlockModel[];
-    type: ReorderingType;
-  }) => {
-    if (!frames.length) return;
+  }: ReorderingAction<FrameBlockModel>) => {
+    if (!elements.length) return;
+
+    elements.sort((a, b) => a.zIndex - b.zIndex);
 
     // TODO: opt sort
-    // const allElements = (this.model.children as FrameBlockModel[]).sort(
-    //   (a, b) => a.zIndex - b.zIndex
-    // );
-    const sortedElements = frames.sort((a, b) => a.zIndex - b.zIndex);
+    const allElements = (this.model.children as FrameBlockModel[]).sort(
+      (a, b) => a.zIndex - b.zIndex
+    );
+
     let zIndex = 0;
+    let frames: FrameBlockModel[];
 
     switch (type) {
       case 'front':
       case 'back': {
         if (type === 'front') {
-          // if (
-          //   sortedElements[0] ===
-          //   allElements[allElements.length - sortedElements.length]
-          // ) {
-          //   return;
-          // }
-          // zIndex = allElements[allElements.length - 1].zIndex;
-          if (sortedElements[0].zIndex >= this._zIndexes.max) {
-            return;
-          }
-
-          zIndex = this._zIndexes.max;
-        } else {
-          // if (
-          //   sortedElements[sortedElements.length - 1] ===
-          //   allElements[sortedElements.length - 1]
-          // ) {
-          //   return;
-          // }
-          // zIndex = allElements[0].zIndex - sortedElements.length - 1;
           if (
-            sortedElements[sortedElements.length - 1].zIndex <=
-            this._zIndexes.min
+            elements[0] === allElements[allElements.length - elements.length]
           ) {
             return;
           }
-          zIndex = this._zIndexes.min - sortedElements.length - 1;
+          zIndex = allElements[allElements.length - 1].zIndex;
+        } else {
+          if (
+            elements[elements.length - 1] === allElements[elements.length - 1]
+          ) {
+            return;
+          }
+          zIndex = allElements[0].zIndex - elements.length - 1;
         }
 
-        frames = sortedElements;
+        frames = elements;
         break;
       }
       case 'forward':
       case 'backward': {
-        const bounds = generateBoundsWithFrames(sortedElements);
+        const bounds = generateBoundsWithFrames(elements);
 
         // TODO: opt filter
-        // const elements = allElements.filter(frame => {
-        //   if (sortedElements.includes(frame)) return true;
-        //   const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
-        //   return intersects(bounds, { x, y, w, h });
-        // });
-        const elements = (this.model.children as FrameBlockModel[])
-          .filter(frame => {
-            if (sortedElements.includes(frame)) return true;
-            const [x, y, w, h] = extendsWithPadding(
-              deserializeXYWH(frame.xywh)
-            );
-            return intersects(bounds, { x, y, w, h });
-          })
-          .sort((a, b) => a.zIndex - b.zIndex);
+        const temp = allElements.filter(frame => {
+          if (elements.includes(frame)) return true;
+          const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
+          return intersects(bounds, { x, y, w, h });
+        });
 
-        if (elements.length <= sortedElements.length) return;
+        if (temp.length <= elements.length) return;
 
         if (type === 'forward') {
-          if (
-            sortedElements[0] ===
-            elements[elements.length - sortedElements.length]
-          ) {
+          if (elements[0] === temp[temp.length - elements.length]) {
             return;
           }
         } else {
-          if (
-            sortedElements[sortedElements.length - 1] ===
-            elements[sortedElements.length - 1]
-          ) {
+          if (elements[elements.length - 1] === temp[elements.length - 1]) {
             return;
           }
         }
 
-        zIndex = elements[0].zIndex - 1;
-        const indexes = getIndexes(sortedElements, elements);
+        zIndex = temp[0].zIndex - 1;
+        const indexes = getIndexes(elements, temp);
         const ranges = generateRanges(indexes);
 
         if (type === 'forward') {
-          bringForward(ranges, elements);
+          bringForward(ranges, temp);
         } else {
-          sendBackward(ranges, elements);
+          sendBackward(ranges, temp);
         }
 
-        frames = elements;
+        frames = temp;
         break;
       }
     }

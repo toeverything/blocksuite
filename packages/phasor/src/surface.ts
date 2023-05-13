@@ -2,6 +2,7 @@ import {
   bringForward,
   generateRanges,
   getIndexes,
+  type ReorderingAction,
   type ReorderingRange,
   sendBackward,
 } from '@blocksuite/blocks/std';
@@ -329,6 +330,24 @@ export class SurfaceManager {
     });
 
     return picked;
+  }
+
+  reorder({ elements, type }: ReorderingAction<SurfaceElement>) {
+    const ids = elements.map(elem => elem.id);
+    switch (type) {
+      case 'front':
+        this.bringToFront(ids);
+        break;
+      case 'forward':
+        this.bringForward(ids);
+        break;
+      case 'backward':
+        this.sendBackward(ids);
+        break;
+      case 'back':
+        this.sendToBack(ids);
+        break;
+    }
   }
 
   bringToFront(elementIds: string[]) {
