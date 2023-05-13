@@ -34,6 +34,7 @@ import {
   almostEqual,
   asyncFocusRichText,
   bringForward,
+  generateBounds,
   generateRanges,
   getIndexes,
   getRectByBlockElement,
@@ -69,10 +70,9 @@ import {
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
   DEFAULT_FRAME_WIDTH,
-  extendsWithPadding,
-  generateBoundsWithFrames,
   getBackgroundGrid,
   getCursorMode,
+  xywhArrayToObject,
 } from './utils.js';
 
 export interface EdgelessSelectionSlots {
@@ -426,13 +426,12 @@ export class EdgelessPageBlockComponent
       }
       case 'forward':
       case 'backward': {
-        const bounds = generateBoundsWithFrames(elements);
+        const bounds = generateBounds(elements, xywhArrayToObject);
 
         // TODO: opt filter
-        const temp = allElements.filter(frame => {
-          if (elements.includes(frame)) return true;
-          const [x, y, w, h] = extendsWithPadding(deserializeXYWH(frame.xywh));
-          return intersects(bounds, { x, y, w, h });
+        const temp = allElements.filter(element => {
+          if (elements.includes(element)) return true;
+          return intersects(bounds, xywhArrayToObject(element));
         });
 
         if (temp.length <= elements.length) return;

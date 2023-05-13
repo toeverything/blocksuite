@@ -13,6 +13,13 @@ export interface ReorderingRange {
 }
 
 /**
+ * Gets indexes of a from b.
+ */
+export function getIndexes<T>(a: T[], b: T[]): number[] {
+  return a.map(e => b.findIndex(element => element === e));
+}
+
+/**
  * Generates the ranges via indexes;
  */
 export function generateRanges(indexes: number[]): ReorderingRange[] {
@@ -35,10 +42,54 @@ export function generateRanges(indexes: number[]): ReorderingRange[] {
 }
 
 /**
- * Gets indexes of a from b.
+ * Generates bounds with selected elements.
  */
-export function getIndexes<T>(a: T[], b: T[]): number[] {
-  return a.map(e => b.findIndex(element => element === e));
+export function generateBounds<T>(
+  elements: T[],
+  getXYWH: (e: T) => {
+    x: number;
+    y: number;
+    h: number;
+    w: number;
+  }
+): {
+  x: number;
+  y: number;
+  h: number;
+  w: number;
+} {
+  const bounds = {
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+  };
+
+  const len = elements.length;
+
+  if (len) {
+    let maxX;
+    let maxY;
+    let i = 0;
+    const { x, y, w, h } = getXYWH(elements[i]);
+
+    bounds.x = x;
+    bounds.y = y;
+    bounds.w = w;
+    bounds.h = h;
+
+    for (i++; i < len; i++) {
+      const { x, y, w, h } = getXYWH(elements[i]);
+      bounds.x = Math.min(bounds.x, x);
+      bounds.y = Math.min(bounds.y, y);
+      maxX = Math.max(bounds.x + bounds.w, x + w);
+      maxY = Math.max(bounds.y + bounds.h, y + h);
+      bounds.w = maxX - bounds.x;
+      bounds.h = maxY - bounds.y;
+    }
+  }
+
+  return bounds;
 }
 
 /**

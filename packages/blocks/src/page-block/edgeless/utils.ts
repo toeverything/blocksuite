@@ -499,3 +499,13 @@ export function addText(
     }
   });
 }
+
+export function xywhArrayToObject(element: TopLevelBlockModel) {
+  const [x, y, w, h] = deserializeXYWH(element.xywh);
+  return {
+    x,
+    y,
+    w,
+    h,
+  };
+}

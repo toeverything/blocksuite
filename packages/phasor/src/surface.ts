@@ -1,5 +1,6 @@
 import {
   bringForward,
+  generateBounds,
   generateRanges,
   getIndexes,
   type ReorderingAction,
@@ -25,7 +26,7 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/surface-element.js';
-import { compare, generateBounds } from './grid.js';
+import { compare } from './grid.js';
 import { ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
@@ -214,7 +215,12 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bounds = generateBounds(sortedElements);
+    const bounds = generateBounds(sortedElements, ({ x, y, w, h }) => ({
+      x,
+      y,
+      w,
+      h,
+    }));
     const elements = this.pickByBound(bounds).sort(compare);
     const { start, end } = getBoundsIndexes(elements);
     const indexes = getIndexes(sortedElements, elements);

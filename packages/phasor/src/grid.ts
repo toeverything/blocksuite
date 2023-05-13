@@ -22,44 +22,6 @@ export function compare(a: SurfaceElement, b: SurfaceElement): number {
   return a.id > b.id ? 1 : -1;
 }
 
-/**
- * Generates bounds with selected elements.
- */
-export function generateBounds(elements: SurfaceElement[]): IBound {
-  const bounds = {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-  };
-
-  const len = elements.length;
-
-  if (len) {
-    let maxX;
-    let maxY;
-    let i = 0;
-    const { x, y, w, h } = elements[i];
-
-    bounds.x = x;
-    bounds.y = y;
-    bounds.w = w;
-    bounds.h = h;
-
-    for (i++; i < len; i++) {
-      const { x, y, w, h } = elements[i];
-      bounds.x = Math.min(bounds.x, x);
-      bounds.y = Math.min(bounds.y, y);
-      maxX = Math.max(bounds.x + bounds.w, x + w);
-      maxY = Math.max(bounds.y + bounds.h, y + h);
-      bounds.w = maxX - bounds.x;
-      bounds.h = maxY - bounds.y;
-    }
-  }
-
-  return bounds;
-}
-
 export class GridManager {
   private _grids: Map<string, Set<SurfaceElement>> = new Map();
   private _elementToGrids: Map<SurfaceElement, Set<Set<SurfaceElement>>> =
