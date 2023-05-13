@@ -118,7 +118,7 @@ export class VirgoInput {
 
         const originalText = this.vEditor.yText.toString();
         const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data
+          ctx.data ?? ''
         }${originalText.substring(vRange.index)}`;
 
         let flag = true;
