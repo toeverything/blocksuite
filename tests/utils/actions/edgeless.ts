@@ -577,7 +577,7 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initTreeShapes(page: Page) {
+export async function initThreeShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
@@ -597,7 +597,7 @@ export async function initTreeShapes(page: Page) {
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
 }
 
-export async function initTreeTextFrames(page: Page) {
+export async function initThreeTextFrames(page: Page) {
   await addTextFrame(page, 'abc', 30 + 100, 40 + 100);
   await addTextFrame(page, 'efg', 30 + 130, 40 + 100);
   await addTextFrame(page, 'hij', 30 + 160, 40 + 100);

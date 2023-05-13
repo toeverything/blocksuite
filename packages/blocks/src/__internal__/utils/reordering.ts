@@ -42,7 +42,7 @@ export function getIndexes<T>(a: T[], b: T[]): number[] {
 }
 
 /**
- * Reorders the elements, moving multiple ranges of child elements to then end.
+ * Reorders the elements, moving multiple ranges of child elements to the end.
  */
 export function bringToFront<T>(ranges: ReorderingRange[], elements: T[]) {
   let n = 0;
@@ -85,7 +85,7 @@ export function sendBackward<T>(ranges: ReorderingRange[], elements: T[]) {
 }
 
 /**
- * Reorders the elements, moving multiple ranges of child elements to then start.
+ * Reorders the elements, moving multiple ranges of child elements to the start.
  */
 export function sendToBack<T>(ranges: ReorderingRange[], elements: T[]) {
   let i = 0;
