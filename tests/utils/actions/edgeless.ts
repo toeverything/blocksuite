@@ -339,6 +339,9 @@ function locatorComponentToolbarMoreButton(page: Page) {
 }
 type Action =
   | 'bringToFront'
+  | 'bringForward'
+  | 'sendBackward'
+  | 'sendToBack'
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
@@ -360,6 +363,30 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'bringForward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring forward',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'sendBackward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send backward',
         });
       await actionButton.click();
       break;
@@ -536,4 +563,24 @@ export async function changeConnectorStrokeStyle(
 ) {
   const button = locatorConnectorStrokeStyleButton(page, mode);
   await button.click();
+}
+
+export async function initTreeShapes(page: Page) {
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 130, y: 130 },
+    end: { x: 230, y: 230 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  const rect2 = {
+    start: { x: 160, y: 160 },
+    end: { x: 260, y: 260 },
+  };
+  await addBasicRectShapeElement(page, rect2.start, rect2.end);
 }
