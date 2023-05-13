@@ -2,6 +2,10 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
+import {
+  checkboxChecked,
+  checkboxUnchecked,
+} from '../../../../list-block/utils/icons.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 @customElement('affine-database-checkbox-cell')
@@ -35,12 +39,9 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
   protected override render() {
     const checked = this.cell?.value ?? false;
 
+    const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html`<div class="affine-database-checkbox-container">
-      <input
-        class="affine-database-checkbox checkbox"
-        type="checkbox"
-        .checked=${checked}
-      />
+      <div class="affine-database-checkbox checkbox">${icon}</div>
     </div>`;
   }
 }
