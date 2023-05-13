@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { expect, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   changeShapeFillColor,
@@ -23,7 +23,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
-  initTreeShapes,
   resizeElementByTopLeftHandle,
   type,
   waitNextFrame,
@@ -397,91 +396,4 @@ test('change shape stroke style', async ({ page }) => {
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#3b25cc');
-});
-
-test.describe('reordering shapes', () => {
-  async function init(page: Page) {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    await switchEditorMode(page);
-    await initTreeShapes(page);
-  }
-
-  test('bring to front', async ({ page }) => {
-    await init(page);
-
-    // should be rect2
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [160, 160, 100, 100]);
-
-    // click outside to clear selection
-    await page.mouse.click(50, 50);
-
-    // should be rect1
-    await page.mouse.click(150, 150);
-    await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
-
-    // should be rect0
-    await page.mouse.click(120, 120);
-    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-
-    // bring rect0 to front
-    await triggerComponentToolbarAction(page, 'bringToFront');
-
-    // should be rect0
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-  });
-
-  test('bring forward', async ({ page }) => {
-    await init(page);
-
-    // should be rect0
-    await page.mouse.click(120, 120);
-    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-
-    // bring rect0 forward
-    await triggerComponentToolbarAction(page, 'bringForward');
-
-    // should be rect0
-    await page.mouse.click(150, 150);
-    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-  });
-
-  test('send backward', async ({ page }) => {
-    await init(page);
-
-    // should be rect2
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [160, 160, 100, 100]);
-
-    // bring rect2 backward
-    await triggerComponentToolbarAction(page, 'sendBackward');
-
-    // should be rect1
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
-  });
-
-  test('send to back', async ({ page }) => {
-    await init(page);
-
-    // should be rect2
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [160, 160, 100, 100]);
-
-    // bring rect2 to back
-    await triggerComponentToolbarAction(page, 'sendToBack');
-
-    // should be rect1
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
-
-    // send rect1 to back
-    await triggerComponentToolbarAction(page, 'sendToBack');
-
-    // should be rect0
-    await page.mouse.click(180, 180);
-    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-  });
 });

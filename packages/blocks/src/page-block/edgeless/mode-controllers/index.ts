@@ -48,10 +48,11 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   protected get _blocks(): TopLevelBlockModel[] {
+    // TODO: opt sort
     return (
-      (this._page.root?.children as TopLevelBlockModel[]).filter(
-        child => child.flavour === 'affine:frame'
-      ) ?? []
+      (this._page.root?.children as TopLevelBlockModel[])
+        .filter(child => child.flavour === 'affine:frame')
+        .sort((a, b) => a.zIndex - b.zIndex) ?? []
     );
   }
 

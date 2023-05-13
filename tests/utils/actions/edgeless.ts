@@ -7,8 +7,8 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHORT_KEY } from './keyboard.js';
-import { getEditorLocator } from './misc.js';
+import { SHORT_KEY, type } from './keyboard.js';
+import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -189,6 +189,19 @@ export async function addBasicConnectorElement(
   await setMouseMode(page, 'default');
 }
 
+export async function addTextFrame(
+  page: Page,
+  text: string,
+  x: number,
+  y: number
+) {
+  await setMouseMode(page, 'text');
+  await page.mouse.click(x, y);
+  await waitForVirgoStateUpdated(page);
+  await type(page, text);
+  await setMouseMode(page, 'default');
+}
+
 export async function resizeElementByTopLeftHandle(
   page: Page,
   delta: { x: number; y: number },
@@ -341,7 +354,6 @@ type Action =
   | 'bringToFront'
   | 'bringForward'
   | 'sendBackward'
-  | 'sendToBack'
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
@@ -583,4 +595,10 @@ export async function initTreeShapes(page: Page) {
     end: { x: 260, y: 260 },
   };
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
+}
+
+export async function initTreeTextFrames(page: Page) {
+  await addTextFrame(page, 'abc', 30 + 100, 40 + 100);
+  await addTextFrame(page, 'efg', 30 + 130, 40 + 100);
+  await addTextFrame(page, 'hij', 30 + 160, 40 + 100);
 }
