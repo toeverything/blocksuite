@@ -58,6 +58,7 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
+import { DatabaseTableViewSelectionManager } from './database/table-view-selection-manager.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
@@ -78,6 +79,7 @@ export class DefaultSelectionManager {
   readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
+  private readonly _databaseTableViewManager: DatabaseTableViewSelectionManager;
 
   constructor({
     page,
@@ -95,6 +97,10 @@ export class DefaultSelectionManager {
     this.container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
+    this._databaseTableViewManager = new DatabaseTableViewSelectionManager(
+      this.state,
+      slots
+    );
     this._disposables.add(
       initMouseEventHandlers(
         mouseRoot,
@@ -137,7 +143,7 @@ export class DefaultSelectionManager {
     }
     if (isDatabase(e)) {
       this.state.type = 'database';
-      // todo: add manager
+      this._databaseTableViewManager.onStart(this, e);
       return;
     }
 
@@ -171,8 +177,13 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onMove(this, e);
       return;
     }
+
     if (this.state.type === 'embed') {
       return this._embedResizeManager.onMove(e);
+    }
+
+    if (this.state.type === 'database') {
+      return this._databaseTableViewManager.onMove(this, e);
     }
   };
 
@@ -189,6 +200,8 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
+    } else if (this.state.type === 'database') {
+      this._databaseTableViewManager.onEnd(this, e);
     }
     if (this.page.readonly) return;
 

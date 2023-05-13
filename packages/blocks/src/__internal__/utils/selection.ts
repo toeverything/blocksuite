@@ -841,9 +841,10 @@ export function isDatabase(e: SelectionEvent) {
     return false;
   }
   if (
-    target.className.startsWith('affine-database') ||
-    // prevent select column from triggering block selection
-    target.tagName.startsWith('AFFINE-DATABASE')
+    // target.className.startsWith('affine-database') ||
+    // // prevent select column from triggering block selection
+    // target.tagName.startsWith('AFFINE-DATABASE')
+    target.closest('affine-database-table')
   ) {
     return true;
   }

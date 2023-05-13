@@ -28,6 +28,13 @@ export interface EditingState {
   rect: DOMRect;
 }
 
+export type DatabaseTableStateStage = 'start' | 'move' | 'end';
+export type DatabaseTableState = {
+  stage: DatabaseTableStateStage;
+  databaseId?: string;
+  rowIds?: number[];
+};
+
 /** Common context interface definition for block models. */
 
 /**

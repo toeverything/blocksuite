@@ -14,6 +14,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockHost,
+  DatabaseTableState,
   EditingState,
   SelectionPosition,
 } from '../../__internal__/index.js';
@@ -44,6 +45,7 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
+  databaseTableUpdated: Slot<DatabaseTableState | null>;
 }
 
 @customElement('affine-default-page')
@@ -170,6 +172,7 @@ export class DefaultPageBlockComponent
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
+    databaseTableUpdated: new Slot<DatabaseTableState | null>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -446,6 +449,29 @@ export class DefaultPageBlockComponent
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
+    });
+    slots.databaseTableUpdated.on(state => {
+      if (!state) return;
+      const { stage, rowIds, databaseId } = state;
+      if (stage === 'move') {
+        const database = document.querySelector(
+          `affine-database[data-block-id="${databaseId}"]`
+        );
+        assertExists(database);
+
+        const allRows = database.querySelectorAll<HTMLElement>('.database-row');
+        allRows.forEach(row => {
+          row.classList.remove('selected');
+        });
+
+        rowIds?.forEach(rowId => {
+          const row = database.querySelector(
+            `.database-row[data-row-id="${rowId}"]`
+          );
+          assertExists(row);
+          row.classList.add('selected');
+        });
+      }
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());
