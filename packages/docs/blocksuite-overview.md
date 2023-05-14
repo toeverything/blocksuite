@@ -1,4 +1,4 @@
-# Introduction
+# BlockSuite Overview
 
 BlockSuite (_pronounced "block sweet"_ 🍬) is a comprehensive project that aims to provide a progressive solution for building collaborative applications. It includes a block-based framework for composing rich content editors, as well as an out-of-the-box block editor tailored for the [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base. The core concept behind BlockSuite is [block-based editing](#block-based-editing), where text editing and state management are all handled on a block-by-block basis. This is facilitated by [using CRDT](#crdt-driven-state-management) technology for distributed collaboration. Additionally, BlockSuite supports [framework agnostic rendering](#framework-agnostic-rendering) to ensure scalability and flexibility.
 
@@ -32,7 +32,7 @@ Also, thanks to the capability of CRDT to serialize any local state updates into
 - Incremental distribution of update data over the network, with updates being distributable via [pluggable providers](./data-persistence) over different network protocol layers.
 - Serialization of the entire application state into standardized data formats, allowing for reading and writing with compatible [Rust implementations](https://github.com/y-crdt/y-crdt) outside the browser.
 
-The CRDT-based state management capabilities in BlockSuite are a prerequisite for building local-first applications, which leads to significant improvements in developer experience and user experience. To support the AFFiNE project, the accompanying [OctoBase](https://github.com/toeverything/OctoBase) project has been developed together with BlockSuite, providing underlying pluggable persistence and data synchronization support.
+The CRDT-based state management capabilities in BlockSuite are a prerequisite for building [local-first](https://www.inkandswitch.com/local-first/) applications, which leads to significant improvements in developer experience and user experience. To support the AFFiNE project, the accompanying [OctoBase](https://github.com/toeverything/OctoBase) project has been developed together with BlockSuite, providing underlying pluggable persistence and data synchronization support.
 
 By leveraging CRDT-driven state management, BlockSuite offers a powerful solution for handling complex structural content updates.
 
