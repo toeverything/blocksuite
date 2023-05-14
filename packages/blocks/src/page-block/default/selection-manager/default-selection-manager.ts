@@ -355,6 +355,10 @@ export class DefaultSelectionManager {
       target instanceof HTMLInputElement
     )
       return;
+
+    this.slots.databaseTableUpdated.emit({
+      stage: 'clear',
+    });
     handleNativeRangeClick(this.page, e, this.container);
   };
 

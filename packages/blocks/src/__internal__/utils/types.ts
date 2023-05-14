@@ -28,7 +28,12 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableStateStage = 'start' | 'move' | 'end';
+export type DatabaseTableStateStage =
+  | 'start'
+  | 'move'
+  | 'end'
+  | 'click'
+  | 'clear';
 export type DatabaseTableState = {
   stage: DatabaseTableStateStage;
   databaseId?: string;

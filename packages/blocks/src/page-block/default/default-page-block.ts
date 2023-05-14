@@ -453,7 +453,7 @@ export class DefaultPageBlockComponent
     slots.databaseTableUpdated.on(state => {
       if (!state) return;
       const { stage, rowIds, databaseId } = state;
-      if (stage === 'move') {
+      if (stage === 'move' || stage === 'click') {
         const database = document.querySelector(
           `affine-database[data-block-id="${databaseId}"]`
         );
@@ -470,6 +470,15 @@ export class DefaultPageBlockComponent
           );
           assertExists(row);
           row.classList.add('selected');
+        });
+      } else if (stage === 'clear') {
+        const databases = document.querySelectorAll('affine-database');
+        databases.forEach(database => {
+          const allRows =
+            database.querySelectorAll<HTMLElement>('.database-row');
+          allRows.forEach(row => {
+            row.classList.remove('selected');
+          });
         });
       }
     });

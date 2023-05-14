@@ -539,6 +539,24 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null) {
+      if (modelState) {
+        const { element } = modelState;
+        const databaseRowId = element
+          .closest('.database-row')
+          ?.getAttribute('data-row-id');
+        if (databaseRowId) {
+          const databaseId = element
+            .closest('affine-database')
+            ?.getAttribute('data-block-id');
+          assertExists(databaseId);
+          pageBlock.selection.slots.databaseTableUpdated.emit({
+            stage: 'click',
+            databaseId,
+            rowIds: [Number(databaseRowId)],
+          });
+          return;
+        }
+      }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
     getSelectedBlocks() {
