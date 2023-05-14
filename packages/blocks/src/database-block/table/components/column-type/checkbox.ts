@@ -41,7 +41,9 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
 
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html`<div class="affine-database-checkbox-container">
-      <div class="affine-database-checkbox checkbox">${icon}</div>
+      <div class="affine-database-checkbox checkbox ${checked && 'checked'}">
+        ${icon}
+      </div>
     </div>`;
   }
 }
