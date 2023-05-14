@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /introduction
+      link: /blocksuite-overview
     - theme: alt
       text: Visit Playground
       link: https://blocksuite-toeverything.vercel.app/?init
