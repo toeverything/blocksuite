@@ -116,8 +116,8 @@ test('add brush element with different size', async ({ page }) => {
 
   await assertEdgelessColorSameWithHexColor(page, color, topEdge);
   await assertEdgelessColorSameWithHexColor(page, color, bottomEdge);
-  assertSameColor(nearTopEdge, '#000000');
-  assertSameColor(nearBottomEdge, '#000000');
+  assertSameColor(nearTopEdge, '#4f90ff');
+  assertSameColor(nearBottomEdge, '#4f90ff');
 });
 
 test('change brush element size by component-toolbar', async ({ page }) => {
