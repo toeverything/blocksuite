@@ -43,7 +43,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const { color, lineWidth } = this.mouseMode;
-    const points = [[modelX, modelY]];
+    const points =
+      e.raw instanceof PointerEvent
+        ? [[modelX, modelY, e.raw.pressure]]
+        : [[modelX, modelY]];
 
     const id = this._surface.addElement('brush', {
       points,
