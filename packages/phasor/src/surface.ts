@@ -193,7 +193,6 @@ export class SurfaceManager {
   }
 
   /**
-   * Brings to front or sends to back.
    * Brings forward or sends backward layer by layer.
    */
   private _reorder(

@@ -68,25 +68,25 @@ export function generateBounds<T>(
   const len = elements.length;
 
   if (len) {
-    let maxX;
-    let maxY;
     let i = 0;
     const { x, y, w, h } = getXYWH(elements[i]);
-
-    bounds.x = x;
-    bounds.y = y;
-    bounds.w = w;
-    bounds.h = h;
+    let minX = x;
+    let minY = y;
+    let maxX = x + w;
+    let maxY = y + h;
 
     for (i++; i < len; i++) {
       const { x, y, w, h } = getXYWH(elements[i]);
-      bounds.x = Math.min(bounds.x, x);
-      bounds.y = Math.min(bounds.y, y);
-      maxX = Math.max(bounds.x + bounds.w, x + w);
-      maxY = Math.max(bounds.y + bounds.h, y + h);
-      bounds.w = maxX - bounds.x;
-      bounds.h = maxY - bounds.y;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
     }
+
+    bounds.x = minX;
+    bounds.y = minY;
+    bounds.w = maxX - minX;
+    bounds.h = maxY - minY;
   }
 
   return bounds;
