@@ -19,7 +19,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     }
     .select-option-text {
       display: inline-block;
-      min-width: 2px;
+      min-width: 22px;
       height: 100%;
       max-width: 100%;
       padding: 2px 10px;
