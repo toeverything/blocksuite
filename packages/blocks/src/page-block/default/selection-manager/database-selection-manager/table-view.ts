@@ -26,7 +26,7 @@ export class DatabaseTableViewSelectionManager {
     this.slots = slots;
   }
 
-  onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     if (!isBlankArea(e)) {
       selection.state.resetStartRange(e);
       selection.state.type = 'database';
@@ -49,7 +49,7 @@ export class DatabaseTableViewSelectionManager {
     }
   }
 
-  onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragMove(selection: DefaultSelectionManager, e: SelectionEvent) {
     const { clientX: x, clientY: y } = e.raw;
 
     const el = document.elementFromPoint(x, y);
@@ -96,7 +96,7 @@ export class DatabaseTableViewSelectionManager {
     selection.state.type = 'database';
   }
 
-  onEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
     selection.slots.databaseTableUpdated.emit({
       stage: 'end',
     });

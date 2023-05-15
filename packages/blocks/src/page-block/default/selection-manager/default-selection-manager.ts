@@ -143,7 +143,7 @@ export class DefaultSelectionManager {
     }
     if (isDatabase(e)) {
       this.state.type = 'database';
-      this._databaseTableViewManager.onStart(this, e);
+      this._databaseTableViewManager.onDragStart(this, e);
       return;
     }
 
@@ -183,7 +183,7 @@ export class DefaultSelectionManager {
     }
 
     if (this.state.type === 'database') {
-      return this._databaseTableViewManager.onMove(this, e);
+      return this._databaseTableViewManager.onDragMove(this, e);
     }
   };
 
@@ -201,7 +201,7 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
     } else if (this.state.type === 'database') {
-      this._databaseTableViewManager.onEnd(this, e);
+      this._databaseTableViewManager.onDragEnd(this, e);
     }
     if (this.page.readonly) return;
 
