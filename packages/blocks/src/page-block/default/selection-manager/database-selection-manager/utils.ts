@@ -8,6 +8,7 @@ export function getSelectedRowIds(
 ): number[] {
   const currentRowId = getClosestRowId(startCell);
   const startRowId = getClosestRowId(endCell);
+  if (currentRowId === -1 || startRowId === -1) return [];
 
   const minId = Math.min(currentRowId, startRowId);
   const maxId = Math.max(currentRowId, startRowId);
@@ -67,6 +68,9 @@ function clearDatabaseRowsSelection(database: HTMLElement) {
 
 function getClosestRowId(element: Element): number {
   const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
-  assertExists(rowId);
-  return Number(rowId);
+  if (rowId) {
+    return Number(rowId);
+  }
+  // Header row has no id.
+  return -1;
 }
