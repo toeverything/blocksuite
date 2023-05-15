@@ -34,7 +34,6 @@ import {
   almostEqual,
   asyncFocusRichText,
   bringForward,
-  generateBounds,
   generateRanges,
   getIndexes,
   getRectByBlockElement,
@@ -384,8 +383,6 @@ export class EdgelessPageBlockComponent
   }
 
   // Just update `zIndex`, we don't change the order of the frames in the children.
-  //
-  // TODO: do not re-render
   private _reorderingFrames = ({
     elements,
     type,
@@ -426,7 +423,8 @@ export class EdgelessPageBlockComponent
       }
       case 'forward':
       case 'backward': {
-        const bounds = generateBounds(elements, xywhArrayToObject);
+        // const bounds = generateBounds(elements, xywhArrayToObject);
+        const bounds = this.surface.viewport.viewportBounds;
 
         // TODO: opt filter
         const temp = allElements.filter(element => {
