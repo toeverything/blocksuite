@@ -1,20 +1,20 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import {
-  type Bound,
-  ConnectorElement,
-  type Controller,
-  type PhasorElement,
-  type SurfaceManager,
-  type SurfaceViewport,
+import type {
+  Bound,
+  Controller,
+  PhasorElement,
+  SurfaceManager,
+  SurfaceViewport,
 } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
+import { ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
   intersects,
   isPointIn as isPointInFromPhasor,
+  normalizeWheelDeltaY,
   serializeXYWH,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -122,13 +122,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
         e.clientY - rect.y
       );
 
-      let delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-      // The delta step when using the mouse wheel is greater than 100, resulting in overly fast zooming
-      // Chromium reports deltaX/deltaY scaled by host device scale factor.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
-      if (Math.abs(delta) > 100) {
-        delta = 10 * Math.sign(delta);
-      }
+      const delta = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
       viewport.applyDeltaZoom(delta);
       const newZoom = viewport.zoom;
 

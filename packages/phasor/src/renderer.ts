@@ -1,7 +1,8 @@
+import { clamp } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
 import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { MIN_ZOOM } from './consts.js';
+import { MAX_ZOOM, MIN_ZOOM } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
@@ -111,9 +112,8 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
+  applyDeltaZoom(zoom: number) {
+    const newZoom = clamp(zoom, MIN_ZOOM, MAX_ZOOM);
     this.setZoom(newZoom);
   }
 
