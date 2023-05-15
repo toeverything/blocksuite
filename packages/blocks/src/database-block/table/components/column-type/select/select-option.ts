@@ -19,7 +19,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     }
     .select-option-text {
       display: inline-block;
-      min-width: 2px;
+      min-width: 22px;
       height: 100%;
       max-width: 100%;
       padding: 2px 10px;
@@ -97,7 +97,9 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     this._container.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        this.saveSelectionName(this.index);
+        if (this._vInput.value.length > 0) {
+          this.saveSelectionName(this.index);
+        }
       }
       if (event.key === 'Escape') {
         event.preventDefault();

@@ -50,7 +50,7 @@ function addBrushElements(surface: SurfaceManager) {
     color: '#00ff00',
     lineWidth: 4,
   });
-  surface.updateElement(brushId, {
+  surface.updateElement<'brush'>(brushId, {
     points: [
       [0, 0],
       [10, 10],

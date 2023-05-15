@@ -145,15 +145,6 @@ const styles = css`
     width: calc(100% - 28px);
     overflow: hidden;
   }
-  .select-option-text {
-    display: none;
-    display: inline-block;
-    height: 100%;
-    padding: 2px 10px;
-    background: var(--affine-tag-white);
-    border-radius: 4px;
-    outline: none;
-  }
   .select-option-icon {
     display: none;
     justify-content: center;

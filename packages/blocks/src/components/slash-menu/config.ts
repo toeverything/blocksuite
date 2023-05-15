@@ -178,7 +178,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
               return false;
             }
-            if (!insideDatabase(model)) {
+            if (insideDatabase(model)) {
               return false;
             }
             return true;
