@@ -125,7 +125,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  const cell = getFirstColumnCell(page, 'rich-text-container');
+  const cell = getFirstColumnCell(page, 'affine-database-rich-text');
   await cell.click();
   await pressArrowLeft(page);
   await pressEnter(page);
@@ -443,8 +443,8 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'rich-text');
 
     // For now, rich-text will only be initialized on click
-    // Therefore, for the time being, here is to detect whether there is '.rich-text-container'
-    const cell = getFirstColumnCell(page, 'rich-text-container');
+    // Therefore, for the time being, here is to detect whether there is '.affine-database-rich-text'
+    const cell = getFirstColumnCell(page, 'affine-database-rich-text');
     expect(await cell.count()).toBe(1);
 
     await initDatabaseDynamicRowWithData(page, '123');
