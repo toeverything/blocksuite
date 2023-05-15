@@ -125,6 +125,13 @@ export function handleBlockSplit(
 ) {
   if (!(model.text instanceof Text)) return;
 
+  // On press enter, it may convert symbols from yjs ContentString
+  // to yjs ContentFormat. Once it happens, the converted symbol will
+  // be deleted and not counted as model.text.yText.length.
+  // Example: "`a`[enter]" -> yText[<ContentFormat: Code>, "a", <ContentFormat: Code>]
+  // In this case, we should not split the block.
+  if (model.text.yText.length < splitIndex + splitLength) return;
+
   const parent = page.getParent(model);
   if (!parent) return;
 
