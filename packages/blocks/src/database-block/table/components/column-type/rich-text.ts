@@ -75,7 +75,8 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
     .affine-database-rich-text {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
       width: 100%;
       height: 100%;
       outline: none;
