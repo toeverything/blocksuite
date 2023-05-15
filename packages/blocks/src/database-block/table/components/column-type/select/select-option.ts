@@ -96,7 +96,9 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     this._container.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        this.saveSelectionName(this.index);
+        if (this._vInput.value.length > 0) {
+          this.saveSelectionName(this.index);
+        }
       }
       if (event.key === 'Escape') {
         event.preventDefault();
