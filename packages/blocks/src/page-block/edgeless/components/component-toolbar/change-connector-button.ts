@@ -193,7 +193,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
             };
           });
 
-          this.surface.updateElement(element.id, {
+          this.surface.updateElement<'connector'>(element.id, {
             controllers,
             mode,
           });
@@ -211,7 +211,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
             []
           );
 
-          this.surface.updateElement(element.id, {
+          this.surface.updateElement<'connector'>(element.id, {
             controllers: route,
             mode,
           });
@@ -225,7 +225,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement(element.id, { color });
+        this.surface.updateElement<'connector'>(element.id, { color });
       }
     });
   }
@@ -233,7 +233,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeWidth(lineWidth: number) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElement(ele.id, {
+        this.surface.updateElement<'connector'>(ele.id, {
           lineWidth,
         });
       });
@@ -244,7 +244,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElement(ele.id, {
+        this.surface.updateElement<'connector'>(ele.id, {
           strokeStyle,
         });
       });

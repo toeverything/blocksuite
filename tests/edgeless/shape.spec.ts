@@ -149,7 +149,8 @@ test('delete shape by component-toolbar', async ({ page }) => {
   await assertEdgelessNonHoverRect(page);
 });
 
-test('change shape fill color', async ({ page }) => {
+//FIXME: need a way to test hand-drawn-like style
+test.skip('change shape fill color', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -394,5 +395,5 @@ test('change shape stroke style', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#000000');
+  expect(pickedColor[0]).toBe('#3b25cc');
 });

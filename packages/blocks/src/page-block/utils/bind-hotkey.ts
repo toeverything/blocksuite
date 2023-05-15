@@ -32,7 +32,10 @@ import {
   Point,
 } from '../../__internal__/utils/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import { handleSelectAll } from '../utils/index.js';
+import {
+  handleKeydownAfterSelectBlocks,
+  handleSelectAll,
+} from '../utils/index.js';
 import { actionConfig } from './const.js';
 import {
   deleteModelsByRange,
@@ -102,7 +105,17 @@ export function bindCommonHotkey(page: Page) {
   hotkey.addListener(HOTKEYS.ANY_KEY, e => {
     if (!isPrintableKeyEvent(e) || page.readonly) return;
     const blockRange = getCurrentBlockRange(page);
-    if (!blockRange || blockRange.type === 'Block') return;
+    if (!blockRange) {
+      return;
+    }
+    if (blockRange.type === 'Block') {
+      handleKeydownAfterSelectBlocks({
+        page,
+        keyboardEvent: e,
+        selectedBlocks: blockRange.models,
+      });
+      return;
+    }
 
     const range = blockRangeToNativeRange(blockRange);
     if (!range || !isMultiBlockRange(range)) return;

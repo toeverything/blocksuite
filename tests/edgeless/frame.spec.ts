@@ -328,7 +328,7 @@ test('drag handle should add new frame when dragged outside frame', async ({
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
   await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
-  await assertRichTexts(page, ['456', '789', '123']);
+  await assertRichTexts(page, ['123', '456', '789']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);

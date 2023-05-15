@@ -35,8 +35,6 @@ export type PhasorElementType = {
   connector: ConnectorElement;
 };
 
-export type IPhasorElement = IShape | IConnector | IDebug | IBrush;
-
 export type IPhasorElementType = {
   shape: IShape;
   debug: IDebug;
@@ -51,9 +49,21 @@ export const ElementCtors = {
   connector: ConnectorElement,
 } as const;
 
-export const ElementDefaultProps = {
+export const ElementDefaultProps: Record<
+  keyof IPhasorElementType,
+  ElementDefaultProps<keyof IPhasorElementType>
+> = {
   debug: DebugElementDefaultProps,
   brush: BrushElementDefaultProps,
   shape: ShapeElementDefaultProps,
   connector: ConnectorElementDefaultProps,
 } as const;
+
+export type ElementCreateProps<T extends keyof IPhasorElementType> = Partial<
+  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
+>;
+
+export type ElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
+  IPhasorElementType[T],
+  'id' | 'index' | 'seed'
+>;

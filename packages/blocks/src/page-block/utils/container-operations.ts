@@ -15,6 +15,7 @@ import {
   asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
+  focusBlockByModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getDefaultPage,
@@ -503,7 +504,41 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
 
   resetNativeSelection(null);
 }
+export function handleKeydownAfterSelectBlocks({
+  page,
+  keyboardEvent,
+  selectedBlocks,
+}: {
+  page: Page;
+  keyboardEvent: KeyboardEvent;
+  selectedBlocks: BaseBlockModel[];
+}) {
+  const { key } = keyboardEvent;
 
+  const parent = page.getParent(selectedBlocks[0]);
+  const index = parent?.children.indexOf(selectedBlocks[0]);
+  selectedBlocks.forEach(block => {
+    page.deleteBlock(block);
+  });
+  // TODO:
+  //  1. should add block which has same flavour as the parent?
+  //  2. If use Chinese input method, the input method state cannot be retained
+  const id = page.addBlock(
+    'affine:paragraph',
+    {
+      text: new page.Text(key),
+    },
+    parent,
+    index
+  );
+  // Wait block inserted to dom
+  requestAnimationFrame(() => {
+    const defaultPage = getDefaultPage(page);
+    const newBlock = page.getBlockById(id) as BaseBlockModel;
+    defaultPage?.selection.clear();
+    focusBlockByModel(newBlock, 'end');
+  });
+}
 export async function onModelTextUpdated(
   model: BaseBlockModel,
   callback: (text: RichText) => void

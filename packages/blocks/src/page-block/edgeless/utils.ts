@@ -439,7 +439,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateElement(id, {
+        surface.updateElement<'connector'>(id, {
           controllers: routes,
         });
       }
@@ -479,10 +479,9 @@ export function addText(
   event: SelectionEvent,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(
-    new Point(event.x, event.y),
-    width
-  );
+  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
+    width,
+  });
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 

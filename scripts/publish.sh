@@ -11,6 +11,7 @@ packages=(
   "store"
   "virgo"
   "connector"
+  "lit"
 )
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
