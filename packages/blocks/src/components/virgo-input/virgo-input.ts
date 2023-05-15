@@ -1,8 +1,13 @@
-import { VEditor } from '@blocksuite/virgo';
+import { VEditor, type VRange } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { isDecimal } from './utils.js';
+
+interface StackItem {
+  meta: Map<'v-range', VRange | null>;
+  type: 'undo' | 'redo';
+}
 
 export class VirgoInput {
   static YTEXT_NAME = 'YTEXT_NAME';
@@ -59,7 +64,25 @@ export class VirgoInput {
       this.yText.insert(0, text);
     }
 
-    this.undoManager = new Y.UndoManager(this.yText);
+    this.undoManager = new Y.UndoManager(this.yText, {
+      trackedOrigins: new Set([this.yDoc.clientID]),
+    });
+    this.undoManager.on(
+      'stack-item-added',
+      (event: { stackItem: StackItem }) => {
+        const vRange = this.vEditor.getVRange();
+        event.stackItem.meta.set('v-range', vRange);
+      }
+    );
+    this.undoManager.on(
+      'stack-item-popped',
+      (event: { stackItem: StackItem }) => {
+        const vRange = event.stackItem.meta.get('v-range');
+        if (vRange) {
+          this.vEditor.setVRange(vRange);
+        }
+      }
+    );
 
     this.vEditor = new VEditor(this.yText, {
       active: () =>
@@ -112,11 +135,14 @@ export class VirgoInput {
         if (!vRange) {
           return ctx;
         }
-        if (vRange.length > 0) {
-          this.vEditor.yText.delete(vRange.index, vRange.length);
-        }
 
-        const originalText = this.vEditor.yText.toString();
+        let originalText = this.vEditor.yText.toString();
+        if (vRange.length > 0) {
+          originalText = `${originalText.substring(
+            0,
+            vRange.index
+          )}${originalText.substring(vRange.index + vRange.length)}`;
+        }
         const tmpText = `${originalText.substring(0, vRange.index)}${
           ctx.data ?? ''
         }${originalText.substring(vRange.index)}`;
@@ -136,7 +162,6 @@ export class VirgoInput {
         if (flag) {
           this.undoManager.stopCapturing();
         }
-
         return ctx;
       },
       virgoCompositionEnd: ctx => {
@@ -144,11 +169,14 @@ export class VirgoInput {
         if (!vRange) {
           return ctx;
         }
-        if (vRange.length > 0) {
-          this.vEditor.yText.delete(vRange.index, vRange.length);
-        }
 
-        const originalText = this.vEditor.yText.toString();
+        let originalText = this.vEditor.yText.toString();
+        if (vRange.length > 0) {
+          originalText = `${originalText.substring(
+            0,
+            vRange.index
+          )}${originalText.substring(vRange.index + vRange.length)}`;
+        }
         const tmpText = `${originalText.substring(0, vRange.index)}${
           ctx.data
         }${originalText.substring(vRange.index)}`;

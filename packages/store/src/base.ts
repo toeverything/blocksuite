@@ -173,6 +173,13 @@ export class BaseBlockModel<
     return this.children[this.children.length - 1].lastChild();
   }
 
+  lastItem(): BaseBlockModel | null {
+    if (!this.children.length) {
+      return this;
+    }
+    return this.children[this.children.length - 1];
+  }
+
   dispose() {
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
