@@ -7,7 +7,11 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import {
+  asyncFocusRichText,
+  getModelByBlockElement,
+  type SerializedBlock,
+} from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 
@@ -107,6 +111,28 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
           value,
         });
       });
+    });
+  }
+
+  private get _databaseModel() {
+    const databases = document.querySelectorAll('affine-database');
+    const databaseModel = getModelByBlockElement(
+      databases[0]
+    ) as DatabaseBlockModel;
+    return databaseModel;
+  }
+
+  clearTableViewSelection() {
+    this._databaseModel.slots.tableViewSelectionUpdated.emit({
+      stage: 'clear',
+    });
+  }
+
+  setTableViewSelection(databaseId: string, rowIds: number[]) {
+    this._databaseModel.slots.tableViewSelectionUpdated.emit({
+      stage: 'click',
+      databaseId,
+      rowIds,
     });
   }
 }

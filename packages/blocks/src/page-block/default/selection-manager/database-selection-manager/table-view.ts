@@ -1,11 +1,11 @@
 import {
+  getModelByBlockElement,
   handleNativeRangeDragMove,
   isBlankArea,
   type SelectionEvent,
 } from '../../../../__internal__/index.js';
-import type { DefaultSelectionSlots } from '../../../../index.js';
+import type { DatabaseBlockModel } from '../../../../index.js';
 import type { DefaultSelectionManager } from '../default-selection-manager.js';
-import type { PageSelectionState } from '../selection-state.js';
 import {
   getClosestDatabase,
   getClosestDatabaseId,
@@ -13,27 +13,16 @@ import {
 } from './utils.js';
 
 export class DatabaseTableViewSelectionManager {
-  readonly state: PageSelectionState;
-  readonly slots: DefaultSelectionSlots;
-
+  private _databaseModel: DatabaseBlockModel | null = null;
   private _startCell: HTMLElement | null = null;
   private _columnWidthHandles: HTMLElement[] = [];
   private _startRange: Range | null = null;
   private _rowIds: number[] = [];
 
-  constructor(state: PageSelectionState, slots: DefaultSelectionSlots) {
-    this.state = state;
-    this.slots = slots;
-  }
-
   onDragStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     if (!isBlankArea(e)) {
       selection.state.resetStartRange(e);
       selection.state.type = 'database';
-
-      selection.slots.databaseTableUpdated.emit({
-        stage: 'start',
-      });
 
       const { clientX: x, clientY: y } = e.raw;
       const el = document.elementFromPoint(x, y);
@@ -46,6 +35,13 @@ export class DatabaseTableViewSelectionManager {
         )
       );
       this._setColumnWidthHandleDisplay('none');
+
+      this._databaseModel = getModelByBlockElement(
+        database
+      ) as DatabaseBlockModel;
+      this._databaseModel.slots.tableViewSelectionUpdated.emit({
+        stage: 'start',
+      });
     }
   }
 
@@ -87,7 +83,8 @@ export class DatabaseTableViewSelectionManager {
 
       const rowIds = getSelectedRowIds(startCell, endCell);
       this._rowIds = rowIds;
-      selection.slots.databaseTableUpdated.emit({
+
+      this._databaseModel?.slots.tableViewSelectionUpdated.emit({
         stage: 'move',
         rowIds,
         databaseId,
@@ -97,7 +94,7 @@ export class DatabaseTableViewSelectionManager {
   }
 
   onDragEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
-    selection.slots.databaseTableUpdated.emit({
+    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
       stage: 'end',
     });
     this._setColumnWidthHandleDisplay('block');
@@ -114,7 +111,7 @@ export class DatabaseTableViewSelectionManager {
     databaseId: string
   ) {
     this._rowIds = [];
-    selection.slots.databaseTableUpdated.emit({
+    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
       stage: 'move',
       rowIds: [],
       databaseId,

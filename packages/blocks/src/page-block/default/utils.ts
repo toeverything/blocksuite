@@ -7,11 +7,11 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockComponentElement,
-  EditingState,
-  Point,
-  SerializedBlock,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type Point,
+  type SerializedBlock,
 } from '../../__internal__/index.js';
 import {
   getBlockElementById,
@@ -21,6 +21,7 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -548,11 +549,9 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
         const rowId = getClosestRowId(element);
         if (rowId !== -1) {
           const databaseId = getClosestDatabaseId(element);
-          pageBlock.selection.slots.databaseTableUpdated.emit({
-            stage: 'click',
-            databaseId,
-            rowIds: [rowId],
-          });
+
+          const databaseService = getService('affine:database');
+          databaseService.setTableViewSelection(databaseId, [rowId]);
           return;
         }
       }

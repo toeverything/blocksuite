@@ -41,6 +41,7 @@ import {
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
+import { getService } from '../../../__internal__/service.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -97,10 +98,7 @@ export class DefaultSelectionManager {
     this.container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
-    this._databaseTableViewManager = new DatabaseTableViewSelectionManager(
-      this.state,
-      slots
-    );
+    this._databaseTableViewManager = new DatabaseTableViewSelectionManager();
     this._disposables.add(
       initMouseEventHandlers(
         mouseRoot,
@@ -356,9 +354,9 @@ export class DefaultSelectionManager {
     )
       return;
 
-    this.slots.databaseTableUpdated.emit({
-      stage: 'clear',
-    });
+    const databaseService = getService('affine:database');
+    databaseService.clearTableViewSelection();
+
     handleNativeRangeClick(this.page, e, this.container);
   };
 

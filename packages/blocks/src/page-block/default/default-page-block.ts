@@ -14,7 +14,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockHost,
-  DatabaseTableState,
   EditingState,
   SelectionPosition,
 } from '../../__internal__/index.js';
@@ -37,11 +36,6 @@ import {
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
 } from './components.js';
-import {
-  clearAllDatabaseRowsSelection,
-  getDatabaseById,
-  setDatabaseRowsSelection,
-} from './selection-manager/database-selection-manager/utils.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
@@ -50,7 +44,6 @@ export interface DefaultSelectionSlots {
   selectedRectsUpdated: Slot<DOMRect[]>;
   embedRectsUpdated: Slot<DOMRect[]>;
   embedEditingStateUpdated: Slot<EditingState | null>;
-  databaseTableUpdated: Slot<DatabaseTableState | null>;
 }
 
 @customElement('affine-default-page')
@@ -177,7 +170,6 @@ export class DefaultPageBlockComponent
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
-    databaseTableUpdated: new Slot<DatabaseTableState | null>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -454,18 +446,6 @@ export class DefaultPageBlockComponent
     });
     slots.embedEditingStateUpdated.on(embedEditingState => {
       this._embedEditingState = embedEditingState;
-    });
-    slots.databaseTableUpdated.on(state => {
-      if (!state) return;
-      const { stage, rowIds, databaseId } = state;
-
-      if (stage === 'move' || stage === 'click') {
-        if (!databaseId || !rowIds) return;
-        const database = getDatabaseById(databaseId);
-        setDatabaseRowsSelection(database, rowIds);
-      } else if (stage === 'clear') {
-        clearAllDatabaseRowsSelection();
-      }
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());
