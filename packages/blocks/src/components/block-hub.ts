@@ -492,6 +492,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
+  private readonly _onClicked: (data: {
+    flavour: string;
+    type?: string;
+  }) => Promise<void>;
+
   private readonly _onDropCallback: (
     e: DragEvent,
     point: Point,
@@ -522,6 +527,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       scale: number;
     };
     onDragStarted: () => void;
+    onClicked: (data: { flavour: string; type?: string }) => Promise<void>;
     onDropCallback: (
       e: DragEvent,
       point: Point,
@@ -536,6 +542,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringFrameState = options.getHoveringFrameState;
     this._onDropCallback = options.onDropCallback;
+    this._onClicked = options.onClicked;
   }
 
   override connectedCallback() {
@@ -569,6 +576,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
+      disposables.addFromEvent(card, 'click', e => this._onClickBlock(e, card));
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.addFromEvent(
@@ -594,12 +602,16 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       'mouseover',
       this._onBlockHubEntryMouseOver
     );
-    disposables.addFromEvent(document, 'click', this._onClick);
+    disposables.addFromEvent(document, 'click', this._onClickDocument);
     disposables.addFromEvent(
       this._blockHubButton,
       'click',
       this._onBlockHubButtonClick
     );
+    disposables.addFromEvent(this._blockHubButton, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
     disposables.addFromEvent(
       this._blockHubIconsContainer,
       'transitionstart',
@@ -639,11 +651,26 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClick = (e: MouseEvent) => {
+  private _onClickDocument = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._hideCardList();
     }
+  };
+
+  private _onClickBlock = (e: MouseEvent, blockHubElement: HTMLElement) => {
+    const affineType = blockHubElement.getAttribute('affine-type');
+    assertExists(affineType);
+    const data: {
+      flavour: string;
+      type?: string;
+    } = {
+      flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
+    };
+    if (affineType) {
+      data.type = affineType;
+    }
+    this._onClicked(data);
   };
 
   public toggleMenu(open: boolean) {

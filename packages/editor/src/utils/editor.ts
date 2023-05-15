@@ -10,6 +10,7 @@ import {
 import {
   type BlockComponentElement,
   getClosestFrameBlockElementById,
+  getCurrentBlockRange,
   getHoveringFrame,
   type Point,
   Rect,
@@ -30,6 +31,38 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
+    onClicked: async (data: { flavour: string; type?: string }) => {
+      const models = [];
+
+      const isDatabase = data.flavour === 'affine:database';
+      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
+        console.warn('database block is not enabled');
+        return;
+      }
+      if (data.flavour === 'affine:embed' && data.type === 'image') {
+        models.push(...(await uploadImageFromLocal(page)));
+      } else {
+        models.push(data);
+      }
+      const last = page.root?.lastItem();
+      const range = getCurrentBlockRange(page);
+      if (range) {
+        const arr = page.addSiblingBlocks(range.models[0], models, 'after');
+        const lastId = arr[arr.length - 1];
+        asyncFocusRichText(page, lastId);
+      } else if (last) {
+        // add to end
+        let lastId = page.root?.lastItem()?.id;
+        models.forEach(model => {
+          lastId = page.addBlock(
+            model.flavour ?? 'affine:paragraph',
+            model,
+            page.root?.lastItem()
+          );
+        });
+        lastId && asyncFocusRichText(page, lastId);
+      }
+    },
     onDropCallback: async (e, point, end, type) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
