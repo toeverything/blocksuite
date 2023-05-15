@@ -149,7 +149,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       mode
     );
 
-    this._surface.updateElement(id, {
+    this._surface.updateElement<'connector'>(id, {
       controllers: routes,
       endElement:
         end && endPosition ? { id: end.id, position: endPosition } : undefined,

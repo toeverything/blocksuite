@@ -4,7 +4,7 @@ import { literal } from 'lit/static-html.js';
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
   metadata: {
-    version: 1,
+    version: 2,
     role: 'root',
     tag: literal`affine-surface`,
     parent: ['affine:page'],

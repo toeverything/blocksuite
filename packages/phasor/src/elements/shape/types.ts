@@ -12,6 +12,7 @@ export interface IShape {
   index: string;
   type: string;
   xywh: SerializedXYWH;
+  seed: number;
 
   shapeType: ShapeType;
   radius: number;

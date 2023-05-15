@@ -10,6 +10,7 @@ export interface ISurfaceElement {
   index: string;
   type: string;
   xywh: SerializedXYWH;
+  seed: number;
 }
 
 export interface HitTestOptions {
@@ -77,6 +78,11 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   get h() {
     const [, , , h] = deserializeXYWH(this.xywh);
     return h;
+  }
+
+  get seed() {
+    const seed = this.yMap.get('seed') as T['seed'];
+    return seed;
   }
 
   applyUpdate(updates: Partial<T>) {

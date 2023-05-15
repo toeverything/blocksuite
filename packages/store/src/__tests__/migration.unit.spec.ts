@@ -102,4 +102,52 @@ describe('migration', () => {
     assert.instanceOf(newTitle, Y.Text);
     assert.equal(oldTitle, newTitle.toString());
   });
+
+  test('migrate to new surface (v1 -> v2)', async () => {
+    const doc = await loadBinary('legacy-surface-seed');
+
+    const oldElement = (
+      (doc.getMap('space:page0').get('529852219:1') as Y.Map<unknown>).get(
+        'elements'
+      ) as Y.Map<Y.Map<unknown>>
+    ).get('2NglrfVtaF');
+
+    assert.deepEqual(oldElement?.toJSON(), {
+      type: 'shape',
+      xywh: '[615.59375,-11.80078125,226.73046875,340.609375]',
+      shapeType: 'rect',
+      radius: 0,
+      filled: false,
+      fillColor: '--affine-palette-transparent',
+      strokeWidth: 4,
+      strokeColor: '--affine-palette-line-black',
+      strokeStyle: 'solid',
+      id: '2NglrfVtaF',
+      index: 'a3',
+    });
+
+    tryMigrate(doc);
+    assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
+      'affine:paragraph': 1,
+      'affine:database': 1,
+      'affine:page': 2,
+      'affine:list': 1,
+      'affine:frame': 1,
+      'affine:divider': 1,
+      'affine:embed': 1,
+      'affine:code': 1,
+      'affine:surface': 2,
+    });
+
+    const newElement = (
+      (doc.getMap('space:page0').get('529852219:1') as Y.Map<unknown>).get(
+        'elements'
+      ) as Y.Map<Y.Map<unknown>>
+    ).get('2NglrfVtaF');
+
+    assert.deepEqual(newElement?.toJSON(), {
+      ...oldElement?.toJSON(),
+      seed: newElement?.get('seed'),
+    });
+  });
 });

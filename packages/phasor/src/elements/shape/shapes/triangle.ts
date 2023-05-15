@@ -15,6 +15,7 @@ export const TriangleMethods: ShapeMethods = {
     const {
       w,
       h,
+      seed,
       strokeWidth,
       filled,
       realFillColor,
@@ -35,6 +36,7 @@ export const TriangleMethods: ShapeMethods = {
         [0, renderHeight],
       ],
       {
+        seed,
         roughness: 2,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,

@@ -15,6 +15,7 @@ export const RectMethods: ShapeMethods = {
     const {
       w,
       h,
+      seed,
       strokeWidth,
       filled,
       realFillColor,
@@ -29,6 +30,7 @@ export const RectMethods: ShapeMethods = {
     ctx.translate(renderOffset, renderOffset);
 
     rc.rectangle(0, 0, renderWidth, renderHeight, {
+      seed,
       roughness: 2,
       strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
       stroke: realStrokeColor,

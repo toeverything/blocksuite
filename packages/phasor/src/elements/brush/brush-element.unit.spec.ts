@@ -10,6 +10,7 @@ const data: IBrush = {
   index: 'a1',
   type: 'brush',
   xywh: '[0,0,104,104]',
+  seed: 0,
 
   points: Array(100)
     .fill(0)
