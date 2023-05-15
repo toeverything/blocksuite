@@ -187,7 +187,8 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       // shortKey+enter
       insertLineAfter: {
         key: 'Enter',
-        shortKey: true,
+        metaKey: true,
+        ctrlKey: true,
         handler(range, context) {
           assertExists(virgo);
           return hardEnter(block, range, virgo, context.event, true);

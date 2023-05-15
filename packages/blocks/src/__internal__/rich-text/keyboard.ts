@@ -1,4 +1,4 @@
-import { ALLOW_DEFAULT, IS_IOS, IS_MAC } from '@blocksuite/global/config';
+import { ALLOW_DEFAULT } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
@@ -23,16 +23,19 @@ export interface BindingContext {
   event: KeyboardEvent;
 }
 
-export type KeyboardBinding = {
+type KeyboardDetector =
+  | { key?: number | string | string[]; match?: KeyboardMatcher } & (
+      | { key: number | string | string[] }
+      | { match: KeyboardMatcher }
+    );
+export type KeyboardBinding = KeyboardDetector & {
   /**
    * See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
    */
-  key: number | string | string[];
   collapsed?: boolean;
   handler: KeyboardBindingHandler;
   prefix?: RegExp;
   suffix?: RegExp;
-  shortKey?: boolean | null;
   shiftKey?: boolean | null;
   altKey?: boolean | null;
   metaKey?: boolean | null;
@@ -44,7 +47,11 @@ type KeyboardBindingHandler = (
   range: VRange,
   context: BindingContext
 ) => boolean;
-
+type KeyboardMatcher = (
+  this: KeyboardEventThis,
+  range: VRange,
+  context: BindingContext
+) => boolean;
 export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
@@ -63,7 +70,7 @@ export function createKeyboardBindings(
   const service = getService(model.flavour);
   const blockKeyBinding = service.defineKeymap(model, vEditor);
 
-  const keyboardBindings: KeyboardBindings = {
+  return {
     ...blockKeyBinding,
 
     linkedPage: {
@@ -87,12 +94,27 @@ export function createKeyboardBindings(
         this.vEditor.slots.rangeUpdated.once(() => {
           if (event.key === '[' || event.key === '【') {
             // Convert to `@`
-            this.vEditor.deleteText({ index: range.index - 1, length: 2 });
-            this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');
-            this.vEditor.setVRange({ index: range.index, length: 0 });
+            this.vEditor.deleteText({
+              index: range.index - 1,
+              length: 2,
+            });
+            this.vEditor.insertText(
+              {
+                index: range.index - 1,
+                length: 0,
+              },
+              '@'
+            );
+            this.vEditor.setVRange({
+              index: range.index,
+              length: 0,
+            });
             this.vEditor.slots.rangeUpdated.once(() => {
               const curRange = getCurrentNativeRange();
-              showLinkedPagePopover({ model, range: curRange });
+              showLinkedPagePopover({
+                model,
+                range: curRange,
+              });
             });
             return;
           }
@@ -136,64 +158,18 @@ export function createKeyboardBindings(
     },
     ...createBracketAutoCompleteBindings(model),
   };
-
-  return keyboardBindings;
 }
 
-const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
+// const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
 export function createKeyDownHandler(
   vEditor: AffineVEditor,
   bindings: KeyboardBindings
 ): (evt: KeyboardEvent) => void {
-  const bindingStore: Record<string, KeyboardBinding[]> = {};
-  function normalize(binding: KeyboardBinding): KeyboardBinding {
-    if (binding.shortKey) {
-      binding[SHORT_KEY_PROPERTY] = binding.shortKey;
-      delete binding.shortKey;
-    }
-    return binding;
-  }
-
-  function match(evt: KeyboardEvent, binding: KeyboardBinding) {
-    if (
-      (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(key => {
-        return !!binding[key] !== evt[key] && binding[key] !== null;
-      })
-    ) {
-      return false;
-    }
-    return binding.key === evt.key || binding.key === evt.which;
-  }
-
-  function addBinding(keyBinding: KeyboardBinding) {
-    const binding = normalize(keyBinding);
-    const keys = Array.isArray(binding.key) ? binding.key : [binding.key];
-    keys.forEach(key => {
-      const singleBinding = {
-        ...binding,
-        key,
-      };
-      bindingStore[key] = bindingStore[key] ?? [];
-      bindingStore[key].push(singleBinding);
-    });
-  }
-
-  Object.values(bindings).forEach(binding => {
-    addBinding(binding);
-  });
-
   function keyDownHandler(evt: KeyboardEvent) {
     if (evt.defaultPrevented || evt.isComposing) return;
-    const keyBindings = (bindingStore[evt.key] || []).concat(
-      bindingStore[evt.which] || []
-    );
-    const matches = keyBindings.filter(binding => match(evt, binding));
-    if (matches.length === 0) return;
-
     const vRange = vEditor.getVRange();
     if (!vRange) return;
-
     // edgeless mode
     if (!hasNativeSelection()) return;
     // if it is multi block selection, we should not handle the keydown event
@@ -228,6 +204,40 @@ export function createKeyDownHandler(
       suffix: suffixText,
       event: evt,
     };
+
+    const matches = Object.entries(bindings)
+      .filter(([, binding]) => {
+        const { key, match } = binding;
+
+        if (
+          (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(key => {
+            return !!binding[key] && binding[key] === evt[key];
+          })
+        ) {
+          return false;
+        }
+
+        return (
+          key === evt.key ||
+          match?.call(
+            {
+              vEditor,
+              options: {
+                bindings,
+              },
+            },
+            vRange,
+            curContext
+          )
+        );
+      })
+      .reduce((store: KeyboardBinding[], [, binding]) => {
+        store.push(binding);
+        return store;
+      }, []);
+
+    if (matches.length === 0) return;
+
     const prevented = matches.some(binding => {
       if (
         binding.collapsed != null &&
