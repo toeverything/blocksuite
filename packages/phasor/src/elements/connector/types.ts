@@ -28,10 +28,10 @@ export interface Controller {
 
 export interface IConnector {
   id: string;
-  index: string;
   type: string;
   xywh: SerializedXYWH;
   seed: number;
+  zIndex: string;
 
   mode: ConnectorMode;
   lineWidth: number;

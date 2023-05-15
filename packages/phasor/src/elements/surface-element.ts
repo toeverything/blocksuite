@@ -7,10 +7,10 @@ import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 
 export interface ISurfaceElement {
   id: string;
-  index: string;
   type: string;
   xywh: SerializedXYWH;
   seed: number;
+  zIndex: string;
 }
 
 export interface HitTestOptions {
@@ -45,8 +45,8 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return id;
   }
 
-  get index() {
-    const index = this.yMap.get('index') as T['index'];
+  get zIndex() {
+    const index = this.yMap.get('zIndex') as T['zIndex'];
     return index;
   }
 

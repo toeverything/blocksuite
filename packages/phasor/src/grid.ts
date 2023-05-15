@@ -17,8 +17,8 @@ function rangeFromBound(a: IBound): number[] {
 }
 
 export function compare(a: SurfaceElement, b: SurfaceElement): number {
-  if (a.index > b.index) return 1;
-  else if (a.index < b.index) return -1;
+  if (a.zIndex > b.zIndex) return 1;
+  else if (a.zIndex < b.zIndex) return -1;
   return a.id > b.id ? 1 : -1;
 }
 

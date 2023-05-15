@@ -7,10 +7,10 @@ import type { IBrush } from './types.js';
 
 const data: IBrush = {
   id: '1',
-  index: 'a1',
   type: 'brush',
   xywh: '[0,0,104,104]',
   seed: 0,
+  zIndex: 'a1',
 
   points: Array(100)
     .fill(0)

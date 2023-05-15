@@ -1,6 +1,5 @@
 import {
   bringForward,
-  generateBounds,
   generateRanges,
   getIndexes,
   type ReorderingAction,
@@ -39,8 +38,7 @@ export class SurfaceManager {
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
-  private _minIndex = 'a0';
-  private _maxIndex = 'a0';
+  private _zIndexes = { min: 'a0', max: 'a0' };
 
   private _transformPropertyValue: TransformPropertyValue;
 
@@ -92,10 +90,10 @@ export class SurfaceManager {
 
       this._elements.set(element.id, element);
 
-      if (element.index > this._maxIndex) {
-        this._maxIndex = element.index;
-      } else if (element.index < this._minIndex) {
-        this._minIndex = element.index;
+      if (element.zIndex > this._zIndexes.max) {
+        this._zIndexes.max = element.zIndex;
+      } else if (element.zIndex < this._zIndexes.min) {
+        this._zIndexes.min = element.zIndex;
       }
 
       this._updateBindings(element);
@@ -124,8 +122,8 @@ export class SurfaceManager {
 
         this._elements.set(element.id, element);
 
-        if (element.index > this._maxIndex) {
-          this._maxIndex = element.index;
+        if (element.zIndex > this._zIndexes.max) {
+          this._zIndexes.max = element.zIndex;
         }
 
         this._updateBindings(element);
@@ -148,16 +146,16 @@ export class SurfaceManager {
   private _updateZIndexes(keys: string[], elements: SurfaceElement[]) {
     this._transact(() => {
       let e;
-      let newIndex;
+      let newZIndex;
       let i = 0;
       const len = elements.length;
       for (; i < len; i++) {
         e = elements[i];
-        newIndex = keys[i];
+        newZIndex = keys[i];
         const yElement = this._yContainer.get(e.id) as Y.Map<unknown>;
-        const oldIndex = yElement.get('index') as string;
-        if (oldIndex === newIndex) continue;
-        yElement.set('index', newIndex);
+        const oldZIndex = yElement.get('zIndex') as string;
+        if (oldZIndex === newZIndex) continue;
+        yElement.set('zIndex', newZIndex);
       }
     });
   }
@@ -214,13 +212,9 @@ export class SurfaceManager {
         .filter(e => !!e) as SurfaceElement[]
     ).sort(compare);
 
-    const bounds = generateBounds(sortedElements, ({ x, y, w, h }) => ({
-      x,
-      y,
-      w,
-      h,
-    }));
-    const elements = this.pickByBound(bounds).sort(compare);
+    const elements = this.pickByBound(this.viewport.viewportBounds).sort(
+      compare
+    );
     const { start, end } = getBoundsIndexes(elements);
     const indexes = getIndexes(sortedElements, elements);
 
@@ -228,7 +222,8 @@ export class SurfaceManager {
 
     order(ranges, elements);
 
-    const keys = generateNKeysBetween(start, end, elements.length);
+    const first = generateKeyBetween(null, start);
+    const keys = generateNKeysBetween(first, end, elements.length);
 
     setBoundsIndexes(keys);
 
@@ -260,7 +255,7 @@ export class SurfaceManager {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(this._maxIndex, null),
+      zIndex: generateKeyBetween(this._zIndexes.max, null),
       seed: randomSeed(),
     };
     for (const key in props) {
@@ -359,13 +354,13 @@ export class SurfaceManager {
     this._reorderTo(
       elementIds,
       () => ({
-        start: this._maxIndex,
+        start: this._zIndexes.max,
         end: null,
       }),
       keys => {
         const index = keys[keys.length - 1];
-        if (index > this._maxIndex) {
-          this._maxIndex = index;
+        if (index > this._zIndexes.max) {
+          this._zIndexes.max = index;
         }
       }
     );
@@ -375,14 +370,14 @@ export class SurfaceManager {
     this._reorder(
       elementIds,
       elements => ({
-        start: elements[0].index,
+        start: elements[0].zIndex,
         end: null,
       }),
       bringForward,
       keys => {
         const index = keys[keys.length - 1];
-        if (index > this._maxIndex) {
-          this._maxIndex = index;
+        if (index > this._zIndexes.max) {
+          this._zIndexes.max = index;
         }
       }
     );
@@ -393,13 +388,13 @@ export class SurfaceManager {
       elementIds,
       elements => ({
         start: null,
-        end: elements[elements.length - 1].index,
+        end: elements[elements.length - 1].zIndex,
       }),
       sendBackward,
       keys => {
         const index = keys[0];
-        if (index < this._minIndex) {
-          this._minIndex = index;
+        if (index < this._zIndexes.min) {
+          this._zIndexes.min = index;
         }
       }
     );
@@ -410,12 +405,12 @@ export class SurfaceManager {
       elementIds,
       () => ({
         start: null,
-        end: this._minIndex,
+        end: this._zIndexes.min,
       }),
       keys => {
         const index = keys[0];
-        if (index < this._minIndex) {
-          this._minIndex = index;
+        if (index < this._zIndexes.min) {
+          this._zIndexes.min = index;
         }
       }
     );
