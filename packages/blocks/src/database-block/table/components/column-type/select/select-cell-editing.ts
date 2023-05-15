@@ -145,7 +145,7 @@ const styles = css`
     width: calc(100% - 28px);
     overflow: hidden;
   }
-  .select-option-text {
+  /* .select-option-text {
     display: none;
     display: inline-block;
     height: 100%;
@@ -153,7 +153,7 @@ const styles = css`
     background: var(--affine-tag-white);
     border-radius: 4px;
     outline: none;
-  }
+  } */
   .select-option-icon {
     display: none;
     justify-content: center;
