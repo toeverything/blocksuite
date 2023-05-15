@@ -41,7 +41,7 @@ import {
   clearAllDatabaseRowsSelection,
   getDatabaseById,
   setDatabaseRowsSelection,
-} from './selection-manager/database/utils.js';
+} from './selection-manager/database-selection-manager/utils.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 

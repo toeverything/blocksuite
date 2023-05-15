@@ -58,7 +58,7 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { DatabaseTableViewSelectionManager } from './database/table-view-selection-manager.js';
+import { DatabaseTableViewSelectionManager } from './database-selection-manager/table-view-selection-manager.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
