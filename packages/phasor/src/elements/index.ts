@@ -60,10 +60,10 @@ export const ElementDefaultProps: Record<
 } as const;
 
 export type ElementCreateProps<T extends keyof IPhasorElementType> = Partial<
-  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
+  Omit<IPhasorElementType[T], 'id' | 'seed' | 'zIndex'>
 >;
 
 export type ElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
   IPhasorElementType[T],
-  'id' | 'index' | 'seed'
+  'id' | 'seed' | 'zIndex'
 >;
