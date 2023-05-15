@@ -72,12 +72,29 @@ class TextCell extends DatabaseCellElement<Y.Text> {
       height: 100%;
       cursor: text;
     }
+
+    .affine-database-rich-text {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+    .affine-database-rich-text v-line {
+      display: flex !important;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+    .affine-database-rich-text v-line > div {
+      flex-grow: 1;
+    }
   `;
 
   vEditor: AffineVEditor | null = null;
   static override tag = literal`affine-database-rich-text-cell`;
 
-  @query('.rich-text-container')
+  @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
   private get readonly() {
@@ -206,21 +223,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   };
 
   override render() {
-    return html`
-      <style>
-        .rich-text-container {
-          display: flex;
-          align-items: center;
-          width: 100%;
-          height: 100%;
-          outline: none;
-        }
-        .rich-text-container v-line {
-          width: 100%;
-        }
-      </style>
-      <div class="rich-text-container virgo-editor"></div>
-    `;
+    return html`<div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
 

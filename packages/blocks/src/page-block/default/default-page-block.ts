@@ -37,6 +37,11 @@ import {
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
 } from './components.js';
+import {
+  clearAllDatabaseRowsSelection,
+  getDatabaseById,
+  setDatabaseRowsSelection,
+} from './selection-manager/database/utils.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
@@ -453,33 +458,13 @@ export class DefaultPageBlockComponent
     slots.databaseTableUpdated.on(state => {
       if (!state) return;
       const { stage, rowIds, databaseId } = state;
+
       if (stage === 'move' || stage === 'click') {
-        const database = document.querySelector(
-          `affine-database[data-block-id="${databaseId}"]`
-        );
-        assertExists(database);
-
-        const allRows = database.querySelectorAll<HTMLElement>('.database-row');
-        allRows.forEach(row => {
-          row.classList.remove('selected');
-        });
-
-        rowIds?.forEach(rowId => {
-          const row = database.querySelector(
-            `.database-row[data-row-id="${rowId}"]`
-          );
-          assertExists(row);
-          row.classList.add('selected');
-        });
+        if (!databaseId || !rowIds) return;
+        const database = getDatabaseById(databaseId);
+        setDatabaseRowsSelection(database, rowIds);
       } else if (stage === 'clear') {
-        const databases = document.querySelectorAll('affine-database');
-        databases.forEach(database => {
-          const allRows =
-            database.querySelectorAll<HTMLElement>('.database-row');
-          allRows.forEach(row => {
-            row.classList.remove('selected');
-          });
-        });
+        clearAllDatabaseRowsSelection();
       }
     });
 
