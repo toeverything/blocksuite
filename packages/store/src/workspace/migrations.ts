@@ -161,6 +161,7 @@ const migrations: Migration[] = [
         for (const yBlock of yBlocks.values()) {
           if (yBlock.get('sys:flavour') === 'affine:surface') {
             const elements = yBlock.get('elements') as Y.Map<Y.Map<unknown>>;
+            if (!elements) break;
 
             for (const element of elements.values()) {
               if (!element.get('seed')) {
