@@ -602,7 +602,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       'mouseover',
       this._onBlockHubEntryMouseOver
     );
-    disposables.addFromEvent(document, 'click', this._onClickDocument);
+    disposables.addFromEvent(document, 'click', this._onClickOutside);
     disposables.addFromEvent(
       this._blockHubButton,
       'click',
@@ -652,7 +652,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClickDocument = (e: MouseEvent) => {
+  private _onClickOutside = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._hideCardList();
