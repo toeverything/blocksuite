@@ -66,7 +66,14 @@ export function DataBaseRowContainer(
       .affine-database-block-row-cell-content > .affine-block-element {
         width: 100%;
       }
+      .affine-database-block-row-cell-content > affine-paragraph {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
       .affine-database-block-row-cell-content > affine-paragraph > .text {
+        width: 100%;
         margin-top: unset;
       }
       .database-cell {
