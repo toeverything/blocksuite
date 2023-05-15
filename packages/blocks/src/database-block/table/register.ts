@@ -1,9 +1,10 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import { ShadowlessElement, WithDisposable } from '../../std.js';
+import { WithDisposable } from '../../std.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { Cell, Column, ColumnType, RowHost } from './types.js';
 

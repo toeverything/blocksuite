@@ -1,10 +1,10 @@
 import './cell-container.js';
 
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockElementWithService } from '../../../__internal__/service/components.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DatabaseTable } from '../table-view.js';
 import { SearchState } from '../types.js';
@@ -12,7 +12,8 @@ import { SearchState } from '../types.js';
 export function DataBaseRowContainer(
   databaseBlock: DatabaseTable,
   filteredRowIds: string[],
-  searchState: SearchState
+  searchState: SearchState,
+  root: BlockSuiteRoot
 ) {
   const databaseModel = databaseBlock.model;
   const columns = databaseModel.columns;
@@ -87,9 +88,7 @@ export function DataBaseRowContainer(
                 style=${style}
               >
                 <div class="affine-database-block-row-cell-content">
-                  ${BlockElementWithService(child, databaseBlock, () => {
-                    databaseBlock.requestUpdate();
-                  })}
+                  ${root.renderModel(child)}
                 </div>
               </div>
               ${repeat(columns, column => {

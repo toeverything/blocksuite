@@ -1,13 +1,13 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import type {
-  Bound,
+import {
+  type Bound,
   ConnectorElement,
-  Controller,
-  PhasorElement,
-  SurfaceManager,
-  SurfaceViewport,
+  type Controller,
+  type PhasorElement,
+  type SurfaceManager,
+  type SurfaceViewport,
 } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import {
@@ -402,7 +402,7 @@ export function handleElementChangedEffectForConnector(
   if (element.type !== 'connector') {
     const bindingElements = surface.getBindingElements(element.id);
     bindingElements.forEach(bindingElement => {
-      if (bindingElement.type === 'connector') {
+      if (bindingElement instanceof ConnectorElement) {
         // if all connector and binding element are selected, they will process in common method.
         // like:
         // mode-controllers/default-mode: _handleSurfaceDragMove
@@ -474,10 +474,9 @@ export function addText(
   event: SelectionEvent,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(
-    new Point(event.x, event.y),
-    width
-  );
+  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
+    width,
+  });
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 

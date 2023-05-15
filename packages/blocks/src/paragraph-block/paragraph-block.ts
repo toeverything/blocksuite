@@ -1,24 +1,26 @@
 import '../__internal__/rich-text/rich-text.js';
 
-import { BlockHubIcon20 } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BlockHubIcon20,
+} from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  isPageMode,
-  ShadowlessElement,
-} from '../__internal__/index.js';
+import { type BlockHost, isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { registerService } from '../__internal__/service.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+import paragraphService from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -176,6 +178,9 @@ export class ParagraphBlockComponent extends ShadowlessElement {
   @property()
   host!: BlockHost;
 
+  @property()
+  content!: TemplateResult;
+
   @state()
   private _tipsPlaceholderTemplate = html``;
   @state()
@@ -194,6 +199,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     super.connectedCallback();
     // Initial placeholder state
     this._updatePlaceholder();
+    registerService('affine:paragraph', paragraphService);
   }
 
   override firstUpdated() {
@@ -244,19 +250,31 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._placeholderDisposables = new DisposableGroup();
   };
 
+  private isInDatabase = () => {
+    let parent = this.parentElement;
+    while (parent && parent !== document.body) {
+      if (parent.tagName.toLowerCase() === 'affine-database') {
+        return true;
+      }
+      parent = parent.parentElement;
+    }
+    return false;
+  };
+
   override render() {
     const { type } = this.model;
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
 
     // hide placeholder in database
-    const tipsPlaceholderTemplate =
-      this.host.flavour === 'affine:database'
-        ? ''
-        : this._tipsPlaceholderTemplate;
+    const tipsPlaceholderTemplate = this.isInDatabase()
+      ? ''
+      : this._tipsPlaceholderTemplate;
+
+    const children = html`<div
+      class="affine-block-children-container"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+    >
+      ${this.content}
+    </div>`;
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
@@ -271,7 +289,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
             fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
           })}
         ></rich-text>
-        ${childrenContainer}
+        ${children}
       </div>
     `;
   }

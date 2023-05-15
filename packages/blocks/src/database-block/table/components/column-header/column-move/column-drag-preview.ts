@@ -1,7 +1,6 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-
-import { ShadowlessElement } from '../../../../../__internal__/index.js';
 
 @customElement('affine-database-column-drag-preview')
 export class ColumnDragPreview extends ShadowlessElement {
@@ -32,6 +31,7 @@ export class ColumnDragPreview extends ShadowlessElement {
           background: var(--affine-tertiary-color);
         }
         .preview-column-header .affine-database-column-move svg {
+          cursor: grabbing;
           opacity: 1;
         }
         .preview-column-header .affine-database-column-move circle {

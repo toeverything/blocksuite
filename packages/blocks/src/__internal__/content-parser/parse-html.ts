@@ -2,6 +2,8 @@ import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, Page } from '@blocksuite/store';
 
+import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
+import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
 
@@ -25,6 +27,7 @@ const INLINE_TAGS = [
   'SMALL',
   'ABBR',
   'CITE',
+  'BDI',
 ];
 
 export class HtmlParser {
@@ -434,10 +437,10 @@ export class HtmlParser {
     const isNormalMarkdown =
       firstChild.tagName === 'Code' && languageTag?.[0] === 'language';
     let content = '';
-    let language = 'Plain Text';
+    let language = FALLBACK_LANG;
     if (isNormalMarkdown) {
       content = element.firstChild?.textContent || '';
-      language = languageTag?.[1] || 'Plain Text';
+      language = getStandardLanguage(languageTag?.[1])?.id || FALLBACK_LANG;
     } else {
       content = element.textContent || '';
     }

@@ -6,8 +6,11 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import { getServiceOrRegister } from '../service.js';
-import { type BlockRange, type SerializedBlock } from '../utils/index.js';
-import { getVirgoByModel } from '../utils/query.js';
+import {
+  asyncGetVirgoByModel,
+  type BlockRange,
+  type SerializedBlock,
+} from '../utils/index.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
@@ -40,10 +43,22 @@ export async function json2block(
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
 
+    const shouldSplitBlock = focusedBlockModel.text?.length !== range.endOffset;
+
+    shouldSplitBlock &&
+      (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
         range?.startOffset || 0
+      );
+
+      await addSerializedBlocks(
+        page,
+        firstBlock.children || [],
+        focusedBlockModel,
+        0
       );
 
       await setRange(focusedBlockModel, {
@@ -51,12 +66,6 @@ export async function json2block(
         length: 0,
       });
     } else {
-      const shouldSplitBlock =
-        focusedBlockModel.text?.length !== range.endOffset;
-
-      shouldSplitBlock &&
-        (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
-
       const [id] = await addSerializedBlocks(
         page,
         pastedBlocks,
@@ -87,6 +96,12 @@ export async function json2block(
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
       range?.startOffset || 0
+    );
+    await addSerializedBlocks(
+      page,
+      firstBlock.children || [],
+      focusedBlockModel,
+      0
     );
   }
 
@@ -132,7 +147,7 @@ export async function json2block(
 }
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
-  const vEditor = getVirgoByModel(model);
+  const vEditor = await asyncGetVirgoByModel(model);
   assertExists(vEditor);
   vEditor.setVRange(vRange);
 }
@@ -173,7 +188,7 @@ export async function addSerializedBlocks(
       json.text && model?.text?.applyDelta(json.text);
     }
 
-    if (model && json.children) {
+    if (model && json.children.length) {
       await addSerializedBlocks(page, json.children, model, 0);
       pendingModels.push({ model, json });
     }

@@ -1,14 +1,15 @@
 import type { IBound, StrokeStyle } from '../../consts.js';
-import type { HitTestOptions } from '../base-element.js';
+import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { HitTestOptions } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
-export type SerializedShapeProps = {
+export interface IShape {
   id: string;
   index: string;
   type: string;
-  xywh: string;
+  xywh: SerializedXYWH;
 
   shapeType: ShapeType;
   radius: number;
@@ -17,16 +18,7 @@ export type SerializedShapeProps = {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
-};
-
-export type CreateShapeProps = Omit<
-  SerializedShapeProps,
-  'id' | 'index' | 'type'
->;
-
-type ShapeKeys = keyof Omit<SerializedShapeProps, 'id' | 'type' | 'xywh'>;
-
-export type ShapeProps = Partial<Pick<SerializedShapeProps, ShapeKeys>>;
+}
 
 export interface ShapeMethods {
   render: (ctx: CanvasRenderingContext2D, element: ShapeElement) => void;

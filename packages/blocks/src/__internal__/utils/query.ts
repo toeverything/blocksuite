@@ -379,6 +379,16 @@ export function getVirgoByModel(model: BaseBlockModel) {
   return richText.vEditor;
 }
 
+export async function asyncGetVirgoByModel(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:database'] as const)) {
+    // Not support database model since it's may be have multiple Virgo instances.
+    throw new Error('Cannot get virgo by database model!');
+  }
+  const richText = await asyncGetRichTextByModel(model);
+  if (!richText) return null;
+  return richText.vEditor;
+}
+
 // TODO fix find embed model
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   // filter comment
@@ -596,8 +606,10 @@ export function isBlock(element: Element) {
 /**
  * Returns `true` if element is image.
  */
-export function isImage({ tagName }: Element) {
-  return tagName === 'AFFINE-IMAGE';
+export function isImage({ tagName, firstElementChild }: Element) {
+  return (
+    tagName === 'AFFINE-EMBED' && firstElementChild?.tagName === 'AFFINE-IMAGE'
+  );
 }
 
 /**
@@ -678,6 +690,9 @@ export function getClosestBlockElementByPoint(
       }
       if (snapToEdge.y) {
         // TODO handle scale
+        if (scale !== 1) {
+          console.warn('scale is not supported yet');
+        }
         point.y = clamp(point.y, rect.top + 1, rect.bottom - 1);
       }
     }

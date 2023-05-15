@@ -334,7 +334,14 @@ export class DefaultSelectionManager {
       }
       return;
     }
-    if (isInsidePageTitle(target) || isDatabaseInput(target)) return;
+    if (
+      isInsidePageTitle(target) ||
+      isDatabaseInput(target) ||
+      // TODO It's a workaround, we need remove the ad-hoc code
+      // Fix https://github.com/toeverything/blocksuite/issues/2459
+      target instanceof HTMLInputElement
+    )
+      return;
     handleNativeRangeClick(this.page, e, this.container);
   };
 

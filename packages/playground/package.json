@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/connector": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/global": "workspace:*",

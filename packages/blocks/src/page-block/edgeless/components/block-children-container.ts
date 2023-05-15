@@ -5,11 +5,11 @@ import {
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockElement } from '../../../__internal__/service/components.js';
 import type {
   BlockHost,
   FrameBlockModel,
@@ -34,7 +34,8 @@ function EdgelessBlockChild(
   model: TopLevelBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
-  active: boolean
+  active: boolean,
+  renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   const { xywh, background } = model;
   const { zoom, viewportX, viewportY } = viewport;
@@ -60,7 +61,7 @@ function EdgelessBlockChild(
 
   return html`
     <div class="affine-edgeless-block-child" style=${styleMap(style)}>
-      ${BlockElement(model, host, true)} ${mask}
+      ${renderer(model)} ${mask}
     </div>
   `;
 }
@@ -69,14 +70,21 @@ export function EdgelessBlockChildrenContainer(
   model: BaseBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
-  active: boolean
+  active: boolean,
+  renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   return html`
     ${repeat(
       model.children,
       child => child.id,
       child =>
-        EdgelessBlockChild(child as FrameBlockModel, host, viewport, active)
+        EdgelessBlockChild(
+          child as FrameBlockModel,
+          host,
+          viewport,
+          active,
+          renderer
+        )
     )}
   `;
 }

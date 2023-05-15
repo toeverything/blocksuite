@@ -1,11 +1,5 @@
 import { getBoundFromPoints } from '../../utils/bound.js';
-import type { Controller, SerializedConnectorProps } from './types.js';
-
-export function validateConnectorProps(
-  props: Record<string, unknown>
-): props is SerializedConnectorProps {
-  return true;
-}
+import type { Controller } from './types.js';
 
 export function getArrowPoints(
   [startX, startY]: number[],

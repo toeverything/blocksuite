@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   clickBlockTypeMenuItem,
@@ -6,7 +6,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
-  getEditorLocator,
   initEmptyParagraphState,
   initThreeParagraphs,
   pressArrowDown,
@@ -20,7 +19,6 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
-  RICH_TEXT_SELECTOR,
   type,
   undoByClick,
   undoByKeyboard,

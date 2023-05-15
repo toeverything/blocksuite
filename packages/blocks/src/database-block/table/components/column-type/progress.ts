@@ -35,12 +35,10 @@ const styles = css`
     width: 100%;
     height: 13px;
     border-radius: 22px;
-    background: var(--affine-hover-color);
   }
 
   .affine-database-progress-fg {
     height: 100%;
-    background: var(--affine-success-color);
   }
 
   .affine-database-progress-drag-handle {
@@ -67,6 +65,12 @@ const styles = css`
     font-size: 14px;
   }
 `;
+
+const progressColors = {
+  empty: 'var(--affine-black-10)',
+  processing: 'var(--affine-processing-color)',
+  success: 'var(--affine-success-color)',
+};
 
 type DragConfig = {
   stepWidth: number;
@@ -167,9 +171,17 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
 
   protected override render() {
     const progress = this.cell?.value ?? 0;
-
+    let backgroundColor = progressColors.processing;
+    if (progress === 100) {
+      backgroundColor = progressColors.success;
+    }
     const fgStyles = styleMap({
       width: `${progress}%`,
+      backgroundColor,
+    });
+    const bgStyles = styleMap({
+      backgroundColor:
+        progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
     });
 
     return html`<div
@@ -177,7 +189,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       @mousedown=${(e: Event) => e.preventDefault()}
     >
       <div class="affine-database-progress-bar">
-        <div class="affine-database-progress-bg">
+        <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
           <div class="affine-database-progress-drag-handle"></div>
         </div>

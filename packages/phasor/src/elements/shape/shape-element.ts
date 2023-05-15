@@ -1,18 +1,42 @@
-import { StrokeStyle } from '../../consts.js';
-import { BaseElement, type HitTestOptions } from '../base-element.js';
+import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
-import type { SerializedShapeProps, ShapeType } from './types.js';
-import { validateShapeProps } from './utils.js';
+import type { IShape } from './types.js';
 
-export class ShapeElement extends BaseElement {
-  type = 'shape' as const;
-  shapeType: ShapeType = 'rect';
-  radius = 0;
-  filled = false;
-  fillColor = '#ffffff';
-  strokeWidth = 4;
-  strokeColor = '#000000';
-  strokeStyle: StrokeStyle = StrokeStyle.Solid;
+export class ShapeElement extends SurfaceElement<IShape> {
+  get shapeType() {
+    const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
+    return shapeType;
+  }
+
+  get radius() {
+    const radius = this.yMap.get('radius') as IShape['radius'];
+    return radius;
+  }
+
+  get filled() {
+    const filled = this.yMap.get('filled') as IShape['filled'];
+    return filled;
+  }
+
+  get fillColor() {
+    const fillColor = this.yMap.get('fillColor') as IShape['fillColor'];
+    return fillColor;
+  }
+
+  get strokeWidth() {
+    const strokeWidth = this.yMap.get('strokeWidth') as IShape['strokeWidth'];
+    return strokeWidth;
+  }
+
+  get strokeColor() {
+    const strokeColor = this.yMap.get('strokeColor') as IShape['strokeColor'];
+    return strokeColor;
+  }
+
+  get strokeStyle() {
+    const strokeStyle = this.yMap.get('strokeStyle') as IShape['strokeStyle'];
+    return strokeStyle;
+  }
 
   get realStrokeColor() {
     return this.transformPropertyValue(this.strokeColor);
@@ -22,54 +46,13 @@ export class ShapeElement extends BaseElement {
     return this.transformPropertyValue(this.fillColor);
   }
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
+  override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     return hitTest(x, y, this, options);
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  override render(ctx: CanvasRenderingContext2D) {
     const { render } = ShapeMethodsMap[this.shapeType];
     render(ctx, this);
-  }
-
-  serialize(): SerializedShapeProps {
-    return {
-      id: this.id,
-      index: this.index,
-      type: this.type,
-      xywh: this._xywh,
-
-      shapeType: this.shapeType,
-
-      radius: this.radius,
-      filled: this.filled,
-      fillColor: this.fillColor,
-      strokeWidth: this.strokeWidth,
-      strokeColor: this.strokeColor,
-      strokeStyle: this.strokeStyle,
-    };
-  }
-
-  static deserialize(data: Record<string, unknown>): ShapeElement {
-    if (!validateShapeProps(data)) {
-      throw new Error('Invalid shape props');
-    }
-    const element = new ShapeElement(data.id);
-    ShapeElement.applySerializedProps(element, data);
-    return element;
-  }
-
-  static override applySerializedProps(
-    element: ShapeElement,
-    props: Partial<SerializedShapeProps>
-  ) {
-    super.applySerializedProps(element, props);
-  }
-
-  static override getUpdatedSerializedProps(
-    element: ShapeElement,
-    props: Partial<SerializedShapeProps>
-  ) {
-    return props;
   }
 }

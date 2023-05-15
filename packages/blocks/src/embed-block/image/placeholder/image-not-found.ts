@@ -1,7 +1,6 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-
-import { ShadowlessElement } from '../../../__internal__/index.js';
 
 const notFoundIcon = html`<svg
   width="25"
