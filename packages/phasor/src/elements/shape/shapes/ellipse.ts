@@ -15,6 +15,7 @@ export const EllipseMethods: ShapeMethods = {
     const {
       w,
       h,
+      seed,
       strokeWidth,
       filled,
       realFillColor,
@@ -29,6 +30,7 @@ export const EllipseMethods: ShapeMethods = {
     ctx.translate(renderOffset, renderOffset);
 
     rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {
+      seed,
       roughness: 2,
       strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
       stroke: realStrokeColor,

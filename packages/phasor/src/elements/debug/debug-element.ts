@@ -1,4 +1,5 @@
 import { type SerializedXYWH } from '../../utils/xywh.js';
+import type { ElementDefaultProps } from '../index.js';
 import { SurfaceElement } from '../surface-element.js';
 
 export interface IDebug {
@@ -6,11 +7,12 @@ export interface IDebug {
   index: string;
   type: string;
   xywh: SerializedXYWH;
+  seed: number;
 
   color: string;
 }
 
-export const DebugElementDefaultProps: Omit<IDebug, 'id' | 'index'> = {
+export const DebugElementDefaultProps: ElementDefaultProps<'debug'> = {
   type: 'debug',
   xywh: '[0,0,0,0]',
 

@@ -434,7 +434,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateElement(id, {
+        surface.updateElement<'connector'>(id, {
           controllers: routes,
         });
       }

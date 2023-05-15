@@ -15,6 +15,7 @@ export const DiamondMethods: ShapeMethods = {
     const {
       w,
       h,
+      seed,
       strokeWidth,
       filled,
       realFillColor,
@@ -36,6 +37,7 @@ export const DiamondMethods: ShapeMethods = {
         [0, renderHeight / 2],
       ],
       {
+        seed,
         roughness: 2,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
