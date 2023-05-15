@@ -2,6 +2,15 @@ import { assertExists } from '@blocksuite/store';
 
 const DATABASE_ROW_SELECTED_CLASS = 'selected';
 
+export function getClosestRowId(element: Element): number {
+  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
+  if (rowId) {
+    return Number(rowId);
+  }
+  // Header row has no id.
+  return -1;
+}
+
 export function getSelectedRowIds(
   startCell: HTMLElement,
   endCell: HTMLElement
@@ -64,13 +73,4 @@ function clearDatabaseRowsSelection(database: HTMLElement) {
   allRows.forEach(row => {
     row.classList.remove(DATABASE_ROW_SELECTED_CLASS);
   });
-}
-
-function getClosestRowId(element: Element): number {
-  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
-  if (rowId) {
-    return Number(rowId);
-  }
-  // Header row has no id.
-  return -1;
 }

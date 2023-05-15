@@ -26,6 +26,10 @@ import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
+import {
+  getClosestDatabaseId,
+  getClosestRowId,
+} from './selection-manager/database-selection-manager/utils.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -541,18 +545,13 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setSelectedBlock(modelState: EditingState | null) {
       if (modelState) {
         const { element } = modelState;
-        const databaseRowId = element
-          .closest('.database-row')
-          ?.getAttribute('data-row-id');
-        if (databaseRowId) {
-          const databaseId = element
-            .closest('affine-database')
-            ?.getAttribute('data-block-id');
-          assertExists(databaseId);
+        const rowId = getClosestRowId(element);
+        if (rowId !== -1) {
+          const databaseId = getClosestDatabaseId(element);
           pageBlock.selection.slots.databaseTableUpdated.emit({
             stage: 'click',
             databaseId,
-            rowIds: [Number(databaseRowId)],
+            rowIds: [rowId],
           });
           return;
         }
