@@ -1,4 +1,5 @@
 import { assertNotExists } from '@blocksuite/global/utils';
+import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { MIN_ZOOM } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
@@ -28,6 +29,7 @@ export interface SurfaceViewport {
 export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  rc: RoughCanvas;
   gridManager = new GridManager();
 
   private _container!: HTMLElement;
@@ -42,8 +44,10 @@ export class Renderer implements SurfaceViewport {
   private _shouldUpdate = false;
 
   constructor() {
-    this.canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
+    this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.rc = new RoughCanvas(canvas);
   }
 
   get left() {
@@ -221,7 +225,7 @@ export class Renderer implements SurfaceViewport {
       this.ctx.translate(dx, dy);
 
       if (intersects(element, viewBound)) {
-        element.render(this.ctx);
+        element.render(this.ctx, this.rc);
       }
 
       this.ctx.restore();

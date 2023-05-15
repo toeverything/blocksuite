@@ -1,3 +1,4 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
@@ -106,7 +107,7 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     this._renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     return;
   }
 }

@@ -1,3 +1,5 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+
 import type { IBound, StrokeStyle } from '../../consts.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../surface-element.js';
@@ -21,7 +23,11 @@ export interface IShape {
 }
 
 export interface ShapeMethods {
-  render: (ctx: CanvasRenderingContext2D, element: ShapeElement) => void;
+  render: (
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    element: ShapeElement
+  ) => void;
   hitTest: (
     x: number,
     y: number,
