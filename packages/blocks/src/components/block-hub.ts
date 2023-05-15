@@ -448,9 +448,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  public onDragStarted: () => void;
-
-  @property()
   public getHoveringFrameState: (point: Point) => {
     container?: Element;
     rect?: Rect;
@@ -492,10 +489,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
-  private readonly _onClicked: (data: {
-    flavour: string;
-    type?: string;
-  }) => Promise<void>;
+  private readonly _onDragStartCallback: () => void;
 
   private readonly _onDropCallback: (
     e: DragEvent,
@@ -503,6 +497,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     lastModelState: EditingState | null,
     lastType: DroppingType
   ) => Promise<void>;
+
+  private readonly _onClickCardCallback: (data: {
+    flavour: string;
+    type?: string;
+  }) => Promise<void>;
 
   private _currentClientX = 0;
   private _currentClientY = 0;
@@ -526,23 +525,24 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect?: Rect;
       scale: number;
     };
-    onDragStarted: () => void;
-    onClicked: (data: { flavour: string; type?: string }) => Promise<void>;
-    onDropCallback: (
+    onDragStart: () => void;
+    onDrop: (
       e: DragEvent,
       point: Point,
       lastModelState: EditingState | null,
       lastType: DroppingType
     ) => Promise<void>;
+    onClickCard: (data: { flavour: string; type?: string }) => Promise<void>;
   }) {
     super();
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
-    this.onDragStarted = options.onDragStarted;
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringFrameState = options.getHoveringFrameState;
-    this._onDropCallback = options.onDropCallback;
-    this._onClicked = options.onClicked;
+
+    this._onDragStartCallback = options.onDragStart;
+    this._onDropCallback = options.onDrop;
+    this._onClickCardCallback = options.onClickCard;
   }
 
   override connectedCallback() {
@@ -576,7 +576,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
-      disposables.addFromEvent(card, 'click', e => this._onClickBlock(e, card));
+      disposables.addFromEvent(card, 'click', e => this._onClickCard(e, card));
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.addFromEvent(
@@ -659,7 +659,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClickBlock = (e: MouseEvent, blockHubElement: HTMLElement) => {
+  private _onClickCard = (e: MouseEvent, blockHubElement: HTMLElement) => {
     const affineType = blockHubElement.getAttribute('affine-type');
     assertExists(affineType);
     const data: {
@@ -671,7 +671,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     if (affineType) {
       data.type = affineType;
     }
-    this._onClicked(data);
+    this._onClickCardCallback(data);
   };
 
   public toggleMenu(open: boolean) {
@@ -715,7 +715,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
     this._lastDraggingFlavour = data.flavour;
-    this.onDragStarted();
+    this._onDragStartCallback();
   };
 
   private _onMouseDown = (e: MouseEvent) => {

@@ -31,7 +31,7 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onClicked: async (data: { flavour: string; type?: string }) => {
+    onClickCard: async (data: { flavour: string; type?: string }) => {
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
@@ -63,7 +63,7 @@ export const createBlockHub: (
         lastId && asyncFocusRichText(page, lastId);
       }
     },
-    onDropCallback: async (e, point, end, type) => {
+    onDrop: async (e, point, end, type) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -136,7 +136,7 @@ export const createBlockHub: (
       }
       pageBlock.setSelection(frameId, true, focusId, point);
     },
-    onDragStarted: () => {
+    onDragStart: () => {
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
