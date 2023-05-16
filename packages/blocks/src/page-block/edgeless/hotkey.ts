@@ -175,7 +175,15 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     bindSpace(edgeless);
     bindDelete(edgeless);
-    bindCommonHotkey(edgeless.page);
+    bindCommonHotkey(edgeless.page, {
+      filter: (e: KeyboardEvent) => e.shiftKey && e.key === 'Shift',
+      keydown: _ => {
+        edgeless.slots.shiftUpdated.emit(true);
+      },
+      keyup: _ => {
+        edgeless.slots.shiftUpdated.emit(false);
+      },
+    });
   });
   return () => {
     hotkey.deleteScope(scope);
