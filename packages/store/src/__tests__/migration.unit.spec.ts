@@ -29,7 +29,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 2,
+      'affine:surface': 3,
     });
 
     assert.equal(
@@ -58,7 +58,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 2,
+      'affine:surface': 3,
     });
     const hasSurface = Object.entries(result['space:page0']).some(
       ([_, value]: [string, unknown]) =>
@@ -91,7 +91,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 2,
+      'affine:surface': 3,
     });
 
     const newTitle = (
@@ -136,7 +136,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 2,
+      'affine:surface': 3,
     });
 
     const newElement = (
