@@ -538,13 +538,13 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'checkbox');
 
     const checkbox = getFirstColumnCell(page, 'checkbox');
-    expect(await checkbox.isChecked()).toBe(false);
+    await expect(checkbox).not.toHaveClass('checked');
 
     await checkbox.click();
-    expect(await checkbox.isChecked()).toBe(true);
+    await expect(checkbox).toHaveClass(/checked/);
 
     await undoByClick(page);
-    expect(await checkbox.isChecked()).toBe(false);
+    await expect(checkbox).not.toHaveClass('checked');
   });
 
   test('switch to progress', async ({ page }) => {

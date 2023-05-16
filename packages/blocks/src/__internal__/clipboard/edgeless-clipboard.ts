@@ -237,7 +237,9 @@ export class EdgelessClipboard implements Clipboard {
         .filter(e => !!e) as PhasorElement[]),
       ...(frameIds
         .map(id => this._page.getBlockById(id))
-        .filter(f => !!f) as TopLevelBlockModel[]),
+        .filter(
+          f => !!f && f.flavour === 'affine:frame'
+        ) as TopLevelBlockModel[]),
     ];
 
     this._edgeless.slots.selectionUpdated.emit({

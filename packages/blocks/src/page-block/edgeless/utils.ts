@@ -188,14 +188,19 @@ export function pickBy(
   return selectedShapes.length
     ? selectedShapes[selectedShapes.length - 1]
     : pickTopBlock(
-        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        (page.root?.children as TopLevelBlockModel[]).filter(
+          child => child.flavour === 'affine:frame'
+        ) ?? [],
         modelX,
         modelY
       );
 }
 
 function pickById(surface: SurfaceManager, page: Page, id: string) {
-  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const blocks =
+    (page.root?.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
 }
@@ -434,7 +439,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateElement(id, {
+        surface.updateElement<'connector'>(id, {
           controllers: routes,
         });
       }
@@ -474,16 +479,18 @@ export function addText(
   event: SelectionEvent,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(
-    new Point(event.x, event.y),
-    width
-  );
+  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
+    width,
+  });
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
   // Wait for mouseMode updated
   requestAnimationFrame(() => {
-    const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+    const blocks =
+      (page.root?.children.filter(
+        child => child.flavour === 'affine:frame'
+      ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
       const selectionState = {

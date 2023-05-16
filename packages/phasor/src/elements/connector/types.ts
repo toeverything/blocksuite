@@ -31,6 +31,7 @@ export interface IConnector {
   index: string;
   type: 'connector';
   xywh: SerializedXYWH;
+  seed: number;
 
   mode: ConnectorMode;
   lineWidth: number;

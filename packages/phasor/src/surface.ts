@@ -1,9 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
+import { randomSeed } from 'roughjs/bin/math.js';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
+  type ElementCreateProps,
   ElementCtors,
   ElementDefaultProps,
   type IPhasorElementType,
@@ -16,7 +18,7 @@ import type {
   TransformPropertyValue,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
-import { ConnectorElement, intersects, type IPhasorElement } from './index.js';
+import { ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
@@ -60,23 +62,24 @@ export class SurfaceManager {
     return getCommonBound([...this._elements.values()]);
   }
 
-  addElement<T extends keyof PhasorElementType>(
+  addElement<T extends keyof IPhasorElementType>(
     type: T,
-    properties: Partial<Omit<IPhasorElementType[T], 'id' | 'index'>>
+    properties: ElementCreateProps<T>
   ): PhasorElement['id'] {
     const id = generateElementId();
 
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
-    const props: IPhasorElement = {
+    const props: ElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
       index: generateKeyBetween(this._lastIndex, null),
+      seed: randomSeed(),
     };
     for (const key in props) {
-      yMap.set(key, props[key as keyof IPhasorElement]);
+      yMap.set(key, props[key as keyof ElementCreateProps<T>]);
     }
 
     this._yContainer.set(id, yMap);
@@ -84,7 +87,10 @@ export class SurfaceManager {
     return id;
   }
 
-  updateElement<T extends IPhasorElement>(id: string, properties: Partial<T>) {
+  updateElement<T extends keyof IPhasorElementType>(
+    id: string,
+    properties: ElementCreateProps<T>
+  ) {
     const element = this._elements.get(id);
     assertExists(element);
     element.applyUpdate(properties);

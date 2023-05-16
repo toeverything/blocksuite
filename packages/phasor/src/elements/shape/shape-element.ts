@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import type { Renderer } from '../../renderer.js';
 import {
@@ -7,7 +8,6 @@ import {
   serializeXYWH,
 } from '../../utils/xywh.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
-import type { TextElement } from '../text/text-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
 
@@ -76,9 +76,9 @@ export class ShapeElement extends SurfaceElement<IShape> {
     return hitTest(x, y, this, options);
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
+  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     const { render } = ShapeMethodsMap[this.shapeType];
-    render(ctx, this);
+    render(ctx, rc, this);
   }
 
   private _onYMap = () => {
@@ -101,7 +101,7 @@ export class ShapeElement extends SurfaceElement<IShape> {
 
   updateText(text: string) {
     if (this.textId) {
-      this.surface?.updateElement<TextElement>(this.textId, {
+      this.surface?.updateElement<'text'>(this.textId, {
         text,
       });
     } else {

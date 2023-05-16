@@ -61,7 +61,7 @@ export const defaultStore: SerializedStore = {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 1,
+      'affine:surface': 3,
     },
   },
   'space:page0': {
@@ -224,7 +224,9 @@ export async function assertFrameXYWH(
 ) {
   const actual = await page.evaluate(() => {
     const root = window.page.root as PageBlockModel;
-    const frame = root.children[0] as FrameBlockModel;
+    const frame = root.children.find(
+      x => x.flavour === 'affine:frame'
+    ) as FrameBlockModel;
     return JSON.parse(frame.xywh) as number[];
   });
   expect(actual[0]).toBeCloseTo(expected[0]);
