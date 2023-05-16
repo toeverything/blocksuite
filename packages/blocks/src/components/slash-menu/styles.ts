@@ -111,4 +111,9 @@ export const styles = css`
     border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
   }
+
+  format-bar-button svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
