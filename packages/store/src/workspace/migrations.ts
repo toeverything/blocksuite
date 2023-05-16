@@ -186,7 +186,7 @@ const migrations: Migration[] = [
       if (!surfaceVersion) {
         throw new MigrationError('affine:surface version not found');
       }
-      return surfaceVersion < 2;
+      return surfaceVersion < 3;
     },
     migrate: doc => {
       // @ts-ignore
@@ -197,7 +197,7 @@ const migrations: Migration[] = [
       const yVersions = doc
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
-      yVersions.set('affine:surface', 2);
+      yVersions.set('affine:surface', 3);
 
       let pageBlock: Y.Map<unknown> | undefined;
       let surfaceId: string | undefined;
@@ -221,7 +221,7 @@ const migrations: Migration[] = [
       }
 
       const yChildren = pageBlock.get('sys:children') as Y.Array<string>;
-      yChildren.push([surfaceId]);
+      yChildren.insert(0, [surfaceId]);
     },
   },
 ];
