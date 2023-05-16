@@ -45,6 +45,7 @@ const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
   .search-container.hidden {
     overflow: hidden;
