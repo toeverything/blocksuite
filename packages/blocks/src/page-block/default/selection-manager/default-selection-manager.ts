@@ -358,6 +358,8 @@ export class DefaultSelectionManager {
     const service = getServiceOrRegister('affine:database');
     if (service instanceof Promise) {
       service.then(database => database.clearTableViewSelection());
+    } else {
+      service.clearTableViewSelection();
     }
 
     handleNativeRangeClick(this.page, e, this.container);
