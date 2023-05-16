@@ -122,8 +122,8 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
         e.clientY - rect.y
       );
 
-      const delta = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
-      viewport.applyDeltaZoom(delta);
+      const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
+      viewport.applyDeltaZoom(zoom);
       const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
