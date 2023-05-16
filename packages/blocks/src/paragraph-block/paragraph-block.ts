@@ -5,14 +5,13 @@ import {
   BlockHubIcon20,
 } from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type BlockHost, isPageMode } from '../__internal__/index.js';
+import { isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
@@ -72,7 +71,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends ShadowlessElement {
+export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
@@ -172,19 +171,12 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     }
   `;
 
-  @property()
-  model!: ParagraphBlockModel;
-
-  @property()
-  host!: BlockHost;
-
-  @property()
-  content!: TemplateResult;
-
   @state()
   private _tipsPlaceholderTemplate = html``;
+
   @state()
   private _isComposing = false;
+
   @state()
   private _isFocus = false;
 
@@ -280,7 +272,6 @@ export class ParagraphBlockComponent extends ShadowlessElement {
       <div class="affine-paragraph-block-container ${type}">
         ${tipsPlaceholderTemplate}
         <rich-text
-          .host=${this.host}
           .model=${this.model}
           .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}

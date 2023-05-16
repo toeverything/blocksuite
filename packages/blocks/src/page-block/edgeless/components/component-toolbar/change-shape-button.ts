@@ -2,6 +2,7 @@ import '../tool-icon-button.js';
 import '../color-panel.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
+import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
   StrokeStyle,
@@ -11,7 +12,6 @@ import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { WithDisposable } from '../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';

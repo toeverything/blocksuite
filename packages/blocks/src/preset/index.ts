@@ -16,6 +16,7 @@ import {
 
 export const pagePreset = new Map<BlockSchemaType, StaticValue>([
   [PageBlockSchema, literal`affine-default-page`],
+  [SurfaceBlockSchema, literal`affine-surface`],
   [ListBlockSchema, literal`affine-list`],
   [FrameBlockSchema, literal`affine-frame`],
   [DatabaseBlockSchema, literal`affine-database`],

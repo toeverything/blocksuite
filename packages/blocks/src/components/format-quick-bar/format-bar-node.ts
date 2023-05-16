@@ -5,6 +5,7 @@ import {
   type BlockConfig,
   paragraphConfig,
 } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
   type BaseBlockModel,
@@ -20,10 +21,7 @@ import {
   getCurrentBlockRange,
   restoreSelection,
 } from '../../__internal__/utils/block-range.js';
-import {
-  getRichTextByModel,
-  WithDisposable,
-} from '../../__internal__/utils/index.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import { actionConfig } from '../../page-block/utils/const.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';

@@ -8,14 +8,17 @@ import {
   edgelessPreset,
   type PageBlockModel,
   pagePreset,
-  WithDisposable,
 } from '@blocksuite/blocks';
 import {
   getDefaultPageBlock,
   getServiceOrRegister,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { BlockSuiteRoot, ShadowlessElement } from '@blocksuite/lit';
+import {
+  BlockSuiteRoot,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

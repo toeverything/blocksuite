@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -7,7 +8,6 @@ import {
   getRichTextByModel,
   isControlledKeyboardEvent,
   isFuzzyMatch,
-  WithDisposable,
 } from '../../__internal__/utils/index.js';
 import { createKeydownObserver } from '../utils.js';
 import { menuGroups, type SlashItem } from './config.js';
