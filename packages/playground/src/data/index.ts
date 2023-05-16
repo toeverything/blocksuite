@@ -108,6 +108,7 @@ export const preset: InitFn = (workspace: Workspace, pageId: string) => {
     index: 'a0',
     type: 'shape',
     xywh: '[0,0,100,100]',
+    seed: Math.floor(Math.random() * 2 ** 31),
 
     shapeType: 'rect',
 
