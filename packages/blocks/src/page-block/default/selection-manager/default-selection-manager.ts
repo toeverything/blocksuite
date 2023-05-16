@@ -41,7 +41,7 @@ import {
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
-import { getService } from '../../../__internal__/service.js';
+import { getServiceOrRegister } from '../../../__internal__/service.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -252,7 +252,7 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerClick = (e: SelectionEvent) => {
+  private _onContainerClick = async (e: SelectionEvent) => {
     const container = getEditorContainerByElement(this.container);
     activeEditorManager.setActive(container);
     const {
@@ -354,8 +354,9 @@ export class DefaultSelectionManager {
     )
       return;
 
-    const databaseService = getService('affine:database');
-    databaseService?.clearTableViewSelection();
+    // FIXME: refactor this
+    const databaseService = await getServiceOrRegister('affine:database');
+    databaseService.clearTableViewSelection();
 
     handleNativeRangeClick(this.page, e, this.container);
   };
