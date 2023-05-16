@@ -17,11 +17,13 @@ import {
   getBlockElementByModel,
   getDefaultPage,
   getDefaultPageBlock,
+  getEdgelessPage,
   getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
   getNextBlock,
   getPreviousBlock,
+  isPageMode,
 } from './query.js';
 import { Rect } from './rect.js';
 import type { SelectionPosition } from './types.js';
@@ -248,12 +250,10 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
+  const pageBlock = isPageMode(page)
+    ? getDefaultPage(page)
+    : getEdgelessPage(page);
+  pageBlock?.selection?.clear();
 }
 
 /**

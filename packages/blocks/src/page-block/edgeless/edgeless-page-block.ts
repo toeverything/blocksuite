@@ -178,8 +178,8 @@ export class EdgelessPageBlockComponent
   getService = getService;
 
   private _selection!: EdgelessSelectionManager;
-  // FIXME: Many parts of code assume that the `selection` is used in page mode
-  getSelection() {
+
+  get selection() {
     return this._selection;
   }
 
@@ -499,7 +499,7 @@ export class EdgelessPageBlockComponent
    * Clear selected blocks.
    */
   clearSelectedBlocks() {
-    if (this.getSelection().selectedBlocks.length) {
+    if (this.selection.selectedBlocks.length) {
       this.slots.selectedBlocksUpdated.emit([]);
     }
   }
@@ -518,7 +518,7 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.slots.selectedBlocksUpdated.emit(this.getSelection().selectedBlocks);
+      this.slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;

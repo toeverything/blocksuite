@@ -286,4 +286,13 @@ export class EdgelessSelectionManager {
       content: hovered,
     };
   }
+
+  clear() {
+    this.selectedBlocks = [];
+    this._container.slots.selectedBlocksUpdated.emit(this.selectedBlocks);
+    this._container.slots.selectionUpdated.emit({
+      selected: [],
+      active: false,
+    });
+  }
 }
