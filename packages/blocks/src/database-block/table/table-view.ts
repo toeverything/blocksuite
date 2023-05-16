@@ -63,6 +63,9 @@ const styles = css`
     border-radius: 16px;
     background-color: var(--affine-black-30);
   }
+  .affine-database-block-table:hover::-webkit-scrollbar-track {
+    background-color: var(--affine-hover-color);
+  }
 
   .affine-database-table-container {
     width: fit-content;
