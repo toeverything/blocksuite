@@ -317,7 +317,7 @@ export async function initEmptyEdgelessState(page: Page) {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:surface', {}, null);
+    page.addBlock('affine:surface', {}, pageId);
     const frameId = page.addBlock('affine:frame', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.resetHistory();

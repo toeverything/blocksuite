@@ -251,8 +251,9 @@ export class Workspace {
     });
     const page = this.getPage(pageId) as Page;
 
+    let pageBlockId = pageId;
     if (init) {
-      const pageBlockId = page.addBlock(
+      pageBlockId = page.addBlock(
         'affine:page',
         typeof init === 'boolean'
           ? undefined
@@ -260,7 +261,7 @@ export class Workspace {
               title: new page.Text(init.title),
             }
       );
-      page.addBlock('affine:surface', {}, null);
+      page.addBlock('affine:surface', {}, pageBlockId);
       const frameId = page.addBlock('affine:frame', {}, pageBlockId);
       page.addBlock('affine:paragraph', {}, frameId);
     }

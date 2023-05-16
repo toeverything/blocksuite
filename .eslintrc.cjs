@@ -11,6 +11,7 @@ const allPackages = [
   'virgo',
   'connector',
   'lit',
+  'hosts',
 ];
 
 const createPattern = packageName => [
@@ -60,6 +61,7 @@ module.exports = {
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
     'packages/connector/dist/*',
+    'packages/hosts/dist/*',
   ],
   overrides: [
     {

@@ -4,12 +4,13 @@ import {
   LinkedPageIcon,
   PageIcon,
 } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import { assertExists, type Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { type BlockHost, WithDisposable } from '../../std.js';
+import { type BlockHost } from '../../std.js';
 
 const styles = css`
   :host {

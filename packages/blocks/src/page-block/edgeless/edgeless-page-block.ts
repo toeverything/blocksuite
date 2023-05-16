@@ -6,8 +6,7 @@ import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/global/config';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -19,9 +18,8 @@ import {
   type Page,
   Slot,
 } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
@@ -41,7 +39,6 @@ import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
-import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type {
   BlockHost,
   DragHandle,
@@ -86,7 +83,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends WithDisposable(ShadowlessElement)
+  extends BlockElement<PageBlockModel>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -144,22 +141,10 @@ export class EdgelessPageBlockComponent
 
   showGrid = true;
 
-  @property()
-  page!: Page;
-
-  @property()
-  model!: PageBlockModel;
-
-  @property()
-  root!: BlockSuiteRoot;
-
-  @property()
+  @state()
   mouseMode: MouseMode = {
     type: 'default',
   };
-
-  @property()
-  content!: TemplateResult;
 
   @state()
   private _toolbarEnabled = false;
@@ -213,7 +198,13 @@ export class EdgelessPageBlockComponent
   // just init surface, attach to dom later
   private _initSurface() {
     const { page } = this;
-    const yContainer = page.ySurfaceContainer;
+    const yBlock = page.getYBlockById(this.model.id);
+    assertExists(yBlock);
+    let yContainer = yBlock.get('elements') as InstanceType<typeof page.YMap>;
+    if (!yContainer) {
+      yContainer = new page.YMap();
+      yBlock.set('elements', yContainer);
+    }
     this.surface = new SurfaceManager(yContainer, value => {
       if (isCssVariable(value)) {
         const cssValue = getThemePropertyValue(this, value as CssVariableName);
@@ -468,7 +459,7 @@ export class EdgelessPageBlockComponent
    * Not supports surface elements.
    */
   setSelection(frameId: string, active = true, blockId: string, point?: Point) {
-    const frameBlock = this.page.root?.children.find(b => b.id === frameId);
+    const frameBlock = this.model.children.find(b => b.id === frameId);
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {
@@ -531,9 +522,16 @@ export class EdgelessPageBlockComponent
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
 
-      const frame = this.model.children[0] as FrameBlockModel;
-      const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-      this.surface.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
+      const frame = this.model.children.find(
+        child => child.flavour === 'affine:frame'
+      ) as FrameBlockModel;
+      if (frame) {
+        const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
+        this.surface.viewport.setCenter(
+          modelX + modelW / 2,
+          modelY + modelH / 2
+        );
+      }
 
       // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();

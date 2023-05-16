@@ -2,10 +2,9 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 
 import { getDefaultPageBlock } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
@@ -20,7 +19,7 @@ import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends ShadowlessElement {
+export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = css`
     .affine-list-block-container {
       box-sizing: border-box;
@@ -76,14 +75,8 @@ export class ListBlockComponent extends ShadowlessElement {
     }
   `;
 
-  @property()
-  model!: ListBlockModel;
-
   @state()
   showChildren = true;
-
-  @property()
-  content!: TemplateResult;
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,

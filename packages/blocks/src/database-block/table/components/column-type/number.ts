@@ -14,6 +14,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       display: block;
       width: 100%;
       height: 100%;
+      cursor: text;
     }
 
     .affine-database-number {
@@ -25,7 +26,13 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       outline: none;
     }
     .affine-database-number v-line {
+      display: flex !important;
+      align-items: center;
+      height: 100%;
       width: 100%;
+    }
+    .affine-database-number v-line > div {
+      flex-grow: 1;
     }
   `;
 
@@ -85,7 +92,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   };
 
   protected override render() {
-    return html`<div class="affine-database-number number"></div>`;
+    return html`<div class="affine-database-number number virgo-editor"></div>`;
   }
 }
 

@@ -1,13 +1,13 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
 import type { EmbedBlockModel } from './embed-model.js';
 import { EmbedBlockService } from './embed-service.js';
 
 @customElement('affine-embed')
-export class EmbedBlockComponent extends ShadowlessElement {
+export class EmbedBlockComponent extends BlockElement<EmbedBlockModel> {
   static override styles = css`
     affine-embed {
       display: block;
@@ -35,8 +35,6 @@ export class EmbedBlockComponent extends ShadowlessElement {
       display: inline-block;
     }
   `;
-  @property()
-  model!: EmbedBlockModel;
 
   @query('input')
   _input!: HTMLInputElement;

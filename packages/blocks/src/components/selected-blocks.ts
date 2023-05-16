@@ -1,9 +1,10 @@
+import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type IPoint, WithDisposable } from '../__internal__/index.js';
+import { type IPoint } from '../__internal__/index.js';
 
 @customElement('affine-selected-blocks')
 export class AffineSelectedBlocks extends WithDisposable(LitElement) {

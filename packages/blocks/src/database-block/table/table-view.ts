@@ -7,15 +7,12 @@ import './components/database-title.js';
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  asyncFocusRichText,
-  WithDisposable,
-} from '../../__internal__/index.js';
+import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { onClickOutside } from '../utils.js';
