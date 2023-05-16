@@ -205,14 +205,17 @@ export function createKeyDownHandler(
       event: evt,
     };
 
+    const modifiersKeys = (
+      ['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const
+    ).filter(key => evt[key]);
+
     const matches = Object.entries(bindings)
       .filter(([, binding]) => {
         const { key, match } = binding;
 
         if (
-          (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(key => {
-            return !!binding[key] && binding[key] === evt[key];
-          })
+          modifiersKeys.length &&
+          !modifiersKeys.every(modifierKey => binding[modifierKey])
         ) {
           return false;
         }

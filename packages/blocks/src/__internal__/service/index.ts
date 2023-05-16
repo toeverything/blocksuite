@@ -1,8 +1,9 @@
-import { PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
 import type { KeyboardBindings } from '../rich-text/keyboard.js';
+import { LINK_PATTERN } from '../rich-text/markdown-convert.js';
 import {
   handleIndent,
   handleKeyDown,
@@ -253,6 +254,63 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
         handler(range, context) {
           return onSpace(block, virgo, range, context);
+        },
+      },
+
+      linkFormat: {
+        match(range, context) {
+          return LINK_PATTERN.test(context.prefix);
+        },
+        handler(range, context) {
+          assertExists(virgo);
+          const {
+            event: { key },
+          } = context;
+
+          const isValidKey = /^[A-Za-z0-9]$/.test(key);
+          if (!isValidKey) {
+            return ALLOW_DEFAULT;
+          }
+
+          const match = LINK_PATTERN.exec(context.prefix);
+          if (!match) {
+            return ALLOW_DEFAULT;
+          }
+
+          const annotatedText = match[0];
+          const startIndex = range.index - annotatedText.length;
+
+          const hasAlreadyLink = virgo.getFormat({
+            index: startIndex,
+            length: annotatedText.length + 1,
+          }).link;
+          if (hasAlreadyLink) {
+            return ALLOW_DEFAULT;
+          }
+
+          block.page.captureSync();
+          virgo.insertText(
+            {
+              index: startIndex + annotatedText.length,
+              length: 0,
+            },
+            key
+          );
+          virgo.setVRange({
+            index: startIndex + annotatedText.length + 1,
+            length: 0,
+          });
+          virgo.formatText(
+            {
+              index: startIndex,
+              length: annotatedText.length + 1,
+            },
+            {
+              link: annotatedText + key,
+            }
+          );
+
+          return !ALLOW_DEFAULT;
         },
       },
     };

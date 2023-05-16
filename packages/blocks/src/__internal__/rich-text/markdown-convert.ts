@@ -25,7 +25,8 @@ type Match = {
     pattern: RegExp
   ) => boolean;
 };
-
+export const LINK_PATTERN =
+  /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/;
 const matches: Match[] = [
   {
     name: 'bolditalic',
@@ -430,8 +431,7 @@ const matches: Match[] = [
   },
   {
     name: 'link',
-    pattern:
-      /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
+    pattern: LINK_PATTERN,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
