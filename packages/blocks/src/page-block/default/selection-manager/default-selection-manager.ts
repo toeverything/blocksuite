@@ -355,7 +355,7 @@ export class DefaultSelectionManager {
       return;
 
     const databaseService = getService('affine:database');
-    databaseService.clearTableViewSelection();
+    databaseService?.clearTableViewSelection();
 
     handleNativeRangeClick(this.page, e, this.container);
   };
