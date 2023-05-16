@@ -1,13 +1,14 @@
-import type { ElementDefaultProps } from '../index.js';
+import * as Y from 'yjs';
 
-export const TextElementDefaultProps: ElementDefaultProps<'text'> = {
+import type { IElementDefaultProps } from '../index.js';
+
+export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   type: 'text',
   xywh: '[0,0,0,0]',
 
-  text: '',
+  text: new Y.Text(),
   color: '#000000',
   fontSize: 16,
   fontFamily: 'sans-serif',
   textAlign: 'center',
-  lineHeight: 1.2,
 };

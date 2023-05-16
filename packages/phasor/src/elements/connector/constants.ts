@@ -1,8 +1,8 @@
 import { StrokeStyle } from '../../consts.js';
-import type { ElementDefaultProps } from '../index.js';
+import type { IElementDefaultProps } from '../index.js';
 import { ConnectorMode } from './types.js';
 
-export const ConnectorElementDefaultProps: ElementDefaultProps<'connector'> = {
+export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
   type: 'connector',
   xywh: '[0,0,0,0]',
 

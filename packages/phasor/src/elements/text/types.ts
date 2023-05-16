@@ -1,3 +1,5 @@
+import type * as Y from 'yjs';
+
 import type { SerializedXYWH } from '../../utils/xywh.js';
 
 export interface IText {
@@ -7,12 +9,18 @@ export interface IText {
   xywh: SerializedXYWH;
   seed: number;
 
-  text: string;
+  text: Y.Text;
   color: string;
   fontSize: number;
   fontFamily: string;
-  textAlign: CanvasTextAlign;
-  lineHeight: number;
+  textAlign: 'left' | 'center' | 'right';
 
   containerId?: string;
+}
+
+export interface ITextDelta {
+  insert: string;
+  attributes?: {
+    [k: string]: unknown;
+  };
 }

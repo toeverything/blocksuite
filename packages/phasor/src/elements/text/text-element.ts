@@ -1,10 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { Renderer } from '../../renderer.js';
-import { serializeXYWH } from '../../utils/xywh.js';
 import { SurfaceElement } from '../surface-element.js';
-import type { IText } from './types.js';
-import { getFontString, getLineHeightInPx, isRTL, wrapText } from './utils.js';
+import type { IText, ITextDelta } from './types.js';
+import {
+  deltaInsertsToChunks,
+  getFontString,
+  getLineHeightInPx,
+  getTextWidth,
+  isRTL,
+  wrapText,
+} from './utils.js';
 
 export class TextElement extends SurfaceElement<IText> {
   get text() {
@@ -27,10 +33,6 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  get lineHeight() {
-    return this.yMap.get('lineHeight') as IText['lineHeight'];
-  }
-
   get containerId() {
     return this.yMap.get('containerId') as IText['containerId'];
   }
@@ -42,67 +44,124 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D) {
-    const rtl = isRTL(this.text);
-    const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
-    if (shouldTemporarilyAttach) {
-      // to correctly render RTL text mixed with LTR, we have to append it
-      // to the DOM
-      document.body.appendChild(ctx.canvas);
-    }
-    ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-    ctx.save();
-    ctx.font = getFontString({
-      fontSize: this.fontSize,
-      fontFamily: this.fontFamily,
-    });
-    ctx.fillStyle = this.color;
-    ctx.textAlign = this.textAlign;
+    const yText = this.text;
+    const deltas: ITextDelta[] = (yText.toDelta() as ITextDelta[]).map(
+      delta => ({
+        insert: wrapText(delta.insert, this.fontFamily, this.w),
+        attributes: delta.attributes,
+      })
+    );
+    const lines = deltaInsertsToChunks(deltas);
 
-    ctx.textBaseline = 'top';
-
-    const wrappedText = wrapText(this.text, this.fontFamily, this.w);
-    // Canvas does not support multiline text by default
-    const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
-
+    const lineHeightPx = getLineHeightInPx(this.fontSize, 1.25);
     const horizontalOffset =
       this.textAlign === 'center'
         ? this.w / 2
         : this.textAlign === 'right'
         ? this.w
         : 0;
-    const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
-    const verticalOffset = this.h / 2 - (lines.length * lineHeightPx) / 2;
 
-    for (let index = 0; index < lines.length; index++) {
-      ctx.fillText(
-        lines[index],
-        horizontalOffset,
-        index * lineHeightPx + verticalOffset
-      );
+    for (const [lineIndex, line] of lines.entries()) {
+      let beforeTextWidth = 0;
+
+      for (const delta of line) {
+        ctx.save();
+
+        const str = delta.insert;
+        const rtl = isRTL(str);
+        const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
+        if (shouldTemporarilyAttach) {
+          // to correctly render RTL text mixed with LTR, we have to append it
+          // to the DOM
+          document.body.appendChild(ctx.canvas);
+        }
+        ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+        ctx.font = getFontString({
+          fontSize: this.fontSize,
+          fontFamily: this.fontFamily,
+        });
+        ctx.fillStyle = this.color;
+        ctx.textAlign = this.textAlign;
+
+        ctx.textBaseline = 'top';
+
+        const verticalOffset =
+          this.h / 2 -
+          (lines.length * lineHeightPx) / 2 +
+          lineIndex * lineHeightPx;
+
+        ctx.fillText(str, horizontalOffset + beforeTextWidth, verticalOffset);
+
+        beforeTextWidth += getTextWidth(str, this.fontFamily);
+
+        if (shouldTemporarilyAttach) {
+          ctx.canvas.remove();
+        }
+
+        ctx.restore();
+      }
     }
-    ctx.restore();
-    if (shouldTemporarilyAttach) {
-      ctx.canvas.remove();
-    }
+
+    // const rtl = isRTL(this.text);
+    // const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
+    // if (shouldTemporarilyAttach) {
+    //   // to correctly render RTL text mixed with LTR, we have to append it
+    //   // to the DOM
+    //   document.body.appendChild(ctx.canvas);
+    // }
+    // ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+    // ctx.save();
+    // ctx.font = getFontString({
+    //   fontSize: this.fontSize,
+    //   fontFamily: this.fontFamily,
+    // });
+    // ctx.fillStyle = this.color;
+    // ctx.textAlign = this.textAlign;
+
+    // ctx.textBaseline = 'top';
+
+    // const wrappedText = wrapText(this.text, this.fontFamily, this.w);
+    // // Canvas does not support multiline text by default
+    // const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
+
+    // const horizontalOffset =
+    //   this.textAlign === 'center'
+    //     ? this.w / 2
+    //     : this.textAlign === 'right'
+    //     ? this.w
+    //     : 0;
+    // const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
+    // const verticalOffset = this.h / 2 - (lines.length * lineHeightPx) / 2;
+
+    // for (let index = 0; index < lines.length; index++) {
+    //   ctx.fillText(
+    //     lines[index],
+    //     horizontalOffset,
+    //     index * lineHeightPx + verticalOffset
+    //   );
+    // }
+    // ctx.restore();
+    // if (shouldTemporarilyAttach) {
+    //   ctx.canvas.remove();
+    // }
   }
 
   private _onYMap = () => {
-    if (this.container) {
-      const wrappedText = wrapText(this.text, this.fontFamily, this.w);
-      const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
-      const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
-
-      if (lines.length * lineHeightPx > this.h) {
-        this.surface?.updateElement(this.container.id, {
-          xywh: serializeXYWH(
-            this.container.x,
-            this.container.y,
-            this.container.w,
-            this.container.h + lineHeightPx * 2
-          ),
-        });
-      }
-    }
+    // if (this.container) {
+    //   const wrappedText = wrapText(this.text, this.fontFamily, this.w);
+    //   const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
+    //   const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
+    //   if (lines.length * lineHeightPx > this.h) {
+    //     this.surface?.updateElement(this.container.id, {
+    //       xywh: serializeXYWH(
+    //         this.container.x,
+    //         this.container.y,
+    //         this.container.w,
+    //         this.container.h + lineHeightPx * 2
+    //       ),
+    //     });
+    //   }
+    // }
   };
 
   override mount(renderer: Renderer) {

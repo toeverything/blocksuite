@@ -57,7 +57,7 @@ export const ElementCtors = {
 
 export const ElementDefaultProps: Record<
   keyof IPhasorElementType,
-  ElementDefaultProps<keyof IPhasorElementType>
+  IElementDefaultProps<keyof IPhasorElementType>
 > = {
   debug: DebugElementDefaultProps,
   brush: BrushElementDefaultProps,
@@ -66,11 +66,11 @@ export const ElementDefaultProps: Record<
   text: TextElementDefaultProps,
 } as const;
 
-export type ElementCreateProps<T extends keyof IPhasorElementType> = Partial<
+export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
 >;
 
-export type ElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
+export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
   IPhasorElementType[T],
   'id' | 'index' | 'seed'
 >;

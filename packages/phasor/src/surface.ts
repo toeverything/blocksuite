@@ -5,9 +5,9 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
-  type ElementCreateProps,
   ElementCtors,
   ElementDefaultProps,
+  type IElementCreateProps,
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
@@ -64,14 +64,14 @@ export class SurfaceManager {
 
   addElement<T extends keyof IPhasorElementType>(
     type: T,
-    properties: ElementCreateProps<T>
+    properties: IElementCreateProps<T>
   ): PhasorElement['id'] {
     const id = generateElementId();
 
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
-    const props: ElementCreateProps<T> = {
+    const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
@@ -79,7 +79,7 @@ export class SurfaceManager {
       seed: randomSeed(),
     };
     for (const key in props) {
-      yMap.set(key, props[key as keyof ElementCreateProps<T>]);
+      yMap.set(key, props[key as keyof IElementCreateProps<T>]);
     }
 
     this._yContainer.set(id, yMap);
@@ -89,7 +89,7 @@ export class SurfaceManager {
 
   updateElement<T extends keyof IPhasorElementType>(
     id: string,
-    properties: ElementCreateProps<T>
+    properties: IElementCreateProps<T>
   ) {
     const element = this._elements.get(id);
     assertExists(element);

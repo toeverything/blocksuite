@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+import * as Y from 'yjs';
 
 import type { Renderer } from '../../renderer.js';
 import {
@@ -99,15 +100,13 @@ export class ShapeElement extends SurfaceElement<IShape> {
     super.unmount();
   }
 
-  updateText(text: string) {
-    if (this.textId) {
-      this.surface?.updateElement<'text'>(this.textId, {
-        text,
-      });
-    } else {
+  addText(text: string) {
+    if (!this.textId) {
+      const yText = new Y.Text(text);
+
       const id = this.surface?.addElement('text', {
         containerId: this.id,
-        text,
+        text: yText,
         xywh: transformShapeXYWH(this.xywh),
       });
       this.yMap.set('textId', id);

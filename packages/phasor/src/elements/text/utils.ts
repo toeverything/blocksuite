@@ -1,5 +1,7 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
+import type { ITextDelta } from './types.js';
+
 const RS_LTR_CHARS =
   'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF' +
   '\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF';
@@ -244,4 +246,62 @@ export function wrapText(text: string, font: string, maxWidth: number): string {
     }
   });
   return lines.join('\n');
+}
+
+function transformDelta(delta: ITextDelta): (ITextDelta | '\n')[] {
+  const result: (ITextDelta | '\n')[] = [];
+
+  let tmpString = delta.insert;
+  while (tmpString.length > 0) {
+    const index = tmpString.indexOf('\n');
+    if (index === -1) {
+      result.push({
+        insert: tmpString,
+        attributes: delta.attributes,
+      });
+      break;
+    }
+
+    if (tmpString.slice(0, index).length > 0) {
+      result.push({
+        insert: tmpString.slice(0, index),
+        attributes: delta.attributes,
+      });
+    }
+
+    result.push('\n');
+    tmpString = tmpString.slice(index + 1);
+  }
+
+  return result;
+}
+
+/**
+ * convert a delta insert array to chunks, each chunk is a line
+ */
+export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
+  if (delta.length === 0) {
+    return [[]];
+  }
+
+  const transformedDelta = delta.flatMap(transformDelta);
+
+  function* chunksGenerator(arr: (ITextDelta | '\n')[]) {
+    let start = 0;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === '\n') {
+        const chunk = arr.slice(start, i);
+        start = i + 1;
+        yield chunk as ITextDelta[];
+      } else if (i === arr.length - 1) {
+        yield arr.slice(start) as ITextDelta[];
+      }
+    }
+
+    if (arr.at(-1) === '\n') {
+      yield [];
+    }
+  }
+
+  return [...chunksGenerator(transformedDelta)];
 }
