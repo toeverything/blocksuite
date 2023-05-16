@@ -67,12 +67,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
       strokeStyle: StrokeStyle.Solid,
     });
     const tmpShape = this._surface.pickById(id) as ShapeElement;
-    let a = 'asadasdas\nefdas❎\n95i605687095687095687059';
-    tmpShape.updateText(a);
-    setInterval(() => {
-      a += '\nff';
-      tmpShape.updateText(a);
-    }, 1000);
+    tmpShape.updateText('asadasdas\nefdas❎\n95i605687095687095687059');
 
     this._draggingElementId = id;
 

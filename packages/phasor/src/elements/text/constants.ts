@@ -1,6 +1,6 @@
-import type { IText } from './types.js';
+import type { ElementDefaultProps } from '../index.js';
 
-export const TextElementDefaultProps: Omit<IText, 'id' | 'index'> = {
+export const TextElementDefaultProps: ElementDefaultProps<'text'> = {
   type: 'text',
   xywh: '[0,0,0,0]',
 

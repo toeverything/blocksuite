@@ -5,6 +5,7 @@ export interface IText {
   index: string;
   type: 'text';
   xywh: SerializedXYWH;
+  seed: number;
 
   text: string;
   color: string;
