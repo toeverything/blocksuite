@@ -704,7 +704,7 @@ function trySelectBySegmenter(
       selection,
       currentChar
     );
-    if (currentCharIndex === -1) return null;
+    if (currentCharIndex === -1 || currentNodeIndex === -1) return null;
 
     // length for expand left
     let leftLength = currentCharIndex;
