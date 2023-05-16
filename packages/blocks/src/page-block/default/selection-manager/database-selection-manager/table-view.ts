@@ -1,10 +1,10 @@
 import {
-  getModelByBlockElement,
   handleNativeRangeDragMove,
   isBlankArea,
   type SelectionEvent,
 } from '../../../../__internal__/index.js';
-import type { DatabaseBlockModel } from '../../../../index.js';
+import { getService } from '../../../../__internal__/service.js';
+import type { DatabaseBlockService } from '../../../../database-block/database-service.js';
 import type { DefaultSelectionManager } from '../default-selection-manager.js';
 import {
   getClosestDatabase,
@@ -13,7 +13,7 @@ import {
 } from './utils.js';
 
 export class DatabaseTableViewSelectionManager {
-  private _databaseModel: DatabaseBlockModel | null = null;
+  private _service: DatabaseBlockService | null = null;
   private _startCell: HTMLElement | null = null;
   private _columnWidthHandles: HTMLElement[] = [];
   private _startRange: Range | null = null;
@@ -36,12 +36,7 @@ export class DatabaseTableViewSelectionManager {
       );
       this._setColumnWidthHandleDisplay('none');
 
-      this._databaseModel = getModelByBlockElement(
-        database
-      ) as DatabaseBlockModel;
-      this._databaseModel.slots.tableViewSelectionUpdated.emit({
-        stage: 'start',
-      });
+      this._service = getService('affine:database');
     }
   }
 
@@ -84,8 +79,8 @@ export class DatabaseTableViewSelectionManager {
       const rowIds = getSelectedRowIds(startCell, endCell);
       this._rowIds = rowIds;
 
-      this._databaseModel?.slots.tableViewSelectionUpdated.emit({
-        stage: 'move',
+      this._service?.setTableViewSelection({
+        type: 'select',
         rowIds,
         databaseId,
       });
@@ -94,9 +89,6 @@ export class DatabaseTableViewSelectionManager {
   }
 
   onDragEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
-    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
-      stage: 'end',
-    });
     this._setColumnWidthHandleDisplay('block');
   }
 
@@ -111,8 +103,8 @@ export class DatabaseTableViewSelectionManager {
     databaseId: string
   ) {
     this._rowIds = [];
-    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
-      stage: 'move',
+    this._service?.setTableViewSelection({
+      type: 'select',
       rowIds: [],
       databaseId,
     });

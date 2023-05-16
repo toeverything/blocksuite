@@ -3,19 +3,43 @@ import {
   assertExists,
   type BaseBlockModel,
   type Page,
+  Slot,
 } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import {
-  asyncFocusRichText,
-  getModelByBlockElement,
-  type SerializedBlock,
-} from '../std.js';
+  clearAllDatabaseRowsSelection,
+  getDatabaseById,
+  setDatabaseRowsSelection,
+} from '../page-block/default/selection-manager/database-selection-manager/utils.js';
+import type { DatabaseTableState } from '../std.js';
+import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
+  slots = {
+    tableViewSelectionUpdated: new Slot<DatabaseTableState | null>(),
+  };
+
+  constructor() {
+    super();
+
+    this.slots.tableViewSelectionUpdated.on(state => {
+      if (!state) return;
+      const { type, rowIds, databaseId } = state;
+
+      if (type === 'select') {
+        if (!databaseId || !rowIds) return;
+        const database = getDatabaseById(databaseId);
+        setDatabaseRowsSelection(database, rowIds);
+      } else if (type === 'clear') {
+        clearAllDatabaseRowsSelection();
+      }
+    });
+  }
+
   initDatabaseBlock(
     page: Page,
     model: BaseBlockModel,
@@ -114,25 +138,15 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
-  private get _databaseModel() {
-    const databases = document.querySelectorAll('affine-database');
-    if (databases.length === 0) return null;
-
-    const databaseModel = getModelByBlockElement(
-      databases[0]
-    ) as DatabaseBlockModel;
-    return databaseModel;
-  }
-
   clearTableViewSelection() {
-    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
-      stage: 'clear',
+    this.slots.tableViewSelectionUpdated.emit({
+      type: 'clear',
     });
   }
 
-  setTableViewSelection(databaseId: string, rowIds: number[]) {
-    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
-      stage: 'click',
+  setTableViewSelection({ type, databaseId, rowIds }: DatabaseTableState) {
+    this.slots.tableViewSelectionUpdated.emit({
+      type,
       databaseId,
       rowIds,
     });

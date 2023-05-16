@@ -1,13 +1,7 @@
-import { Slot, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-import {
-  clearAllDatabaseRowsSelection,
-  getDatabaseById,
-  setDatabaseRowsSelection,
-} from '../page-block/default/selection-manager/database-selection-manager/utils.js';
-import type { DatabaseTableState } from '../std.js';
 import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column, SelectTag } from './table/types.js';
 import type { DatabaseMode } from './types.js';
@@ -30,10 +24,6 @@ type SerializedCells = {
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
-  slots = {
-    tableViewSelectionUpdated: new Slot<DatabaseTableState | null>(),
-  };
-
   override onCreated() {
     super.onCreated();
 
@@ -44,19 +34,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
           event.path.includes('prop:cells'))
       ) {
         this.propsUpdated.emit();
-      }
-    });
-
-    this.slots.tableViewSelectionUpdated.on(state => {
-      if (!state) return;
-      const { stage, rowIds, databaseId } = state;
-
-      if (stage === 'move' || stage === 'click') {
-        if (!databaseId || !rowIds) return;
-        const database = getDatabaseById(databaseId);
-        setDatabaseRowsSelection(database, rowIds);
-      } else if (stage === 'clear') {
-        clearAllDatabaseRowsSelection();
       }
     });
   }

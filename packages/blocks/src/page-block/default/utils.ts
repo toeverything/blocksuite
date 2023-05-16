@@ -551,7 +551,11 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
           const databaseId = getClosestDatabaseId(element);
 
           const databaseService = getService('affine:database');
-          databaseService.setTableViewSelection(databaseId, [rowId]);
+          databaseService.setTableViewSelection({
+            type: 'select',
+            databaseId,
+            rowIds: [rowId],
+          });
           return;
         }
       }
