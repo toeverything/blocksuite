@@ -55,9 +55,17 @@ const styles = css`
   }
   .affine-database-block-table::-webkit-scrollbar-thumb {
     border-radius: 2px;
+    background-color: var(--affine-black-10);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar {
+    margin-top: 0px;
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
+    height: 8px;
   }
   .affine-database-block-table:hover::-webkit-scrollbar-thumb {
-    background-color: var(--affine-black-10);
+    border-radius: 16px;
+    background-color: var(--affine-black-30);
   }
 
   .affine-database-table-container {

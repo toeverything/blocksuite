@@ -252,7 +252,7 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerClick = async (e: SelectionEvent) => {
+  private _onContainerClick = (e: SelectionEvent) => {
     const container = getEditorContainerByElement(this.container);
     activeEditorManager.setActive(container);
     const {
@@ -355,8 +355,10 @@ export class DefaultSelectionManager {
       return;
 
     // FIXME: refactor this
-    const databaseService = await getServiceOrRegister('affine:database');
-    databaseService.clearTableViewSelection();
+    const service = getServiceOrRegister('affine:database');
+    if (service instanceof Promise) {
+      service.then(database => database.clearTableViewSelection());
+    }
 
     handleNativeRangeClick(this.page, e, this.container);
   };
