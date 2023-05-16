@@ -43,8 +43,10 @@ const styles = css`
     overflow-x: scroll;
     border-top: 1.5px solid var(--affine-border-color);
   }
+  .affine-database-block-table:hover {
+    padding-bottom: 0px;
+  }
   .affine-database-block-table::-webkit-scrollbar {
-    margin-top: 4px;
     -webkit-appearance: none;
   }
   .affine-database-block-table::-webkit-scrollbar:horizontal {
@@ -52,9 +54,17 @@ const styles = css`
   }
   .affine-database-block-table::-webkit-scrollbar-thumb {
     border-radius: 2px;
+    background-color: var(--affine-black-10);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
+    height: 8px;
   }
   .affine-database-block-table:hover::-webkit-scrollbar-thumb {
-    background-color: var(--affine-black-10);
+    border-radius: 16px;
+    background-color: var(--affine-black-30);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar-track {
+    background-color: var(--affine-hover-color);
   }
 
   .affine-database-table-container {
@@ -84,7 +94,9 @@ const styles = css`
     margin-top: -8px;
   }
   .affine-database-block-footer:hover {
-    background-color: var(--affine-hover-color);
+    position: relative;
+    z-index: 1;
+    background-color: var(--affine-hover-color-filled);
   }
   .affine-database-block-footer:hover .affine-database-block-add-row {
     display: flex;
