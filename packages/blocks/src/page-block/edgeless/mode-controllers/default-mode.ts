@@ -188,9 +188,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._handleDragMoveEffect(block);
 
     // TODO: refactor
-    if (this._edgeless.getSelection().selectedBlocks.length) {
+    if (this._edgeless.selection.selectedBlocks.length) {
       this._edgeless.slots.selectedBlocksUpdated.emit(
-        this._edgeless.getSelection().selectedBlocks
+        this._edgeless.selection.selectedBlocks
       );
     }
   }

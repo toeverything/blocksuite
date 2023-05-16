@@ -66,7 +66,7 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     this._onCopy(e);
 
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const selection = this._edgeless.selection.blockSelectionState;
     if (selection.active) {
       deleteModelsByRange(this._page);
       return;
@@ -89,7 +89,7 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const selection = this._edgeless.selection.blockSelectionState;
     // when frame active, handle copy like page mode
     if (selection.active) {
       const range = getCurrentBlockRange(this._page);
@@ -116,7 +116,7 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const selection = this._edgeless.selection.blockSelectionState;
     if (selection.active) {
       this._pasteInTextFrame(e);
       return;
@@ -265,7 +265,7 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.frames || []
     );
 
-    const lastMousePos = this._edgeless.getSelection().lastMousePos;
+    const lastMousePos = this._edgeless.selection.lastMousePos;
     const [modelX, modelY] = this._edgeless.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
