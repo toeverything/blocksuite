@@ -30,7 +30,7 @@ import { ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { generateElementId } from './utils/std.js';
+import { generateElementId, normalizeWheelDeltaY } from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -443,8 +443,8 @@ export class SurfaceManager {
       }
       // zoom
       else {
-        const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-        _renderer.applyDeltaZoom(delta);
+        const zoom = normalizeWheelDeltaY(e.deltaY);
+        _renderer.setZoom(zoom);
       }
     });
   }

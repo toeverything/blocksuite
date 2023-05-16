@@ -2,7 +2,7 @@ import { clamp, type IPoint } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
 import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { type IBound, MAX_ZOOM, MIN_ZOOM } from './consts.js';
+import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
@@ -26,7 +26,6 @@ export interface SurfaceViewport {
 
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number): void;
-  applyDeltaZoom(delta: number): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
@@ -159,13 +158,8 @@ export class Renderer implements SurfaceViewport {
   }
 
   setZoom(zoom: number) {
-    this._zoom = zoom;
+    this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
     this._shouldUpdate = true;
-  }
-
-  applyDeltaZoom(zoom: number) {
-    const newZoom = clamp(zoom, MIN_ZOOM, MAX_ZOOM);
-    this.setZoom(newZoom);
   }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {

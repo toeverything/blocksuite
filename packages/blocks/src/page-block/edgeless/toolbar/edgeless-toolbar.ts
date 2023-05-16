@@ -14,7 +14,14 @@ import {
   ViewBarIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
+import {
+  Bound,
+  deserializeXYWH,
+  getCommonBound,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -27,7 +34,7 @@ import {
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '../utils.js';
+import { stopPropagation } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 

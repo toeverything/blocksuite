@@ -1,6 +1,6 @@
 /// <reference types="@blocksuite/global" />
 
-export { StrokeStyle } from './consts.js';
+export { StrokeStyle, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export type {
   AttachedElement,
   AttachedElementPosition,
