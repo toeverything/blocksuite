@@ -544,12 +544,7 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
   const selection = window.getSelection();
-  if (
-    selection &&
-    selection.isCollapsed &&
-    selection.anchorNode &&
-    selection.anchorNode.nodeType !== Node.COMMENT_NODE
-  ) {
+  if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =
       selection.anchorNode.parentElement?.closest('[contenteditable]');
     if (editableContainer) {
@@ -708,7 +703,7 @@ function trySelectBySegmenter(
       selection,
       currentChar
     );
-    if (currentCharIndex === -1) return null;
+    if (currentCharIndex === -1 || currentNodeIndex === -1) return null;
 
     // length for expand left
     let leftLength = currentCharIndex;
