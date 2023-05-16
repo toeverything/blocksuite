@@ -41,6 +41,12 @@ export function DataBaseRowContainer(
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
       }
+      .affine-database-block-row.selected {
+        background: var(--affine-secondary-color);
+      }
+      .affine-database-block-row.selected > .database-cell {
+        background: transparent;
+      }
       .affine-database-block-row > .affine-database-block-row-cell:first-child {
         background: var(--affine-hover-color);
       }
@@ -60,7 +66,14 @@ export function DataBaseRowContainer(
       .affine-database-block-row-cell-content > .affine-block-element {
         width: 100%;
       }
+      .affine-database-block-row-cell-content > affine-paragraph {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
       .affine-database-block-row-cell-content > affine-paragraph > .text {
+        width: 100%;
         margin-top: unset;
       }
       .database-cell {

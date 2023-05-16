@@ -499,6 +499,7 @@ function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
   const { clientX, clientY } = e.raw;
 
   const horizontalElement = getClosestEditor(clientY, container);
+  if (horizontalElement?.closest('affine-database')) return;
   if (!horizontalElement) return;
 
   const model = getModelByElement(horizontalElement);
@@ -839,7 +840,12 @@ export function isDatabase(e: SelectionEvent) {
     // the target is not an `HTMLElement`, instead `SVGElement`.
     return false;
   }
-  if (target.className.startsWith('affine-database')) {
+  if (
+    // target.className.startsWith('affine-database') ||
+    // // prevent select column from triggering block selection
+    // target.tagName.startsWith('AFFINE-DATABASE')
+    target.closest('affine-database-table')
+  ) {
     return true;
   }
   return false;

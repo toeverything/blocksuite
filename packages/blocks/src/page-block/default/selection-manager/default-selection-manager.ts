@@ -41,6 +41,7 @@ import {
   Rect,
   type SelectionEvent,
 } from '../../../__internal__/index.js';
+import { getServiceOrRegister } from '../../../__internal__/service.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -58,6 +59,7 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
+import { DatabaseTableViewSelectionManager } from './database-selection-manager/table-view.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
@@ -78,6 +80,7 @@ export class DefaultSelectionManager {
   readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
+  private readonly _databaseTableViewManager: DatabaseTableViewSelectionManager;
 
   constructor({
     page,
@@ -95,6 +98,7 @@ export class DefaultSelectionManager {
     this.container = container;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
+    this._databaseTableViewManager = new DatabaseTableViewSelectionManager();
     this._disposables.add(
       initMouseEventHandlers(
         mouseRoot,
@@ -137,7 +141,7 @@ export class DefaultSelectionManager {
     }
     if (isDatabase(e)) {
       this.state.type = 'database';
-      // todo: add manager
+      this._databaseTableViewManager.onDragStart(this, e);
       return;
     }
 
@@ -171,8 +175,13 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onMove(this, e);
       return;
     }
+
     if (this.state.type === 'embed') {
       return this._embedResizeManager.onMove(e);
+    }
+
+    if (this.state.type === 'database') {
+      return this._databaseTableViewManager.onDragMove(this, e);
     }
   };
 
@@ -189,6 +198,8 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
+    } else if (this.state.type === 'database') {
+      this._databaseTableViewManager.onDragEnd(this, e);
     }
     if (this.page.readonly) return;
 
@@ -342,6 +353,13 @@ export class DefaultSelectionManager {
       target instanceof HTMLInputElement
     )
       return;
+
+    // FIXME: refactor this
+    const service = getServiceOrRegister('affine:database');
+    if (service instanceof Promise) {
+      service.then(database => database.clearTableViewSelection());
+    }
+
     handleNativeRangeClick(this.page, e, this.container);
   };
 
