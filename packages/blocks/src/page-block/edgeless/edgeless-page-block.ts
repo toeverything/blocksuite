@@ -391,10 +391,11 @@ export class EdgelessPageBlockComponent
 
     elements.sort((a, b) => a.zIndex - b.zIndex);
 
-    // TODO: opt sort
-    const allElements = (this.model.children as FrameBlockModel[]).sort(
-      (a, b) => a.zIndex - b.zIndex
-    );
+    // filter & sort
+    const allElements = (this.model.children as FrameBlockModel[])
+      .filter(element => element.flavour === 'affine:frame')
+      .slice(0);
+    allElements.sort((a, b) => a.zIndex - b.zIndex);
 
     let zIndex = 0;
     let frames: FrameBlockModel[];
