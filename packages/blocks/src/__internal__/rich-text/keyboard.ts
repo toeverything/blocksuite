@@ -220,19 +220,19 @@ export function createKeyDownHandler(
           return false;
         }
 
-        return (
-          key === evt.key ||
-          match?.call(
-            {
-              vEditor,
-              options: {
-                bindings,
-              },
-            },
-            vRange,
-            curContext
-          )
-        );
+        return Array.isArray(key)
+          ? key.includes(evt.key)
+          : key === evt.key ||
+              match?.call(
+                {
+                  vEditor,
+                  options: {
+                    bindings,
+                  },
+                },
+                vRange,
+                curContext
+              );
       })
       .reduce((store: KeyboardBinding[], [, binding]) => {
         store.push(binding);
