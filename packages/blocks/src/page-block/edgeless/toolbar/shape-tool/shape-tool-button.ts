@@ -2,6 +2,7 @@ import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
 import { ShapeIcon } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -9,7 +10,6 @@ import type {
   MouseMode,
   ShapeMouseMode,
 } from '../../../../__internal__/index.js';
-import { WithDisposable } from '../../../../__internal__/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

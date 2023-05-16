@@ -1,16 +1,15 @@
 /// <reference types="vite/client" />
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
 import type { DividerBlockModel } from './divider-model.js';
 import { DividerBlockService } from './divider-service.js';
 
 @customElement('affine-divider')
-export class DividerBlockComponent extends ShadowlessElement {
+export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
   static override styles = css`
     .affine-divider-block-container {
       width: 100%;
@@ -25,12 +24,6 @@ export class DividerBlockComponent extends ShadowlessElement {
       width: 100%;
     }
   `;
-
-  @property()
-  model!: DividerBlockModel;
-
-  @property()
-  content!: TemplateResult;
 
   override connectedCallback() {
     super.connectedCallback();
