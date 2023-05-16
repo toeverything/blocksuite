@@ -174,6 +174,56 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    desc: 'move surface block into children of page block',
+    condition: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      if (!yVersions) return false;
+
+      const surfaceVersion = yVersions.get('affine:surface');
+      if (!surfaceVersion) {
+        throw new MigrationError('affine:surface version not found');
+      }
+      return surfaceVersion < 2;
+    },
+    migrate: doc => {
+      // @ts-ignore
+      const pageIds = doc
+        .getMap('space:meta')
+        .get('pages')
+        .map((a: Y.Map<unknown>) => a.get('id')) as string[];
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      yVersions.set('affine:surface', 2);
+
+      let pageBlock: Y.Map<unknown> | undefined;
+      let surfaceId: string | undefined;
+
+      pageIds.forEach(pageId => {
+        const spaceId = `space:${pageId}`;
+        const yBlocks = doc.getMap(spaceId);
+
+        Array.from(yBlocks.entries()).forEach(([yId, yBlock]) => {
+          if (yBlock.get('sys:flavour') === 'affine:page') {
+            pageBlock = yBlock;
+          }
+          if (yBlock.get('sys:flavour') === 'affine:surface') {
+            surfaceId = yId;
+          }
+        });
+      });
+
+      if (!pageBlock || !surfaceId) {
+        return;
+      }
+
+      const yChildren = pageBlock.get('sys:children') as Y.Array<string>;
+      yChildren.push([surfaceId]);
+    },
+  },
 ];
 
 export function tryMigrate(doc: Y.Doc) {
