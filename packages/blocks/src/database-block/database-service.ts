@@ -116,6 +116,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   private get _databaseModel() {
     const databases = document.querySelectorAll('affine-database');
+    if (databases.length === 0) return null;
+
     const databaseModel = getModelByBlockElement(
       databases[0]
     ) as DatabaseBlockModel;
@@ -123,13 +125,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   }
 
   clearTableViewSelection() {
-    this._databaseModel.slots.tableViewSelectionUpdated.emit({
+    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
       stage: 'clear',
     });
   }
 
   setTableViewSelection(databaseId: string, rowIds: number[]) {
-    this._databaseModel.slots.tableViewSelectionUpdated.emit({
+    this._databaseModel?.slots.tableViewSelectionUpdated.emit({
       stage: 'click',
       databaseId,
       rowIds,
