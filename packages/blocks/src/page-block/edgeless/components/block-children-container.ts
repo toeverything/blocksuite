@@ -75,7 +75,7 @@ export function EdgelessBlockChildrenContainer(
 ) {
   return html`
     ${repeat(
-      model.children,
+      model.children.filter(child => child.flavour === 'affine:frame'),
       child => child.id,
       child =>
         EdgelessBlockChild(

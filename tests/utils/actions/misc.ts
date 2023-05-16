@@ -38,6 +38,8 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     return true;
   }
   const ignoredMessages = [
+    // surface block don't have component
+    'Cannot find tag for affine:surface',
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
     // clipboard.spec.ts
@@ -317,7 +319,7 @@ export async function initEmptyEdgelessState(page: Page) {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:surface', {}, null);
+    page.addBlock('affine:surface', {}, pageId);
     const frameId = page.addBlock('affine:frame', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.resetHistory();

@@ -31,7 +31,7 @@ export const empty: InitFn = (workspace: Workspace, pageId: string) => {
     title: new Text(),
   });
 
-  page.addBlock('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
@@ -51,7 +51,7 @@ export const heavy: InitFn = (workspace: Workspace, pageId: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text(),
   });
-  page.addBlock('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
@@ -97,13 +97,13 @@ export const preset: InitFn = (workspace: Workspace, pageId: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  page.addBlock('affine:surface', {}, null);
+  const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   // Import preset markdown content inside frame block
   const contentParser = new window.ContentParser(page);
-  addShapeElement(page, {
+  addShapeElement(page, surfaceBlockId, {
     id: '0',
     index: 'a0',
     type: 'shape',
@@ -133,7 +133,7 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  page.addBlock('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
@@ -230,7 +230,7 @@ export const multiEditor: InitFn = (workspace: Workspace, pageId: string) => {
     title: new Text(),
   });
 
-  page.addBlock('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
@@ -265,7 +265,7 @@ export const multiEditorVertical: InitFn = (
     title: new Text(),
   });
 
-  page.addBlock('affine:surface', {}, null);
+  page.addBlock('affine:surface', {}, pageBlockId);
 
   // Add frame block inside page block
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);

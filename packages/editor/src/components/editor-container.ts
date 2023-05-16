@@ -8,7 +8,6 @@ import {
   edgelessPreset,
   type PageBlockModel,
   pagePreset,
-  type SurfaceBlockModel,
   WithDisposable,
 } from '@blocksuite/blocks';
 import {
@@ -61,15 +60,8 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
-  get model() {
-    return [this.page.root, this.page.surface] as [
-      PageBlockModel | null,
-      SurfaceBlockModel | null
-    ];
-  }
-
-  get pageBlockModel(): PageBlockModel | null {
-    return Array.isArray(this.model) ? this.model[0] : this.model;
+  get model(): PageBlockModel | null {
+    return this.page.root as PageBlockModel | null;
   }
 
   slots: AbstractEditor['slots'] = {
@@ -90,7 +82,7 @@ export class EditorContainer
       if (e.code !== 'Escape') {
         return;
       }
-      const pageModel = this.pageBlockModel;
+      const pageModel = this.model;
       if (!pageModel) return;
 
       if (this.mode === 'page') {
@@ -197,10 +189,10 @@ export class EditorContainer
   }
 
   override render() {
-    if (!this.model || !this.pageBlockModel) return null;
+    if (!this.model) return null;
 
     const rootContainer = keyed(
-      this.pageBlockModel.id,
+      this.model.id,
       html`<block-suite-root
         .page=${this.page}
         .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
