@@ -127,7 +127,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   return id;
 }
 
-test('text added after a link should not have link formatting', async ({
+test('text added after a link which has custom edited should not have link formatting', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

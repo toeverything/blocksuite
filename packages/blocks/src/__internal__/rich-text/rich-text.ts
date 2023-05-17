@@ -32,15 +32,18 @@ const autoIdentifyLink = (
       .getDeltasByVRange(vRange)
       .filter(([delta]) => delta.attributes?.link)[0];
     const [delta, { index, length }] = linkDeltaInfo;
-
-    //It means the link has been custom edited, so we should not auto identify it
-    if (delta.attributes?.link !== delta.insert) {
-      delete context.attributes['link'];
-      return;
-    }
-
     const rangePositionInDelta = vRange.index - index;
 
+    //It means the link has been custom edited
+    if (delta.attributes?.link !== delta.insert) {
+      // If the cursor is at the end of the link, we should not auto identify it
+      if (rangePositionInDelta === length) {
+        delete context.attributes['link'];
+        return;
+      }
+      // If the cursor is not at the end of the link, we should only update the link text
+      return;
+    }
     const newText =
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
