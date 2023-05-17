@@ -91,7 +91,8 @@ export function DataBaseRowContainer(
           return html`
             <div
               class="affine-database-block-row database-row"
-              data-row-id="${idx}"
+              data-row-index="${idx}"
+              data-row-id="${child.id}"
             >
               <div
                 class="affine-database-block-row-cell database-cell"

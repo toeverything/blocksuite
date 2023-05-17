@@ -2,31 +2,49 @@ import { assertExists } from '@blocksuite/store';
 
 import { RowLevelSelection } from '../../../../database-block/table/components/selection.js';
 
-export function getClosestRowId(element: Element): number {
-  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
-  if (rowId) {
-    return Number(rowId);
+export function getClosestRowIndex(element: Element): number {
+  const rowIndex = element
+    .closest('.database-row')
+    ?.getAttribute('data-row-index');
+  if (rowIndex) {
+    return Number(rowIndex);
   }
-  // Header row has no id.
+  // Header row has no index.
   return -1;
 }
 
-export function getSelectedRowIds(
+export function getClosestRowId(element: Element): string {
+  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
+  if (rowId) {
+    return rowId;
+  }
+  // Header row has no id.
+  return '';
+}
+
+export function getSelectedRowIdsByIndexes(
+  database: Element,
+  indexes: number[]
+) {
+  return indexes.map(item => getRowIdByIndex(database, item));
+}
+
+export function getSelectedRowIndexes(
   startCell: Element,
   endCell: Element
 ): number[] {
-  const currentRowId = getClosestRowId(startCell);
-  const startRowId = getClosestRowId(endCell);
-  if (currentRowId === -1 || startRowId === -1) return [];
+  const currentRowIndex = getClosestRowIndex(startCell);
+  const startRowIndex = getClosestRowIndex(endCell);
+  if (currentRowIndex === -1 || startRowIndex === -1) return [];
 
-  const minId = Math.min(currentRowId, startRowId);
-  const maxId = Math.max(currentRowId, startRowId);
-  const rowIds = [];
-  for (let id = minId; id <= maxId; id++) {
-    rowIds.push(id);
+  const minIndex = Math.min(currentRowIndex, startRowIndex);
+  const maxIndex = Math.max(currentRowIndex, startRowIndex);
+  const rowIndexes = [];
+  for (let id = minIndex; id <= maxIndex; id++) {
+    rowIndexes.push(id);
   }
 
-  return rowIds;
+  return rowIndexes;
 }
 
 export function getClosestDatabase(element: Element | null) {
@@ -64,8 +82,9 @@ export function clearAllDatabaseRowsSelection() {
 }
 
 export function setDatabaseRowsSelection(
+  databaseId: string,
   database: HTMLElement,
-  rowIds: number[]
+  rowIds: string[]
 ) {
   const container = database.querySelector<HTMLElement>(
     '.affine-database-table-container'
@@ -80,11 +99,17 @@ export function setDatabaseRowsSelection(
     container.appendChild(rowLevelSelection);
   }
 
-  const databaseId = database.getAttribute('data-block-id');
-  assertExists(databaseId);
   rowLevelSelection.container = container;
   rowLevelSelection.setSelection({
     databaseId,
     rowIds,
   });
+}
+
+function getRowIdByIndex(database: Element, index: number) {
+  const rowId = database
+    .querySelector(`.database-row[data-row-index="${index}"]`)
+    ?.getAttribute('data-row-id');
+  assertExists(rowId);
+  return rowId;
 }

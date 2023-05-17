@@ -44,7 +44,12 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
 
   private _getStyles = () => {
     const { rowIds = [] } = this.state;
-    if (rowIds.length === 0) {
+    const { startRow, endRow } = getRowsByIds(this.container, {
+      startRowId: rowIds[0],
+      endRowId: rowIds[rowIds.length - 1],
+    });
+
+    if (rowIds.length === 0 || !startRow || !endRow) {
       return {
         left: 0,
         top: 0,
@@ -53,13 +58,9 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       };
     }
 
-    const startRowId = rowIds[0];
-    const endRowId = rowIds[rowIds.length - 1];
+    const startIndex = getRowIndex(startRow);
+    const endIdex = getRowIndex(endRow);
 
-    const startRow = this.container.querySelector(
-      `.database-row[data-row-id="${startRowId}"]`
-    );
-    assertExists(startRow);
     const containerPos = this.container.getBoundingClientRect();
     const { left, top, height } = startRow.getBoundingClientRect();
 
@@ -67,7 +68,7 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       left: left - containerPos.left,
       top: top - containerPos.top,
       height:
-        startRowId === endRowId ? height : (endRowId - startRowId + 1) * height,
+        startIndex === endIdex ? height : (endIdex - startIndex + 1) * height,
     };
   };
 
@@ -92,4 +93,27 @@ declare global {
   interface HTMLElementTagNameMap {
     'database-row-level-selection': RowLevelSelection;
   }
+}
+
+function getRowsByIds(
+  container: Element,
+  { startRowId, endRowId }: { startRowId: string; endRowId: string }
+) {
+  const startRow = container.querySelector(
+    `.database-row[data-row-id="${startRowId}"]`
+  );
+  const endRow = container.querySelector(
+    `.database-row[data-row-id="${endRowId}"]`
+  );
+
+  return {
+    startRow,
+    endRow,
+  };
+}
+
+function getRowIndex(row: Element) {
+  const rowIndex = row?.getAttribute('data-row-index');
+  assertExists(rowIndex);
+  return Number(rowIndex);
 }

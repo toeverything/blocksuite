@@ -516,10 +516,10 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       page.captureSync();
 
+      const parent = page.getParent(model);
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const parent = page.getParent(model);
         assertExists(parent);
         page.moveBlocks(models, parent, model, type === 'before');
       }
@@ -529,6 +529,13 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
+        const service = getService('affine:database');
+        service.refreshTableViewSelection();
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          pageBlock.selection.clear();
+          return;
+        }
+
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
@@ -543,19 +550,29 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setDragType(dragging: boolean) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
-    setSelectedBlock(modelState: EditingState | null) {
-      if (modelState) {
-        const { element } = modelState;
+    setSelectedBlock(modelState: EditingState | null, element) {
+      if (element) {
         const rowId = getClosestRowId(element);
-        if (rowId !== -1) {
+        if (rowId !== '') {
           const databaseId = getClosestDatabaseId(element);
 
           const databaseService = getService('affine:database');
           databaseService.setTableViewSelection({
-            type: 'select',
+            type: 'click',
             databaseId,
             rowIds: [rowId],
           });
+
+          pageBlock.selection.clear();
+          return;
+        }
+      }
+
+      const model = modelState?.model;
+      if (model) {
+        const page = model.page;
+        const parent = page.getParent(model);
+        if (parent && matchFlavours(parent, ['affine:database'])) {
           return;
         }
       }

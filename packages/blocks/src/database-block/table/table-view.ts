@@ -41,6 +41,7 @@ const styles = css`
     width: 100%;
     padding-bottom: 4px;
     overflow-x: scroll;
+    overflow-y: hidden;
     border-top: 1.5px solid var(--affine-border-color);
   }
   .affine-database-block-table:hover {
