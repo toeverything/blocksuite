@@ -18,11 +18,24 @@ import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { clamp, type MouseMode } from '../../../__internal__/index.js';
+import {
+  clamp,
+  type MouseMode,
+  Point,
+  uploadImageFromLocal,
+} from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
+import {
+  DEFAULT_FRAME_HEIGHT,
+  DEFAULT_FRAME_OFFSET_X,
+  DEFAULT_FRAME_OFFSET_Y,
+  DEFAULT_FRAME_WIDTH,
+  stopPropagation,
+  ZOOM_MAX,
+  ZOOM_MIN,
+} from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -97,6 +110,8 @@ export class EdgelessToolbar extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  private _imageLoading = false;
+
   private _setMouseMode(mouseMode: MouseMode) {
     this.edgeless?.slots.mouseModeUpdated.emit(mouseMode);
   }
@@ -137,6 +152,39 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.slots.viewportUpdated.emit();
   }
 
+  private async _addImage() {
+    this._imageLoading = true;
+    const options = {
+      width: DEFAULT_FRAME_WIDTH,
+      height: DEFAULT_FRAME_HEIGHT,
+      offsetX: DEFAULT_FRAME_OFFSET_X,
+      offsetY: DEFAULT_FRAME_OFFSET_Y,
+    };
+
+    const models = await uploadImageFromLocal(this.edgeless.page, realSize =>
+      Object.assign(options, realSize)
+    );
+    const { centerX, centerY, viewportBounds } = this.edgeless.surface.viewport;
+
+    if (options.width && options.height) {
+      const { h } = viewportBounds;
+      const s = options.width / options.height;
+      const sh =
+        options.height > h ? h * 0.618 : Math.min(options.height, h * 0.618);
+      options.height = sh;
+      options.width = sh * s;
+      options.offsetX = 0;
+      options.offsetY = 0;
+    }
+
+    const [x, y] = this.edgeless.surface.toViewCoord(
+      centerX - options.width / 2,
+      centerY - options.height / 2
+    );
+    this.edgeless.addNewFrame(models, new Point(x, y), options);
+    this._imageLoading = false;
+  }
+
   override render() {
     const type = this.mouseMode?.type;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
@@ -172,10 +220,9 @@ export class EdgelessToolbar extends LitElement {
           .edgeless=${this.edgeless}
         ></edgeless-shape-tool-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
+          .disabled=${this._imageLoading}
           .tooltip=${'Image'}
-          .active=${false}
-          @click=${() => console.log('Image')}
+          @click=${() => this._addImage()}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>

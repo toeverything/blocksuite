@@ -16,7 +16,8 @@ export const createImageInputElement = () => {
 type Props = Partial<BaseBlockModel>;
 
 export const uploadImageFromLocal = async (
-  page: Page
+  page: Page,
+  getSize?: (size: { width: number; height: number }) => void
 ): Promise<Array<Props>> => {
   const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
   const fileInput = createImageInputElement();
@@ -32,7 +33,33 @@ export const uploadImageFromLocal = async (
     assertExists(storage);
     const files = fileInput.files;
     if (files.length === 1) {
-      const id = await storage.set(files[0]);
+      const file = files[0];
+      if (getSize) {
+        const size = await new Promise<{ width: number; height: number }>(
+          resolve => {
+            let width = 0;
+            let height = 0;
+            let reader: FileReader | null = new FileReader();
+            reader.addEventListener('load', _ => {
+              const img = new Image();
+              img.onload = () => {
+                width = img.width;
+                height = img.height;
+                resolve({ width, height });
+              };
+              img.src = reader?.result as string;
+              reader = null;
+            });
+            reader.addEventListener('error', _ => {
+              reader = null;
+              resolve({ width, height });
+            });
+            reader.readAsDataURL(file);
+          }
+        );
+        getSize(size);
+      }
+      const id = await storage.set(file);
       resolvePromise([{ ...baseProps, sourceId: id }]);
     } else {
       const res = [];
