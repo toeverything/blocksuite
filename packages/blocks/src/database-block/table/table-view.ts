@@ -33,7 +33,7 @@ const styles = css`
     align-items: center;
     justify-content: space-between;
     height: 44px;
-    margin: 18px 0 6px;
+    margin: 18px 0 0;
   }
 
   .affine-database-block-table {
@@ -68,6 +68,7 @@ const styles = css`
   }
 
   .affine-database-table-container {
+    position: relative;
     width: fit-content;
     min-width: 100%;
   }

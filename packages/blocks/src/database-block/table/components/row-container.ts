@@ -41,9 +41,6 @@ export function DataBaseRowContainer(
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
       }
-      .affine-database-block-row.selected {
-        background: var(--affine-secondary-color);
-      }
       .affine-database-block-row.selected > .database-cell {
         background: transparent;
       }

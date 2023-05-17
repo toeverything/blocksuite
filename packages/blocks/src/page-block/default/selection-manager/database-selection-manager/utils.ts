@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/store';
 
-const DATABASE_ROW_SELECTED_CLASS = 'selected';
+import { RowLevelSelection } from '../../../../database-block/table/components/selection.js';
 
 export function getClosestRowId(element: Element): number {
   const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
@@ -12,8 +12,8 @@ export function getClosestRowId(element: Element): number {
 }
 
 export function getSelectedRowIds(
-  startCell: HTMLElement,
-  endCell: HTMLElement
+  startCell: Element,
+  endCell: Element
 ): number[] {
   const currentRowId = getClosestRowId(startCell);
   const startRowId = getClosestRowId(endCell);
@@ -52,7 +52,14 @@ export function getDatabaseById(id: string) {
 export function clearAllDatabaseRowsSelection() {
   const databases = document.querySelectorAll('affine-database');
   databases.forEach(database => {
-    clearDatabaseRowsSelection(database);
+    const rowLevelSelection = database.querySelector(
+      'database-row-level-selection'
+    );
+    if (rowLevelSelection) {
+      const databaseId = database.getAttribute('data-block-id');
+      assertExists(databaseId);
+      rowLevelSelection.clearSelection();
+    }
   });
 }
 
@@ -60,17 +67,24 @@ export function setDatabaseRowsSelection(
   database: HTMLElement,
   rowIds: number[]
 ) {
-  clearDatabaseRowsSelection(database);
+  const container = database.querySelector<HTMLElement>(
+    '.affine-database-table-container'
+  );
+  assertExists(container);
 
-  rowIds.forEach(rowId => {
-    const row = database.querySelector(`.database-row[data-row-id="${rowId}"]`);
-    row?.classList.add(DATABASE_ROW_SELECTED_CLASS);
-  });
-}
+  let rowLevelSelection = container.querySelector(
+    'database-row-level-selection'
+  );
+  if (!rowLevelSelection) {
+    rowLevelSelection = new RowLevelSelection();
+    container.appendChild(rowLevelSelection);
+  }
 
-function clearDatabaseRowsSelection(database: HTMLElement) {
-  const allRows = database.querySelectorAll<HTMLElement>('.database-row');
-  allRows.forEach(row => {
-    row.classList.remove(DATABASE_ROW_SELECTED_CLASS);
+  const databaseId = database.getAttribute('data-block-id');
+  assertExists(databaseId);
+  rowLevelSelection.container = container;
+  rowLevelSelection.setSelection({
+    databaseId,
+    rowIds,
   });
 }

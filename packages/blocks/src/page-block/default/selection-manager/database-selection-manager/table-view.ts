@@ -43,15 +43,17 @@ export class DatabaseTableViewSelectionManager {
   onDragMove(selection: DefaultSelectionManager, e: SelectionEvent) {
     const { clientX: x, clientY: y } = e.raw;
 
-    const el = document.elementFromPoint(x, y);
-    const endCell = el?.closest<HTMLElement>('.database-cell');
+    // In order to avoid missing the underlying database-related elements, use `elementsFromPoint` instead
+    const elements = Array.from(document.elementsFromPoint(x, y));
+
+    const endCell = elements.find(el => el.classList.contains('database-cell'));
     const startCell = this._startCell;
     if (!endCell || !startCell) return;
 
     const databaseId = getClosestDatabaseId(endCell);
     if (endCell === startCell) {
       // current cell, native selection
-      const editor = el?.closest('.virgo-editor');
+      const editor = elements.find(el => el.classList.contains('virgo-editor'));
       if (editor) {
         const { left, right } = editor.getBoundingClientRect();
         // Prevent native cross-cell selections from being generated
