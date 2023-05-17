@@ -46,12 +46,13 @@ const autoIdentifyLink = (
       context.data +
       delta.insert.slice(rangePositionInDelta);
     const match = linkPattern.exec(newText);
+    // If the new text with original link text is not pattern matched, we should reset the text
     if (!match) {
       editor.resetText({ index, length });
       delete context.attributes['link'];
       return;
     }
-
+    // If the new text with original link text is pattern matched, we should update the link text
     editor.formatText(
       {
         index,
