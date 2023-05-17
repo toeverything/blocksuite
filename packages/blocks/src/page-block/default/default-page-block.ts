@@ -227,7 +227,9 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultFrame = model.children[0];
+    const defaultFrame = model.children.find(
+      child => child.flavour === 'affine:frame'
+    );
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
