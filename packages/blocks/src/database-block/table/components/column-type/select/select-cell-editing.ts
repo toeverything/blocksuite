@@ -134,6 +134,7 @@ const styles = css`
     padding: 4px;
     border-radius: 4px;
     margin-bottom: 4px;
+    cursor: pointer;
   }
   .select-option:hover {
     background: var(--affine-hover-color);
@@ -498,6 +499,9 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
                     @click=${() => this._onSelect(selectedTag, select)}
                   >
                     <affine-database-select-option
+                      style=${styleMap({
+                        cursor: isEditing ? 'text' : 'pointer',
+                      })}
                       .databaseModel=${this.databaseModel}
                       .select=${select}
                       .editing=${isEditing}

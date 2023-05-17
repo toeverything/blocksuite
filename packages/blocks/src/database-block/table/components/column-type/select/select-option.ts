@@ -130,6 +130,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   override render() {
     const style = styleMap({
       backgroundColor: this.select.color,
+      cursor: this.editing ? 'text' : 'pointer',
     });
     return html`<div
       class="select-option-text virgo-editor"

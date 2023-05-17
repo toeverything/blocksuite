@@ -20,8 +20,9 @@ export const styles = css`
   .affine-database-column {
     position: relative;
     z-index: 1;
-    transform: translateX(0);
+    cursor: pointer;
     background: var(--affine-white);
+    transform: translateX(0);
   }
   .database-cell {
     min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
