@@ -45,6 +45,19 @@ const autoIdentifyLink = (
       return;
     }
 
+    editor.formatText(
+      {
+        index,
+        length,
+      },
+      {
+        link: newText,
+      }
+    );
+    context.attributes = {
+      ...context.attributes,
+      link: newText,
+    };
     return;
   }
 
