@@ -1,5 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/lit';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -10,7 +11,67 @@ import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
-const IGNORED_ATTRIBUTES = ['link', 'code', 'reference'] as const;
+const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+
+const autoIdentifyLink = (
+  editor: AffineVEditor,
+  context: VHandlerContext<BaseTextAttributes, InputEvent>
+) => {
+  const vRange = editor.getVRange();
+  if (!vRange) return;
+  if (context.attributes?.link && context.data === ' ') {
+    delete context.attributes['link'];
+    return;
+  }
+
+  const linkPattern =
+    /(https?:\/\/|www\.)\S+\.(com|cn|org|net|edu|gov|info|io)(\/\S*)?$/;
+
+  if (context.attributes?.link) {
+    const linkDeltaInfo = editor.deltaService
+      .getDeltasByVRange(vRange)
+      .filter(([delta]) => delta.attributes?.link)[0];
+    const [delta, { index, length }] = linkDeltaInfo;
+    const rangePositionInDelta = vRange.index - index;
+
+    const newText =
+      delta.insert.slice(0, rangePositionInDelta) +
+      context.data +
+      delta.insert.slice(rangePositionInDelta);
+    const match = linkPattern.exec(newText);
+    if (!match) {
+      editor.resetText({ index, length });
+      delete context.attributes['link'];
+      return;
+    }
+
+    return;
+  }
+
+  const [line] = editor.getLine(vRange.index);
+  const prefixText = line.textContent.slice(0, vRange.index);
+  const match = linkPattern.exec(prefixText + context.data);
+  if (!match) {
+    return;
+  }
+  const linkText = match[0];
+  const startIndex = vRange.index - linkText.length;
+
+  editor.formatText(
+    {
+      index: startIndex,
+      length: linkText.length,
+    },
+    {
+      link: linkText,
+    }
+  );
+
+  context.attributes = {
+    ...context.attributes,
+    link: linkText,
+  };
+};
 
 @customElement('rich-text')
 export class RichText extends ShadowlessElement {
@@ -56,7 +117,6 @@ export class RichText extends ShadowlessElement {
       active: () => activeEditorManager.isActive(this),
     });
     setupVirgoScroll(this.model.page, this._vEditor);
-
     const textSchema = this.textSchema;
     assertExists(
       textSchema,
@@ -102,7 +162,7 @@ export class RichText extends ShadowlessElement {
             deltas.length > 1 ||
             (deltas.length === 1 && vRange.index !== 0)
           ) {
-            const attributes = deltas[0][0].attributes;
+            const { attributes } = deltas[0][0];
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
               IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
@@ -112,6 +172,7 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
+        autoIdentifyLink(vEditor, ctx);
 
         return ctx;
       },
@@ -140,6 +201,7 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
+        // autoIdentifyLink(vEditor, ctx);
 
         return ctx;
       },
