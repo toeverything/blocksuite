@@ -3,13 +3,13 @@ import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
 import { FRAME_BACKGROUND_COLORS } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
   TextMouseMode,

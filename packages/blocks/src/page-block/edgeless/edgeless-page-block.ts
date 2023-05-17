@@ -6,8 +6,7 @@ import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/global/config';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -19,9 +18,8 @@ import {
   type Page,
   Slot,
 } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
@@ -41,7 +39,6 @@ import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
-import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type {
   BlockHost,
   DragHandle,
@@ -86,7 +83,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends WithDisposable(ShadowlessElement)
+  extends BlockElement<PageBlockModel>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -149,18 +146,6 @@ export class EdgelessPageBlockComponent
     type: 'default',
   };
 
-  @property()
-  page!: Page;
-
-  @property()
-  model!: PageBlockModel;
-
-  @property()
-  root!: BlockSuiteRoot;
-
-  @property()
-  content!: TemplateResult;
-
   @state()
   private _toolbarEnabled = false;
 
@@ -213,7 +198,11 @@ export class EdgelessPageBlockComponent
   // just init surface, attach to dom later
   private _initSurface() {
     const { page } = this;
-    const yBlock = page.getYBlockById(this.model.id);
+    const surfaceBlock = this.model.children.find(
+      child => child.flavour === 'affine:surface'
+    );
+    assertExists(surfaceBlock);
+    const yBlock = page.getYBlockById(surfaceBlock.id);
     assertExists(yBlock);
     let yContainer = yBlock.get('elements') as InstanceType<typeof page.YMap>;
     if (!yContainer) {

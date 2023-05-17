@@ -7,15 +7,12 @@ import './components/database-title.js';
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  asyncFocusRichText,
-  WithDisposable,
-} from '../../__internal__/index.js';
+import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { onClickOutside } from '../utils.js';
@@ -46,8 +43,10 @@ const styles = css`
     overflow-x: scroll;
     border-top: 1.5px solid var(--affine-border-color);
   }
+  .affine-database-block-table:hover {
+    padding-bottom: 0px;
+  }
   .affine-database-block-table::-webkit-scrollbar {
-    margin-top: 4px;
     -webkit-appearance: none;
   }
   .affine-database-block-table::-webkit-scrollbar:horizontal {
@@ -55,9 +54,17 @@ const styles = css`
   }
   .affine-database-block-table::-webkit-scrollbar-thumb {
     border-radius: 2px;
+    background-color: var(--affine-black-10);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
+    height: 8px;
   }
   .affine-database-block-table:hover::-webkit-scrollbar-thumb {
-    background-color: var(--affine-black-10);
+    border-radius: 16px;
+    background-color: var(--affine-black-30);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar-track {
+    background-color: var(--affine-hover-color);
   }
 
   .affine-database-table-container {
@@ -87,7 +94,9 @@ const styles = css`
     margin-top: -8px;
   }
   .affine-database-block-footer:hover {
-    background-color: var(--affine-hover-color);
+    position: relative;
+    z-index: 1;
+    background-color: var(--affine-hover-color-filled);
   }
   .affine-database-block-footer:hover .affine-database-block-add-row {
     display: flex;

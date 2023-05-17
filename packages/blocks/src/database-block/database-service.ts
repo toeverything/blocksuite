@@ -3,15 +3,43 @@ import {
   assertExists,
   type BaseBlockModel,
   type Page,
+  Slot,
 } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
+import {
+  clearAllDatabaseRowsSelection,
+  getDatabaseById,
+  setDatabaseRowsSelection,
+} from '../page-block/default/selection-manager/database-selection-manager/utils.js';
+import type { DatabaseTableState } from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
+  slots = {
+    tableViewSelectionUpdated: new Slot<DatabaseTableState | null>(),
+  };
+
+  constructor() {
+    super();
+
+    this.slots.tableViewSelectionUpdated.on(state => {
+      if (!state) return;
+      const { type, rowIds, databaseId } = state;
+
+      if (type === 'select') {
+        if (!databaseId || !rowIds) return;
+        const database = getDatabaseById(databaseId);
+        setDatabaseRowsSelection(database, rowIds);
+      } else if (type === 'clear') {
+        clearAllDatabaseRowsSelection();
+      }
+    });
+  }
+
   initDatabaseBlock(
     page: Page,
     model: BaseBlockModel,
@@ -107,6 +135,20 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
           value,
         });
       });
+    });
+  }
+
+  clearTableViewSelection() {
+    this.slots.tableViewSelectionUpdated.emit({
+      type: 'clear',
+    });
+  }
+
+  setTableViewSelection({ type, databaseId, rowIds }: DatabaseTableState) {
+    this.slots.tableViewSelectionUpdated.emit({
+      type,
+      databaseId,
+      rowIds,
     });
   }
 }

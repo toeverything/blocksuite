@@ -7,11 +7,11 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockComponentElement,
-  EditingState,
-  Point,
-  SerializedBlock,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type Point,
+  type SerializedBlock,
 } from '../../__internal__/index.js';
 import {
   getBlockElementById,
@@ -21,11 +21,16 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
+import {
+  getClosestDatabaseId,
+  getClosestRowId,
+} from './selection-manager/database-selection-manager/utils.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -539,6 +544,21 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null) {
+      if (modelState) {
+        const { element } = modelState;
+        const rowId = getClosestRowId(element);
+        if (rowId !== -1) {
+          const databaseId = getClosestDatabaseId(element);
+
+          const databaseService = getService('affine:database');
+          databaseService.setTableViewSelection({
+            type: 'select',
+            databaseId,
+            rowIds: [rowId],
+          });
+          return;
+        }
+      }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
     getSelectedBlocks() {

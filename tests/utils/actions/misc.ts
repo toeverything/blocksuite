@@ -38,8 +38,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     return true;
   }
   const ignoredMessages = [
-    // surface block don't have component
-    'Cannot find tag for affine:surface',
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
     // clipboard.spec.ts

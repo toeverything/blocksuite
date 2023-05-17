@@ -2,9 +2,8 @@
 import './table/table-view.js';
 import './kanban/kanban-view.js';
 
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
-import { customElement, property } from 'lit/decorators.js';
+import { BlockElement } from '@blocksuite/lit';
+import { customElement } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import { registerService } from '../__internal__/service.js';
@@ -12,13 +11,7 @@ import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends ShadowlessElement {
-  @property()
-  model!: DatabaseBlockModel;
-
-  @property()
-  root!: BlockSuiteRoot;
-
+export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 

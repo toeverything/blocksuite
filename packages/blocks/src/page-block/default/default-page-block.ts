@@ -4,12 +4,11 @@ import {
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
-import { type BaseBlockModel, type Page, Slot, Utils } from '@blocksuite/store';
+import { BlockElement } from '@blocksuite/lit';
+import { type BaseBlockModel, Slot, Utils } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
-import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
@@ -25,7 +24,6 @@ import {
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-import { WithDisposable } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -48,7 +46,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends WithDisposable(ShadowlessElement)
+  extends BlockElement<PageBlockModel>
   implements BlockHost
 {
   static override styles = css`
@@ -112,15 +110,6 @@ export class DefaultPageBlockComponent
       display: block;
     }
   `;
-
-  @property()
-  page!: Page;
-
-  @property()
-  model!: PageBlockModel;
-
-  @property()
-  content!: TemplateResult;
 
   flavour = 'affine:page' as const;
 
@@ -238,7 +227,9 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultFrame = model.children[0];
+    const defaultFrame = model.children.find(
+      child => child.flavour === 'affine:frame'
+    );
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();

@@ -10,7 +10,6 @@ export * from './drag-and-drop.js';
 export * from './filesys.js';
 export * from './gesture/index.js';
 export * from './hotkey.js';
-export * from './lit.js';
 export * from './query.js';
 export * from './rect.js';
 export * from './selection.js';
