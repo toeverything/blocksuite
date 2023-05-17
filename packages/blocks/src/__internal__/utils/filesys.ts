@@ -35,29 +35,7 @@ export const uploadImageFromLocal = async (
     if (files.length === 1) {
       const file = files[0];
       if (getSize) {
-        const size = await new Promise<{ width: number; height: number }>(
-          resolve => {
-            let width = 0;
-            let height = 0;
-            let reader: FileReader | null = new FileReader();
-            reader.addEventListener('load', _ => {
-              const img = new Image();
-              img.onload = () => {
-                width = img.width;
-                height = img.height;
-                resolve({ width, height });
-              };
-              img.src = reader?.result as string;
-              reader = null;
-            });
-            reader.addEventListener('error', _ => {
-              reader = null;
-              resolve({ width, height });
-            });
-            reader.readAsDataURL(file);
-          }
-        );
-        getSize(size);
+        getSize(await readImageSize(file));
       }
       const id = await storage.set(file);
       resolvePromise([{ ...baseProps, sourceId: id }]);
@@ -79,3 +57,26 @@ export const uploadImageFromLocal = async (
   fileInput.click();
   return await pending;
 };
+
+function readImageSize(file: File) {
+  return new Promise<{ width: number; height: number }>(resolve => {
+    let width = 0;
+    let height = 0;
+    let reader: FileReader | null = new FileReader();
+    reader.addEventListener('load', _ => {
+      const img = new Image();
+      img.onload = () => {
+        width = img.width;
+        height = img.height;
+        reader = null;
+        resolve({ width, height });
+      };
+      img.src = reader?.result as string;
+    });
+    reader.addEventListener('error', _ => {
+      reader = null;
+      resolve({ width, height });
+    });
+    reader.readAsDataURL(file);
+  });
+}
