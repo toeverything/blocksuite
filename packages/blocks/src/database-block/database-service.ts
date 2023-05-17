@@ -173,6 +173,18 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
+  setTableViewSelectionByElement(element: Element) {
+    const rowId = getClosestRowId(element);
+    if (rowId !== '') {
+      const databaseId = getClosestDatabaseId(element);
+      this.setTableViewSelection({
+        type: 'select',
+        databaseId,
+        rowIds: [rowId],
+      });
+    }
+  }
+
   clearLastSelection() {
     this._lastSelection = {
       databaseId: '',

@@ -559,7 +559,11 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       const model = modelState?.model;
       if (model) {
         const parent = model.page.getParent(model);
-        if (parent && matchFlavours(parent, ['affine:database'])) return;
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          const service = getService('affine:database');
+          service.setTableViewSelectionByElement(modelState.element);
+          return;
+        }
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
