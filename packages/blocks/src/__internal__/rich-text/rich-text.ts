@@ -32,6 +32,13 @@ const autoIdentifyLink = (
       .getDeltasByVRange(vRange)
       .filter(([delta]) => delta.attributes?.link)[0];
     const [delta, { index, length }] = linkDeltaInfo;
+
+    //It means the link has been custom edited, so we should not auto identify it
+    if (delta.attributes?.link !== delta.insert) {
+      delete context.attributes['link'];
+      return;
+    }
+
     const rangePositionInDelta = vRange.index - index;
 
     const newText =
