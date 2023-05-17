@@ -36,6 +36,10 @@ export class EdgelessToolIconButton extends LitElement {
     }
 
     ${tooltipStyle}
+
+    tool-tip {
+      z-index: 12;
+    }
   `;
 
   @property()
