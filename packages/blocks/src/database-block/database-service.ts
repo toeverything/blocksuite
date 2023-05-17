@@ -10,6 +10,8 @@ import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import {
   clearAllDatabaseRowsSelection,
+  getClosestDatabaseId,
+  getClosestRowId,
   getDatabaseById,
   setDatabaseRowsSelection,
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
@@ -187,6 +189,19 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       databaseId,
       rowIds,
     });
-    this.clearLastSelection();
+  }
+
+  toggleTableViewSelection(element: Element) {
+    const rowId = getClosestRowId(element);
+    if (rowId !== '') {
+      const databaseId = getClosestDatabaseId(element);
+      this.setTableViewSelection({
+        type: 'click',
+        databaseId,
+        rowIds: [rowId],
+      });
+      return true;
+    }
+    return false;
   }
 }

@@ -27,10 +27,6 @@ import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from './selection-manager/database-selection-manager/utils.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -552,17 +548,9 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     },
     setSelectedBlock(modelState: EditingState | null, element) {
       if (element) {
-        const rowId = getClosestRowId(element);
-        if (rowId !== '') {
-          const databaseId = getClosestDatabaseId(element);
-
-          const databaseService = getService('affine:database');
-          databaseService.setTableViewSelection({
-            type: 'click',
-            databaseId,
-            rowIds: [rowId],
-          });
-
+        const service = getService('affine:database');
+        const toggled = service.toggleTableViewSelection(element);
+        if (toggled) {
           pageBlock.selection.clear();
           return;
         }
@@ -570,11 +558,8 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       const model = modelState?.model;
       if (model) {
-        const page = model.page;
-        const parent = page.getParent(model);
-        if (parent && matchFlavours(parent, ['affine:database'])) {
-          return;
-        }
+        const parent = model.page.getParent(model);
+        if (parent && matchFlavours(parent, ['affine:database'])) return;
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
