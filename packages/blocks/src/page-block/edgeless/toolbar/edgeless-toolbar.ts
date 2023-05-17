@@ -162,14 +162,14 @@ export class EdgelessToolbar extends LitElement {
 
     if (options.width && options.height) {
       const s = width / height;
+      const sh = height > 100 ? height - 100 : height;
       const p = options.width / options.height;
       if (s >= 1) {
-        const sh = height * 0.618;
         options.height =
           options.height > sh ? sh : Math.min(options.height, sh);
         options.width = p * options.height;
       } else {
-        const sw = width * 0.618;
+        const sw = sh * s;
         options.width = options.width > sw ? sw : Math.min(options.width, sw);
         options.height = options.width / p;
       }
@@ -178,10 +178,17 @@ export class EdgelessToolbar extends LitElement {
     const { zoom } = this.edgeless.surface.viewport;
     const centerX = left + width / 2;
     const centerY = top + height / 2;
-    const [x, y] = [
-      centerX - (options.width * zoom) / 2,
-      centerY - (options.height * zoom) / 2,
-    ];
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = centerX - options.width / 2;
+      y = centerY - options.height / 2;
+      options.width /= zoom;
+      options.height /= zoom;
+    } else {
+      x = centerX - (options.width * zoom) / 2;
+      y = centerY - (options.height * zoom) / 2;
+    }
 
     this.edgeless.addNewFrame(models, new Point(x, y), options);
     this._imageLoading = false;
