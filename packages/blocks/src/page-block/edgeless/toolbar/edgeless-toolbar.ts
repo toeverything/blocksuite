@@ -27,15 +27,7 @@ import {
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_OFFSET_X,
-  DEFAULT_FRAME_OFFSET_Y,
-  DEFAULT_FRAME_WIDTH,
-  stopPropagation,
-  ZOOM_MAX,
-  ZOOM_MIN,
-} from '../utils.js';
+import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -155,32 +147,42 @@ export class EdgelessToolbar extends LitElement {
   private async _addImage() {
     this._imageLoading = true;
     const options = {
-      width: DEFAULT_FRAME_WIDTH,
-      height: DEFAULT_FRAME_HEIGHT,
-      offsetX: DEFAULT_FRAME_OFFSET_X,
-      offsetY: DEFAULT_FRAME_OFFSET_Y,
+      width: 0,
+      height: 0,
+      offsetX: 0,
+      offsetY: 0,
     };
 
     const models = await uploadImageFromLocal(this.edgeless.page, realSize =>
       Object.assign(options, realSize)
     );
-    const { centerX, centerY, viewportBounds } = this.edgeless.surface.viewport;
+
+    const { left, width, top, height } =
+      this.edgeless.pageBlockContainer.getBoundingClientRect();
 
     if (options.width && options.height) {
-      const { h } = viewportBounds;
-      const s = options.width / options.height;
-      const sh =
-        options.height > h ? h * 0.618 : Math.min(options.height, h * 0.618);
-      options.height = sh;
-      options.width = sh * s;
-      options.offsetX = 0;
-      options.offsetY = 0;
+      const s = width / height;
+      const p = options.width / options.height;
+      if (s >= 1) {
+        const sh = height * 0.618;
+        options.height =
+          options.height > sh ? sh : Math.min(options.height, sh);
+        options.width = p * options.height;
+      } else {
+        const sw = width * 0.618;
+        options.width = options.width > sw ? sw : Math.min(options.width, sw);
+        options.height = options.width / p;
+      }
     }
 
-    const [x, y] = this.edgeless.surface.toViewCoord(
-      centerX - options.width / 2,
-      centerY - options.height / 2
-    );
+    const { zoom } = this.edgeless.surface.viewport;
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    const [x, y] = [
+      centerX - (options.width * zoom) / 2,
+      centerY - (options.height * zoom) / 2,
+    ];
+
     this.edgeless.addNewFrame(models, new Point(x, y), options);
     this._imageLoading = false;
   }
