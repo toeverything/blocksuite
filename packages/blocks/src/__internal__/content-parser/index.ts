@@ -164,6 +164,17 @@ export class ContentParser {
     service.json2Block(insertBlockModel, blocks);
   }
 
+  public async importHtml(text: string, insertPositionId: string) {
+    const blocks = await this.htmlText2Block(text);
+    const insertBlockModel = this._page.getBlockById(insertPositionId);
+
+    assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
+
+    service.json2Block(insertBlockModel, blocks);
+  }
+
   public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
     this._parsers[name] = func;
   }

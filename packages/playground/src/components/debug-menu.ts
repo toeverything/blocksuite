@@ -34,6 +34,7 @@ import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
+import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -282,6 +283,113 @@ export class DebugMenu extends ShadowlessElement {
   private async _importYDoc() {
     await this.workspace.importYDoc();
     this.requestUpdate();
+  }
+
+  private async _importMarkDown() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.md';
+    input.multiple = false;
+    input.onchange = async () => {
+      const file = input.files?.item(0);
+      if (!file) {
+        return;
+      }
+      const text = await file.text();
+      const rootId = this.page.root?.id;
+      rootId && (await this.contentParser.importMarkdown(text, rootId));
+    };
+    input.click();
+  }
+
+  private async _importHtml() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.html';
+    input.multiple = false;
+    input.onchange = async () => {
+      const file = input.files?.item(0);
+      if (!file) {
+        return;
+      }
+      const text = await file.text();
+      const rootId = this.page.root?.id;
+      rootId && (await this.contentParser.importHtml(text, rootId));
+    };
+    input.click();
+  }
+
+  private async _importNotion() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.zip';
+    input.multiple = false;
+    input.onchange = async () => {
+      const file = input.files?.item(0);
+      if (!file) {
+        return;
+      }
+      const zip = new JSZip();
+      const zipFile = await zip.loadAsync(file);
+      const pageIdMap = new Map<string, string>();
+      const subPageMap = new Map<string, string[]>();
+      const subFileMap = new Map<string, string[]>();
+      const files = Object.keys(zipFile.files);
+      for (let i = files.length - 1; i >= 0; i--) {
+        const file = files[i];
+        const lastSplitIndex = file.lastIndexOf('/');
+        const folder = file.substring(0, lastSplitIndex) || '';
+        const fileName = file.substring(lastSplitIndex + 1);
+        if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+          const isHtml = fileName.endsWith('.html');
+          let page = this.page;
+          if (folder) {
+            subPageMap.get(folder) || subPageMap.set(folder, []);
+            subPageMap.get(folder)?.push(file);
+            page = this.page.workspace.createPage({
+              init: {
+                title: file.substring(
+                  lastSplitIndex + 1,
+                  file.length - (isHtml ? 5 : 3)
+                ),
+              },
+            });
+          } else {
+            // todo clear page and set title
+          }
+
+          const rootId = page.root?.id;
+          const contentParser = new window.ContentParser(page);
+          let text = (await zipFile.file(file)?.async('string')) || '';
+          subPageMap
+            .get(file.substring(0, file.length - (isHtml ? 5 : 3)))
+            ?.forEach(async subFile => {
+              const subPageLink = subFile.replaceAll(' ', '%20');
+              text = isHtml
+                ? text.replaceAll(
+                    `href="${subPageLink}"`,
+                    `href="notion-subpage-${pageIdMap.get(subFile)}"`
+                  )
+                : text.replaceAll(
+                    `(${subPageLink})`,
+                    `(notion-subpage-${pageIdMap.get(subFile)})`
+                  );
+            });
+          if (rootId) {
+            if (isHtml) {
+              await contentParser.importHtml(text, rootId);
+            } else {
+              await contentParser.importMarkdown(text, rootId);
+            }
+          }
+          pageIdMap.set(file, page.id);
+        } else {
+          subFileMap.get(folder) || subFileMap.set(folder, []);
+          subFileMap.get(folder)?.push(file);
+        }
+      }
+    };
+    input.click();
   }
 
   private async _inspect() {
@@ -549,6 +657,15 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._importYDoc}>
                 Import YDoc
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importMarkDown}>
+                Import Markdown
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importHtml}>
+                Import Html
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importNotion}>
+                Import Notion
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
