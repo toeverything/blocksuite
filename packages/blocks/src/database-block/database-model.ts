@@ -1,13 +1,17 @@
-import { Text } from '@blocksuite/store';
+import { Text, uuidv4 } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
+import type {
+  DatabaseViewData,
+  DatabaseViewDataMap,
+} from './common/view-manager.js';
+import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column, SelectTag } from './table/types.js';
-import type { DatabaseMode } from './types.js';
 
 export type Props = {
-  mode: DatabaseMode;
+  views: DatabaseViewData[];
   title: Text;
   cells: SerializedCells;
   columns: Array<Column>;
@@ -35,6 +39,25 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       ) {
         this.propsUpdated.emit();
       }
+    });
+  }
+
+  getViewList() {
+    return this.views;
+  }
+
+  updateView<Type extends keyof DatabaseViewDataMap>(
+    id: string,
+    type: Type,
+    update: (data: DatabaseViewDataMap[Type]) => void
+  ) {
+    this.page.transact(() => {
+      this.views.map(v => {
+        if (v.id !== id || v.mode !== type) {
+          return v;
+        }
+        return update(v as DatabaseViewDataMap[Type]);
+      });
     });
   }
 
@@ -69,18 +92,24 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   addColumn(column: Omit<Column, 'id'>, index?: number): string {
     const id = this.page.generateId();
     this.page.transact(() => {
-      const col = { ...column, id } as Column;
+      const col = { ...column, id };
       if (index === undefined) {
         this.columns.push(col);
       } else {
         this.columns.splice(index, 0, col);
       }
+      this.views.forEach(view => {
+        ViewOperationMap[view.mode].addColumn(this, view as any, col, index);
+      });
     });
     return id;
   }
 
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
-    const id = column.id ?? this.page.generateId();
+    if (!column.id) {
+      return this.addColumn(column);
+    }
+    const id = column.id;
     const index = this.findColumnIndex(id);
     this.page.transact(() => {
       if (index < 0) {
@@ -153,10 +182,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  convertCellsByColumn(
-    columnId: Column['id'],
-    newType: 'select' | 'rich-text'
-  ) {
+  convertCellsByColumn(columnId: Column['id'], newType: string) {
     this.page.transact(() => {
       Object.keys(this.cells).forEach(rowId => {
         const cell = this.cells[rowId][columnId];
@@ -185,22 +211,33 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  renameSelectedCellTag(
-    columnId: Column['id'],
-    oldValue: SelectTag,
-    newValue: SelectTag
-  ) {
+  // renameSelectedCellTag(
+  //   columnId: Column['id'],
+  //   oldValue: SelectTag,
+  //   newValue: SelectTag,
+  // ) {
+  //   this.page.transact(() => {
+  //     Object.keys(this.cells).forEach(rowId => {
+  //       const cell = this.cells[rowId][columnId];
+  //       if (!cell) return;
+  //
+  //       const selected = cell.value as SelectTag[];
+  //       const newSelected = [...selected];
+  //       const index = newSelected.findIndex(s => s.value === oldValue.value);
+  //       newSelected[index] = newValue;
+  //
+  //       this.cells[rowId][columnId].value = newSelected;
+  //     });
+  //   });
+  // }
+  updateCellByColumn(columnId: string, update: (value: unknown) => unknown) {
     this.page.transact(() => {
       Object.keys(this.cells).forEach(rowId => {
         const cell = this.cells[rowId][columnId];
-        if (!cell) return;
-
-        const selected = cell.value as SelectTag[];
-        const newSelected = [...selected];
-        const index = newSelected.findIndex(s => s.value === oldValue.value);
-        newSelected[index] = newValue;
-
-        this.cells[rowId][columnId].value = newSelected;
+        this.cells[rowId][columnId] = {
+          columnId,
+          value: update(cell.value),
+        };
       });
     });
   }
@@ -228,7 +265,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
-    mode: 'table',
+    views: [
+      { mode: 'table', name: 'Table', id: uuidv4(), columns: [], filter: [] },
+    ],
     title: internal.Text(DEFAULT_TITLE),
     cells: {},
     columns: [],

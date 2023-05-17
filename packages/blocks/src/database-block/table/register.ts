@@ -1,24 +1,26 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
+import type { SelectColumnData } from '../common/column-manager.js';
+import type { TableMixColumn } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import type { Cell, Column, ColumnType, RowHost } from './types.js';
+import type { Cell, ColumnType, RowHost } from './types.js';
 
-export abstract class DatabaseCellElement<Value> extends WithDisposable(
-  ShadowlessElement
-) {
+export abstract class DatabaseCellElement<
+  Value,
+  Data extends Record<string, unknown> = Record<string, unknown>
+> extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
   @property()
-  rowHost!: RowHost<Value>;
+  rowHost!: RowHost<Value, SelectColumnData>;
   @property()
   databaseModel!: DatabaseBlockModel;
   @property()
   rowModel!: BaseBlockModel;
   @property()
-  column!: Column;
+  column!: TableMixColumn<Data>;
   @property()
   cell: Cell<Value> | null = null;
 }

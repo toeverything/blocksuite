@@ -19,45 +19,41 @@ import { SearchState } from '../../types.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
-type CellValues = string[];
-
-/**
- * Containing all the cell values in rows.
- * ```
- * { rowId: CellValues }
- * ```
- */
-type DatabaseMap = Record<string, CellValues>;
-
 const styles = css`
   .affine-database-toolbar {
     display: none;
     align-items: center;
     gap: 26px;
   }
+
   .affine-database-toolbar-search svg,
   .affine-database-toolbar svg {
     width: 16px;
     height: 16px;
   }
+
   .affine-database-toolbar-item {
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
   }
+
   .search-container.hidden {
     overflow: hidden;
   }
+
   .affine-database-toolbar-item.more-action {
     width: 32px;
     height: 32px;
     border-radius: 4px;
   }
+
   .affine-database-toolbar-item.more-action:hover,
   .more-action.active {
     background: var(--affine-hover-color);
   }
+
   .affine-database-search-container {
     display: flex;
     align-items: center;
@@ -68,23 +64,28 @@ const styles = css`
     border-radius: 8px;
     transition: all 0.3s ease;
   }
+
   .affine-database-search-container > svg {
     min-width: 16px;
     min-height: 16px;
   }
+
   .search-container-expand {
     width: 138px;
     padding: 8px 12px;
     background-color: var(--affine-hover-color);
   }
+
   .search-input-container {
     display: flex;
     align-items: center;
   }
+
   .search-input-container > .close-icon {
     display: flex;
     align-items: center;
   }
+
   .close-icon .code {
     width: 31px;
     height: 18px;
@@ -92,9 +93,11 @@ const styles = css`
     border-radius: 4px;
     background: var(--affine-white-10);
   }
+
   .affine-database-search-input-icon {
     display: inline-flex;
   }
+
   .affine-database-search-input {
     flex: 1;
     height: 16px;
@@ -106,9 +109,11 @@ const styles = css`
     color: inherit;
     background: transparent;
   }
+
   .affine-database-search-input:focus {
     outline: none;
   }
+
   .affine-database-search-input::placeholder {
     color: var(--affine-placeholder-color);
     font-size: var(--affine-font-sm);
@@ -132,6 +137,7 @@ const styles = css`
       ),
       var(--affine-white);
   }
+
   .new-record > tool-tip {
     max-width: 280px;
   }
@@ -160,6 +166,8 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   @property()
   setSearchState!: (state: SearchState) => void;
 
+  @property()
+  setSearchString!: (search: string) => void;
   @property()
   setFilteredRowIds!: (rowIds: string[]) => void;
 
@@ -211,35 +219,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  private get _databaseMap() {
-    const databaseMap: DatabaseMap = {};
-    for (const child of this.targetModel.children) {
-      // The first value is the text context of the row block
-      databaseMap[child.id] = [child.text?.toString() ?? ''];
-    }
-
-    const { cells } = this.targetModel;
-    const rowIds = this.targetModel.children.map(child => child.id);
-
-    rowIds.forEach(rowId => {
-      // The map containing all columns related to this row (block)
-      const columnMap = cells[rowId];
-      if (!columnMap) return;
-
-      // Flatten the columnMap into a list of values
-      const columnValues = Object.keys(columnMap).map(key => {
-        const value = columnMap[key].value;
-        if (Array.isArray(value)) {
-          return value.map(item => item.value);
-        }
-        return columnMap[key].value + '';
-      });
-      databaseMap[rowId].push(...columnValues.flat());
-    });
-
-    return databaseMap;
-  }
-
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
     const inputValue = el.value.trim();
@@ -248,19 +227,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       this.setSearchState(SearchState.SearchInput);
     }
 
-    const { _databaseMap } = this;
-    const existingRowIds = Object.keys(_databaseMap).filter(key => {
-      return (
-        _databaseMap[key].findIndex(item =>
-          item.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())
-        ) > -1
-      );
-    });
-
-    const filteredRowIds = this.targetModel.children
-      .filter(child => existingRowIds.includes(child.id))
-      .map(child => child.id);
-    this.setFilteredRowIds(filteredRowIds);
+    this.setSearchString(inputValue);
 
     // When deleting the search content, the rich-text in the database row will automatically get the focus,
     // causing the search box to blur. So, here we manually make it focus.
@@ -341,7 +308,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _resetSearchStatus = () => {
     this._searchInput.value = '';
-    this.setFilteredRowIds([]);
+    this.setSearchString('');
     this.setSearchState(SearchState.SearchIcon);
   };
 
@@ -369,8 +336,8 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         class="affine-database-search-container ${expandSearch
           ? 'search-container-expand'
           : ''}"
-        @click=${onSearchIconClick}
-        @transitionend=${this._onFocusSearchInput}
+        @click="${onSearchIconClick}"
+        @transitionend="${this._onFocusSearchInput}"
       >
         <div class="affine-database-search-input-icon">
           ${DatabaseSearchIcon}
@@ -379,12 +346,12 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
           <input
             placeholder="Search..."
             class="affine-database-search-input"
-            @input=${this._onSearch}
-            @click=${(event: MouseEvent) => event.stopPropagation()}
-            @keydown=${this._onSearchKeydown}
-            @pointerdown=${stopPropagation}
+            @input="${this._onSearch}"
+            @click="${(event: MouseEvent) => event.stopPropagation()}"
+            @keydown="${this._onSearchKeydown}"
+            @pointerdown="${stopPropagation}"
           />
-          <div class="has-tool-tip close-icon" @click=${this._clearSearch}>
+          <div class="has-tool-tip close-icon" @click="${this._clearSearch}">
             ${closeIcon}
             <tool-tip inert arrow tip-position="top" role="tooltip">
               <span class="code">Esc</span> to clear all
@@ -394,7 +361,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       </div>
     `;
 
-    return html`<div
+    return html` <div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
       <div class="affine-database-toolbar-item search-container hidden">
@@ -402,18 +369,18 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       </div>
       ${this.readonly
         ? null
-        : html`<div
+        : html` <div
               class="affine-database-toolbar-item more-action ${isActiveMoreAction
                 ? 'active'
                 : ''}"
-              @click=${this._onShowAction}
+              @click="${this._onShowAction}"
             >
               ${MoreHorizontalIcon}
             </div>
             <div
               class="has-tool-tip affine-database-toolbar-item new-record"
               draggable="true"
-              @click=${this._onAddNewRecord}
+              @click="${this._onAddNewRecord}"
             >
               ${PlusIcon}<span>New Record</span>
               <tool-tip inert arrow tip-position="top" role="tooltip"

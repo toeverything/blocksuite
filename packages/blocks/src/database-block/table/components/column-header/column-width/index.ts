@@ -1,5 +1,6 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
+import type { DatabaseViewDataMap } from '../../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../../database-model.js';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
@@ -18,6 +19,7 @@ type ColumnWidthConfig = {
 };
 
 export function initChangeColumnWidthHandlers(
+  view: DatabaseViewDataMap['table'],
   headerContainer: HTMLElement,
   tableContainer: HTMLElement,
   targetModel: DatabaseBlockModel,
@@ -149,10 +151,12 @@ export function initChangeColumnWidthHandlers(
       });
     } else {
       const columnId = targetModel.columns[index - 1].id;
-      const columnProps = targetModel.getColumn(columnId);
-      targetModel.updateColumn({
-        ...columnProps,
-        width: columnWidth,
+      targetModel.updateView(view.id, 'table', data => {
+        data.columns.forEach(v => {
+          if (v.id === columnId) {
+            v.width = columnWidth;
+          }
+        });
       });
       targetModel.applyColumnUpdate();
     }

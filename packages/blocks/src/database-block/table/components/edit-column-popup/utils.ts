@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/store';
 
+import { columnManager } from '../../../common/column-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import type { ColumnRendererHelper } from '../../register.js';
 import type { Column, ColumnActionType, ColumnType } from '../../types.js';
@@ -16,32 +17,19 @@ export function changeColumnType(
 
   const currentType = targetColumn.type;
   targetModel.page.captureSync();
-
-  // select -> multi-select
-  if (currentType === 'select' && targetType === 'multi-select') {
-    updateColumn(columnId, { type: targetType }, targetModel);
-  }
-  // multi-select -> select
-  else if (currentType === 'multi-select' && targetType === 'select') {
-    updateColumn(columnId, { type: targetType }, targetModel);
-    targetModel.convertCellsByColumn(columnId, 'select');
-  }
-  // number -> rich-text
-  else if (currentType === 'number' && targetType === 'rich-text') {
-    updateColumn(columnId, { type: targetType }, targetModel);
-    targetModel.convertCellsByColumn(columnId, 'rich-text');
+  const [newColumnData, update] =
+    columnManager.convertCell(currentType, targetType, targetColumn.data) ?? [];
+  if (!update) {
+    const newColumn = columnManager.create(targetType, targetColumn.name);
+    console.log(newColumn);
+    updateColumn(columnId, newColumn, targetModel);
   } else {
-    // incompatible types: clear the value of the column
-    const renderer = columnRenderer.get(targetType);
     updateColumn(
       columnId,
-      {
-        ...renderer.propertyCreator(),
-        type: targetType,
-      },
+      { type: targetType, data: newColumnData },
       targetModel
     );
-    targetModel.deleteCellsByColumn(columnId);
+    targetModel.updateCellByColumn(columnId, update);
   }
 }
 

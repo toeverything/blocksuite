@@ -6,30 +6,34 @@ export type SetValueOption = {
   captureSync: boolean;
 };
 
-export interface RowHost<Value = unknown> extends HTMLElement {
+export interface RowHost<
+  Value = unknown,
+  ColumnData extends Record<string, unknown> = Record<string, unknown>
+> extends HTMLElement {
   setEditing(isEditing: boolean): void;
+
   setHeight(height: number): void;
+
   setValue(value: Value, option?: SetValueOption): void;
+
   updateColumnProperty(
-    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
+    apply: (oldProperty: Column<ColumnData>) => Partial<Column<ColumnData>>
   ): void;
 }
 
-export type ColumnType =
-  | 'rich-text'
-  | 'select'
-  | 'multi-select'
-  | 'number'
-  | 'checkbox'
-  | 'progress';
+export type ColumnType = string;
 
 export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 
-export interface Column extends Record<string, unknown> {
+export interface Column<
+  Data extends Record<string, unknown> = Record<string, unknown>
+> {
   id: string;
   type: ColumnType;
-  width: number; // px
-  hide: boolean;
+  name: string;
+  data: Data;
+  // width: number; // px
+  // hide: boolean;
 }
 
 export type Cell<ValueType = unknown> = {

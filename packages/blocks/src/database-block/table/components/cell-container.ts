@@ -5,7 +5,7 @@ import { html } from 'lit/static-html.js';
 import { onClickOutside } from '../../utils.js';
 import type { ColumnRendererHelper } from '../register.js';
 import { DatabaseCellElement } from '../register.js';
-import type { RowHost, SetValueOption } from '../types.js';
+import type { Column, RowHost, SetValueOption } from '../types.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
@@ -63,17 +63,6 @@ export class DatabaseCellContainer
     }
   };
 
-  updateColumnProperty(
-    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
-  ) {
-    const newProperty = apply(this.column);
-    this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumn({
-      ...this.column,
-      ...newProperty,
-    });
-  }
-
   setHeight = (height: number) => {
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
@@ -124,25 +113,33 @@ export class DatabaseCellContainer
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}
-          data-is-editing-cell="true"
-          .rowHost=${this}
-          .databaseModel=${this.databaseModel}
-          .rowModel=${this.rowModel}
-          .column=${this.column}
-          .cell=${cell}
+          data-is-editing-cell='true'
+          .rowHost='${this}'
+          .databaseModel='${this.databaseModel}'
+          .rowModel='${this.rowModel}'
+          .column='${this.column}'
+          .cell='${cell}'
         ></${editingTag}>
       `;
     }
     const previewTag = renderer.components.Cell.tag;
     return html`
       <${previewTag}
-        .rowHost=${this}
-        .databaseModel=${this.databaseModel}
-        .rowModel=${this.rowModel}
-        .column=${this.column}
-        .cell=${cell}
+        .rowHost='${this}'
+        .databaseModel='${this.databaseModel}'
+        .rowModel='${this.rowModel}'
+        .column='${this.column}'
+        .cell='${cell}'
       ></${previewTag}>
     `;
+  }
+  updateColumnProperty(apply: (oldProperty: Column) => Partial<Column>): void {
+    const newProperty = apply(this.column);
+    this.databaseModel.page.captureSync();
+    this.databaseModel.updateColumn({
+      ...this.column,
+      ...newProperty,
+    });
   }
 }
 

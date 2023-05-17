@@ -9,13 +9,18 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
   type SelectTag,
 } from '@blocksuite/blocks';
+import {
+  numberHelper,
+  richTextHelper,
+  selectHelper,
+} from '@blocksuite/blocks/database-block/common/column-manager';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import { nanoid, type Workspace } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { createEditor } from '../utils';
 import { addShapeElement } from './utils';
+
 export interface InitFn {
   (workspace: Workspace, pageId: string): void;
   id: string;
@@ -156,26 +161,11 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
     frameId
   );
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-  const col1 = database.updateColumn({
-    name: 'Number',
-    type: 'number',
-    width: 200,
-    hide: false,
-    decimal: 0,
-  });
-  const col2 = database.updateColumn({
-    name: 'Single Select',
-    type: 'select',
-    width: 200,
-    hide: false,
-    selection,
-  });
-  const col3 = database.updateColumn({
-    name: 'Rich Text',
-    type: 'rich-text',
-    width: 200,
-    hide: false,
-  });
+  const col1 = database.updateColumn(numberHelper.create('Number'));
+  const col2 = database.updateColumn(
+    selectHelper.create('Single Select', { options: selection })
+  );
+  const col3 = database.updateColumn(richTextHelper.create('Rich Text'));
 
   database.applyColumnUpdate();
 
@@ -203,7 +193,7 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
 
   database.updateCell(p2, {
     columnId: col2,
-    value: [selection[1]],
+    value: selection[1].id,
   });
 
   const text = new page.YText();

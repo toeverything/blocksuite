@@ -15,6 +15,7 @@ import {
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
 import type { DatabaseTableState } from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 
@@ -67,13 +68,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    blockModel.updateColumn({
-      name: 'Tag',
-      type: 'multi-select',
-      width: 200,
-      hide: false,
-      selection: [],
-    });
+    blockModel.addColumn(
+      multiSelectHelper.create('Tag', {
+        options: [],
+      })
+    );
     blockModel.applyColumnUpdate();
   }
 
