@@ -44,22 +44,25 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D) {
-    const yText = this.text;
+    const { w, h, text, color, fontSize, fontFamily, textAlign } = this;
+
+    const font = getFontString({
+      fontSize: fontSize,
+      fontFamily: fontFamily,
+    });
+
+    const yText = text;
     const deltas: ITextDelta[] = (yText.toDelta() as ITextDelta[]).map(
       delta => ({
-        insert: wrapText(delta.insert, this.fontFamily, this.w),
+        insert: wrapText(delta.insert, font, w),
         attributes: delta.attributes,
       })
     );
     const lines = deltaInsertsToChunks(deltas);
 
-    const lineHeightPx = getLineHeightInPx(this.fontSize, 1.25);
+    const lineHeightPx = getLineHeightInPx(fontSize, 1.25);
     const horizontalOffset =
-      this.textAlign === 'center'
-        ? this.w / 2
-        : this.textAlign === 'right'
-        ? this.w
-        : 0;
+      textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
     for (const [lineIndex, line] of lines.entries()) {
       let beforeTextWidth = 0;
@@ -76,23 +79,18 @@ export class TextElement extends SurfaceElement<IText> {
           document.body.appendChild(ctx.canvas);
         }
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-        ctx.font = getFontString({
-          fontSize: this.fontSize,
-          fontFamily: this.fontFamily,
-        });
-        ctx.fillStyle = this.color;
-        ctx.textAlign = this.textAlign;
+        ctx.font = font;
+        ctx.fillStyle = color;
+        ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'top';
 
         const verticalOffset =
-          this.h / 2 -
-          (lines.length * lineHeightPx) / 2 +
-          lineIndex * lineHeightPx;
+          h / 2 - (lines.length * lineHeightPx) / 2 + lineIndex * lineHeightPx;
 
         ctx.fillText(str, horizontalOffset + beforeTextWidth, verticalOffset);
 
-        beforeTextWidth += getTextWidth(str, this.fontFamily);
+        beforeTextWidth += getTextWidth(str, fontFamily);
 
         if (shouldTemporarilyAttach) {
           ctx.canvas.remove();
