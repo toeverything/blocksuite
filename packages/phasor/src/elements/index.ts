@@ -23,6 +23,7 @@ export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export type { SurfaceElement } from './surface-element.js';
+export { TextElement } from './text/text-element.js';
 
 export type PhasorElement =
   | ShapeElement
