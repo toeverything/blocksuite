@@ -50,8 +50,9 @@ function capPointerdown(
     const { clientX, clientY } = mousePointerEvent;
     const deltaX = clientX - startX;
     const deltaY = clientY - startY;
-    const modelX = elementX + deltaX;
-    const modelY = elementY + deltaY;
+    const { zoom } = surface.viewport;
+    const modelX = elementX + deltaX / zoom;
+    const modelY = elementY + deltaY / zoom;
     const [x, y] = surface.toViewCoord(modelX, modelY);
 
     const { start, end } = getConnectorAttachedInfo(element, surface, page);
