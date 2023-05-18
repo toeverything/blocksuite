@@ -438,11 +438,7 @@ export class EdgelessPageBlockComponent
       order,
       (start, end, len) => {
         if (start && !end) {
-          if (start > 'a0') {
-            start = generateKeyBetween(null, start);
-          } else {
-            start = null;
-          }
+          start = generateKeyBetween(null, start);
         }
         return generateNKeysBetween(start, end, len);
       },
