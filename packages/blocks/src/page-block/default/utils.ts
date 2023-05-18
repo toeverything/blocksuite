@@ -27,10 +27,6 @@ import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from './selection-manager/database-selection-manager/utils.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -516,10 +512,10 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       page.captureSync();
 
+      const parent = page.getParent(model);
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const parent = page.getParent(model);
         assertExists(parent);
         page.moveBlocks(models, parent, model, type === 'before');
       }
@@ -529,6 +525,13 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
+        const service = getService('affine:database');
+        service.refreshTableViewSelection();
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          pageBlock.selection.clear();
+          return;
+        }
+
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
@@ -543,19 +546,22 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setDragType(dragging: boolean) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
-    setSelectedBlock(modelState: EditingState | null) {
-      if (modelState) {
-        const { element } = modelState;
-        const rowId = getClosestRowId(element);
-        if (rowId !== -1) {
-          const databaseId = getClosestDatabaseId(element);
+    setSelectedBlock(modelState: EditingState | null, element) {
+      if (element) {
+        const service = getService('affine:database');
+        const toggled = service.toggleTableViewSelection(element);
+        if (toggled) {
+          pageBlock.selection.clear();
+          return;
+        }
+      }
 
-          const databaseService = getService('affine:database');
-          databaseService.setTableViewSelection({
-            type: 'select',
-            databaseId,
-            rowIds: [rowId],
-          });
+      const model = modelState?.model;
+      if (model) {
+        const parent = model.page.getParent(model);
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          const service = getService('affine:database');
+          service.setTableViewSelectionByElement(modelState.element);
           return;
         }
       }
