@@ -33,7 +33,7 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
@@ -45,7 +45,7 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
