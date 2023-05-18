@@ -116,31 +116,6 @@ export class Renderer implements SurfaceViewport {
     };
   }
 
-  get viewportMinXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX - width / 2 / zoom,
-      y: centerY - height / 2 / zoom,
-    };
-  }
-
-  get viewportMaxXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX + width / 2 / zoom,
-      y: centerY + height / 2 / zoom,
-    };
-  }
-
-  get viewportBounds() {
-    const { viewportMinXY, viewportMaxXY } = this;
-    return {
-      ...viewportMinXY,
-      w: viewportMaxXY.x - viewportMinXY.x,
-      h: viewportMaxXY.y - viewportMinXY.y,
-    };
-  }
-
   toModelCoord(viewX: number, viewY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];
