@@ -436,8 +436,16 @@ export class EdgelessPageBlockComponent
       pick,
       getIndexes,
       order,
-      (start, end, len) =>
-        generateNKeysBetween(generateKeyBetween(null, start), end, len),
+      (start, end, len) => {
+        if (start && !end) {
+          if (start > 'a0') {
+            start = generateKeyBetween(null, start);
+          } else {
+            start = null;
+          }
+        }
+        return generateNKeysBetween(start, end, len);
+      },
       updateIndexes
     );
   }
