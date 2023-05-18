@@ -132,6 +132,7 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title1"
 >
+  <affine:surface />
   <affine:frame
     prop:background="--affine-background-secondary-color"
   >
@@ -334,6 +335,7 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page1"
 >
+  <affine:surface />
   <affine:frame
     prop:background="--affine-background-secondary-color"
   >

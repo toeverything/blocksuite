@@ -10,6 +10,7 @@ const dataWithoutXywh: Omit<IShape, 'xywh'> = {
   id: '1',
   index: 'a0',
   type: 'shape',
+  seed: 0,
 
   shapeType: 'rect',
 

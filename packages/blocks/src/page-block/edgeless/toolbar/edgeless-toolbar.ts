@@ -18,7 +18,12 @@ import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { clamp, type MouseMode } from '../../../__internal__/index.js';
+import {
+  clamp,
+  type MouseMode,
+  Point,
+  uploadImageFromLocal,
+} from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -97,6 +102,8 @@ export class EdgelessToolbar extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  private _imageLoading = false;
+
   private _setMouseMode(mouseMode: MouseMode) {
     this.edgeless?.slots.mouseModeUpdated.emit(mouseMode);
   }
@@ -137,6 +144,56 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.slots.viewportUpdated.emit();
   }
 
+  private async _addImage() {
+    this._imageLoading = true;
+    const options = {
+      width: 0,
+      height: 0,
+      offsetX: 0,
+      offsetY: 0,
+    };
+
+    const models = await uploadImageFromLocal(this.edgeless.page, realSize =>
+      Object.assign(options, realSize)
+    );
+
+    const { left, width, top, height } =
+      this.edgeless.pageBlockContainer.getBoundingClientRect();
+
+    if (options.width && options.height) {
+      const s = width / height;
+      const sh = height > 100 ? height - 100 : height;
+      const p = options.width / options.height;
+      if (s >= 1) {
+        options.height =
+          options.height > sh ? sh : Math.min(options.height, sh);
+        options.width = p * options.height;
+      } else {
+        const sw = sh * s;
+        options.width = options.width > sw ? sw : Math.min(options.width, sw);
+        options.height = options.width / p;
+      }
+    }
+
+    const { zoom } = this.edgeless.surface.viewport;
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = centerX - options.width / 2;
+      y = centerY - options.height / 2;
+      options.width /= zoom;
+      options.height /= zoom;
+    } else {
+      x = centerX - (options.width * zoom) / 2;
+      y = centerY - (options.height * zoom) / 2;
+    }
+
+    this.edgeless.addNewFrame(models, new Point(x, y), options);
+    this._imageLoading = false;
+  }
+
   override render() {
     const type = this.mouseMode?.type;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
@@ -172,10 +229,9 @@ export class EdgelessToolbar extends LitElement {
           .edgeless=${this.edgeless}
         ></edgeless-shape-tool-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
+          .disabled=${this._imageLoading}
           .tooltip=${'Image'}
-          .active=${false}
-          @click=${() => console.log('Image')}
+          @click=${() => this._addImage()}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>

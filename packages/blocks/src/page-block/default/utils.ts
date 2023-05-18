@@ -7,11 +7,11 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockComponentElement,
-  EditingState,
-  Point,
-  SerializedBlock,
+import {
+  type BlockComponentElement,
+  type EditingState,
+  type Point,
+  type SerializedBlock,
 } from '../../__internal__/index.js';
 import {
   getBlockElementById,
@@ -21,6 +21,7 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -511,10 +512,10 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       page.captureSync();
 
+      const parent = page.getParent(model);
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const parent = page.getParent(model);
         assertExists(parent);
         page.moveBlocks(models, parent, model, type === 'before');
       }
@@ -524,6 +525,13 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
+        const service = getService('affine:database');
+        service.refreshTableViewSelection();
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          pageBlock.selection.clear();
+          return;
+        }
+
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
@@ -538,7 +546,25 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setDragType(dragging: boolean) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
-    setSelectedBlock(modelState: EditingState | null) {
+    setSelectedBlock(modelState: EditingState | null, element) {
+      if (element) {
+        const service = getService('affine:database');
+        const toggled = service.toggleTableViewSelection(element);
+        if (toggled) {
+          pageBlock.selection.clear();
+          return;
+        }
+      }
+
+      const model = modelState?.model;
+      if (model) {
+        const parent = model.page.getParent(model);
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          const service = getService('affine:database');
+          service.setTableViewSelectionByElement(modelState.element);
+          return;
+        }
+      }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
     },
     getSelectedBlocks() {

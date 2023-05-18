@@ -1,20 +1,20 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import {
-  type Bound,
-  ConnectorElement,
-  type Controller,
-  type PhasorElement,
-  type SurfaceManager,
-  type SurfaceViewport,
+import type {
+  Bound,
+  Controller,
+  PhasorElement,
+  SurfaceManager,
+  SurfaceViewport,
 } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
+import { ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
   intersects,
   isPointIn as isPointInFromPhasor,
+  normalizeWheelDeltaY,
   serializeXYWH,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -122,14 +122,8 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
         e.clientY - rect.y
       );
 
-      let delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-      // The delta step when using the mouse wheel is greater than 100, resulting in overly fast zooming
-      // Chromium reports deltaX/deltaY scaled by host device scale factor.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
-      if (Math.abs(delta) > 100) {
-        delta = 10 * Math.sign(delta);
-      }
-      viewport.applyDeltaZoom(delta);
+      const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
+      viewport.applyDeltaZoom(zoom);
       const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
@@ -188,14 +182,19 @@ export function pickBy(
   return selectedShapes.length
     ? selectedShapes[selectedShapes.length - 1]
     : pickTopBlock(
-        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        (page.root?.children as TopLevelBlockModel[]).filter(
+          child => child.flavour === 'affine:frame'
+        ) ?? [],
         modelX,
         modelY
       );
 }
 
 function pickById(surface: SurfaceManager, page: Page, id: string) {
-  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const blocks =
+    (page.root?.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
 }
@@ -434,7 +433,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateElement(id, {
+        surface.updateElement<'connector'>(id, {
           controllers: routes,
         });
       }
@@ -482,7 +481,10 @@ export function addText(
 
   // Wait for mouseMode updated
   requestAnimationFrame(() => {
-    const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+    const blocks =
+      (page.root?.children.filter(
+        child => child.flavour === 'affine:frame'
+      ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
       const selectionState = {

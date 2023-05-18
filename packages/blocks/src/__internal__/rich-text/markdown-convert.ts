@@ -430,56 +430,6 @@ const matches: Match[] = [
   },
   {
     name: 'link',
-    pattern:
-      /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
-      if (!match) {
-        return false;
-      }
-
-      const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
-
-      vEditor.insertText(
-        {
-          index: startIndex + annotatedText.length,
-          length: 0,
-        },
-        ' '
-      );
-      model.page.captureSync();
-      vEditor.formatText(
-        {
-          index: startIndex,
-          length: annotatedText.length,
-        },
-        {
-          link: annotatedText,
-        }
-      );
-
-      vEditor.deleteText({
-        index: startIndex + annotatedText.length,
-        length: 1,
-      });
-
-      vEditor.setVRange({
-        index: startIndex + annotatedText.length,
-        length: 0,
-      });
-
-      return true;
-    },
-  },
-  {
-    name: 'link',
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
     action: (
       model: BaseBlockModel,

@@ -48,7 +48,11 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   protected get _blocks(): TopLevelBlockModel[] {
-    return (this._page.root?.children as TopLevelBlockModel[]) ?? [];
+    return (
+      (this._page.root?.children as TopLevelBlockModel[]).filter(
+        child => child.flavour === 'affine:frame'
+      ) ?? []
+    );
   }
 
   setBlockSelectionState(state: EdgelessSelectionState) {

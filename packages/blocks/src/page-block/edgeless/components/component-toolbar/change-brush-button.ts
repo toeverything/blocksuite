@@ -1,13 +1,13 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
 
+import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { WithDisposable } from '../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
@@ -119,7 +119,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement(element.id, { lineWidth: size });
+        this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
       }
     });
     // FIXME: force update selection, because brush size changed
@@ -130,7 +130,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement(element.id, { color });
+        this.surface.updateElement<'brush'>(element.id, { color });
       }
     });
   }

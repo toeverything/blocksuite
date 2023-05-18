@@ -6,13 +6,12 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { WithDisposable } from '../../../../__internal__/index.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
@@ -45,6 +44,7 @@ const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
   .search-container.hidden {
     overflow: hidden;

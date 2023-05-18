@@ -1,6 +1,8 @@
+import { clamp, type IPoint } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
+import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { MIN_ZOOM } from './consts.js';
+import { type IBound, MAX_ZOOM, MIN_ZOOM } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
@@ -15,6 +17,9 @@ export interface SurfaceViewport {
   readonly zoom: number;
   readonly viewportX: number;
   readonly viewportY: number;
+  readonly viewportMinXY: IPoint;
+  readonly viewportMaxXY: IPoint;
+  readonly viewportBounds: IBound;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
@@ -28,6 +33,7 @@ export interface SurfaceViewport {
 export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  rc: RoughCanvas;
   gridManager = new GridManager();
 
   private _container!: HTMLElement;
@@ -42,8 +48,10 @@ export class Renderer implements SurfaceViewport {
   private _shouldUpdate = false;
 
   constructor() {
-    this.canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
+    this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.rc = new RoughCanvas(canvas);
   }
 
   get left() {
@@ -82,6 +90,31 @@ export class Renderer implements SurfaceViewport {
     return this.centerY - this.height / 2 / this._zoom;
   }
 
+  get viewportMinXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX - width / 2 / zoom,
+      y: centerY - height / 2 / zoom,
+    };
+  }
+
+  get viewportMaxXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX + width / 2 / zoom,
+      y: centerY + height / 2 / zoom,
+    };
+  }
+
+  get viewportBounds() {
+    const { viewportMinXY, viewportMaxXY } = this;
+    return {
+      ...viewportMinXY,
+      w: viewportMaxXY.x - viewportMinXY.x,
+      h: viewportMaxXY.y - viewportMinXY.y,
+    };
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     return [
       this.viewportX + viewX / this._zoom,
@@ -107,9 +140,8 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
+  applyDeltaZoom(zoom: number) {
+    const newZoom = clamp(zoom, MIN_ZOOM, MAX_ZOOM);
     this.setZoom(newZoom);
   }
 
@@ -221,7 +253,7 @@ export class Renderer implements SurfaceViewport {
       this.ctx.translate(dx, dy);
 
       if (intersects(element, viewBound)) {
-        element.render(this.ctx);
+        element.render(this.ctx, this.rc);
       }
 
       this.ctx.restore();

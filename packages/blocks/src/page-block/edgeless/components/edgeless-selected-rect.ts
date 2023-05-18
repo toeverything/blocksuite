@@ -1,5 +1,6 @@
 import './component-toolbar/component-toolbar.js';
 
+import { WithDisposable } from '@blocksuite/lit';
 import type { Bound, ConnectorElement } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
@@ -9,7 +10,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { WithDisposable } from '../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type {
   EdgelessSelectionState,

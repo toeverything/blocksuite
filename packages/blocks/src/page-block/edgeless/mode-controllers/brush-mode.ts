@@ -72,7 +72,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     this._draggingPathPoints = points;
 
-    this._surface.updateElement(this._draggingElementId, {
+    this._surface.updateElement<'brush'>(this._draggingElementId, {
       points,
       lineWidth,
     });

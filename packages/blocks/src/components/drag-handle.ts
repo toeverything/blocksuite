@@ -4,7 +4,7 @@ import {
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -22,7 +22,6 @@ import {
   Point,
   type Rect,
   type SelectionEvent,
-  WithDisposable,
 } from '../__internal__/index.js';
 
 const handleIcon = svg`
@@ -207,7 +206,10 @@ export class DragHandle extends WithDisposable(LitElement) {
       lastType: DroppingType
     ) => void;
     setDragType: (dragging: boolean) => void;
-    setSelectedBlock: (selectedBlock: EditingState | null) => void;
+    setSelectedBlock: (
+      selectedBlock: EditingState | null,
+      element?: Element
+    ) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getClosestBlockElement: (point: Point) => Element | null;
   }) {
@@ -244,7 +246,10 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   public setDragType: (dragging: boolean) => void;
 
-  public setSelectedBlock: (selectedBlock: EditingState | null) => void;
+  public setSelectedBlock: (
+    selectedBlock: EditingState | null,
+    element?: Element
+  ) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
 
@@ -545,14 +550,11 @@ export class DragHandle extends WithDisposable(LitElement) {
   private _onClick = (e: MouseEvent) => {
     const { selectedBlocks } = this;
     let { _handleAnchorState: modelState } = this;
-    if (
-      modelState &&
-      selectedBlocks.length &&
-      modelState.element === selectedBlocks[0]
-    ) {
+    const element = modelState?.element;
+    if (modelState && selectedBlocks.length && element === selectedBlocks[0]) {
       modelState = null;
     }
-    this.setSelectedBlock(modelState);
+    this.setSelectedBlock(modelState, element);
     this.toggleAttribute('data-selected', Boolean(modelState));
     e.stopPropagation();
   };

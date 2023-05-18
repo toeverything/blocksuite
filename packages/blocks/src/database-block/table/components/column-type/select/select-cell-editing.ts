@@ -134,6 +134,7 @@ const styles = css`
     padding: 4px;
     border-radius: 4px;
     margin-bottom: 4px;
+    cursor: pointer;
   }
   .select-option:hover {
     background: var(--affine-hover-color);
@@ -144,15 +145,6 @@ const styles = css`
   .select-option-text-container {
     width: calc(100% - 28px);
     overflow: hidden;
-  }
-  .select-option-text {
-    display: none;
-    display: inline-block;
-    height: 100%;
-    padding: 2px 10px;
-    background: var(--affine-tag-white);
-    border-radius: 4px;
-    outline: none;
   }
   .select-option-icon {
     display: none;
@@ -507,6 +499,9 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
                     @click=${() => this._onSelect(selectedTag, select)}
                   >
                     <affine-database-select-option
+                      style=${styleMap({
+                        cursor: isEditing ? 'text' : 'pointer',
+                      })}
                       .databaseModel=${this.databaseModel}
                       .select=${select}
                       .editing=${isEditing}

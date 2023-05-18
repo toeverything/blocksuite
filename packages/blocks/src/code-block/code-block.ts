@@ -4,12 +4,11 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
 import { css, html, render } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
   BUNDLED_LANGUAGES,
@@ -20,11 +19,7 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import {
-  getViewportElement,
-  queryCurrentMode,
-  WithDisposable,
-} from '../__internal__/index.js';
+import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -36,7 +31,7 @@ import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
+export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = css`
     code-block {
       position: relative;
@@ -160,12 +155,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
     ${tooltipStyle}
   `;
-
-  @property()
-  model!: CodeBlockModel;
-
-  @property()
-  content!: TemplateResult;
 
   @state()
   private _showLangList = false;

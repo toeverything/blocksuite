@@ -1,3 +1,4 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
@@ -9,6 +10,7 @@ export interface ISurfaceElement {
   index: string;
   type: string;
   xywh: SerializedXYWH;
+  seed: number;
 }
 
 export interface HitTestOptions {
@@ -78,6 +80,11 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return h;
   }
 
+  get seed() {
+    const seed = this.yMap.get('seed') as T['seed'];
+    return seed;
+  }
+
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
@@ -106,7 +113,7 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     this._renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     return;
   }
 }

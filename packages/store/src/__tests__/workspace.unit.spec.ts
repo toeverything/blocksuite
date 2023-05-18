@@ -226,10 +226,7 @@ describe('addBlock', () => {
       })
     );
     const block = await waitOnce(page.slots.rootAdded);
-    if (!Array.isArray(block) || !block[0]) {
-      throw new Error('');
-    }
-    assert.equal(block[0].flavour, 'affine:page');
+    assert.equal(block.flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
@@ -438,7 +435,7 @@ describe('getBlock', () => {
     ) as BaseBlockModel;
     assert.equal(result, root.children[0]);
 
-    const invalid = page.getParentById(root.id, root);
+    const invalid = page.getParent(root);
     assert.equal(invalid, null);
   });
 

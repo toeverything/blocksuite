@@ -1,11 +1,11 @@
 // related component
 
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { type BlockHost, WithDisposable } from '../../__internal__/index.js';
+import { type BlockHost } from '../../__internal__/index.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 
 const styles = css`

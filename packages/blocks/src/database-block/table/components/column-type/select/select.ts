@@ -29,6 +29,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
       flex-wrap: wrap;
       gap: 6px;
       width: 100%;
+      cursor: pointer;
       font-size: var(--affine-font-sm);
     }
     .affine-database-select-cell-container .select-selected {
