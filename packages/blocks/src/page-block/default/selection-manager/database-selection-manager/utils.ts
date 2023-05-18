@@ -1,32 +1,50 @@
 import { assertExists } from '@blocksuite/store';
 
-const DATABASE_ROW_SELECTED_CLASS = 'selected';
+import { RowLevelSelection } from '../../../../database-block/table/components/selection.js';
 
-export function getClosestRowId(element: Element): number {
-  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
-  if (rowId) {
-    return Number(rowId);
+export function getClosestRowIndex(element: Element): number {
+  const rowIndex = element
+    .closest('.database-row')
+    ?.getAttribute('data-row-index');
+  if (rowIndex) {
+    return Number(rowIndex);
   }
-  // Header row has no id.
+  // Header row has no index.
   return -1;
 }
 
-export function getSelectedRowIds(
-  startCell: HTMLElement,
-  endCell: HTMLElement
-): number[] {
-  const currentRowId = getClosestRowId(startCell);
-  const startRowId = getClosestRowId(endCell);
-  if (currentRowId === -1 || startRowId === -1) return [];
+export function getClosestRowId(element: Element): string {
+  const rowId = element.closest('.database-row')?.getAttribute('data-row-id');
+  if (rowId) {
+    return rowId;
+  }
+  // Header row has no id.
+  return '';
+}
 
-  const minId = Math.min(currentRowId, startRowId);
-  const maxId = Math.max(currentRowId, startRowId);
-  const rowIds = [];
-  for (let id = minId; id <= maxId; id++) {
-    rowIds.push(id);
+export function getSelectedRowIdsByIndexes(
+  database: Element,
+  indexes: number[]
+) {
+  return indexes.map(item => getRowIdByIndex(database, item));
+}
+
+export function getSelectedRowIndexes(
+  startCell: Element,
+  endCell: Element
+): number[] {
+  const currentRowIndex = getClosestRowIndex(startCell);
+  const startRowIndex = getClosestRowIndex(endCell);
+  if (currentRowIndex === -1 || startRowIndex === -1) return [];
+
+  const minIndex = Math.min(currentRowIndex, startRowIndex);
+  const maxIndex = Math.max(currentRowIndex, startRowIndex);
+  const rowIndexes = [];
+  for (let id = minIndex; id <= maxIndex; id++) {
+    rowIndexes.push(id);
   }
 
-  return rowIds;
+  return rowIndexes;
 }
 
 export function getClosestDatabase(element: Element | null) {
@@ -52,25 +70,46 @@ export function getDatabaseById(id: string) {
 export function clearAllDatabaseRowsSelection() {
   const databases = document.querySelectorAll('affine-database');
   databases.forEach(database => {
-    clearDatabaseRowsSelection(database);
+    const rowLevelSelection = database.querySelector(
+      'database-row-level-selection'
+    );
+    if (rowLevelSelection) {
+      const databaseId = database.getAttribute('data-block-id');
+      assertExists(databaseId);
+      rowLevelSelection.clearSelection();
+    }
   });
 }
 
 export function setDatabaseRowsSelection(
+  databaseId: string,
   database: HTMLElement,
-  rowIds: number[]
+  rowIds: string[]
 ) {
-  clearDatabaseRowsSelection(database);
+  const container = database.querySelector<HTMLElement>(
+    '.affine-database-table-container'
+  );
+  assertExists(container);
 
-  rowIds.forEach(rowId => {
-    const row = database.querySelector(`.database-row[data-row-id="${rowId}"]`);
-    row?.classList.add(DATABASE_ROW_SELECTED_CLASS);
+  let rowLevelSelection = container.querySelector(
+    'database-row-level-selection'
+  );
+  if (!rowLevelSelection) {
+    rowLevelSelection = new RowLevelSelection();
+    container.appendChild(rowLevelSelection);
+  }
+
+  rowLevelSelection.container = container;
+  rowLevelSelection.setSelection({
+    databaseId,
+    rowIds,
   });
 }
 
-function clearDatabaseRowsSelection(database: HTMLElement) {
-  const allRows = database.querySelectorAll<HTMLElement>('.database-row');
-  allRows.forEach(row => {
-    row.classList.remove(DATABASE_ROW_SELECTED_CLASS);
-  });
+function getRowIdByIndex(database: Element, index: number) {
+  const rowId = database
+    .querySelector(`.database-row[data-row-index="${index}"]`)
+    ?.getAttribute('data-row-id');
+  assertExists(rowId);
+  return rowId;
 }

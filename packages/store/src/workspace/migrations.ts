@@ -221,6 +221,11 @@ const migrations: Migration[] = [
       }
 
       const yChildren = pageBlock.get('sys:children') as Y.Array<string>;
+
+      if (yChildren.toArray().includes(surfaceId)) {
+        return;
+      }
+
       yChildren.insert(0, [surfaceId]);
     },
   },

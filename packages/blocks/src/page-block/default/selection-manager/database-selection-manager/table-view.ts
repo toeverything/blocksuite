@@ -9,15 +9,17 @@ import type { DefaultSelectionManager } from '../default-selection-manager.js';
 import {
   getClosestDatabase,
   getClosestDatabaseId,
-  getSelectedRowIds,
+  getSelectedRowIdsByIndexes,
+  getSelectedRowIndexes,
 } from './utils.js';
 
 export class DatabaseTableViewSelectionManager {
   private _service: DatabaseBlockService | null = null;
   private _startCell: HTMLElement | null = null;
+  private _database: HTMLElement | null = null;
   private _columnWidthHandles: HTMLElement[] = [];
   private _startRange: Range | null = null;
-  private _rowIds: number[] = [];
+  private _rowIds: string[] = [];
 
   onDragStart(selection: DefaultSelectionManager, e: SelectionEvent) {
     if (!isBlankArea(e)) {
@@ -29,6 +31,7 @@ export class DatabaseTableViewSelectionManager {
       this._startCell = el?.closest<HTMLElement>('.database-cell') ?? null;
 
       const database = getClosestDatabase(this._startCell);
+      this._database = database;
       this._columnWidthHandles = Array.from(
         database.querySelectorAll<HTMLElement>(
           '.affine-database-column-drag-handle'
@@ -43,15 +46,17 @@ export class DatabaseTableViewSelectionManager {
   onDragMove(selection: DefaultSelectionManager, e: SelectionEvent) {
     const { clientX: x, clientY: y } = e.raw;
 
-    const el = document.elementFromPoint(x, y);
-    const endCell = el?.closest<HTMLElement>('.database-cell');
+    // In order to avoid missing the underlying database-related elements, use `elementsFromPoint` instead
+    const elements = Array.from(document.elementsFromPoint(x, y));
+
+    const endCell = elements.find(el => el.classList.contains('database-cell'));
     const startCell = this._startCell;
-    if (!endCell || !startCell) return;
+    if (!endCell || !startCell || !this._database) return;
 
     const databaseId = getClosestDatabaseId(endCell);
     if (endCell === startCell) {
       // current cell, native selection
-      const editor = el?.closest('.virgo-editor');
+      const editor = elements.find(el => el.classList.contains('virgo-editor'));
       if (editor) {
         const { left, right } = editor.getBoundingClientRect();
         // Prevent native cross-cell selections from being generated
@@ -76,7 +81,8 @@ export class DatabaseTableViewSelectionManager {
       }
       selection.state.clearSelection();
 
-      const rowIds = getSelectedRowIds(startCell, endCell);
+      const rowIndexes = getSelectedRowIndexes(startCell, endCell);
+      const rowIds = getSelectedRowIdsByIndexes(this._database, rowIndexes);
       this._rowIds = rowIds;
 
       this._service?.setTableViewSelection({

@@ -4,7 +4,7 @@ import type { BlockModelProps } from '../../types.js';
 import {
   BulletedListIcon,
   CodeBlockIcon,
-  // DividerIcon,
+  DividerIcon,
   H1Icon,
   H2Icon,
   H3Icon,
@@ -118,15 +118,13 @@ export const paragraphConfig = [
     hotkey: null,
     icon: QuoteIcon,
   },
-  // Temporarily due to https://github.com/toeverything/blocksuite/issues/2577
-  // {
-  //   flavour: 'affine:divider',
-  //   type: 'divider',
-  //   name: 'Divider',
-  //   hotkey: `${SHORT_KEY}+option+d,${SHORT_KEY}+shift+d`,
-  //   icon: DividerIcon,
-  // },
-
+  {
+    flavour: 'affine:divider',
+    type: 'divider',
+    name: 'Divider',
+    hotkey: `${SHORT_KEY}+option+d,${SHORT_KEY}+shift+d`,
+    icon: DividerIcon,
+  },
   // {
   //   flavour: 'affine:',
   //   type: 'callout',
@@ -208,16 +206,14 @@ export const BLOCKHUB_TEXT_ITEMS = [
     icon: QuoteIcon,
     tooltip: 'Drag/Click to insert Quote',
   },
-
-  // Temporarily due to https://github.com/toeverything/blocksuite/issues/2577
-  // {
-  //   flavour: 'affine:divider',
-  //   type: null,
-  //   name: 'Divider',
-  //   description: 'A visual divider.',
-  //   icon: DividerIcon,
-  //   tooltip: 'A visual divider',
-  // },
+  {
+    flavour: 'affine:divider',
+    type: null,
+    name: 'Divider',
+    description: 'A visual divider.',
+    icon: DividerIcon,
+    tooltip: 'A visual divider',
+  },
 ];
 
 export const BLOCKHUB_LIST_ITEMS = [

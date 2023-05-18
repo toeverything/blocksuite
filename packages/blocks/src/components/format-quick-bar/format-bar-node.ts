@@ -96,6 +96,7 @@ function ParagraphPanel(
     @mouseout="${onHoverEnd}"
   >
     ${paragraphConfig
+      .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
         ({ flavour, type, name, icon }) => html`<format-bar-button

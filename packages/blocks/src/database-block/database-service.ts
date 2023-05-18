@@ -10,6 +10,8 @@ import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import {
   clearAllDatabaseRowsSelection,
+  getClosestDatabaseId,
+  getClosestRowId,
   getDatabaseById,
   setDatabaseRowsSelection,
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
@@ -18,7 +20,16 @@ import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 
+type LastTableViewSelection = {
+  databaseId: string;
+  rowIds: string[];
+};
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
+  private _lastSelection: LastTableViewSelection = {
+    databaseId: '',
+    rowIds: [],
+  };
+
   slots = {
     tableViewSelectionUpdated: new Slot<DatabaseTableState | null>(),
   };
@@ -30,11 +41,16 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       if (!state) return;
       const { type, rowIds, databaseId } = state;
 
-      if (type === 'select') {
+      if (type === 'select' || type === 'click') {
         if (!databaseId || !rowIds) return;
         const database = getDatabaseById(databaseId);
-        setDatabaseRowsSelection(database, rowIds);
+        this._lastSelection = {
+          databaseId,
+          rowIds,
+        };
+        setDatabaseRowsSelection(databaseId, database, rowIds);
       } else if (type === 'clear') {
+        this.clearLastSelection();
         clearAllDatabaseRowsSelection();
       }
     });
@@ -145,10 +161,59 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   }
 
   setTableViewSelection({ type, databaseId, rowIds }: DatabaseTableState) {
+    if (type === 'click' && rowIds?.[0] === this._lastSelection.rowIds?.[0]) {
+      this.clearTableViewSelection();
+      return;
+    }
+
     this.slots.tableViewSelectionUpdated.emit({
       type,
       databaseId,
       rowIds,
     });
+  }
+
+  setTableViewSelectionByElement(element: Element) {
+    const rowId = getClosestRowId(element);
+    if (rowId !== '') {
+      const databaseId = getClosestDatabaseId(element);
+      this.setTableViewSelection({
+        type: 'select',
+        databaseId,
+        rowIds: [rowId],
+      });
+    }
+  }
+
+  clearLastSelection() {
+    this._lastSelection = {
+      databaseId: '',
+      rowIds: [],
+    };
+  }
+
+  refreshTableViewSelection() {
+    const { databaseId, rowIds } = this._lastSelection;
+    if (rowIds.length === 0) return;
+
+    this.setTableViewSelection({
+      type: 'select',
+      databaseId,
+      rowIds,
+    });
+  }
+
+  toggleTableViewSelection(element: Element) {
+    const rowId = getClosestRowId(element);
+    if (rowId !== '') {
+      const databaseId = getClosestDatabaseId(element);
+      this.setTableViewSelection({
+        type: 'click',
+        databaseId,
+        rowIds: [rowId],
+      });
+      return true;
+    }
+    return false;
   }
 }
