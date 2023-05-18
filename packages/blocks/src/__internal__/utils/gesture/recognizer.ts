@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/store';
 
+import { isRawInput } from '../query.js';
 import { type SelectionEvent, toSelectionEvent } from './selection-event.js';
 import { isFarEnough } from './utils.js';
 
@@ -73,6 +74,8 @@ export class Recognizer {
   };
 
   private _pointerdown = (event: PointerEvent) => {
+    if (isRawInput(event.target)) return;
+
     if (
       this._lastPointerDownEvent &&
       event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&

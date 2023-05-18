@@ -526,6 +526,12 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isRawInput(element: unknown): boolean {
+  return (
+    element instanceof HTMLInputElement && !!element.closest('affine-database')
+  );
+}
+
 export function isInsideDatabaseTitle(element: unknown): boolean {
   const titleElement = document.querySelector(
     '[data-block-is-database-title="true"]'
