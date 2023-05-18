@@ -55,6 +55,7 @@ const styles = css`
     border-radius: 4px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-menu-shadow);
+    font-family: var(--affine-font-family);
   }
   ${actionStyles}
   .action > svg {
